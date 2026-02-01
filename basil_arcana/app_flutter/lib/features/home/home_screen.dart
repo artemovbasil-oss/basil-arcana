@@ -124,13 +124,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ),
       ),
-      bottomNavigationBar: AnimatedPadding(
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeOut,
-        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-        child: SafeArea(
-          top: false,
-          minimum: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        minimum: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+        child: AnimatedPadding(
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeOut,
+          padding:
+              EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
           child: SizedBox(
             height: 56,
             width: double.infinity,
