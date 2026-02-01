@@ -69,7 +69,7 @@ class ReadingModelAdapter extends TypeAdapter<ReadingModel> {
   ReadingModel read(BinaryReader reader) {
     return ReadingModel(
       readingId: reader.readString(),
-      createdAt: reader.readDateTime(),
+      createdAt: reader.read() as DateTime,
       question: reader.readString(),
       spreadId: reader.readString(),
       spreadName: reader.readString(),
@@ -88,7 +88,7 @@ class ReadingModelAdapter extends TypeAdapter<ReadingModel> {
   void write(BinaryWriter writer, ReadingModel obj) {
     writer
       ..writeString(obj.readingId)
-      ..writeDateTime(obj.createdAt)
+      ..write(obj.createdAt)
       ..writeString(obj.question)
       ..writeString(obj.spreadId)
       ..writeString(obj.spreadName)

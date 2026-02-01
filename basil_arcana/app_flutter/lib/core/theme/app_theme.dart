@@ -15,7 +15,7 @@ ThemeData buildAppTheme() {
       foregroundColor: colorScheme.onSurface,
       elevation: 0,
     ),
-    cardTheme: CardTheme(
+    cardTheme: CardThemeData(
       color: Colors.white,
       surfaceTintColor: Colors.white,
       elevation: 0,
