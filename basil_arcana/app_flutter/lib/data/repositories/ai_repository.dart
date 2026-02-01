@@ -23,6 +23,7 @@ enum AiErrorType {
   noInternet,
   timeout,
   serverError,
+  upstreamFailed,
 }
 
 class AiRepositoryException implements Exception {
@@ -76,18 +77,16 @@ class AiRepository {
 
     final headers = {
       'Content-Type': 'application/json',
-      'x-api-key': apiKey,
+      if (hasApiKey) 'x-api-key': apiKey,
     };
 
     http.Response response;
     try {
-      response = await http
-          .post(
-            uri,
-            headers: headers,
-            body: jsonEncode(payload),
-          )
-          .timeout(const Duration(seconds: 12));
+      response = await _postWithRetry(
+        uri,
+        headers: headers,
+        payload: payload,
+      );
     } on TimeoutException {
       throw const AiRepositoryException(AiErrorType.timeout);
     } on SocketException {
@@ -105,7 +104,39 @@ class AiRepository {
       );
     }
 
-    final data = jsonDecode(response.body) as Map<String, dynamic>;
-    return AiResultModel.fromJson(data);
+    try {
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      return AiResultModel.fromJson(data);
+    } catch (error) {
+      throw AiRepositoryException(
+        AiErrorType.upstreamFailed,
+        message: error.toString(),
+      );
+    }
+  }
+
+  Future<http.Response> _postWithRetry(
+    Uri uri, {
+    required Map<String, String> headers,
+    required Map<String, dynamic> payload,
+  }) async {
+    try {
+      return await http
+          .post(
+            uri,
+            headers: headers,
+            body: jsonEncode(payload),
+          )
+          .timeout(const Duration(seconds: 25));
+    } on TimeoutException {
+      await Future.delayed(const Duration(milliseconds: 600));
+      return await http
+          .post(
+            uri,
+            headers: headers,
+            body: jsonEncode(payload),
+          )
+          .timeout(const Duration(seconds: 25));
+    }
   }
 }
