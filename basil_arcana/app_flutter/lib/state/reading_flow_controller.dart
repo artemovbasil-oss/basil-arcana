@@ -20,6 +20,8 @@ class ReadingFlowState {
   final bool isLoading;
   final String? errorMessage;
   final bool aiUsed;
+  final AiErrorType? aiErrorType;
+  final int? aiErrorStatusCode;
 
   const ReadingFlowState({
     required this.question,
@@ -29,6 +31,8 @@ class ReadingFlowState {
     required this.isLoading,
     required this.errorMessage,
     required this.aiUsed,
+    required this.aiErrorType,
+    required this.aiErrorStatusCode,
   });
 
   factory ReadingFlowState.initial() {
@@ -40,6 +44,8 @@ class ReadingFlowState {
       isLoading: false,
       errorMessage: null,
       aiUsed: true,
+      aiErrorType: null,
+      aiErrorStatusCode: null,
     );
   }
 
@@ -51,6 +57,8 @@ class ReadingFlowState {
     bool? isLoading,
     String? errorMessage,
     bool? aiUsed,
+    AiErrorType? aiErrorType,
+    int? aiErrorStatusCode,
     bool clearError = false,
   }) {
     return ReadingFlowState(
@@ -61,6 +69,9 @@ class ReadingFlowState {
       isLoading: isLoading ?? this.isLoading,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
       aiUsed: aiUsed ?? this.aiUsed,
+      aiErrorType: clearError ? null : (aiErrorType ?? this.aiErrorType),
+      aiErrorStatusCode:
+          clearError ? null : (aiErrorStatusCode ?? this.aiErrorStatusCode),
     );
   }
 }
@@ -120,18 +131,6 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
 
     try {
       final aiRepository = ref.read(aiRepositoryProvider);
-      if (!aiRepository.hasApiKey) {
-        final fallback = _offlineFallback(spread, drawnCards);
-        state = state.copyWith(
-          aiResult: fallback,
-          isLoading: false,
-          aiUsed: false,
-          errorMessage:
-              'API key missing — set --dart-define=API_KEY=your_key to use live readings.',
-        );
-        return;
-      }
-
       final result = await aiRepository.generateReading(
         question: state.question,
         spread: spread,
@@ -142,14 +141,43 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
         isLoading: false,
         aiUsed: true,
       );
-    } catch (error) {
+    } on AiRepositoryException catch (error) {
       final fallback = _offlineFallback(spread, drawnCards);
       state = state.copyWith(
         aiResult: fallback,
         isLoading: false,
         aiUsed: false,
-        errorMessage: 'AI interpretation unavailable — showing offline reading',
+        aiErrorType: error.type,
+        aiErrorStatusCode: error.statusCode,
+        errorMessage: _messageForError(error),
       );
+    } catch (_) {
+      final fallback = _offlineFallback(spread, drawnCards);
+      state = state.copyWith(
+        aiResult: fallback,
+        isLoading: false,
+        aiUsed: false,
+        aiErrorType: AiErrorType.serverError,
+        errorMessage: 'Server unavailable — showing offline reading',
+      );
+    }
+  }
+
+  String _messageForError(AiRepositoryException error) {
+    switch (error.type) {
+      case AiErrorType.missingApiKey:
+        return 'AI disabled — API key not included in this build';
+      case AiErrorType.unauthorized:
+        return 'Unauthorized — check API key';
+      case AiErrorType.noInternet:
+        return 'No internet — showing offline reading';
+      case AiErrorType.timeout:
+        return 'Request timed out — showing offline reading';
+      case AiErrorType.serverError:
+        if (error.statusCode != null) {
+          return 'Server unavailable (${error.statusCode}) — showing offline reading';
+        }
+        return 'Server unavailable — showing offline reading';
     }
   }
 
