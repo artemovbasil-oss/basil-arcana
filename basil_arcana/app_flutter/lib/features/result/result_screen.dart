@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
@@ -6,12 +9,33 @@ import '../../core/widgets/card_face_widget.dart';
 import '../../data/repositories/ai_repository.dart';
 import '../../state/reading_flow_controller.dart';
 import '../../state/providers.dart';
+import 'widgets/chat_widgets.dart';
 
-class ResultScreen extends ConsumerWidget {
+class ResultScreen extends ConsumerStatefulWidget {
   const ResultScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ResultScreen> createState() => _ResultScreenState();
+}
+
+class _ResultScreenState extends ConsumerState<ResultScreen> {
+  final ScrollController _scrollController = ScrollController();
+  final List<_ChatItem> _items = [];
+  final List<_ChatItem> _basilQueue = [];
+  Timer? _typingTimer;
+  bool _sequenceComplete = false;
+  bool _initialized = false;
+  int _itemCounter = 0;
+
+  @override
+  void dispose() {
+    _typingTimer?.cancel();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(readingFlowControllerProvider);
     final aiResult = state.aiResult;
     final spread = state.spread;
@@ -22,21 +46,146 @@ class ResultScreen extends ConsumerWidget {
       );
     }
 
+    if (!_initialized) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _initializeSequence(state);
+        }
+      });
+    }
+
+    final statusText = state.aiUsed ? 'AI reading' : _statusMessage(state);
+    final detailsText = aiResult.requestId == null
+        ? 'Request ID unavailable'
+        : 'Request ID: ${aiResult.requestId}';
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Your reading')),
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: ListView(
+                controller: _scrollController,
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: _StatusPill(text: statusText),
+                  ),
+                  const SizedBox(height: 18),
+                  for (final item in _items) ...[
+                    _buildChatItem(item),
+                    const SizedBox(height: 14),
+                  ],
+                  if (_sequenceComplete)
+                    _DetailsTile(detailsText: detailsText),
+                ],
+              ),
+            ),
+            _ActionBar(
+              isVisible: _sequenceComplete,
+              onSave: () async {
+                await ref
+                    .read(readingFlowControllerProvider.notifier)
+                    .saveReading();
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Reading saved.')),
+                  );
+                }
+              },
+              onNew: () {
+                ref.read(readingFlowControllerProvider.notifier).reset();
+                Navigator.popUntil(context, (route) => route.isFirst);
+              },
+              onShare: () async {
+                await Share.share(
+                  aiResult.fullText,
+                  subject: 'Basil\'s Arcana Reading',
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _initializeSequence(ReadingFlowState state) {
+    _initialized = true;
+    _sequenceComplete = false;
+    _items
+      ..clear()
+      ..add(
+        _ChatItem.user(
+          id: _nextId(),
+          child: Text(state.question),
+        ),
+      );
+    _basilQueue
+      ..clear()
+      ..addAll(_buildBasilMessages(state));
+    setState(() {});
+    _scrollToBottom();
+    _queueNextBasilMessage();
+  }
+
+  void _queueNextBasilMessage() {
+    if (_basilQueue.isEmpty) {
+      setState(() {
+        _sequenceComplete = true;
+      });
+      _scrollToBottom();
+      return;
+    }
+
+    setState(() {
+      _items.add(_ChatItem.typing(id: _nextId()));
+    });
+    _scrollToBottom();
+
+    final delay = Duration(milliseconds: 700 + Random().nextInt(401));
+    _typingTimer?.cancel();
+    _typingTimer = Timer(delay, () {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        if (_items.isNotEmpty) {
+          _items[_items.length - 1] = _basilQueue.removeAt(0);
+        }
+      });
+      _scrollToBottom();
+      Future.delayed(const Duration(milliseconds: 200), () {
+        if (mounted) {
+          _queueNextBasilMessage();
+        }
+      });
+    });
+  }
+
+  List<_ChatItem> _buildBasilMessages(ReadingFlowState state) {
+    final aiResult = state.aiResult!;
     final sectionMap = {
       for (final section in aiResult.sections) section.positionId: section
     };
 
-    final messages = <Widget>[];
-    messages.add(
-      _buildUserBubble(context, state.question),
-    );
-    messages.add(
-      _buildAssistantBubble(
-        context,
-        Column(
+    final items = <_ChatItem>[];
+    items.add(
+      _ChatItem.basil(
+        id: _nextId(),
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('TL;DR', style: Theme.of(context).textTheme.titleMedium),
+            Text(
+              'Arcane Snapshot',
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium
+                  ?.copyWith(color: Theme.of(context).colorScheme.primary),
+            ),
             const SizedBox(height: 8),
             Text(aiResult.tldr),
           ],
@@ -46,10 +195,10 @@ class ResultScreen extends ConsumerWidget {
 
     for (final drawn in state.drawnCards) {
       final section = sectionMap[drawn.positionId];
-      messages.add(
-        _buildAssistantBubble(
-          context,
-          Column(
+      items.add(
+        _ChatItem.basil(
+          id: _nextId(),
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               CardFaceWidget(
@@ -69,14 +218,16 @@ class ResultScreen extends ConsumerWidget {
       );
     }
 
-    messages.add(
-      _buildAssistantBubble(
-        context,
-        Column(
+    items.add(
+      _ChatItem.basil(
+        id: _nextId(),
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Why this reading',
-                style: Theme.of(context).textTheme.titleMedium),
+            Text(
+              'Why this reading',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
             const SizedBox(height: 8),
             Text(aiResult.why),
           ],
@@ -84,14 +235,16 @@ class ResultScreen extends ConsumerWidget {
       ),
     );
 
-    messages.add(
-      _buildAssistantBubble(
-        context,
-        Column(
+    items.add(
+      _ChatItem.basil(
+        id: _nextId(),
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Action step (next 24–72h)',
-                style: Theme.of(context).textTheme.titleMedium),
+            Text(
+              'Action step (next 24–72h)',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
             const SizedBox(height: 8),
             Text(aiResult.action),
           ],
@@ -99,87 +252,35 @@ class ResultScreen extends ConsumerWidget {
       ),
     );
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Your reading')),
-      body: SafeArea(
-        child: Column(
-          children: [
-            if (!state.aiUsed)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-                child: _StatusPill(
-                  text: _statusMessage(state),
-                ),
-              ),
-            Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-                itemCount: messages.length,
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 14),
-                    child: _StaggeredFadeSlide(
-                      delay: Duration(milliseconds: 120 * index),
-                      child: messages[index],
-                    ),
-                  );
-                },
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 4, 20, 20),
-              child: Column(
-                children: [
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: () async {
-                        await ref
-                            .read(readingFlowControllerProvider.notifier)
-                            .saveReading();
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Reading saved.')),
-                          );
-                        }
-                      },
-                      icon: const Icon(Icons.bookmark_add),
-                      label: const Text('Save reading'),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        ref.read(readingFlowControllerProvider.notifier).reset();
-                        Navigator.popUntil(context, (route) => route.isFirst);
-                      },
-                      icon: const Icon(Icons.auto_awesome),
-                      label: const Text('New reading'),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      onPressed: () async {
-                        await Share.share(
-                          aiResult.fullText,
-                          subject: 'Basil\'s Arcana Reading',
-                        );
-                      },
-                      icon: const Icon(Icons.share),
-                      label: const Text('Share text'),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+    return items;
+  }
+
+  Widget _buildChatItem(_ChatItem item) {
+    switch (item.kind) {
+      case _ChatItemKind.user:
+        return ChatBubbleReveal(
+          key: ValueKey(item.id),
+          child: ChatBubble(
+            isUser: true,
+            avatarEmoji: '🙂',
+            child: item.child ?? const SizedBox.shrink(),
+          ),
+        );
+      case _ChatItemKind.basil:
+        return ChatBubbleReveal(
+          key: ValueKey(item.id),
+          child: ChatBubble(
+            isUser: false,
+            avatarEmoji: '🪄',
+            child: item.child ?? const SizedBox.shrink(),
+          ),
+        );
+      case _ChatItemKind.typing:
+        return ChatBubbleReveal(
+          key: ValueKey(item.id),
+          child: const TypingIndicatorBubble(),
+        );
+    }
   }
 
   String _statusMessage(ReadingFlowState state) {
@@ -191,85 +292,60 @@ class ResultScreen extends ConsumerWidget {
       case AiErrorType.noInternet:
         return 'No internet — showing offline reading';
       case AiErrorType.timeout:
-        return 'Request timed out — showing offline reading';
+        return 'AI is taking longer than usual — showing offline reading.';
       case AiErrorType.serverError:
         final status = state.aiErrorStatusCode;
         if (status != null) {
           return 'Server unavailable ($status) — showing offline reading';
         }
         return 'Server unavailable — showing offline reading';
+      case AiErrorType.upstreamFailed:
+        return 'Unexpected response — showing offline reading';
       case null:
         return 'AI interpretation unavailable — showing offline reading';
     }
-    return 'AI interpretation unavailable — showing offline reading';
+  }
+
+  String _nextId() => 'chat_${_itemCounter++}';
+
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
   }
 }
 
-Widget _buildUserBubble(BuildContext context, String text) {
-  final colorScheme = Theme.of(context).colorScheme;
-  return Align(
-    alignment: Alignment.centerRight,
-    child: ConstrainedBox(
-      constraints: BoxConstraints(
-        maxWidth: MediaQuery.of(context).size.width * 0.78,
-      ),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              colorScheme.primary.withOpacity(0.95),
-              colorScheme.primary.withOpacity(0.7),
-            ],
-          ),
-          borderRadius: BorderRadius.circular(18),
-          boxShadow: [
-            BoxShadow(
-              color: colorScheme.primary.withOpacity(0.4),
-              blurRadius: 18,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: Text(
-          text,
-          style: Theme.of(context)
-              .textTheme
-              .bodyMedium
-              ?.copyWith(color: colorScheme.onPrimary),
-        ),
-      ),
-    ),
-  );
+class _ChatItem {
+  const _ChatItem._({
+    required this.id,
+    required this.kind,
+    this.child,
+  });
+
+  factory _ChatItem.user({required String id, required Widget child}) {
+    return _ChatItem._(id: id, kind: _ChatItemKind.user, child: child);
+  }
+
+  factory _ChatItem.basil({required String id, required Widget child}) {
+    return _ChatItem._(id: id, kind: _ChatItemKind.basil, child: child);
+  }
+
+  factory _ChatItem.typing({required String id}) {
+    return _ChatItem._(id: id, kind: _ChatItemKind.typing);
+  }
+
+  final String id;
+  final _ChatItemKind kind;
+  final Widget? child;
 }
 
-Widget _buildAssistantBubble(BuildContext context, Widget child) {
-  final colorScheme = Theme.of(context).colorScheme;
-  return Align(
-    alignment: Alignment.centerLeft,
-    child: ConstrainedBox(
-      constraints: BoxConstraints(
-        maxWidth: MediaQuery.of(context).size.width * 0.86,
-      ),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: colorScheme.surface,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: colorScheme.outlineVariant),
-          boxShadow: [
-            BoxShadow(
-              color: colorScheme.primary.withOpacity(0.08),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: child,
-      ),
-    ),
-  );
-}
+enum _ChatItemKind { user, basil, typing }
 
 class _StatusPill extends StatelessWidget {
   const _StatusPill({required this.text});
@@ -280,18 +356,11 @@ class _StatusPill extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
       decoration: BoxDecoration(
         color: colorScheme.primary.withOpacity(0.12),
         borderRadius: BorderRadius.circular(999),
         border: Border.all(color: colorScheme.primary.withOpacity(0.6)),
-        boxShadow: [
-          BoxShadow(
-            color: colorScheme.primary.withOpacity(0.18),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
-          ),
-        ],
       ),
       child: Text(
         text,
@@ -304,57 +373,115 @@ class _StatusPill extends StatelessWidget {
   }
 }
 
-class _StaggeredFadeSlide extends StatefulWidget {
-  const _StaggeredFadeSlide({
-    required this.child,
-    required this.delay,
-  });
+class _DetailsTile extends StatelessWidget {
+  const _DetailsTile({required this.detailsText});
 
-  final Widget child;
-  final Duration delay;
-
-  @override
-  State<_StaggeredFadeSlide> createState() => _StaggeredFadeSlideState();
-}
-
-class _StaggeredFadeSlideState extends State<_StaggeredFadeSlide>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-  late final Animation<double> _opacity;
-  late final Animation<Offset> _offset;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 420),
-    );
-    _opacity = CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic);
-    _offset = Tween<Offset>(
-      begin: const Offset(0, 0.06),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
-    Future.delayed(widget.delay, () {
-      if (mounted) {
-        _controller.forward();
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+  final String detailsText;
 
   @override
   Widget build(BuildContext context) {
-    return FadeTransition(
-      opacity: _opacity,
-      child: SlideTransition(
-        position: _offset,
-        child: widget.child,
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      margin: const EdgeInsets.only(top: 12),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceVariant.withOpacity(0.6),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: colorScheme.outlineVariant),
+      ),
+      child: ExpansionTile(
+        title: Text(
+          'Details',
+          style: Theme.of(context).textTheme.titleSmall,
+        ),
+        childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        children: [
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              detailsText,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ActionBar extends StatelessWidget {
+  const _ActionBar({
+    required this.isVisible,
+    required this.onSave,
+    required this.onNew,
+    required this.onShare,
+  });
+
+  final bool isVisible;
+  final VoidCallback onSave;
+  final VoidCallback onNew;
+  final VoidCallback onShare;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return AnimatedSlide(
+      duration: const Duration(milliseconds: 360),
+      curve: Curves.easeOutCubic,
+      offset: isVisible ? Offset.zero : const Offset(0, 0.2),
+      child: AnimatedOpacity(
+        duration: const Duration(milliseconds: 360),
+        opacity: isVisible ? 1 : 0,
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+            child: Column(
+              children: [
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: isVisible ? onSave : null,
+                    icon: const Icon(Icons.bookmark_add),
+                    label: const Text('Save reading'),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: const StadiumBorder(),
+                      backgroundColor: colorScheme.primary,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: isVisible ? onNew : null,
+                    icon: const Icon(Icons.auto_awesome),
+                    label: const Text('New reading'),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: const StadiumBorder(),
+                      side: BorderSide(color: colorScheme.primary),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: isVisible ? onShare : null,
+                    icon: const Icon(Icons.share),
+                    label: const Text('Share text'),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: const StadiumBorder(),
+                      side: BorderSide(color: colorScheme.primary),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

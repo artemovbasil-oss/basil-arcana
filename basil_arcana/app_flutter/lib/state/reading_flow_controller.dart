@@ -172,12 +172,14 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       case AiErrorType.noInternet:
         return 'No internet — showing offline reading';
       case AiErrorType.timeout:
-        return 'Request timed out — showing offline reading';
+        return 'AI is taking longer than usual — showing offline reading.';
       case AiErrorType.serverError:
         if (error.statusCode != null) {
           return 'Server unavailable (${error.statusCode}) — showing offline reading';
         }
         return 'Server unavailable — showing offline reading';
+      case AiErrorType.upstreamFailed:
+        return 'Unexpected response — showing offline reading';
     }
   }
 
