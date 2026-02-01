@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
 import '../../core/utils/date_format.dart';
 import '../../core/widgets/card_face_widget.dart';
