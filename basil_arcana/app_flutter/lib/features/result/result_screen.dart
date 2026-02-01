@@ -4,6 +4,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../core/widgets/card_face_widget.dart';
 import '../../data/repositories/ai_repository.dart';
+import '../../state/reading_flow_controller.dart';
 import '../../state/providers.dart';
 
 class ResultScreen extends ConsumerWidget {
@@ -200,6 +201,7 @@ class ResultScreen extends ConsumerWidget {
       case null:
         return 'AI interpretation unavailable — showing offline reading';
     }
+    return 'AI interpretation unavailable — showing offline reading';
   }
 }
 
