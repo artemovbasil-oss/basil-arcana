@@ -10,7 +10,12 @@ Basil’s Arcana is a calm, reflective tarot MVP designed to help you explore qu
 cd server
 npm install
 export OPENAI_API_KEY=your_key_here
+# Required for authenticated API calls:
+export ARCANA_API_KEY=your_arcana_key_here
 # Optional: export OPENAI_MODEL=gpt-4o-mini
+# Optional rate limit overrides:
+# export RATE_LIMIT_WINDOW_MS=60000
+# export RATE_LIMIT_MAX=60
 npm start
 ```
 
@@ -20,12 +25,51 @@ Health check:
 curl http://localhost:3000/health
 ```
 
+Root route:
+
+```bash
+curl http://localhost:3000/
+```
+
+Generate a reading (missing/invalid API key should return 401):
+
+```bash
+curl -X POST http://localhost:3000/api/reading/generate \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: your_arcana_key_here" \
+  -d '{
+    "question":"What should I focus on right now?",
+    "spread":{
+      "id":"spread_1_focus",
+      "name":"Focus / Advice",
+      "positions":[{"id":"p1","title":"Focus / Advice"}]
+    },
+    "cards":[{
+      "positionId":"p1",
+      "positionTitle":"Focus / Advice",
+      "cardId":"major_08_strength",
+      "cardName":"Strength",
+      "keywords":["resilience","gentle power"],
+      "meaning":{
+        "general":"Inner steadiness is more powerful than force.",
+        "light":"Patience and empathy help you hold the moment.",
+        "shadow":"Self-doubt could soften your resolve.",
+        "advice":"Lead with kindness, and trust your endurance."
+      }
+    }],
+    "tone":"neutral"
+  }'
+```
+
 ## Deploy to Railway
 
 1. Create a Railway project from this GitHub repo.
 2. In Railway Variables, set:
    - `OPENAI_API_KEY`
+   - `ARCANA_API_KEY`
    - `OPENAI_MODEL` (optional)
+   - `RATE_LIMIT_WINDOW_MS` (optional, default 60000)
+   - `RATE_LIMIT_MAX` (optional, default 60)
 3. Ensure the `start` script runs (`npm start`). Railway uses `process.env.PORT`.
 4. Use the Railway public URL to test `/health`.
 
@@ -52,35 +96,6 @@ flutter run --dart-define=API_BASE_URL=http://10.0.2.2:3000
 ```
 
 Production default: `https://api.basilarcana.com`.
-
-## Sample curl for /api/reading/generate
-
-```bash
-curl -X POST http://localhost:3000/api/reading/generate \
-  -H "Content-Type: application/json" \
-  -d '{
-    "question":"What should I focus on right now?",
-    "spread":{
-      "id":"spread_1_focus",
-      "name":"Focus / Advice",
-      "positions":[{"id":"p1","title":"Focus / Advice"}]
-    },
-    "cards":[{
-      "positionId":"p1",
-      "positionTitle":"Focus / Advice",
-      "cardId":"major_08_strength",
-      "cardName":"Strength",
-      "keywords":["resilience","gentle power"],
-      "meaning":{
-        "general":"Inner steadiness is more powerful than force.",
-        "light":"Patience and empathy help you hold the moment.",
-        "shadow":"Self-doubt could soften your resolve.",
-        "advice":"Lead with kindness, and trust your endurance."
-      }
-    }],
-    "tone":"neutral"
-  }'
-```
 
 ## Notes
 - Secrets are never committed to the repo. Use Railway Variables or local environment variables.
