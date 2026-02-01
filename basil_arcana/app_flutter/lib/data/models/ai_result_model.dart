@@ -38,6 +38,7 @@ class AiResultModel {
   final String why;
   final String action;
   final String fullText;
+  final String? requestId;
 
   const AiResultModel({
     required this.tldr,
@@ -45,6 +46,7 @@ class AiResultModel {
     required this.why,
     required this.action,
     required this.fullText,
+    required this.requestId,
   });
 
   factory AiResultModel.fromJson(Map<String, dynamic> json) {
@@ -56,6 +58,7 @@ class AiResultModel {
       why: json['why'] as String,
       action: json['action'] as String,
       fullText: json['fullText'] as String,
+      requestId: json['requestId'] as String?,
     );
   }
 }

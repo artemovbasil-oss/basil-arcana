@@ -41,6 +41,9 @@ class ReadingModel {
   @HiveField(11)
   final bool aiUsed;
 
+  @HiveField(12)
+  final String? requestId;
+
   const ReadingModel({
     required this.readingId,
     required this.createdAt,
@@ -54,6 +57,7 @@ class ReadingModel {
     required this.action,
     required this.fullText,
     required this.aiUsed,
+    required this.requestId,
   });
 }
 
@@ -76,6 +80,7 @@ class ReadingModelAdapter extends TypeAdapter<ReadingModel> {
       action: reader.readString(),
       fullText: reader.readString(),
       aiUsed: reader.readBool(),
+      requestId: reader.read() as String?,
     );
   }
 
@@ -93,6 +98,7 @@ class ReadingModelAdapter extends TypeAdapter<ReadingModel> {
       ..writeString(obj.why)
       ..writeString(obj.action)
       ..writeString(obj.fullText)
-      ..writeBool(obj.aiUsed);
+      ..writeBool(obj.aiUsed)
+      ..write(obj.requestId);
   }
 }

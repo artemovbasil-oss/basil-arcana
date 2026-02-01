@@ -1,5 +1,7 @@
 import 'package:hive/hive.dart';
 
+import 'card_model.dart';
+
 @HiveType(typeId: 1)
 class DrawnCardModel {
   @HiveField(0)
@@ -17,12 +19,16 @@ class DrawnCardModel {
   @HiveField(4)
   final List<String> keywords;
 
+  @HiveField(5)
+  final CardMeaning meaning;
+
   const DrawnCardModel({
     required this.positionId,
     required this.positionTitle,
     required this.cardId,
     required this.cardName,
     required this.keywords,
+    required this.meaning,
   });
 
   Map<String, dynamic> toJson() => {
@@ -31,6 +37,7 @@ class DrawnCardModel {
         'cardId': cardId,
         'cardName': cardName,
         'keywords': keywords,
+        'meaning': meaning.toJson(),
       };
 }
 
@@ -46,6 +53,7 @@ class DrawnCardModelAdapter extends TypeAdapter<DrawnCardModel> {
       cardId: reader.readString(),
       cardName: reader.readString(),
       keywords: reader.readList().cast<String>(),
+      meaning: reader.read() as CardMeaning,
     );
   }
 
@@ -56,6 +64,7 @@ class DrawnCardModelAdapter extends TypeAdapter<DrawnCardModel> {
       ..writeString(obj.positionTitle)
       ..writeString(obj.cardId)
       ..writeString(obj.cardName)
-      ..writeList(obj.keywords);
+      ..writeList(obj.keywords)
+      ..write(obj.meaning);
   }
 }

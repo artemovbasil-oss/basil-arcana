@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../core/widgets/card_face_widget.dart';
 import '../../state/providers.dart';
@@ -151,18 +151,12 @@ class ResultScreen extends ConsumerWidget {
                   Expanded(
                     child: TextButton(
                       onPressed: () async {
-                        await Clipboard.setData(
-                          ClipboardData(text: aiResult.fullText),
+                        await Share.share(
+                          aiResult.fullText,
+                          subject: 'Basil\'s Arcana Reading',
                         );
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Reading copied to clipboard.'),
-                            ),
-                          );
-                        }
                       },
-                      child: const Text('Share'),
+                      child: const Text('Share text'),
                     ),
                   ),
                 ],
