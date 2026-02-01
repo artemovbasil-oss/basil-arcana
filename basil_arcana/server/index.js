@@ -1,35 +1,98 @@
 const express = require('express');
 const cors = require('cors');
+const rateLimit = require('express-rate-limit');
+const { v4: uuidv4 } = require('uuid');
 
 const { buildPromptMessages } = require('./src/prompt');
 const { createChatCompletion } = require('./src/openai_client');
 const { validateReadingRequest } = require('./src/validate');
+const {
+  ARCANA_API_KEY,
+  PORT,
+  RATE_LIMIT_MAX,
+  RATE_LIMIT_WINDOW_MS
+} = require('./src/config');
 
 const app = express();
 
 app.use(cors());
 app.use(express.json({ limit: '1mb' }));
 
+app.use((req, res, next) => {
+  const requestId = uuidv4();
+  req.requestId = requestId;
+  res.setHeader('x-request-id', requestId);
+
+  const startTime = Date.now();
+  res.on('finish', () => {
+    const durationMs = Date.now() - startTime;
+    console.log(
+      JSON.stringify({
+        method: req.method,
+        path: req.originalUrl,
+        status: res.statusCode,
+        duration_ms: durationMs,
+        requestId
+      })
+    );
+  });
+
+  next();
+});
+
+app.get('/', (_req, res) => {
+  res.json({ ok: true, name: 'basils-arcana', message: 'Basil’s Arcana API' });
+});
+
 app.get('/health', (_req, res) => {
   res.json({ ok: true, name: 'basils-arcana' });
+});
+
+const apiLimiter = rateLimit({
+  windowMs: RATE_LIMIT_WINDOW_MS,
+  max: RATE_LIMIT_MAX,
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+app.use('/api', apiLimiter);
+app.use('/api', (req, res, next) => {
+  if (!ARCANA_API_KEY) {
+    return res.status(500).json({
+      error: 'server_misconfig',
+      requestId: req.requestId
+    });
+  }
+
+  const providedKey = req.get('x-api-key');
+  if (!providedKey || providedKey !== ARCANA_API_KEY) {
+    return res.status(401).json({
+      error: 'unauthorized',
+      requestId: req.requestId
+    });
+  }
+
+  return next();
 });
 
 app.post('/api/reading/generate', async (req, res) => {
   const error = validateReadingRequest(req.body);
   if (error) {
-    return res.status(400).json({ error });
+    return res.status(400).json({ error, requestId: req.requestId });
   }
 
   try {
     const messages = buildPromptMessages(req.body);
     const result = await createChatCompletion(messages);
-    return res.json(result);
+    return res.json({ ...result, requestId: req.requestId });
   } catch (err) {
-    return res.status(502).json({ error: 'upstream_failed' });
+    return res
+      .status(502)
+      .json({ error: 'upstream_failed', requestId: req.requestId });
   }
 });
 
-const port = process.env.PORT || 3000;
+const port = PORT || 3000;
 app.listen(port, () => {
   console.log(`Basil's Arcana API listening on ${port}`);
 });
