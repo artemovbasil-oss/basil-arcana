@@ -4,6 +4,7 @@ import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
 import '../../state/providers.dart';
 import '../history/history_screen.dart';
+import '../cards/cards_screen.dart';
 import '../settings/settings_screen.dart';
 import '../spread/spread_screen.dart';
 
@@ -39,6 +40,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       l10n.homeExample2,
       l10n.homeExample3,
     ];
+    final hasQuestion = _controller.text.trim().isNotEmpty;
 
     return Scaffold(
       appBar: AppBar(
@@ -100,6 +102,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   decoration: InputDecoration(
                     labelText: l10n.homeQuestionLabel,
                     hintText: l10n.homeQuestionHint,
+                    suffixIcon: hasQuestion
+                        ? IconButton(
+                            icon: const Icon(Icons.close),
+                            tooltip: l10n.homeClearQuestionTooltip,
+                            onPressed: () {
+                              _controller.clear();
+                              ref
+                                  .read(
+                                      readingFlowControllerProvider.notifier)
+                                  .setQuestion('');
+                              setState(() {});
+                            },
+                          )
+                        : null,
                   ),
                   onChanged: (value) {
                     ref
@@ -129,6 +145,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                     )
                     .toList(),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  icon: const Icon(Icons.style_outlined),
+                  label: Text(l10n.homeAllCardsButton),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const CardsScreen(),
+                      ),
+                    );
+                  },
+                ),
               ),
             ],
           ),
