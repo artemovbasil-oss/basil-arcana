@@ -55,7 +55,7 @@ function validateReadingRequest(body) {
     return 'Request body must be an object';
   }
 
-  const { question, spread, cards, tone } = body;
+  const { question, spread, cards, tone, language } = body;
   if (!isNonEmptyString(question)) {
     return 'question is required';
   }
@@ -77,6 +77,9 @@ function validateReadingRequest(body) {
 
   if (tone && typeof tone !== 'string') {
     return 'tone must be a string';
+  }
+  if (language && typeof language !== 'string') {
+    return 'language must be a string';
   }
 
   return null;

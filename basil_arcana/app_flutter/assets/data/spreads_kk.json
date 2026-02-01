@@ -1,0 +1,18 @@
+[
+  {
+    "id": "spread_1_focus",
+    "name": "Назар / Кеңес",
+    "positions": [
+      { "id": "p1", "title": "Назар / Кеңес" }
+    ]
+  },
+  {
+    "id": "spread_3_situation_challenge_step",
+    "name": "Жағдай / Қиындық / Келесі қадам",
+    "positions": [
+      { "id": "p1", "title": "Жағдай" },
+      { "id": "p2", "title": "Қиындық" },
+      { "id": "p3", "title": "Келесі қадам" }
+    ]
+  }
+]

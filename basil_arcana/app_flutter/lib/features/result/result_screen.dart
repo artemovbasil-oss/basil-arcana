@@ -59,10 +59,6 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
     final statusText = state.aiUsed
         ? l10n.resultStatusAiReading
         : _statusMessage(state, l10n);
-    final detailsText = aiResult.requestId == null
-        ? l10n.resultRequestIdUnavailable
-        : l10n.resultRequestIdLabel(aiResult.requestId!);
-
     return Scaffold(
       appBar: AppBar(title: Text(l10n.resultTitle)),
       backgroundColor: Theme.of(context).colorScheme.surface,
@@ -83,11 +79,6 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                     _buildChatItem(item),
                     const SizedBox(height: 14),
                   ],
-                  if (_sequenceComplete)
-                    _DetailsTile(
-                      detailsText: detailsText,
-                      title: l10n.resultDetailsTitle,
-                    ),
                 ],
               ),
             ),
@@ -377,42 +368,6 @@ class _StatusPill extends StatelessWidget {
             .textTheme
             .labelLarge
             ?.copyWith(color: colorScheme.onSurface),
-      ),
-    );
-  }
-}
-
-class _DetailsTile extends StatelessWidget {
-  const _DetailsTile({required this.detailsText, required this.title});
-
-  final String detailsText;
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Container(
-      margin: const EdgeInsets.only(top: 12),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceVariant.withOpacity(0.6),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: colorScheme.outlineVariant),
-      ),
-      child: ExpansionTile(
-        title: Text(
-          title,
-          style: Theme.of(context).textTheme.titleSmall,
-        ),
-        childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-        children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              detailsText,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-          ),
-        ],
       ),
     );
   }

@@ -59,6 +59,7 @@ class AiRepository {
     required String question,
     required SpreadModel spread,
     required List<DrawnCardModel> drawnCards,
+    required String languageCode,
   }) async {
     if (!hasApiKey) {
       throw const AiRepositoryException(
@@ -73,6 +74,7 @@ class AiRepository {
       'spread': spread.toJson(),
       'cards': drawnCards.map((drawn) => drawn.toJson()).toList(),
       'tone': 'neutral',
+      'language': languageCode,
     };
 
     final headers = {
