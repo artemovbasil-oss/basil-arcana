@@ -106,6 +106,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
           cardId: card.id,
           cardName: card.name,
           keywords: card.keywords,
+          meaning: card.meaning,
         ),
       );
     }
@@ -117,15 +118,24 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       clearError: true,
     );
 
-    final cardLookup = {for (final card in cards) card.id: card};
-
     try {
       final aiRepository = ref.read(aiRepositoryProvider);
+      if (!aiRepository.hasApiKey) {
+        final fallback = _offlineFallback(spread, drawnCards);
+        state = state.copyWith(
+          aiResult: fallback,
+          isLoading: false,
+          aiUsed: false,
+          errorMessage:
+              'API key missing — set --dart-define=API_KEY=your_key to use live readings.',
+        );
+        return;
+      }
+
       final result = await aiRepository.generateReading(
         question: state.question,
         spread: spread,
         drawnCards: drawnCards,
-        cardLookup: cardLookup,
       );
       state = state.copyWith(
         aiResult: result,
@@ -133,7 +143,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
         aiUsed: true,
       );
     } catch (error) {
-      final fallback = _offlineFallback(spread, drawnCards, cardLookup);
+      final fallback = _offlineFallback(spread, drawnCards);
       state = state.copyWith(
         aiResult: fallback,
         isLoading: false,
@@ -146,7 +156,6 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
   AiResultModel _offlineFallback(
     SpreadModel spread,
     List<DrawnCardModel> drawnCards,
-    Map<String, CardModel> cardLookup,
   ) {
     final tldrKeywords = drawnCards.isNotEmpty
         ? drawnCards.first.keywords.join(', ')
@@ -155,9 +164,8 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
         'For “${state.question}”, the reading centers on $tldrKeywords.';
 
     final sections = drawnCards.map((drawn) {
-      final card = cardLookup[drawn.cardId];
-      final general = card?.meaning.general ?? '';
-      final advice = card?.meaning.advice ?? '';
+      final general = drawn.meaning.general;
+      final advice = drawn.meaning.advice;
       final text =
           '${drawn.positionTitle}: $general ${advice.isNotEmpty ? 'Advice: $advice' : ''}';
       return AiSectionModel(
@@ -171,8 +179,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
         'Each position reflects a facet of your question, and the card themes align with where attention can be placed now.';
     final action = drawnCards
         .map((drawn) {
-          final advice = cardLookup[drawn.cardId]?.meaning.advice ?? '';
-          return advice;
+          return drawn.meaning.advice;
         })
         .where((advice) => advice.isNotEmpty)
         .take(2)
@@ -193,6 +200,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
           ? 'Choose one small, practical step that honors the advice in the cards.'
           : action,
       fullText: fullText,
+      requestId: null,
     );
   }
 
@@ -217,6 +225,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       action: aiResult.action,
       fullText: aiResult.fullText,
       aiUsed: state.aiUsed,
+      requestId: aiResult.requestId,
     );
     await readingsRepository.saveReading(reading);
   }
