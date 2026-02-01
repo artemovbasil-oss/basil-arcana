@@ -51,107 +51,109 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ],
       ),
       body: SafeArea(
-        child: AnimatedPadding(
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeOut,
-          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Reflective tarot readings for clarity, not certainty.',
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleLarge
-                            ?.copyWith(color: colorScheme.onSurface),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Ask a question and explore the threads that shape your next step.',
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyMedium
-                            ?.copyWith(color: colorScheme.onSurface.withOpacity(0.7)),
-                      ),
-                      const SizedBox(height: 24),
-                      Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(22),
-                          boxShadow: [
-                            BoxShadow(
-                              color: colorScheme.primary.withOpacity(0.12),
-                              blurRadius: 18,
-                              offset: const Offset(0, 8),
-                            ),
-                          ],
-                        ),
-                        child: TextField(
-                          controller: _controller,
-                          maxLines: 3,
-                          decoration: const InputDecoration(
-                            labelText: 'What\'s your question?',
-                            hintText: 'Type what you want clarity on...',
-                          ),
-                          onChanged: (value) {
-                            ref
-                                .read(readingFlowControllerProvider.notifier)
-                                .setQuestion(value);
-                            setState(() {});
-                          },
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      Text(
-                        'Try one of these prompts:',
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleSmall
-                            ?.copyWith(color: colorScheme.onSurface.withOpacity(0.8)),
-                      ),
-                      const SizedBox(height: 10),
-                      Wrap(
-                        spacing: 10,
-                        runSpacing: 10,
-                        children: _examples
-                            .map(
-                              (example) => ActionChip(
-                                label: Text(example),
-                                onPressed: () => _applyExample(example),
-                              ),
-                            )
-                            .toList(),
-                      ),
-                    ],
+              Text(
+                'Reflective tarot readings for clarity, not certainty.',
+                style: Theme.of(context)
+                    .textTheme
+                    .titleLarge
+                    ?.copyWith(color: colorScheme.onSurface),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Ask a question and explore the threads that shape your next step.',
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyMedium
+                    ?.copyWith(color: colorScheme.onSurface.withOpacity(0.7)),
+              ),
+              const SizedBox(height: 24),
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(22),
+                  boxShadow: [
+                    BoxShadow(
+                      color: colorScheme.primary.withOpacity(0.12),
+                      blurRadius: 18,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: TextField(
+                  controller: _controller,
+                  maxLines: 3,
+                  decoration: const InputDecoration(
+                    labelText: 'What\'s your question?',
+                    hintText: 'Type what you want clarity on...',
                   ),
+                  onChanged: (value) {
+                    ref
+                        .read(readingFlowControllerProvider.notifier)
+                        .setQuestion(value);
+                    setState(() {});
+                  },
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    icon: const Icon(Icons.auto_awesome),
-                    onPressed: state.question.trim().isEmpty
-                        ? null
-                        : () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const SpreadScreen(),
-                              ),
-                            );
-                          },
-                    label: const Text('Continue to your spread'),
-                  ),
-                ),
+              const SizedBox(height: 20),
+              Text(
+                'Try one of these prompts:',
+                style: Theme.of(context)
+                    .textTheme
+                    .titleSmall
+                    ?.copyWith(color: colorScheme.onSurface.withOpacity(0.8)),
+              ),
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: _examples
+                    .map(
+                      (example) => ActionChip(
+                        label: Text(example),
+                        onPressed: () => _applyExample(example),
+                      ),
+                    )
+                    .toList(),
               ),
             ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: AnimatedPadding(
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOut,
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        child: SafeArea(
+          top: false,
+          minimum: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+          child: SizedBox(
+            height: 56,
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: colorScheme.primary,
+                foregroundColor: colorScheme.onPrimary,
+                shape: const StadiumBorder(),
+                textStyle: Theme.of(context).textTheme.titleMedium,
+              ),
+              icon: const Icon(Icons.auto_awesome),
+              onPressed: state.question.trim().isEmpty
+                  ? null
+                  : () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const SpreadScreen(),
+                        ),
+                      );
+                    },
+              label: const Text('Continue to your spread'),
+            ),
           ),
         ),
       ),
