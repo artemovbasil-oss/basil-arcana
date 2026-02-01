@@ -1,0 +1,89 @@
+{
+  "@@locale": "en",
+  "appTitle": "Basil's Arcana",
+  "historyTooltip": "History",
+  "settingsTitle": "Settings",
+  "languageLabel": "Language",
+  "languageEnglish": "English (EN)",
+  "languageRussian": "Russian (RU)",
+  "languageKazakh": "Kazakh (KZ)",
+  "homeTagline": "Reflective tarot readings for clarity, not certainty.",
+  "homeSubtitle": "Ask a question and explore the threads that shape your next step.",
+  "homeQuestionLabel": "What's your question?",
+  "homeQuestionHint": "Type what you want clarity on...",
+  "homeTryPrompt": "Try one of these prompts:",
+  "homeExample1": "What should I focus on right now?",
+  "homeExample2": "What is blocking my progress?",
+  "homeExample3": "How can I approach this situation more wisely?",
+  "homeContinueButton": "Continue to your spread",
+  "spreadTitle": "Choose a spread",
+  "spreadCardCount": "{count,plural, one{1 card} other{{count} cards}}",
+  "@spreadCardCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "spreadLoadError": "Error: {error}",
+  "@spreadLoadError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "shuffleTitle": "Shuffle the deck",
+  "shuffleSubtitle": "Shuffling the deck...",
+  "shuffleDrawButton": "Draw cards",
+  "resultTitle": "Your reading",
+  "resultStatusAiReading": "AI reading",
+  "resultRequestIdUnavailable": "Request ID unavailable",
+  "resultRequestIdLabel": "Request ID: {id}",
+  "@resultRequestIdLabel": {
+    "placeholders": {
+      "id": {}
+    }
+  },
+  "resultSnackSaved": "Reading saved.",
+  "resultSectionArcaneSnapshot": "Arcane Snapshot",
+  "resultSectionWhy": "Why this reading",
+  "resultSectionAction": "Action step (next 24–72h)",
+  "resultDetailsTitle": "Details",
+  "resultSaveButton": "Save reading",
+  "resultNewButton": "New reading",
+  "resultWantMoreButton": "Want more",
+  "resultStatusMissingApiKey": "AI disabled — API key not included in this build",
+  "resultStatusUnauthorized": "Unauthorized — check API key",
+  "resultStatusNoInternet": "No internet — showing offline reading",
+  "resultStatusTimeout": "AI is taking longer than usual — showing offline reading.",
+  "resultStatusServerUnavailableWithStatus": "Server unavailable ({status}) — showing offline reading",
+  "@resultStatusServerUnavailableWithStatus": {
+    "placeholders": {
+      "status": {
+        "type": "int"
+      }
+    }
+  },
+  "resultStatusServerUnavailable": "Server unavailable — showing offline reading",
+  "resultStatusUnexpectedResponse": "Unexpected response — showing offline reading",
+  "resultStatusInterpretationUnavailable": "AI interpretation unavailable — showing offline reading",
+  "historyTitle": "Reading history",
+  "historyEmpty": "No saved readings yet.",
+  "historyDetailTitle": "Reading detail",
+  "historyTldrTitle": "TL;DR",
+  "offlineFallbackReflection": "reflection",
+  "offlineFallbackSummary": "For “{question}”, the reading centers on {keywords}.",
+  "@offlineFallbackSummary": {
+    "placeholders": {
+      "question": {},
+      "keywords": {}
+    }
+  },
+  "offlineFallbackAdviceLabel": "Advice: {advice}",
+  "@offlineFallbackAdviceLabel": {
+    "placeholders": {
+      "advice": {}
+    }
+  },
+  "offlineFallbackWhy": "Each position reflects a facet of your question, and the card themes align with where attention can be placed now.",
+  "offlineFallbackAction": "Choose one small, practical step that honors the advice in the cards."
+}

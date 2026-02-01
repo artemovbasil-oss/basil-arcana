@@ -1,0 +1,89 @@
+{
+  "@@locale": "ru",
+  "appTitle": "Basil's Arcana",
+  "historyTooltip": "История",
+  "settingsTitle": "Настройки",
+  "languageLabel": "Язык",
+  "languageEnglish": "English (EN)",
+  "languageRussian": "Русский (RU)",
+  "languageKazakh": "Қазақша (KZ)",
+  "homeTagline": "Рефлексивные таро-расклады для ясности, а не для уверенности.",
+  "homeSubtitle": "Задайте вопрос и исследуйте нити, которые определяют ваш следующий шаг.",
+  "homeQuestionLabel": "Какой у вас вопрос?",
+  "homeQuestionHint": "Напишите, в чем нужна ясность...",
+  "homeTryPrompt": "Попробуйте один из этих запросов:",
+  "homeExample1": "На чем мне стоит сосредоточиться сейчас?",
+  "homeExample2": "Что блокирует мой прогресс?",
+  "homeExample3": "Как мне мудрее подойти к этой ситуации?",
+  "homeContinueButton": "Перейти к раскладу",
+  "spreadTitle": "Выберите расклад",
+  "spreadCardCount": "{count,plural, one{1 карта} few{{count} карты} many{{count} карт} other{{count} карты}}",
+  "@spreadCardCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "spreadLoadError": "Ошибка: {error}",
+  "@spreadLoadError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "shuffleTitle": "Перетасуйте колоду",
+  "shuffleSubtitle": "Перетасовываем колоду...",
+  "shuffleDrawButton": "Вытянуть карты",
+  "resultTitle": "Ваш расклад",
+  "resultStatusAiReading": "Расклад ИИ",
+  "resultRequestIdUnavailable": "Идентификатор запроса недоступен",
+  "resultRequestIdLabel": "ID запроса: {id}",
+  "@resultRequestIdLabel": {
+    "placeholders": {
+      "id": {}
+    }
+  },
+  "resultSnackSaved": "Расклад сохранен.",
+  "resultSectionArcaneSnapshot": "Арканический снимок",
+  "resultSectionWhy": "Почему этот расклад",
+  "resultSectionAction": "Шаг действия (следующие 24–72 ч)",
+  "resultDetailsTitle": "Детали",
+  "resultSaveButton": "Сохранить расклад",
+  "resultNewButton": "Новый расклад",
+  "resultWantMoreButton": "Хочу больше",
+  "resultStatusMissingApiKey": "ИИ отключен — API-ключ не включен в эту сборку",
+  "resultStatusUnauthorized": "Неавторизовано — проверьте API-ключ",
+  "resultStatusNoInternet": "Нет интернета — показываем офлайн-расклад",
+  "resultStatusTimeout": "ИИ отвечает дольше обычного — показываем офлайн-расклад.",
+  "resultStatusServerUnavailableWithStatus": "Сервер недоступен ({status}) — показываем офлайн-расклад",
+  "@resultStatusServerUnavailableWithStatus": {
+    "placeholders": {
+      "status": {
+        "type": "int"
+      }
+    }
+  },
+  "resultStatusServerUnavailable": "Сервер недоступен — показываем офлайн-расклад",
+  "resultStatusUnexpectedResponse": "Неожиданный ответ — показываем офлайн-расклад",
+  "resultStatusInterpretationUnavailable": "Интерпретация ИИ недоступна — показываем офлайн-расклад",
+  "historyTitle": "История раскладов",
+  "historyEmpty": "Сохраненных раскладов пока нет.",
+  "historyDetailTitle": "Детали расклада",
+  "historyTldrTitle": "TL;DR",
+  "offlineFallbackReflection": "размышление",
+  "offlineFallbackSummary": "Для «{question}» чтение сосредоточено на {keywords}.",
+  "@offlineFallbackSummary": {
+    "placeholders": {
+      "question": {},
+      "keywords": {}
+    }
+  },
+  "offlineFallbackAdviceLabel": "Совет: {advice}",
+  "@offlineFallbackAdviceLabel": {
+    "placeholders": {
+      "advice": {}
+    }
+  },
+  "offlineFallbackWhy": "Каждая позиция отражает грань вашего вопроса, а темы карт указывают, куда стоит направить внимание сейчас.",
+  "offlineFallbackAction": "Выберите один небольшой практичный шаг, который следует советам карт."
+}

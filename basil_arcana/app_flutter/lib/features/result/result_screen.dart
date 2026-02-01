@@ -3,7 +3,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:share_plus/share_plus.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/widgets/card_face_widget.dart';
 import '../../data/repositories/ai_repository.dart';
@@ -39,6 +40,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
     final state = ref.watch(readingFlowControllerProvider);
     final aiResult = state.aiResult;
     final spread = state.spread;
+    final l10n = AppLocalizations.of(context)!;
 
     if (aiResult == null || spread == null) {
       return const Scaffold(
@@ -54,13 +56,15 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
       });
     }
 
-    final statusText = state.aiUsed ? 'AI reading' : _statusMessage(state);
+    final statusText = state.aiUsed
+        ? l10n.resultStatusAiReading
+        : _statusMessage(state, l10n);
     final detailsText = aiResult.requestId == null
-        ? 'Request ID unavailable'
-        : 'Request ID: ${aiResult.requestId}';
+        ? l10n.resultRequestIdUnavailable
+        : l10n.resultRequestIdLabel(aiResult.requestId!);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Your reading')),
+      appBar: AppBar(title: Text(l10n.resultTitle)),
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
         child: Column(
@@ -80,7 +84,10 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                     const SizedBox(height: 14),
                   ],
                   if (_sequenceComplete)
-                    _DetailsTile(detailsText: detailsText),
+                    _DetailsTile(
+                      detailsText: detailsText,
+                      title: l10n.resultDetailsTitle,
+                    ),
                 ],
               ),
             ),
@@ -92,7 +99,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                     .saveReading();
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Reading saved.')),
+                    SnackBar(content: Text(l10n.resultSnackSaved)),
                   );
                 }
               },
@@ -101,11 +108,12 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                 Navigator.popUntil(context, (route) => route.isFirst);
               },
               onShare: () async {
-                await Share.share(
-                  aiResult.fullText,
-                  subject: 'Basil\'s Arcana Reading',
-                );
+                final url = Uri.parse('https://t.me/tarot_arkana_bot');
+                await launchUrl(url, mode: LaunchMode.externalApplication);
               },
+              saveLabel: l10n.resultSaveButton,
+              newLabel: l10n.resultNewButton,
+              moreLabel: l10n.resultWantMoreButton,
             ),
           ],
         ),
@@ -168,6 +176,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
 
   List<_ChatItem> _buildBasilMessages(ReadingFlowState state) {
     final aiResult = state.aiResult!;
+    final l10n = AppLocalizations.of(context)!;
     final sectionMap = {
       for (final section in aiResult.sections) section.positionId: section
     };
@@ -180,7 +189,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Arcane Snapshot',
+              l10n.resultSectionArcaneSnapshot,
               style: Theme.of(context)
                   .textTheme
                   .titleMedium
@@ -225,7 +234,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Why this reading',
+              l10n.resultSectionWhy,
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
@@ -242,7 +251,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Action step (next 24–72h)',
+              l10n.resultSectionAction,
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
@@ -283,26 +292,26 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
     }
   }
 
-  String _statusMessage(ReadingFlowState state) {
+  String _statusMessage(ReadingFlowState state, AppLocalizations l10n) {
     switch (state.aiErrorType) {
       case AiErrorType.missingApiKey:
-        return 'AI disabled — API key not included in this build';
+        return l10n.resultStatusMissingApiKey;
       case AiErrorType.unauthorized:
-        return 'Unauthorized — check API key';
+        return l10n.resultStatusUnauthorized;
       case AiErrorType.noInternet:
-        return 'No internet — showing offline reading';
+        return l10n.resultStatusNoInternet;
       case AiErrorType.timeout:
-        return 'AI is taking longer than usual — showing offline reading.';
+        return l10n.resultStatusTimeout;
       case AiErrorType.serverError:
         final status = state.aiErrorStatusCode;
         if (status != null) {
-          return 'Server unavailable ($status) — showing offline reading';
+          return l10n.resultStatusServerUnavailableWithStatus(status);
         }
-        return 'Server unavailable — showing offline reading';
+        return l10n.resultStatusServerUnavailable;
       case AiErrorType.upstreamFailed:
-        return 'Unexpected response — showing offline reading';
+        return l10n.resultStatusUnexpectedResponse;
       case null:
-        return 'AI interpretation unavailable — showing offline reading';
+        return l10n.resultStatusInterpretationUnavailable;
     }
   }
 
@@ -374,9 +383,10 @@ class _StatusPill extends StatelessWidget {
 }
 
 class _DetailsTile extends StatelessWidget {
-  const _DetailsTile({required this.detailsText});
+  const _DetailsTile({required this.detailsText, required this.title});
 
   final String detailsText;
+  final String title;
 
   @override
   Widget build(BuildContext context) {
@@ -390,7 +400,7 @@ class _DetailsTile extends StatelessWidget {
       ),
       child: ExpansionTile(
         title: Text(
-          'Details',
+          title,
           style: Theme.of(context).textTheme.titleSmall,
         ),
         childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -414,12 +424,18 @@ class _ActionBar extends StatelessWidget {
     required this.onSave,
     required this.onNew,
     required this.onShare,
+    required this.saveLabel,
+    required this.newLabel,
+    required this.moreLabel,
   });
 
   final bool isVisible;
   final VoidCallback onSave;
   final VoidCallback onNew;
   final VoidCallback onShare;
+  final String saveLabel;
+  final String newLabel;
+  final String moreLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -442,7 +458,7 @@ class _ActionBar extends StatelessWidget {
                   child: ElevatedButton.icon(
                     onPressed: isVisible ? onSave : null,
                     icon: const Icon(Icons.bookmark_add),
-                    label: const Text('Save reading'),
+                    label: Text(saveLabel),
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: const StadiumBorder(),
@@ -456,7 +472,7 @@ class _ActionBar extends StatelessWidget {
                   child: OutlinedButton.icon(
                     onPressed: isVisible ? onNew : null,
                     icon: const Icon(Icons.auto_awesome),
-                    label: const Text('New reading'),
+                    label: Text(newLabel),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: const StadiumBorder(),
@@ -469,8 +485,8 @@ class _ActionBar extends StatelessWidget {
                   width: double.infinity,
                   child: OutlinedButton.icon(
                     onPressed: isVisible ? onShare : null,
-                    icon: const Icon(Icons.share),
-                    label: const Text('Share text'),
+                    icon: const Icon(Icons.auto_awesome_outlined),
+                    label: Text(moreLabel),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: const StadiumBorder(),

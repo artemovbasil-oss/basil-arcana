@@ -1,0 +1,89 @@
+{
+  "@@locale": "kk",
+  "appTitle": "Basil's Arcana",
+  "historyTooltip": "Тарих",
+  "settingsTitle": "Баптаулар",
+  "languageLabel": "Тіл",
+  "languageEnglish": "English (EN)",
+  "languageRussian": "Русский (RU)",
+  "languageKazakh": "Қазақша (KZ)",
+  "homeTagline": "Айқындық үшін, нақтылық үшін емес, рефлексиялық таро оқылымдары.",
+  "homeSubtitle": "Сұрақ қойып, келесі қадамыңызды айқындайтын желілерді зерттеңіз.",
+  "homeQuestionLabel": "Сұрағыңыз қандай?",
+  "homeQuestionHint": "Айқындық керек нәрсені жазыңыз...",
+  "homeTryPrompt": "Осы сұрақтардың бірін көріңіз:",
+  "homeExample1": "Қазір неге назар аударуым керек?",
+  "homeExample2": "Прогресіме не кедергі болып тұр?",
+  "homeExample3": "Бұл жағдайға қалай даналықпен қараған дұрыс?",
+  "homeContinueButton": "Жаймаға өту",
+  "spreadTitle": "Жайманы таңдаңыз",
+  "spreadCardCount": "{count,plural, other{{count} карта}}",
+  "@spreadCardCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "spreadLoadError": "Қате: {error}",
+  "@spreadLoadError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "shuffleTitle": "Колоданы араластырыңыз",
+  "shuffleSubtitle": "Колода араластырылуда...",
+  "shuffleDrawButton": "Карталарды тарту",
+  "resultTitle": "Сіздің оқылымыңыз",
+  "resultStatusAiReading": "AI оқылымы",
+  "resultRequestIdUnavailable": "Сұрау идентификаторы қолжетімсіз",
+  "resultRequestIdLabel": "Сұрау ID: {id}",
+  "@resultRequestIdLabel": {
+    "placeholders": {
+      "id": {}
+    }
+  },
+  "resultSnackSaved": "Оқылым сақталды.",
+  "resultSectionArcaneSnapshot": "Аркандық шолу",
+  "resultSectionWhy": "Неге бұл оқылым",
+  "resultSectionAction": "Әрекет қадамы (келесі 24–72 сағ)",
+  "resultDetailsTitle": "Толығырақ",
+  "resultSaveButton": "Оқылымды сақтау",
+  "resultNewButton": "Жаңа оқылым",
+  "resultWantMoreButton": "Көбірек қалаймын",
+  "resultStatusMissingApiKey": "AI өшірулі — бұл жинақта API кілті жоқ",
+  "resultStatusUnauthorized": "Рұқсат жоқ — API кілтін тексеріңіз",
+  "resultStatusNoInternet": "Интернет жоқ — офлайн оқылым көрсетіледі",
+  "resultStatusTimeout": "AI әдеттегіден ұзақ жауап беруде — офлайн оқылым көрсетіледі.",
+  "resultStatusServerUnavailableWithStatus": "Сервер қолжетімсіз ({status}) — офлайн оқылым көрсетіледі",
+  "@resultStatusServerUnavailableWithStatus": {
+    "placeholders": {
+      "status": {
+        "type": "int"
+      }
+    }
+  },
+  "resultStatusServerUnavailable": "Сервер қолжетімсіз — офлайн оқылым көрсетіледі",
+  "resultStatusUnexpectedResponse": "Күтілмеген жауап — офлайн оқылым көрсетіледі",
+  "resultStatusInterpretationUnavailable": "AI түсіндірмесі қолжетімсіз — офлайн оқылым көрсетіледі",
+  "historyTitle": "Оқылым тарихы",
+  "historyEmpty": "Әзірге сақталған оқылымдар жоқ.",
+  "historyDetailTitle": "Оқылым мәліметі",
+  "historyTldrTitle": "TL;DR",
+  "offlineFallbackReflection": "ойлану",
+  "offlineFallbackSummary": "«{question}» сұрағы үшін оқылым {keywords} төңірегінде өрбиді.",
+  "@offlineFallbackSummary": {
+    "placeholders": {
+      "question": {},
+      "keywords": {}
+    }
+  },
+  "offlineFallbackAdviceLabel": "Кеңес: {advice}",
+  "@offlineFallbackAdviceLabel": {
+    "placeholders": {
+      "advice": {}
+    }
+  },
+  "offlineFallbackWhy": "Әр позиция сұрағыңыздың бір қырын көрсетеді, ал карталардың тақырыптары қазір назарды қайда бағыттау керегін айқындайды.",
+  "offlineFallbackAction": "Карталардың кеңесіне сай бір шағын, практикалық қадам таңдаңыз."
+}
