@@ -1,0 +1,18 @@
+[
+  {
+    "id": "spread_1_focus",
+    "name": "Фокус / Совет",
+    "positions": [
+      { "id": "p1", "title": "Фокус / Совет" }
+    ]
+  },
+  {
+    "id": "spread_3_situation_challenge_step",
+    "name": "Ситуация / Вызов / Следующий шаг",
+    "positions": [
+      { "id": "p1", "title": "Ситуация" },
+      { "id": "p2", "title": "Вызов" },
+      { "id": "p3", "title": "Следующий шаг" }
+    ]
+  }
+]

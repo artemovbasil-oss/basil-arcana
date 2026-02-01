@@ -133,10 +133,12 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
 
     try {
       final aiRepository = ref.read(aiRepositoryProvider);
+      final locale = ref.read(localeProvider);
       final result = await aiRepository.generateReading(
         question: state.question,
         spread: spread,
         drawnCards: drawnCards,
+        languageCode: locale.languageCode,
       );
       state = state.copyWith(
         aiResult: result,
