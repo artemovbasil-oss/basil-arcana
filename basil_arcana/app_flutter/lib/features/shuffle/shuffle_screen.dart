@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../state/providers.dart';
 import '../result/result_screen.dart';
@@ -48,9 +49,10 @@ class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
     final state = ref.watch(readingFlowControllerProvider);
     final cardsAsync = ref.watch(cardsProvider);
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Shuffle the deck')),
+      appBar: AppBar(title: Text(l10n.shuffleTitle)),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -117,7 +119,7 @@ class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
                     ),
                     const SizedBox(height: 24),
                     Text(
-                      'Shuffling the deck...',
+                      l10n.shuffleSubtitle,
                       style: Theme.of(context)
                           .textTheme
                           .titleMedium
@@ -162,7 +164,7 @@ class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: const StadiumBorder(),
                     ),
-                    child: const Text('Draw cards'),
+                    child: Text(l10n.shuffleDrawButton),
                   ),
                 ),
               ),

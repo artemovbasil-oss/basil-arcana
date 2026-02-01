@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../core/utils/date_format.dart';
 import '../../core/widgets/card_face_widget.dart';
@@ -14,9 +15,11 @@ class HistoryDetailScreen extends StatelessWidget {
     final sectionMap = {
       for (final section in reading.sections) section.positionId: section
     };
+    final l10n = AppLocalizations.of(context)!;
+    final locale = Localizations.localeOf(context).toString();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Reading detail')),
+      appBar: AppBar(title: Text(l10n.historyDetailTitle)),
       body: SafeArea(
         child: Column(
           children: [
@@ -25,16 +28,14 @@ class HistoryDetailScreen extends StatelessWidget {
                 width: double.infinity,
                 color: Theme.of(context).colorScheme.secondaryContainer,
                 padding: const EdgeInsets.all(12),
-                child: const Text(
-                  'AI interpretation unavailable — showing offline reading',
-                ),
+                child: Text(l10n.resultStatusInterpretationUnavailable),
               ),
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.all(20),
                 children: [
                   Text(
-                    formatDateTime(reading.createdAt),
+                    formatDateTime(reading.createdAt, locale: locale),
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                   const SizedBox(height: 8),
@@ -49,8 +50,10 @@ class HistoryDetailScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('TL;DR',
-                              style: Theme.of(context).textTheme.titleMedium),
+                          Text(
+                            l10n.historyTldrTitle,
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
                           const SizedBox(height: 8),
                           Text(reading.tldr),
                         ],
@@ -91,8 +94,10 @@ class HistoryDetailScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Why this reading',
-                              style: Theme.of(context).textTheme.titleMedium),
+                          Text(
+                            l10n.resultSectionWhy,
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
                           const SizedBox(height: 8),
                           Text(reading.why),
                         ],
@@ -106,8 +111,10 @@ class HistoryDetailScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Action step (next 24–72h)',
-                              style: Theme.of(context).textTheme.titleMedium),
+                          Text(
+                            l10n.resultSectionAction,
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
                           const SizedBox(height: 8),
                           Text(reading.action),
                         ],

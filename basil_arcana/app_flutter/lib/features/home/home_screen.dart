@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../state/providers.dart';
 import '../history/history_screen.dart';
+import '../settings/settings_screen.dart';
 import '../spread/spread_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -14,11 +16,6 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   final TextEditingController _controller = TextEditingController();
-  final List<String> _examples = const [
-    'What should I focus on right now?',
-    'What is blocking my progress?',
-    'How can I approach this situation more wisely?',
-  ];
 
   @override
   void dispose() {
@@ -36,16 +33,29 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final state = ref.watch(readingFlowControllerProvider);
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
+    final examples = [
+      l10n.homeExample1,
+      l10n.homeExample2,
+      l10n.homeExample3,
+    ];
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Basil\'s Arcana'),
+        title: Text(l10n.appTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.history),
-            tooltip: 'History',
+            tooltip: l10n.historyTooltip,
             onPressed: () {
               Navigator.pushNamed(context, HistoryScreen.routeName);
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.settings),
+            tooltip: l10n.settingsTitle,
+            onPressed: () {
+              Navigator.pushNamed(context, SettingsScreen.routeName);
             },
           ),
         ],
@@ -57,7 +67,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Reflective tarot readings for clarity, not certainty.',
+                l10n.homeTagline,
                 style: Theme.of(context)
                     .textTheme
                     .titleLarge
@@ -65,7 +75,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Ask a question and explore the threads that shape your next step.',
+                l10n.homeSubtitle,
                 style: Theme.of(context)
                     .textTheme
                     .bodyMedium
@@ -87,9 +97,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 child: TextField(
                   controller: _controller,
                   maxLines: 3,
-                  decoration: const InputDecoration(
-                    labelText: 'What\'s your question?',
-                    hintText: 'Type what you want clarity on...',
+                  decoration: InputDecoration(
+                    labelText: l10n.homeQuestionLabel,
+                    hintText: l10n.homeQuestionHint,
                   ),
                   onChanged: (value) {
                     ref
@@ -101,7 +111,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
               const SizedBox(height: 20),
               Text(
-                'Try one of these prompts:',
+                l10n.homeTryPrompt,
                 style: Theme.of(context)
                     .textTheme
                     .titleSmall
@@ -111,7 +121,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               Wrap(
                 spacing: 10,
                 runSpacing: 10,
-                children: _examples
+                children: examples
                     .map(
                       (example) => ActionChip(
                         label: Text(example),
@@ -153,7 +163,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         ),
                       );
                     },
-              label: const Text('Continue to your spread'),
+              label: Text(l10n.homeContinueButton),
             ),
           ),
         ),

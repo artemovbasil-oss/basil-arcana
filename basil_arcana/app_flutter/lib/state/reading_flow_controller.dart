@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:uuid/uuid.dart';
 
 import '../data/models/ai_result_model.dart';
@@ -104,6 +105,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
     if (spread == null) {
       return;
     }
+    final l10n = _l10n();
 
     final drawn = drawCards(spread.positions.length, cards);
     final drawnCards = <DrawnCardModel>[];
@@ -142,62 +144,75 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
         aiUsed: true,
       );
     } on AiRepositoryException catch (error) {
-      final fallback = _offlineFallback(spread, drawnCards);
+      final fallback = _offlineFallback(spread, drawnCards, l10n);
       state = state.copyWith(
         aiResult: fallback,
         isLoading: false,
         aiUsed: false,
         aiErrorType: error.type,
         aiErrorStatusCode: error.statusCode,
-        errorMessage: _messageForError(error),
+        errorMessage: _messageForError(error, l10n),
       );
     } catch (_) {
-      final fallback = _offlineFallback(spread, drawnCards);
+      final fallback = _offlineFallback(spread, drawnCards, l10n);
       state = state.copyWith(
         aiResult: fallback,
         isLoading: false,
         aiUsed: false,
         aiErrorType: AiErrorType.serverError,
-        errorMessage: 'Server unavailable — showing offline reading',
+        errorMessage: l10n.resultStatusServerUnavailable,
       );
     }
   }
 
-  String _messageForError(AiRepositoryException error) {
+  AppLocalizations _l10n() {
+    final locale = ref.read(localeProvider);
+    return lookupAppLocalizations(locale);
+  }
+
+  String _messageForError(AiRepositoryException error, AppLocalizations l10n) {
     switch (error.type) {
       case AiErrorType.missingApiKey:
-        return 'AI disabled — API key not included in this build';
+        return l10n.resultStatusMissingApiKey;
       case AiErrorType.unauthorized:
-        return 'Unauthorized — check API key';
+        return l10n.resultStatusUnauthorized;
       case AiErrorType.noInternet:
-        return 'No internet — showing offline reading';
+        return l10n.resultStatusNoInternet;
       case AiErrorType.timeout:
-        return 'AI is taking longer than usual — showing offline reading.';
+        return l10n.resultStatusTimeout;
       case AiErrorType.serverError:
         if (error.statusCode != null) {
-          return 'Server unavailable (${error.statusCode}) — showing offline reading';
+          return l10n.resultStatusServerUnavailableWithStatus(
+            error.statusCode!,
+          );
         }
-        return 'Server unavailable — showing offline reading';
+        return l10n.resultStatusServerUnavailable;
       case AiErrorType.upstreamFailed:
-        return 'Unexpected response — showing offline reading';
+        return l10n.resultStatusUnexpectedResponse;
     }
   }
 
   AiResultModel _offlineFallback(
     SpreadModel spread,
     List<DrawnCardModel> drawnCards,
+    AppLocalizations l10n,
   ) {
     final tldrKeywords = drawnCards.isNotEmpty
         ? drawnCards.first.keywords.join(', ')
-        : 'reflection';
-    final tldr =
-        'For “${state.question}”, the reading centers on $tldrKeywords.';
+        : l10n.offlineFallbackReflection;
+    final tldr = l10n.offlineFallbackSummary(
+      state.question,
+      tldrKeywords,
+    );
 
     final sections = drawnCards.map((drawn) {
       final general = drawn.meaning.general;
       final advice = drawn.meaning.advice;
+      final adviceText = advice.isNotEmpty
+          ? l10n.offlineFallbackAdviceLabel(advice)
+          : '';
       final text =
-          '${drawn.positionTitle}: $general ${advice.isNotEmpty ? 'Advice: $advice' : ''}';
+          '${drawn.positionTitle}: $general ${adviceText.isNotEmpty ? adviceText : ''}';
       return AiSectionModel(
         positionId: drawn.positionId,
         title: drawn.positionTitle,
@@ -205,8 +220,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       );
     }).toList();
 
-    final why =
-        'Each position reflects a facet of your question, and the card themes align with where attention can be placed now.';
+    final why = l10n.offlineFallbackWhy;
     final action = drawnCards
         .map((drawn) {
           return drawn.meaning.advice;
@@ -227,7 +241,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       sections: sections,
       why: why,
       action: action.isEmpty
-          ? 'Choose one small, practical step that honors the advice in the cards.'
+          ? l10n.offlineFallbackAction
           : action,
       fullText: fullText,
       requestId: null,

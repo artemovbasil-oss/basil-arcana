@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../core/utils/date_format.dart';
 import '../../data/models/reading_model.dart';
@@ -14,14 +15,15 @@ class HistoryScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final repository = ref.watch(readingsRepositoryProvider);
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Reading history')),
+      appBar: AppBar(title: Text(l10n.historyTitle)),
       body: ValueListenableBuilder(
         valueListenable: repository.listenable(),
         builder: (context, box, _) {
           final readings = repository.getReadings();
           if (readings.isEmpty) {
-            return const Center(child: Text('No saved readings yet.'));
+            return Center(child: Text(l10n.historyEmpty));
           }
           return ListView.separated(
             padding: const EdgeInsets.all(20),
@@ -45,6 +47,7 @@ class _HistoryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final locale = Localizations.localeOf(context).toString();
     return Card(
       child: ListTile(
         title: Text(reading.spreadName),
@@ -52,7 +55,7 @@ class _HistoryTile extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 4),
-            Text(formatDateTime(reading.createdAt)),
+            Text(formatDateTime(reading.createdAt, locale: locale)),
             const SizedBox(height: 4),
             Text(
               reading.question,

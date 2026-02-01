@@ -16,6 +16,7 @@ Future<void> main() async {
   Hive.registerAdapter(AiSectionModelAdapter());
   Hive.registerAdapter(ReadingModelAdapter());
   await Hive.openBox<ReadingModel>('readings');
+  await Hive.openBox<String>('settings');
 
   runApp(const ProviderScope(child: BasilArcanaApp()));
 }
