@@ -26,6 +26,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
   Timer? _typingTimer;
   bool _sequenceComplete = false;
   bool _initialized = false;
+  bool _precacheDone = false;
   int _itemCounter = 0;
 
   @override
@@ -46,6 +47,10 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
       );
+    }
+
+    if (!_precacheDone) {
+      _precacheDrawnCards(state);
     }
 
     if (!_initialized) {
@@ -202,6 +207,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               CardFaceWidget(
+                cardId: drawn.cardId,
                 cardName: drawn.cardName,
                 keywords: drawn.keywords,
               ),
@@ -315,6 +321,18 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
           _scrollController.position.maxScrollExtent,
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
+  void _precacheDrawnCards(ReadingFlowState state) {
+    _precacheDone = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      for (final drawn in state.drawnCards) {
+        precacheImage(
+          AssetImage('assets/cards/major/${drawn.cardId}.webp'),
+          context,
         );
       }
     });

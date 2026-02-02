@@ -1,6 +1,6 @@
 {
   "@@locale": "en",
-  "appTitle": "Basil's Arcana",
+  "appTitle": "Reflective Tarot Readings",
   "historyTooltip": "History",
   "settingsTitle": "Settings",
   "languageLabel": "Language",
@@ -19,7 +19,12 @@
   "homeContinueButton": "Continue to your spread",
   "homeAllCardsButton": "All cards",
   "cardsTitle": "All cards",
+  "cardsEmptyTitle": "No cards to show yet",
+  "cardsEmptySubtitle": "Please try again in a moment.",
   "cardsLoadError": "Unable to load cards right now.",
+  "cardsDetailTitle": "Card details",
+  "cardsDetailKeywordsTitle": "Keywords",
+  "cardsDetailMeaningTitle": "General meaning",
   "spreadTitle": "Choose a spread",
   "spreadCardCount": "{count,plural, one{1 card} other{{count} cards}}",
   "@spreadCardCount": {

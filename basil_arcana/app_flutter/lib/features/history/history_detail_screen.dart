@@ -72,6 +72,7 @@ class HistoryDetailScreen extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               CardFaceWidget(
+                                cardId: drawn.cardId,
                                 cardName: drawn.cardName,
                                 keywords: drawn.keywords,
                               ),
