@@ -27,3 +27,5 @@ flutter:
     - assets/data/spreads_en.json
     - assets/data/spreads_ru.json
     - assets/data/spreads_kk.json
+    - assets/deck/
+    - assets/cards/major/

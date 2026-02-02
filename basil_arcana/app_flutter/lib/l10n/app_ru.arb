@@ -1,6 +1,6 @@
 {
   "@@locale": "ru",
-  "appTitle": "Basil's Arcana",
+  "appTitle": "Рефлексивные таро-расклады",
   "historyTooltip": "История",
   "settingsTitle": "Настройки",
   "languageLabel": "Язык",
@@ -19,7 +19,12 @@
   "homeContinueButton": "Перейти к раскладу",
   "homeAllCardsButton": "Все карты",
   "cardsTitle": "Все карты",
+  "cardsEmptyTitle": "Карты пока недоступны",
+  "cardsEmptySubtitle": "Попробуйте снова чуть позже.",
   "cardsLoadError": "Не удалось загрузить карты.",
+  "cardsDetailTitle": "Детали карты",
+  "cardsDetailKeywordsTitle": "Ключевые слова",
+  "cardsDetailMeaningTitle": "Общее значение",
   "spreadTitle": "Выберите расклад",
   "spreadCardCount": "{count,plural, one{1 карта} few{{count} карты} many{{count} карт} other{{count} карты}}",
   "@spreadCardCount": {

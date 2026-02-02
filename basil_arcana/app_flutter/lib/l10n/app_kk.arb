@@ -1,6 +1,6 @@
 {
   "@@locale": "kk",
-  "appTitle": "Basil's Arcana",
+  "appTitle": "Рефлексияға арналған таро",
   "historyTooltip": "Тарих",
   "settingsTitle": "Баптаулар",
   "languageLabel": "Тіл",
@@ -19,7 +19,12 @@
   "homeContinueButton": "Жаймаға өту",
   "homeAllCardsButton": "Барлық карталар",
   "cardsTitle": "Барлық карталар",
+  "cardsEmptyTitle": "Карталар әзірге жоқ",
+  "cardsEmptySubtitle": "Сәл кейінірек қайталап көріңіз.",
   "cardsLoadError": "Карталарды жүктеу мүмкін болмады.",
+  "cardsDetailTitle": "Карта туралы",
+  "cardsDetailKeywordsTitle": "Кілт сөздер",
+  "cardsDetailMeaningTitle": "Жалпы мағынасы",
   "spreadTitle": "Жайманы таңдаңыз",
   "spreadCardCount": "{count,plural, other{{count} карта}}",
   "@spreadCardCount": {
