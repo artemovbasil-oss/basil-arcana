@@ -133,6 +133,31 @@ class TypingIndicatorBubble extends StatelessWidget {
   }
 }
 
+class OracleTypingBubble extends StatelessWidget {
+  const OracleTypingBubble({
+    super.key,
+    required this.label,
+  });
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return ChatBubble(
+      isUser: false,
+      avatarEmoji: '🪄',
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Flexible(child: Text(label)),
+          const SizedBox(width: 6),
+          const _TypingEllipsis(),
+        ],
+      ),
+    );
+  }
+}
+
 class _TypingDots extends StatefulWidget {
   const _TypingDots();
 
@@ -181,6 +206,48 @@ class _TypingDotsState extends State<_TypingDots>
               ),
             );
           }),
+        );
+      },
+    );
+  }
+}
+
+class _TypingEllipsis extends StatefulWidget {
+  const _TypingEllipsis();
+
+  @override
+  State<_TypingEllipsis> createState() => _TypingEllipsisState();
+}
+
+class _TypingEllipsisState extends State<_TypingEllipsis>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        final index = (_controller.value * 3).floor() % 3;
+        final dots = '.' * (index + 1);
+        return Text(
+          dots,
+          style: Theme.of(context).textTheme.bodyMedium,
         );
       },
     );

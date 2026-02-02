@@ -26,7 +26,7 @@ enum AiErrorType {
   badResponse,
 }
 
-enum ReadingMode { fast, deep }
+enum ReadingMode { fast, deep, lifeAreas }
 
 class AiRepositoryException implements Exception {
   const AiRepositoryException(
@@ -76,7 +76,7 @@ class AiRepository {
     final uri = Uri.parse(apiBaseUrl).replace(
       path: '/api/reading/generate',
       queryParameters: {
-        'mode': mode.name,
+        'mode': _modeParam(mode),
       },
     );
     final totalCards = drawnCards.length;
@@ -92,18 +92,20 @@ class AiRepository {
             'whyMaxChars': 400,
             'actionMaxChars': 240,
           };
-    final cardsPayload = mode == ReadingMode.deep
+    final cardsPayload = mode == ReadingMode.deep ||
+            mode == ReadingMode.lifeAreas
         ? drawnCards
             .map((drawn) => drawn.toAiDeepJson(totalCards: totalCards))
             .toList()
         : drawnCards
             .map((drawn) => drawn.toAiJson(totalCards: totalCards))
             .toList();
+    final tone = mode == ReadingMode.lifeAreas ? 'gentle' : 'neutral';
     final payload = {
       'question': question,
       'spread': spread.toJson(),
       'cards': cardsPayload,
-      'tone': 'neutral',
+      'tone': tone,
       'language': languageCode,
       'responseFormat': 'strict_json',
       'responseConstraints': responseConstraints,
@@ -162,5 +164,12 @@ class AiRepository {
         message: error.toString(),
       );
     }
+  }
+
+  String _modeParam(ReadingMode mode) {
+    if (mode == ReadingMode.lifeAreas) {
+      return 'life_areas';
+    }
+    return mode.name;
   }
 }
