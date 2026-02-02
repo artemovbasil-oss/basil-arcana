@@ -553,7 +553,6 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
     final headings = [
       l10n.resultDeepLoveHeading,
       l10n.resultDeepCareerHeading,
-      l10n.resultDeepHealthHeading,
     ];
     final sectionTexts = List<String>.generate(headings.length, (index) {
       final section = index < deepResult.sections.length
