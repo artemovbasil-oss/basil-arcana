@@ -100,13 +100,20 @@ app.use('/api', (req, res, next) => {
 });
 
 app.post('/api/reading/generate', async (req, res) => {
+  const mode = req.query.mode || 'deep';
+  if (mode !== 'fast' && mode !== 'deep') {
+    return res.status(400).json({
+      error: 'invalid_mode',
+      requestId: req.requestId
+    });
+  }
   const error = validateReadingRequest(req.body);
   if (error) {
     return res.status(400).json({ error, requestId: req.requestId });
   }
 
   try {
-    const messages = buildPromptMessages(req.body);
+    const messages = buildPromptMessages(req.body, mode);
     const result = await createChatCompletion(messages, {
       requestId: req.requestId
     });

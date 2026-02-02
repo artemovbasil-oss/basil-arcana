@@ -19,22 +19,32 @@ class ReadingFlowState {
   final SpreadModel? spread;
   final List<DrawnCardModel> drawnCards;
   final AiResultModel? aiResult;
+  final AiResultModel? deepResult;
   final bool isLoading;
+  final bool isDeepLoading;
   final String? errorMessage;
+  final String? deepErrorMessage;
   final bool aiUsed;
   final AiErrorType? aiErrorType;
+  final AiErrorType? deepErrorType;
   final int? aiErrorStatusCode;
+  final int? deepErrorStatusCode;
 
   const ReadingFlowState({
     required this.question,
     required this.spread,
     required this.drawnCards,
     required this.aiResult,
+    required this.deepResult,
     required this.isLoading,
+    required this.isDeepLoading,
     required this.errorMessage,
+    required this.deepErrorMessage,
     required this.aiUsed,
     required this.aiErrorType,
+    required this.deepErrorType,
     required this.aiErrorStatusCode,
+    required this.deepErrorStatusCode,
   });
 
   factory ReadingFlowState.initial() {
@@ -43,11 +53,16 @@ class ReadingFlowState {
       spread: null,
       drawnCards: [],
       aiResult: null,
+      deepResult: null,
       isLoading: false,
+      isDeepLoading: false,
       errorMessage: null,
+      deepErrorMessage: null,
       aiUsed: true,
       aiErrorType: null,
+      deepErrorType: null,
       aiErrorStatusCode: null,
+      deepErrorStatusCode: null,
     );
   }
 
@@ -56,24 +71,39 @@ class ReadingFlowState {
     SpreadModel? spread,
     List<DrawnCardModel>? drawnCards,
     AiResultModel? aiResult,
+    AiResultModel? deepResult,
     bool? isLoading,
+    bool? isDeepLoading,
     String? errorMessage,
+    String? deepErrorMessage,
     bool? aiUsed,
     AiErrorType? aiErrorType,
+    AiErrorType? deepErrorType,
     int? aiErrorStatusCode,
+    int? deepErrorStatusCode,
     bool clearError = false,
+    bool clearDeepError = false,
   }) {
     return ReadingFlowState(
       question: question ?? this.question,
       spread: spread ?? this.spread,
       drawnCards: drawnCards ?? this.drawnCards,
       aiResult: aiResult ?? this.aiResult,
+      deepResult: deepResult ?? this.deepResult,
       isLoading: isLoading ?? this.isLoading,
+      isDeepLoading: isDeepLoading ?? this.isDeepLoading,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
+      deepErrorMessage:
+          clearDeepError ? null : (deepErrorMessage ?? this.deepErrorMessage),
       aiUsed: aiUsed ?? this.aiUsed,
       aiErrorType: clearError ? null : (aiErrorType ?? this.aiErrorType),
+      deepErrorType:
+          clearDeepError ? null : (deepErrorType ?? this.deepErrorType),
       aiErrorStatusCode:
           clearError ? null : (aiErrorStatusCode ?? this.aiErrorStatusCode),
+      deepErrorStatusCode: clearDeepError
+          ? null
+          : (deepErrorStatusCode ?? this.deepErrorStatusCode),
     );
   }
 }
@@ -85,13 +115,25 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
   http.Client? _activeClient;
   int _requestCounter = 0;
   int _activeRequestId = 0;
+  http.Client? _activeDeepClient;
+  int _deepRequestCounter = 0;
+  int _activeDeepRequestId = 0;
 
   void setQuestion(String question) {
     state = state.copyWith(question: question, clearError: true);
   }
 
   void selectSpread(SpreadModel spread) {
-    state = state.copyWith(spread: spread, drawnCards: [], aiResult: null);
+    state = state.copyWith(
+      spread: spread,
+      drawnCards: [],
+      aiResult: null,
+      deepResult: null,
+      isDeepLoading: false,
+      deepErrorType: null,
+      deepErrorMessage: null,
+      clearDeepError: true,
+    );
   }
 
   void reset() {
@@ -106,6 +148,17 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       isLoading: false,
       aiResult: null,
       clearError: true,
+    );
+  }
+
+  void cancelDeepReading() {
+    _activeDeepRequestId = ++_deepRequestCounter;
+    _activeDeepClient?.close();
+    _activeDeepClient = null;
+    state = state.copyWith(
+      isDeepLoading: false,
+      deepResult: null,
+      clearDeepError: true,
     );
   }
 
@@ -143,6 +196,9 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       drawnCards: drawnCards,
       isLoading: true,
       aiResult: null,
+      deepResult: null,
+      isDeepLoading: false,
+      clearDeepError: true,
       clearError: true,
     );
 
@@ -269,6 +325,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
         spread: spread,
         drawnCards: drawnCards,
         languageCode: locale.languageCode,
+        mode: ReadingMode.fast,
         client: client,
       );
       if (_activeRequestId != requestId) {
@@ -323,9 +380,95 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
     }
   }
 
-  Future<void> saveReading() async {
+  Future<void> requestDeepReading() async {
     final spread = state.spread;
     final aiResult = state.aiResult;
+    if (spread == null || aiResult == null || state.drawnCards.isEmpty) {
+      return;
+    }
+
+    state = state.copyWith(
+      isDeepLoading: true,
+      deepResult: null,
+      clearDeepError: true,
+    );
+
+    await _generateDeepReading(
+      spread: spread,
+      drawnCards: state.drawnCards,
+      l10n: _l10n(),
+      fastReading: {
+        'tldr': aiResult.tldr,
+        'sections': aiResult.sections
+            .map((section) => section.toJson())
+            .toList(),
+        'action': aiResult.action,
+      },
+    );
+  }
+
+  Future<void> _generateDeepReading({
+    required SpreadModel spread,
+    required List<DrawnCardModel> drawnCards,
+    required AppLocalizations l10n,
+    Map<String, dynamic>? fastReading,
+  }) async {
+    final requestId = ++_deepRequestCounter;
+    _activeDeepRequestId = requestId;
+    final client = http.Client();
+    _activeDeepClient?.close();
+    _activeDeepClient = client;
+    try {
+      final aiRepository = ref.read(aiRepositoryProvider);
+      final locale = ref.read(localeProvider);
+      final result = await aiRepository.generateReading(
+        question: state.question,
+        spread: spread,
+        drawnCards: drawnCards,
+        languageCode: locale.languageCode,
+        mode: ReadingMode.deep,
+        fastReading: fastReading,
+        client: client,
+      );
+      if (_activeDeepRequestId != requestId) {
+        return;
+      }
+      state = state.copyWith(
+        deepResult: result,
+        isDeepLoading: false,
+      );
+    } on AiRepositoryException catch (error) {
+      if (_activeDeepRequestId != requestId) {
+        return;
+      }
+      state = state.copyWith(
+        deepResult: null,
+        isDeepLoading: false,
+        deepErrorType: error.type,
+        deepErrorStatusCode: error.statusCode,
+        deepErrorMessage: _messageForError(error, l10n),
+      );
+    } catch (_) {
+      if (_activeDeepRequestId != requestId) {
+        return;
+      }
+      state = state.copyWith(
+        deepResult: null,
+        isDeepLoading: false,
+        deepErrorType: AiErrorType.serverError,
+        deepErrorMessage: l10n.resultStatusServerUnavailable,
+      );
+    } finally {
+      if (_activeDeepClient == client) {
+        _activeDeepClient = null;
+      }
+      client.close();
+    }
+  }
+
+  Future<void> saveReading() async {
+    final spread = state.spread;
+    final aiResult = state.deepResult ?? state.aiResult;
     if (spread == null || aiResult == null) {
       return;
     }

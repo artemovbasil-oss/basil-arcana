@@ -71,43 +71,10 @@ class _OracleWaitingScreenState extends State<OracleWaitingScreen>
               animation: _breath,
               builder: (context, _) {
                 final t = disableAnimations ? 0.4 : _breath.value;
-                return Stack(
-                  children: [
-                    Positioned.fill(child: Container(color: background)),
-                    _GlowOrb(
-                      alignment: Alignment.topLeft,
-                      color: glowColor,
-                      size: lerpDouble(220, 320, t)!,
-                      opacity: lerpDouble(0.25, 0.6, t)!,
-                    ),
-                    _GlowOrb(
-                      alignment: Alignment.topRight,
-                      color: glowColor,
-                      size: lerpDouble(200, 300, t)!,
-                      opacity: lerpDouble(0.2, 0.55, t)!,
-                    ),
-                    _GlowOrb(
-                      alignment: Alignment.bottomLeft,
-                      color: glowColor,
-                      size: lerpDouble(240, 340, t)!,
-                      opacity: lerpDouble(0.25, 0.65, t)!,
-                    ),
-                    _GlowOrb(
-                      alignment: Alignment.bottomRight,
-                      color: glowColor,
-                      size: lerpDouble(210, 320, t)!,
-                      opacity: lerpDouble(0.22, 0.6, t)!,
-                    ),
-                    Positioned.fill(
-                      child: BackdropFilter(
-                        filter: ImageFilter.blur(
-                          sigmaX: lerpDouble(24, 60, t)!,
-                          sigmaY: lerpDouble(24, 60, t)!,
-                        ),
-                        child: const SizedBox.expand(),
-                      ),
-                    ),
-                  ],
+                return _OracleGlowLayer(
+                  background: background,
+                  glowColor: glowColor,
+                  t: t,
                 );
               },
             ),
@@ -200,6 +167,129 @@ class _GlowOrb extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class OracleThinkingGlow extends StatefulWidget {
+  const OracleThinkingGlow({
+    super.key,
+    this.height = 180,
+    this.borderRadius = const BorderRadius.all(Radius.circular(24)),
+  });
+
+  final double height;
+  final BorderRadius borderRadius;
+
+  @override
+  State<OracleThinkingGlow> createState() => _OracleThinkingGlowState();
+}
+
+class _OracleThinkingGlowState extends State<OracleThinkingGlow>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _breath;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 5200),
+    );
+    _breath = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final background = theme.colorScheme.background;
+    final glowColor = theme.colorScheme.primary;
+    final disableAnimations = MediaQuery.of(context).disableAnimations;
+    if (disableAnimations) {
+      _controller.stop();
+      if (_controller.value != 0.4) {
+        _controller.value = 0.4;
+      }
+    } else if (!_controller.isAnimating) {
+      _controller.repeat(reverse: true);
+    }
+    return ClipRRect(
+      borderRadius: widget.borderRadius,
+      child: SizedBox(
+        height: widget.height,
+        child: AnimatedBuilder(
+          animation: _breath,
+          builder: (context, _) {
+            final t = disableAnimations ? 0.4 : _breath.value;
+            return _OracleGlowLayer(
+              background: background,
+              glowColor: glowColor,
+              t: t,
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _OracleGlowLayer extends StatelessWidget {
+  const _OracleGlowLayer({
+    required this.background,
+    required this.glowColor,
+    required this.t,
+  });
+
+  final Color background;
+  final Color glowColor;
+  final double t;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Positioned.fill(child: Container(color: background)),
+        _GlowOrb(
+          alignment: Alignment.topLeft,
+          color: glowColor,
+          size: lerpDouble(220, 320, t)!,
+          opacity: lerpDouble(0.25, 0.6, t)!,
+        ),
+        _GlowOrb(
+          alignment: Alignment.topRight,
+          color: glowColor,
+          size: lerpDouble(200, 300, t)!,
+          opacity: lerpDouble(0.2, 0.55, t)!,
+        ),
+        _GlowOrb(
+          alignment: Alignment.bottomLeft,
+          color: glowColor,
+          size: lerpDouble(240, 340, t)!,
+          opacity: lerpDouble(0.25, 0.65, t)!,
+        ),
+        _GlowOrb(
+          alignment: Alignment.bottomRight,
+          color: glowColor,
+          size: lerpDouble(210, 320, t)!,
+          opacity: lerpDouble(0.22, 0.6, t)!,
+        ),
+        Positioned.fill(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(
+              sigmaX: lerpDouble(24, 60, t)!,
+              sigmaY: lerpDouble(24, 60, t)!,
+            ),
+            child: const SizedBox.expand(),
+          ),
+        ),
+      ],
     );
   }
 }
