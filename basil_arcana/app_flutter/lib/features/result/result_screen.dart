@@ -14,6 +14,7 @@ import '../../state/reading_flow_controller.dart';
 import '../../state/providers.dart';
 import '../cards/card_detail_screen.dart';
 import 'widgets/chat_widgets.dart';
+import 'widgets/oracle_waiting_screen.dart';
 
 class ResultScreen extends ConsumerStatefulWidget {
   const ResultScreen({super.key});
@@ -54,6 +55,27 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
     }
 
     if (aiResult == null) {
+      if (state.isLoading) {
+        return OracleWaitingScreen(
+          onCancel: () {
+            ref.read(readingFlowControllerProvider.notifier).cancelGeneration();
+            Navigator.pop(context);
+          },
+        );
+      }
+
+      if (_shouldShowRetryScreen(state.aiErrorType)) {
+        return _OracleRetryScreen(
+          onCancel: () {
+            ref.read(readingFlowControllerProvider.notifier).cancelGeneration();
+            Navigator.pop(context);
+          },
+          onRetry: () {
+            ref.read(readingFlowControllerProvider.notifier).retryGenerate();
+          },
+        );
+      }
+
       final statusText = state.isLoading
           ? l10n.resultStatusAiReading
           : _statusMessage(state, l10n);
@@ -153,6 +175,12 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
         ),
       ),
     );
+  }
+
+  bool _shouldShowRetryScreen(AiErrorType? type) {
+    return type == AiErrorType.timeout ||
+        type == AiErrorType.serverError ||
+        type == AiErrorType.badResponse;
   }
 
   void _initializeSequence(ReadingFlowState state) {
@@ -436,6 +464,59 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
         );
       }
     });
+  }
+}
+
+class _OracleRetryScreen extends StatelessWidget {
+  const _OracleRetryScreen({
+    required this.onCancel,
+    required this.onRetry,
+  });
+
+  final VoidCallback onCancel;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Scaffold(
+      backgroundColor: theme.colorScheme.background,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'The Oracle is silent…',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  color: theme.colorScheme.onBackground,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Sometimes clarity needs another breath.',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onBackground.withOpacity(0.75),
+                ),
+              ),
+              const SizedBox(height: 28),
+              OutlinedButton(
+                onPressed: onCancel,
+                child: const Text('Cancel'),
+              ),
+              const SizedBox(height: 12),
+              ElevatedButton(
+                onPressed: onRetry,
+                child: const Text('Try again'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 
