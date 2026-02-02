@@ -426,7 +426,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
         spread: spread,
         drawnCards: drawnCards,
         languageCode: locale.languageCode,
-        mode: ReadingMode.deep,
+        mode: ReadingMode.lifeAreas,
         fastReading: fastReading,
         client: client,
       );

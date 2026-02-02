@@ -372,37 +372,54 @@ Widget _cardShape({
 }) {
   return Transform.translate(
     offset: offset,
-    child: Container(
-      width: width,
-      height: height,
-      decoration: BoxDecoration(
-        gradient: RadialGradient(
-          center: const Alignment(0, -0.2),
-          radius: 1,
-          colors: [
-            color.withOpacity(0.95),
-            color.withOpacity(0.7),
-          ],
+    child: Stack(
+      children: [
+        Container(
+          width: width,
+          height: height,
+          decoration: BoxDecoration(
+            gradient: RadialGradient(
+              center: const Alignment(0, -0.2),
+              radius: 1,
+              colors: [
+                color.withOpacity(0.95),
+                color.withOpacity(0.7),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(16),
+            border: borderColor != null
+                ? Border.all(color: borderColor.withOpacity(0.8), width: 1.1)
+                : null,
+            boxShadow: [
+              if (shadowColor != null)
+                BoxShadow(
+                  color: shadowColor,
+                  blurRadius: 14,
+                  offset: const Offset(0, 6),
+                ),
+              if (elevationGlow)
+                BoxShadow(
+                  color: borderColor?.withOpacity(0.3) ?? Colors.transparent,
+                  blurRadius: 18,
+                  offset: const Offset(0, 8),
+                ),
+            ],
+          ),
         ),
-        borderRadius: BorderRadius.circular(16),
-        border: borderColor != null
-            ? Border.all(color: borderColor.withOpacity(0.8), width: 1.1)
-            : null,
-        boxShadow: [
-          if (shadowColor != null)
-            BoxShadow(
-              color: shadowColor,
-              blurRadius: 14,
-              offset: const Offset(0, 6),
+        Positioned.fill(
+          child: IgnorePointer(
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.22),
+                  width: 0.6,
+                ),
+              ),
             ),
-          if (elevationGlow)
-            BoxShadow(
-              color: borderColor?.withOpacity(0.3) ?? Colors.transparent,
-              blurRadius: 18,
-              offset: const Offset(0, 8),
-            ),
-        ],
-      ),
+          ),
+        ),
+      ],
     ),
   );
 }
