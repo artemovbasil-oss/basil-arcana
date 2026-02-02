@@ -13,6 +13,7 @@ class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _opacity;
+  late final Animation<double> _scale;
 
   @override
   void initState() {
@@ -24,6 +25,12 @@ class _SplashScreenState extends State<SplashScreen>
     _opacity = CurvedAnimation(
       parent: _controller,
       curve: Curves.easeOutCubic,
+    );
+    _scale = Tween<double>(begin: 1.12, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeOutCubic,
+      ),
     );
     _controller.forward().whenComplete(() async {
       await Future.delayed(const Duration(milliseconds: 500));
@@ -50,12 +57,14 @@ class _SplashScreenState extends State<SplashScreen>
       body: Center(
         child: FadeTransition(
           opacity: _opacity,
-          child: FractionallySizedBox(
-            widthFactor: 0.6,
-            child: Image.asset(
-              'assets/deck/cover.webp',
-              fit: BoxFit.contain,
-              filterQuality: FilterQuality.high,
+          child: ScaleTransition(
+            scale: _scale,
+            child: SizedBox.expand(
+              child: Image.asset(
+                'assets/deck/cover.webp',
+                fit: BoxFit.cover,
+                filterQuality: FilterQuality.high,
+              ),
             ),
           ),
         ),
