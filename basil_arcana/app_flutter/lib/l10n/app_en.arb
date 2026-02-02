@@ -44,7 +44,7 @@
   "shuffleSubtitle": "Shuffling the deck...",
   "shuffleDrawButton": "Draw cards",
   "resultTitle": "Your reading",
-  "resultStatusAiReading": "AI reading",
+  "resultStatusAiReading": "Basil is interpreting…",
   "resultRequestIdUnavailable": "Request ID unavailable",
   "resultRequestIdLabel": "Request ID: {id}",
   "@resultRequestIdLabel": {
@@ -63,8 +63,8 @@
   "resultStatusMissingApiKey": "AI disabled — API key not included in this build",
   "resultStatusUnauthorized": "Unauthorized — check API key",
   "resultStatusNoInternet": "No internet — showing offline reading",
-  "resultStatusTimeout": "AI is taking longer than usual — showing offline reading.",
-  "resultStatusServerUnavailableWithStatus": "Server unavailable ({status}) — showing offline reading",
+  "resultStatusTimeout": "AI is taking longer than usual — tap to retry.",
+  "resultStatusServerUnavailableWithStatus": "The oracle is foggy ({status}) — try again in a moment.",
   "@resultStatusServerUnavailableWithStatus": {
     "placeholders": {
       "status": {
@@ -72,9 +72,9 @@
       }
     }
   },
-  "resultStatusServerUnavailable": "Server unavailable — showing offline reading",
-  "resultStatusUnexpectedResponse": "Unexpected response — showing offline reading",
-  "resultStatusInterpretationUnavailable": "AI interpretation unavailable — showing offline reading",
+  "resultStatusServerUnavailable": "The oracle is foggy — try again in a moment.",
+  "resultStatusUnexpectedResponse": "Unexpected response — tap to retry.",
+  "resultStatusInterpretationUnavailable": "AI interpretation unavailable — tap to retry.",
   "historyTitle": "Reading history",
   "historyEmpty": "No saved readings yet.",
   "historyDetailTitle": "Reading detail",

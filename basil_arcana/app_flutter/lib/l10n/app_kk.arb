@@ -44,7 +44,7 @@
   "shuffleSubtitle": "Колода араластырылуда...",
   "shuffleDrawButton": "Карталарды тарту",
   "resultTitle": "Сіздің оқылымыңыз",
-  "resultStatusAiReading": "AI оқылымы",
+  "resultStatusAiReading": "Basil түсіндіріп жатыр…",
   "resultRequestIdUnavailable": "Сұрау идентификаторы қолжетімсіз",
   "resultRequestIdLabel": "Сұрау ID: {id}",
   "@resultRequestIdLabel": {
@@ -63,8 +63,8 @@
   "resultStatusMissingApiKey": "AI өшірулі — бұл жинақта API кілті жоқ",
   "resultStatusUnauthorized": "Рұқсат жоқ — API кілтін тексеріңіз",
   "resultStatusNoInternet": "Интернет жоқ — офлайн оқылым көрсетіледі",
-  "resultStatusTimeout": "AI әдеттегіден ұзақ жауап беруде — офлайн оқылым көрсетіледі.",
-  "resultStatusServerUnavailableWithStatus": "Сервер қолжетімсіз ({status}) — офлайн оқылым көрсетіледі",
+  "resultStatusTimeout": "AI әдеттегіден ұзақ жауап беруде — қайта көру үшін түртіңіз.",
+  "resultStatusServerUnavailableWithStatus": "Оракул көмескі ({status}) — сәл кейінірек қайталап көріңіз.",
   "@resultStatusServerUnavailableWithStatus": {
     "placeholders": {
       "status": {
@@ -72,9 +72,9 @@
       }
     }
   },
-  "resultStatusServerUnavailable": "Сервер қолжетімсіз — офлайн оқылым көрсетіледі",
-  "resultStatusUnexpectedResponse": "Күтілмеген жауап — офлайн оқылым көрсетіледі",
-  "resultStatusInterpretationUnavailable": "AI түсіндірмесі қолжетімсіз — офлайн оқылым көрсетіледі",
+  "resultStatusServerUnavailable": "Оракул көмескі — сәл кейінірек қайталап көріңіз.",
+  "resultStatusUnexpectedResponse": "Күтілмеген жауап — қайта көру үшін түртіңіз.",
+  "resultStatusInterpretationUnavailable": "AI түсіндірмесі қолжетімсіз — қайта көру үшін түртіңіз.",
   "historyTitle": "Оқылым тарихы",
   "historyEmpty": "Әзірге сақталған оқылымдар жоқ.",
   "historyDetailTitle": "Оқылым мәліметі",

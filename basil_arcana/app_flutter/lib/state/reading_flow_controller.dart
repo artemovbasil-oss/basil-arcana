@@ -131,40 +131,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       clearError: true,
     );
 
-    try {
-      final aiRepository = ref.read(aiRepositoryProvider);
-      final locale = ref.read(localeProvider);
-      final result = await aiRepository.generateReading(
-        question: state.question,
-        spread: spread,
-        drawnCards: drawnCards,
-        languageCode: locale.languageCode,
-      );
-      state = state.copyWith(
-        aiResult: result,
-        isLoading: false,
-        aiUsed: true,
-      );
-    } on AiRepositoryException catch (error) {
-      final fallback = _offlineFallback(spread, drawnCards, l10n);
-      state = state.copyWith(
-        aiResult: fallback,
-        isLoading: false,
-        aiUsed: false,
-        aiErrorType: error.type,
-        aiErrorStatusCode: error.statusCode,
-        errorMessage: _messageForError(error, l10n),
-      );
-    } catch (_) {
-      final fallback = _offlineFallback(spread, drawnCards, l10n);
-      state = state.copyWith(
-        aiResult: fallback,
-        isLoading: false,
-        aiUsed: false,
-        aiErrorType: AiErrorType.serverError,
-        errorMessage: l10n.resultStatusServerUnavailable,
-      );
-    }
+    await _generateReading(spread: spread, drawnCards: drawnCards, l10n: l10n);
   }
 
   AppLocalizations _l10n() {
@@ -189,7 +156,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
           );
         }
         return l10n.resultStatusServerUnavailable;
-      case AiErrorType.upstreamFailed:
+      case AiErrorType.badResponse:
         return l10n.resultStatusUnexpectedResponse;
     }
   }
@@ -248,6 +215,77 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       fullText: fullText,
       requestId: null,
     );
+  }
+
+  Future<void> retryGenerate() async {
+    final spread = state.spread;
+    if (spread == null || state.drawnCards.isEmpty) {
+      return;
+    }
+
+    state = state.copyWith(
+      isLoading: true,
+      aiResult: null,
+      clearError: true,
+    );
+
+    await _generateReading(
+      spread: spread,
+      drawnCards: state.drawnCards,
+      l10n: _l10n(),
+    );
+  }
+
+  Future<void> _generateReading({
+    required SpreadModel spread,
+    required List<DrawnCardModel> drawnCards,
+    required AppLocalizations l10n,
+  }) async {
+    try {
+      final aiRepository = ref.read(aiRepositoryProvider);
+      final locale = ref.read(localeProvider);
+      final result = await aiRepository.generateReading(
+        question: state.question,
+        spread: spread,
+        drawnCards: drawnCards,
+        languageCode: locale.languageCode,
+      );
+      state = state.copyWith(
+        aiResult: result,
+        isLoading: false,
+        aiUsed: true,
+      );
+    } on AiRepositoryException catch (error) {
+      if (error.type == AiErrorType.noInternet) {
+        final fallback = _offlineFallback(spread, drawnCards, l10n);
+        state = state.copyWith(
+          aiResult: fallback,
+          isLoading: false,
+          aiUsed: false,
+          aiErrorType: error.type,
+          aiErrorStatusCode: error.statusCode,
+          errorMessage: _messageForError(error, l10n),
+        );
+        return;
+      }
+
+      state = state.copyWith(
+        aiResult: null,
+        isLoading: false,
+        aiUsed: false,
+        aiErrorType: error.type,
+        aiErrorStatusCode: error.statusCode,
+        errorMessage: _messageForError(error, l10n),
+      );
+    } catch (_) {
+      state = state.copyWith(
+        aiResult: null,
+        isLoading: false,
+        aiUsed: false,
+        aiErrorType: AiErrorType.serverError,
+        errorMessage: l10n.resultStatusServerUnavailable,
+      );
+    }
   }
 
   Future<void> saveReading() async {

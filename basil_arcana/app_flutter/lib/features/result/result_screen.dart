@@ -31,6 +31,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
   bool _initialized = false;
   bool _precacheDone = false;
   int _itemCounter = 0;
+  String? _warmTip;
 
   @override
   void dispose() {
@@ -46,9 +47,43 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
     final spread = state.spread;
     final l10n = AppLocalizations.of(context)!;
 
-    if (aiResult == null || spread == null) {
+    if (spread == null) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (aiResult == null) {
+      final statusText = state.isLoading
+          ? l10n.resultStatusAiReading
+          : _statusMessage(state, l10n);
+      final canRetry = !state.isLoading && state.aiErrorType != null;
+      return Scaffold(
+        appBar: AppBar(title: Text(l10n.resultTitle)),
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        body: SafeArea(
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                GestureDetector(
+                  onTap: canRetry
+                      ? () {
+                          ref
+                              .read(
+                                readingFlowControllerProvider.notifier,
+                              )
+                              .retryGenerate();
+                        }
+                      : null,
+                  child: _StatusPill(text: statusText),
+                ),
+                const SizedBox(height: 16),
+                if (state.isLoading) const CircularProgressIndicator(),
+              ],
+            ),
+          ),
+        ),
       );
     }
 
@@ -123,6 +158,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
   void _initializeSequence(ReadingFlowState state) {
     _initialized = true;
     _sequenceComplete = false;
+    _warmTip = _maybeWarmTip(state);
     _items
       ..clear()
       ..add(
@@ -276,6 +312,15 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
       ),
     );
 
+    if (_warmTip != null) {
+      items.add(
+        _ChatItem.basil(
+          id: _nextId(),
+          child: Text(_warmTip!),
+        ),
+      );
+    }
+
     return items;
   }
 
@@ -323,10 +368,47 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
           return l10n.resultStatusServerUnavailableWithStatus(status);
         }
         return l10n.resultStatusServerUnavailable;
-      case AiErrorType.upstreamFailed:
+      case AiErrorType.badResponse:
         return l10n.resultStatusUnexpectedResponse;
       case null:
         return l10n.resultStatusInterpretationUnavailable;
+    }
+  }
+
+  String? _maybeWarmTip(ReadingFlowState state) {
+    if (!state.aiUsed) {
+      return null;
+    }
+    final rng = Random();
+    if (rng.nextDouble() >= 0.5) {
+      return null;
+    }
+    final languageCode = Localizations.localeOf(context).languageCode;
+    final tips = _warmTipsFor(languageCode);
+    return tips[rng.nextInt(tips.length)];
+  }
+
+  List<String> _warmTipsFor(String languageCode) {
+    switch (languageCode) {
+      case 'ru':
+        return const [
+          'Сделайте медленный вдох и дайте себе небольшую паузу. Маленькие перерывы делают день мягче.',
+          'Если получится, проявите к себе небольшую заботу сегодня. Небольшие шаги поддержки очень важны.',
+          'Пусть сегодня будет устойчивость, а не идеальность. Маленький прогресс — тоже прогресс.',
+        ];
+      case 'kk':
+        return const [
+          'Бүгін бір сәт баяу тыныстап, өзіңізге кідіріс беріңіз. Кішкентай үзіліс күнді жеңілдетеді.',
+          'Мүмкіндік болса, өзіңізге кішкентай қамқорлық жасаңыз. Шағын қолдау үлкен әсер береді.',
+          'Бүгін мінсіздіктен гөрі тұрақтылықты таңдаңыз. Кішкентай қадам да алға жылжу.',
+        ];
+      case 'en':
+      default:
+        return const [
+          'Take a slow breath and give yourself a small pause today. Small resets can make the rest feel lighter.',
+          'If you can, do one tiny kind thing for yourself today. Little care adds up.',
+          'Let today be steady rather than perfect. Progress in small steps is still progress.',
+        ];
     }
   }
 

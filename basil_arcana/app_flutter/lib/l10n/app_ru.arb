@@ -44,7 +44,7 @@
   "shuffleSubtitle": "Перетасовываем колоду...",
   "shuffleDrawButton": "Вытянуть карты",
   "resultTitle": "Ваш расклад",
-  "resultStatusAiReading": "Расклад ИИ",
+  "resultStatusAiReading": "Базилик толкует…",
   "resultRequestIdUnavailable": "Идентификатор запроса недоступен",
   "resultRequestIdLabel": "ID запроса: {id}",
   "@resultRequestIdLabel": {
@@ -63,8 +63,8 @@
   "resultStatusMissingApiKey": "ИИ отключен — API-ключ не включен в эту сборку",
   "resultStatusUnauthorized": "Неавторизовано — проверьте API-ключ",
   "resultStatusNoInternet": "Нет интернета — показываем офлайн-расклад",
-  "resultStatusTimeout": "ИИ отвечает дольше обычного — показываем офлайн-расклад.",
-  "resultStatusServerUnavailableWithStatus": "Сервер недоступен ({status}) — показываем офлайн-расклад",
+  "resultStatusTimeout": "ИИ отвечает дольше обычного — нажмите, чтобы повторить.",
+  "resultStatusServerUnavailableWithStatus": "Оракул затуманен ({status}) — попробуйте снова чуть позже.",
   "@resultStatusServerUnavailableWithStatus": {
     "placeholders": {
       "status": {
@@ -72,9 +72,9 @@
       }
     }
   },
-  "resultStatusServerUnavailable": "Сервер недоступен — показываем офлайн-расклад",
-  "resultStatusUnexpectedResponse": "Неожиданный ответ — показываем офлайн-расклад",
-  "resultStatusInterpretationUnavailable": "Интерпретация ИИ недоступна — показываем офлайн-расклад",
+  "resultStatusServerUnavailable": "Оракул затуманен — попробуйте снова чуть позже.",
+  "resultStatusUnexpectedResponse": "Неожиданный ответ — нажмите, чтобы повторить.",
+  "resultStatusInterpretationUnavailable": "Интерпретация ИИ недоступна — нажмите, чтобы повторить.",
   "historyTitle": "История раскладов",
   "historyEmpty": "Сохраненных раскладов пока нет.",
   "historyDetailTitle": "Детали расклада",

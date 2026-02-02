@@ -23,7 +23,7 @@ enum AiErrorType {
   noInternet,
   timeout,
   serverError,
-  upstreamFailed,
+  badResponse,
 }
 
 class AiRepositoryException implements Exception {
@@ -99,9 +99,16 @@ class AiRepository {
       throw const AiRepositoryException(AiErrorType.unauthorized);
     }
 
-    if (response.statusCode < 200 || response.statusCode >= 300) {
+    if (response.statusCode >= 500) {
       throw AiRepositoryException(
         AiErrorType.serverError,
+        statusCode: response.statusCode,
+      );
+    }
+
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw AiRepositoryException(
+        AiErrorType.badResponse,
         statusCode: response.statusCode,
       );
     }
@@ -111,7 +118,7 @@ class AiRepository {
       return AiResultModel.fromJson(data);
     } catch (error) {
       throw AiRepositoryException(
-        AiErrorType.upstreamFailed,
+        AiErrorType.badResponse,
         message: error.toString(),
       );
     }
@@ -129,16 +136,16 @@ class AiRepository {
             headers: headers,
             body: jsonEncode(payload),
           )
-          .timeout(const Duration(seconds: 25));
+          .timeout(const Duration(seconds: 40));
     } on TimeoutException {
-      await Future.delayed(const Duration(milliseconds: 600));
+      await Future.delayed(const Duration(milliseconds: 800));
       return await http
           .post(
             uri,
             headers: headers,
             body: jsonEncode(payload),
           )
-          .timeout(const Duration(seconds: 25));
+          .timeout(const Duration(seconds: 40));
     }
   }
 }
