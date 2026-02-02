@@ -331,6 +331,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       if (_activeRequestId != requestId) {
         return;
       }
+      await _incrementCardStats(drawnCards);
       state = state.copyWith(
         aiResult: result,
         isLoading: false,
@@ -342,6 +343,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       }
       if (error.type == AiErrorType.noInternet) {
         final fallback = _offlineFallback(spread, drawnCards, l10n);
+        await _incrementCardStats(drawnCards);
         state = state.copyWith(
           aiResult: fallback,
           isLoading: false,
@@ -490,5 +492,18 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       requestId: aiResult.requestId,
     );
     await readingsRepository.saveReading(reading);
+  }
+
+  Future<void> runSmokeTest() async {
+    final aiRepository = ref.read(aiRepositoryProvider);
+    final locale = ref.read(localeProvider);
+    await aiRepository.smokeTest(languageCode: locale.languageCode);
+  }
+
+  Future<void> _incrementCardStats(List<DrawnCardModel> drawnCards) async {
+    final statsRepository = ref.read(cardStatsRepositoryProvider);
+    for (final drawn in drawnCards) {
+      await statsRepository.increment(drawn.cardId);
+    }
   }
 }
