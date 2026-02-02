@@ -1,5 +1,12 @@
-function buildPromptMessages(payload) {
-  const { question, spread, cards, language } = payload;
+function buildPromptMessages(payload, mode = 'deep') {
+  const { question, spread, cards, language, fastReading, responseConstraints } =
+    payload;
+  const constraints = responseConstraints || {};
+  const tldrMax = constraints.tldrMaxChars || 180;
+  const sectionMax = constraints.sectionMaxChars || 450;
+  const whyMax = constraints.whyMaxChars || 300;
+  const actionMax = constraints.actionMaxChars || 220;
+  const isFast = mode === 'fast';
 
   const system = [
     'You are an insightful tarot reader for Basil\'s Arcana.',
@@ -12,6 +19,9 @@ function buildPromptMessages(payload) {
     'Write one section per spread position.',
     'If the spread has three cards, mention relationships or tensions between cards.',
     `Respond in the same language as the user (${language || 'infer from the question'}).`,
+    isFast
+      ? `Fast mode: keep tldr <= ${tldrMax} chars, each section text <= ${sectionMax} chars, action <= ${actionMax} chars. Set "why" to an empty string.`
+      : `Deep mode: keep tldr <= ${tldrMax} chars, each section text <= ${sectionMax} chars, why <= ${whyMax} chars, action <= ${actionMax} chars.`,
     'Output strict JSON only with keys: tldr, sections, why, action, fullText.',
     'Each section must have: positionId, title, text.',
     'No markdown, no extra keys.'
@@ -23,6 +33,9 @@ function buildPromptMessages(payload) {
     cards,
     language
   };
+  if (!isFast && fastReading) {
+    user.fastReading = fastReading;
+  }
 
   return [
     { role: 'system', content: system },

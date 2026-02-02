@@ -59,6 +59,26 @@ class DrawnCardModel {
       },
     };
   }
+
+  Map<String, dynamic> toAiDeepJson({
+    required int totalCards,
+  }) {
+    final keywordLimit = totalCards > 1 ? 4 : 6;
+    final meaningLimit = totalCards > 1 ? 70 : 110;
+    return {
+      'positionId': positionId,
+      'positionTitle': positionTitle,
+      'cardId': cardId,
+      'cardName': cardName,
+      'keywords': keywords.take(keywordLimit).toList(),
+      'meaning': {
+        'general': _truncate(meaning.general, meaningLimit),
+        'light': _truncate(meaning.light, meaningLimit),
+        'shadow': _truncate(meaning.shadow, meaningLimit),
+        'advice': _truncate(meaning.advice, meaningLimit),
+      },
+    };
+  }
 }
 
 String _truncate(String value, int maxLength) {

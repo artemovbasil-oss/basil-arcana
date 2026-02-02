@@ -55,7 +55,7 @@ function validateReadingRequest(body) {
     return 'Request body must be an object';
   }
 
-  const { question, spread, cards, tone, language } = body;
+  const { question, spread, cards, tone, language, fastReading } = body;
   if (!isNonEmptyString(question)) {
     return 'question is required';
   }
@@ -80,6 +80,21 @@ function validateReadingRequest(body) {
   }
   if (language && typeof language !== 'string') {
     return 'language must be a string';
+  }
+
+  if (fastReading != null) {
+    if (typeof fastReading !== 'object') {
+      return 'fastReading must be an object';
+    }
+    if (fastReading.tldr && typeof fastReading.tldr !== 'string') {
+      return 'fastReading.tldr must be a string';
+    }
+    if (fastReading.action && typeof fastReading.action !== 'string') {
+      return 'fastReading.action must be a string';
+    }
+    if (fastReading.sections && !Array.isArray(fastReading.sections)) {
+      return 'fastReading.sections must be an array';
+    }
   }
 
   return null;

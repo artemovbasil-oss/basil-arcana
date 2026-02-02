@@ -51,13 +51,13 @@ class AiResultModel {
 
   factory AiResultModel.fromJson(Map<String, dynamic> json) {
     return AiResultModel(
-      tldr: json['tldr'] as String,
-      sections: (json['sections'] as List<dynamic>)
+      tldr: (json['tldr'] as String?) ?? '',
+      sections: (json['sections'] as List<dynamic>? ?? [])
           .map((section) => AiSectionModel.fromJson(section))
           .toList(),
-      why: json['why'] as String,
-      action: json['action'] as String,
-      fullText: json['fullText'] as String,
+      why: (json['why'] as String?) ?? '',
+      action: (json['action'] as String?) ?? '',
+      fullText: (json['fullText'] as String?) ?? '',
       requestId: json['requestId'] as String?,
     );
   }

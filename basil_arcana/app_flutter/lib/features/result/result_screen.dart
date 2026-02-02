@@ -33,12 +33,27 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
   bool _precacheDone = false;
   int _itemCounter = 0;
   String? _warmTip;
+  bool _deepPromptDismissed = false;
 
   @override
   void dispose() {
     _typingTimer?.cancel();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    ref.listen<ReadingFlowState>(readingFlowControllerProvider, (prev, next) {
+      if (prev?.deepResult == null && next.deepResult != null) {
+        _handleDeepResult(next);
+      } else if ((prev?.isDeepLoading ?? false) &&
+          !(next.isDeepLoading) &&
+          next.deepErrorType != null) {
+        _handleDeepError(next);
+      }
+    });
   }
 
   @override
@@ -141,7 +156,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                   ),
                   const SizedBox(height: 18),
                   for (final item in _items) ...[
-                    _buildChatItem(item),
+                    _buildChatItem(item, state),
                     const SizedBox(height: 14),
                   ],
                 ],
@@ -185,6 +200,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
     _initialized = true;
     _sequenceComplete = false;
     _warmTip = _maybeWarmTip(state);
+    _deepPromptDismissed = false;
     _items
       ..clear()
       ..add(
@@ -304,39 +320,43 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
       );
     }
 
-    items.add(
-      _ChatItem.basil(
-        id: _nextId(),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              l10n.resultSectionWhy,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 8),
-            Text(aiResult.why),
-          ],
+    if (aiResult.why.trim().isNotEmpty) {
+      items.add(
+        _ChatItem.basil(
+          id: _nextId(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.resultSectionWhy,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 8),
+              Text(aiResult.why),
+            ],
+          ),
         ),
-      ),
-    );
+      );
+    }
 
-    items.add(
-      _ChatItem.basil(
-        id: _nextId(),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              l10n.resultSectionAction,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 8),
-            Text(aiResult.action),
-          ],
+    if (aiResult.action.trim().isNotEmpty) {
+      items.add(
+        _ChatItem.basil(
+          id: _nextId(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.resultSectionAction,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 8),
+              Text(aiResult.action),
+            ],
+          ),
         ),
-      ),
-    );
+      );
+    }
 
     if (_warmTip != null) {
       items.add(
@@ -347,10 +367,16 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
       );
     }
 
+    items.add(
+      _ChatItem.deepPrompt(
+        id: _nextId(),
+      ),
+    );
+
     return items;
   }
 
-  Widget _buildChatItem(_ChatItem item) {
+  Widget _buildChatItem(_ChatItem item, ReadingFlowState state) {
     switch (item.kind) {
       case _ChatItemKind.user:
         return ChatBubbleReveal(
@@ -375,6 +401,80 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
           key: ValueKey(item.id),
           child: const TypingIndicatorBubble(),
         );
+      case _ChatItemKind.deepPrompt:
+        return ChatBubbleReveal(
+          key: ValueKey(item.id),
+          child: ChatBubble(
+            isUser: false,
+            avatarEmoji: '🪄',
+            child: _DeepPromptBubble(
+              isActionable: !_deepPromptDismissed &&
+                  !state.isDeepLoading &&
+                  state.deepResult == null &&
+                  state.deepErrorType == null,
+              onDecline: () {
+                setState(() {
+                  _deepPromptDismissed = true;
+                });
+              },
+              onAccept: () {
+                if (state.isDeepLoading || state.deepResult != null) {
+                  return;
+                }
+                setState(() {
+                  _deepPromptDismissed = true;
+                });
+                _showDeepLoading();
+                ref
+                    .read(readingFlowControllerProvider.notifier)
+                    .requestDeepReading();
+              },
+            ),
+          ),
+        );
+      case _ChatItemKind.deepLoading:
+        return ChatBubbleReveal(
+          key: ValueKey(item.id),
+          child: ChatBubble(
+            isUser: false,
+            avatarEmoji: '🪄',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: const [
+                OracleThinkingGlow(height: 160),
+              ],
+            ),
+          ),
+        );
+      case _ChatItemKind.deepError:
+        return ChatBubbleReveal(
+          key: ValueKey(item.id),
+          child: ChatBubble(
+            isUser: false,
+            avatarEmoji: '🪄',
+            child: _DeepErrorBubble(
+              message: item.message ?? '',
+              onCancel: () {
+                setState(() {
+                  _deepPromptDismissed = true;
+                  _removeDeepStatusItems();
+                });
+                ref
+                    .read(readingFlowControllerProvider.notifier)
+                    .cancelDeepReading();
+              },
+              onRetry: () {
+                setState(() {
+                  _removeDeepStatusItems();
+                });
+                _showDeepLoading();
+                ref
+                    .read(readingFlowControllerProvider.notifier)
+                    .requestDeepReading();
+              },
+            ),
+          ),
+        );
     }
   }
 
@@ -398,6 +498,148 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
         return l10n.resultStatusUnexpectedResponse;
       case null:
         return l10n.resultStatusInterpretationUnavailable;
+    }
+  }
+
+  void _showDeepLoading() {
+    setState(() {
+      _removeDeepStatusItems();
+      _items.add(_ChatItem.deepLoading(id: _nextId()));
+    });
+    _scrollToBottom();
+  }
+
+  void _handleDeepResult(ReadingFlowState state) {
+    if (state.deepResult == null) {
+      return;
+    }
+    setState(() {
+      _removeDeepStatusItems();
+    });
+    _appendDeepMessages(state);
+  }
+
+  void _handleDeepError(ReadingFlowState state) {
+    final l10n = AppLocalizations.of(context)!;
+    final message =
+        state.deepErrorMessage ?? l10n.resultDeepRetryMessage;
+    setState(() {
+      _removeDeepStatusItems();
+      _items.add(
+        _ChatItem.deepError(
+          id: _nextId(),
+          message: message,
+        ),
+      );
+    });
+    _scrollToBottom();
+  }
+
+  void _removeDeepStatusItems() {
+    _items.removeWhere(
+      (item) =>
+          item.kind == _ChatItemKind.deepLoading ||
+          item.kind == _ChatItemKind.deepError,
+    );
+  }
+
+  void _appendDeepMessages(ReadingFlowState state) {
+    final deepResult = state.deepResult;
+    if (deepResult == null) {
+      return;
+    }
+    final l10n = AppLocalizations.of(context)!;
+    final sectionMap = {
+      for (final section in deepResult.sections) section.positionId: section
+    };
+    final items = <_ChatItem>[];
+
+    for (final drawn in state.drawnCards) {
+      final section = sectionMap[drawn.positionId];
+      if (section == null || section.text.trim().isEmpty) {
+        continue;
+      }
+      items.add(
+        _ChatItem.basil(
+          id: _nextId(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CardFaceWidget(
+                cardId: drawn.cardId,
+                cardName: drawn.cardName,
+                keywords: drawn.keywords,
+                onCardTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => CardDetailScreen(
+                        card: CardModel(
+                          id: drawn.cardId,
+                          name: drawn.cardName,
+                          keywords: drawn.keywords,
+                          meaning: drawn.meaning,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 12),
+              Text(
+                drawn.positionTitle,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 8),
+              Text(section.text),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (deepResult.why.trim().isNotEmpty) {
+      items.add(
+        _ChatItem.basil(
+          id: _nextId(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.resultSectionWhy,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 8),
+              Text(deepResult.why),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (deepResult.action.trim().isNotEmpty) {
+      items.add(
+        _ChatItem.basil(
+          id: _nextId(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.resultSectionAction,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 8),
+              Text(deepResult.action),
+            ],
+          ),
+        ),
+      );
+    }
+
+    _basilQueue.addAll(items);
+    if (_sequenceComplete) {
+      _sequenceComplete = false;
+      _queueNextBasilMessage();
     }
   }
 
@@ -484,11 +726,100 @@ class _OracleRetryScreen extends StatelessWidget {
   }
 }
 
+class _DeepPromptBubble extends StatelessWidget {
+  const _DeepPromptBubble({
+    required this.isActionable,
+    required this.onDecline,
+    required this.onAccept,
+  });
+
+  final bool isActionable;
+  final VoidCallback onDecline;
+  final VoidCallback onAccept;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.resultDeepPrompt,
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton(
+                onPressed: isActionable ? onDecline : null,
+                child: Text(l10n.resultDeepNotNow),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: ElevatedButton(
+                onPressed: isActionable ? onAccept : null,
+                child: Text(l10n.resultDeepShowDetails),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _DeepErrorBubble extends StatelessWidget {
+  const _DeepErrorBubble({
+    required this.message,
+    required this.onCancel,
+    required this.onRetry,
+  });
+
+  final String message;
+  final VoidCallback onCancel;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          message,
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton(
+                onPressed: onCancel,
+                child: Text(l10n.resultDeepCancel),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: ElevatedButton(
+                onPressed: onRetry,
+                child: Text(l10n.resultDeepTryAgain),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
 class _ChatItem {
   const _ChatItem._({
     required this.id,
     required this.kind,
     this.child,
+    this.message,
   });
 
   factory _ChatItem.user({required String id, required Widget child}) {
@@ -503,12 +834,39 @@ class _ChatItem {
     return _ChatItem._(id: id, kind: _ChatItemKind.typing);
   }
 
+  factory _ChatItem.deepPrompt({required String id}) {
+    return _ChatItem._(id: id, kind: _ChatItemKind.deepPrompt);
+  }
+
+  factory _ChatItem.deepLoading({required String id}) {
+    return _ChatItem._(id: id, kind: _ChatItemKind.deepLoading);
+  }
+
+  factory _ChatItem.deepError({
+    required String id,
+    required String message,
+  }) {
+    return _ChatItem._(
+      id: id,
+      kind: _ChatItemKind.deepError,
+      message: message,
+    );
+  }
+
   final String id;
   final _ChatItemKind kind;
   final Widget? child;
+  final String? message;
 }
 
-enum _ChatItemKind { user, basil, typing }
+enum _ChatItemKind {
+  user,
+  basil,
+  typing,
+  deepPrompt,
+  deepLoading,
+  deepError,
+}
 
 class _StatusPill extends StatelessWidget {
   const _StatusPill({required this.text});

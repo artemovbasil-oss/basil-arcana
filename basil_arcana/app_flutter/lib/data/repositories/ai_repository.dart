@@ -26,6 +26,8 @@ enum AiErrorType {
   badResponse,
 }
 
+enum ReadingMode { fast, deep }
+
 class AiRepositoryException implements Exception {
   const AiRepositoryException(
     this.type, {
@@ -60,6 +62,8 @@ class AiRepository {
     required SpreadModel spread,
     required List<DrawnCardModel> drawnCards,
     required String languageCode,
+    required ReadingMode mode,
+    Map<String, dynamic>? fastReading,
     http.Client? client,
   }) async {
     if (!hasApiKey) {
@@ -69,23 +73,41 @@ class AiRepository {
       );
     }
 
-    final uri = Uri.parse(apiBaseUrl).resolve('/api/reading/generate');
+    final uri = Uri.parse(apiBaseUrl).replace(
+      path: '/api/reading/generate',
+      queryParameters: {
+        'mode': mode.name,
+      },
+    );
     final totalCards = drawnCards.length;
+    final responseConstraints = mode == ReadingMode.fast
+        ? {
+            'tldrMaxChars': 180,
+            'sectionMaxChars': 280,
+            'actionMaxChars': 160,
+          }
+        : {
+            'tldrMaxChars': 180,
+            'sectionMaxChars': 700,
+            'whyMaxChars': 400,
+            'actionMaxChars': 240,
+          };
+    final cardsPayload = mode == ReadingMode.deep
+        ? drawnCards
+            .map((drawn) => drawn.toAiDeepJson(totalCards: totalCards))
+            .toList()
+        : drawnCards
+            .map((drawn) => drawn.toAiJson(totalCards: totalCards))
+            .toList();
     final payload = {
       'question': question,
       'spread': spread.toJson(),
-      'cards': drawnCards
-          .map((drawn) => drawn.toAiJson(totalCards: totalCards))
-          .toList(),
+      'cards': cardsPayload,
       'tone': 'neutral',
       'language': languageCode,
       'responseFormat': 'strict_json',
-      'responseConstraints': {
-        'tldrMaxChars': 180,
-        'sectionMaxChars': 450,
-        'whyMaxChars': 250,
-        'actionMaxChars': 220,
-      },
+      'responseConstraints': responseConstraints,
+      if (fastReading != null) 'fastReading': fastReading,
     };
 
     final headers = {

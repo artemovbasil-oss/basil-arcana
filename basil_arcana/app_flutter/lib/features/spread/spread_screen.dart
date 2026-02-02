@@ -107,14 +107,14 @@ class _SpreadOptionCard extends ConsumerWidget {
           color: theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(26),
           border: Border.all(
-            color: primary.withOpacity(0.45),
-            width: 1.2,
+            color: primary.withOpacity(0.32),
+            width: 1.1,
           ),
           boxShadow: [
             BoxShadow(
-              color: primary.withOpacity(0.15),
-              blurRadius: 18,
-              offset: const Offset(0, 8),
+              color: primary.withOpacity(0.14),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
             ),
           ],
         ),
@@ -131,13 +131,15 @@ class _SpreadOptionCard extends ConsumerWidget {
                       title,
                       style: theme.textTheme.titleLarge?.copyWith(
                         color: theme.colorScheme.onSurface,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                     const SizedBox(height: 6),
                     Text(
                       subtitle,
-                      style: theme.textTheme.bodyMedium?.copyWith(
+                      style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurface.withOpacity(0.7),
+                        height: 1.35,
                       ),
                     ),
                   ],
@@ -175,7 +177,7 @@ class _OneCardAnimationState extends State<_OneCardAnimation>
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 3800),
-    )..repeat();
+    )..repeat(reverse: true);
     _progress = CurvedAnimation(
       parent: _controller,
       curve: Curves.easeInOutCubic,
@@ -191,10 +193,11 @@ class _OneCardAnimationState extends State<_OneCardAnimation>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final cardColor = theme.colorScheme.surfaceVariant;
-    final accent = theme.colorScheme.primary.withOpacity(0.65);
-    final border = theme.colorScheme.onSurface.withOpacity(0.25);
-    final shadow = theme.colorScheme.onSurface.withOpacity(0.18);
+    final primary = theme.colorScheme.primary;
+    final cardColor = primary.withOpacity(0.22);
+    final accent = primary.withOpacity(0.5);
+    final border = primary.withOpacity(0.32);
+    final shadow = primary.withOpacity(0.2);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -212,7 +215,7 @@ class _OneCardAnimationState extends State<_OneCardAnimation>
                 _cardShape(
                   width: cardWidth,
                   height: cardHeight,
-                  color: cardColor.withOpacity(0.8),
+                  color: cardColor.withOpacity(0.7),
                   offset: const Offset(6, 10),
                   borderColor: border,
                   shadowColor: shadow,
@@ -220,7 +223,7 @@ class _OneCardAnimationState extends State<_OneCardAnimation>
                 _cardShape(
                   width: cardWidth,
                   height: cardHeight,
-                  color: cardColor.withOpacity(0.92),
+                  color: cardColor.withOpacity(0.8),
                   offset: const Offset(2, 4),
                   borderColor: border,
                   shadowColor: shadow,
@@ -232,8 +235,8 @@ class _OneCardAnimationState extends State<_OneCardAnimation>
                     child: _cardShape(
                       width: cardWidth,
                       height: cardHeight,
-                      color: cardColor.withOpacity(0.98),
-                      borderColor: accent,
+                      color: cardColor.withOpacity(0.9),
+                      borderColor: accent.withOpacity(0.75),
                       shadowColor: shadow,
                       elevationGlow: true,
                     ),
@@ -266,7 +269,7 @@ class _ThreeCardAnimationState extends State<_ThreeCardAnimation>
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 4200),
-    )..repeat();
+    )..repeat(reverse: true);
     _fan = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
   }
 
@@ -279,10 +282,11 @@ class _ThreeCardAnimationState extends State<_ThreeCardAnimation>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final cardColor = theme.colorScheme.surfaceVariant;
-    final accent = theme.colorScheme.primary.withOpacity(0.6);
-    final border = theme.colorScheme.onSurface.withOpacity(0.25);
-    final shadow = theme.colorScheme.onSurface.withOpacity(0.18);
+    final primary = theme.colorScheme.primary;
+    final cardColor = primary.withOpacity(0.2);
+    final accent = primary.withOpacity(0.5);
+    final border = primary.withOpacity(0.3);
+    final shadow = primary.withOpacity(0.2);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -298,7 +302,7 @@ class _ThreeCardAnimationState extends State<_ThreeCardAnimation>
                 _cardShape(
                   width: cardWidth,
                   height: cardHeight,
-                  color: cardColor.withOpacity(0.7),
+                  color: cardColor.withOpacity(0.65),
                   offset: const Offset(6, 8),
                   borderColor: border,
                   shadowColor: shadow,
@@ -306,7 +310,7 @@ class _ThreeCardAnimationState extends State<_ThreeCardAnimation>
                 _cardShape(
                   width: cardWidth,
                   height: cardHeight,
-                  color: cardColor.withOpacity(0.85),
+                  color: cardColor.withOpacity(0.78),
                   offset: const Offset(2, 4),
                   borderColor: border,
                   shadowColor: shadow,
@@ -318,7 +322,7 @@ class _ThreeCardAnimationState extends State<_ThreeCardAnimation>
                     child: _cardShape(
                       width: cardWidth,
                       height: cardHeight,
-                      color: cardColor.withOpacity(0.95),
+                      color: cardColor.withOpacity(0.9),
                       borderColor: border,
                       shadowColor: shadow,
                     ),
@@ -329,8 +333,8 @@ class _ThreeCardAnimationState extends State<_ThreeCardAnimation>
                   child: _cardShape(
                     width: cardWidth,
                     height: cardHeight,
-                    color: cardColor.withOpacity(0.98),
-                    borderColor: accent,
+                    color: cardColor.withOpacity(0.92),
+                    borderColor: accent.withOpacity(0.75),
                     shadowColor: shadow,
                     elevationGlow: true,
                   ),
@@ -342,7 +346,7 @@ class _ThreeCardAnimationState extends State<_ThreeCardAnimation>
                     child: _cardShape(
                       width: cardWidth,
                       height: cardHeight,
-                      color: cardColor.withOpacity(0.95),
+                      color: cardColor.withOpacity(0.9),
                       borderColor: border,
                       shadowColor: shadow,
                     ),
@@ -372,10 +376,17 @@ Widget _cardShape({
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: color,
+        gradient: RadialGradient(
+          center: const Alignment(0, -0.2),
+          radius: 1,
+          colors: [
+            color.withOpacity(0.95),
+            color.withOpacity(0.7),
+          ],
+        ),
         borderRadius: BorderRadius.circular(16),
         border: borderColor != null
-            ? Border.all(color: borderColor.withOpacity(0.7), width: 1.2)
+            ? Border.all(color: borderColor.withOpacity(0.8), width: 1.1)
             : null,
         boxShadow: [
           if (shadowColor != null)
@@ -386,7 +397,7 @@ Widget _cardShape({
             ),
           if (elevationGlow)
             BoxShadow(
-              color: borderColor?.withOpacity(0.35) ?? Colors.transparent,
+              color: borderColor?.withOpacity(0.3) ?? Colors.transparent,
               blurRadius: 18,
               offset: const Offset(0, 8),
             ),
