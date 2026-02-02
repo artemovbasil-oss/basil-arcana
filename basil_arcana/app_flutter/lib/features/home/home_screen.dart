@@ -17,16 +17,24 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   final TextEditingController _controller = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
 
   @override
   void dispose() {
     _controller.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
   void _applyExample(String example) {
     _controller.text = example;
     ref.read(readingFlowControllerProvider.notifier).setQuestion(example);
+    setState(() {});
+  }
+
+  void _clearQuestion() {
+    _controller.clear();
+    ref.read(readingFlowControllerProvider.notifier).setQuestion('');
     setState(() {});
   }
 
@@ -43,161 +51,216 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final hasQuestion = _controller.text.trim().isNotEmpty;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.appTitle),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.history),
-            tooltip: l10n.historyTooltip,
-            onPressed: () {
-              Navigator.pushNamed(context, HistoryScreen.routeName);
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.settings),
-            tooltip: l10n.settingsTitle,
-            onPressed: () {
-              Navigator.pushNamed(context, SettingsScreen.routeName);
-            },
-          ),
-        ],
-      ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                l10n.homeTagline,
-                style: Theme.of(context)
-                    .textTheme
-                    .titleLarge
-                    ?.copyWith(color: colorScheme.onSurface),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                l10n.homeSubtitle,
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyMedium
-                    ?.copyWith(color: colorScheme.onSurface.withOpacity(0.7)),
-              ),
-              const SizedBox(height: 24),
-              Container(
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(22),
-                  boxShadow: [
-                    BoxShadow(
-                      color: colorScheme.primary.withOpacity(0.12),
-                      blurRadius: 18,
-                      offset: const Offset(0, 8),
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            l10n.appTitle,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(
+                                  color: colorScheme.onSurface,
+                                ),
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.history),
+                          tooltip: l10n.historyTooltip,
+                          onPressed: () {
+                            Navigator.pushNamed(
+                              context,
+                              HistoryScreen.routeName,
+                            );
+                          },
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.settings),
+                          tooltip: l10n.settingsTitle,
+                          onPressed: () {
+                            Navigator.pushNamed(
+                              context,
+                              SettingsScreen.routeName,
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      l10n.homeDescription,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: colorScheme.onSurface.withOpacity(0.7),
+                          ),
+                    ),
+                    const SizedBox(height: 22),
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(22),
+                        color: colorScheme.surfaceVariant.withOpacity(0.25),
+                        boxShadow: [
+                          BoxShadow(
+                            color: colorScheme.primary.withOpacity(0.18),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
+                        border: Border.all(
+                          color: colorScheme.primary.withOpacity(0.35),
+                        ),
+                      ),
+                      child: Stack(
+                        children: [
+                          TextField(
+                            controller: _controller,
+                            focusNode: _focusNode,
+                            maxLines: 6,
+                            minLines: 5,
+                            decoration: InputDecoration(
+                              hintText: l10n.homeQuestionPlaceholder,
+                              hintStyle: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
+                                    color:
+                                        colorScheme.onSurface.withOpacity(0.45),
+                                  ),
+                              border: InputBorder.none,
+                              contentPadding:
+                                  const EdgeInsets.fromLTRB(16, 16, 48, 32),
+                              alignLabelWithHint: true,
+                            ),
+                            onChanged: (value) {
+                              ref
+                                  .read(readingFlowControllerProvider.notifier)
+                                  .setQuestion(value);
+                              setState(() {});
+                            },
+                          ),
+                          if (hasQuestion)
+                            Positioned(
+                              right: 10,
+                              bottom: 10,
+                              child: GestureDetector(
+                                onTap: _clearQuestion,
+                                child: Container(
+                                  width: 28,
+                                  height: 28,
+                                  decoration: BoxDecoration(
+                                    color: colorScheme.surface
+                                        .withOpacity(0.85),
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: colorScheme.primary
+                                          .withOpacity(0.35),
+                                    ),
+                                  ),
+                                  child: Icon(
+                                    Icons.close,
+                                    size: 16,
+                                    color:
+                                        colorScheme.onSurface.withOpacity(0.7),
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Wrap(
+                      spacing: 12,
+                      runSpacing: 8,
+                      children: examples
+                          .map(
+                            (example) => InkWell(
+                              onTap: () => _applyExample(example),
+                              borderRadius: BorderRadius.circular(20),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 4,
+                                ),
+                                child: Text(
+                                  example,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .labelLarge
+                                      ?.copyWith(
+                                        color: colorScheme.onSurface
+                                            .withOpacity(0.65),
+                                      ),
+                                ),
+                              ),
+                            ),
+                          )
+                          .toList(),
+                    ),
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        icon: const Icon(Icons.style_outlined),
+                        label: Text(l10n.homeAllCardsButton),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const CardsScreen(),
+                            ),
+                          );
+                        },
+                      ),
                     ),
                   ],
                 ),
-                child: TextField(
-                  controller: _controller,
-                  maxLines: 3,
-                  decoration: InputDecoration(
-                    labelText: l10n.homeQuestionLabel,
-                    hintText: l10n.homeQuestionHint,
-                    suffixIcon: hasQuestion
-                        ? IconButton(
-                            icon: const Icon(Icons.close),
-                            tooltip: l10n.homeClearQuestionTooltip,
-                            onPressed: () {
-                              _controller.clear();
-                              ref
-                                  .read(
-                                      readingFlowControllerProvider.notifier)
-                                  .setQuestion('');
-                              setState(() {});
-                            },
-                          )
-                        : null,
-                  ),
-                  onChanged: (value) {
-                    ref
-                        .read(readingFlowControllerProvider.notifier)
-                        .setQuestion(value);
-                    setState(() {});
-                  },
-                ),
               ),
-              const SizedBox(height: 20),
-              Text(
-                l10n.homeTryPrompt,
-                style: Theme.of(context)
-                    .textTheme
-                    .titleSmall
-                    ?.copyWith(color: colorScheme.onSurface.withOpacity(0.8)),
-              ),
-              const SizedBox(height: 10),
-              Wrap(
-                spacing: 10,
-                runSpacing: 10,
-                children: examples
-                    .map(
-                      (example) => ActionChip(
-                        label: Text(example),
-                        onPressed: () => _applyExample(example),
-                      ),
-                    )
-                    .toList(),
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  icon: const Icon(Icons.style_outlined),
-                  label: Text(l10n.homeAllCardsButton),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const CardsScreen(),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-      bottomNavigationBar: SafeArea(
-        top: false,
-        minimum: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-        child: AnimatedPadding(
-          duration: const Duration(milliseconds: 250),
-          curve: Curves.easeOut,
-          padding:
-              EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-          child: SizedBox(
-            height: 56,
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: colorScheme.primary,
-                foregroundColor: colorScheme.onPrimary,
-                shape: const StadiumBorder(),
-                textStyle: Theme.of(context).textTheme.titleMedium,
-              ),
-              icon: const Icon(Icons.auto_awesome),
-              onPressed: state.question.trim().isEmpty
-                  ? null
-                  : () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const SpreadScreen(),
-                        ),
-                      );
-                    },
-              label: Text(l10n.homeContinueButton),
             ),
-          ),
+            SafeArea(
+              top: false,
+              minimum: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+              child: AnimatedPadding(
+                duration: const Duration(milliseconds: 250),
+                curve: Curves.easeOut,
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).viewInsets.bottom,
+                ),
+                child: SizedBox(
+                  height: 56,
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: colorScheme.primary,
+                      foregroundColor: colorScheme.onPrimary,
+                      shape: const StadiumBorder(),
+                      textStyle: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    icon: const Icon(Icons.auto_awesome),
+                    onPressed: state.question.trim().isEmpty
+                        ? null
+                        : () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const SpreadScreen(),
+                              ),
+                            );
+                          },
+                    label: Text(l10n.homeContinueButton),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

@@ -551,7 +551,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
     }
     final l10n = AppLocalizations.of(context)!;
     final headings = [
-      l10n.resultDeepLoveHeading,
+      l10n.resultDeepRelationshipsHeading,
       l10n.resultDeepCareerHeading,
     ];
     final sectionTexts = List<String>.generate(headings.length, (index) {

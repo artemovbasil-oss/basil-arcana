@@ -4,6 +4,7 @@ import 'package:hive/hive.dart';
 
 import '../data/repositories/ai_repository.dart';
 import '../data/repositories/cards_repository.dart';
+import '../data/repositories/card_stats_repository.dart';
 import '../data/repositories/readings_repository.dart';
 import '../data/repositories/spreads_repository.dart';
 import 'reading_flow_controller.dart';
@@ -22,6 +23,10 @@ final aiRepositoryProvider = Provider<AiRepository>((ref) {
 
 final readingsRepositoryProvider = Provider<ReadingsRepository>((ref) {
   return ReadingsRepository();
+});
+
+final cardStatsRepositoryProvider = Provider<CardStatsRepository>((ref) {
+  return CardStatsRepository();
 });
 
 final readingFlowControllerProvider =

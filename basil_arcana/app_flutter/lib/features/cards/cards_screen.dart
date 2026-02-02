@@ -21,6 +21,7 @@ class _CardsScreenState extends ConsumerState<CardsScreen> {
   Widget build(BuildContext context) {
     final cardsAsync = ref.watch(cardsProvider);
     final l10n = AppLocalizations.of(context)!;
+    final statsRepository = ref.watch(cardStatsRepositoryProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -35,25 +36,33 @@ class _CardsScreenState extends ConsumerState<CardsScreen> {
             );
           }
           _precacheFirstCards(cards);
-          return GridView.builder(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              mainAxisSpacing: 16,
-              crossAxisSpacing: 16,
-              childAspectRatio: 0.62,
-            ),
-            itemCount: cards.length,
-            itemBuilder: (context, index) {
-              final card = cards[index];
-              return _CardTile(
-                card: card,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => CardDetailScreen(card: card),
-                    ),
+          return ValueListenableBuilder(
+            valueListenable: statsRepository.listenable(),
+            builder: (context, box, _) {
+              return GridView.builder(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 16,
+                  crossAxisSpacing: 16,
+                  childAspectRatio: 0.62,
+                ),
+                itemCount: cards.length,
+                itemBuilder: (context, index) {
+                  final card = cards[index];
+                  final count = statsRepository.getCount(card.id);
+                  return _CardTile(
+                    card: card,
+                    drawnCount: count,
+                    drawnLabel: l10n.cardsDrawnCount(count),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => CardDetailScreen(card: card),
+                        ),
+                      );
+                    },
                   );
                 },
               );
@@ -90,9 +99,16 @@ class _CardsScreenState extends ConsumerState<CardsScreen> {
 }
 
 class _CardTile extends StatelessWidget {
-  const _CardTile({required this.card, required this.onTap});
+  const _CardTile({
+    required this.card,
+    required this.drawnCount,
+    required this.drawnLabel,
+    required this.onTap,
+  });
 
   final CardModel card;
+  final int drawnCount;
+  final String drawnLabel;
   final VoidCallback onTap;
 
   @override
@@ -114,6 +130,14 @@ class _CardTile extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Align(
+                alignment: Alignment.topLeft,
+                child: _DrawnBadge(
+                  label: drawnLabel,
+                  isEmpty: drawnCount == 0,
+                ),
+              ),
+              const SizedBox(height: 10),
               Expanded(
                 child: Center(
                   child: CardAssetImage(
@@ -135,6 +159,34 @@ class _CardTile extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _DrawnBadge extends StatelessWidget {
+  const _DrawnBadge({required this.label, required this.isEmpty});
+
+  final String label;
+  final bool isEmpty;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: colorScheme.primary.withOpacity(isEmpty ? 0.08 : 0.14),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: colorScheme.primary.withOpacity(isEmpty ? 0.2 : 0.4),
+        ),
+      ),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: colorScheme.onSurface.withOpacity(isEmpty ? 0.6 : 0.9),
+            ),
       ),
     );
   }
