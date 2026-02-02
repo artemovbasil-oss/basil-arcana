@@ -178,9 +178,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
   }
 
   bool _shouldShowRetryScreen(AiErrorType? type) {
-    return type == AiErrorType.timeout ||
-        type == AiErrorType.serverError ||
-        type == AiErrorType.badResponse;
+    return type == AiErrorType.timeout || type == AiErrorType.serverError;
   }
 
   void _initializeSequence(ReadingFlowState state) {

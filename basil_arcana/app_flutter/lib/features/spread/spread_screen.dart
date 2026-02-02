@@ -44,11 +44,7 @@ class SpreadScreen extends ConsumerWidget {
                       spread: threeCardSpread,
                       title: l10n.spreadThreeCardTitle,
                       subtitle: l10n.spreadThreeCardSubtitle,
-                      animation: _ThreeCardAnimation(
-                        pastLabel: l10n.spreadLabelPast,
-                        presentLabel: l10n.spreadLabelPresent,
-                        futureLabel: l10n.spreadLabelFuture,
-                      ),
+                      animation: const _ThreeCardAnimation(),
                     ),
                   ),
               ],
@@ -196,7 +192,9 @@ class _OneCardAnimationState extends State<_OneCardAnimation>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cardColor = theme.colorScheme.surfaceVariant;
-    final accent = theme.colorScheme.primary.withOpacity(0.5);
+    final accent = theme.colorScheme.primary.withOpacity(0.65);
+    final border = theme.colorScheme.onSurface.withOpacity(0.25);
+    final shadow = theme.colorScheme.onSurface.withOpacity(0.18);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -214,14 +212,18 @@ class _OneCardAnimationState extends State<_OneCardAnimation>
                 _cardShape(
                   width: cardWidth,
                   height: cardHeight,
-                  color: cardColor.withOpacity(0.65),
+                  color: cardColor.withOpacity(0.8),
                   offset: const Offset(6, 10),
+                  borderColor: border,
+                  shadowColor: shadow,
                 ),
                 _cardShape(
                   width: cardWidth,
                   height: cardHeight,
-                  color: cardColor.withOpacity(0.8),
+                  color: cardColor.withOpacity(0.92),
                   offset: const Offset(2, 4),
+                  borderColor: border,
+                  shadowColor: shadow,
                 ),
                 Transform.translate(
                   offset: Offset(0, lift),
@@ -230,8 +232,9 @@ class _OneCardAnimationState extends State<_OneCardAnimation>
                     child: _cardShape(
                       width: cardWidth,
                       height: cardHeight,
-                      color: theme.colorScheme.surface,
+                      color: cardColor.withOpacity(0.98),
                       borderColor: accent,
+                      shadowColor: shadow,
                       elevationGlow: true,
                     ),
                   ),
@@ -246,15 +249,7 @@ class _OneCardAnimationState extends State<_OneCardAnimation>
 }
 
 class _ThreeCardAnimation extends StatefulWidget {
-  const _ThreeCardAnimation({
-    required this.pastLabel,
-    required this.presentLabel,
-    required this.futureLabel,
-  });
-
-  final String pastLabel;
-  final String presentLabel;
-  final String futureLabel;
+  const _ThreeCardAnimation();
 
   @override
   State<_ThreeCardAnimation> createState() => _ThreeCardAnimationState();
@@ -284,12 +279,10 @@ class _ThreeCardAnimationState extends State<_ThreeCardAnimation>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final cardColor = theme.colorScheme.surface;
-    final accent = theme.colorScheme.primary.withOpacity(0.55);
-    final labelStyle = theme.textTheme.labelSmall?.copyWith(
-      color: theme.colorScheme.onSurface.withOpacity(0.7),
-      letterSpacing: 0.4,
-    );
+    final cardColor = theme.colorScheme.surfaceVariant;
+    final accent = theme.colorScheme.primary.withOpacity(0.6);
+    final border = theme.colorScheme.onSurface.withOpacity(0.25);
+    final shadow = theme.colorScheme.onSurface.withOpacity(0.18);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -305,14 +298,18 @@ class _ThreeCardAnimationState extends State<_ThreeCardAnimation>
                 _cardShape(
                   width: cardWidth,
                   height: cardHeight,
-                  color: cardColor.withOpacity(0.35),
+                  color: cardColor.withOpacity(0.7),
                   offset: const Offset(6, 8),
+                  borderColor: border,
+                  shadowColor: shadow,
                 ),
                 _cardShape(
                   width: cardWidth,
                   height: cardHeight,
-                  color: cardColor.withOpacity(0.55),
+                  color: cardColor.withOpacity(0.85),
                   offset: const Offset(2, 4),
+                  borderColor: border,
+                  shadowColor: shadow,
                 ),
                 Transform.translate(
                   offset: Offset(-18 * t, -8 * t),
@@ -321,7 +318,9 @@ class _ThreeCardAnimationState extends State<_ThreeCardAnimation>
                     child: _cardShape(
                       width: cardWidth,
                       height: cardHeight,
-                      color: cardColor.withOpacity(0.8),
+                      color: cardColor.withOpacity(0.95),
+                      borderColor: border,
+                      shadowColor: shadow,
                     ),
                   ),
                 ),
@@ -330,8 +329,9 @@ class _ThreeCardAnimationState extends State<_ThreeCardAnimation>
                   child: _cardShape(
                     width: cardWidth,
                     height: cardHeight,
-                    color: cardColor,
+                    color: cardColor.withOpacity(0.98),
                     borderColor: accent,
+                    shadowColor: shadow,
                     elevationGlow: true,
                   ),
                 ),
@@ -342,23 +342,11 @@ class _ThreeCardAnimationState extends State<_ThreeCardAnimation>
                     child: _cardShape(
                       width: cardWidth,
                       height: cardHeight,
-                      color: cardColor.withOpacity(0.8),
+                      color: cardColor.withOpacity(0.95),
+                      borderColor: border,
+                      shadowColor: shadow,
                     ),
                   ),
-                ),
-                Positioned(
-                  left: 0,
-                  top: cardHeight * 0.85,
-                  child: Text(widget.pastLabel, style: labelStyle),
-                ),
-                Positioned(
-                  top: cardHeight * 0.78,
-                  child: Text(widget.presentLabel, style: labelStyle),
-                ),
-                Positioned(
-                  right: 0,
-                  top: cardHeight * 0.85,
-                  child: Text(widget.futureLabel, style: labelStyle),
                 ),
               ],
             );
@@ -375,6 +363,7 @@ Widget _cardShape({
   required Color color,
   Offset offset = Offset.zero,
   Color? borderColor,
+  Color? shadowColor,
   bool elevationGlow = false,
 }) {
   return Transform.translate(
@@ -388,15 +377,20 @@ Widget _cardShape({
         border: borderColor != null
             ? Border.all(color: borderColor.withOpacity(0.7), width: 1.2)
             : null,
-        boxShadow: elevationGlow
-            ? [
-                BoxShadow(
-                  color: borderColor?.withOpacity(0.3) ?? Colors.transparent,
-                  blurRadius: 18,
-                  offset: const Offset(0, 8),
-                ),
-              ]
-            : null,
+        boxShadow: [
+          if (shadowColor != null)
+            BoxShadow(
+              color: shadowColor,
+              blurRadius: 14,
+              offset: const Offset(0, 6),
+            ),
+          if (elevationGlow)
+            BoxShadow(
+              color: borderColor?.withOpacity(0.35) ?? Colors.transparent,
+              blurRadius: 18,
+              offset: const Offset(0, 8),
+            ),
+        ],
       ),
     ),
   );

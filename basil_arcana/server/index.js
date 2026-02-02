@@ -4,13 +4,14 @@ const rateLimit = require('express-rate-limit');
 const { v4: uuidv4 } = require('uuid');
 
 const { buildPromptMessages } = require('./src/prompt');
-const { createChatCompletion } = require('./src/openai_client');
+const { createChatCompletion, listModels } = require('./src/openai_client');
 const { validateReadingRequest } = require('./src/validate');
 const {
   ARCANA_API_KEY,
   PORT,
   RATE_LIMIT_MAX,
-  RATE_LIMIT_WINDOW_MS
+  RATE_LIMIT_WINDOW_MS,
+  OPENAI_API_KEY
 } = require('./src/config');
 
 const app = express();
@@ -48,6 +49,29 @@ app.get('/health', (_req, res) => {
   res.json({ ok: true, name: 'basils-arcana' });
 });
 
+app.get('/debug/openai', async (req, res) => {
+  if (!OPENAI_API_KEY) {
+    return res.json({
+      hasKey: false,
+      ok: false,
+      status: null,
+      errorName: 'MissingOpenAIKey',
+      errorMessage: 'Missing OPENAI_API_KEY',
+      bodyPreview: ''
+    });
+  }
+
+  const result = await listModels({ requestId: req.requestId, timeoutMs: 10000 });
+  return res.json({
+    hasKey: true,
+    ok: result.ok,
+    status: result.status,
+    errorName: result.errorName,
+    errorMessage: result.errorMessage,
+    bodyPreview: result.bodyPreview
+  });
+});
+
 const apiLimiter = rateLimit({
   windowMs: RATE_LIMIT_WINDOW_MS,
   max: RATE_LIMIT_MAX,
@@ -83,7 +107,9 @@ app.post('/api/reading/generate', async (req, res) => {
 
   try {
     const messages = buildPromptMessages(req.body);
-    const result = await createChatCompletion(messages);
+    const result = await createChatCompletion(messages, {
+      requestId: req.requestId
+    });
     return res.json({ ...result, requestId: req.requestId });
   } catch (err) {
     return res
@@ -94,5 +120,20 @@ app.post('/api/reading/generate', async (req, res) => {
 
 const port = PORT || 3000;
 app.listen(port, () => {
+  const region =
+    process.env.RAILWAY_REGION ||
+    process.env.AWS_REGION ||
+    process.env.FLY_REGION ||
+    process.env.VERCEL_REGION ||
+    '';
+  console.log(
+    JSON.stringify({
+      event: 'startup',
+      openaiKeyPresent: Boolean(OPENAI_API_KEY),
+      nodeEnv: process.env.NODE_ENV || '',
+      nodeVersion: process.version,
+      region
+    })
+  );
   console.log(`Basil's Arcana API listening on ${port}`);
 });
