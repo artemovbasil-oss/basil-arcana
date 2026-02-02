@@ -478,44 +478,10 @@ class _OracleRetryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Scaffold(
-      backgroundColor: theme.colorScheme.background,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'The Oracle is silent…',
-                textAlign: TextAlign.center,
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  color: theme.colorScheme.onBackground,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Sometimes clarity needs another breath.',
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onBackground.withOpacity(0.75),
-                ),
-              ),
-              const SizedBox(height: 28),
-              OutlinedButton(
-                onPressed: onCancel,
-                child: const Text('Cancel'),
-              ),
-              const SizedBox(height: 12),
-              ElevatedButton(
-                onPressed: onRetry,
-                child: const Text('Try again'),
-              ),
-            ],
-          ),
-        ),
-      ),
+    return OracleWaitingScreen(
+      onCancel: onCancel,
+      onRetry: onRetry,
+      isTimeout: true,
     );
   }
 }

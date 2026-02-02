@@ -64,8 +64,9 @@ final localeProvider =
 });
 
 final cardsProvider = FutureProvider((ref) async {
+  final locale = ref.watch(localeProvider);
   final repo = ref.watch(cardsRepositoryProvider);
-  return repo.fetchCards();
+  return repo.fetchCards(locale: locale);
 });
 
 final spreadsProvider = FutureProvider((ref) async {
