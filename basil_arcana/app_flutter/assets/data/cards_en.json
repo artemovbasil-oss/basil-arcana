@@ -1,0 +1,222 @@
+{
+  "major_00_fool": {
+    "title": "The Fool",
+    "keywords": ["beginnings", "curiosity", "leap of faith"],
+    "meaning": {
+      "general": "A fresh start invites openness and experimentation.",
+      "light": "Optimism and curiosity are helping you move forward.",
+      "shadow": "Naivety or avoidance could blur the risks.",
+      "advice": "Take a small step that keeps the door open to learning."
+    }
+  },
+  "major_01_magician": {
+    "title": "The Magician",
+    "keywords": ["focus", "resources", "initiative"],
+    "meaning": {
+      "general": "You already have tools available to shape the outcome.",
+      "light": "Aligned intention makes your efforts more effective.",
+      "shadow": "Scattered energy may dilute your impact.",
+      "advice": "Choose one priority and direct your attention there."
+    }
+  },
+  "major_02_high_priestess": {
+    "title": "The High Priestess",
+    "keywords": ["intuition", "stillness", "inner knowing"],
+    "meaning": {
+      "general": "Quiet insight is available beneath the surface.",
+      "light": "Trusting your intuition brings clarity.",
+      "shadow": "Keeping too much hidden can create distance.",
+      "advice": "Give yourself space to listen before acting."
+    }
+  },
+  "major_03_empress": {
+    "title": "The Empress",
+    "keywords": ["nurture", "abundance", "growth"],
+    "meaning": {
+      "general": "Supportive conditions allow something to grow.",
+      "light": "Care and patience are strengthening your foundation.",
+      "shadow": "Overextending yourself may sap vitality.",
+      "advice": "Nourish what matters most and simplify the rest."
+    }
+  },
+  "major_04_emperor": {
+    "title": "The Emperor",
+    "keywords": ["structure", "leadership", "boundaries"],
+    "meaning": {
+      "general": "Clear structure helps you move with confidence.",
+      "light": "Taking responsibility brings stability.",
+      "shadow": "Rigidity could block needed flexibility.",
+      "advice": "Define boundaries that support your priorities."
+    }
+  },
+  "major_05_hierophant": {
+    "title": "The Hierophant",
+    "keywords": ["tradition", "guidance", "learning"],
+    "meaning": {
+      "general": "Guidance from trusted sources can be helpful.",
+      "light": "Shared values offer a steady compass.",
+      "shadow": "Following rules blindly can limit growth.",
+      "advice": "Seek mentors, but adapt advice to your reality."
+    }
+  },
+  "major_06_lovers": {
+    "title": "The Lovers",
+    "keywords": ["choice", "alignment", "relationships"],
+    "meaning": {
+      "general": "A meaningful choice asks for alignment with values.",
+      "light": "Connection and honesty deepen trust.",
+      "shadow": "Avoiding a decision can create tension.",
+      "advice": "Name what matters most and choose accordingly."
+    }
+  },
+  "major_07_chariot": {
+    "title": "The Chariot",
+    "keywords": ["drive", "direction", "self-control"],
+    "meaning": {
+      "general": "Focused effort creates forward momentum.",
+      "light": "Determination helps you navigate obstacles.",
+      "shadow": "Forcing progress may create resistance.",
+      "advice": "Move steadily and keep your intention clear."
+    }
+  },
+  "major_08_strength": {
+    "title": "Strength",
+    "keywords": ["resilience", "compassion", "gentle power"],
+    "meaning": {
+      "general": "Inner steadiness is more powerful than force.",
+      "light": "Patience and empathy help you hold the moment.",
+      "shadow": "Self-doubt could soften your resolve.",
+      "advice": "Lead with kindness, and trust your endurance."
+    }
+  },
+  "major_09_hermit": {
+    "title": "The Hermit",
+    "keywords": ["reflection", "solitude", "guidance"],
+    "meaning": {
+      "general": "Solitude offers perspective and clarity.",
+      "light": "Intentional reflection reveals the next step.",
+      "shadow": "Withdrawing too far can reduce support.",
+      "advice": "Take quiet time, then return with a plan."
+    }
+  },
+  "major_10_wheel_of_fortune": {
+    "title": "Wheel of Fortune",
+    "keywords": ["change", "cycles", "timing"],
+    "meaning": {
+      "general": "Circumstances are shifting in meaningful ways.",
+      "light": "Good timing can open a helpful window.",
+      "shadow": "Feeling out of control may cloud decisions.",
+      "advice": "Notice the cycle you are in and respond calmly."
+    }
+  },
+  "major_11_justice": {
+    "title": "Justice",
+    "keywords": ["fairness", "truth", "accountability"],
+    "meaning": {
+      "general": "Balance and honesty clarify the situation.",
+      "light": "Clear choices bring integrity and calm.",
+      "shadow": "Overanalyzing could delay action.",
+      "advice": "Weigh facts and values before deciding."
+    }
+  },
+  "major_12_hanged_man": {
+    "title": "The Hanged Man",
+    "keywords": ["pause", "perspective", "surrender"],
+    "meaning": {
+      "general": "A pause can shift how you see the issue.",
+      "light": "Letting go invites a new perspective.",
+      "shadow": "Stagnation may feel like being stuck.",
+      "advice": "Release urgency and allow insight to emerge."
+    }
+  },
+  "major_13_death": {
+    "title": "Death",
+    "keywords": ["transition", "release", "renewal"],
+    "meaning": {
+      "general": "An ending clears space for a new chapter.",
+      "light": "Letting go helps renewal begin.",
+      "shadow": "Holding on may prolong discomfort.",
+      "advice": "Acknowledge what is complete and turn forward."
+    }
+  },
+  "major_14_temperance": {
+    "title": "Temperance",
+    "keywords": ["balance", "integration", "patience"],
+    "meaning": {
+      "general": "Steady blending creates harmony over time.",
+      "light": "Moderation keeps things sustainable.",
+      "shadow": "Imbalance can create unnecessary strain.",
+      "advice": "Aim for small adjustments rather than extremes."
+    }
+  },
+  "major_15_devil": {
+    "title": "The Devil",
+    "keywords": ["attachment", "temptation", "patterns"],
+    "meaning": {
+      "general": "A pattern or attachment wants your attention.",
+      "light": "Awareness creates choice and freedom.",
+      "shadow": "Feeling trapped can cloud possibilities.",
+      "advice": "Name the pattern and choose one way to loosen it."
+    }
+  },
+  "major_16_tower": {
+    "title": "The Tower",
+    "keywords": ["disruption", "truth", "reset"],
+    "meaning": {
+      "general": "A reset clears away what no longer holds.",
+      "light": "Honest change makes room for growth.",
+      "shadow": "Unexpected shifts can feel destabilizing.",
+      "advice": "Stay grounded and rebuild with what remains true."
+    }
+  },
+  "major_17_star": {
+    "title": "The Star",
+    "keywords": ["hope", "healing", "renewal"],
+    "meaning": {
+      "general": "A calm sense of hope is returning.",
+      "light": "Gentle healing restores confidence.",
+      "shadow": "Doubt could dim your optimism.",
+      "advice": "Focus on what brings steadiness and ease."
+    }
+  },
+  "major_18_moon": {
+    "title": "The Moon",
+    "keywords": ["uncertainty", "intuition", "mystery"],
+    "meaning": {
+      "general": "The situation is unclear, but insight is possible.",
+      "light": "Listening inward reveals subtle truths.",
+      "shadow": "Anxiety might amplify what is unknown.",
+      "advice": "Take things slowly and verify assumptions."
+    }
+  },
+  "major_19_sun": {
+    "title": "The Sun",
+    "keywords": ["clarity", "joy", "confidence"],
+    "meaning": {
+      "general": "Clarity brings warmth and forward movement.",
+      "light": "Optimism helps you see the path ahead.",
+      "shadow": "Overconfidence could miss important details.",
+      "advice": "Celebrate progress while staying attentive."
+    }
+  },
+  "major_20_judgement": {
+    "title": "Judgement",
+    "keywords": ["awakening", "review", "decision"],
+    "meaning": {
+      "general": "A clear review points to a renewed direction.",
+      "light": "Learning from the past supports a wise choice.",
+      "shadow": "Harsh self-judgment may limit growth.",
+      "advice": "Assess honestly, then commit to a fresh start."
+    }
+  },
+  "major_21_world": {
+    "title": "The World",
+    "keywords": ["completion", "integration", "wholeness"],
+    "meaning": {
+      "general": "Completion brings a sense of wholeness.",
+      "light": "You are ready to integrate what you have learned.",
+      "shadow": "Delaying closure can drain momentum.",
+      "advice": "Honor the finish and define the next horizon."
+    }
+  }
+}

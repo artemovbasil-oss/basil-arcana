@@ -70,12 +70,22 @@ class AiRepository {
     }
 
     final uri = Uri.parse(apiBaseUrl).resolve('/api/reading/generate');
+    final totalCards = drawnCards.length;
     final payload = {
       'question': question,
       'spread': spread.toJson(),
-      'cards': drawnCards.map((drawn) => drawn.toJson()).toList(),
+      'cards': drawnCards
+          .map((drawn) => drawn.toAiJson(totalCards: totalCards))
+          .toList(),
       'tone': 'neutral',
       'language': languageCode,
+      'responseFormat': 'strict_json',
+      'responseConstraints': {
+        'tldrMaxChars': 180,
+        'sectionMaxChars': 450,
+        'whyMaxChars': 250,
+        'actionMaxChars': 220,
+      },
     };
 
     final headers = {

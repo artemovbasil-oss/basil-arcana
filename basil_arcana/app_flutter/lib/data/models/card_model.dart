@@ -56,6 +56,18 @@ class CardModel {
       meaning: CardMeaning.fromJson(json['meaning'] as Map<String, dynamic>),
     );
   }
+
+  factory CardModel.fromLocalizedEntry(
+    String id,
+    Map<String, dynamic> json,
+  ) {
+    return CardModel(
+      id: id,
+      name: json['title'] as String,
+      keywords: (json['keywords'] as List<dynamic>).cast<String>(),
+      meaning: CardMeaning.fromJson(json['meaning'] as Map<String, dynamic>),
+    );
+  }
 }
 
 class CardMeaningAdapter extends TypeAdapter<CardMeaning> {

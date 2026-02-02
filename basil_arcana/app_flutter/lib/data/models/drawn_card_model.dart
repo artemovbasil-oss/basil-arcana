@@ -39,6 +39,31 @@ class DrawnCardModel {
         'keywords': keywords,
         'meaning': meaning.toJson(),
       };
+
+  Map<String, dynamic> toAiJson({
+    required int totalCards,
+  }) {
+    final keywordLimit = totalCards > 1 ? 3 : 5;
+    final meaningLimit = totalCards > 1 ? 90 : 140;
+    return {
+      'cardId': cardId,
+      'cardTitle': cardName,
+      'keywords': keywords.take(keywordLimit).toList(),
+      'meaning': {
+        'general': _truncate(meaning.general, meaningLimit),
+        'light': _truncate(meaning.light, meaningLimit),
+        'shadow': _truncate(meaning.shadow, meaningLimit),
+        'advice': _truncate(meaning.advice, meaningLimit),
+      },
+    };
+  }
+}
+
+String _truncate(String value, int maxLength) {
+  if (value.length <= maxLength) {
+    return value;
+  }
+  return value.substring(0, maxLength).trimRight();
 }
 
 class DrawnCardModelAdapter extends TypeAdapter<DrawnCardModel> {

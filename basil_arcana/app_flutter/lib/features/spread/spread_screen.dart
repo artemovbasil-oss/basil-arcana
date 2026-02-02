@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
@@ -29,8 +31,8 @@ class SpreadScreen extends ConsumerWidget {
                   Expanded(
                     child: _SpreadOptionCard(
                       spread: oneCardSpread,
-                      title: 'One Card',
-                      subtitle: 'A single focus',
+                      title: l10n.spreadOneCardTitle,
+                      subtitle: l10n.spreadOneCardSubtitle,
                       animation: const _OneCardAnimation(),
                     ),
                   ),
@@ -40,9 +42,13 @@ class SpreadScreen extends ConsumerWidget {
                   Expanded(
                     child: _SpreadOptionCard(
                       spread: threeCardSpread,
-                      title: 'Three Cards',
-                      subtitle: 'Past · Present · Future',
-                      animation: const _ThreeCardAnimation(),
+                      title: l10n.spreadThreeCardTitle,
+                      subtitle: l10n.spreadThreeCardSubtitle,
+                      animation: _ThreeCardAnimation(
+                        pastLabel: l10n.spreadLabelPast,
+                        presentLabel: l10n.spreadLabelPresent,
+                        futureLabel: l10n.spreadLabelFuture,
+                      ),
                     ),
                   ),
               ],
@@ -165,17 +171,18 @@ class _OneCardAnimation extends StatefulWidget {
 class _OneCardAnimationState extends State<_OneCardAnimation>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
-  late final Animation<double> _slide;
+  late final Animation<double> _progress;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 3400),
-    )..repeat(reverse: true);
-    _slide = Tween<double>(begin: 0, end: -18).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+      duration: const Duration(milliseconds: 3800),
+    )..repeat();
+    _progress = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOutCubic,
     );
   }
 
@@ -196,31 +203,37 @@ class _OneCardAnimationState extends State<_OneCardAnimation>
         final cardWidth = constraints.maxWidth * 0.48;
         final cardHeight = constraints.maxHeight * 0.7;
         return AnimatedBuilder(
-          animation: _controller,
+          animation: _progress,
           builder: (context, _) {
+            final t = _progress.value;
+            final lift = lerpDouble(26, -6, t)!;
+            final settle = Curves.easeOut.transform(t);
             return Stack(
               alignment: Alignment.center,
               children: [
                 _cardShape(
                   width: cardWidth,
                   height: cardHeight,
-                  color: cardColor.withOpacity(0.55),
-                  offset: const Offset(10, 10),
+                  color: cardColor.withOpacity(0.65),
+                  offset: const Offset(6, 10),
                 ),
                 _cardShape(
                   width: cardWidth,
                   height: cardHeight,
-                  color: cardColor.withOpacity(0.7),
-                  offset: const Offset(4, 4),
+                  color: cardColor.withOpacity(0.8),
+                  offset: const Offset(2, 4),
                 ),
                 Transform.translate(
-                  offset: Offset(0, _slide.value),
-                  child: _cardShape(
-                    width: cardWidth,
-                    height: cardHeight,
-                    color: theme.colorScheme.surface,
-                    borderColor: accent,
-                    elevationGlow: true,
+                  offset: Offset(0, lift),
+                  child: Transform.rotate(
+                    angle: lerpDouble(0.08, 0.0, settle)!,
+                    child: _cardShape(
+                      width: cardWidth,
+                      height: cardHeight,
+                      color: theme.colorScheme.surface,
+                      borderColor: accent,
+                      elevationGlow: true,
+                    ),
                   ),
                 ),
               ],
@@ -233,7 +246,15 @@ class _OneCardAnimationState extends State<_OneCardAnimation>
 }
 
 class _ThreeCardAnimation extends StatefulWidget {
-  const _ThreeCardAnimation();
+  const _ThreeCardAnimation({
+    required this.pastLabel,
+    required this.presentLabel,
+    required this.futureLabel,
+  });
+
+  final String pastLabel;
+  final String presentLabel;
+  final String futureLabel;
 
   @override
   State<_ThreeCardAnimation> createState() => _ThreeCardAnimationState();
@@ -249,8 +270,8 @@ class _ThreeCardAnimationState extends State<_ThreeCardAnimation>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 3600),
-    )..repeat(reverse: true);
+      duration: const Duration(milliseconds: 4200),
+    )..repeat();
     _fan = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
   }
 
@@ -265,6 +286,10 @@ class _ThreeCardAnimationState extends State<_ThreeCardAnimation>
     final theme = Theme.of(context);
     final cardColor = theme.colorScheme.surface;
     final accent = theme.colorScheme.primary.withOpacity(0.55);
+    final labelStyle = theme.textTheme.labelSmall?.copyWith(
+      color: theme.colorScheme.onSurface.withOpacity(0.7),
+      letterSpacing: 0.4,
+    );
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -282,6 +307,12 @@ class _ThreeCardAnimationState extends State<_ThreeCardAnimation>
                   height: cardHeight,
                   color: cardColor.withOpacity(0.35),
                   offset: const Offset(6, 8),
+                ),
+                _cardShape(
+                  width: cardWidth,
+                  height: cardHeight,
+                  color: cardColor.withOpacity(0.55),
+                  offset: const Offset(2, 4),
                 ),
                 Transform.translate(
                   offset: Offset(-18 * t, -8 * t),
@@ -314,6 +345,20 @@ class _ThreeCardAnimationState extends State<_ThreeCardAnimation>
                       color: cardColor.withOpacity(0.8),
                     ),
                   ),
+                ),
+                Positioned(
+                  left: 0,
+                  top: cardHeight * 0.85,
+                  child: Text(widget.pastLabel, style: labelStyle),
+                ),
+                Positioned(
+                  top: cardHeight * 0.78,
+                  child: Text(widget.presentLabel, style: labelStyle),
+                ),
+                Positioned(
+                  right: 0,
+                  top: cardHeight * 0.85,
+                  child: Text(widget.futureLabel, style: labelStyle),
                 ),
               ],
             );
