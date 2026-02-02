@@ -6,12 +6,14 @@ class CardFaceWidget extends StatelessWidget {
   final String cardName;
   final List<String> keywords;
   final String? cardId;
+  final VoidCallback? onCardTap;
 
   const CardFaceWidget({
     super.key,
     required this.cardName,
     required this.keywords,
     this.cardId,
+    this.onCardTap,
   });
 
   @override
@@ -20,7 +22,7 @@ class CardFaceWidget extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: colorScheme.outlineVariant),
         color: colorScheme.primary.withOpacity(0.05),
       ),
@@ -28,12 +30,26 @@ class CardFaceWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (cardId != null) ...[
-            Center(
-              child: CardAssetImage(
-                cardId: cardId!,
-                width: 160,
-                height: 230,
-              ),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final cardWidth = constraints.maxWidth;
+                final cardHeight = cardWidth * 1.5;
+                final image = CardAssetImage(
+                  cardId: cardId!,
+                  width: cardWidth,
+                  height: cardHeight,
+                  borderRadius: BorderRadius.circular(8),
+                  fit: BoxFit.cover,
+                );
+                return Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(10),
+                    onTap: onCardTap,
+                    child: image,
+                  ),
+                );
+              },
             ),
             const SizedBox(height: 16),
           ],

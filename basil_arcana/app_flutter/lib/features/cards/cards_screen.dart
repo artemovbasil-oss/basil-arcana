@@ -81,7 +81,7 @@ class _CardsScreenState extends ConsumerState<CardsScreen> {
       final initialCards = cards.take(6);
       for (final card in initialCards) {
         precacheImage(
-          AssetImage('assets/cards/major/${card.id}.webp'),
+          AssetImage(cardAssetPath(card.id)),
           context,
         );
       }

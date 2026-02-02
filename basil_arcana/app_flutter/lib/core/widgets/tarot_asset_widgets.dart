@@ -1,5 +1,14 @@
 import 'package:flutter/material.dart';
 
+String cardAssetPath(String cardId) {
+  switch (cardId) {
+    case 'major_10_wheel':
+      return 'assets/cards/major/major_10_wheel_of_fortune.webp';
+    default:
+      return 'assets/cards/major/$cardId.webp';
+  }
+}
+
 class CardAssetImage extends StatelessWidget {
   const CardAssetImage({
     super.key,
@@ -23,11 +32,22 @@ class CardAssetImage extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final radius = borderRadius ?? BorderRadius.circular(18);
     final image = Image.asset(
-      'assets/cards/major/$cardId.webp',
+      cardAssetPath(cardId),
       width: width,
       height: height,
       fit: fit,
       filterQuality: FilterQuality.high,
+      errorBuilder: (context, error, stackTrace) {
+        assert(() {
+          debugPrint('Missing card asset for $cardId');
+          return true;
+        }());
+        return _MissingCardPlaceholder(
+          width: width,
+          height: height,
+          borderRadius: radius,
+        );
+      },
     );
 
     return DecoratedBox(
@@ -50,6 +70,38 @@ class CardAssetImage extends StatelessWidget {
       child: ClipRRect(
         borderRadius: radius,
         child: image,
+      ),
+    );
+  }
+}
+
+class _MissingCardPlaceholder extends StatelessWidget {
+  const _MissingCardPlaceholder({
+    required this.width,
+    required this.height,
+    required this.borderRadius,
+  });
+
+  final double? width;
+  final double? height;
+  final BorderRadius borderRadius;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        borderRadius: borderRadius,
+        color: colorScheme.surfaceVariant.withOpacity(0.5),
+        border: Border.all(color: colorScheme.primary.withOpacity(0.35)),
+      ),
+      alignment: Alignment.center,
+      child: Icon(
+        Icons.auto_awesome,
+        color: colorScheme.primary.withOpacity(0.6),
+        size: 32,
       ),
     );
   }

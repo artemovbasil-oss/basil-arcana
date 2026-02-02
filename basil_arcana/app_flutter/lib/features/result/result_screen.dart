@@ -7,9 +7,12 @@ import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/widgets/card_face_widget.dart';
+import '../../core/widgets/tarot_asset_widgets.dart';
+import '../../data/models/card_model.dart';
 import '../../data/repositories/ai_repository.dart';
 import '../../state/reading_flow_controller.dart';
 import '../../state/providers.dart';
+import '../cards/card_detail_screen.dart';
 import 'widgets/chat_widgets.dart';
 
 class ResultScreen extends ConsumerStatefulWidget {
@@ -210,6 +213,21 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                 cardId: drawn.cardId,
                 cardName: drawn.cardName,
                 keywords: drawn.keywords,
+                onCardTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => CardDetailScreen(
+                        card: CardModel(
+                          id: drawn.cardId,
+                          name: drawn.cardName,
+                          keywords: drawn.keywords,
+                          meaning: drawn.meaning,
+                        ),
+                      ),
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 12),
               Text(
@@ -331,7 +349,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       for (final drawn in state.drawnCards) {
         precacheImage(
-          AssetImage('assets/cards/major/${drawn.cardId}.webp'),
+          AssetImage(cardAssetPath(drawn.cardId)),
           context,
         );
       }
