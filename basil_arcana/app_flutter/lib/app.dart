@@ -3,9 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
 import 'core/theme/app_theme.dart';
-import 'features/home/home_screen.dart';
 import 'features/history/history_screen.dart';
 import 'features/settings/settings_screen.dart';
+import 'features/splash/splash_screen.dart';
 import 'state/providers.dart';
 
 class BasilArcanaApp extends ConsumerWidget {
@@ -25,7 +25,7 @@ class BasilArcanaApp extends ConsumerWidget {
         Locale('kk'),
       ],
       localizationsDelegates: AppLocalizations.localizationsDelegates,
-      home: const HomeScreen(),
+      home: const SplashScreen(),
       routes: {
         HistoryScreen.routeName: (_) => const HistoryScreen(),
         SettingsScreen.routeName: (_) => const SettingsScreen(),

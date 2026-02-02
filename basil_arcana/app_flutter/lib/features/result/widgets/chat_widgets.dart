@@ -62,7 +62,7 @@ class ChatBubble extends StatelessWidget {
                     colorScheme.primary.withOpacity(0.7),
                   ],
                 ),
-                borderRadius: BorderRadius.circular(18),
+                borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
                     color: colorScheme.primary.withOpacity(0.35),
@@ -73,7 +73,7 @@ class ChatBubble extends StatelessWidget {
               )
             : BoxDecoration(
                 color: colorScheme.surface,
-                borderRadius: BorderRadius.circular(18),
+                borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: colorScheme.primary.withOpacity(0.3)),
                 boxShadow: [
                   BoxShadow(
