@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
+import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
 
 import '../data/models/ai_result_model.dart';
@@ -81,6 +82,9 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
   ReadingFlowController(this.ref) : super(ReadingFlowState.initial());
 
   final Ref ref;
+  http.Client? _activeClient;
+  int _requestCounter = 0;
+  int _activeRequestId = 0;
 
   void setQuestion(String question) {
     state = state.copyWith(question: question, clearError: true);
@@ -92,6 +96,17 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
 
   void reset() {
     state = ReadingFlowState.initial();
+  }
+
+  void cancelGeneration() {
+    _activeRequestId = ++_requestCounter;
+    _activeClient?.close();
+    _activeClient = null;
+    state = state.copyWith(
+      isLoading: false,
+      aiResult: null,
+      clearError: true,
+    );
   }
 
   List<CardModel> drawCards(int count, List<CardModel> deck) {
@@ -241,6 +256,11 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
     required List<DrawnCardModel> drawnCards,
     required AppLocalizations l10n,
   }) async {
+    final requestId = ++_requestCounter;
+    _activeRequestId = requestId;
+    final client = http.Client();
+    _activeClient?.close();
+    _activeClient = client;
     try {
       final aiRepository = ref.read(aiRepositoryProvider);
       final locale = ref.read(localeProvider);
@@ -249,13 +269,20 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
         spread: spread,
         drawnCards: drawnCards,
         languageCode: locale.languageCode,
+        client: client,
       );
+      if (_activeRequestId != requestId) {
+        return;
+      }
       state = state.copyWith(
         aiResult: result,
         isLoading: false,
         aiUsed: true,
       );
     } on AiRepositoryException catch (error) {
+      if (_activeRequestId != requestId) {
+        return;
+      }
       if (error.type == AiErrorType.noInternet) {
         final fallback = _offlineFallback(spread, drawnCards, l10n);
         state = state.copyWith(
@@ -278,6 +305,9 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
         errorMessage: _messageForError(error, l10n),
       );
     } catch (_) {
+      if (_activeRequestId != requestId) {
+        return;
+      }
       state = state.copyWith(
         aiResult: null,
         isLoading: false,
@@ -285,6 +315,11 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
         aiErrorType: AiErrorType.serverError,
         errorMessage: l10n.resultStatusServerUnavailable,
       );
+    } finally {
+      if (_activeClient == client) {
+        _activeClient = null;
+      }
+      client.close();
     }
   }
 

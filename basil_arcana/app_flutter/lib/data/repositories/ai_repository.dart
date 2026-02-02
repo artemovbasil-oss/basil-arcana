@@ -60,6 +60,7 @@ class AiRepository {
     required SpreadModel spread,
     required List<DrawnCardModel> drawnCards,
     required String languageCode,
+    http.Client? client,
   }) async {
     if (!hasApiKey) {
       throw const AiRepositoryException(
@@ -82,17 +83,24 @@ class AiRepository {
       if (hasApiKey) 'x-api-key': apiKey,
     };
 
+    final httpClient = client ?? http.Client();
     http.Response response;
     try {
-      response = await _postWithRetry(
-        uri,
-        headers: headers,
-        payload: payload,
-      );
+      response = await httpClient
+          .post(
+            uri,
+            headers: headers,
+            body: jsonEncode(payload),
+          )
+          .timeout(const Duration(seconds: 60));
     } on TimeoutException {
       throw const AiRepositoryException(AiErrorType.timeout);
     } on SocketException {
       throw const AiRepositoryException(AiErrorType.noInternet);
+    } finally {
+      if (client == null) {
+        httpClient.close();
+      }
     }
 
     if (response.statusCode == 401) {
@@ -121,31 +129,6 @@ class AiRepository {
         AiErrorType.badResponse,
         message: error.toString(),
       );
-    }
-  }
-
-  Future<http.Response> _postWithRetry(
-    Uri uri, {
-    required Map<String, String> headers,
-    required Map<String, dynamic> payload,
-  }) async {
-    try {
-      return await http
-          .post(
-            uri,
-            headers: headers,
-            body: jsonEncode(payload),
-          )
-          .timeout(const Duration(seconds: 40));
-    } on TimeoutException {
-      await Future.delayed(const Duration(milliseconds: 800));
-      return await http
-          .post(
-            uri,
-            headers: headers,
-            body: jsonEncode(payload),
-          )
-          .timeout(const Duration(seconds: 40));
     }
   }
 }
