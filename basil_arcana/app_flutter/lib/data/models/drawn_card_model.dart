@@ -46,8 +46,10 @@ class DrawnCardModel {
     final keywordLimit = totalCards > 1 ? 3 : 5;
     final meaningLimit = totalCards > 1 ? 90 : 140;
     return {
+      'positionId': positionId,
+      'positionTitle': positionTitle,
       'cardId': cardId,
-      'cardTitle': cardName,
+      'cardName': cardName,
       'keywords': keywords.take(keywordLimit).toList(),
       'meaning': {
         'general': _truncate(meaning.general, meaningLimit),

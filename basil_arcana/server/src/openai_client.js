@@ -1,35 +1,275 @@
 const { OPENAI_API_KEY, OPENAI_MODEL } = require('./config');
 
-async function createChatCompletion(messages) {
+const DEFAULT_TIMEOUT_MS = 65000;
+
+class OpenAIRequestError extends Error {
+  constructor(message, { status, errorType, errorCode, bodyPreview } = {}) {
+    super(message);
+    this.name = 'OpenAIRequestError';
+    this.status = status;
+    this.errorType = errorType;
+    this.errorCode = errorCode;
+    this.bodyPreview = bodyPreview;
+  }
+}
+
+function logOpenAIEvent(payload) {
+  console.log(
+    JSON.stringify({
+      event: 'openai_request',
+      ...payload,
+    })
+  );
+}
+
+function buildBodyPreview(text) {
+  if (!text) {
+    return '';
+  }
+  return text.slice(0, 300);
+}
+
+function extractErrorDetails(text) {
+  try {
+    const parsed = JSON.parse(text);
+    const error = parsed?.error;
+    return {
+      errorType: error?.type ?? null,
+      errorCode: error?.code ?? null,
+      errorMessage: error?.message ?? null,
+    };
+  } catch (err) {
+    return { errorType: null, errorCode: null, errorMessage: null };
+  }
+}
+
+async function fetchWithTimeout(url, options, timeoutMs) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+async function createChatCompletion(messages, { requestId } = {}) {
   if (!OPENAI_API_KEY) {
     throw new Error('Missing OPENAI_API_KEY');
   }
 
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${OPENAI_API_KEY}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
+  const startTime = Date.now();
+  let logged = false;
+
+  try {
+    const response = await fetchWithTimeout(
+      'https://api.openai.com/v1/chat/completions',
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: OPENAI_MODEL,
+          messages,
+          temperature: 0.7,
+          response_format: { type: 'json_object' },
+        }),
+      },
+      DEFAULT_TIMEOUT_MS
+    );
+
+    const durationMs = Date.now() - startTime;
+
+    if (!response.ok) {
+      const text = await response.text();
+      const bodyPreview = buildBodyPreview(text);
+      const details = extractErrorDetails(text);
+      const errorMessage = details.errorMessage || `OpenAI error ${response.status}`;
+
+      logOpenAIEvent({
+        requestId,
+        model: OPENAI_MODEL,
+        duration_ms: durationMs,
+        ok: false,
+        status: response.status,
+        errorType: details.errorType,
+        errorCode: details.errorCode,
+        errorName: 'OpenAIRequestError',
+        errorMessage,
+        bodyPreview,
+      });
+      logged = true;
+
+      throw new OpenAIRequestError(errorMessage, {
+        status: response.status,
+        errorType: details.errorType,
+        errorCode: details.errorCode,
+        bodyPreview,
+      });
+    }
+
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content;
+    if (!content) {
+      const errorMessage = 'Empty OpenAI response';
+      logOpenAIEvent({
+        requestId,
+        model: OPENAI_MODEL,
+        duration_ms: durationMs,
+        ok: false,
+        status: response.status,
+        errorName: 'OpenAIRequestError',
+        errorMessage,
+      });
+      logged = true;
+      throw new OpenAIRequestError(errorMessage, { status: response.status });
+    }
+
+    let parsed;
+    try {
+      parsed = JSON.parse(content);
+    } catch (error) {
+      const bodyPreview = buildBodyPreview(content);
+      const errorMessage = 'Invalid JSON response from OpenAI';
+      logOpenAIEvent({
+        requestId,
+        model: OPENAI_MODEL,
+        duration_ms: durationMs,
+        ok: false,
+        status: response.status,
+        errorName: 'OpenAIRequestError',
+        errorMessage,
+        bodyPreview,
+      });
+      logged = true;
+      throw new OpenAIRequestError(errorMessage, {
+        status: response.status,
+        bodyPreview,
+      });
+    }
+
+    logOpenAIEvent({
+      requestId,
       model: OPENAI_MODEL,
-      messages,
-      temperature: 0.7,
-      response_format: { type: 'json_object' }
-    })
-  });
+      duration_ms: durationMs,
+      ok: true,
+    });
+    logged = true;
 
-  if (!response.ok) {
-    throw new Error(`OpenAI error ${response.status}`);
+    return parsed;
+  } catch (error) {
+    if (!logged) {
+      const durationMs = Date.now() - startTime;
+      logOpenAIEvent({
+        requestId,
+        model: OPENAI_MODEL,
+        duration_ms: durationMs,
+        ok: false,
+        errorName: error.name,
+        errorMessage: error.message,
+      });
+    }
+    throw error;
   }
-
-  const data = await response.json();
-  const content = data.choices?.[0]?.message?.content;
-  if (!content) {
-    throw new Error('Empty OpenAI response');
-  }
-
-  return JSON.parse(content);
 }
 
-module.exports = { createChatCompletion };
+async function listModels({ requestId, timeoutMs = 10000 } = {}) {
+  if (!OPENAI_API_KEY) {
+    return {
+      ok: false,
+      status: null,
+      errorName: 'MissingOpenAIKey',
+      errorMessage: 'Missing OPENAI_API_KEY',
+      bodyPreview: '',
+    };
+  }
+
+  const startTime = Date.now();
+  let logged = false;
+
+  try {
+    const response = await fetchWithTimeout(
+      'https://api.openai.com/v1/models',
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
+        },
+      },
+      timeoutMs
+    );
+
+    const durationMs = Date.now() - startTime;
+    const text = await response.text();
+    const bodyPreview = buildBodyPreview(text);
+
+    if (!response.ok) {
+      const details = extractErrorDetails(text);
+      const errorMessage = details.errorMessage || `OpenAI error ${response.status}`;
+      logOpenAIEvent({
+        requestId,
+        model: OPENAI_MODEL,
+        duration_ms: durationMs,
+        ok: false,
+        status: response.status,
+        errorType: details.errorType,
+        errorCode: details.errorCode,
+        errorName: 'OpenAIRequestError',
+        errorMessage,
+        bodyPreview,
+      });
+      logged = true;
+      return {
+        ok: false,
+        status: response.status,
+        errorName: 'OpenAIRequestError',
+        errorMessage,
+        bodyPreview,
+      };
+    }
+
+    logOpenAIEvent({
+      requestId,
+      model: OPENAI_MODEL,
+      duration_ms: durationMs,
+      ok: true,
+      status: response.status,
+    });
+    logged = true;
+
+    return {
+      ok: true,
+      status: response.status,
+      errorName: null,
+      errorMessage: null,
+      bodyPreview,
+    };
+  } catch (error) {
+    if (!logged) {
+      const durationMs = Date.now() - startTime;
+      logOpenAIEvent({
+        requestId,
+        model: OPENAI_MODEL,
+        duration_ms: durationMs,
+        ok: false,
+        errorName: error.name,
+        errorMessage: error.message,
+      });
+    }
+
+    return {
+      ok: false,
+      status: null,
+      errorName: error.name,
+      errorMessage: error.message,
+      bodyPreview: '',
+    };
+  }
+}
+
+module.exports = { createChatCompletion, listModels };
