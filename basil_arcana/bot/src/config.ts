@@ -1,4 +1,4 @@
-import { resolveFlutterAssetsRoot } from "./assets";
+import { resolveBotAssetsRoot } from "./assets";
 
 type Locale = "en" | "ru" | "kk";
 
@@ -11,8 +11,8 @@ export interface BotConfig {
   requestTimeoutMs: number;
 }
 
-function requireEnv(name: string): string {
-  const value = process.env[name];
+function requireEnv(name: string, fallback?: string): string {
+  const value = process.env[name] || fallback;
   if (!value || value.trim().length === 0) {
     throw new Error(`Missing required environment variable: ${name}`);
   }
@@ -29,10 +29,12 @@ function parseLocale(value: string | undefined, fallback: Locale): Locale {
 export function loadConfig(): BotConfig {
   const telegramToken = requireEnv("TELEGRAM_BOT_TOKEN");
   const apiBaseUrl = process.env.API_BASE_URL || "https://api.basilarcana.com";
-  const arcanaApiKey = requireEnv("ARCANA_API_KEY");
+  const arcanaApiKey = requireEnv(
+    "BASIL_ARCANA_API_KEY",
+    process.env.ARCANA_API_KEY
+  );
   const defaultLocale = parseLocale(process.env.DEFAULT_LOCALE, "en");
-  const assetsBasePath =
-    process.env.ASSETS_BASE_PATH || resolveFlutterAssetsRoot();
+  const assetsBasePath = resolveBotAssetsRoot();
   const requestTimeoutMs = 35000;
 
   return {

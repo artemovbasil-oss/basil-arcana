@@ -1,17 +1,22 @@
-export default {
+import type { I18nStrings } from "./types";
+
+const kk: I18nStrings = {
   languagePrompt: "Тілді таңдаңыз:",
-  languageSet: "Тіл орнатылды. Сұрағыңызды жазыңыз.",
+  languageSet: "Тіл орнатылды. Сұрағыңызды жіберіңіз.",
   askQuestion: "Сіздің сұрағыңыз қандай?",
-  chooseSpread: "Таруды таңдаңыз:",
+  chooseSpread: "Тарот жаймасын таңдаңыз:",
   spreadOne: "1 карта",
   spreadThree: "3 карта",
-  processing: "Колоданы араластырып, карталарды тартып жатырмын…",
-  readingFailed: "Жауапты жасау мүмкін болмады. Қайта көріңіз.",
-  detailsFailed: "Толық мәліметті алу мүмкін болмады. Қайта көріңіз.",
+  processing: "Колода араластырылып, карталар алынады…",
+  readingFailed: "Оқылымды құрастыру кезінде қате кетті. Қайтадан көріңіз.",
+  detailsFailed: "Қосымша мәліметтерді алу мүмкін болмады. Қайтадан көріңіз.",
   detailsButton: "Толығырақ",
-  newReadingButton: "Жаңа оқу",
-  nextAction: "Келесі не істегіңіз келеді?",
-  alreadyProcessing: "Қазірдің өзінде оқу жасап жатырмын. Аздап күте тұрыңыз.",
-  missingReading: "Алдымен жаңа оқу бастаңыз.",
-  detailsIntro: "Толық мәлімет:",
+  newReadingButton: "Жаңа оқылым",
+  nextAction: "Келесі қадам қандай болсын?",
+  alreadyProcessing: "Оқылым дайындалып жатыр. Сәл күтіңіз.",
+  missingReading: "Алдымен жаңа оқылым бастаңыз.",
+  detailsIntro: "Мәліметтер:",
+  cardsCaption: "Сіздің карталарыңыз",
 };
+
+export default kk;

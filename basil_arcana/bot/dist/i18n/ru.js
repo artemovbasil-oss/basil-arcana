@@ -1,19 +1,21 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = {
+const ru = {
     languagePrompt: "Выберите язык:",
     languageSet: "Язык установлен. Пожалуйста, задайте вопрос.",
-    askQuestion: "Какой у вас вопрос?",
+    askQuestion: "Какой ваш вопрос?",
     chooseSpread: "Выберите расклад:",
     spreadOne: "1 карта",
     spreadThree: "3 карты",
-    processing: "Тасую колоду и вытягиваю карты…",
-    readingFailed: "Не удалось создать расклад. Попробуйте еще раз.",
+    processing: "Перетасовываю колоду и вытягиваю карты…",
+    readingFailed: "Что-то пошло не так при генерации расклада. Попробуйте еще раз.",
     detailsFailed: "Не удалось получить детали. Попробуйте еще раз.",
-    detailsButton: "Детали",
+    detailsButton: "Подробнее",
     newReadingButton: "Новый расклад",
     nextAction: "Что вы хотите сделать дальше?",
     alreadyProcessing: "Я уже работаю над вашим раскладом. Пожалуйста, подождите.",
-    missingReading: "Сначала начните новый расклад.",
-    detailsIntro: "Детали расклада:",
+    missingReading: "Пожалуйста, сначала начните новый расклад.",
+    detailsIntro: "Вот подробности:",
+    cardsCaption: "Ваши карты",
 };
+exports.default = ru;

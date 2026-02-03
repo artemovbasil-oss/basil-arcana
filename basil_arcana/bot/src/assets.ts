@@ -1,60 +1,54 @@
 import fs from "fs";
 import path from "path";
-import sharp from "sharp";
-import { InputFile } from "grammy";
 
-const conversionCache = new Map<string, string>();
+type CardImageResolverInput = {
+  deckId?: string;
+  cardId?: string;
+  imagePath?: string;
+  filename?: string;
+  locale?: string;
+};
+
 const cardImageMapCache = new Map<string, Map<string, string>>();
 
-export function resolveFlutterAssetsRoot(): string {
-  const checkedPaths: string[] = [];
-  const envRoot = process.env.FLUTTER_ASSETS_ROOT?.trim();
+const SUPPORTED_DECKS = ["major", "wands"] as const;
+
+type SupportedDeck = (typeof SUPPORTED_DECKS)[number];
+
+export function resolveBotAssetsRoot(): string {
+  const envRoot =
+    process.env.BOT_ASSETS_ROOT?.trim() ||
+    process.env.ASSETS_BASE_PATH?.trim();
   if (envRoot) {
-    const resolved = path.resolve(envRoot);
-    const cardsPath = path.join(resolved, "cards");
-    if (
-      resolved.includes(`${path.sep}assets${path.sep}cards`) ||
-      fs.existsSync(cardsPath)
-    ) {
-      return resolved;
-    }
-    checkedPaths.push(resolved);
+    return path.resolve(envRoot);
   }
+  return path.resolve(__dirname, "..", "assets");
+}
 
-  const candidates = [
-    path.resolve(process.cwd(), "..", "app_flutter", "assets"),
-    path.resolve(process.cwd(), "..", "basil_arcana", "app_flutter", "assets"),
-    path.resolve(process.cwd(), "..", "..", "app_flutter", "assets"),
-    path.resolve(
-      process.cwd(),
-      "..",
-      "..",
-      "basil_arcana",
-      "app_flutter",
-      "assets"
-    ),
-  ];
+export function localAssetsAvailable(assetsBasePath: string): boolean {
+  return fs.existsSync(path.join(assetsBasePath, "cards"));
+}
 
-  for (const candidate of candidates) {
-    checkedPaths.push(candidate);
-    if (fs.existsSync(path.join(candidate, "cards"))) {
-      return candidate;
-    }
-  }
+export function logAssetsSummary(assetsBasePath: string): void {
+  const deckFolders = listDeckFolders(assetsBasePath);
+  const display = deckFolders.length > 0 ? deckFolders.join(", ") : "none";
+  console.log(
+    `Assets root resolved to ${assetsBasePath}. Deck folders found: ${display}.`
+  );
+}
 
-  throw new Error(
-    `Unable to locate Flutter assets root. cwd=${process.cwd()} Checked: ${checkedPaths.join(
-      ", "
-    )}`
+function listDeckFolders(assetsBasePath: string): string[] {
+  const cardRoot = path.join(assetsBasePath, "cards");
+  return SUPPORTED_DECKS.filter((deck) =>
+    fs.existsSync(path.join(cardRoot, deck))
   );
 }
 
 function buildCardImageMap(assetsBasePath: string): Map<string, string> {
   const map = new Map<string, string>();
   const cardRoot = path.join(assetsBasePath, "cards");
-  const deckFolders = ["wands", "major"];
 
-  for (const deck of deckFolders) {
+  for (const deck of SUPPORTED_DECKS) {
     const deckDir = path.join(cardRoot, deck);
     if (!fs.existsSync(deckDir)) {
       continue;
@@ -86,64 +80,83 @@ function getCardImageMap(assetsBasePath: string): Map<string, string> {
   return built;
 }
 
-export function resolveCardImage(
-  cardId: string,
+function stripExtension(value: string): string {
+  return path.basename(value, path.extname(value));
+}
+
+function inferDeckId(value: string): SupportedDeck | undefined {
+  if (value.startsWith("major_")) {
+    return "major";
+  }
+  if (value.startsWith("wands_")) {
+    return "wands";
+  }
+  return undefined;
+}
+
+export function resolveCardImagePath(
+  input: CardImageResolverInput,
   assetsBasePath: string
-): string {
+): string | null {
   const map = getCardImageMap(assetsBasePath);
-  const exact = map.get(cardId);
+
+  if (input.imagePath) {
+    const resolved = path.isAbsolute(input.imagePath)
+      ? input.imagePath
+      : path.resolve(assetsBasePath, input.imagePath);
+    if (fs.existsSync(resolved)) {
+      return resolved;
+    }
+  }
+
+  const baseName = input.cardId
+    ? stripExtension(input.cardId)
+    : input.filename
+    ? stripExtension(input.filename)
+    : input.imagePath
+    ? stripExtension(input.imagePath)
+    : undefined;
+
+  if (!baseName) {
+    return null;
+  }
+
+  const exact = map.get(baseName);
   if (exact) {
     return exact;
   }
 
-  const prefix = `${cardId}_`;
-  const matches = [...map.keys()].filter((key) => key.startsWith(prefix));
+  const inferredDeck = input.deckId || inferDeckId(baseName);
+  if (inferredDeck && !baseName.startsWith(`${inferredDeck}_`)) {
+    const prefixed = map.get(`${inferredDeck}_${baseName}`);
+    if (prefixed) {
+      return prefixed;
+    }
+  }
+
+  const prefix = baseName.endsWith("_") ? baseName : `${baseName}_`;
+  const matches = [...map.entries()].filter(([key]) => key.startsWith(prefix));
   if (matches.length === 1) {
-    return map.get(matches[0]) as string;
+    return matches[0][1];
   }
 
-  const suggestions = [...map.keys()]
-    .filter((key) => key.startsWith(cardId.split("_")[0]))
-    .slice(0, 5);
+  if (matches.length > 1 && inferredDeck) {
+    const deckPrefix = `${inferredDeck}_`;
+    const deckMatches = matches.filter(([key]) => key.startsWith(deckPrefix));
+    if (deckMatches.length === 1) {
+      return deckMatches[0][1];
+    }
+  }
 
-  if (matches.length > 1) {
-    throw new Error(
-      `Multiple matches for cardId=${cardId}: ${matches.join(", ")}`
+  if (inferredDeck) {
+    const deckPrefix = `${inferredDeck}_${baseName}_`;
+    const deckMatches = [...map.entries()].filter(([key]) =>
+      key.startsWith(deckPrefix)
     );
+    if (deckMatches.length === 1) {
+      return deckMatches[0][1];
+    }
   }
 
-  throw new Error(
-    `Unable to resolve card image for ${cardId}. Suggestions: ${suggestions.join(
-      ", "
-    )}`
-  );
-}
-
-export function localAssetsAvailable(assetsBasePath: string): boolean {
-  return fs.existsSync(path.join(assetsBasePath, "cards"));
-}
-
-export async function ensurePng(inputPath: string): Promise<string> {
-  const cached = conversionCache.get(inputPath);
-  if (cached && fs.existsSync(cached)) {
-    return cached;
-  }
-  const outputDir = path.join("/tmp", "basil-arcana-bot");
-  if (!fs.existsSync(outputDir)) {
-    fs.mkdirSync(outputDir, { recursive: true });
-  }
-  const baseName = path.basename(inputPath, path.extname(inputPath));
-  const outputPath = path.join(outputDir, `${baseName}.png`);
-  await sharp(inputPath).png().toFile(outputPath);
-  conversionCache.set(inputPath, outputPath);
-  return outputPath;
-}
-
-export async function fileToInputFile(
-  inputPath: string
-): Promise<InputFile> {
-  const fileBuffer = await fs.promises.readFile(inputPath);
-  const pngBuffer = await sharp(fileBuffer).png().toBuffer();
-  const baseName = path.basename(inputPath, path.extname(inputPath));
-  return new InputFile(pngBuffer, `${baseName}.png`);
+  return null;
 }
