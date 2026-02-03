@@ -100,4 +100,39 @@ function validateReadingRequest(body) {
   return null;
 }
 
-module.exports = { validateReadingRequest };
+function validateDetailsRequest(body) {
+  if (!body || typeof body !== 'object') {
+    return 'Request body must be an object';
+  }
+
+  const { question, spread, cards, locale } = body;
+  if (!isNonEmptyString(question)) {
+    return 'question is required';
+  }
+  if (!spread || typeof spread !== 'object') {
+    return 'spread is required';
+  }
+  if (!isNonEmptyString(spread.id) || !isNonEmptyString(spread.name)) {
+    return 'spread must include id and name';
+  }
+  const positionError = validatePositions(spread.positions);
+  if (positionError) {
+    return positionError;
+  }
+
+  const cardsError = validateCards(cards);
+  if (cardsError) {
+    return cardsError;
+  }
+
+  if (!isNonEmptyString(locale)) {
+    return 'locale is required';
+  }
+  if (!['en', 'ru', 'kk'].includes(locale)) {
+    return 'locale must be one of en, ru, kk';
+  }
+
+  return null;
+}
+
+module.exports = { validateReadingRequest, validateDetailsRequest };

@@ -62,4 +62,38 @@ function buildPromptMessages(payload, mode = 'deep') {
   ];
 }
 
-module.exports = { buildPromptMessages };
+function buildDetailsPrompt(payload) {
+  const { question, spread, cards, locale } = payload;
+  const system = [
+    'You are an insightful tarot reader for Basil\'s Arcana.',
+    'Tone: warm, supportive, gently encouraging. Avoid negative framing.',
+    'Avoid absolute predictions and avoid the word "will". Use "may", "could", "suggests", "likely".',
+    'Do not give medical, legal, or financial directives.',
+    'Generate a single coherent message, not bullet spam.',
+    'Start with a compact spread diagram using the drawn cards.',
+    'If there is 1 card, render: [CardName].',
+    'If there are 3 cards, render: [Left: CardName] [Center: CardName] [Right: CardName].',
+    'Use neutral titles Left / Center / Right even if position titles differ.',
+    'After the diagram, explain the interaction in 1-2 sentences: Center anchors the theme, Left feeds it, Right shows the direction it tends toward.',
+    'Then write two sections labeled exactly "Relationships —" and "Career —" with short paragraphs.',
+    'After each paragraph, add one gentle advice line.',
+    `Respond in the requested locale (${locale || 'infer from the question'}).`,
+  ].join(' ');
+
+  const user = {
+    question,
+    spread,
+    cards,
+    locale,
+  };
+
+  return [
+    { role: 'system', content: system },
+    {
+      role: 'user',
+      content: `Use this input to generate the details:\n${JSON.stringify(user, null, 2)}`,
+    },
+  ];
+}
+
+module.exports = { buildPromptMessages, buildDetailsPrompt };
