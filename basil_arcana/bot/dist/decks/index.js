@@ -8,6 +8,16 @@ exports.pickSpread = pickSpread;
 exports.drawCards = drawCards;
 const promises_1 = __importDefault(require("fs/promises"));
 const path_1 = __importDefault(require("path"));
+async function readJsonFile(filePath) {
+    try {
+        await promises_1.default.access(filePath);
+    }
+    catch (error) {
+        throw new Error(`Missing deck data file at ${filePath}. cwd=${process.cwd()}`);
+    }
+    const raw = await promises_1.default.readFile(filePath, "utf-8");
+    return JSON.parse(raw);
+}
 async function loadDecks(dataBasePath) {
     const locales = ["en", "ru", "kk"];
     const cardsByLocale = {
@@ -21,14 +31,14 @@ async function loadDecks(dataBasePath) {
         kk: [],
     };
     await Promise.all(locales.map(async (locale) => {
-        const cardsPath = path_1.default.join(dataBasePath, `cards_${locale}.json`);
-        const spreadsPath = path_1.default.join(dataBasePath, `spreads_${locale}.json`);
-        const [cardsRaw, spreadsRaw] = await Promise.all([
-            promises_1.default.readFile(cardsPath, "utf-8"),
-            promises_1.default.readFile(spreadsPath, "utf-8"),
+        const cardsPath = path_1.default.resolve(dataBasePath, `cards_${locale}.json`);
+        const spreadsPath = path_1.default.resolve(dataBasePath, `spreads_${locale}.json`);
+        const [cards, spreads] = await Promise.all([
+            readJsonFile(cardsPath),
+            readJsonFile(spreadsPath),
         ]);
-        cardsByLocale[locale] = JSON.parse(cardsRaw);
-        spreadsByLocale[locale] = JSON.parse(spreadsRaw);
+        cardsByLocale[locale] = cards;
+        spreadsByLocale[locale] = spreads;
     }));
     const allCardIds = Object.keys(cardsByLocale.en);
     return { cardsByLocale, spreadsByLocale, allCardIds };

@@ -9,6 +9,19 @@ export interface DecksData {
   allCardIds: string[];
 }
 
+async function readJsonFile<T>(filePath: string): Promise<T> {
+  try {
+    await fs.access(filePath);
+  } catch (error) {
+    throw new Error(
+      `Missing deck data file at ${filePath}. cwd=${process.cwd()}`
+    );
+  }
+
+  const raw = await fs.readFile(filePath, "utf-8");
+  return JSON.parse(raw) as T;
+}
+
 export async function loadDecks(dataBasePath: string): Promise<DecksData> {
   const locales: Locale[] = ["en", "ru", "kk"];
   const cardsByLocale: DecksData["cardsByLocale"] = {
@@ -24,14 +37,14 @@ export async function loadDecks(dataBasePath: string): Promise<DecksData> {
 
   await Promise.all(
     locales.map(async (locale) => {
-      const cardsPath = path.join(dataBasePath, `cards_${locale}.json`);
-      const spreadsPath = path.join(dataBasePath, `spreads_${locale}.json`);
-      const [cardsRaw, spreadsRaw] = await Promise.all([
-        fs.readFile(cardsPath, "utf-8"),
-        fs.readFile(spreadsPath, "utf-8"),
+      const cardsPath = path.resolve(dataBasePath, `cards_${locale}.json`);
+      const spreadsPath = path.resolve(dataBasePath, `spreads_${locale}.json`);
+      const [cards, spreads] = await Promise.all([
+        readJsonFile<Record<string, CardData>>(cardsPath),
+        readJsonFile<Spread[]>(spreadsPath),
       ]);
-      cardsByLocale[locale] = JSON.parse(cardsRaw) as Record<string, CardData>;
-      spreadsByLocale[locale] = JSON.parse(spreadsRaw) as Spread[];
+      cardsByLocale[locale] = cards;
+      spreadsByLocale[locale] = spreads;
     })
   );
 
