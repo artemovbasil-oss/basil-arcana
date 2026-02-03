@@ -1,3 +1,4 @@
+import { existsSync } from "fs";
 import fs from "fs/promises";
 import path from "path";
 import type { Locale } from "../config";
@@ -9,20 +10,51 @@ export interface DecksData {
   allCardIds: string[];
 }
 
-async function readJsonFile<T>(filePath: string): Promise<T> {
-  try {
-    await fs.access(filePath);
-  } catch (error) {
-    throw new Error(
-      `Missing deck data file at ${filePath}. cwd=${process.cwd()}`
-    );
-  }
-
-  const raw = await fs.readFile(filePath, "utf-8");
-  return JSON.parse(raw) as T;
+interface DeckCardInfo {
+  id: string;
+  deckId: "major" | "wands";
+  imagePath: string;
+  displayName: string;
 }
 
-export async function loadDecks(dataBasePath: string): Promise<DecksData> {
+function resolveRepoRoot(): string {
+  const cwd = process.cwd();
+  if (existsSync(path.join(cwd, "app_flutter"))) {
+    return cwd;
+  }
+  return path.resolve(cwd, "..");
+}
+
+function humanizeCardId(cardId: string, deckId: string): string {
+  const withoutPrefix = cardId.startsWith(`${deckId}_`)
+    ? cardId.slice(deckId.length + 1)
+    : cardId;
+  return withoutPrefix
+    .split("_")
+    .filter(Boolean)
+    .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
+    .join(" ");
+}
+
+async function collectCards(
+  directory: string,
+  deckId: DeckCardInfo["deckId"]
+): Promise<DeckCardInfo[]> {
+  const entries = await fs.readdir(directory, { withFileTypes: true });
+  return entries
+    .filter((entry) => entry.isFile() && entry.name.endsWith(".webp"))
+    .map((entry) => {
+      const id = path.basename(entry.name, ".webp");
+      return {
+        id,
+        deckId,
+        imagePath: path.join(directory, entry.name),
+        displayName: humanizeCardId(id, deckId),
+      };
+    });
+}
+
+export async function loadDecks(_dataBasePath: string): Promise<DecksData> {
   const locales: Locale[] = ["en", "ru", "kk"];
   const cardsByLocale: DecksData["cardsByLocale"] = {
     en: {},
@@ -35,20 +67,53 @@ export async function loadDecks(dataBasePath: string): Promise<DecksData> {
     kk: [],
   };
 
-  await Promise.all(
-    locales.map(async (locale) => {
-      const cardsPath = path.resolve(dataBasePath, `cards_${locale}.json`);
-      const spreadsPath = path.resolve(dataBasePath, `spreads_${locale}.json`);
-      const [cards, spreads] = await Promise.all([
-        readJsonFile<Record<string, CardData>>(cardsPath),
-        readJsonFile<Spread[]>(spreadsPath),
-      ]);
-      cardsByLocale[locale] = cards;
-      spreadsByLocale[locale] = spreads;
-    })
+  const repoRoot = resolveRepoRoot();
+  const cardsRoot = path.join(repoRoot, "app_flutter", "assets", "cards");
+  const [majorCards, wandsCards] = await Promise.all([
+    collectCards(path.join(cardsRoot, "major"), "major"),
+    collectCards(path.join(cardsRoot, "wands"), "wands"),
+  ]);
+  const allCards = [...majorCards, ...wandsCards];
+  const cardRecords = allCards.reduce<Record<string, CardData>>(
+    (acc, card) => {
+      acc[card.id] = {
+        title: card.displayName,
+        keywords: [],
+        meaning: {
+          general: "",
+          light: "",
+          shadow: "",
+          advice: "",
+        },
+      };
+      return acc;
+    },
+    {}
   );
 
-  const allCardIds = Object.keys(cardsByLocale.en);
+  const spreads: Spread[] = [
+    {
+      id: "spread_1_focus",
+      name: "Focus",
+      positions: [{ id: "p1", title: "Focus" }],
+    },
+    {
+      id: "spread_3",
+      name: "Three Card",
+      positions: [
+        { id: "left", title: "Left" },
+        { id: "center", title: "Center" },
+        { id: "right", title: "Right" },
+      ],
+    },
+  ];
+
+  locales.forEach((locale) => {
+    cardsByLocale[locale] = { ...cardRecords };
+    spreadsByLocale[locale] = spreads;
+  });
+
+  const allCardIds = allCards.map((card) => card.id).sort();
 
   return { cardsByLocale, spreadsByLocale, allCardIds };
 }
