@@ -1,4 +1,4 @@
-enum DeckId { major, wands }
+enum DeckId { all, major, wands }
 
 const List<String> wandsCardIds = [
   'wands_00_knight',
@@ -18,6 +18,7 @@ const List<String> wandsCardIds = [
 ];
 
 const Map<DeckId, String> deckStorageValues = {
+  DeckId.all: 'all',
   DeckId.major: 'major',
   DeckId.wands: 'wands',
 };
@@ -28,5 +29,5 @@ DeckId deckIdFromStorage(String? value) {
       return entry.key;
     }
   }
-  return DeckId.major;
+  return DeckId.all;
 }
