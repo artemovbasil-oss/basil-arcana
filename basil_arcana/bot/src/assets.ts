@@ -4,7 +4,20 @@ import sharp from "sharp";
 
 const conversionCache = new Map<string, string>();
 
-export function resolveCardPath(cardId: string, assetsBasePath: string): string {
+export function cardImageUrl(cardId: string, assetsBaseUrl: string): string {
+  if (cardId.startsWith("major_")) {
+    return `${assetsBaseUrl}/cards/major/${cardId}.webp`;
+  }
+  if (cardId.startsWith("wands_")) {
+    return `${assetsBaseUrl}/cards/wands/${cardId}.webp`;
+  }
+  return `${assetsBaseUrl}/deck/cover.webp`;
+}
+
+export function resolveLocalCardPath(
+  cardId: string,
+  assetsBasePath: string
+): string {
   const majorPath = path.join(assetsBasePath, "cards", "major", `${cardId}.webp`);
   const wandsPath = path.join(assetsBasePath, "cards", "wands", `${cardId}.webp`);
   if (cardId.startsWith("major_") && fs.existsSync(majorPath)) {
@@ -14,6 +27,10 @@ export function resolveCardPath(cardId: string, assetsBasePath: string): string 
     return wandsPath;
   }
   return path.join(assetsBasePath, "deck", "cover.webp");
+}
+
+export function localAssetsAvailable(assetsBasePath: string): boolean {
+  return fs.existsSync(path.join(assetsBasePath, "deck", "cover.webp"));
 }
 
 export async function ensurePng(inputPath: string): Promise<string> {

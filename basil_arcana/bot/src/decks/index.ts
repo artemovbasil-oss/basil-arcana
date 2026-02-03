@@ -1,6 +1,3 @@
-import { existsSync, readdirSync } from "fs";
-import fs from "fs/promises";
-import path from "path";
 import type { Locale } from "../config";
 import type { CardData, Spread } from "../state/types";
 
@@ -13,41 +10,37 @@ export interface DecksData {
 interface DeckCardInfo {
   id: string;
   deckId: "major" | "wands";
-  imagePath: string;
   displayName: string;
 }
 
-let hasLoggedAssetPaths = false;
+const MAJOR_CARD_IDS = [
+  "major_00_fool",
+  "major_01_magician",
+  "major_02_high_priestess",
+  "major_03_empress",
+  "major_04_emperor",
+  "major_05_hierophant",
+  "major_06_lovers",
+  "major_07_chariot",
+  "major_08_strength",
+  "major_09_hermit",
+  "major_10_wheel_of_fortune",
+  "major_11_justice",
+  "major_12_hanged_man",
+  "major_13_death",
+  "major_14_temperance",
+  "major_15_devil",
+  "major_16_tower",
+  "major_17_star",
+  "major_18_moon",
+  "major_19_sun",
+  "major_20_judgement",
+  "major_21_world",
+];
 
-function resolveFlutterAssetsRoot(): string {
-  const cwd = process.cwd();
-  const candidates = [
-    path.join(cwd, "app_flutter", "assets"),
-    path.join(cwd, "basil_arcana", "app_flutter", "assets"),
-    path.join(cwd, "..", "app_flutter", "assets"),
-    path.join(cwd, "..", "basil_arcana", "app_flutter", "assets"),
-  ];
-
-  for (const candidate of candidates) {
-    if (existsSync(path.join(candidate, "cards"))) {
-      return candidate;
-    }
-  }
-
-  console.error(`[decks] Unable to locate Flutter assets root. cwd=${cwd}`);
-  try {
-    const entries = readdirSync(cwd);
-    console.error(`[decks] cwd entries: ${entries.join(", ")}`);
-  } catch (error) {
-    console.error(`[decks] Failed to read cwd entries: ${error}`);
-  }
-
-  throw new Error(
-    `Unable to locate Flutter assets root. cwd=${cwd} attempted=${candidates.join(
-      ", "
-    )}`
-  );
-}
+const WANDS_CARD_IDS = Array.from({ length: 14 }, (_, index) =>
+  `wands_${String(index + 1).padStart(2, "0")}`
+);
 
 function humanizeCardId(cardId: string, deckId: string): string {
   const withoutPrefix = cardId.startsWith(`${deckId}_`)
@@ -60,25 +53,15 @@ function humanizeCardId(cardId: string, deckId: string): string {
     .join(" ");
 }
 
-async function collectCards(
-  directory: string,
-  deckId: DeckCardInfo["deckId"]
-): Promise<DeckCardInfo[]> {
-  const entries = await fs.readdir(directory, { withFileTypes: true });
-  return entries
-    .filter((entry) => entry.isFile() && entry.name.endsWith(".webp"))
-    .map((entry) => {
-      const id = path.basename(entry.name, ".webp");
-      return {
-        id,
-        deckId,
-        imagePath: path.join(directory, entry.name),
-        displayName: humanizeCardId(id, deckId),
-      };
-    });
+function buildDeck(deckId: DeckCardInfo["deckId"], cardIds: string[]): DeckCardInfo[] {
+  return cardIds.map((id) => ({
+    id,
+    deckId,
+    displayName: humanizeCardId(id, deckId),
+  }));
 }
 
-export async function loadDecks(_dataBasePath: string): Promise<DecksData> {
+export async function loadDecks(): Promise<DecksData> {
   const locales: Locale[] = ["en", "ru", "kk"];
   const cardsByLocale: DecksData["cardsByLocale"] = {
     en: {},
@@ -91,41 +74,8 @@ export async function loadDecks(_dataBasePath: string): Promise<DecksData> {
     kk: [],
   };
 
-  const flutterAssetsRoot = resolveFlutterAssetsRoot();
-  const majorDir = path.join(flutterAssetsRoot, "cards", "major");
-  const wandsDir = path.join(flutterAssetsRoot, "cards", "wands");
-  const fallbackCover = path.join(flutterAssetsRoot, "deck", "cover.webp");
-
-  if (!hasLoggedAssetPaths) {
-    hasLoggedAssetPaths = true;
-    console.info(
-      `[decks] assetsRoot=${flutterAssetsRoot} majorExists=${existsSync(
-        majorDir
-      )} wandsExists=${existsSync(wandsDir)} cwd=${process.cwd()}`
-    );
-  }
-
-  const deckPromises: Array<Promise<DeckCardInfo[]>> = [];
-  if (existsSync(majorDir)) {
-    deckPromises.push(collectCards(majorDir, "major"));
-  } else {
-    console.warn(
-      `[decks] Major arcana directory missing at ${majorDir}; skipping major deck.`
-    );
-    deckPromises.push(Promise.resolve([]));
-  }
-  if (existsSync(wandsDir)) {
-    deckPromises.push(collectCards(wandsDir, "wands"));
-  } else {
-    console.warn(
-      `[decks] Wands directory missing at ${wandsDir}; skipping wands deck.`
-    );
-    deckPromises.push(Promise.resolve([]));
-  }
-
-  void fallbackCover;
-
-  const [majorCards, wandsCards] = await Promise.all(deckPromises);
+  const majorCards = buildDeck("major", MAJOR_CARD_IDS);
+  const wandsCards = buildDeck("wands", WANDS_CARD_IDS);
   const allCards = [...majorCards, ...wandsCards];
   const cardRecords = allCards.reduce<Record<string, CardData>>(
     (acc, card) => {
