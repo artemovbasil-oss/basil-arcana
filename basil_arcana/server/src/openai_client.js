@@ -1,6 +1,7 @@
 const { OPENAI_API_KEY, OPENAI_MODEL } = require('./config');
 
 const DEFAULT_TIMEOUT_MS = 65000;
+const DEFAULT_RETRIES = 0;
 
 class OpenAIRequestError extends Error {
   constructor(message, { status, errorType, errorCode, bodyPreview } = {}) {
@@ -56,7 +57,10 @@ async function fetchWithTimeout(url, options, timeoutMs) {
   }
 }
 
-async function createChatCompletion(messages, { requestId } = {}) {
+async function createChatCompletion(
+  messages,
+  { requestId, timeoutMs = DEFAULT_TIMEOUT_MS, retries = DEFAULT_RETRIES } = {}
+) {
   if (!OPENAI_API_KEY) {
     throw new Error('Missing OPENAI_API_KEY');
   }
@@ -80,7 +84,7 @@ async function createChatCompletion(messages, { requestId } = {}) {
           response_format: { type: 'json_object' },
         }),
       },
-      DEFAULT_TIMEOUT_MS
+      timeoutMs
     );
 
     const durationMs = Date.now() - startTime;
@@ -94,6 +98,8 @@ async function createChatCompletion(messages, { requestId } = {}) {
       logOpenAIEvent({
         requestId,
         model: OPENAI_MODEL,
+        timeout_ms: timeoutMs,
+        retries,
         duration_ms: durationMs,
         ok: false,
         status: response.status,
@@ -120,6 +126,8 @@ async function createChatCompletion(messages, { requestId } = {}) {
       logOpenAIEvent({
         requestId,
         model: OPENAI_MODEL,
+        timeout_ms: timeoutMs,
+        retries,
         duration_ms: durationMs,
         ok: false,
         status: response.status,
@@ -139,6 +147,8 @@ async function createChatCompletion(messages, { requestId } = {}) {
       logOpenAIEvent({
         requestId,
         model: OPENAI_MODEL,
+        timeout_ms: timeoutMs,
+        retries,
         duration_ms: durationMs,
         ok: false,
         status: response.status,
@@ -156,6 +166,8 @@ async function createChatCompletion(messages, { requestId } = {}) {
     logOpenAIEvent({
       requestId,
       model: OPENAI_MODEL,
+      timeout_ms: timeoutMs,
+      retries,
       duration_ms: durationMs,
       ok: true,
     });
@@ -168,6 +180,8 @@ async function createChatCompletion(messages, { requestId } = {}) {
       logOpenAIEvent({
         requestId,
         model: OPENAI_MODEL,
+        timeout_ms: timeoutMs,
+        retries,
         duration_ms: durationMs,
         ok: false,
         errorName: error.name,
@@ -178,14 +192,19 @@ async function createChatCompletion(messages, { requestId } = {}) {
   }
 }
 
-async function listModels({ requestId, timeoutMs = 10000 } = {}) {
+async function listModels({
+  requestId,
+  timeoutMs = 10000,
+  retries = DEFAULT_RETRIES,
+} = {}) {
   if (!OPENAI_API_KEY) {
     return {
       ok: false,
       status: null,
-      errorName: 'MissingOpenAIKey',
+      errorType: 'MissingOpenAIKey',
       errorMessage: 'Missing OPENAI_API_KEY',
       bodyPreview: '',
+      model: OPENAI_MODEL,
     };
   }
 
@@ -214,6 +233,8 @@ async function listModels({ requestId, timeoutMs = 10000 } = {}) {
       logOpenAIEvent({
         requestId,
         model: OPENAI_MODEL,
+        timeout_ms: timeoutMs,
+        retries,
         duration_ms: durationMs,
         ok: false,
         status: response.status,
@@ -227,27 +248,49 @@ async function listModels({ requestId, timeoutMs = 10000 } = {}) {
       return {
         ok: false,
         status: response.status,
-        errorName: 'OpenAIRequestError',
+        errorType: details.errorType || 'OpenAIRequestError',
         errorMessage,
         bodyPreview,
+        model: OPENAI_MODEL,
       };
     }
+
+    let modelFound = true;
+    try {
+      const parsed = JSON.parse(text);
+      if (Array.isArray(parsed?.data)) {
+        modelFound = parsed.data.some((item) => item?.id === OPENAI_MODEL);
+      }
+    } catch (_) {
+      modelFound = true;
+    }
+
+    const ok = modelFound;
+    const errorType = modelFound ? null : 'ModelNotFound';
+    const errorMessage = modelFound
+      ? null
+      : `Model ${OPENAI_MODEL} not found in OpenAI account`;
 
     logOpenAIEvent({
       requestId,
       model: OPENAI_MODEL,
+      timeout_ms: timeoutMs,
+      retries,
       duration_ms: durationMs,
-      ok: true,
+      ok,
       status: response.status,
+      errorType,
+      errorMessage,
     });
     logged = true;
 
     return {
-      ok: true,
+      ok,
       status: response.status,
-      errorName: null,
-      errorMessage: null,
+      errorType,
+      errorMessage,
       bodyPreview,
+      model: OPENAI_MODEL,
     };
   } catch (error) {
     if (!logged) {
@@ -255,6 +298,8 @@ async function listModels({ requestId, timeoutMs = 10000 } = {}) {
       logOpenAIEvent({
         requestId,
         model: OPENAI_MODEL,
+        timeout_ms: timeoutMs,
+        retries,
         duration_ms: durationMs,
         ok: false,
         errorName: error.name,
@@ -265,9 +310,10 @@ async function listModels({ requestId, timeoutMs = 10000 } = {}) {
     return {
       ok: false,
       status: null,
-      errorName: error.name,
+      errorType: error.name,
       errorMessage: error.message,
       bodyPreview: '',
+      model: OPENAI_MODEL,
     };
   }
 }

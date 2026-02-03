@@ -473,7 +473,9 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
       case AiErrorType.missingApiKey:
         return l10n.resultStatusMissingApiKey;
       case AiErrorType.unauthorized:
-        return l10n.resultStatusUnauthorized;
+        return l10n.resultStatusServerUnavailable;
+      case AiErrorType.rateLimited:
+        return l10n.resultStatusTooManyAttempts;
       case AiErrorType.noInternet:
         return l10n.resultStatusNoInternet;
       case AiErrorType.timeout:

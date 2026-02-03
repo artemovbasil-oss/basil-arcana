@@ -20,7 +20,8 @@ app.use(cors());
 app.use(express.json({ limit: '1mb' }));
 
 app.use((req, res, next) => {
-  const requestId = uuidv4();
+  const incomingRequestId = req.get('x-request-id');
+  const requestId = incomingRequestId || uuidv4();
   req.requestId = requestId;
   res.setHeader('x-request-id', requestId);
 
@@ -41,45 +42,57 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get('/', (_req, res) => {
-  res.json({ ok: true, name: 'basils-arcana', message: 'Basil’s Arcana API' });
+app.get('/', (req, res) => {
+  res.json({
+    ok: true,
+    name: 'basils-arcana',
+    message: 'Basil’s Arcana API',
+    requestId: req.requestId
+  });
 });
 
-app.get('/health', (_req, res) => {
-  res.json({ ok: true, name: 'basils-arcana' });
+app.get('/health', (req, res) => {
+  res.json({ ok: true, name: 'basils-arcana', requestId: req.requestId });
 });
 
 app.get('/debug/openai', async (req, res) => {
   if (!OPENAI_API_KEY) {
     return res.json({
       hasKey: false,
+      model: null,
       ok: false,
       status: null,
-      errorName: 'MissingOpenAIKey',
+      errorType: 'MissingOpenAIKey',
       errorMessage: 'Missing OPENAI_API_KEY',
-      bodyPreview: ''
+      bodyPreview: '',
+      requestId: req.requestId
     });
   }
 
   const result = await listModels({ requestId: req.requestId, timeoutMs: 10000 });
   return res.json({
     hasKey: true,
+    model: result.model,
     ok: result.ok,
     status: result.status,
-    errorName: result.errorName,
+    errorType: result.errorType,
     errorMessage: result.errorMessage,
-    bodyPreview: result.bodyPreview
+    bodyPreview: result.bodyPreview,
+    requestId: req.requestId
   });
 });
 
-const apiLimiter = rateLimit({
-  windowMs: RATE_LIMIT_WINDOW_MS,
-  max: RATE_LIMIT_MAX,
-  standardHeaders: true,
-  legacyHeaders: false
-});
-
-app.use('/api', apiLimiter);
+if (RATE_LIMIT_MAX != null) {
+  const apiLimiter = rateLimit({
+    windowMs: RATE_LIMIT_WINDOW_MS ?? 60000,
+    max: RATE_LIMIT_MAX,
+    standardHeaders: true,
+    legacyHeaders: false,
+    handler: (req, res) =>
+      res.status(429).json({ error: 'rate_limited', requestId: req.requestId })
+  });
+  app.use('/api', apiLimiter);
+}
 app.use('/api', (req, res, next) => {
   if (!ARCANA_API_KEY) {
     return res.status(500).json({
