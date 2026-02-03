@@ -122,7 +122,11 @@ async function createResponse(
             model: OPENAI_MODEL,
             input: buildResponseInput(messages),
             temperature: 0,
-            text: { format: 'json' },
+            text: {
+              format: {
+                type: 'json',
+              },
+            },
           }),
         },
         timeoutMs
