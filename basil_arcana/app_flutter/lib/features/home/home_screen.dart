@@ -18,11 +18,20 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   final TextEditingController _controller = TextEditingController();
   final FocusNode _focusNode = FocusNode();
+  final ScrollController _scrollController = ScrollController();
+  final GlobalKey _questionKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode.addListener(_handleFocusChange);
+  }
 
   @override
   void dispose() {
     _controller.dispose();
     _focusNode.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -38,6 +47,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     setState(() {});
   }
 
+  void _handleFocusChange() {
+    if (!_focusNode.hasFocus) {
+      return;
+    }
+    final context = _questionKey.currentContext;
+    if (context == null) {
+      return;
+    }
+    Scrollable.ensureVisible(
+      context,
+      duration: const Duration(milliseconds: 260),
+      curve: Curves.easeOut,
+      alignment: 0.2,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(readingFlowControllerProvider);
@@ -50,13 +75,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     ];
     final hasQuestion = _controller.text.trim().isNotEmpty;
 
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    const buttonHeight = 56.0;
+    const buttonGap = 12.0;
+
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: SafeArea(
-        child: Column(
+        child: Stack(
           children: [
-            Expanded(
+            Positioned.fill(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+                controller: _scrollController,
+                padding: EdgeInsets.fromLTRB(
+                  20,
+                  12,
+                  20,
+                  24 + buttonHeight + buttonGap + bottomInset,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -104,6 +140,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                     const SizedBox(height: 22),
                     Container(
+                      key: _questionKey,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(22),
                         color: colorScheme.surfaceVariant.withOpacity(0.25),
@@ -225,37 +262,38 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ),
             ),
-            SafeArea(
-              top: false,
-              minimum: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-              child: AnimatedPadding(
-                duration: const Duration(milliseconds: 250),
-                curve: Curves.easeOut,
-                padding: EdgeInsets.only(
-                  bottom: MediaQuery.of(context).viewInsets.bottom,
-                ),
-                child: SizedBox(
-                  height: 56,
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: colorScheme.primary,
-                      foregroundColor: colorScheme.onPrimary,
-                      shape: const StadiumBorder(),
-                      textStyle: Theme.of(context).textTheme.titleMedium,
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: SafeArea(
+                top: false,
+                minimum: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+                child: AnimatedPadding(
+                  duration: const Duration(milliseconds: 250),
+                  curve: Curves.easeOut,
+                  padding: EdgeInsets.only(bottom: bottomInset + buttonGap),
+                  child: SizedBox(
+                    height: buttonHeight,
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: colorScheme.primary,
+                        foregroundColor: colorScheme.onPrimary,
+                        shape: const StadiumBorder(),
+                        textStyle: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      icon: const Icon(Icons.auto_awesome),
+                      onPressed: state.question.trim().isEmpty
+                          ? null
+                          : () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const SpreadScreen(),
+                                ),
+                              );
+                            },
+                      label: Text(l10n.homeContinueButton),
                     ),
-                    icon: const Icon(Icons.auto_awesome),
-                    onPressed: state.question.trim().isEmpty
-                        ? null
-                        : () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const SpreadScreen(),
-                              ),
-                            );
-                          },
-                    label: Text(l10n.homeContinueButton),
                   ),
                 ),
               ),
