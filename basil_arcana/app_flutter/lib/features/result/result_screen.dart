@@ -33,7 +33,6 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
   bool _precacheDone = false;
   int _itemCounter = 0;
   String? _warmTip;
-  bool _deepPromptDismissed = false;
 
   @override
   void dispose() {
@@ -59,6 +58,12 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
           next.detailsStatus == DetailsStatus.idle) {
         setState(() {
           _removeDeepStatusItems();
+        });
+      }
+
+      if (prev?.showDetailsCta == true && !next.showDetailsCta) {
+        setState(() {
+          _removeDeepPromptItem();
         });
       }
     });
@@ -208,7 +213,6 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
     _initialized = true;
     _sequenceComplete = false;
     _warmTip = _maybeWarmTip(state);
-    _deepPromptDismissed = false;
     _items
       ..clear()
       ..add(
@@ -375,11 +379,13 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
       );
     }
 
-    items.add(
-      _ChatItem.deepPrompt(
-        id: _nextId(),
-      ),
-    );
+    if (state.showDetailsCta) {
+      items.add(
+        _ChatItem.deepPrompt(
+          id: _nextId(),
+        ),
+      );
+    }
 
     return items;
   }
@@ -410,23 +416,30 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
           child: const TypingIndicatorBubble(),
         );
       case _ChatItemKind.deepPrompt:
+        if (!state.showDetailsCta) {
+          return const SizedBox.shrink();
+        }
         return ChatBubbleReveal(
           key: ValueKey(item.id),
           child: ChatBubble(
             isUser: false,
             avatarEmoji: '🪄',
             child: _DeepPromptBubble(
-              isActionable: !_deepPromptDismissed &&
+              isActionable: state.showDetailsCta &&
                   state.detailsStatus == DetailsStatus.idle,
               onDecline: () {
-                _dismissDeepPrompt();
+                ref
+                    .read(readingFlowControllerProvider.notifier)
+                    .dismissDetailsCta();
+                setState(() {
+                  _removeDeepPromptItem();
+                });
               },
-              onAccept: () {
+              onAccept: () async {
                 if (state.detailsStatus == DetailsStatus.loading) {
                   return;
                 }
-                _dismissDeepPrompt();
-                ref
+                await ref
                     .read(readingFlowControllerProvider.notifier)
                     .requestDeepReading();
               },
@@ -444,7 +457,6 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
             cancelLabel: AppLocalizations.of(context)!.resultDeepNotNow,
             onCancel: () {
               setState(() {
-                _deepPromptDismissed = true;
                 _removeDeepStatusItems();
                 _removeDeepPromptItem();
               });
@@ -460,18 +472,17 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
           child: ChatBubble(
             isUser: false,
             avatarEmoji: '🪄',
-            child: _DeepErrorBubble(
-              message: item.message ?? '',
-              onCancel: () {
-                setState(() {
-                  _deepPromptDismissed = true;
-                  _removeDeepStatusItems();
-                  _removeDeepPromptItem();
-                });
-                ref
-                    .read(readingFlowControllerProvider.notifier)
-                    .cancelDeepReading();
-              },
+              child: _DeepErrorBubble(
+                message: item.message ?? '',
+                onCancel: () {
+                  setState(() {
+                    _removeDeepStatusItems();
+                    _removeDeepPromptItem();
+                  });
+                  ref
+                      .read(readingFlowControllerProvider.notifier)
+                      .cancelDeepReading();
+                },
               onRetry: () {
                 setState(() {
                   _removeDeepStatusItems();
@@ -522,7 +533,6 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
   void _handleDetailsResult(ReadingFlowState state) {
     setState(() {
       _removeDeepStatusItems();
-      _deepPromptDismissed = true;
       _removeDeepPromptItem();
     });
     _appendDetailsMessage(state);
@@ -553,13 +563,6 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
 
   void _removeDeepPromptItem() {
     _items.removeWhere((item) => item.kind == _ChatItemKind.deepPrompt);
-  }
-
-  void _dismissDeepPrompt() {
-    setState(() {
-      _deepPromptDismissed = true;
-      _removeDeepPromptItem();
-    });
   }
 
   void _appendDetailsMessage(ReadingFlowState state) {
@@ -670,7 +673,7 @@ class _DeepPromptBubble extends StatelessWidget {
 
   final bool isActionable;
   final VoidCallback onDecline;
-  final VoidCallback onAccept;
+  final Future<void> Function() onAccept;
 
   @override
   Widget build(BuildContext context) {
@@ -699,7 +702,11 @@ class _DeepPromptBubble extends StatelessWidget {
             const SizedBox(width: 10),
             Expanded(
               child: ElevatedButton(
-                onPressed: isActionable ? onAccept : null,
+                onPressed: isActionable
+                    ? () async {
+                        await onAccept();
+                      }
+                    : null,
                 style: ElevatedButton.styleFrom(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
