@@ -45,26 +45,9 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
   void initState() {
     super.initState();
     ref.listen<ReadingFlowState>(readingFlowControllerProvider, (prev, next) {
-      if (prev?.detailsStatus != DetailsStatus.loading &&
-          next.detailsStatus == DetailsStatus.loading) {
-        _showDeepLoading();
-      } else if (prev?.detailsStatus != DetailsStatus.success &&
-          next.detailsStatus == DetailsStatus.success) {
-        _handleDetailsResult(next);
-      } else if (prev?.detailsStatus == DetailsStatus.loading &&
-          next.detailsStatus == DetailsStatus.error) {
-        _handleDetailsError(next);
-      } else if (prev?.detailsStatus == DetailsStatus.loading &&
-          next.detailsStatus == DetailsStatus.idle) {
-        setState(() {
-          _removeDeepStatusItems();
-        });
-      }
-
-      if (prev?.showDetailsCta == true && !next.showDetailsCta) {
-        setState(() {
-          _removeDeepPromptItem();
-        });
+      if (prev?.detailsStatus != next.detailsStatus ||
+          prev?.showDetailsCta != next.showDetailsCta) {
+        _scrollToBottom();
       }
     });
   }
@@ -171,6 +154,85 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                   for (final item in _items) ...[
                     _buildChatItem(item, state),
                     const SizedBox(height: 14),
+                  ],
+                  if (state.showDetailsCta &&
+                      state.detailsStatus == DetailsStatus.idle) ...[
+                    ChatBubbleReveal(
+                      child: ChatBubble(
+                        isUser: false,
+                        avatarEmoji: '🪄',
+                        child: _DeepPromptBubble(
+                          isActionable: state.showDetailsCta &&
+                              state.detailsStatus == DetailsStatus.idle,
+                          onDecline: () {
+                            ref
+                                .read(
+                                  readingFlowControllerProvider.notifier,
+                                )
+                                .dismissDetails();
+                          },
+                          onAccept: () async {
+                            if (state.detailsStatus == DetailsStatus.loading) {
+                              return;
+                            }
+                            await ref
+                                .read(
+                                  readingFlowControllerProvider.notifier,
+                                )
+                                .requestDetails();
+                          },
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                  ],
+                  if (state.detailsStatus == DetailsStatus.loading) ...[
+                    ChatBubbleReveal(
+                      child: OracleTypingBubble(
+                        label: AppLocalizations.of(context)!
+                            .resultDeepTypingLabel,
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                  ],
+                  if (state.detailsStatus == DetailsStatus.success &&
+                      state.detailsText != null &&
+                      state.detailsText!.trim().isNotEmpty) ...[
+                    ChatBubbleReveal(
+                      child: ChatBubble(
+                        isUser: false,
+                        avatarEmoji: '🪄',
+                        child: Text(state.detailsText!),
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                  ],
+                  if (state.detailsStatus == DetailsStatus.error) ...[
+                    ChatBubbleReveal(
+                      child: ChatBubble(
+                        isUser: false,
+                        avatarEmoji: '🪄',
+                        child: _DeepErrorBubble(
+                          message: state.detailsError ??
+                              AppLocalizations.of(context)!
+                                  .resultDeepRetryMessage,
+                          onCancel: () {
+                            ref
+                                .read(
+                                  readingFlowControllerProvider.notifier,
+                                )
+                                .dismissDetails();
+                          },
+                          onRetry: () {
+                            ref
+                                .read(
+                                  readingFlowControllerProvider.notifier,
+                                )
+                                .tryAgainDetails();
+                          },
+                        ),
+                      ),
+                    ),
                   ],
                 ],
               ),
@@ -379,15 +441,6 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
       );
     }
 
-    if (state.showDetailsCta &&
-        state.detailsStatus == DetailsStatus.idle) {
-      items.add(
-        _ChatItem.deepPrompt(
-          id: _nextId(),
-        ),
-      );
-    }
-
     return items;
   }
 
@@ -416,76 +469,6 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
           key: ValueKey(item.id),
           child: const TypingIndicatorBubble(),
         );
-      case _ChatItemKind.deepPrompt:
-        if (!state.showDetailsCta ||
-            state.detailsStatus != DetailsStatus.idle) {
-          return const SizedBox.shrink();
-        }
-        return ChatBubbleReveal(
-          key: ValueKey(item.id),
-          child: ChatBubble(
-            isUser: false,
-            avatarEmoji: '🪄',
-            child: _DeepPromptBubble(
-              isActionable: state.showDetailsCta &&
-                  state.detailsStatus == DetailsStatus.idle,
-              onDecline: () {
-                ref
-                    .read(readingFlowControllerProvider.notifier)
-                    .dismissDetailsCta();
-                setState(() {
-                  _removeDeepPromptItem();
-                });
-              },
-              onAccept: () async {
-                if (state.detailsStatus == DetailsStatus.loading) {
-                  return;
-                }
-                await ref
-                    .read(readingFlowControllerProvider.notifier)
-                    .requestDeepReading();
-              },
-            ),
-          ),
-        );
-      case _ChatItemKind.deepLoading:
-        if (state.detailsStatus != DetailsStatus.loading) {
-          return const SizedBox.shrink();
-        }
-        return ChatBubbleReveal(
-          key: ValueKey(item.id),
-          child: OracleTypingBubble(
-            label: AppLocalizations.of(context)!.resultDeepTypingLabel,
-          ),
-        );
-      case _ChatItemKind.deepError:
-        return ChatBubbleReveal(
-          key: ValueKey(item.id),
-          child: ChatBubble(
-            isUser: false,
-            avatarEmoji: '🪄',
-            child: _DeepErrorBubble(
-              message: item.message ?? '',
-              onCancel: () {
-                setState(() {
-                  _removeDeepStatusItems();
-                  _removeDeepPromptItem();
-                });
-                ref
-                    .read(readingFlowControllerProvider.notifier)
-                    .dismissDetailsError();
-              },
-              onRetry: () {
-                setState(() {
-                  _removeDeepStatusItems();
-                });
-                ref
-                    .read(readingFlowControllerProvider.notifier)
-                    .requestDeepReading();
-              },
-            ),
-          ),
-        );
     }
   }
 
@@ -512,65 +495,6 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
       case null:
         return l10n.resultStatusInterpretationUnavailable;
     }
-  }
-
-  void _showDeepLoading() {
-    setState(() {
-      _removeDeepStatusItems();
-      _items.add(_ChatItem.deepLoading(id: _nextId()));
-    });
-    _scrollToBottom();
-  }
-
-  void _handleDetailsResult(ReadingFlowState state) {
-    setState(() {
-      _removeDeepStatusItems();
-      _removeDeepPromptItem();
-    });
-    _appendDetailsMessage(state);
-  }
-
-  void _handleDetailsError(ReadingFlowState state) {
-    final l10n = AppLocalizations.of(context)!;
-    final message = state.detailsError ?? l10n.resultDeepRetryMessage;
-    setState(() {
-      _removeDeepStatusItems();
-      _items.add(
-        _ChatItem.deepError(
-          id: _nextId(),
-          message: message,
-        ),
-      );
-    });
-    _scrollToBottom();
-  }
-
-  void _removeDeepStatusItems() {
-    _items.removeWhere(
-      (item) =>
-          item.kind == _ChatItemKind.deepLoading ||
-          item.kind == _ChatItemKind.deepError,
-    );
-  }
-
-  void _removeDeepPromptItem() {
-    _items.removeWhere((item) => item.kind == _ChatItemKind.deepPrompt);
-  }
-
-  void _appendDetailsMessage(ReadingFlowState state) {
-    final detailsText = state.detailsText;
-    if (detailsText == null || detailsText.isEmpty) {
-      return;
-    }
-    setState(() {
-      _items.add(
-        _ChatItem.basil(
-          id: _nextId(),
-          child: Text(detailsText),
-        ),
-      );
-    });
-    _scrollToBottom();
   }
 
   String? _maybeWarmTip(ReadingFlowState state) {
@@ -788,25 +712,6 @@ class _ChatItem {
     return _ChatItem._(id: id, kind: _ChatItemKind.typing);
   }
 
-  factory _ChatItem.deepPrompt({required String id}) {
-    return _ChatItem._(id: id, kind: _ChatItemKind.deepPrompt);
-  }
-
-  factory _ChatItem.deepLoading({required String id}) {
-    return _ChatItem._(id: id, kind: _ChatItemKind.deepLoading);
-  }
-
-  factory _ChatItem.deepError({
-    required String id,
-    required String message,
-  }) {
-    return _ChatItem._(
-      id: id,
-      kind: _ChatItemKind.deepError,
-      message: message,
-    );
-  }
-
   final String id;
   final _ChatItemKind kind;
   final Widget? child;
@@ -817,9 +722,6 @@ enum _ChatItemKind {
   user,
   basil,
   typing,
-  deepPrompt,
-  deepLoading,
-  deepError,
 }
 
 class _StatusPill extends StatelessWidget {
