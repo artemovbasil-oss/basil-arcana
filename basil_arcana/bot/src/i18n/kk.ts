@@ -14,4 +14,4 @@ export default {
   alreadyProcessing: "Қазірдің өзінде оқу жасап жатырмын. Аздап күте тұрыңыз.",
   missingReading: "Алдымен жаңа оқу бастаңыз.",
   detailsIntro: "Толық мәлімет:",
-} as const;
+};

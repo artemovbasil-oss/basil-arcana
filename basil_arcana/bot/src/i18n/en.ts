@@ -14,4 +14,4 @@ export default {
   alreadyProcessing: "I am already working on your reading. Please wait a moment.",
   missingReading: "Please start a new reading first.",
   detailsIntro: "Here are the details:",
-} as const;
+};
