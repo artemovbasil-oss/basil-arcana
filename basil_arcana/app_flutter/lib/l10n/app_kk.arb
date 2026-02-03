@@ -12,7 +12,7 @@
   "homeDescription": "Бір анық сұраққа арналған тыныш кеңістік",
   "homeQuestionPlaceholder": "Сұрағыңызды жазыңыз…",
   "homeQuestionLabel": "Сұрағыңыз қандай?",
-  "homeQuestionHint": "Айқындық керек нәрсені жазыңыз...",
+  "homeQuestionHint": "Айқындық керек нәрсені жазыңыз",
   "homeClearQuestionTooltip": "Сұрақты тазарту",
   "homeTryPrompt": "Осы сұрақтардың бірін көріңіз:",
   "homeExample1": "Энергиямды қайда бағыттаған дұрыс?",
@@ -50,7 +50,7 @@
     }
   },
   "shuffleTitle": "Колоданы араластырыңыз",
-  "shuffleSubtitle": "Колода араластырылуда...",
+  "shuffleSubtitle": "Колода араластырылуда",
   "shuffleDrawButton": "Карталарды тарту",
   "resultTitle": "Сіздің оқылымыңыз",
   "resultStatusAiReading": "Basil түсіндіріп жатыр…",

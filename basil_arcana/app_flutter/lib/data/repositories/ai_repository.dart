@@ -277,7 +277,7 @@ class AiRepository {
     }
   }
 
-  Future<String> fetchReadingDetails({
+  Future<String?> fetchReadingDetails({
     required String question,
     required SpreadModel spread,
     required List<DrawnCardModel> drawnCards,
@@ -417,17 +417,16 @@ class AiRepository {
     }
 
     try {
-      final data = jsonDecode(response.body) as Map<String, dynamic>;
-      final detailsText = (data['detailsText'] as String?) ?? '';
-      final responseRequestId = data['requestId'] as String?;
-      if (detailsText.trim().isEmpty) {
+      final parsed = _parseDetailsText(response.body);
+      if (parsed == null || parsed.trim().isEmpty) {
         throw const FormatException('Missing detailsText');
       }
+      final responseRequestId = _extractRequestId(response.body);
       if (kDebugMode) {
         debugPrint(
           '[AiRepository] detailsResponse requestId=${responseRequestId ?? requestId} '
           'status=${response.statusCode} '
-          'preview="${detailsText.substring(0, min(detailsText.length, 80))}"',
+          'preview="${parsed.substring(0, min(parsed.length, 80))}"',
         );
       }
       _logSuccess(
@@ -436,7 +435,7 @@ class AiRepository {
         requestId: responseRequestId ?? requestId,
         statusCode: response.statusCode,
       );
-      return detailsText;
+      return parsed.trim();
     } catch (error) {
       if (kDebugMode) {
         debugPrint(
@@ -457,6 +456,35 @@ class AiRepository {
         message: error.toString(),
       );
     }
+  }
+
+  String? _parseDetailsText(String body) {
+    final trimmed = body.trim();
+    if (trimmed.isEmpty) {
+      return null;
+    }
+    try {
+      final decoded = jsonDecode(body);
+      if (decoded is String) {
+        return decoded.trim();
+      }
+      if (decoded is Map<String, dynamic>) {
+        final direct = decoded['detailsText'];
+        if (direct is String && direct.trim().isNotEmpty) {
+          return direct.trim();
+        }
+        final nested = decoded['data'];
+        if (nested is Map<String, dynamic>) {
+          final nestedText = nested['detailsText'];
+          if (nestedText is String && nestedText.trim().isNotEmpty) {
+            return nestedText.trim();
+          }
+        }
+      }
+    } catch (_) {
+      return trimmed;
+    }
+    return trimmed;
   }
 
   Future<void> smokeTest({required String languageCode}) async {

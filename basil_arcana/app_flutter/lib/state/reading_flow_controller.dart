@@ -13,7 +13,6 @@ import '../data/models/reading_model.dart';
 import '../data/models/spread_model.dart';
 import '../data/repositories/ai_repository.dart';
 import '../data/repositories/readings_repository.dart';
-import '../core/utils/oracle_text.dart';
 import 'providers.dart';
 
 enum DetailsStatus { idle, loading, success, error }
@@ -480,8 +479,8 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       if (_activeDeepRequestId != requestId) {
         return;
       }
-      final sanitized = sanitizeOracleText(detailsText);
-      if (sanitized.trim().isEmpty) {
+      final trimmed = detailsText?.trim() ?? '';
+      if (trimmed.isEmpty) {
         final message = _l10n().resultStatusUnexpectedResponse;
         state = state.copyWith(
           detailsStatus: DetailsStatus.error,
@@ -492,11 +491,11 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       }
       debugPrint(
         '[ReadingFlow] detailsResponse:received id=$requestId '
-        'chars=${sanitized.length}',
+        'chars=${trimmed.length}',
       );
       state = state.copyWith(
         detailsStatus: DetailsStatus.success,
-        detailsText: sanitized,
+        detailsText: trimmed,
         detailsError: null,
       );
     } on AiRepositoryException catch (error) {
