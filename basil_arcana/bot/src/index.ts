@@ -1,5 +1,6 @@
 import { Bot, InlineKeyboard, InputFile } from "grammy";
 import type { Context } from "grammy";
+import type { InputMediaPhoto } from "grammy/types";
 import { loadConfig } from "./config";
 import { resolveCardPath, ensurePng } from "./assets";
 import { loadDecks, pickSpread, drawCards } from "./decks";
@@ -221,7 +222,10 @@ async function sendCardImages(
     return;
   }
 
-  const media = paths.map((p) => ({ type: "photo", media: new InputFile(p) }));
+  const media: InputMediaPhoto[] = paths.map((p) => ({
+    type: "photo",
+    media: new InputFile(p),
+  }));
   try {
     await ctx.replyWithMediaGroup(media);
     return;
@@ -230,7 +234,10 @@ async function sendCardImages(
   }
 
   const pngPaths = await Promise.all(paths.map((p) => ensurePng(p)));
-  const pngMedia = pngPaths.map((p) => ({ type: "photo", media: new InputFile(p) }));
+  const pngMedia: InputMediaPhoto[] = pngPaths.map((p) => ({
+    type: "photo",
+    media: new InputFile(p),
+  }));
   await ctx.replyWithMediaGroup(pngMedia);
 }
 

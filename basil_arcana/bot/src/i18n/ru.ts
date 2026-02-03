@@ -14,4 +14,4 @@ export default {
   alreadyProcessing: "Я уже работаю над вашим раскладом. Пожалуйста, подождите.",
   missingReading: "Сначала начните новый расклад.",
   detailsIntro: "Детали расклада:",
-} as const;
+};
