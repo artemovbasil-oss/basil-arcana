@@ -182,7 +182,12 @@ app.use('/api', (req, res, next) => {
 
 app.post('/api/reading/generate', async (req, res) => {
   const mode = req.query.mode || 'deep';
-  if (mode !== 'fast' && mode !== 'deep' && mode !== 'life_areas') {
+  if (
+    mode !== 'fast' &&
+    mode !== 'deep' &&
+    mode !== 'life_areas' &&
+    mode !== 'details_relationships_career'
+  ) {
     return res.status(400).json({
       error: 'invalid_mode',
       requestId: req.requestId

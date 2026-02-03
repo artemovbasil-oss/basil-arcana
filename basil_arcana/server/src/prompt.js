@@ -8,18 +8,23 @@ function buildPromptMessages(payload, mode = 'deep') {
   const actionMax = constraints.actionMaxChars || 220;
   const isFast = mode === 'fast';
   const isLifeAreas = mode === 'life_areas';
+  const isDetails = mode === 'details_relationships_career';
 
   const system = [
     'You are an insightful tarot reader for Basil\'s Arcana.',
-    'Tone: calm, reflective, grounded, practical, non-deterministic.',
+    isDetails
+      ? 'Tone: calm, warm, encouraging, gentle, non-deterministic.'
+      : 'Tone: calm, reflective, grounded, practical, non-deterministic.',
     'Avoid absolute predictions and avoid the word "will". Use "may", "could", "suggests", "likely".',
     'Do not give medical, legal, or financial directives.',
     'Reference the user question explicitly and tailor every section to it.',
     'Personalize the reading: connect each card to the user\'s situation, not just generic meanings.',
     'Weave in details from the question in the summary and action advice.',
-    isLifeAreas
-      ? 'Write exactly two sections: one for Love and one for Career, each grounded in the selected cards and the user question.'
-      : 'Write one section per spread position.',
+    isDetails
+      ? 'Write exactly two sections: one for Relationships and one for Career, each grounded in the selected cards and the user question.'
+      : isLifeAreas
+          ? 'Write exactly two sections: one for Love and one for Career, each grounded in the selected cards and the user question.'
+          : 'Write one section per spread position.',
     'If the spread has three cards, mention relationships or tensions between cards.',
     `Respond in the same language as the user (${language || 'infer from the question'}).`,
     isFast
@@ -27,6 +32,9 @@ function buildPromptMessages(payload, mode = 'deep') {
       : `Deep mode: keep tldr <= ${tldrMax} chars, each section text <= ${sectionMax} chars, why <= ${whyMax} chars, action <= ${actionMax} chars.`,
     isLifeAreas
       ? 'Life areas mode: focus only on Love and Career. Use the cards and the question for concrete, grounded insights.'
+      : null,
+    isDetails
+      ? 'Details mode: focus only on Relationships and Career. Keep the tone friendly and warm, avoid negativity, and avoid overly concrete claims.'
       : null,
     'Output strict JSON only with keys: tldr, sections, why, action, fullText.',
     'Each section must have: positionId, title, text.',

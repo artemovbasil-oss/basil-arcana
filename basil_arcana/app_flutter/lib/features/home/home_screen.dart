@@ -48,6 +48,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   void _handleFocusChange() {
+    setState(() {});
     if (!_focusNode.hasFocus) {
       return;
     }
@@ -76,8 +77,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final hasQuestion = _controller.text.trim().isNotEmpty;
 
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    final isKeyboardVisible = bottomInset > 0;
+    final isFocusMode = _focusNode.hasFocus && isKeyboardVisible;
     const buttonHeight = 56.0;
     const buttonGap = 12.0;
+    final primaryColor = isFocusMode
+        ? Color.lerp(colorScheme.primary, Colors.white, 0.08)!
+        : colorScheme.primary;
+    final disabledColor =
+        Color.lerp(primaryColor, colorScheme.surface, 0.45)!;
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -96,47 +104,58 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            l10n.appTitle,
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleLarge
-                                ?.copyWith(
-                                  color: colorScheme.onSurface,
+                    AnimatedOpacity(
+                      duration: const Duration(milliseconds: 200),
+                      opacity: isFocusMode ? 0.45 : 1,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  l10n.appTitle,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleLarge
+                                      ?.copyWith(
+                                        color: colorScheme.onSurface,
+                                      ),
                                 ),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.history),
+                                tooltip: l10n.historyTooltip,
+                                onPressed: () {
+                                  Navigator.pushNamed(
+                                    context,
+                                    HistoryScreen.routeName,
+                                  );
+                                },
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.settings),
+                                tooltip: l10n.settingsTitle,
+                                onPressed: () {
+                                  Navigator.pushNamed(
+                                    context,
+                                    SettingsScreen.routeName,
+                                  );
+                                },
+                              ),
+                            ],
                           ),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.history),
-                          tooltip: l10n.historyTooltip,
-                          onPressed: () {
-                            Navigator.pushNamed(
-                              context,
-                              HistoryScreen.routeName,
-                            );
-                          },
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.settings),
-                          tooltip: l10n.settingsTitle,
-                          onPressed: () {
-                            Navigator.pushNamed(
-                              context,
-                              SettingsScreen.routeName,
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      l10n.homeDescription,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: colorScheme.onSurface.withOpacity(0.7),
+                          const SizedBox(height: 6),
+                          Text(
+                            l10n.homeDescription,
+                            style:
+                                Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                      color:
+                                          colorScheme.onSurface.withOpacity(0.7),
+                                    ),
                           ),
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 22),
                     Container(
@@ -214,48 +233,57 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    Wrap(
-                      spacing: 12,
-                      runSpacing: 8,
-                      children: examples
-                          .map(
-                            (example) => InkWell(
-                              onTap: () => _applyExample(example),
-                              borderRadius: BorderRadius.circular(20),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 6,
-                                  vertical: 4,
-                                ),
-                                child: Text(
-                                  example,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .labelLarge
-                                      ?.copyWith(
-                                        color: colorScheme.onSurface
-                                            .withOpacity(0.65),
+                    AnimatedOpacity(
+                      duration: const Duration(milliseconds: 200),
+                      opacity: isFocusMode ? 0.45 : 1,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Wrap(
+                            spacing: 12,
+                            runSpacing: 8,
+                            children: examples
+                                .map(
+                                  (example) => InkWell(
+                                    onTap: () => _applyExample(example),
+                                    borderRadius: BorderRadius.circular(20),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                        vertical: 4,
                                       ),
-                                ),
-                              ),
+                                      child: Text(
+                                        example,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .labelLarge
+                                            ?.copyWith(
+                                              color: colorScheme.onSurface
+                                                  .withOpacity(0.65),
+                                            ),
+                                      ),
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                          ),
+                          const SizedBox(height: 20),
+                          SizedBox(
+                            width: double.infinity,
+                            child: OutlinedButton.icon(
+                              icon: const Icon(Icons.style_outlined),
+                              label: Text(l10n.homeAllCardsButton),
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const CardsScreen(),
+                                  ),
+                                );
+                              },
                             ),
-                          )
-                          .toList(),
-                    ),
-                    const SizedBox(height: 20),
-                    SizedBox(
-                      width: double.infinity,
-                      child: OutlinedButton.icon(
-                        icon: const Icon(Icons.style_outlined),
-                        label: Text(l10n.homeAllCardsButton),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const CardsScreen(),
-                            ),
-                          );
-                        },
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -276,8 +304,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     width: double.infinity,
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: colorScheme.primary,
+                        backgroundColor: primaryColor,
+                        disabledBackgroundColor: disabledColor,
                         foregroundColor: colorScheme.onPrimary,
+                        disabledForegroundColor:
+                            colorScheme.onSurface.withOpacity(0.7),
+                        elevation: isFocusMode ? 5 : 2,
+                        shadowColor:
+                            isFocusMode ? primaryColor.withOpacity(0.45) : null,
                         shape: const StadiumBorder(),
                         textStyle: Theme.of(context).textTheme.titleMedium,
                       ),

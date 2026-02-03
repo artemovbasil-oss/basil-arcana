@@ -35,7 +35,7 @@ enum AiErrorType {
   badResponse,
 }
 
-enum ReadingMode { fast, deep, lifeAreas }
+enum ReadingMode { fast, deep, lifeAreas, detailsRelationshipsCareer }
 
 class AiRepositoryException implements Exception {
   const AiRepositoryException(
@@ -75,6 +75,7 @@ class AiRepository {
     required List<DrawnCardModel> drawnCards,
     required String languageCode,
     required ReadingMode mode,
+    String? requestIdOverride,
     Map<String, dynamic>? fastReading,
     http.Client? client,
     Duration timeout = _requestTimeout,
@@ -96,7 +97,7 @@ class AiRepository {
         'mode': _modeParam(mode),
       },
     );
-    final requestId = const Uuid().v4();
+    final requestId = requestIdOverride ?? const Uuid().v4();
     final startTimestamp = DateTime.now().toIso8601String();
     final stopwatch = Stopwatch()..start();
     final totalCards = drawnCards.length;
@@ -113,14 +114,18 @@ class AiRepository {
             'actionMaxChars': 240,
           };
     final cardsPayload = mode == ReadingMode.deep ||
-            mode == ReadingMode.lifeAreas
+            mode == ReadingMode.lifeAreas ||
+            mode == ReadingMode.detailsRelationshipsCareer
         ? drawnCards
             .map((drawn) => drawn.toAiDeepJson(totalCards: totalCards))
             .toList()
         : drawnCards
             .map((drawn) => drawn.toAiJson(totalCards: totalCards))
             .toList();
-    final tone = mode == ReadingMode.lifeAreas ? 'gentle' : 'neutral';
+    final tone = mode == ReadingMode.lifeAreas ||
+            mode == ReadingMode.detailsRelationshipsCareer
+        ? 'gentle'
+        : 'neutral';
     final payload = {
       'question': question,
       'spread': spread.toJson(),
@@ -296,6 +301,9 @@ class AiRepository {
   String _modeParam(ReadingMode mode) {
     if (mode == ReadingMode.lifeAreas) {
       return 'life_areas';
+    }
+    if (mode == ReadingMode.detailsRelationshipsCareer) {
+      return 'details_relationships_career';
     }
     return mode.name;
   }
