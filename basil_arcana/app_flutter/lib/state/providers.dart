@@ -77,7 +77,7 @@ class DeckNotifier extends StateNotifier<DeckId> {
 
   Future<void> setDeck(DeckId deckId) async {
     state = deckId;
-    await _box.put(_deckIdKey, deckStorageValues[deckId]);
+    await _box.put(_deckIdKey, deckStorageValues[deckId] ?? 'major');
   }
 }
 
