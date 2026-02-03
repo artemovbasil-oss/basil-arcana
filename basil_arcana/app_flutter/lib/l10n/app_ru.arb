@@ -87,9 +87,10 @@
   "resultNewButton": "Новый расклад",
   "resultWantMoreButton": "Хочу больше",
   "resultStatusMissingApiKey": "ИИ отключен — API-ключ не включен в эту сборку",
-  "resultStatusUnauthorized": "Неавторизовано — проверьте API-ключ",
+  "resultStatusUnauthorized": "Сервис недоступен — попробуйте снова чуть позже.",
   "resultStatusNoInternet": "Нет интернета — показываем офлайн-расклад",
-  "resultStatusTimeout": "ИИ отвечает дольше обычного — нажмите, чтобы повторить.",
+  "resultStatusTimeout": "Оракул на паузе — нажмите, чтобы повторить.",
+  "resultStatusTooManyAttempts": "Слишком много попыток — подождите и попробуйте снова.",
   "resultStatusServerUnavailableWithStatus": "Оракул затуманен ({status}) — попробуйте снова чуть позже.",
   "@resultStatusServerUnavailableWithStatus": {
     "placeholders": {

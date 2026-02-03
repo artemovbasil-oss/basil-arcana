@@ -87,9 +87,10 @@
   "resultNewButton": "Жаңа оқылым",
   "resultWantMoreButton": "Көбірек қалаймын",
   "resultStatusMissingApiKey": "AI өшірулі — бұл жинақта API кілті жоқ",
-  "resultStatusUnauthorized": "Рұқсат жоқ — API кілтін тексеріңіз",
+  "resultStatusUnauthorized": "Қызмет қолжетімсіз — сәл кейінірек қайталап көріңіз.",
   "resultStatusNoInternet": "Интернет жоқ — офлайн оқылым көрсетіледі",
-  "resultStatusTimeout": "AI әдеттегіден ұзақ жауап беруде — қайта көру үшін түртіңіз.",
+  "resultStatusTimeout": "Оракул кідірді — қайта көру үшін түртіңіз.",
+  "resultStatusTooManyAttempts": "Тым көп әрекет — біраз күтіп, қайта көріңіз.",
   "resultStatusServerUnavailableWithStatus": "Оракул көмескі ({status}) — сәл кейінірек қайталап көріңіз.",
   "@resultStatusServerUnavailableWithStatus": {
     "placeholders": {

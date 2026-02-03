@@ -87,9 +87,10 @@
   "resultNewButton": "New reading",
   "resultWantMoreButton": "Want more",
   "resultStatusMissingApiKey": "AI disabled — API key not included in this build",
-  "resultStatusUnauthorized": "Unauthorized — check API key",
+  "resultStatusUnauthorized": "Service unavailable — try again in a moment.",
   "resultStatusNoInternet": "No internet — showing offline reading",
-  "resultStatusTimeout": "AI is taking longer than usual — tap to retry.",
+  "resultStatusTimeout": "The oracle paused — tap to retry.",
+  "resultStatusTooManyAttempts": "Too many attempts — please wait and try again.",
   "resultStatusServerUnavailableWithStatus": "The oracle is foggy ({status}) — try again in a moment.",
   "@resultStatusServerUnavailableWithStatus": {
     "placeholders": {

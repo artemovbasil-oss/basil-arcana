@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
+import 'package:uuid/uuid.dart';
 
 import '../models/ai_result_model.dart';
 import '../models/card_model.dart';
@@ -22,9 +23,12 @@ const legacyApiKey = String.fromEnvironment(
   defaultValue: '',
 );
 
+const Duration _requestTimeout = Duration(seconds: 60);
+
 enum AiErrorType {
   missingApiKey,
   unauthorized,
+  rateLimited,
   noInternet,
   timeout,
   serverError,
@@ -91,6 +95,8 @@ class AiRepository {
         'mode': _modeParam(mode),
       },
     );
+    final requestId = const Uuid().v4();
+    final startTimestamp = DateTime.now().toIso8601String();
     final stopwatch = Stopwatch()..start();
     final totalCards = drawnCards.length;
     final responseConstraints = mode == ReadingMode.fast
@@ -128,30 +134,41 @@ class AiRepository {
     final headers = {
       'Content-Type': 'application/json',
       if (hasApiKey) 'x-api-key': _resolvedApiKey,
+      'x-request-id': requestId,
     };
 
     final httpClient = client ?? http.Client();
     http.Response response;
     try {
+      _logStart(
+        uri,
+        requestId: requestId,
+        startTimestamp: startTimestamp,
+        timeout: _requestTimeout,
+      );
       response = await httpClient
           .post(
             uri,
             headers: headers,
             body: jsonEncode(payload),
           )
-          .timeout(const Duration(seconds: 60));
-    } on TimeoutException {
+          .timeout(_requestTimeout);
+    } on TimeoutException catch (error) {
       _logFailure(
         uri,
         stopwatch,
+        requestId: requestId,
         errorType: AiErrorType.timeout,
+        exception: error,
       );
       throw const AiRepositoryException(AiErrorType.timeout);
-    } on SocketException {
+    } on SocketException catch (error) {
       _logFailure(
         uri,
         stopwatch,
+        requestId: requestId,
         errorType: AiErrorType.noInternet,
+        exception: error,
       );
       throw const AiRepositoryException(AiErrorType.noInternet);
     } finally {
@@ -160,10 +177,11 @@ class AiRepository {
       }
     }
 
-    if (response.statusCode == 401) {
+    if (response.statusCode == 401 || response.statusCode == 403) {
       _logFailure(
         uri,
         stopwatch,
+        requestId: requestId,
         statusCode: response.statusCode,
         errorType: AiErrorType.unauthorized,
         responseBody: response.body,
@@ -171,10 +189,23 @@ class AiRepository {
       throw const AiRepositoryException(AiErrorType.unauthorized);
     }
 
+    if (response.statusCode == 429) {
+      _logFailure(
+        uri,
+        stopwatch,
+        requestId: requestId,
+        statusCode: response.statusCode,
+        errorType: AiErrorType.rateLimited,
+        responseBody: response.body,
+      );
+      throw const AiRepositoryException(AiErrorType.rateLimited);
+    }
+
     if (response.statusCode >= 500) {
       _logFailure(
         uri,
         stopwatch,
+        requestId: requestId,
         statusCode: response.statusCode,
         errorType: AiErrorType.serverError,
         responseBody: response.body,
@@ -189,6 +220,7 @@ class AiRepository {
       _logFailure(
         uri,
         stopwatch,
+        requestId: requestId,
         statusCode: response.statusCode,
         errorType: AiErrorType.badResponse,
         responseBody: response.body,
@@ -205,7 +237,7 @@ class AiRepository {
       _logSuccess(
         uri,
         stopwatch,
-        requestId: result.requestId,
+        requestId: result.requestId ?? requestId,
         statusCode: response.statusCode,
       );
       return result;
@@ -213,6 +245,7 @@ class AiRepository {
       _logFailure(
         uri,
         stopwatch,
+        requestId: requestId,
         statusCode: response.statusCode,
         errorType: AiErrorType.badResponse,
         responseBody: response.body,
@@ -279,15 +312,29 @@ class AiRepository {
     );
   }
 
+  void _logStart(
+    Uri uri, {
+    required String requestId,
+    required String startTimestamp,
+    required Duration timeout,
+  }) {
+    print(
+      '[AiRepository] requestId=$requestId url=$uri '
+      'start_ts=$startTimestamp timeout_ms=${timeout.inMilliseconds}',
+    );
+  }
+
   void _logFailure(
     Uri uri,
     Stopwatch stopwatch, {
     required AiErrorType errorType,
+    required String requestId,
     int? statusCode,
     String? responseBody,
+    Object? exception,
   }) {
     final durationMs = stopwatch.elapsedMilliseconds;
-    final requestId = _extractRequestId(responseBody);
+    final responseRequestId = _extractRequestId(responseBody);
     final preview = responseBody == null
         ? null
         : responseBody.substring(
@@ -295,11 +342,16 @@ class AiRepository {
             responseBody.length > 300 ? 300 : responseBody.length,
           );
     final buffer = StringBuffer('[AiRepository] ')
-      ..write('requestId=${requestId ?? 'unknown'} ')
+      ..write('requestId=${responseRequestId ?? requestId} ')
       ..write('url=$uri ')
       ..write('status=${statusCode ?? 'n/a'} ')
       ..write('duration_ms=$durationMs ')
       ..write('error=${errorType.name}');
+    if (exception != null) {
+      buffer.write(
+        ' exception=${exception.runtimeType} message="${exception.toString()}"',
+      );
+    }
     if (preview != null && preview.isNotEmpty) {
       buffer.write(' body_preview="${preview.replaceAll('\n', ' ')}"');
     }
