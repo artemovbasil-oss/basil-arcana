@@ -17,12 +17,21 @@ interface DeckCardInfo {
   displayName: string;
 }
 
+let hasLoggedAssetPaths = false;
+
 function resolveRepoRoot(): string {
   const cwd = process.cwd();
-  if (existsSync(path.join(cwd, "app_flutter"))) {
+  const candidateA = path.join(cwd, "basil_arcana");
+  const candidateB = path.join(cwd, "..", "basil_arcana");
+  if (existsSync(candidateA)) {
     return cwd;
   }
-  return path.resolve(cwd, "..");
+  if (existsSync(candidateB)) {
+    return path.resolve(cwd, "..");
+  }
+  throw new Error(
+    `Unable to locate basil_arcana repo root. cwd=${cwd} attempted=${candidateA}, ${candidateB}`
+  );
 }
 
 function humanizeCardId(cardId: string, deckId: string): string {
@@ -68,11 +77,46 @@ export async function loadDecks(_dataBasePath: string): Promise<DecksData> {
   };
 
   const repoRoot = resolveRepoRoot();
-  const cardsRoot = path.join(repoRoot, "app_flutter", "assets", "cards");
-  const [majorCards, wandsCards] = await Promise.all([
-    collectCards(path.join(cardsRoot, "major"), "major"),
-    collectCards(path.join(cardsRoot, "wands"), "wands"),
-  ]);
+  const flutterAssetsRoot = path.join(
+    repoRoot,
+    "basil_arcana",
+    "app_flutter",
+    "assets"
+  );
+  const majorDir = path.join(flutterAssetsRoot, "cards", "major");
+  const wandsDir = path.join(flutterAssetsRoot, "cards", "wands");
+  const fallbackCover = path.join(flutterAssetsRoot, "deck", "cover.webp");
+
+  if (!hasLoggedAssetPaths) {
+    hasLoggedAssetPaths = true;
+    console.info(
+      `[decks] cwd=${process.cwd()} repoRoot=${repoRoot} majorDirExists=${existsSync(
+        majorDir
+      )} wandsDirExists=${existsSync(wandsDir)}`
+    );
+  }
+
+  const deckPromises: Array<Promise<DeckCardInfo[]>> = [];
+  if (existsSync(majorDir)) {
+    deckPromises.push(collectCards(majorDir, "major"));
+  } else {
+    console.warn(
+      `[decks] Major arcana directory missing at ${majorDir}; skipping major deck.`
+    );
+    deckPromises.push(Promise.resolve([]));
+  }
+  if (existsSync(wandsDir)) {
+    deckPromises.push(collectCards(wandsDir, "wands"));
+  } else {
+    console.warn(
+      `[decks] Wands directory missing at ${wandsDir}; skipping wands deck.`
+    );
+    deckPromises.push(Promise.resolve([]));
+  }
+
+  void fallbackCover;
+
+  const [majorCards, wandsCards] = await Promise.all(deckPromises);
   const allCards = [...majorCards, ...wandsCards];
   const cardRecords = allCards.reduce<Record<string, CardData>>(
     (acc, card) => {
