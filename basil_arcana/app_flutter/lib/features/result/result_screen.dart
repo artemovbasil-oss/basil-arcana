@@ -9,6 +9,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../core/widgets/card_face_widget.dart';
 import '../../core/widgets/tarot_asset_widgets.dart';
 import '../../data/models/card_model.dart';
+import '../../data/models/drawn_card_model.dart';
+import '../../data/models/spread_model.dart';
 import '../../data/repositories/ai_repository.dart';
 import '../../state/reading_flow_controller.dart';
 import '../../state/providers.dart';
@@ -202,7 +204,17 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                       child: ChatBubble(
                         isUser: false,
                         avatarEmoji: '🪄',
-                        child: Text(state.detailsText!),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _DetailsCardThumbnails(
+                              spread: spread,
+                              drawnCards: state.drawnCards,
+                            ),
+                            const SizedBox(height: 12),
+                            Text(state.detailsText!),
+                          ],
+                        ),
                       ),
                     ),
                     const SizedBox(height: 14),
@@ -829,6 +841,89 @@ class _ActionBar extends StatelessWidget {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DetailsCardThumbnails extends StatelessWidget {
+  const _DetailsCardThumbnails({
+    required this.spread,
+    required this.drawnCards,
+  });
+
+  final SpreadModel spread;
+  final List<DrawnCardModel> drawnCards;
+
+  @override
+  Widget build(BuildContext context) {
+    final cards = _thumbnailCards();
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        for (var i = 0; i < cards.length; i++) ...[
+          _DetailThumbnailCard(assetPath: cards[i]),
+          if (i != cards.length - 1) const SizedBox(width: 10),
+        ],
+      ],
+    );
+  }
+
+  List<String> _thumbnailCards() {
+    if (spread.positions.length >= 3 && drawnCards.length >= 3) {
+      return drawnCards
+          .take(3)
+          .map((card) => cardAssetPath(card.cardId))
+          .toList();
+    }
+    if (drawnCards.isEmpty) {
+      return const [
+        'assets/deck/cover.webp',
+        'assets/deck/cover.webp',
+        'assets/deck/cover.webp',
+      ];
+    }
+    return [
+      'assets/deck/cover.webp',
+      cardAssetPath(drawnCards.first.cardId),
+      'assets/deck/cover.webp',
+    ];
+  }
+}
+
+class _DetailThumbnailCard extends StatelessWidget {
+  const _DetailThumbnailCard({required this.assetPath});
+
+  final String assetPath;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final radius = BorderRadius.circular(12);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: radius,
+        border: Border.all(
+          color: colorScheme.primary.withOpacity(0.6),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: colorScheme.primary.withOpacity(0.25),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: radius,
+        child: Image.asset(
+          assetPath,
+          width: 56,
+          height: 88,
+          fit: BoxFit.cover,
+          filterQuality: FilterQuality.high,
         ),
       ),
     );
