@@ -3,8 +3,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.repoPath = repoPath;
 exports.loadConfig = loadConfig;
 const path_1 = __importDefault(require("path"));
+function repoPath(...segments) {
+    return path_1.default.resolve(process.cwd(), "..", ...segments);
+}
 function requireEnv(name) {
     const value = process.env[name];
     if (!value || value.trim().length === 0) {
@@ -24,9 +28,9 @@ function loadConfig() {
     const arcanaApiKey = requireEnv("ARCANA_API_KEY");
     const defaultLocale = parseLocale(process.env.DEFAULT_LOCALE, "en");
     const assetsBasePath = process.env.ASSETS_BASE_PATH ||
-        path_1.default.resolve(process.cwd(), "..", "app_flutter", "assets");
+        repoPath("app_flutter", "assets");
     const dataBasePath = process.env.DATA_BASE_PATH ||
-        path_1.default.resolve(process.cwd(), "..", "app_flutter", "assets", "data");
+        repoPath("app_flutter", "assets", "data");
     const requestTimeoutMs = 35000;
     return {
         telegramToken,

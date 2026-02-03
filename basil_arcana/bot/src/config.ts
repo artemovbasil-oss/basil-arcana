@@ -12,6 +12,10 @@ export interface BotConfig {
   requestTimeoutMs: number;
 }
 
+export function repoPath(...segments: string[]): string {
+  return path.resolve(process.cwd(), "..", ...segments);
+}
+
 function requireEnv(name: string): string {
   const value = process.env[name];
   if (!value || value.trim().length === 0) {
@@ -34,10 +38,10 @@ export function loadConfig(): BotConfig {
   const defaultLocale = parseLocale(process.env.DEFAULT_LOCALE, "en");
   const assetsBasePath =
     process.env.ASSETS_BASE_PATH ||
-    path.resolve(process.cwd(), "..", "app_flutter", "assets");
+    repoPath("app_flutter", "assets");
   const dataBasePath =
     process.env.DATA_BASE_PATH ||
-    path.resolve(process.cwd(), "..", "app_flutter", "assets", "data");
+    repoPath("app_flutter", "assets", "data");
   const requestTimeoutMs = 35000;
 
   return {
