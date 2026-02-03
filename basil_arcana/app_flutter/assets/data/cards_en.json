@@ -218,5 +218,145 @@
       "shadow": "Delaying closure can drain momentum.",
       "advice": "Honor the finish and define the next horizon."
     }
+  },
+  "wands_00_knight": {
+    "title": "Knight of Wands",
+    "keywords": ["drive", "adventure", "impulse"],
+    "meaning": {
+      "general": "Momentum surges and you feel ready to move.",
+      "light": "Bold action and charismatic pursuit.",
+      "shadow": "Rushing ahead without a plan.",
+      "advice": "Channel the rush into a focused aim."
+    }
+  },
+  "wands_01_king": {
+    "title": "King of Wands",
+    "keywords": ["vision", "leadership", "confidence"],
+    "meaning": {
+      "general": "Lead with clear vision and steady fire.",
+      "light": "Inspire others and set direction.",
+      "shadow": "Dominating or forcing outcomes.",
+      "advice": "Lead with warmth and integrity."
+    }
+  },
+  "wands_02_queen": {
+    "title": "Queen of Wands",
+    "keywords": ["radiance", "creativity", "magnetism"],
+    "meaning": {
+      "general": "Confidence and creative warmth draw support.",
+      "light": "Express yourself and nurture passion.",
+      "shadow": "Jealousy or burnout.",
+      "advice": "Share your light without dimming yourself."
+    }
+  },
+  "wands_03_page": {
+    "title": "Page of Wands",
+    "keywords": ["curiosity", "messages", "discovery"],
+    "meaning": {
+      "general": "A fresh idea or message sparks interest.",
+      "light": "Explore, learn, and play.",
+      "shadow": "Naivety or scattered focus.",
+      "advice": "Follow the spark and test it."
+    }
+  },
+  "wands_04_two": {
+    "title": "Two of Wands",
+    "keywords": ["planning", "choice", "horizon"],
+    "meaning": {
+      "general": "You stand at a threshold with options.",
+      "light": "Plan boldly and commit.",
+      "shadow": "Hesitation or fear of change.",
+      "advice": "Choose a direction and take the first step."
+    }
+  },
+  "wands_05_three": {
+    "title": "Three of Wands",
+    "keywords": ["expansion", "momentum", "foresight"],
+    "meaning": {
+      "general": "Progress grows as you look outward.",
+      "light": "Collaborate and expand.",
+      "shadow": "Waiting too long for certainty.",
+      "advice": "Keep moving; your reach is widening."
+    }
+  },
+  "wands_06_four": {
+    "title": "Four of Wands",
+    "keywords": ["celebration", "home", "stability"],
+    "meaning": {
+      "general": "A pause to celebrate and anchor.",
+      "light": "Community and joyful milestones.",
+      "shadow": "Taking comfort for granted.",
+      "advice": "Honor what is steady and shared."
+    }
+  },
+  "wands_07_five": {
+    "title": "Five of Wands",
+    "keywords": ["friction", "competition", "energy"],
+    "meaning": {
+      "general": "Different forces clash and spark.",
+      "light": "Healthy challenge and growth.",
+      "shadow": "Ego battles or chaos.",
+      "advice": "Focus the energy on a shared goal."
+    }
+  },
+  "wands_08_six": {
+    "title": "Six of Wands",
+    "keywords": ["recognition", "success", "momentum"],
+    "meaning": {
+      "general": "Effort is noticed and rewarded.",
+      "light": "Confidence after a win.",
+      "shadow": "Needing applause to move forward.",
+      "advice": "Celebrate, then keep it grounded."
+    }
+  },
+  "wands_09_seven": {
+    "title": "Seven of Wands",
+    "keywords": ["defense", "courage", "boundaries"],
+    "meaning": {
+      "general": "Stand your ground for what matters.",
+      "light": "Protect your position and values.",
+      "shadow": "Feeling attacked or isolated.",
+      "advice": "Hold firm without closing off."
+    }
+  },
+  "wands_10_eight": {
+    "title": "Eight of Wands",
+    "keywords": ["speed", "messages", "movement"],
+    "meaning": {
+      "general": "Things move quickly and align.",
+      "light": "Swift progress and clear signals.",
+      "shadow": "Overwhelm or rushing.",
+      "advice": "Ride the momentum with focus."
+    }
+  },
+  "wands_11_nine": {
+    "title": "Nine of Wands",
+    "keywords": ["resilience", "persistence", "guarded"],
+    "meaning": {
+      "general": "You are close to the finish; stay steady.",
+      "light": "Endurance and learned strength.",
+      "shadow": "Exhaustion or mistrust.",
+      "advice": "Rest, then hold the line."
+    }
+  },
+  "wands_12_ten": {
+    "title": "Ten of Wands",
+    "keywords": ["burden", "responsibility", "pressure"],
+    "meaning": {
+      "general": "Responsibilities feel heavy.",
+      "light": "Commitment and hard work.",
+      "shadow": "Overload or martyrdom.",
+      "advice": "Delegate and set limits."
+    }
+  },
+  "wands_13_ace": {
+    "title": "Ace of Wands",
+    "keywords": ["spark", "inspiration", "potential"],
+    "meaning": {
+      "general": "A new spark of passion arrives.",
+      "light": "Creative surge and bold start.",
+      "shadow": "Impulsive flare with no follow-through.",
+      "advice": "Take the first step and nurture it."
+    }
   }
 }

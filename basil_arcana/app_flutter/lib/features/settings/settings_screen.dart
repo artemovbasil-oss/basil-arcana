@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
+import '../../core/widgets/tarot_asset_widgets.dart';
+import '../../data/models/deck_model.dart';
 import '../../state/providers.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -13,6 +16,7 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final locale = ref.watch(localeProvider);
+    final deckId = ref.watch(deckProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -50,7 +54,74 @@ class SettingsScreen extends ConsumerWidget {
               ref.read(localeProvider.notifier).setLocale(value);
             },
           ),
+          const SizedBox(height: 20),
+          Text(
+            l10n.deckLabel,
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+          const SizedBox(height: 8),
+          _DeckOption(
+            label: l10n.deckMajorName,
+            deckId: DeckId.major,
+            groupValue: deckId,
+            onSelected: (value) {
+              ref.read(deckProvider.notifier).setDeck(value);
+            },
+          ),
+          _DeckOption(
+            label: l10n.deckWandsName,
+            deckId: DeckId.wands,
+            groupValue: deckId,
+            onSelected: (value) {
+              ref.read(deckProvider.notifier).setDeck(value);
+            },
+          ),
+          if (kDebugMode) ...[
+            const SizedBox(height: 12),
+            ListTile(
+              contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+              leading: const Icon(Icons.bug_report_outlined),
+              title: Text(l10n.deckDebugLogLabel),
+              onTap: () {
+                final path = cardAssetPath(
+                  'wands_13_ace',
+                  deckId: DeckId.wands,
+                );
+                debugPrint('Wands sample asset: $path');
+              },
+            ),
+          ],
         ],
+      ),
+    );
+  }
+}
+
+class _DeckOption extends StatelessWidget {
+  const _DeckOption({
+    required this.label,
+    required this.deckId,
+    required this.groupValue,
+    required this.onSelected,
+  });
+
+  final String label;
+  final DeckId deckId;
+  final DeckId groupValue;
+  final ValueChanged<DeckId> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: RadioListTile<DeckId>(
+        value: deckId,
+        groupValue: groupValue,
+        onChanged: (value) {
+          if (value != null) {
+            onSelected(value);
+          }
+        },
+        title: Text(label),
       ),
     );
   }

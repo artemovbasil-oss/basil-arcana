@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-String cardAssetPath(String cardId) {
+import '../../data/models/deck_model.dart';
+import '../../state/providers.dart';
+
+String cardAssetPath(String cardId, {DeckId deckId = DeckId.major}) {
+  if (deckId == DeckId.wands) {
+    return 'assets/cards/wands/$cardId.webp';
+  }
   switch (cardId) {
     case 'major_10_wheel':
       return 'assets/cards/major/major_10_wheel_of_fortune.webp';
@@ -9,7 +16,17 @@ String cardAssetPath(String cardId) {
   }
 }
 
-class CardAssetImage extends StatelessWidget {
+String deckCoverAssetPath(DeckId deckId) {
+  switch (deckId) {
+    case DeckId.wands:
+      return 'assets/deck/wands_cover.webp';
+    case DeckId.major:
+    default:
+      return 'assets/deck/cover.webp';
+  }
+}
+
+class CardAssetImage extends ConsumerWidget {
   const CardAssetImage({
     super.key,
     required this.cardId,
@@ -28,16 +45,37 @@ class CardAssetImage extends StatelessWidget {
   final bool showGlow;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
     final radius = borderRadius ?? BorderRadius.circular(18);
+    final deckId = ref.watch(deckProvider);
     final image = Image.asset(
-      cardAssetPath(cardId),
+      cardAssetPath(cardId, deckId: deckId),
       width: width,
       height: height,
       fit: fit,
       filterQuality: FilterQuality.high,
       errorBuilder: (context, error, stackTrace) {
+        if (deckId != DeckId.major) {
+          return Image.asset(
+            cardAssetPath(cardId, deckId: DeckId.major),
+            width: width,
+            height: height,
+            fit: fit,
+            filterQuality: FilterQuality.high,
+            errorBuilder: (context, error, stackTrace) {
+              assert(() {
+                debugPrint('Missing card asset for $cardId');
+                return true;
+              }());
+              return _MissingCardPlaceholder(
+                width: width,
+                height: height,
+                borderRadius: radius,
+              );
+            },
+          );
+        }
         assert(() {
           debugPrint('Missing card asset for $cardId');
           return true;
@@ -107,7 +145,7 @@ class _MissingCardPlaceholder extends StatelessWidget {
   }
 }
 
-class DeckCoverBack extends StatelessWidget {
+class DeckCoverBack extends ConsumerWidget {
   const DeckCoverBack({
     super.key,
     this.width = 160,
@@ -120,9 +158,11 @@ class DeckCoverBack extends StatelessWidget {
   final bool highlight;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
     final radius = BorderRadius.circular(18);
+    final deckId = ref.watch(deckProvider);
+    final coverPath = deckCoverAssetPath(deckId);
     return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: radius,
@@ -141,11 +181,23 @@ class DeckCoverBack extends StatelessWidget {
       child: ClipRRect(
         borderRadius: radius,
         child: Image.asset(
-          'assets/deck/cover.webp',
+          coverPath,
           width: width,
           height: height,
           fit: BoxFit.cover,
           filterQuality: FilterQuality.high,
+          errorBuilder: (context, error, stackTrace) {
+            if (deckId != DeckId.major) {
+              return Image.asset(
+                deckCoverAssetPath(DeckId.major),
+                width: width,
+                height: height,
+                fit: BoxFit.cover,
+                filterQuality: FilterQuality.high,
+              );
+            }
+            return const SizedBox.shrink();
+          },
         ),
       ),
     );

@@ -86,11 +86,12 @@ class _CardsScreenState extends ConsumerState<CardsScreen> {
       return;
     }
     _precacheDone = true;
+    final deckId = ref.read(deckProvider);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final initialCards = cards.take(6);
       for (final card in initialCards) {
         precacheImage(
-          AssetImage(cardAssetPath(card.id)),
+          AssetImage(cardAssetPath(card.id, deckId: deckId)),
           context,
         );
       }
