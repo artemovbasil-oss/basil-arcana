@@ -4,7 +4,11 @@ const rateLimit = require('express-rate-limit');
 const { v4: uuidv4 } = require('uuid');
 
 const { buildPromptMessages } = require('./src/prompt');
-const { createChatCompletion, listModels } = require('./src/openai_client');
+const {
+  createResponse,
+  listModels,
+  OpenAIRequestError
+} = require('./src/openai_client');
 const { validateReadingRequest } = require('./src/validate');
 const {
   ARCANA_API_KEY,
@@ -82,6 +86,68 @@ app.get('/debug/openai', async (req, res) => {
   });
 });
 
+app.get('/debug/openai-generate', async (req, res) => {
+  const hasKey = Boolean(OPENAI_API_KEY);
+  if (!hasKey) {
+    return res.json({
+      hasKey: false,
+      model: null,
+      ok: false,
+      status: null,
+      duration_ms: null,
+      upstream: { code: null, type: 'MissingOpenAIKey', message: 'Missing OPENAI_API_KEY' },
+      samplePreview: null,
+      requestId: req.requestId
+    });
+  }
+
+  const debugMessages = [
+    {
+      role: 'system',
+      content:
+        'Return a short JSON object with keys "ok" and "message". Keep the message under 60 characters.'
+    },
+    {
+      role: 'user',
+      content: 'Say hello from Basil’s Arcana.'
+    }
+  ];
+
+  const startTime = Date.now();
+  try {
+    const result = await createResponse(debugMessages, { requestId: req.requestId });
+    const durationMs = Date.now() - startTime;
+    const samplePreview = JSON.stringify(result.parsed).slice(0, 300);
+    return res.json({
+      hasKey: true,
+      model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+      ok: true,
+      status: result.meta.status,
+      duration_ms: durationMs,
+      upstream: { code: null, type: null, message: null },
+      samplePreview,
+      requestId: req.requestId
+    });
+  } catch (error) {
+    const durationMs = Date.now() - startTime;
+    const upstream = {
+      code: error instanceof OpenAIRequestError ? error.errorCode : null,
+      type: error instanceof OpenAIRequestError ? error.errorType : error.name,
+      message: error.message ? error.message.slice(0, 300) : null
+    };
+    return res.json({
+      hasKey: true,
+      model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+      ok: false,
+      status: error instanceof OpenAIRequestError ? error.status : null,
+      duration_ms: durationMs,
+      upstream,
+      samplePreview: null,
+      requestId: req.requestId
+    });
+  }
+});
+
 if (RATE_LIMIT_MAX != null) {
   const apiLimiter = rateLimit({
     windowMs: RATE_LIMIT_WINDOW_MS ?? 60000,
@@ -125,20 +191,60 @@ app.post('/api/reading/generate', async (req, res) => {
     return res.status(400).json({ error, requestId: req.requestId });
   }
 
+  const startTime = Date.now();
   try {
     const messages = buildPromptMessages(req.body, mode);
-    const result = await createChatCompletion(messages, {
+    const result = await createResponse(messages, {
       requestId: req.requestId
     });
-    return res.json({ ...result, requestId: req.requestId });
+    return res.json({ ...result.parsed, requestId: req.requestId });
   } catch (err) {
+    const durationMs = Date.now() - startTime;
+    const upstream = {
+      status: err instanceof OpenAIRequestError ? err.status : null,
+      code: err instanceof OpenAIRequestError ? err.errorCode : null,
+      type: err instanceof OpenAIRequestError ? err.errorType : err.name,
+      message: err.message ? err.message.slice(0, 300) : null
+    };
+
+    console.error(
+      JSON.stringify({
+        event: 'openai_upstream_error',
+        requestId: req.requestId,
+        model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+        duration_ms: durationMs,
+        status: upstream.status,
+        errorCode: upstream.code,
+        errorType: upstream.type
+      })
+    );
+
     return res
       .status(502)
-      .json({ error: 'upstream_failed', requestId: req.requestId });
+      .json({
+        error: 'upstream_failed',
+        requestId: req.requestId,
+        upstream
+      });
   }
 });
 
-const port = PORT || 3000;
+const missingRequired = [];
+if (!ARCANA_API_KEY) {
+  missingRequired.push('ARCANA_API_KEY');
+}
+if (!OPENAI_API_KEY) {
+  missingRequired.push('OPENAI_API_KEY');
+}
+
+if (missingRequired.length > 0) {
+  console.error(
+    `Missing required environment variables: ${missingRequired.join(', ')}`
+  );
+  process.exit(1);
+}
+
+const port = Number(PORT) || 3000;
 app.listen(port, () => {
   const region =
     process.env.RAILWAY_REGION ||
