@@ -1,4 +1,4 @@
-import { existsSync } from "fs";
+import { existsSync, readdirSync } from "fs";
 import fs from "fs/promises";
 import path from "path";
 import type { Locale } from "../config";
@@ -19,18 +19,33 @@ interface DeckCardInfo {
 
 let hasLoggedAssetPaths = false;
 
-function resolveRepoRoot(): string {
+function resolveFlutterAssetsRoot(): string {
   const cwd = process.cwd();
-  const candidateA = path.join(cwd, "basil_arcana");
-  const candidateB = path.join(cwd, "..", "basil_arcana");
-  if (existsSync(candidateA)) {
-    return cwd;
+  const candidates = [
+    path.join(cwd, "app_flutter", "assets"),
+    path.join(cwd, "basil_arcana", "app_flutter", "assets"),
+    path.join(cwd, "..", "app_flutter", "assets"),
+    path.join(cwd, "..", "basil_arcana", "app_flutter", "assets"),
+  ];
+
+  for (const candidate of candidates) {
+    if (existsSync(path.join(candidate, "cards"))) {
+      return candidate;
+    }
   }
-  if (existsSync(candidateB)) {
-    return path.resolve(cwd, "..");
+
+  console.error(`[decks] Unable to locate Flutter assets root. cwd=${cwd}`);
+  try {
+    const entries = readdirSync(cwd);
+    console.error(`[decks] cwd entries: ${entries.join(", ")}`);
+  } catch (error) {
+    console.error(`[decks] Failed to read cwd entries: ${error}`);
   }
+
   throw new Error(
-    `Unable to locate basil_arcana repo root. cwd=${cwd} attempted=${candidateA}, ${candidateB}`
+    `Unable to locate Flutter assets root. cwd=${cwd} attempted=${candidates.join(
+      ", "
+    )}`
   );
 }
 
@@ -76,13 +91,7 @@ export async function loadDecks(_dataBasePath: string): Promise<DecksData> {
     kk: [],
   };
 
-  const repoRoot = resolveRepoRoot();
-  const flutterAssetsRoot = path.join(
-    repoRoot,
-    "basil_arcana",
-    "app_flutter",
-    "assets"
-  );
+  const flutterAssetsRoot = resolveFlutterAssetsRoot();
   const majorDir = path.join(flutterAssetsRoot, "cards", "major");
   const wandsDir = path.join(flutterAssetsRoot, "cards", "wands");
   const fallbackCover = path.join(flutterAssetsRoot, "deck", "cover.webp");
@@ -90,9 +99,9 @@ export async function loadDecks(_dataBasePath: string): Promise<DecksData> {
   if (!hasLoggedAssetPaths) {
     hasLoggedAssetPaths = true;
     console.info(
-      `[decks] cwd=${process.cwd()} repoRoot=${repoRoot} majorDirExists=${existsSync(
+      `[decks] assetsRoot=${flutterAssetsRoot} majorExists=${existsSync(
         majorDir
-      )} wandsDirExists=${existsSync(wandsDir)}`
+      )} wandsExists=${existsSync(wandsDir)} cwd=${process.cwd()}`
     );
   }
 
