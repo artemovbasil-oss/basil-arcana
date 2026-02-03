@@ -2,7 +2,12 @@ import { Bot, InlineKeyboard, InputFile } from "grammy";
 import type { Context } from "grammy";
 import type { InputMediaPhoto } from "grammy/types";
 import { loadConfig } from "./config";
-import { resolveCardPath, ensurePng } from "./assets";
+import {
+  cardImageUrl,
+  resolveLocalCardPath,
+  ensurePng,
+  localAssetsAvailable,
+} from "./assets";
 import { loadDecks, pickSpread, drawCards } from "./decks";
 import { StateStore } from "./state/store";
 import { t } from "./i18n";
@@ -13,7 +18,7 @@ const config = loadConfig();
 const stateStore = new StateStore(config.defaultLocale);
 
 async function main(): Promise<void> {
-  const decks = await loadDecks(config.dataBasePath);
+  const decks = await loadDecks();
 
   const bot = new Bot(config.telegramToken);
 
@@ -209,20 +214,43 @@ async function sendCardImages(
   ctx: Context,
   cardIds: string[]
 ): Promise<void> {
-  const paths = cardIds.map((cardId) => resolveCardPath(cardId, config.assetsBasePath));
-  if (paths.length === 1) {
+  const useLocalAssets =
+    config.useLocalAssets && localAssetsAvailable(config.assetsBasePath);
+  const localPaths = useLocalAssets
+    ? cardIds.map((cardId) =>
+        resolveLocalCardPath(cardId, config.assetsBasePath)
+      )
+    : [];
+  const remoteUrls = cardIds.map((cardId) =>
+    cardImageUrl(cardId, config.assetsBaseUrl)
+  );
+
+  if (!useLocalAssets) {
+    if (remoteUrls.length === 1) {
+      await ctx.replyWithPhoto(remoteUrls[0]);
+      return;
+    }
+    const media: InputMediaPhoto[] = remoteUrls.map((url) => ({
+      type: "photo",
+      media: url,
+    }));
+    await ctx.replyWithMediaGroup(media);
+    return;
+  }
+
+  if (localPaths.length === 1) {
     try {
-      await ctx.replyWithPhoto(new InputFile(paths[0]));
+      await ctx.replyWithPhoto(new InputFile(localPaths[0]));
       return;
     } catch (error) {
       console.warn("WEBP failed, converting to PNG", error);
     }
-    const pngPath = await ensurePng(paths[0]);
+    const pngPath = await ensurePng(localPaths[0]);
     await ctx.replyWithPhoto(new InputFile(pngPath));
     return;
   }
 
-  const media: InputMediaPhoto[] = paths.map((p) => ({
+  const media: InputMediaPhoto[] = localPaths.map((p) => ({
     type: "photo",
     media: new InputFile(p),
   }));
@@ -233,7 +261,7 @@ async function sendCardImages(
     console.warn("WEBP media group failed, converting to PNG", error);
   }
 
-  const pngPaths = await Promise.all(paths.map((p) => ensurePng(p)));
+  const pngPaths = await Promise.all(localPaths.map((p) => ensurePng(p)));
   const pngMedia: InputMediaPhoto[] = pngPaths.map((p) => ({
     type: "photo",
     media: new InputFile(p),
