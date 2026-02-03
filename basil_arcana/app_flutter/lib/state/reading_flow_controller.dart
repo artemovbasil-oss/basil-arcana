@@ -26,6 +26,7 @@ class ReadingFlowState {
   final DetailsStatus detailsStatus;
   final String? detailsMessage;
   final String? detailsError;
+  final bool showDetailsCta;
   final bool isLoading;
   final bool isDeepLoading;
   final String? errorMessage;
@@ -45,6 +46,7 @@ class ReadingFlowState {
     required this.detailsStatus,
     required this.detailsMessage,
     required this.detailsError,
+    required this.showDetailsCta,
     required this.isLoading,
     required this.isDeepLoading,
     required this.errorMessage,
@@ -66,6 +68,7 @@ class ReadingFlowState {
       detailsStatus: DetailsStatus.idle,
       detailsMessage: null,
       detailsError: null,
+      showDetailsCta: false,
       isLoading: false,
       isDeepLoading: false,
       errorMessage: null,
@@ -87,6 +90,7 @@ class ReadingFlowState {
     DetailsStatus? detailsStatus,
     String? detailsMessage,
     String? detailsError,
+    bool? showDetailsCta,
     bool? isLoading,
     bool? isDeepLoading,
     String? errorMessage,
@@ -108,6 +112,7 @@ class ReadingFlowState {
       detailsStatus: detailsStatus ?? this.detailsStatus,
       detailsMessage: detailsMessage ?? this.detailsMessage,
       detailsError: detailsError ?? this.detailsError,
+      showDetailsCta: showDetailsCta ?? this.showDetailsCta,
       isLoading: isLoading ?? this.isLoading,
       isDeepLoading: isDeepLoading ?? this.isDeepLoading,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
@@ -150,6 +155,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       detailsStatus: DetailsStatus.idle,
       detailsMessage: null,
       detailsError: null,
+      showDetailsCta: false,
       isDeepLoading: false,
       deepErrorType: null,
       deepErrorMessage: null,
@@ -171,6 +177,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       detailsStatus: DetailsStatus.idle,
       detailsMessage: null,
       detailsError: null,
+      showDetailsCta: false,
       clearError: true,
     );
   }
@@ -185,8 +192,16 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       detailsStatus: DetailsStatus.idle,
       detailsMessage: null,
       detailsError: null,
+      showDetailsCta: false,
       clearDeepError: true,
     );
+  }
+
+  void dismissDetailsCta() {
+    if (!state.showDetailsCta) {
+      return;
+    }
+    state = state.copyWith(showDetailsCta: false);
   }
 
   List<CardModel> drawCards(int count, List<CardModel> deck) {
@@ -227,6 +242,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       detailsStatus: DetailsStatus.idle,
       detailsMessage: null,
       detailsError: null,
+      showDetailsCta: false,
       isDeepLoading: false,
       clearDeepError: true,
       clearError: true,
@@ -333,6 +349,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       detailsStatus: DetailsStatus.idle,
       detailsMessage: null,
       detailsError: null,
+      showDetailsCta: false,
       clearError: true,
     );
 
@@ -372,6 +389,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
         aiResult: result,
         isLoading: false,
         aiUsed: true,
+        showDetailsCta: true,
       );
     } on AiRepositoryException catch (error) {
       if (_activeRequestId != requestId) {
@@ -384,6 +402,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
           aiResult: fallback,
           isLoading: false,
           aiUsed: false,
+          showDetailsCta: true,
           aiErrorType: error.type,
           aiErrorStatusCode: error.statusCode,
           errorMessage: _messageForError(error, l10n),
@@ -395,6 +414,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
         aiResult: null,
         isLoading: false,
         aiUsed: false,
+        showDetailsCta: false,
         aiErrorType: error.type,
         aiErrorStatusCode: error.statusCode,
         errorMessage: _messageForError(error, l10n),
@@ -407,6 +427,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
         aiResult: null,
         isLoading: false,
         aiUsed: false,
+        showDetailsCta: false,
         aiErrorType: AiErrorType.serverError,
         errorMessage: l10n.resultStatusServerUnavailable,
       );
@@ -428,14 +449,26 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       return;
     }
 
+    if (kDebugMode) {
+      debugPrint(
+        '[ReadingFlow] detailsRequest:tap status=${state.detailsStatus.name} '
+        'showCta=${state.showDetailsCta}',
+      );
+    }
+
     state = state.copyWith(
       isDeepLoading: true,
       deepResult: null,
       detailsStatus: DetailsStatus.loading,
       detailsMessage: null,
       detailsError: null,
+      showDetailsCta: false,
       clearDeepError: true,
     );
+
+    if (kDebugMode) {
+      debugPrint('[ReadingFlow] detailsStatus:loading');
+    }
 
     await _generateDeepReading(
       spread: spread,
@@ -517,7 +550,8 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
         debugPrint(
           '[ReadingFlow] detailsRequest:success id=$requestId '
           'requestId=${result.requestId ?? detailsRequestId} '
-          'elapsed_ms=${stopwatch.elapsedMilliseconds}',
+          'elapsed_ms=${stopwatch.elapsedMilliseconds} '
+          'message_len=${detailsMessage.length}',
         );
       }
     } on AiRepositoryException catch (error) {
@@ -539,7 +573,8 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
         debugPrint(
           '[ReadingFlow] detailsRequest:error id=$requestId '
           'type=${error.type.name} status=${error.statusCode ?? 'n/a'} '
-          'elapsed_ms=${stopwatch.elapsedMilliseconds}',
+          'elapsed_ms=${stopwatch.elapsedMilliseconds} '
+          'message_len=${message.length}',
         );
       }
     } catch (_) {
@@ -560,7 +595,8 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
         debugPrint(
           '[ReadingFlow] detailsRequest:error id=$requestId '
           'type=${AiErrorType.serverError.name} '
-          'elapsed_ms=${stopwatch.elapsedMilliseconds}',
+          'elapsed_ms=${stopwatch.elapsedMilliseconds} '
+          'message_len=${message.length}',
         );
       }
     } finally {
