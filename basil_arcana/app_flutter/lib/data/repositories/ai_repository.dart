@@ -276,6 +276,184 @@ class AiRepository {
     }
   }
 
+  Future<String> fetchDetails({
+    required String question,
+    required SpreadModel spread,
+    required List<DrawnCardModel> drawnCards,
+    required String locale,
+    String? requestIdOverride,
+    http.Client? client,
+    Duration timeout = const Duration(seconds: 35),
+  }) async {
+    if (!hasApiKey) {
+      print(
+        '[AiRepository] requestId=unknown url=$apiBaseUrl/api/reading/details '
+        'status=n/a duration_ms=0 error=${AiErrorType.missingApiKey.name}',
+      );
+      throw const AiRepositoryException(
+        AiErrorType.missingApiKey,
+        message: 'API key not included in this build.',
+      );
+    }
+
+    final uri = Uri.parse(apiBaseUrl).replace(
+      path: '/api/reading/details',
+    );
+    final requestId = requestIdOverride ?? const Uuid().v4();
+    final startTimestamp = DateTime.now().toIso8601String();
+    final stopwatch = Stopwatch()..start();
+    final totalCards = drawnCards.length;
+    final payload = {
+      'question': question,
+      'spread': spread.toJson(),
+      'cards': drawnCards
+          .map((drawn) => drawn.toAiDeepJson(totalCards: totalCards))
+          .toList(),
+      'locale': locale,
+    };
+
+    final headers = {
+      'Content-Type': 'application/json',
+      if (hasApiKey) 'x-api-key': _resolvedApiKey,
+      'x-request-id': requestId,
+    };
+
+    final httpClient = client ?? http.Client();
+    http.Response response;
+    try {
+      _logStart(
+        uri,
+        requestId: requestId,
+        startTimestamp: startTimestamp,
+        timeout: timeout,
+      );
+      response = await httpClient
+          .post(
+            uri,
+            headers: headers,
+            body: jsonEncode(payload),
+          )
+          .timeout(timeout);
+    } on TimeoutException catch (error) {
+      _logFailure(
+        uri,
+        stopwatch,
+        requestId: requestId,
+        errorType: AiErrorType.timeout,
+        exception: error,
+      );
+      throw const AiRepositoryException(AiErrorType.timeout);
+    } on SocketException catch (error) {
+      _logFailure(
+        uri,
+        stopwatch,
+        requestId: requestId,
+        errorType: AiErrorType.noInternet,
+        exception: error,
+      );
+      throw const AiRepositoryException(AiErrorType.noInternet);
+    } finally {
+      if (client == null) {
+        httpClient.close();
+      }
+    }
+
+    if (response.statusCode == 401 || response.statusCode == 403) {
+      _logFailure(
+        uri,
+        stopwatch,
+        requestId: requestId,
+        statusCode: response.statusCode,
+        errorType: AiErrorType.unauthorized,
+        responseBody: response.body,
+      );
+      throw const AiRepositoryException(AiErrorType.unauthorized);
+    }
+
+    if (response.statusCode == 429) {
+      _logFailure(
+        uri,
+        stopwatch,
+        requestId: requestId,
+        statusCode: response.statusCode,
+        errorType: AiErrorType.rateLimited,
+        responseBody: response.body,
+      );
+      throw const AiRepositoryException(AiErrorType.rateLimited);
+    }
+
+    if (response.statusCode >= 500) {
+      _logFailure(
+        uri,
+        stopwatch,
+        requestId: requestId,
+        statusCode: response.statusCode,
+        errorType: AiErrorType.serverError,
+        responseBody: response.body,
+      );
+      throw AiRepositoryException(
+        AiErrorType.serverError,
+        statusCode: response.statusCode,
+      );
+    }
+
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      _logFailure(
+        uri,
+        stopwatch,
+        requestId: requestId,
+        statusCode: response.statusCode,
+        errorType: AiErrorType.badResponse,
+        responseBody: response.body,
+      );
+      throw AiRepositoryException(
+        AiErrorType.badResponse,
+        statusCode: response.statusCode,
+      );
+    }
+
+    try {
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      final detailsText = (data['detailsText'] as String?) ?? '';
+      final responseRequestId = data['requestId'] as String?;
+      if (detailsText.trim().isEmpty) {
+        throw const FormatException('Missing detailsText');
+      }
+      if (kDebugMode) {
+        debugPrint(
+          '[AiRepository] detailsResponse requestId=${responseRequestId ?? requestId} '
+          'chars=${detailsText.length}',
+        );
+      }
+      _logSuccess(
+        uri,
+        stopwatch,
+        requestId: responseRequestId ?? requestId,
+        statusCode: response.statusCode,
+      );
+      return detailsText;
+    } catch (error) {
+      if (kDebugMode) {
+        debugPrint(
+          '[AiRepository] detailsParseError requestId=$requestId '
+          'type=${error.runtimeType} message="${error.toString()}"',
+        );
+      }
+      _logFailure(
+        uri,
+        stopwatch,
+        requestId: requestId,
+        statusCode: response.statusCode,
+        errorType: AiErrorType.badResponse,
+        responseBody: response.body,
+      );
+      throw AiRepositoryException(
+        AiErrorType.badResponse,
+        message: error.toString(),
+      );
+    }
+  }
+
   Future<void> smokeTest({required String languageCode}) async {
     const spread = SpreadModel(
       id: 'smoke_one',

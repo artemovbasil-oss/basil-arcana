@@ -3,13 +3,14 @@ const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 const { v4: uuidv4 } = require('uuid');
 
-const { buildPromptMessages } = require('./src/prompt');
+const { buildPromptMessages, buildDetailsPrompt } = require('./src/prompt');
 const {
   createResponse,
+  createTextResponse,
   listModels,
   OpenAIRequestError
 } = require('./src/openai_client');
-const { validateReadingRequest } = require('./src/validate');
+const { validateReadingRequest, validateDetailsRequest } = require('./src/validate');
 const {
   ARCANA_API_KEY,
   PORT,
@@ -226,6 +227,76 @@ app.post('/api/reading/generate', async (req, res) => {
       })
     );
 
+    return res
+      .status(502)
+      .json({
+        error: 'upstream_failed',
+        requestId: req.requestId,
+        upstream
+      });
+  }
+});
+
+app.post('/api/reading/details', async (req, res) => {
+  const error = validateDetailsRequest(req.body);
+  if (error) {
+    return res.status(400).json({ error, requestId: req.requestId });
+  }
+
+  const startTime = Date.now();
+  try {
+    const messages = buildDetailsPrompt(req.body);
+    const result = await createTextResponse(messages, {
+      requestId: req.requestId,
+      timeoutMs: 35000,
+    });
+    const detailsText = result.text.trim();
+    if (!detailsText) {
+      throw new OpenAIRequestError('Empty OpenAI response', {
+        status: result.meta?.status,
+      });
+    }
+    const durationMs = Date.now() - startTime;
+    console.log(
+      JSON.stringify({
+        event: 'details_request',
+        requestId: req.requestId,
+        status: 200,
+        duration_ms: durationMs,
+      })
+    );
+    return res.json({ detailsText, requestId: req.requestId });
+  } catch (err) {
+    const durationMs = Date.now() - startTime;
+    if (err?.name === 'AbortError') {
+      console.error(
+        JSON.stringify({
+          event: 'details_timeout',
+          requestId: req.requestId,
+          status: 504,
+          duration_ms: durationMs,
+        })
+      );
+      return res.status(504).json({ error: 'timeout', requestId: req.requestId });
+    }
+    const upstream = {
+      status: err instanceof OpenAIRequestError ? err.status : null,
+      code: err instanceof OpenAIRequestError ? err.errorCode : null,
+      type: err instanceof OpenAIRequestError ? err.errorType : err.name,
+      message: err.message ? err.message.slice(0, 300) : null
+    };
+
+    console.error(
+      JSON.stringify({
+        event: 'details_upstream_error',
+        requestId: req.requestId,
+        model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+        duration_ms: durationMs,
+        status: upstream.status,
+        errorCode: upstream.code,
+        errorType: upstream.type
+      })
+    );
     return res
       .status(502)
       .json({

@@ -379,7 +379,8 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
       );
     }
 
-    if (state.showDetailsCta) {
+    if (state.showDetailsCta &&
+        state.detailsStatus == DetailsStatus.idle) {
       items.add(
         _ChatItem.deepPrompt(
           id: _nextId(),
@@ -416,7 +417,8 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
           child: const TypingIndicatorBubble(),
         );
       case _ChatItemKind.deepPrompt:
-        if (!state.showDetailsCta) {
+        if (!state.showDetailsCta ||
+            state.detailsStatus != DetailsStatus.idle) {
           return const SizedBox.shrink();
         }
         return ChatBubbleReveal(
@@ -454,16 +456,6 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
           key: ValueKey(item.id),
           child: OracleTypingBubble(
             label: AppLocalizations.of(context)!.resultDeepTypingLabel,
-            cancelLabel: AppLocalizations.of(context)!.resultDeepNotNow,
-            onCancel: () {
-              setState(() {
-                _removeDeepStatusItems();
-                _removeDeepPromptItem();
-              });
-              ref
-                  .read(readingFlowControllerProvider.notifier)
-                  .cancelDeepReading();
-            },
           ),
         );
       case _ChatItemKind.deepError:
@@ -472,17 +464,17 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
           child: ChatBubble(
             isUser: false,
             avatarEmoji: '🪄',
-              child: _DeepErrorBubble(
-                message: item.message ?? '',
-                onCancel: () {
-                  setState(() {
-                    _removeDeepStatusItems();
-                    _removeDeepPromptItem();
-                  });
-                  ref
-                      .read(readingFlowControllerProvider.notifier)
-                      .cancelDeepReading();
-                },
+            child: _DeepErrorBubble(
+              message: item.message ?? '',
+              onCancel: () {
+                setState(() {
+                  _removeDeepStatusItems();
+                  _removeDeepPromptItem();
+                });
+                ref
+                    .read(readingFlowControllerProvider.notifier)
+                    .dismissDetailsError();
+              },
               onRetry: () {
                 setState(() {
                   _removeDeepStatusItems();
@@ -566,15 +558,15 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
   }
 
   void _appendDetailsMessage(ReadingFlowState state) {
-    final detailsMessage = state.detailsMessage;
-    if (detailsMessage == null || detailsMessage.isEmpty) {
+    final detailsText = state.detailsText;
+    if (detailsText == null || detailsText.isEmpty) {
       return;
     }
     setState(() {
       _items.add(
         _ChatItem.basil(
           id: _nextId(),
-          child: Text(detailsMessage),
+          child: Text(detailsText),
         ),
       );
     });
