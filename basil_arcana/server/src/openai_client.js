@@ -124,7 +124,7 @@ async function createResponse(
             temperature: 0,
             text: {
               format: {
-                type: 'json',
+                type: 'json_object',
               },
             },
           }),
