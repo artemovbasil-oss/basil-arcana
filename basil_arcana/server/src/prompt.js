@@ -32,7 +32,7 @@ function buildPromptMessages(payload, mode = 'deep') {
     'Each section must have: positionId, title, text.',
     'No markdown, no extra keys.'
   ]
-      .where((line) => line != null)
+      .filter((line) => line != null)
       .join(' ');
 
   const user = {
