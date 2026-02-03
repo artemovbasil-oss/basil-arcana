@@ -15,12 +15,16 @@ import '../data/repositories/ai_repository.dart';
 import '../data/repositories/readings_repository.dart';
 import 'providers.dart';
 
+enum DetailsStatus { idle, loading, success, error }
+
 class ReadingFlowState {
   final String question;
   final SpreadModel? spread;
   final List<DrawnCardModel> drawnCards;
   final AiResultModel? aiResult;
   final AiResultModel? deepResult;
+  final DetailsStatus detailsStatus;
+  final String? detailsMessage;
   final bool isLoading;
   final bool isDeepLoading;
   final String? errorMessage;
@@ -37,6 +41,8 @@ class ReadingFlowState {
     required this.drawnCards,
     required this.aiResult,
     required this.deepResult,
+    required this.detailsStatus,
+    required this.detailsMessage,
     required this.isLoading,
     required this.isDeepLoading,
     required this.errorMessage,
@@ -55,6 +61,8 @@ class ReadingFlowState {
       drawnCards: [],
       aiResult: null,
       deepResult: null,
+      detailsStatus: DetailsStatus.idle,
+      detailsMessage: null,
       isLoading: false,
       isDeepLoading: false,
       errorMessage: null,
@@ -73,6 +81,8 @@ class ReadingFlowState {
     List<DrawnCardModel>? drawnCards,
     AiResultModel? aiResult,
     AiResultModel? deepResult,
+    DetailsStatus? detailsStatus,
+    String? detailsMessage,
     bool? isLoading,
     bool? isDeepLoading,
     String? errorMessage,
@@ -91,6 +101,8 @@ class ReadingFlowState {
       drawnCards: drawnCards ?? this.drawnCards,
       aiResult: aiResult ?? this.aiResult,
       deepResult: deepResult ?? this.deepResult,
+      detailsStatus: detailsStatus ?? this.detailsStatus,
+      detailsMessage: detailsMessage ?? this.detailsMessage,
       isLoading: isLoading ?? this.isLoading,
       isDeepLoading: isDeepLoading ?? this.isDeepLoading,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
@@ -130,6 +142,8 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       drawnCards: [],
       aiResult: null,
       deepResult: null,
+      detailsStatus: DetailsStatus.idle,
+      detailsMessage: null,
       isDeepLoading: false,
       deepErrorType: null,
       deepErrorMessage: null,
@@ -148,6 +162,8 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
     state = state.copyWith(
       isLoading: false,
       aiResult: null,
+      detailsStatus: DetailsStatus.idle,
+      detailsMessage: null,
       clearError: true,
     );
   }
@@ -159,6 +175,8 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
     state = state.copyWith(
       isDeepLoading: false,
       deepResult: null,
+      detailsStatus: DetailsStatus.idle,
+      detailsMessage: null,
       clearDeepError: true,
     );
   }
@@ -198,6 +216,8 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       isLoading: true,
       aiResult: null,
       deepResult: null,
+      detailsStatus: DetailsStatus.idle,
+      detailsMessage: null,
       isDeepLoading: false,
       clearDeepError: true,
       clearError: true,
@@ -300,6 +320,8 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
     state = state.copyWith(
       isLoading: true,
       aiResult: null,
+      detailsStatus: DetailsStatus.idle,
+      detailsMessage: null,
       clearError: true,
     );
 
@@ -391,13 +413,15 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
     if (spread == null ||
         aiResult == null ||
         state.drawnCards.isEmpty ||
-        state.isDeepLoading) {
+        state.detailsStatus == DetailsStatus.loading) {
       return;
     }
 
     state = state.copyWith(
       isDeepLoading: true,
       deepResult: null,
+      detailsStatus: DetailsStatus.loading,
+      detailsMessage: null,
       clearDeepError: true,
     );
 
@@ -423,12 +447,16 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
   }) async {
     final requestId = ++_deepRequestCounter;
     _activeDeepRequestId = requestId;
+    final detailsRequestId = 'details-${const Uuid().v4()}';
     final client = http.Client();
     _activeDeepClient?.close();
     _activeDeepClient = client;
     try {
       if (kDebugMode) {
-        debugPrint('[ReadingFlow] deepRequest:start id=$requestId');
+        debugPrint(
+          '[ReadingFlow] detailsRequest:start id=$requestId '
+          'requestId=$detailsRequestId',
+        );
       }
       final aiRepository = ref.read(aiRepositoryProvider);
       final locale = ref.read(localeProvider);
@@ -437,10 +465,11 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
         spread: spread,
         drawnCards: drawnCards,
         languageCode: locale.languageCode,
-        mode: ReadingMode.lifeAreas,
+        mode: ReadingMode.detailsRelationshipsCareer,
         fastReading: fastReading,
         client: client,
         timeout: const Duration(seconds: 30),
+        requestIdOverride: detailsRequestId,
       );
       if (_activeDeepRequestId != requestId) {
         return;
@@ -448,27 +477,32 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       state = state.copyWith(
         deepResult: result,
         isDeepLoading: false,
+        detailsStatus: DetailsStatus.success,
+        detailsMessage: _buildDetailsMessage(result, l10n),
       );
       if (kDebugMode) {
         debugPrint(
-          '[ReadingFlow] deepRequest:success id=$requestId '
-          'requestId=${result.requestId ?? 'unknown'}',
+          '[ReadingFlow] detailsRequest:success id=$requestId '
+          'requestId=${result.requestId ?? detailsRequestId}',
         );
       }
     } on AiRepositoryException catch (error) {
       if (_activeDeepRequestId != requestId) {
         return;
       }
+      final message = _messageForError(error, l10n);
       state = state.copyWith(
         deepResult: null,
         isDeepLoading: false,
         deepErrorType: error.type,
         deepErrorStatusCode: error.statusCode,
-        deepErrorMessage: _messageForError(error, l10n),
+        deepErrorMessage: message,
+        detailsStatus: DetailsStatus.error,
+        detailsMessage: message,
       );
       if (kDebugMode) {
         debugPrint(
-          '[ReadingFlow] deepRequest:error id=$requestId '
+          '[ReadingFlow] detailsRequest:error id=$requestId '
           'type=${error.type.name} status=${error.statusCode ?? 'n/a'}',
         );
       }
@@ -476,15 +510,18 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       if (_activeDeepRequestId != requestId) {
         return;
       }
+      final message = l10n.resultStatusServerUnavailable;
       state = state.copyWith(
         deepResult: null,
         isDeepLoading: false,
         deepErrorType: AiErrorType.serverError,
-        deepErrorMessage: l10n.resultStatusServerUnavailable,
+        deepErrorMessage: message,
+        detailsStatus: DetailsStatus.error,
+        detailsMessage: message,
       );
       if (kDebugMode) {
         debugPrint(
-          '[ReadingFlow] deepRequest:error id=$requestId '
+          '[ReadingFlow] detailsRequest:error id=$requestId '
           'type=${AiErrorType.serverError.name}',
         );
       }
@@ -493,10 +530,40 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
         _activeDeepClient = null;
       }
       if (kDebugMode) {
-        debugPrint('[ReadingFlow] deepRequest:finish id=$requestId');
+        debugPrint(
+          '[ReadingFlow] detailsRequest:finish id=$requestId '
+          'requestId=$detailsRequestId',
+        );
       }
       client.close();
     }
+  }
+
+  String _buildDetailsMessage(AiResultModel result, AppLocalizations l10n) {
+    final sections = result.sections;
+    String pickSectionText(int index) {
+      if (index < sections.length) {
+        final text = sections[index].text.trim();
+        if (text.isNotEmpty) {
+          return text;
+        }
+      }
+      final full = result.fullText.trim();
+      if (full.isNotEmpty) {
+        return full;
+      }
+      return result.tldr.trim();
+    }
+
+    final relationshipsText = pickSectionText(0);
+    final careerText = pickSectionText(1);
+    return [
+      l10n.resultDeepRelationshipsHeading,
+      relationshipsText,
+      '',
+      l10n.resultDeepCareerHeading,
+      careerText,
+    ].join('\n');
   }
 
   Future<void> saveReading() async {

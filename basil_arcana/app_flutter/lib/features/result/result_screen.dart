@@ -46,12 +46,12 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
   void initState() {
     super.initState();
     ref.listen<ReadingFlowState>(readingFlowControllerProvider, (prev, next) {
-      if (prev?.deepResult == null && next.deepResult != null) {
-        _handleDeepResult(next);
-      } else if ((prev?.isDeepLoading ?? false) &&
-          !(next.isDeepLoading) &&
-          next.deepErrorType != null) {
-        _handleDeepError(next);
+      if (prev?.detailsStatus != DetailsStatus.success &&
+          next.detailsStatus == DetailsStatus.success) {
+        _handleDetailsResult(next);
+      } else if (prev?.detailsStatus == DetailsStatus.loading &&
+          next.detailsStatus == DetailsStatus.error) {
+        _handleDetailsError(next);
       }
     });
   }
@@ -409,14 +409,12 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
             avatarEmoji: '🪄',
             child: _DeepPromptBubble(
               isActionable: !_deepPromptDismissed &&
-                  !state.isDeepLoading &&
-                  state.deepResult == null &&
-                  state.deepErrorType == null,
+                  state.detailsStatus == DetailsStatus.idle,
               onDecline: () {
                 _dismissDeepPrompt();
               },
               onAccept: () {
-                if (state.isDeepLoading || state.deepResult != null) {
+                if (state.detailsStatus == DetailsStatus.loading) {
                   return;
                 }
                 _dismissDeepPrompt();
@@ -512,8 +510,8 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
     _scrollToBottom();
   }
 
-  void _handleDeepResult(ReadingFlowState state) {
-    if (state.deepResult == null) {
+  void _handleDetailsResult(ReadingFlowState state) {
+    if (state.detailsMessage == null || state.detailsMessage!.isEmpty) {
       return;
     }
     setState(() {
@@ -521,13 +519,12 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
       _deepPromptDismissed = true;
       _removeDeepPromptItem();
     });
-    _appendDeepMessages(state);
+    _appendDetailsMessage(state);
   }
 
-  void _handleDeepError(ReadingFlowState state) {
+  void _handleDetailsError(ReadingFlowState state) {
     final l10n = AppLocalizations.of(context)!;
-    final message =
-        state.deepErrorMessage ?? l10n.resultDeepRetryMessage;
+    final message = state.detailsMessage ?? l10n.resultDeepRetryMessage;
     setState(() {
       _removeDeepStatusItems();
       _items.add(
@@ -559,65 +556,16 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
     });
   }
 
-  void _appendDeepMessages(ReadingFlowState state) {
-    final deepResult = state.deepResult;
-    if (deepResult == null) {
+  void _appendDetailsMessage(ReadingFlowState state) {
+    final detailsMessage = state.detailsMessage;
+    if (detailsMessage == null || detailsMessage.isEmpty) {
       return;
     }
-    final l10n = AppLocalizations.of(context)!;
-    final headings = [
-      l10n.resultDeepRelationshipsHeading,
-      l10n.resultDeepCareerHeading,
-    ];
-    final adviceLines = [
-      deepResult.why.trim(),
-      deepResult.action.trim(),
-    ];
-    final sectionTexts = List<String>.generate(headings.length, (index) {
-      final section = index < deepResult.sections.length
-          ? deepResult.sections[index].text.trim()
-          : '';
-      if (section.isNotEmpty) {
-        return section;
-      }
-      return deepResult.fullText.trim().isNotEmpty
-          ? deepResult.fullText.trim()
-          : deepResult.tldr.trim();
-    });
-
     setState(() {
       _items.add(
         _ChatItem.basil(
           id: _nextId(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              for (var i = 0; i < headings.length; i++) ...[
-                Text(
-                  headings[i],
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                ),
-                const SizedBox(height: 6),
-                Text(sectionTexts[i]),
-                if (adviceLines[i].isNotEmpty) ...[
-                  const SizedBox(height: 6),
-                  Text(
-                    adviceLines[i],
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurface
-                              .withOpacity(0.7),
-                          fontStyle: FontStyle.italic,
-                        ),
-                  ),
-                ],
-                if (i != headings.length - 1) const SizedBox(height: 12),
-              ],
-            ],
-          ),
+          child: Text(detailsMessage),
         ),
       );
     });

@@ -185,7 +185,7 @@ class _SpreadIconDeckState extends State<SpreadIconDeck>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 3600),
+      duration: const Duration(milliseconds: 1500),
     )..repeat(reverse: true);
     _progress = CurvedAnimation(
       parent: _controller,
@@ -214,14 +214,15 @@ class _SpreadIconDeckState extends State<SpreadIconDeck>
         final size = constraints.biggest;
         final deckWidth = size.width * 0.46;
         final deckHeight = size.height * 0.68;
-        final cardWidth = deckWidth * 0.92;
-        final cardHeight = deckHeight * 0.96;
+        final cardWidth = deckWidth;
+        final cardHeight = deckHeight;
+        const cardRadius = 16.0;
 
         return AnimatedBuilder(
           animation: _progress,
           builder: (context, _) {
             final t = _progress.value;
-            final baseOffset = Offset(size.width * 0.04, size.height * 0.06);
+            final baseOffset = Offset(size.width * 0.03, size.height * 0.04);
             return Stack(
               alignment: Alignment.center,
               children: [
@@ -230,6 +231,7 @@ class _SpreadIconDeckState extends State<SpreadIconDeck>
                   height: deckHeight,
                   color: deckColor.withOpacity(0.82),
                   borderColor: deckBorder.withOpacity(0.5),
+                  borderRadius: cardRadius,
                   offset: baseOffset,
                 ),
                 _deckCard(
@@ -237,6 +239,7 @@ class _SpreadIconDeckState extends State<SpreadIconDeck>
                   height: deckHeight,
                   color: deckColor,
                   borderColor: deckBorder,
+                  borderRadius: cardRadius,
                 ),
                 if (widget.mode == SpreadIconMode.oneCard)
                   _movingCard(
@@ -245,9 +248,10 @@ class _SpreadIconDeckState extends State<SpreadIconDeck>
                     color: cardColor,
                     borderColor: cardBorder,
                     shadowColor: shadow,
+                    borderRadius: cardRadius,
                     offset: Offset(
-                      lerpDouble(0, -16, t)!,
-                      lerpDouble(0, -32, t)!,
+                      lerpDouble(0, -11, t)!,
+                      lerpDouble(0, -22, t)!,
                     ),
                     rotation: lerpDouble(0, -0.05, t)!,
                   ),
@@ -258,9 +262,10 @@ class _SpreadIconDeckState extends State<SpreadIconDeck>
                     color: cardColor,
                     borderColor: cardBorder,
                     shadowColor: shadow,
+                    borderRadius: cardRadius,
                     offset: Offset(
-                      lerpDouble(0, -18, t)!,
-                      lerpDouble(0, -22, t)!,
+                      lerpDouble(0, -13, t)!,
+                      lerpDouble(0, -16, t)!,
                     ),
                     rotation: lerpDouble(0, -0.12, t)!,
                   ),
@@ -270,9 +275,10 @@ class _SpreadIconDeckState extends State<SpreadIconDeck>
                     color: cardColor,
                     borderColor: cardBorder,
                     shadowColor: shadow,
+                    borderRadius: cardRadius,
                     offset: Offset(
                       lerpDouble(0, 0, t)!,
-                      lerpDouble(0, -30, t)!,
+                      lerpDouble(0, -21, t)!,
                     ),
                     rotation: lerpDouble(0, 0, t)!,
                   ),
@@ -282,9 +288,10 @@ class _SpreadIconDeckState extends State<SpreadIconDeck>
                     color: cardColor,
                     borderColor: cardBorder,
                     shadowColor: shadow,
+                    borderRadius: cardRadius,
                     offset: Offset(
-                      lerpDouble(0, 18, t)!,
-                      lerpDouble(0, -22, t)!,
+                      lerpDouble(0, 13, t)!,
+                      lerpDouble(0, -16, t)!,
                     ),
                     rotation: lerpDouble(0, 0.12, t)!,
                   ),
@@ -303,6 +310,7 @@ Widget _deckCard({
   required double height,
   required Color color,
   required Color borderColor,
+  required double borderRadius,
   Offset offset = Offset.zero,
 }) {
   return Transform.translate(
@@ -312,7 +320,7 @@ Widget _deckCard({
       height: height,
       decoration: BoxDecoration(
         color: color,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(borderRadius),
         border: Border.all(color: borderColor, width: 1.1),
       ),
     ),
@@ -325,6 +333,7 @@ Widget _movingCard({
   required Color color,
   required Color borderColor,
   required Color shadowColor,
+  required double borderRadius,
   required Offset offset,
   required double rotation,
 }) {
@@ -337,7 +346,7 @@ Widget _movingCard({
         height: height,
         decoration: BoxDecoration(
           color: color,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(borderRadius),
           border: Border.all(color: borderColor, width: 0.8),
           boxShadow: [
             BoxShadow(
