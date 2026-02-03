@@ -1,11 +1,10 @@
-import { Bot, InlineKeyboard, InputFile } from "grammy";
+import { Bot, InlineKeyboard } from "grammy";
 import type { Context } from "grammy";
 import type { InputMediaPhoto } from "grammy/types";
 import { loadConfig } from "./config";
 import {
-  cardImageUrl,
-  resolveLocalCardPath,
-  ensurePng,
+  resolveCardImage,
+  fileToInputFile,
   localAssetsAvailable,
 } from "./assets";
 import { loadDecks, pickSpread, drawCards } from "./decks";
@@ -214,59 +213,39 @@ async function sendCardImages(
   ctx: Context,
   cardIds: string[]
 ): Promise<void> {
-  const useLocalAssets =
-    config.useLocalAssets && localAssetsAvailable(config.assetsBasePath);
-  const localPaths = useLocalAssets
-    ? cardIds.map((cardId) =>
-        resolveLocalCardPath(cardId, config.assetsBasePath)
-      )
-    : [];
-  const remoteUrls = cardIds.map((cardId) =>
-    cardImageUrl(cardId, config.assetsBaseUrl)
+  if (!localAssetsAvailable(config.assetsBasePath)) {
+    throw new Error(
+      `Local assets missing at ${config.assetsBasePath}. Configure FLUTTER_ASSETS_ROOT.`
+    );
+  }
+
+  const localPaths = cardIds.map((cardId) =>
+    resolveCardImage(cardId, config.assetsBasePath)
   );
 
-  if (!useLocalAssets) {
-    if (remoteUrls.length === 1) {
-      await ctx.replyWithPhoto(remoteUrls[0]);
-      return;
-    }
-    const media: InputMediaPhoto[] = remoteUrls.map((url) => ({
-      type: "photo",
-      media: url,
-    }));
-    await ctx.replyWithMediaGroup(media);
-    return;
-  }
-
   if (localPaths.length === 1) {
-    try {
-      await ctx.replyWithPhoto(new InputFile(localPaths[0]));
-      return;
-    } catch (error) {
-      console.warn("WEBP failed, converting to PNG", error);
-    }
-    const pngPath = await ensurePng(localPaths[0]);
-    await ctx.replyWithPhoto(new InputFile(pngPath));
+    const file = await fileToInputFile(localPaths[0]);
+    await ctx.replyWithPhoto(file);
     return;
   }
 
-  const media: InputMediaPhoto[] = localPaths.map((p) => ({
-    type: "photo",
-    media: new InputFile(p),
-  }));
+  const media: InputMediaPhoto[] = await Promise.all(
+    localPaths.map(async (p) => ({
+      type: "photo" as const,
+      media: await fileToInputFile(p),
+    }))
+  );
+
   try {
     await ctx.replyWithMediaGroup(media);
     return;
   } catch (error) {
-    console.warn("WEBP media group failed, converting to PNG", error);
+    console.warn("Media group failed, sending photos individually", error);
   }
 
-  const pngPaths = await Promise.all(localPaths.map((p) => ensurePng(p)));
-  const pngMedia: InputMediaPhoto[] = pngPaths.map((p) => ({
-    type: "photo",
-    media: new InputFile(p),
-  }));
-  await ctx.replyWithMediaGroup(pngMedia);
+  for (const item of media) {
+    await ctx.replyWithPhoto(item.media);
+  }
 }
 
 async function callGenerate(

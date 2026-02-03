@@ -1,4 +1,4 @@
-import path from "path";
+import { resolveFlutterAssetsRoot } from "./assets";
 
 type Locale = "en" | "ru" | "kk";
 
@@ -7,14 +7,8 @@ export interface BotConfig {
   apiBaseUrl: string;
   arcanaApiKey: string;
   defaultLocale: Locale;
-  assetsBaseUrl: string;
   assetsBasePath: string;
-  useLocalAssets: boolean;
   requestTimeoutMs: number;
-}
-
-export function repoPath(...segments: string[]): string {
-  return path.resolve(process.cwd(), "..", ...segments);
 }
 
 function requireEnv(name: string): string {
@@ -37,11 +31,8 @@ export function loadConfig(): BotConfig {
   const apiBaseUrl = process.env.API_BASE_URL || "https://api.basilarcana.com";
   const arcanaApiKey = requireEnv("ARCANA_API_KEY");
   const defaultLocale = parseLocale(process.env.DEFAULT_LOCALE, "en");
-  const assetsBaseUrl = requireEnv("ASSETS_BASE_URL").replace(/\/$/, "");
   const assetsBasePath =
-    process.env.ASSETS_BASE_PATH ||
-    repoPath("app_flutter", "assets");
-  const useLocalAssets = process.env.USE_LOCAL_ASSETS === "true";
+    process.env.ASSETS_BASE_PATH || resolveFlutterAssetsRoot();
   const requestTimeoutMs = 35000;
 
   return {
@@ -49,9 +40,7 @@ export function loadConfig(): BotConfig {
     apiBaseUrl,
     arcanaApiKey,
     defaultLocale,
-    assetsBaseUrl,
     assetsBasePath,
-    useLocalAssets,
     requestTimeoutMs,
   };
 }

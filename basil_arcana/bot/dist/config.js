@@ -1,14 +1,7 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.repoPath = repoPath;
 exports.loadConfig = loadConfig;
-const path_1 = __importDefault(require("path"));
-function repoPath(...segments) {
-    return path_1.default.resolve(process.cwd(), "..", ...segments);
-}
+const assets_1 = require("./assets");
 function requireEnv(name) {
     const value = process.env[name];
     if (!value || value.trim().length === 0) {
@@ -27,10 +20,7 @@ function loadConfig() {
     const apiBaseUrl = process.env.API_BASE_URL || "https://api.basilarcana.com";
     const arcanaApiKey = requireEnv("ARCANA_API_KEY");
     const defaultLocale = parseLocale(process.env.DEFAULT_LOCALE, "en");
-    const assetsBasePath = process.env.ASSETS_BASE_PATH ||
-        repoPath("app_flutter", "assets");
-    const dataBasePath = process.env.DATA_BASE_PATH ||
-        repoPath("app_flutter", "assets", "data");
+    const assetsBasePath = process.env.ASSETS_BASE_PATH || (0, assets_1.resolveFlutterAssetsRoot)();
     const requestTimeoutMs = 35000;
     return {
         telegramToken,
@@ -38,7 +28,6 @@ function loadConfig() {
         arcanaApiKey,
         defaultLocale,
         assetsBasePath,
-        dataBasePath,
         requestTimeoutMs,
     };
 }
