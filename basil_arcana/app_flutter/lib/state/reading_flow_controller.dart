@@ -13,6 +13,7 @@ import '../data/models/reading_model.dart';
 import '../data/models/spread_model.dart';
 import '../data/repositories/ai_repository.dart';
 import '../data/repositories/readings_repository.dart';
+import '../core/utils/oracle_text.dart';
 import 'providers.dart';
 
 enum DetailsStatus { idle, loading, success, error }
@@ -464,6 +465,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
     final client = http.Client();
     _activeDeepClient?.close();
     _activeDeepClient = client;
+    debugPrint('[ReadingFlow] detailsRequest:sent id=$requestId');
     try {
       final aiRepository = ref.read(aiRepositoryProvider);
       final locale = ref.read(localeProvider);
@@ -478,7 +480,8 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       if (_activeDeepRequestId != requestId) {
         return;
       }
-      if (detailsText.trim().isEmpty) {
+      final sanitized = sanitizeOracleText(detailsText);
+      if (sanitized.trim().isEmpty) {
         final message = _l10n().resultStatusUnexpectedResponse;
         state = state.copyWith(
           detailsStatus: DetailsStatus.error,
@@ -487,15 +490,22 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
         );
         return;
       }
+      debugPrint(
+        '[ReadingFlow] detailsResponse:received id=$requestId '
+        'chars=${sanitized.length}',
+      );
       state = state.copyWith(
         detailsStatus: DetailsStatus.success,
-        detailsText: detailsText,
+        detailsText: sanitized,
         detailsError: null,
       );
     } on AiRepositoryException catch (error) {
       if (_activeDeepRequestId != requestId) {
         return;
       }
+      debugPrint(
+        '[ReadingFlow] detailsResponse:error id=$requestId type=${error.type.name}',
+      );
       final message = _messageForError(error, _l10n());
       state = state.copyWith(
         detailsStatus: DetailsStatus.error,
@@ -506,6 +516,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       if (_activeDeepRequestId != requestId) {
         return;
       }
+      debugPrint('[ReadingFlow] detailsResponse:error id=$requestId');
       final message = _l10n().resultStatusServerUnavailable;
       state = state.copyWith(
         detailsStatus: DetailsStatus.error,
