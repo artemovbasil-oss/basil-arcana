@@ -166,10 +166,10 @@ async function handleReading(ctx, question, spreadId, locale, decks) {
     await sendCardImages(ctx, drawnIds, locale);
     let reading;
     try {
-        reading = await callGenerate(question, spread, cardsPayload, locale);
+        reading = await callGenerate(question, spread, locale);
     }
     catch (error) {
-        if (error instanceof ApiError && error.status === 400) {
+        if (error instanceof ApiError) {
             await ctx.reply((0, i18n_1.t)(locale).readingFailedBadRequest);
             return;
         }
@@ -236,34 +236,24 @@ async function sendCardImages(ctx, cardIds, locale) {
         await ctx.replyWithPhoto(new grammy_1.InputFile(localPath), options);
     }
 }
-async function callGenerate(question, spread, cards, locale) {
+async function callGenerate(question, spread, locale) {
     const endpoint = "/api/reading/generate";
     const mode = "fast";
     const requestId = (0, crypto_1.randomUUID)();
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), config.requestTimeoutMs);
     try {
-        const cardsPayload = toAiCardsPayload(cards, "fast");
+        const spreadPayload = normalizeGenerateSpread(spread);
         const payload = {
             question,
-            spread,
-            cards: cardsPayload,
-            tone: "neutral",
-            language: locale,
-            responseFormat: "strict_json",
-            responseConstraints: {
-                tldrMaxChars: 180,
-                sectionMaxChars: 280,
-                actionMaxChars: 160,
-            },
+            spread: spreadPayload,
+            locale,
         };
         const payloadSummary = {
             questionLength: question.length,
-            spreadId: spread.id,
+            spreadId: spreadPayload.id,
             locale,
-            cardCount: cardsPayload.length,
             mode,
-            deckMode: "random",
         };
         console.info(`[Api] generate payload ${JSON.stringify(payloadSummary)}`);
         const url = new URL(`${config.apiBaseUrl}${endpoint}`);
@@ -376,6 +366,27 @@ function toAiCardsPayload(cards, mode) {
             advice: truncate(card.meaning.advice, meaningLimit),
         },
     }));
+}
+function normalizeGenerateSpread(spread) {
+    const positions = spread.positions.map((position, index) => {
+        const mappedId = position.id === "left"
+            ? "p1"
+            : position.id === "center"
+                ? "p2"
+                : position.id === "right"
+                    ? "p3"
+                    : position.id;
+        const fallbackId = `p${index + 1}`;
+        return {
+            id: mappedId || fallbackId,
+            title: position.title,
+        };
+    });
+    return {
+        id: spread.id,
+        name: spread.name,
+        positions,
+    };
 }
 function truncate(value, maxLength) {
     if (value.length <= maxLength) {
