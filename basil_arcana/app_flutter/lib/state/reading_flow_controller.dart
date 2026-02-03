@@ -197,13 +197,6 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
     );
   }
 
-  void dismissDetailsCta() {
-    if (!state.showDetailsCta) {
-      return;
-    }
-    state = state.copyWith(showDetailsCta: false);
-  }
-
   List<CardModel> drawCards(int count, List<CardModel> deck) {
     final rng = Random();
     final shuffled = [...deck]..shuffle(rng);
@@ -439,11 +432,9 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
     }
   }
 
-  Future<void> requestDeepReading() async {
+  Future<void> requestDetails() async {
     final spread = state.spread;
-    final aiResult = state.aiResult;
     if (spread == null ||
-        aiResult == null ||
         state.drawnCards.isEmpty ||
         state.detailsStatus == DetailsStatus.loading) {
       return;
@@ -457,159 +448,92 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
     }
 
     state = state.copyWith(
-      isDeepLoading: true,
-      deepResult: null,
+      showDetailsCta: false,
       detailsStatus: DetailsStatus.loading,
       detailsText: null,
       detailsError: null,
-      showDetailsCta: false,
-      clearDeepError: true,
     );
 
     if (kDebugMode) {
       debugPrint('[ReadingFlow] detailsStatus:loading');
     }
 
-    await _fetchDetails(
-      spread: spread,
-      drawnCards: state.drawnCards,
-      l10n: _l10n(),
-    );
-  }
-
-  Future<void> _fetchDetails({
-    required SpreadModel spread,
-    required List<DrawnCardModel> drawnCards,
-    required AppLocalizations l10n,
-  }) async {
     final requestId = ++_deepRequestCounter;
     _activeDeepRequestId = requestId;
-    final detailsRequestId = 'details-${const Uuid().v4()}';
-    final stopwatch = Stopwatch()..start();
+    final started = DateTime.now();
     final client = http.Client();
     _activeDeepClient?.close();
     _activeDeepClient = client;
     try {
-      if (kDebugMode) {
-        debugPrint(
-          '[ReadingFlow] detailsRequest:start id=$requestId '
-          'requestId=$detailsRequestId',
-        );
-      }
       final aiRepository = ref.read(aiRepositoryProvider);
       final locale = ref.read(localeProvider);
-      final detailsText = await aiRepository.fetchDetails(
+      final detailsText = await aiRepository.fetchReadingDetails(
         question: state.question,
         spread: spread,
-        drawnCards: drawnCards,
+        drawnCards: state.drawnCards,
         locale: locale.languageCode,
         client: client,
         timeout: const Duration(seconds: 35),
-        requestIdOverride: detailsRequestId,
       );
       if (_activeDeepRequestId != requestId) {
         return;
       }
       if (detailsText.trim().isEmpty) {
-        final message = l10n.resultStatusUnexpectedResponse;
+        final message = _l10n().resultStatusUnexpectedResponse;
         state = state.copyWith(
-          isDeepLoading: false,
           detailsStatus: DetailsStatus.error,
           detailsText: null,
           detailsError: message,
         );
-        if (kDebugMode) {
-          debugPrint(
-            '[ReadingFlow] detailsRequest:empty id=$requestId '
-            'requestId=$detailsRequestId '
-            'elapsed_ms=${stopwatch.elapsedMilliseconds}',
-          );
-        }
         return;
       }
       state = state.copyWith(
-        isDeepLoading: false,
         detailsStatus: DetailsStatus.success,
         detailsText: detailsText,
         detailsError: null,
       );
-      if (kDebugMode) {
-        debugPrint(
-          '[ReadingFlow] detailsRequest:success id=$requestId '
-          'requestId=$detailsRequestId '
-          'elapsed_ms=${stopwatch.elapsedMilliseconds} '
-          'message_len=${detailsText.length}',
-        );
-      }
     } on AiRepositoryException catch (error) {
       if (_activeDeepRequestId != requestId) {
         return;
       }
-      final message = _messageForError(error, l10n);
+      final message = _messageForError(error, _l10n());
       state = state.copyWith(
-        deepResult: null,
-        isDeepLoading: false,
-        deepErrorType: error.type,
-        deepErrorStatusCode: error.statusCode,
-        deepErrorMessage: message,
         detailsStatus: DetailsStatus.error,
         detailsText: null,
         detailsError: message,
       );
-      if (kDebugMode) {
-        debugPrint(
-          '[ReadingFlow] detailsRequest:error id=$requestId '
-          'type=${error.type.name} status=${error.statusCode ?? 'n/a'} '
-          'elapsed_ms=${stopwatch.elapsedMilliseconds} '
-          'message_len=${message.length}',
-        );
-      }
     } catch (_) {
       if (_activeDeepRequestId != requestId) {
         return;
       }
-      final message = l10n.resultStatusServerUnavailable;
+      final message = _l10n().resultStatusServerUnavailable;
       state = state.copyWith(
-        deepResult: null,
-        isDeepLoading: false,
-        deepErrorType: AiErrorType.serverError,
-        deepErrorMessage: message,
         detailsStatus: DetailsStatus.error,
         detailsText: null,
         detailsError: message,
       );
-      if (kDebugMode) {
-        debugPrint(
-          '[ReadingFlow] detailsRequest:error id=$requestId '
-          'type=${AiErrorType.serverError.name} '
-          'elapsed_ms=${stopwatch.elapsedMilliseconds} '
-          'message_len=${message.length}',
-        );
-      }
     } finally {
       if (_activeDeepClient == client) {
         _activeDeepClient = null;
       }
-      if (kDebugMode) {
-        debugPrint(
-          '[ReadingFlow] detailsRequest:finish id=$requestId '
-          'requestId=$detailsRequestId '
-          'elapsed_ms=${stopwatch.elapsedMilliseconds}',
-        );
-      }
+      debugPrint(
+        '[details] done in ${DateTime.now().difference(started).inMilliseconds}ms '
+        'status=${state.detailsStatus}',
+      );
       client.close();
     }
   }
 
-  void dismissDetailsError() {
-    if (state.detailsStatus != DetailsStatus.error) {
-      return;
-    }
+  Future<void> tryAgainDetails() async {
+    await requestDetails();
+  }
+
+  void dismissDetails() {
     state = state.copyWith(
+      showDetailsCta: false,
       detailsStatus: DetailsStatus.idle,
       detailsText: null,
       detailsError: null,
-      showDetailsCta: false,
     );
   }
 

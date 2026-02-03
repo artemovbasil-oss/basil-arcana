@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
@@ -276,7 +277,7 @@ class AiRepository {
     }
   }
 
-  Future<String> fetchDetails({
+  Future<String> fetchReadingDetails({
     required String question,
     required SpreadModel spread,
     required List<DrawnCardModel> drawnCards,
@@ -299,10 +300,13 @@ class AiRepository {
     final uri = Uri.parse(apiBaseUrl).replace(
       path: '/api/reading/details',
     );
-    final requestId = requestIdOverride ?? const Uuid().v4();
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final randomSuffix = Random().nextInt(900000) + 100000;
+    final requestId = requestIdOverride ??
+        'details-$timestamp-$randomSuffix';
     final startTimestamp = DateTime.now().toIso8601String();
     final stopwatch = Stopwatch()..start();
-    final totalCards = drawnCards.length;
+    final totalCards = spread.positions.length;
     final payload = {
       'question': question,
       'spread': spread.toJson(),
@@ -422,7 +426,8 @@ class AiRepository {
       if (kDebugMode) {
         debugPrint(
           '[AiRepository] detailsResponse requestId=${responseRequestId ?? requestId} '
-          'chars=${detailsText.length}',
+          'status=${response.statusCode} '
+          'preview="${detailsText.substring(0, min(detailsText.length, 80))}"',
         );
       }
       _logSuccess(
