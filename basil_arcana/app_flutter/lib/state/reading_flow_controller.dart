@@ -25,6 +25,7 @@ class ReadingFlowState {
   final AiResultModel? deepResult;
   final DetailsStatus detailsStatus;
   final String? detailsMessage;
+  final String? detailsError;
   final bool isLoading;
   final bool isDeepLoading;
   final String? errorMessage;
@@ -43,6 +44,7 @@ class ReadingFlowState {
     required this.deepResult,
     required this.detailsStatus,
     required this.detailsMessage,
+    required this.detailsError,
     required this.isLoading,
     required this.isDeepLoading,
     required this.errorMessage,
@@ -63,6 +65,7 @@ class ReadingFlowState {
       deepResult: null,
       detailsStatus: DetailsStatus.idle,
       detailsMessage: null,
+      detailsError: null,
       isLoading: false,
       isDeepLoading: false,
       errorMessage: null,
@@ -83,6 +86,7 @@ class ReadingFlowState {
     AiResultModel? deepResult,
     DetailsStatus? detailsStatus,
     String? detailsMessage,
+    String? detailsError,
     bool? isLoading,
     bool? isDeepLoading,
     String? errorMessage,
@@ -103,6 +107,7 @@ class ReadingFlowState {
       deepResult: deepResult ?? this.deepResult,
       detailsStatus: detailsStatus ?? this.detailsStatus,
       detailsMessage: detailsMessage ?? this.detailsMessage,
+      detailsError: detailsError ?? this.detailsError,
       isLoading: isLoading ?? this.isLoading,
       isDeepLoading: isDeepLoading ?? this.isDeepLoading,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
@@ -144,6 +149,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       deepResult: null,
       detailsStatus: DetailsStatus.idle,
       detailsMessage: null,
+      detailsError: null,
       isDeepLoading: false,
       deepErrorType: null,
       deepErrorMessage: null,
@@ -164,6 +170,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       aiResult: null,
       detailsStatus: DetailsStatus.idle,
       detailsMessage: null,
+      detailsError: null,
       clearError: true,
     );
   }
@@ -177,6 +184,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       deepResult: null,
       detailsStatus: DetailsStatus.idle,
       detailsMessage: null,
+      detailsError: null,
       clearDeepError: true,
     );
   }
@@ -218,6 +226,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       deepResult: null,
       detailsStatus: DetailsStatus.idle,
       detailsMessage: null,
+      detailsError: null,
       isDeepLoading: false,
       clearDeepError: true,
       clearError: true,
@@ -307,6 +316,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
           ? l10n.offlineFallbackAction
           : action,
       fullText: fullText,
+      detailsText: '',
       requestId: null,
     );
   }
@@ -322,6 +332,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       aiResult: null,
       detailsStatus: DetailsStatus.idle,
       detailsMessage: null,
+      detailsError: null,
       clearError: true,
     );
 
@@ -422,6 +433,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       deepResult: null,
       detailsStatus: DetailsStatus.loading,
       detailsMessage: null,
+      detailsError: null,
       clearDeepError: true,
     );
 
@@ -448,6 +460,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
     final requestId = ++_deepRequestCounter;
     _activeDeepRequestId = requestId;
     final detailsRequestId = 'details-${const Uuid().v4()}';
+    final stopwatch = Stopwatch()..start();
     final client = http.Client();
     _activeDeepClient?.close();
     _activeDeepClient = client;
@@ -474,16 +487,37 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       if (_activeDeepRequestId != requestId) {
         return;
       }
+      final detailsMessage = _buildDetailsMessage(result, l10n);
+      if (detailsMessage.isEmpty) {
+        final message = l10n.resultStatusUnexpectedResponse;
+        state = state.copyWith(
+          deepResult: result,
+          isDeepLoading: false,
+          detailsStatus: DetailsStatus.error,
+          detailsMessage: null,
+          detailsError: message,
+        );
+        if (kDebugMode) {
+          debugPrint(
+            '[ReadingFlow] detailsRequest:empty id=$requestId '
+            'requestId=${result.requestId ?? detailsRequestId} '
+            'elapsed_ms=${stopwatch.elapsedMilliseconds}',
+          );
+        }
+        return;
+      }
       state = state.copyWith(
         deepResult: result,
         isDeepLoading: false,
         detailsStatus: DetailsStatus.success,
-        detailsMessage: _buildDetailsMessage(result, l10n),
+        detailsMessage: detailsMessage,
+        detailsError: null,
       );
       if (kDebugMode) {
         debugPrint(
           '[ReadingFlow] detailsRequest:success id=$requestId '
-          'requestId=${result.requestId ?? detailsRequestId}',
+          'requestId=${result.requestId ?? detailsRequestId} '
+          'elapsed_ms=${stopwatch.elapsedMilliseconds}',
         );
       }
     } on AiRepositoryException catch (error) {
@@ -498,12 +532,14 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
         deepErrorStatusCode: error.statusCode,
         deepErrorMessage: message,
         detailsStatus: DetailsStatus.error,
-        detailsMessage: message,
+        detailsMessage: null,
+        detailsError: message,
       );
       if (kDebugMode) {
         debugPrint(
           '[ReadingFlow] detailsRequest:error id=$requestId '
-          'type=${error.type.name} status=${error.statusCode ?? 'n/a'}',
+          'type=${error.type.name} status=${error.statusCode ?? 'n/a'} '
+          'elapsed_ms=${stopwatch.elapsedMilliseconds}',
         );
       }
     } catch (_) {
@@ -517,12 +553,14 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
         deepErrorType: AiErrorType.serverError,
         deepErrorMessage: message,
         detailsStatus: DetailsStatus.error,
-        detailsMessage: message,
+        detailsMessage: null,
+        detailsError: message,
       );
       if (kDebugMode) {
         debugPrint(
           '[ReadingFlow] detailsRequest:error id=$requestId '
-          'type=${AiErrorType.serverError.name}',
+          'type=${AiErrorType.serverError.name} '
+          'elapsed_ms=${stopwatch.elapsedMilliseconds}',
         );
       }
     } finally {
@@ -532,7 +570,8 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       if (kDebugMode) {
         debugPrint(
           '[ReadingFlow] detailsRequest:finish id=$requestId '
-          'requestId=$detailsRequestId',
+          'requestId=$detailsRequestId '
+          'elapsed_ms=${stopwatch.elapsedMilliseconds}',
         );
       }
       client.close();
@@ -540,30 +579,30 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
   }
 
   String _buildDetailsMessage(AiResultModel result, AppLocalizations l10n) {
-    final sections = result.sections;
-    String pickSectionText(int index) {
-      if (index < sections.length) {
-        final text = sections[index].text.trim();
-        if (text.isNotEmpty) {
-          return text;
-        }
-      }
-      final full = result.fullText.trim();
-      if (full.isNotEmpty) {
-        return full;
-      }
-      return result.tldr.trim();
+    final detailsText = result.detailsText.trim();
+    if (detailsText.isNotEmpty) {
+      return detailsText;
     }
-
-    final relationshipsText = pickSectionText(0);
-    final careerText = pickSectionText(1);
-    return [
-      l10n.resultDeepRelationshipsHeading,
-      relationshipsText,
-      '',
-      l10n.resultDeepCareerHeading,
-      careerText,
-    ].join('\n');
+    final fullText = result.fullText.trim();
+    if (fullText.isNotEmpty) {
+      return fullText;
+    }
+    final sections = result.sections;
+    if (sections.isEmpty) {
+      return '';
+    }
+    if (sections.length >= 2) {
+      final relationshipsText = sections[0].text.trim();
+      final careerText = sections[1].text.trim();
+      return [
+        l10n.resultDeepRelationshipsHeading,
+        relationshipsText,
+        '',
+        l10n.resultDeepCareerHeading,
+        careerText,
+      ].join('\n').trim();
+    }
+    return sections.map((section) => section.text.trim()).join('\n\n').trim();
   }
 
   Future<void> saveReading() async {
