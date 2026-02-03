@@ -38,6 +38,7 @@ class AiResultModel {
   final String why;
   final String action;
   final String fullText;
+  final String detailsText;
   final String? requestId;
 
   const AiResultModel({
@@ -46,6 +47,7 @@ class AiResultModel {
     required this.why,
     required this.action,
     required this.fullText,
+    required this.detailsText,
     required this.requestId,
   });
 
@@ -58,6 +60,7 @@ class AiResultModel {
       why: (json['why'] as String?) ?? '',
       action: (json['action'] as String?) ?? '',
       fullText: (json['fullText'] as String?) ?? '',
+      detailsText: (json['detailsText'] as String?) ?? '',
       requestId: json['requestId'] as String?,
     );
   }

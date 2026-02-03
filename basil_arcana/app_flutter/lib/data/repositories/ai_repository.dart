@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
 
@@ -239,6 +240,12 @@ class AiRepository {
 
     try {
       final data = jsonDecode(response.body) as Map<String, dynamic>;
+      if (kDebugMode) {
+        debugPrint(
+          '[AiRepository] responseKeys requestId=$requestId '
+          'keys=${data.keys.toList()}',
+        );
+      }
       final result = AiResultModel.fromJson(data);
       _logSuccess(
         uri,
@@ -248,6 +255,12 @@ class AiRepository {
       );
       return result;
     } catch (error) {
+      if (kDebugMode) {
+        debugPrint(
+          '[AiRepository] responseParseError requestId=$requestId '
+          'type=${error.runtimeType} message="${error.toString()}"',
+        );
+      }
       _logFailure(
         uri,
         stopwatch,

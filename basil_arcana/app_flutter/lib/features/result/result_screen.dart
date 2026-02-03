@@ -46,12 +46,20 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
   void initState() {
     super.initState();
     ref.listen<ReadingFlowState>(readingFlowControllerProvider, (prev, next) {
-      if (prev?.detailsStatus != DetailsStatus.success &&
+      if (prev?.detailsStatus != DetailsStatus.loading &&
+          next.detailsStatus == DetailsStatus.loading) {
+        _showDeepLoading();
+      } else if (prev?.detailsStatus != DetailsStatus.success &&
           next.detailsStatus == DetailsStatus.success) {
         _handleDetailsResult(next);
       } else if (prev?.detailsStatus == DetailsStatus.loading &&
           next.detailsStatus == DetailsStatus.error) {
         _handleDetailsError(next);
+      } else if (prev?.detailsStatus == DetailsStatus.loading &&
+          next.detailsStatus == DetailsStatus.idle) {
+        setState(() {
+          _removeDeepStatusItems();
+        });
       }
     });
   }
@@ -418,7 +426,6 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                   return;
                 }
                 _dismissDeepPrompt();
-                _showDeepLoading();
                 ref
                     .read(readingFlowControllerProvider.notifier)
                     .requestDeepReading();
@@ -427,6 +434,9 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
           ),
         );
       case _ChatItemKind.deepLoading:
+        if (state.detailsStatus != DetailsStatus.loading) {
+          return const SizedBox.shrink();
+        }
         return ChatBubbleReveal(
           key: ValueKey(item.id),
           child: OracleTypingBubble(
@@ -466,7 +476,6 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                 setState(() {
                   _removeDeepStatusItems();
                 });
-                _showDeepLoading();
                 ref
                     .read(readingFlowControllerProvider.notifier)
                     .requestDeepReading();
@@ -511,9 +520,6 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
   }
 
   void _handleDetailsResult(ReadingFlowState state) {
-    if (state.detailsMessage == null || state.detailsMessage!.isEmpty) {
-      return;
-    }
     setState(() {
       _removeDeepStatusItems();
       _deepPromptDismissed = true;
@@ -524,7 +530,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
 
   void _handleDetailsError(ReadingFlowState state) {
     final l10n = AppLocalizations.of(context)!;
-    final message = state.detailsMessage ?? l10n.resultDeepRetryMessage;
+    final message = state.detailsError ?? l10n.resultDeepRetryMessage;
     setState(() {
       _removeDeepStatusItems();
       _items.add(
