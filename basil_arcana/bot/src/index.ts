@@ -1,11 +1,11 @@
-import { Bot, InlineKeyboard } from "grammy";
+import { Bot, InlineKeyboard, InputFile } from "grammy";
 import type { Context } from "grammy";
 import type { InputMediaPhoto } from "grammy/types";
 import { loadConfig } from "./config";
 import {
-  resolveCardImage,
-  fileToInputFile,
+  resolveCardImagePath,
   localAssetsAvailable,
+  logAssetsSummary,
 } from "./assets";
 import { loadDecks, pickSpread, drawCards } from "./decks";
 import { StateStore } from "./state/store";
@@ -18,6 +18,7 @@ const stateStore = new StateStore(config.defaultLocale);
 
 async function main(): Promise<void> {
   const decks = await loadDecks();
+  logAssetsSummary(config.assetsBasePath);
 
   const bot = new Bot(config.telegramToken);
 
@@ -185,7 +186,7 @@ async function handleReading(
     };
   });
 
-  await sendCardImages(ctx, drawnIds);
+  await sendCardImages(ctx, drawnIds, locale);
 
   const reading = await callGenerate(question, spread, cardsPayload, locale);
   const shortText = [reading.tldr, reading.action, reading.fullText]
@@ -211,30 +212,46 @@ async function handleReading(
 
 async function sendCardImages(
   ctx: Context,
-  cardIds: string[]
+  cardIds: string[],
+  locale: Locale
 ): Promise<void> {
   if (!localAssetsAvailable(config.assetsBasePath)) {
-    throw new Error(
-      `Local assets missing at ${config.assetsBasePath}. Configure FLUTTER_ASSETS_ROOT.`
+    console.warn(
+      `Local assets missing at ${config.assetsBasePath}. Set BOT_ASSETS_ROOT if needed.`
     );
-  }
-
-  const localPaths = cardIds.map((cardId) =>
-    resolveCardImage(cardId, config.assetsBasePath)
-  );
-
-  if (localPaths.length === 1) {
-    const file = await fileToInputFile(localPaths[0]);
-    await ctx.replyWithPhoto(file);
     return;
   }
 
-  const media: InputMediaPhoto[] = await Promise.all(
-    localPaths.map(async (p) => ({
-      type: "photo" as const,
-      media: await fileToInputFile(p),
-    }))
-  );
+  const localPaths = cardIds.flatMap((cardId) => {
+    const resolved = resolveCardImagePath({ cardId }, config.assetsBasePath);
+    if (!resolved) {
+      console.warn(`Unable to resolve card image for ${cardId}`);
+      return [];
+    }
+    return [resolved];
+  });
+
+  if (localPaths.length === 0) {
+    return;
+  }
+
+  const messages = t(locale);
+
+  if (localPaths.length === 1) {
+    await ctx.replyWithPhoto(new InputFile(localPaths[0]));
+    return;
+  }
+
+  const media: InputMediaPhoto[] = localPaths.map((localPath, index) => {
+    const item: InputMediaPhoto = {
+      type: "photo",
+      media: new InputFile(localPath),
+    };
+    if (index === 0) {
+      item.caption = messages.cardsCaption;
+    }
+    return item;
+  });
 
   try {
     await ctx.replyWithMediaGroup(media);
@@ -243,8 +260,9 @@ async function sendCardImages(
     console.warn("Media group failed, sending photos individually", error);
   }
 
-  for (const item of media) {
-    await ctx.replyWithPhoto(item.media);
+  for (const [index, localPath] of localPaths.entries()) {
+    const options = index === 0 ? { caption: messages.cardsCaption } : undefined;
+    await ctx.replyWithPhoto(new InputFile(localPath), options);
   }
 }
 

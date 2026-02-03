@@ -1,4 +1,6 @@
-export default {
+import type { I18nStrings } from "./types";
+
+const en: I18nStrings = {
   languagePrompt: "Choose your language:",
   languageSet: "Language set. Please share your question.",
   askQuestion: "What is your question?",
@@ -14,4 +16,7 @@ export default {
   alreadyProcessing: "I am already working on your reading. Please wait a moment.",
   missingReading: "Please start a new reading first.",
   detailsIntro: "Here are the details:",
+  cardsCaption: "Your cards",
 };
+
+export default en;

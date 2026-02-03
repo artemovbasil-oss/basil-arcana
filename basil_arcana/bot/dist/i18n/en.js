@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = {
+const en = {
     languagePrompt: "Choose your language:",
     languageSet: "Language set. Please share your question.",
     askQuestion: "What is your question?",
@@ -16,4 +16,6 @@ exports.default = {
     alreadyProcessing: "I am already working on your reading. Please wait a moment.",
     missingReading: "Please start a new reading first.",
     detailsIntro: "Here are the details:",
+    cardsCaption: "Your cards",
 };
+exports.default = en;
