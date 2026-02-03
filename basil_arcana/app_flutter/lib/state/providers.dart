@@ -7,6 +7,7 @@ import '../data/repositories/cards_repository.dart';
 import '../data/repositories/card_stats_repository.dart';
 import '../data/repositories/readings_repository.dart';
 import '../data/repositories/spreads_repository.dart';
+import '../data/models/deck_model.dart';
 import 'reading_flow_controller.dart';
 
 final cardsRepositoryProvider = Provider<CardsRepository>((ref) {
@@ -36,6 +37,7 @@ final readingFlowControllerProvider =
 
 const _settingsBoxName = 'settings';
 const _languageCodeKey = 'languageCode';
+const _deckIdKey = 'deckId';
 
 Locale _localeFromBox(Box<String> box) {
   final code = box.get(_languageCodeKey) ?? 'en';
@@ -68,10 +70,27 @@ final localeProvider =
   return LocaleNotifier(box);
 });
 
+class DeckNotifier extends StateNotifier<DeckId> {
+  DeckNotifier(this._box) : super(deckIdFromStorage(_box.get(_deckIdKey)));
+
+  final Box<String> _box;
+
+  Future<void> setDeck(DeckId deckId) async {
+    state = deckId;
+    await _box.put(_deckIdKey, deckStorageValues[deckId]);
+  }
+}
+
+final deckProvider = StateNotifierProvider<DeckNotifier, DeckId>((ref) {
+  final box = Hive.box<String>(_settingsBoxName);
+  return DeckNotifier(box);
+});
+
 final cardsProvider = FutureProvider((ref) async {
   final locale = ref.watch(localeProvider);
+  final deckId = ref.watch(deckProvider);
   final repo = ref.watch(cardsRepositoryProvider);
-  return repo.fetchCards(locale: locale);
+  return repo.fetchCards(locale: locale, deckId: deckId);
 });
 
 final spreadsProvider = FutureProvider((ref) async {

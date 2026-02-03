@@ -9,6 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../core/widgets/card_face_widget.dart';
 import '../../core/widgets/tarot_asset_widgets.dart';
 import '../../data/models/card_model.dart';
+import '../../data/models/deck_model.dart';
 import '../../data/models/drawn_card_model.dart';
 import '../../data/models/spread_model.dart';
 import '../../data/repositories/ai_repository.dart';
@@ -588,10 +589,11 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
 
   void _precacheDrawnCards(ReadingFlowState state) {
     _precacheDone = true;
+    final deckId = ref.read(deckProvider);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       for (final drawn in state.drawnCards) {
         precacheImage(
-          AssetImage(cardAssetPath(drawn.cardId)),
+          AssetImage(cardAssetPath(drawn.cardId, deckId: deckId)),
           context,
         );
       }
@@ -1028,7 +1030,7 @@ class _DetailsCardThumbnails extends StatelessWidget {
   }
 }
 
-class _DetailThumbnailCard extends StatelessWidget {
+class _DetailThumbnailCard extends ConsumerWidget {
   const _DetailThumbnailCard({
     required this.cardId,
     required this.isBack,
@@ -1040,9 +1042,10 @@ class _DetailThumbnailCard extends StatelessWidget {
   final bool highlight;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
     final radius = BorderRadius.circular(12);
+    final deckId = ref.watch(deckProvider);
     final card = isBack
         ? DecoratedBox(
             decoration: BoxDecoration(
@@ -1064,11 +1067,23 @@ class _DetailThumbnailCard extends StatelessWidget {
             child: ClipRRect(
               borderRadius: radius,
               child: Image.asset(
-                'assets/deck/cover.webp',
+                deckCoverAssetPath(deckId),
                 width: 56,
                 height: 88,
                 fit: BoxFit.cover,
                 filterQuality: FilterQuality.high,
+                errorBuilder: (context, error, stackTrace) {
+                  if (deckId != DeckId.major) {
+                    return Image.asset(
+                      deckCoverAssetPath(DeckId.major),
+                      width: 56,
+                      height: 88,
+                      fit: BoxFit.cover,
+                      filterQuality: FilterQuality.high,
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
               ),
             ),
           )
