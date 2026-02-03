@@ -18,16 +18,7 @@ class CardsRepository {
     };
     final raw = await rootBundle.loadString('assets/data/$filename');
     final data = jsonDecode(raw) as Map<String, dynamic>;
-    if (deckId == DeckId.wands) {
-      return wandsCardIds
-          .where(data.containsKey)
-          .map((id) => CardModel.fromLocalizedEntry(
-                id,
-                data[id] as Map<String, dynamic>,
-              ))
-          .toList();
-    }
-    return data.entries
+    final majorCards = data.entries
         .where((entry) => entry.key.startsWith('major_'))
         .map((entry) {
           return CardModel.fromLocalizedEntry(
@@ -36,5 +27,27 @@ class CardsRepository {
           );
         })
         .toList();
+    final wandsCards = wandsCardIds
+        .where(data.containsKey)
+        .map((id) => CardModel.fromLocalizedEntry(
+              id,
+              data[id] as Map<String, dynamic>,
+            ))
+        .toList();
+    final deckRegistry = <DeckId, List<CardModel>>{
+      DeckId.major: majorCards,
+      DeckId.wands: wandsCards,
+    };
+    return getActiveDeckCards(deckId, deckRegistry);
   }
+}
+
+List<CardModel> getActiveDeckCards(
+  DeckId? selectedDeckId,
+  Map<DeckId, List<CardModel>> deckRegistry,
+) {
+  if (selectedDeckId == null || selectedDeckId == DeckId.all) {
+    return deckRegistry.values.expand((cards) => cards).toList();
+  }
+  return deckRegistry[selectedDeckId] ?? const [];
 }

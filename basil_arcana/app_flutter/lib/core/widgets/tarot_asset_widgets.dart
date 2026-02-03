@@ -5,7 +5,8 @@ import '../../data/models/deck_model.dart';
 import '../../state/providers.dart';
 
 String cardAssetPath(String cardId, {DeckId deckId = DeckId.major}) {
-  if (deckId == DeckId.wands) {
+  if (deckId == DeckId.wands ||
+      (deckId == DeckId.all && cardId.startsWith('wands_'))) {
     return 'assets/cards/wands/$cardId.webp';
   }
   switch (cardId) {
@@ -21,6 +22,7 @@ String deckCoverAssetPath(DeckId deckId) {
     case DeckId.wands:
       return 'assets/deck/wands_cover.webp';
     case DeckId.major:
+    case DeckId.all:
     default:
       return 'assets/deck/cover.webp';
   }

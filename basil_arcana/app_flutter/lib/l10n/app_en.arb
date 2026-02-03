@@ -8,6 +8,7 @@
   "languageRussian": "Russian (RU)",
   "languageKazakh": "Kazakh (KZ)",
   "deckLabel": "Deck",
+  "deckAllName": "All decks",
   "deckMajorName": "Major Arcana",
   "deckWandsName": "Wands",
   "deckDebugLogLabel": "Debug: log Wands asset path",

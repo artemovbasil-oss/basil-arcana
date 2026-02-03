@@ -61,6 +61,14 @@ class SettingsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           _DeckOption(
+            label: l10n.deckAllName,
+            deckId: DeckId.all,
+            groupValue: deckId,
+            onSelected: (value) {
+              ref.read(deckProvider.notifier).setDeck(value);
+            },
+          ),
+          _DeckOption(
             label: l10n.deckMajorName,
             deckId: DeckId.major,
             groupValue: deckId,

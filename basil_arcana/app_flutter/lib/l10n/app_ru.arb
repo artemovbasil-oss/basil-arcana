@@ -8,6 +8,7 @@
   "languageRussian": "Русский (RU)",
   "languageKazakh": "Қазақша (KZ)",
   "deckLabel": "Колода",
+  "deckAllName": "Все колоды",
   "deckMajorName": "Старшие арканы",
   "deckWandsName": "Жезлы",
   "deckDebugLogLabel": "Debug: вывести путь для Жезлов",
