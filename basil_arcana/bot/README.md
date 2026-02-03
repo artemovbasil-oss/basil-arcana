@@ -14,9 +14,8 @@ Set these in Railway **Secrets**:
 - `API_BASE_URL` (default: `https://api.basilarcana.com`)
 - `ARCANA_API_KEY` (required)
 - `DEFAULT_LOCALE` (`en`, `ru`, or `kk`)
-- `ASSETS_BASE_URL` (required, e.g. `https://raw.githubusercontent.com/artemovbasil-oss/basil-arcana/main/basil_arcana/app_flutter/assets`)
-- `USE_LOCAL_ASSETS` (optional, `true` to send images from local files when assets exist)
-- `ASSETS_BASE_PATH` (optional, default: `../app_flutter/assets`)
+- `FLUTTER_ASSETS_ROOT` (required on Railway, e.g. `/app/basil_arcana/app_flutter/assets`)
+- `ASSETS_BASE_PATH` (optional override for local assets path)
 
 > Never commit real secrets. Keep `.env` files out of the repo.
 
@@ -35,18 +34,16 @@ export TELEGRAM_BOT_TOKEN=...
 export ARCANA_API_KEY=...
 export API_BASE_URL=https://api.basilarcana.com
 export DEFAULT_LOCALE=en
-export ASSETS_BASE_URL=https://raw.githubusercontent.com/artemovbasil-oss/basil-arcana/main/basil_arcana/app_flutter/assets
+export FLUTTER_ASSETS_ROOT=/absolute/path/to/app_flutter/assets
 npm run dev
 ```
 
 ## Railway deployment
 - Set the above secrets in Railway.
-- Ensure `ASSETS_BASE_URL` is set to the GitHub raw assets path.
-- Build command: `npm run build`
-- Start command: `npm start`
-- Ensure the service working directory is `bot/`.
+- Build command: `cd bot && npm ci && npm run build`
+- Start command: `cd bot && npm run start`
+- Ensure `FLUTTER_ASSETS_ROOT` points to the Flutter assets directory in the container.
 
 ## Assets
-The bot sends card images using GitHub raw URLs, built from `ASSETS_BASE_URL`.
-If `USE_LOCAL_ASSETS=true` and local assets are available, it sends local files and
-falls back to converting WEBP → PNG when needed.
+The bot resolves exact filenames from the local Flutter assets directory and
+converts WEBP → PNG before sending to Telegram for reliability.

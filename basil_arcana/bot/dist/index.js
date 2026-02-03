@@ -9,7 +9,7 @@ const i18n_1 = require("./i18n");
 const config = (0, config_1.loadConfig)();
 const stateStore = new store_1.StateStore(config.defaultLocale);
 async function main() {
-    const decks = await (0, decks_1.loadDecks)(config.dataBasePath);
+    const decks = await (0, decks_1.loadDecks)();
     const bot = new grammy_1.Bot(config.telegramToken);
     bot.command("start", async (ctx) => {
         const userId = ctx.from?.id;
@@ -182,36 +182,29 @@ async function handleReading(ctx, question, spreadId, locale, decks) {
     }
 }
 async function sendCardImages(ctx, cardIds) {
-    const paths = cardIds.map((cardId) => (0, assets_1.resolveCardPath)(cardId, config.assetsBasePath));
-    if (paths.length === 1) {
-        try {
-            await ctx.replyWithPhoto(new grammy_1.InputFile(paths[0]));
-            return;
-        }
-        catch (error) {
-            console.warn("WEBP failed, converting to PNG", error);
-        }
-        const pngPath = await (0, assets_1.ensurePng)(paths[0]);
-        await ctx.replyWithPhoto(new grammy_1.InputFile(pngPath));
+    if (!(0, assets_1.localAssetsAvailable)(config.assetsBasePath)) {
+        throw new Error(`Local assets missing at ${config.assetsBasePath}. Configure FLUTTER_ASSETS_ROOT.`);
+    }
+    const localPaths = cardIds.map((cardId) => (0, assets_1.resolveCardImage)(cardId, config.assetsBasePath));
+    if (localPaths.length === 1) {
+        const file = await (0, assets_1.fileToInputFile)(localPaths[0]);
+        await ctx.replyWithPhoto(file);
         return;
     }
-    const media = paths.map((p) => ({
+    const media = await Promise.all(localPaths.map(async (p) => ({
         type: "photo",
-        media: new grammy_1.InputFile(p),
-    }));
+        media: await (0, assets_1.fileToInputFile)(p),
+    })));
     try {
         await ctx.replyWithMediaGroup(media);
         return;
     }
     catch (error) {
-        console.warn("WEBP media group failed, converting to PNG", error);
+        console.warn("Media group failed, sending photos individually", error);
     }
-    const pngPaths = await Promise.all(paths.map((p) => (0, assets_1.ensurePng)(p)));
-    const pngMedia = pngPaths.map((p) => ({
-        type: "photo",
-        media: new grammy_1.InputFile(p),
-    }));
-    await ctx.replyWithMediaGroup(pngMedia);
+    for (const item of media) {
+        await ctx.replyWithPhoto(item.media);
+    }
 }
 async function callGenerate(question, spread, cards, locale) {
     const controller = new AbortController();

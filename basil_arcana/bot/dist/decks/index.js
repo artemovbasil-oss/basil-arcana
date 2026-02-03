@@ -1,24 +1,51 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.loadDecks = loadDecks;
 exports.pickSpread = pickSpread;
 exports.drawCards = drawCards;
-const promises_1 = __importDefault(require("fs/promises"));
-const path_1 = __importDefault(require("path"));
-async function readJsonFile(filePath) {
-    try {
-        await promises_1.default.access(filePath);
-    }
-    catch (error) {
-        throw new Error(`Missing deck data file at ${filePath}. cwd=${process.cwd()}`);
-    }
-    const raw = await promises_1.default.readFile(filePath, "utf-8");
-    return JSON.parse(raw);
+const MAJOR_CARD_IDS = [
+    "major_00_fool",
+    "major_01_magician",
+    "major_02_high_priestess",
+    "major_03_empress",
+    "major_04_emperor",
+    "major_05_hierophant",
+    "major_06_lovers",
+    "major_07_chariot",
+    "major_08_strength",
+    "major_09_hermit",
+    "major_10_wheel_of_fortune",
+    "major_11_justice",
+    "major_12_hanged_man",
+    "major_13_death",
+    "major_14_temperance",
+    "major_15_devil",
+    "major_16_tower",
+    "major_17_star",
+    "major_18_moon",
+    "major_19_sun",
+    "major_20_judgement",
+    "major_21_world",
+];
+const WANDS_CARD_IDS = Array.from({ length: 14 }, (_, index) => `wands_${String(index + 1).padStart(2, "0")}`);
+function humanizeCardId(cardId, deckId) {
+    const withoutPrefix = cardId.startsWith(`${deckId}_`)
+        ? cardId.slice(deckId.length + 1)
+        : cardId;
+    return withoutPrefix
+        .split("_")
+        .filter(Boolean)
+        .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
+        .join(" ");
 }
-async function loadDecks(dataBasePath) {
+function buildDeck(deckId, cardIds) {
+    return cardIds.map((id) => ({
+        id,
+        deckId,
+        displayName: humanizeCardId(id, deckId),
+    }));
+}
+async function loadDecks() {
     const locales = ["en", "ru", "kk"];
     const cardsByLocale = {
         en: {},
@@ -30,17 +57,43 @@ async function loadDecks(dataBasePath) {
         ru: [],
         kk: [],
     };
-    await Promise.all(locales.map(async (locale) => {
-        const cardsPath = path_1.default.resolve(dataBasePath, `cards_${locale}.json`);
-        const spreadsPath = path_1.default.resolve(dataBasePath, `spreads_${locale}.json`);
-        const [cards, spreads] = await Promise.all([
-            readJsonFile(cardsPath),
-            readJsonFile(spreadsPath),
-        ]);
-        cardsByLocale[locale] = cards;
+    const majorCards = buildDeck("major", MAJOR_CARD_IDS);
+    const wandsCards = buildDeck("wands", WANDS_CARD_IDS);
+    const allCards = [...majorCards, ...wandsCards];
+    const cardRecords = allCards.reduce((acc, card) => {
+        acc[card.id] = {
+            title: card.displayName,
+            keywords: [],
+            meaning: {
+                general: "",
+                light: "",
+                shadow: "",
+                advice: "",
+            },
+        };
+        return acc;
+    }, {});
+    const spreads = [
+        {
+            id: "spread_1_focus",
+            name: "Focus",
+            positions: [{ id: "p1", title: "Focus" }],
+        },
+        {
+            id: "spread_3",
+            name: "Three Card",
+            positions: [
+                { id: "left", title: "Left" },
+                { id: "center", title: "Center" },
+                { id: "right", title: "Right" },
+            ],
+        },
+    ];
+    locales.forEach((locale) => {
+        cardsByLocale[locale] = { ...cardRecords };
         spreadsByLocale[locale] = spreads;
-    }));
-    const allCardIds = Object.keys(cardsByLocale.en);
+    });
+    const allCardIds = allCards.map((card) => card.id).sort();
     return { cardsByLocale, spreadsByLocale, allCardIds };
 }
 function pickSpread(spreads, spreadId) {

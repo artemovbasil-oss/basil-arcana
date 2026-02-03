@@ -73,6 +73,17 @@ curl -X POST http://localhost:3000/api/reading/generate \
 3. Ensure the `start` script runs (`npm start`). Railway uses `process.env.PORT`.
 4. Use the Railway public URL to test `/health`.
 
+## Telegram bot (Railway)
+
+1. Set bot variables in Railway:
+   - `TELEGRAM_BOT_TOKEN`
+   - `ARCANA_API_KEY`
+   - `API_BASE_URL` (optional, defaults to `https://api.basilarcana.com`)
+   - `DEFAULT_LOCALE` (`en`, `ru`, or `kk`)
+   - `FLUTTER_ASSETS_ROOT=/app/basil_arcana/app_flutter/assets`
+2. Build command: `cd bot && npm ci && npm run build`
+3. Start command: `cd bot && npm run start`
+
 ## Attach custom domain: api.basilarcana.com
 
 1. In Railway → Settings → Domains, add `api.basilarcana.com`.
