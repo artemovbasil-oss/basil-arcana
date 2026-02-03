@@ -204,20 +204,46 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                       child: ChatBubble(
                         isUser: false,
                         avatarEmoji: '🪄',
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _DetailsCardThumbnails(
-                              spread: spread,
-                              drawnCards: state.drawnCards,
-                            ),
-                            const SizedBox(height: 12),
-                            Text(state.detailsText!),
-                          ],
+                        child: _DetailsCardThumbnails(
+                          spread: spread,
+                          drawnCards: state.drawnCards,
                         ),
                       ),
                     ),
                     const SizedBox(height: 14),
+                    for (final section
+                        in _buildDetailsSections(
+                          state.detailsText!,
+                          l10n,
+                        )) ...[
+                      ChatBubbleReveal(
+                        child: ChatBubble(
+                          isUser: false,
+                          avatarEmoji: '🪄',
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (section.heading != null) ...[
+                                Text(
+                                  section.heading!,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium
+                                      ?.copyWith(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary,
+                                      ),
+                                ),
+                                const SizedBox(height: 8),
+                              ],
+                              Text(section.text),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                    ],
                   ],
                   if (state.detailsStatus == DetailsStatus.error) ...[
                     ChatBubbleReveal(
@@ -571,6 +597,107 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
       }
     });
   }
+
+  List<_DetailsSection> _buildDetailsSections(
+    String rawText,
+    AppLocalizations l10n,
+  ) {
+    final sanitized = _sanitizeDetailsText(rawText);
+    final cleaned = sanitized.trim().isEmpty ? rawText.trim() : sanitized.trim();
+    if (cleaned.isEmpty) {
+      return const [];
+    }
+    final relationshipMatch = RegExp(
+      r'(relationships|relationship|love)\b[:\-–—]*',
+      caseSensitive: false,
+    ).firstMatch(cleaned);
+    final careerMatch = RegExp(
+      r'(career|work)\b[:\-–—]*',
+      caseSensitive: false,
+    ).firstMatch(cleaned);
+
+    if (relationshipMatch == null || careerMatch == null) {
+      return [
+        _DetailsSection(text: cleaned),
+      ];
+    }
+
+    final relationshipIndex = relationshipMatch.start;
+    final careerIndex = careerMatch.start;
+    if (relationshipIndex == careerIndex) {
+      return [
+        _DetailsSection(text: cleaned),
+      ];
+    }
+
+    final relationshipsFirst = relationshipIndex < careerIndex;
+    final firstIndex = relationshipsFirst ? relationshipIndex : careerIndex;
+    final secondIndex = relationshipsFirst ? careerIndex : relationshipIndex;
+    final firstLabel = relationshipsFirst
+        ? l10n.resultDeepRelationshipsHeading
+        : l10n.resultDeepCareerHeading;
+    final secondLabel = relationshipsFirst
+        ? l10n.resultDeepCareerHeading
+        : l10n.resultDeepRelationshipsHeading;
+    final firstBody =
+        cleaned.substring(firstIndex, secondIndex).trim();
+    final secondBody = cleaned.substring(secondIndex).trim();
+
+    final firstText = _stripSectionHeading(
+      firstBody,
+      isRelationship: relationshipsFirst,
+    );
+    final secondText = _stripSectionHeading(
+      secondBody,
+      isRelationship: !relationshipsFirst,
+    );
+
+    if (firstText.isEmpty || secondText.isEmpty) {
+      return [
+        _DetailsSection(text: cleaned),
+      ];
+    }
+
+    return [
+      _DetailsSection(text: firstText, heading: firstLabel),
+      _DetailsSection(text: secondText, heading: secondLabel),
+    ];
+  }
+
+  String _stripSectionHeading(String text, {required bool isRelationship}) {
+    final pattern = isRelationship
+        ? RegExp(r'^\s*(relationships|relationship|love)\b[:\-–—]*\s*',
+            caseSensitive: false)
+        : RegExp(r'^\s*(career|work)\b[:\-–—]*\s*', caseSensitive: false);
+    return text.replaceFirst(pattern, '').trim();
+  }
+
+  String _sanitizeDetailsText(String input) {
+    final lines = input.replaceAll(RegExp(r'[`*_]+'), '').split('\n');
+    final cleanedLines = <String>[];
+    for (final line in lines) {
+      final trimmedLine = line.trim();
+      final lower = trimmedLine.toLowerCase();
+      if (lower.contains('[left') &&
+          lower.contains('[center') &&
+          lower.contains('[right')) {
+        continue;
+      }
+      final withoutBullet = trimmedLine.replaceAll(
+        RegExp(r'^(\d+\.\s+|[-*•–—]+\s+)'),
+        '',
+      );
+      cleanedLines.add(withoutBullet);
+    }
+    return cleanedLines.join('\n').trim();
+  }
+}
+
+class _DetailsSection {
+  const _DetailsSection({required this.text, this.heading});
+
+  final String text;
+  final String? heading;
 }
 
 class _OracleRetryScreen extends StatelessWidget {
@@ -863,69 +990,110 @@ class _DetailsCardThumbnails extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         for (var i = 0; i < cards.length; i++) ...[
-          _DetailThumbnailCard(assetPath: cards[i]),
+          _DetailThumbnailCard(
+            cardId: cards[i].cardId,
+            isBack: cards[i].isBack,
+            highlight: cards[i].highlight,
+          ),
           if (i != cards.length - 1) const SizedBox(width: 10),
         ],
       ],
     );
   }
 
-  List<String> _thumbnailCards() {
+  List<_ThumbnailCardData> _thumbnailCards() {
     if (spread.positions.length >= 3 && drawnCards.length >= 3) {
-      return drawnCards
-          .take(3)
-          .map((card) => cardAssetPath(card.cardId))
-          .toList();
+      final cards = drawnCards.take(3).toList();
+      return [
+        _ThumbnailCardData(cardId: cards[0].cardId),
+        _ThumbnailCardData(
+          cardId: cards[1].cardId,
+          highlight: true,
+        ),
+        _ThumbnailCardData(cardId: cards[2].cardId),
+      ];
     }
     if (drawnCards.isEmpty) {
       return const [
-        'assets/deck/cover.webp',
-        'assets/deck/cover.webp',
-        'assets/deck/cover.webp',
+        _ThumbnailCardData(isBack: true),
+        _ThumbnailCardData(isBack: true),
+        _ThumbnailCardData(isBack: true),
       ];
     }
     return [
-      'assets/deck/cover.webp',
-      cardAssetPath(drawnCards.first.cardId),
-      'assets/deck/cover.webp',
+      const _ThumbnailCardData(isBack: true),
+      _ThumbnailCardData(cardId: drawnCards.first.cardId),
+      const _ThumbnailCardData(isBack: true),
     ];
   }
 }
 
 class _DetailThumbnailCard extends StatelessWidget {
-  const _DetailThumbnailCard({required this.assetPath});
+  const _DetailThumbnailCard({
+    required this.cardId,
+    required this.isBack,
+    required this.highlight,
+  });
 
-  final String assetPath;
+  final String? cardId;
+  final bool isBack;
+  final bool highlight;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final radius = BorderRadius.circular(12);
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: radius,
-        border: Border.all(
-          color: colorScheme.primary.withOpacity(0.6),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: colorScheme.primary.withOpacity(0.25),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: radius,
-        child: Image.asset(
-          assetPath,
-          width: 56,
-          height: 88,
-          fit: BoxFit.cover,
-          filterQuality: FilterQuality.high,
-        ),
-      ),
+    final card = isBack
+        ? DecoratedBox(
+            decoration: BoxDecoration(
+              borderRadius: radius,
+              border: Border.all(
+                color: colorScheme.primary.withOpacity(0.35),
+                width: 1,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: colorScheme.primary.withOpacity(
+                    highlight ? 0.28 : 0.16,
+                  ),
+                  blurRadius: highlight ? 16 : 10,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: radius,
+              child: Image.asset(
+                'assets/deck/cover.webp',
+                width: 56,
+                height: 88,
+                fit: BoxFit.cover,
+                filterQuality: FilterQuality.high,
+              ),
+            ),
+          )
+        : CardAssetImage(
+            cardId: cardId ?? '',
+            width: 56,
+            height: 88,
+            borderRadius: radius,
+            showGlow: highlight,
+          );
+    return Transform.scale(
+      scale: highlight ? 1.02 : 1,
+      child: card,
     );
   }
+}
+
+class _ThumbnailCardData {
+  const _ThumbnailCardData({
+    this.cardId,
+    this.isBack = false,
+    this.highlight = false,
+  });
+
+  final String? cardId;
+  final bool isBack;
+  final bool highlight;
 }

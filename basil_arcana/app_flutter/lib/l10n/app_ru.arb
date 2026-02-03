@@ -12,7 +12,7 @@
   "homeDescription": "Тихое пространство для одного ясного вопроса",
   "homeQuestionPlaceholder": "Напишите свой вопрос…",
   "homeQuestionLabel": "Какой у вас вопрос?",
-  "homeQuestionHint": "Напишите, в чем нужна ясность...",
+  "homeQuestionHint": "Напишите, в чем нужна ясность",
   "homeClearQuestionTooltip": "Очистить вопрос",
   "homeTryPrompt": "Попробуйте один из этих запросов:",
   "homeExample1": "Куда направить свою энергию?",
@@ -50,7 +50,7 @@
     }
   },
   "shuffleTitle": "Перетасуйте колоду",
-  "shuffleSubtitle": "Перетасовываем колоду...",
+  "shuffleSubtitle": "Перетасовываем колоду",
   "shuffleDrawButton": "Вытянуть карты",
   "resultTitle": "Ваш расклад",
   "resultStatusAiReading": "Базилик толкует…",

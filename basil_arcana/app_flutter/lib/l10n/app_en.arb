@@ -12,7 +12,7 @@
   "homeDescription": "A quiet space for a single clear question",
   "homeQuestionPlaceholder": "Type your question here…",
   "homeQuestionLabel": "What's your question?",
-  "homeQuestionHint": "Type what you want clarity on...",
+  "homeQuestionHint": "Type what you want clarity on",
   "homeClearQuestionTooltip": "Clear question",
   "homeTryPrompt": "Try one of these prompts:",
   "homeExample1": "Where should I place my energy?",
@@ -50,7 +50,7 @@
     }
   },
   "shuffleTitle": "Shuffle the deck",
-  "shuffleSubtitle": "Shuffling the deck...",
+  "shuffleSubtitle": "Shuffling the deck",
   "shuffleDrawButton": "Draw cards",
   "resultTitle": "Your reading",
   "resultStatusAiReading": "Basil is interpreting…",
