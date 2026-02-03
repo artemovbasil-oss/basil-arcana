@@ -433,6 +433,17 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
           key: ValueKey(item.id),
           child: OracleTypingBubble(
             label: AppLocalizations.of(context)!.resultDeepTypingLabel,
+            cancelLabel: AppLocalizations.of(context)!.resultDeepNotNow,
+            onCancel: () {
+              setState(() {
+                _deepPromptDismissed = true;
+                _removeDeepStatusItems();
+                _removeDeepPromptItem();
+              });
+              ref
+                  .read(readingFlowControllerProvider.notifier)
+                  .cancelDeepReading();
+            },
           ),
         );
       case _ChatItemKind.deepError:
@@ -507,6 +518,8 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
     }
     setState(() {
       _removeDeepStatusItems();
+      _deepPromptDismissed = true;
+      _removeDeepPromptItem();
     });
     _appendDeepMessages(state);
   }
@@ -556,6 +569,10 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
       l10n.resultDeepRelationshipsHeading,
       l10n.resultDeepCareerHeading,
     ];
+    final adviceLines = [
+      deepResult.why.trim(),
+      deepResult.action.trim(),
+    ];
     final sectionTexts = List<String>.generate(headings.length, (index) {
       final section = index < deepResult.sections.length
           ? deepResult.sections[index].text.trim()
@@ -584,6 +601,19 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                 ),
                 const SizedBox(height: 6),
                 Text(sectionTexts[i]),
+                if (adviceLines[i].isNotEmpty) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    adviceLines[i],
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withOpacity(0.7),
+                          fontStyle: FontStyle.italic,
+                        ),
+                  ),
+                ],
                 if (i != headings.length - 1) const SizedBox(height: 12),
               ],
             ],
@@ -763,7 +793,7 @@ class _DeepErrorBubble extends StatelessWidget {
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   minimumSize: const Size(0, 36),
                 ),
-                child: Text(l10n.resultDeepCancel),
+                child: Text(l10n.resultDeepNotNow),
               ),
             ),
             const SizedBox(width: 10),

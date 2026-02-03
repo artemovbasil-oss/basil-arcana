@@ -137,21 +137,43 @@ class OracleTypingBubble extends StatelessWidget {
   const OracleTypingBubble({
     super.key,
     required this.label,
+    this.cancelLabel,
+    this.onCancel,
   });
 
   final String label;
+  final String? cancelLabel;
+  final VoidCallback? onCancel;
 
   @override
   Widget build(BuildContext context) {
     return ChatBubble(
       isUser: false,
       avatarEmoji: '🪄',
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Flexible(child: Text(label)),
-          const SizedBox(width: 6),
-          const _TypingEllipsis(),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(child: Text(label)),
+              const SizedBox(width: 6),
+              const _TypingEllipsis(),
+            ],
+          ),
+          if (cancelLabel != null && onCancel != null) ...[
+            const SizedBox(height: 6),
+            TextButton(
+              onPressed: onCancel,
+              style: TextButton.styleFrom(
+                padding: EdgeInsets.zero,
+                minimumSize: const Size(0, 0),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                alignment: Alignment.centerLeft,
+              ),
+              child: Text(cancelLabel!),
+            ),
+          ],
         ],
       ),
     );

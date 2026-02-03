@@ -77,6 +77,7 @@ class AiRepository {
     required ReadingMode mode,
     Map<String, dynamic>? fastReading,
     http.Client? client,
+    Duration timeout = _requestTimeout,
   }) async {
     if (!hasApiKey) {
       print(
@@ -144,7 +145,7 @@ class AiRepository {
         uri,
         requestId: requestId,
         startTimestamp: startTimestamp,
-        timeout: _requestTimeout,
+        timeout: timeout,
       );
       response = await httpClient
           .post(
@@ -152,7 +153,7 @@ class AiRepository {
             headers: headers,
             body: jsonEncode(payload),
           )
-          .timeout(_requestTimeout);
+          .timeout(timeout);
     } on TimeoutException catch (error) {
       _logFailure(
         uri,

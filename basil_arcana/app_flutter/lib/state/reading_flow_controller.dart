@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 import 'package:http/http.dart' as http;
@@ -387,7 +388,10 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
   Future<void> requestDeepReading() async {
     final spread = state.spread;
     final aiResult = state.aiResult;
-    if (spread == null || aiResult == null || state.drawnCards.isEmpty) {
+    if (spread == null ||
+        aiResult == null ||
+        state.drawnCards.isEmpty ||
+        state.isDeepLoading) {
       return;
     }
 
@@ -423,6 +427,9 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
     _activeDeepClient?.close();
     _activeDeepClient = client;
     try {
+      if (kDebugMode) {
+        debugPrint('[ReadingFlow] deepRequest:start id=$requestId');
+      }
       final aiRepository = ref.read(aiRepositoryProvider);
       final locale = ref.read(localeProvider);
       final result = await aiRepository.generateReading(
@@ -433,6 +440,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
         mode: ReadingMode.lifeAreas,
         fastReading: fastReading,
         client: client,
+        timeout: const Duration(seconds: 30),
       );
       if (_activeDeepRequestId != requestId) {
         return;
@@ -441,6 +449,12 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
         deepResult: result,
         isDeepLoading: false,
       );
+      if (kDebugMode) {
+        debugPrint(
+          '[ReadingFlow] deepRequest:success id=$requestId '
+          'requestId=${result.requestId ?? 'unknown'}',
+        );
+      }
     } on AiRepositoryException catch (error) {
       if (_activeDeepRequestId != requestId) {
         return;
@@ -452,6 +466,12 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
         deepErrorStatusCode: error.statusCode,
         deepErrorMessage: _messageForError(error, l10n),
       );
+      if (kDebugMode) {
+        debugPrint(
+          '[ReadingFlow] deepRequest:error id=$requestId '
+          'type=${error.type.name} status=${error.statusCode ?? 'n/a'}',
+        );
+      }
     } catch (_) {
       if (_activeDeepRequestId != requestId) {
         return;
@@ -462,9 +482,18 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
         deepErrorType: AiErrorType.serverError,
         deepErrorMessage: l10n.resultStatusServerUnavailable,
       );
+      if (kDebugMode) {
+        debugPrint(
+          '[ReadingFlow] deepRequest:error id=$requestId '
+          'type=${AiErrorType.serverError.name}',
+        );
+      }
     } finally {
       if (_activeDeepClient == client) {
         _activeDeepClient = null;
+      }
+      if (kDebugMode) {
+        debugPrint('[ReadingFlow] deepRequest:finish id=$requestId');
       }
       client.close();
     }
