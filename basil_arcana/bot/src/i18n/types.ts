@@ -7,6 +7,7 @@ export type I18nStrings = {
   spreadThree: string;
   processing: string;
   readingFailed: string;
+  readingFailedBadRequest: string;
   detailsFailed: string;
   detailsButton: string;
   newReadingButton: string;

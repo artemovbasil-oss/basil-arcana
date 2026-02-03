@@ -1,6 +1,7 @@
 import { Bot, InlineKeyboard, InputFile } from "grammy";
 import type { Context } from "grammy";
 import type { InputMediaPhoto } from "grammy/types";
+import { randomUUID } from "crypto";
 import { loadConfig } from "./config";
 import {
   resolveCardImagePath,
@@ -188,7 +189,16 @@ async function handleReading(
 
   await sendCardImages(ctx, drawnIds, locale);
 
-  const reading = await callGenerate(question, spread, cardsPayload, locale);
+  let reading;
+  try {
+    reading = await callGenerate(question, spread, cardsPayload, locale);
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 400) {
+      await ctx.reply(t(locale).readingFailedBadRequest);
+      return;
+    }
+    throw error;
+  }
   const shortText = [reading.tldr, reading.action, reading.fullText]
     .filter(Boolean)
     .join("\n\n");
@@ -272,25 +282,64 @@ async function callGenerate(
   cards: DrawnCard[],
   locale: Locale
 ): Promise<{ tldr?: string; fullText?: string; action?: string }> {
+  const endpoint = "/api/reading/generate";
+  const mode = "fast";
+  const requestId = randomUUID();
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), config.requestTimeoutMs);
   try {
-    const response = await fetch(`${config.apiBaseUrl}/api/reading/generate`, {
+    const cardsPayload = toAiCardsPayload(cards, "fast");
+    const payload = {
+      question,
+      spread,
+      cards: cardsPayload,
+      tone: "neutral",
+      language: locale,
+      responseFormat: "strict_json",
+      responseConstraints: {
+        tldrMaxChars: 180,
+        sectionMaxChars: 280,
+        actionMaxChars: 160,
+      },
+    };
+    const payloadSummary = {
+      questionLength: question.length,
+      spreadId: spread.id,
+      locale,
+      cardCount: cardsPayload.length,
+      mode,
+      deckMode: "random",
+    };
+    console.info(`[Api] generate payload ${JSON.stringify(payloadSummary)}`);
+    const url = new URL(`${config.apiBaseUrl}${endpoint}`);
+    url.searchParams.set("mode", mode);
+    const response = await fetch(url.toString(), {
       method: "POST",
       headers: {
         "content-type": "application/json",
         "x-api-key": config.arcanaApiKey,
+        "x-request-id": requestId,
       },
-      body: JSON.stringify({
-        question,
-        spread,
-        cards,
-        language: locale,
-      }),
+      body: JSON.stringify(payload),
       signal: controller.signal,
     });
     if (!response.ok) {
-      throw new Error(`Generate failed: ${response.status}`);
+      const errorBody = await readErrorBody(response);
+      logApiError({
+        endpoint,
+        status: response.status,
+        requestId,
+        payloadSummary,
+        errorBody,
+      });
+      const serverMessage = extractServerMessage(errorBody, response.statusText);
+      throw new ApiError(
+        `Generate failed: ${response.status} ${serverMessage}`.trim(),
+        response.status,
+        endpoint,
+        requestId,
+        serverMessage
+      );
     }
     return (await response.json()) as {
       tldr?: string;
@@ -307,25 +356,53 @@ async function sendDetails(
   payload: { question: string; spread: Spread; cards: DrawnCard[] },
   locale: Locale
 ): Promise<void> {
+  const endpoint = "/api/reading/details";
+  const requestId = randomUUID();
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), config.requestTimeoutMs);
   try {
-    const response = await fetch(`${config.apiBaseUrl}/api/reading/details`, {
+    const cardsPayload = toAiCardsPayload(payload.cards, "deep");
+    const payloadSummary = {
+      questionLength: payload.question.length,
+      spreadId: payload.spread.id,
+      locale,
+      cardCount: cardsPayload.length,
+      mode: "details",
+      deckMode: "random",
+    };
+    console.info(`[Api] details payload ${JSON.stringify(payloadSummary)}`);
+    const response = await fetch(`${config.apiBaseUrl}${endpoint}`, {
       method: "POST",
       headers: {
         "content-type": "application/json",
         "x-api-key": config.arcanaApiKey,
+        "x-request-id": requestId,
       },
       body: JSON.stringify({
         question: payload.question,
         spread: payload.spread,
-        cards: payload.cards,
+        cards: cardsPayload,
         locale,
       }),
       signal: controller.signal,
     });
     if (!response.ok) {
-      throw new Error(`Details failed: ${response.status}`);
+      const errorBody = await readErrorBody(response);
+      logApiError({
+        endpoint,
+        status: response.status,
+        requestId,
+        payloadSummary,
+        errorBody,
+      });
+      const serverMessage = extractServerMessage(errorBody, response.statusText);
+      throw new ApiError(
+        `Details failed: ${response.status} ${serverMessage}`.trim(),
+        response.status,
+        endpoint,
+        requestId,
+        serverMessage
+      );
     }
     const result = (await response.json()) as { detailsText?: string };
     if (result.detailsText) {
@@ -334,6 +411,118 @@ async function sendDetails(
   } finally {
     clearTimeout(timeout);
   }
+}
+
+class ApiError extends Error {
+  status: number;
+  endpoint: string;
+  requestId?: string;
+  serverMessage?: string;
+
+  constructor(
+    message: string,
+    status: number,
+    endpoint: string,
+    requestId?: string,
+    serverMessage?: string
+  ) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+    this.endpoint = endpoint;
+    this.requestId = requestId;
+    this.serverMessage = serverMessage;
+  }
+}
+
+function toAiCardsPayload(
+  cards: DrawnCard[],
+  mode: "fast" | "deep"
+): DrawnCard[] {
+  const totalCards = cards.length;
+  const keywordLimit =
+    mode === "deep" ? (totalCards > 1 ? 4 : 6) : totalCards > 1 ? 3 : 5;
+  const meaningLimit =
+    mode === "deep" ? (totalCards > 1 ? 70 : 110) : totalCards > 1 ? 90 : 140;
+  return cards.map((card) => ({
+    ...card,
+    keywords: card.keywords.slice(0, keywordLimit),
+    meaning: {
+      general: truncate(card.meaning.general, meaningLimit),
+      light: truncate(card.meaning.light, meaningLimit),
+      shadow: truncate(card.meaning.shadow, meaningLimit),
+      advice: truncate(card.meaning.advice, meaningLimit),
+    },
+  }));
+}
+
+function truncate(value: string, maxLength: number): string {
+  if (value.length <= maxLength) {
+    return value;
+  }
+  return value.substring(0, maxLength).trimRight();
+}
+
+async function readErrorBody(
+  response: Response
+): Promise<Record<string, unknown> | string | null> {
+  try {
+    return (await response.json()) as Record<string, unknown>;
+  } catch (error) {
+    try {
+      const text = await response.text();
+      return text || null;
+    } catch (textError) {
+      return null;
+    }
+  }
+}
+
+function extractServerMessage(
+  errorBody: Record<string, unknown> | string | null,
+  fallback: string
+): string {
+  if (!errorBody) {
+    return fallback;
+  }
+  if (typeof errorBody === "string") {
+    return errorBody;
+  }
+  const message =
+    (typeof errorBody.message === "string" && errorBody.message) ||
+    (typeof errorBody.error === "string" && errorBody.error) ||
+    (typeof (errorBody.error as { message?: string } | undefined)?.message ===
+      "string" &&
+      (errorBody.error as { message?: string }).message);
+  return message || fallback;
+}
+
+function logApiError({
+  endpoint,
+  status,
+  requestId,
+  payloadSummary,
+  errorBody,
+}: {
+  endpoint: string;
+  status: number;
+  requestId: string;
+  payloadSummary: Record<string, unknown>;
+  errorBody: Record<string, unknown> | string | null;
+}): void {
+  const sanitizedPayload = {
+    ...payloadSummary,
+  };
+  const serverMessage = extractServerMessage(
+    errorBody,
+    "Unexpected response"
+  );
+  const errorOutput = config.debug ? errorBody : serverMessage;
+  console.error(
+    `[ApiError] endpoint=${endpoint} status=${status} requestId=${requestId} payload=${JSON.stringify(
+      sanitizedPayload
+    )} error=${JSON.stringify(errorOutput)}`
+  );
 }
 
 main().catch((error) => {

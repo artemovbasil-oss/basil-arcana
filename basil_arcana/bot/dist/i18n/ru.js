@@ -9,6 +9,7 @@ const ru = {
     spreadThree: "3 карты",
     processing: "Перетасовываю колоду и вытягиваю карты…",
     readingFailed: "Что-то пошло не так при генерации расклада. Попробуйте еще раз.",
+    readingFailedBadRequest: "Оракул споткнулся. Попробуйте еще раз чуть позже.",
     detailsFailed: "Не удалось получить детали. Попробуйте еще раз.",
     detailsButton: "Подробнее",
     newReadingButton: "Новый расклад",

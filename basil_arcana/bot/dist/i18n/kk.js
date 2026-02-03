@@ -9,6 +9,7 @@ const kk = {
     spreadThree: "3 карта",
     processing: "Колода араластырылып, карталар алынады…",
     readingFailed: "Оқылымды құрастыру кезінде қате кетті. Қайтадан көріңіз.",
+    readingFailedBadRequest: "Оракул сүрінді. Біраздан кейін қайта көріңіз.",
     detailsFailed: "Қосымша мәліметтерді алу мүмкін болмады. Қайтадан көріңіз.",
     detailsButton: "Толығырақ",
     newReadingButton: "Жаңа оқылым",
