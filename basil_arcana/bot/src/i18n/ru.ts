@@ -1,0 +1,17 @@
+export default {
+  languagePrompt: "Выберите язык:",
+  languageSet: "Язык установлен. Пожалуйста, задайте вопрос.",
+  askQuestion: "Какой у вас вопрос?",
+  chooseSpread: "Выберите расклад:",
+  spreadOne: "1 карта",
+  spreadThree: "3 карты",
+  processing: "Тасую колоду и вытягиваю карты…",
+  readingFailed: "Не удалось создать расклад. Попробуйте еще раз.",
+  detailsFailed: "Не удалось получить детали. Попробуйте еще раз.",
+  detailsButton: "Детали",
+  newReadingButton: "Новый расклад",
+  nextAction: "Что вы хотите сделать дальше?",
+  alreadyProcessing: "Я уже работаю над вашим раскладом. Пожалуйста, подождите.",
+  missingReading: "Сначала начните новый расклад.",
+  detailsIntro: "Детали расклада:",
+} as const;
