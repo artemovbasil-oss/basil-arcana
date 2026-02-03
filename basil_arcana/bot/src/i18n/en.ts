@@ -9,6 +9,7 @@ const en: I18nStrings = {
   spreadThree: "3 cards",
   processing: "Shuffling the deck and drawing cards…",
   readingFailed: "Something went wrong generating your reading. Please try again.",
+  readingFailedBadRequest: "Oracle stumbled. Please try again in a moment.",
   detailsFailed: "Unable to fetch details right now. Please try again.",
   detailsButton: "Details",
   newReadingButton: "New reading",

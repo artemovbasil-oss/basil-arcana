@@ -76,16 +76,16 @@ async function loadDecks() {
     const spreads = [
         {
             id: "spread_1_focus",
-            name: "Focus",
-            positions: [{ id: "p1", title: "Focus" }],
+            name: "Focus / Advice",
+            positions: [{ id: "p1", title: "Focus / Advice" }],
         },
         {
-            id: "spread_3",
-            name: "Three Card",
+            id: "spread_3_situation_challenge_step",
+            name: "Situation / Challenge / Next Step",
             positions: [
-                { id: "left", title: "Left" },
-                { id: "center", title: "Center" },
-                { id: "right", title: "Right" },
+                { id: "p1", title: "Situation" },
+                { id: "p2", title: "Challenge" },
+                { id: "p3", title: "Next Step" },
             ],
         },
     ];

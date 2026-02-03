@@ -9,6 +9,7 @@ export interface BotConfig {
   defaultLocale: Locale;
   assetsBasePath: string;
   requestTimeoutMs: number;
+  debug: boolean;
 }
 
 function requireEnv(name: string, fallback?: string): string {
@@ -36,6 +37,7 @@ export function loadConfig(): BotConfig {
   const defaultLocale = parseLocale(process.env.DEFAULT_LOCALE, "en");
   const assetsBasePath = resolveBotAssetsRoot();
   const requestTimeoutMs = 35000;
+  const debug = process.env.BOT_DEBUG === "1";
 
   return {
     telegramToken,
@@ -44,6 +46,7 @@ export function loadConfig(): BotConfig {
     defaultLocale,
     assetsBasePath,
     requestTimeoutMs,
+    debug,
   };
 }
 

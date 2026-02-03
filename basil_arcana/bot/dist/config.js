@@ -22,6 +22,7 @@ function loadConfig() {
     const defaultLocale = parseLocale(process.env.DEFAULT_LOCALE, "en");
     const assetsBasePath = (0, assets_1.resolveBotAssetsRoot)();
     const requestTimeoutMs = 35000;
+    const debug = process.env.BOT_DEBUG === "1";
     return {
         telegramToken,
         apiBaseUrl,
@@ -29,5 +30,6 @@ function loadConfig() {
         defaultLocale,
         assetsBasePath,
         requestTimeoutMs,
+        debug,
     };
 }
