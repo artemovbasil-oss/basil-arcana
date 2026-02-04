@@ -358,5 +358,257 @@
       "shadow": "Impulsive flare with no follow-through.",
       "advice": "Take the first step and nurture it."
     }
+  },
+  "cups_00_knight": {
+    "title": "Knight of Cups",
+    "keywords": ["romance", "invitation", "gentle pursuit", "dreams"],
+    "meaning": {
+      "general": "A tender offer approaches, led by feeling more than plan.",
+      "light": "Sincere affection and graceful pursuit.",
+      "shadow": "Mixed signals or emotional fog.",
+      "advice": "Accept the offer only if it comes with steady actions.",
+      "detailed": "He rides with a full heart and soft words, but the road still matters. Let sweetness be proven by consistency. If the invitation feels real, let it in, but keep your eyes open."
+    },
+    "funFact": "Traditional decks show the knight moving slowly to signal calm devotion.",
+    "stats": {
+      "luck": 58,
+      "power": 42,
+      "love": 82,
+      "clarity": 55
+    }
+  },
+  "cups_01_king": {
+    "title": "King of Cups",
+    "keywords": ["emotional mastery", "compassion", "diplomacy", "steady heart"],
+    "meaning": {
+      "general": "Maturity of heart asks you to lead with calm.",
+      "light": "Wise compassion and balanced support.",
+      "shadow": "Emotions held too tightly can turn distant.",
+      "advice": "Be kind, but keep your boundaries clear.",
+      "detailed": "This king knows the waves but does not drown in them. Your feelings are real, yet they must be guided. Speak gently and act firmly, and others will trust your steadiness."
+    },
+    "funFact": "The king sits on a throne surrounded by water, a sign of calm amid emotion.",
+    "stats": {
+      "luck": 46,
+      "power": 70,
+      "love": 78,
+      "clarity": 68
+    }
+  },
+  "cups_02_queen": {
+    "title": "Queen of Cups",
+    "keywords": ["intuition", "empathy", "nurture", "inner tides"],
+    "meaning": {
+      "general": "Deep sensitivity reveals what is unspoken.",
+      "light": "Warm care and intuitive insight.",
+      "shadow": "Absorbing too much can drain you.",
+      "advice": "Offer comfort while protecting your energy.",
+      "detailed": "The queen listens with her whole spirit, so be honest with yourself. Your intuition is sharp, but do not carry everyone else's sorrow. Give care where it is welcomed and keep your cup full."
+    },
+    "funFact": "Her cup is often closed, symbolizing private intuition.",
+    "stats": {
+      "luck": 52,
+      "power": 48,
+      "love": 86,
+      "clarity": 60
+    }
+  },
+  "cups_03_page": {
+    "title": "Page of Cups",
+    "keywords": ["surprise", "curiosity", "messages", "playfulness"],
+    "meaning": {
+      "general": "A gentle surprise or message stirs the heart.",
+      "light": "Fresh feelings and open curiosity.",
+      "shadow": "Naivety or emotional immaturity.",
+      "advice": "Receive the message, then respond with care.",
+      "detailed": "This page brings a small offering and a wide-eyed heart. Let yourself feel, but do not rush to declare. Curiosity is sweet when it is paired with patience."
+    },
+    "funFact": "The fish peeking from the cup hints at unexpected inspiration.",
+    "stats": {
+      "luck": 64,
+      "power": 36,
+      "love": 74,
+      "clarity": 58
+    }
+  },
+  "cups_04_two": {
+    "title": "Two of Cups",
+    "keywords": ["union", "trust", "balance", "mutual respect"],
+    "meaning": {
+      "general": "A mutual bond asks to be honored.",
+      "light": "Shared affection and fair exchange.",
+      "shadow": "Imbalance or dependence can creep in.",
+      "advice": "Choose partnership that respects both hearts.",
+      "detailed": "Two cups meet as equals, not as saviors. A good bond strengthens both sides and does not erase self. Keep the exchange balanced and the respect steady."
+    },
+    "funFact": "This card echoes a sacred agreement, not just romance.",
+    "stats": {
+      "luck": 72,
+      "power": 50,
+      "love": 90,
+      "clarity": 66
+    }
+  },
+  "cups_05_three": {
+    "title": "Three of Cups",
+    "keywords": ["celebration", "friends", "support", "joy"],
+    "meaning": {
+      "general": "Community lifts the spirit.",
+      "light": "Shared joy and loyal support.",
+      "shadow": "Gossip or shallow connection.",
+      "advice": "Celebrate with those who truly care.",
+      "detailed": "Laughter is medicine, so accept the invitation. Your people want to hold you up, and you can do the same for them. Keep the circle clean and the kindness honest."
+    },
+    "funFact": "The three figures raise cups in a simple toast of unity.",
+    "stats": {
+      "luck": 68,
+      "power": 44,
+      "love": 76,
+      "clarity": 62
+    }
+  },
+  "cups_06_four": {
+    "title": "Four of Cups",
+    "keywords": ["apathy", "rest", "reassessment", "missed chance"],
+    "meaning": {
+      "general": "Disinterest hides a choice you are avoiding.",
+      "light": "Taking space to reconsider what you want.",
+      "shadow": "Missing a gift while staring at what is not.",
+      "advice": "Look again, and choose with intention.",
+      "detailed": "You sit with crossed arms, but the offer is still there. Rest if you need it, yet do not reject help out of habit. Name what you truly want before you decide."
+    },
+    "funFact": "The offered cup appears from a cloud, symbolizing a quiet blessing.",
+    "stats": {
+      "luck": 40,
+      "power": 38,
+      "love": 52,
+      "clarity": 48
+    }
+  },
+  "cups_07_five": {
+    "title": "Five of Cups",
+    "keywords": ["grief", "regret", "acceptance", "healing"],
+    "meaning": {
+      "general": "Loss is present, but not all is gone.",
+      "light": "Acknowledging sadness opens healing.",
+      "shadow": "Fixation on regret blocks recovery.",
+      "advice": "Mourn what passed, then notice what remains.",
+      "detailed": "Your eyes are on the spilled cups, and that is human. Still, two cups stand, waiting for you to turn. Let grief move through you, then gather what is left."
+    },
+    "funFact": "The bridge in the image reminds you there is a way forward.",
+    "stats": {
+      "luck": 34,
+      "power": 46,
+      "love": 58,
+      "clarity": 44
+    }
+  },
+  "cups_08_six": {
+    "title": "Six of Cups",
+    "keywords": ["nostalgia", "innocence", "kindness", "memory"],
+    "meaning": {
+      "general": "Past sweetness returns to soften the moment.",
+      "light": "Simple joys and gentle remembrance.",
+      "shadow": "Living in the past can stall growth.",
+      "advice": "Take the warmth, then keep moving.",
+      "detailed": "A familiar scent or story may return you to kinder days. Let it comfort you, but do not let it trap you. Carry the lesson forward with a soft heart."
+    },
+    "funFact": "This card often signals a childhood memory resurfacing.",
+    "stats": {
+      "luck": 62,
+      "power": 40,
+      "love": 70,
+      "clarity": 54
+    }
+  },
+  "cups_09_seven": {
+    "title": "Seven of Cups",
+    "keywords": ["choices", "fantasy", "temptation", "confusion"],
+    "meaning": {
+      "general": "Many options shimmer, and not all are true.",
+      "light": "Imagination opens possibilities.",
+      "shadow": "Illusion or scattered desire.",
+      "advice": "Choose what is real, not what only sparkles.",
+      "detailed": "The cups show dreams and dangers together. Take time to sort the real from the glitter. One clear choice is worth more than seven half wishes."
+    },
+    "funFact": "Each cup holds a different symbol of desire or fear.",
+    "stats": {
+      "luck": 48,
+      "power": 52,
+      "love": 60,
+      "clarity": 36
+    }
+  },
+  "cups_10_eight": {
+    "title": "Eight of Cups",
+    "keywords": ["walking away", "search", "release", "truth"],
+    "meaning": {
+      "general": "It may be time to leave what no longer feeds you.",
+      "light": "Courage to seek deeper meaning.",
+      "shadow": "Avoiding a hard conversation.",
+      "advice": "Go toward what is true, even if it is quiet.",
+      "detailed": "You have enough, yet your soul is still hungry. This is not failure, it is honesty. Walk away with respect and let the next chapter find you."
+    },
+    "funFact": "The moon in the card marks a journey guided by intuition.",
+    "stats": {
+      "luck": 45,
+      "power": 64,
+      "love": 42,
+      "clarity": 70
+    }
+  },
+  "cups_11_nine": {
+    "title": "Nine of Cups",
+    "keywords": ["contentment", "wish", "gratitude", "comfort"],
+    "meaning": {
+      "general": "A wish comes close, and gratitude steadies it.",
+      "light": "Satisfaction and earned comfort.",
+      "shadow": "Overindulgence or smugness.",
+      "advice": "Enjoy the reward, but keep humility.",
+      "detailed": "You have earned a warm seat at the table. Give thanks and share your plenty, and the blessing will last. Do not let comfort make you careless."
+    },
+    "funFact": "This card is often called the wish card.",
+    "stats": {
+      "luck": 80,
+      "power": 58,
+      "love": 72,
+      "clarity": 68
+    }
+  },
+  "cups_12_ten": {
+    "title": "Ten of Cups",
+    "keywords": ["harmony", "family", "shared joy", "blessing"],
+    "meaning": {
+      "general": "Harmony grows when hearts align.",
+      "light": "Peace at home and emotional fulfillment.",
+      "shadow": "Unrealistic perfection can crack the bond.",
+      "advice": "Protect the harmony with honest care.",
+      "detailed": "Joy is sweetest when it is shared and steady. The rainbow is a promise, but it still needs daily kindness. Keep showing up for those you love."
+    },
+    "funFact": "The rainbow of cups symbolizes emotional completion.",
+    "stats": {
+      "luck": 78,
+      "power": 62,
+      "love": 88,
+      "clarity": 74
+    }
+  },
+  "cups_13_ace": {
+    "title": "Ace of Cups",
+    "keywords": ["new feelings", "renewal", "open heart", "blessing"],
+    "meaning": {
+      "general": "A new wave of feeling rises.",
+      "light": "Emotional renewal and sincere openness.",
+      "shadow": "Overwhelming emotion or wishful thinking.",
+      "advice": "Open your heart, but keep your feet on the ground.",
+      "detailed": "The cup overflows, and so does your intuition. Let the feeling in, then shape it with gentle action. This is a beginning, not the whole story."
+    },
+    "funFact": "In many decks a dove delivers the cup, a sign of grace.",
+    "stats": {
+      "luck": 74,
+      "power": 46,
+      "love": 92,
+      "clarity": 66
+    }
   }
 }

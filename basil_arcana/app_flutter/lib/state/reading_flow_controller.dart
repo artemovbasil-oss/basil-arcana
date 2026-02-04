@@ -223,6 +223,8 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
           cardName: card.name,
           keywords: card.keywords,
           meaning: card.meaning,
+          funFact: card.funFact,
+          stats: card.stats,
         ),
       );
     }

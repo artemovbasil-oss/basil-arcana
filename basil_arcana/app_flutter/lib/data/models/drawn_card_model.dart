@@ -22,6 +22,12 @@ class DrawnCardModel {
   @HiveField(5)
   final CardMeaning meaning;
 
+  @HiveField(6)
+  final String funFact;
+
+  @HiveField(7)
+  final CardStats? stats;
+
   const DrawnCardModel({
     required this.positionId,
     required this.positionTitle,
@@ -29,6 +35,8 @@ class DrawnCardModel {
     required this.cardName,
     required this.keywords,
     required this.meaning,
+    this.funFact = '',
+    this.stats,
   });
 
   Map<String, dynamic> toJson() => {
@@ -38,6 +46,8 @@ class DrawnCardModel {
         'cardName': cardName,
         'keywords': keywords,
         'meaning': meaning.toJson(),
+        'funFact': funFact,
+        'stats': stats?.toJson(),
       };
 
   Map<String, dynamic> toAiJson({
@@ -101,6 +111,8 @@ class DrawnCardModelAdapter extends TypeAdapter<DrawnCardModel> {
       cardName: reader.readString(),
       keywords: reader.readList().cast<String>(),
       meaning: reader.read() as CardMeaning,
+      funFact: reader.availableBytes > 0 ? reader.readString() : '',
+      stats: _readStats(reader),
     );
   }
 
@@ -112,6 +124,19 @@ class DrawnCardModelAdapter extends TypeAdapter<DrawnCardModel> {
       ..writeString(obj.cardId)
       ..writeString(obj.cardName)
       ..writeList(obj.keywords)
-      ..write(obj.meaning);
+      ..write(obj.meaning)
+      ..writeString(obj.funFact)
+      ..write(obj.stats?.toJson());
   }
+}
+
+CardStats? _readStats(BinaryReader reader) {
+  if (reader.availableBytes <= 0) {
+    return null;
+  }
+  final value = reader.read();
+  if (value is Map) {
+    return CardStats.fromJson(value.cast<String, dynamic>());
+  }
+  return null;
 }
