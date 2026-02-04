@@ -29,7 +29,7 @@ ThemeData buildAppTheme() {
       elevation: 0,
       centerTitle: false,
     ),
-    cardTheme: CardThemeData(
+    cardTheme: CardTheme(
       color: surface,
       surfaceTintColor: Colors.transparent,
       elevation: 3,

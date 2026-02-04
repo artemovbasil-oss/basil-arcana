@@ -6,7 +6,9 @@ COPY . .
 RUN flutter --version
 RUN flutter config --enable-web
 RUN flutter pub get
+RUN mkdir -p lib/l10n/gen
 RUN flutter gen-l10n
+RUN test -f lib/l10n/gen/app_localizations.dart || (echo "Missing generated localization file at lib/l10n/gen/app_localizations.dart" && exit 1)
 RUN flutter build web --release --base-href "/" \
     --dart-define=API_BASE_URL=https://api.basilarcana.com
 
