@@ -1,0 +1,25 @@
+FROM ghcr.io/cirruslabs/flutter:3.24.4 AS build
+
+WORKDIR /app
+COPY . .
+
+RUN flutter --version
+RUN flutter config --enable-web
+RUN flutter pub get
+RUN flutter gen-l10n
+RUN flutter build web --release --base-href "/" \
+    --dart-define=API_BASE_URL=https://api.basilarcana.com
+
+FROM node:18-alpine
+
+WORKDIR /app
+COPY package.json ./
+RUN npm install --omit=dev
+
+COPY server.js ./
+COPY --from=build /app/build/web ./build/web
+
+ENV PORT=3000
+EXPOSE 3000
+
+CMD ["npm", "start"]

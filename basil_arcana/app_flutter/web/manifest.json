@@ -1,0 +1,9 @@
+{
+  "name": "Basil’s Arcana",
+  "short_name": "Basil Arcana",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "description": "Reflective tarot readings for clarity, not certainty."
+}
