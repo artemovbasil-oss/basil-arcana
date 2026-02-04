@@ -1,367 +1,804 @@
 {
   "major_00_fool": {
     "title": "The Fool",
-    "keywords": ["beginnings", "curiosity", "leap of faith"],
+    "keywords": [
+      "beginnings",
+      "curiosity",
+      "leap of faith"
+    ],
     "meaning": {
       "general": "A fresh start invites openness and experimentation.",
       "light": "Optimism and curiosity are helping you move forward.",
       "shadow": "Naivety or avoidance could blur the risks.",
-      "advice": "Take a small step that keeps the door open to learning."
+      "advice": "Take a small step that keeps the door open to learning.",
+      "detailed": "You are at the edge of a new road, and you do not need all the answers. Start with one small step, but keep a plan for shelter and money. If someone pushes you to leap, ask what safety net they offer. Your freedom grows when you choose curiosity with responsibility."
+    },
+    "funFact": "In many traditions the Fool is numbered zero, the start of the journey.",
+    "stats": {
+      "luck": 72,
+      "power": 40,
+      "love": 55,
+      "clarity": 45
     }
   },
   "major_01_magician": {
     "title": "The Magician",
-    "keywords": ["focus", "resources", "initiative"],
+    "keywords": [
+      "focus",
+      "resources",
+      "initiative"
+    ],
     "meaning": {
       "general": "You already have tools available to shape the outcome.",
       "light": "Aligned intention makes your efforts more effective.",
       "shadow": "Scattered energy may dilute your impact.",
-      "advice": "Choose one priority and direct your attention there."
+      "advice": "Choose one priority and direct your attention there.",
+      "detailed": "Your tools are on the table; use them instead of waiting. Focus on one goal and gather the right supplies. Speak clearly about what you want so others can help. If you try to impress, you will waste power."
+    },
+    "funFact": "The Magician often points one hand up and one down to link above and below.",
+    "stats": {
+      "luck": 60,
+      "power": 80,
+      "love": 52,
+      "clarity": 78
     }
   },
   "major_02_high_priestess": {
     "title": "The High Priestess",
-    "keywords": ["intuition", "stillness", "inner knowing"],
+    "keywords": [
+      "intuition",
+      "stillness",
+      "inner knowing"
+    ],
     "meaning": {
       "general": "Quiet insight is available beneath the surface.",
       "light": "Trusting your intuition brings clarity.",
       "shadow": "Keeping too much hidden can create distance.",
-      "advice": "Give yourself space to listen before acting."
+      "advice": "Give yourself space to listen before acting.",
+      "detailed": "Quiet knows more than noise. Wait, observe, and collect the truth before acting. If someone hides something, you can sense it, but do not force it open. Trust your inner rules and protect your boundaries."
+    },
+    "funFact": "Her scroll is often labeled TORA to hint at hidden knowledge.",
+    "stats": {
+      "luck": 58,
+      "power": 50,
+      "love": 62,
+      "clarity": 85
     }
   },
   "major_03_empress": {
     "title": "The Empress",
-    "keywords": ["nurture", "abundance", "growth"],
+    "keywords": [
+      "nurture",
+      "abundance",
+      "growth"
+    ],
     "meaning": {
       "general": "Supportive conditions allow something to grow.",
       "light": "Care and patience are strengthening your foundation.",
       "shadow": "Overextending yourself may sap vitality.",
-      "advice": "Nourish what matters most and simplify the rest."
+      "advice": "Nourish what matters most and simplify the rest.",
+      "detailed": "Care is work, not just a feeling. Feed what you want to grow and cut what drains you. Pleasure is allowed if it is balanced and paid for. Create a routine that supports your body and your home."
+    },
+    "funFact": "She is usually surrounded by wheat, a sign of harvest and abundance.",
+    "stats": {
+      "luck": 70,
+      "power": 65,
+      "love": 88,
+      "clarity": 60
     }
   },
   "major_04_emperor": {
     "title": "The Emperor",
-    "keywords": ["structure", "leadership", "boundaries"],
+    "keywords": [
+      "structure",
+      "leadership",
+      "boundaries"
+    ],
     "meaning": {
       "general": "Clear structure helps you move with confidence.",
       "light": "Taking responsibility brings stability.",
       "shadow": "Rigidity could block needed flexibility.",
-      "advice": "Define boundaries that support your priorities."
+      "advice": "Define boundaries that support your priorities.",
+      "detailed": "Order brings safety when it is fair. Set clear rules and keep them yourself. This is a time to handle paperwork, money, and decisions directly. Do not confuse control with respect."
+    },
+    "funFact": "His throne is commonly carved with rams for Aries.",
+    "stats": {
+      "luck": 55,
+      "power": 85,
+      "love": 48,
+      "clarity": 75
     }
   },
   "major_05_hierophant": {
     "title": "The Hierophant",
-    "keywords": ["tradition", "guidance", "learning"],
+    "keywords": [
+      "tradition",
+      "guidance",
+      "learning"
+    ],
     "meaning": {
       "general": "Guidance from trusted sources can be helpful.",
       "light": "Shared values offer a steady compass.",
       "shadow": "Following rules blindly can limit growth.",
-      "advice": "Seek mentors, but adapt advice to your reality."
+      "advice": "Seek mentors, but adapt advice to your reality.",
+      "detailed": "Tradition can guide you if you choose it wisely. Ask a mentor or follow a proven method for now. The card warns against empty rituals with no heart. Commit to the values you claim."
+    },
+    "funFact": "The raised fingers are a classic teaching gesture.",
+    "stats": {
+      "luck": 52,
+      "power": 60,
+      "love": 58,
+      "clarity": 70
     }
   },
   "major_06_lovers": {
     "title": "The Lovers",
-    "keywords": ["choice", "alignment", "relationships"],
+    "keywords": [
+      "choice",
+      "alignment",
+      "relationships"
+    ],
     "meaning": {
       "general": "A meaningful choice asks for alignment with values.",
       "light": "Connection and honesty deepen trust.",
       "shadow": "Avoiding a decision can create tension.",
-      "advice": "Name what matters most and choose accordingly."
+      "advice": "Name what matters most and choose accordingly.",
+      "detailed": "Love is a choice and a responsibility. Be honest about what you want and what you can give. If there are two paths, choose the one that matches your values. Do not promise more than you can sustain."
+    },
+    "funFact": "Early decks often showed a choice scene, not only romance.",
+    "stats": {
+      "luck": 64,
+      "power": 55,
+      "love": 90,
+      "clarity": 62
     }
   },
   "major_07_chariot": {
     "title": "The Chariot",
-    "keywords": ["drive", "direction", "self-control"],
+    "keywords": [
+      "drive",
+      "direction",
+      "self-control"
+    ],
     "meaning": {
       "general": "Focused effort creates forward momentum.",
       "light": "Determination helps you navigate obstacles.",
       "shadow": "Forcing progress may create resistance.",
-      "advice": "Move steadily and keep your intention clear."
+      "advice": "Move steadily and keep your intention clear.",
+      "detailed": "You can win if you steer with discipline. Keep your emotions in check and drive toward one target. Outside voices will pull you; answer only to your plan. Victory comes from control, not force."
+    },
+    "funFact": "The charioteer is often shown without reins to show willpower.",
+    "stats": {
+      "luck": 50,
+      "power": 88,
+      "love": 46,
+      "clarity": 72
     }
   },
   "major_08_strength": {
     "title": "Strength",
-    "keywords": ["resilience", "compassion", "gentle power"],
+    "keywords": [
+      "resilience",
+      "compassion",
+      "gentle power"
+    ],
     "meaning": {
       "general": "Inner steadiness is more powerful than force.",
       "light": "Patience and empathy help you hold the moment.",
       "shadow": "Self-doubt could soften your resolve.",
-      "advice": "Lead with kindness, and trust your endurance."
+      "advice": "Lead with kindness, and trust your endurance.",
+      "detailed": "Gentle power tames the wild. Speak calmly, but do not allow disrespect. This is about patience, not weakness. You gain more by steady care than by shouting."
+    },
+    "funFact": "The infinity symbol above her head points to inner mastery.",
+    "stats": {
+      "luck": 57,
+      "power": 82,
+      "love": 70,
+      "clarity": 68
     }
   },
   "major_09_hermit": {
     "title": "The Hermit",
-    "keywords": ["reflection", "solitude", "guidance"],
+    "keywords": [
+      "reflection",
+      "solitude",
+      "guidance"
+    ],
     "meaning": {
       "general": "Solitude offers perspective and clarity.",
       "light": "Intentional reflection reveals the next step.",
       "shadow": "Withdrawing too far can reduce support.",
-      "advice": "Take quiet time, then return with a plan."
+      "advice": "Take quiet time, then return with a plan.",
+      "detailed": "Step back so you can hear yourself. Solitude helps you sort what matters from noise. Keep your light small and steady, not flashy. When you return, bring a clear answer."
+    },
+    "funFact": "The lantern is a symbol of personal guidance.",
+    "stats": {
+      "luck": 45,
+      "power": 55,
+      "love": 40,
+      "clarity": 90
     }
   },
   "major_10_wheel_of_fortune": {
     "title": "Wheel of Fortune",
-    "keywords": ["change", "cycles", "timing"],
+    "keywords": [
+      "change",
+      "cycles",
+      "timing"
+    ],
     "meaning": {
       "general": "Circumstances are shifting in meaningful ways.",
       "light": "Good timing can open a helpful window.",
       "shadow": "Feeling out of control may cloud decisions.",
-      "advice": "Notice the cycle you are in and respond calmly."
+      "advice": "Notice the cycle you are in and respond calmly.",
+      "detailed": "Change is moving; you cannot stop it. Keep flexible and prepare for the next turn. When luck rises, save something for later. When luck dips, keep doing the basics."
+    },
+    "funFact": "Many wheels include a sphinx to represent riddles of fate.",
+    "stats": {
+      "luck": 85,
+      "power": 52,
+      "love": 58,
+      "clarity": 55
     }
   },
   "major_11_justice": {
     "title": "Justice",
-    "keywords": ["fairness", "truth", "accountability"],
+    "keywords": [
+      "fairness",
+      "truth",
+      "accountability"
+    ],
     "meaning": {
       "general": "Balance and honesty clarify the situation.",
       "light": "Clear choices bring integrity and calm.",
       "shadow": "Overanalyzing could delay action.",
-      "advice": "Weigh facts and values before deciding."
+      "advice": "Weigh facts and values before deciding.",
+      "detailed": "Balance your actions with the results. Be precise with words, contracts, and promises. If you owe something, pay it. If you are wronged, seek a fair process, not revenge."
+    },
+    "funFact": "Justice is one of the few cards that faces forward directly.",
+    "stats": {
+      "luck": 50,
+      "power": 70,
+      "love": 48,
+      "clarity": 88
     }
   },
   "major_12_hanged_man": {
     "title": "The Hanged Man",
-    "keywords": ["pause", "perspective", "surrender"],
+    "keywords": [
+      "pause",
+      "perspective",
+      "surrender"
+    ],
     "meaning": {
       "general": "A pause can shift how you see the issue.",
       "light": "Letting go invites a new perspective.",
       "shadow": "Stagnation may feel like being stuck.",
-      "advice": "Release urgency and allow insight to emerge."
+      "advice": "Release urgency and allow insight to emerge.",
+      "detailed": "Pause and look from a new angle. What feels stuck may be asking for a sacrifice. Release the need to be right so you can learn. This is a time to wait with purpose."
+    },
+    "funFact": "He hangs by one foot to show willing surrender.",
+    "stats": {
+      "luck": 46,
+      "power": 40,
+      "love": 60,
+      "clarity": 78
     }
   },
   "major_13_death": {
     "title": "Death",
-    "keywords": ["transition", "release", "renewal"],
+    "keywords": [
+      "transition",
+      "release",
+      "renewal"
+    ],
     "meaning": {
       "general": "An ending clears space for a new chapter.",
       "light": "Letting go helps renewal begin.",
       "shadow": "Holding on may prolong discomfort.",
-      "advice": "Acknowledge what is complete and turn forward."
+      "advice": "Acknowledge what is complete and turn forward.",
+      "detailed": "An ending clears space for the next chapter. Do not cling to what is already gone. Clean up, say goodbye, and move on. Renewal comes after you let the old fall away."
+    },
+    "funFact": "The card usually speaks of transition, not literal death.",
+    "stats": {
+      "luck": 48,
+      "power": 75,
+      "love": 45,
+      "clarity": 70
     }
   },
   "major_14_temperance": {
     "title": "Temperance",
-    "keywords": ["balance", "integration", "patience"],
+    "keywords": [
+      "balance",
+      "integration",
+      "patience"
+    ],
     "meaning": {
       "general": "Steady blending creates harmony over time.",
       "light": "Moderation keeps things sustainable.",
       "shadow": "Imbalance can create unnecessary strain.",
-      "advice": "Aim for small adjustments rather than extremes."
+      "advice": "Aim for small adjustments rather than extremes.",
+      "detailed": "Mix with care; extreme choices will spill. Take the middle road and keep your habits steady. Healing takes time, so do not rush it. Small daily balance beats dramatic change."
+    },
+    "funFact": "The angel pours between two cups to show blending.",
+    "stats": {
+      "luck": 62,
+      "power": 58,
+      "love": 72,
+      "clarity": 80
     }
   },
   "major_15_devil": {
     "title": "The Devil",
-    "keywords": ["attachment", "temptation", "patterns"],
+    "keywords": [
+      "attachment",
+      "temptation",
+      "patterns"
+    ],
     "meaning": {
       "general": "A pattern or attachment wants your attention.",
       "light": "Awareness creates choice and freedom.",
       "shadow": "Feeling trapped can cloud possibilities.",
-      "advice": "Name the pattern and choose one way to loosen it."
+      "advice": "Name the pattern and choose one way to loosen it.",
+      "detailed": "Desire can become a chain if you feed it blindly. Name what controls you and reduce it. Pleasure is fine when it is honest and limited. Break the habit before it breaks you."
+    },
+    "funFact": "The figures are loose, suggesting they could walk away.",
+    "stats": {
+      "luck": 42,
+      "power": 78,
+      "love": 50,
+      "clarity": 40
     }
   },
   "major_16_tower": {
     "title": "The Tower",
-    "keywords": ["disruption", "truth", "reset"],
+    "keywords": [
+      "disruption",
+      "truth",
+      "reset"
+    ],
     "meaning": {
       "general": "A reset clears away what no longer holds.",
       "light": "Honest change makes room for growth.",
       "shadow": "Unexpected shifts can feel destabilizing.",
-      "advice": "Stay grounded and rebuild with what remains true."
+      "advice": "Stay grounded and rebuild with what remains true.",
+      "detailed": "A sudden shake clears weak foundations. Do not try to keep a structure that is already cracked. Tell the truth and accept the fallout. After the dust, you can build stronger."
+    },
+    "funFact": "Lightning is a common symbol of sudden insight.",
+    "stats": {
+      "luck": 30,
+      "power": 72,
+      "love": 35,
+      "clarity": 65
     }
   },
   "major_17_star": {
     "title": "The Star",
-    "keywords": ["hope", "healing", "renewal"],
+    "keywords": [
+      "hope",
+      "healing",
+      "renewal"
+    ],
     "meaning": {
       "general": "A calm sense of hope is returning.",
       "light": "Gentle healing restores confidence.",
       "shadow": "Doubt could dim your optimism.",
-      "advice": "Focus on what brings steadiness and ease."
+      "advice": "Focus on what brings steadiness and ease.",
+      "detailed": "Hope returns when you keep your heart open. Do the simple, healing acts and trust the process. Share your gift quietly without chasing applause. The future grows from steady faith."
+    },
+    "funFact": "The Star follows the Tower in order, signaling renewal.",
+    "stats": {
+      "luck": 78,
+      "power": 50,
+      "love": 75,
+      "clarity": 82
     }
   },
   "major_18_moon": {
     "title": "The Moon",
-    "keywords": ["uncertainty", "intuition", "mystery"],
+    "keywords": [
+      "uncertainty",
+      "intuition",
+      "mystery"
+    ],
     "meaning": {
       "general": "The situation is unclear, but insight is possible.",
       "light": "Listening inward reveals subtle truths.",
       "shadow": "Anxiety might amplify what is unknown.",
-      "advice": "Take things slowly and verify assumptions."
+      "advice": "Take things slowly and verify assumptions.",
+      "detailed": "Not everything is as it seems; check the facts. Your intuition is active, but fear can distort it. Move slowly and avoid big commitments right now. Night questions need morning answers."
+    },
+    "funFact": "The dog and wolf together show tame and wild instincts.",
+    "stats": {
+      "luck": 38,
+      "power": 48,
+      "love": 55,
+      "clarity": 35
     }
   },
   "major_19_sun": {
     "title": "The Sun",
-    "keywords": ["clarity", "joy", "confidence"],
+    "keywords": [
+      "clarity",
+      "joy",
+      "confidence"
+    ],
     "meaning": {
       "general": "Clarity brings warmth and forward movement.",
       "light": "Optimism helps you see the path ahead.",
       "shadow": "Overconfidence could miss important details.",
-      "advice": "Celebrate progress while staying attentive."
+      "advice": "Celebrate progress while staying attentive.",
+      "detailed": "Clarity is strong and warm. Show yourself plainly and let joy lead. Success comes from honest effort, not shortcuts. Celebrate, but keep your feet on the ground."
+    },
+    "funFact": "The child on the horse symbolizes simple happiness.",
+    "stats": {
+      "luck": 88,
+      "power": 70,
+      "love": 80,
+      "clarity": 90
     }
   },
   "major_20_judgement": {
     "title": "Judgement",
-    "keywords": ["awakening", "review", "decision"],
+    "keywords": [
+      "awakening",
+      "review",
+      "decision"
+    ],
     "meaning": {
       "general": "A clear review points to a renewed direction.",
       "light": "Learning from the past supports a wise choice.",
       "shadow": "Harsh self-judgment may limit growth.",
-      "advice": "Assess honestly, then commit to a fresh start."
+      "advice": "Assess honestly, then commit to a fresh start.",
+      "detailed": "A call is arriving; answer it. Review your past and take responsibility for choices. Forgive what can be forgiven, then act. This is a chance to reset your direction."
+    },
+    "funFact": "The trumpet imagery echoes a final awakening.",
+    "stats": {
+      "luck": 60,
+      "power": 68,
+      "love": 62,
+      "clarity": 85
     }
   },
   "major_21_world": {
     "title": "The World",
-    "keywords": ["completion", "integration", "wholeness"],
+    "keywords": [
+      "completion",
+      "integration",
+      "wholeness"
+    ],
     "meaning": {
       "general": "Completion brings a sense of wholeness.",
       "light": "You are ready to integrate what you have learned.",
       "shadow": "Delaying closure can drain momentum.",
-      "advice": "Honor the finish and define the next horizon."
+      "advice": "Honor the finish and define the next horizon.",
+      "detailed": "A cycle completes; recognize what you achieved. Close the loop and share your result. If you want a new goal, finish the old one first. You are more capable than you think."
+    },
+    "funFact": "The laurel wreath is a sign of victory and completion.",
+    "stats": {
+      "luck": 82,
+      "power": 75,
+      "love": 70,
+      "clarity": 88
     }
   },
   "wands_00_knight": {
     "title": "Knight of Wands",
-    "keywords": ["drive", "adventure", "impulse"],
+    "keywords": [
+      "drive",
+      "adventure",
+      "impulse"
+    ],
     "meaning": {
       "general": "Momentum surges and you feel ready to move.",
       "light": "Bold action and charismatic pursuit.",
       "shadow": "Rushing ahead without a plan.",
-      "advice": "Channel the rush into a focused aim."
+      "advice": "Channel the rush into a focused aim.",
+      "detailed": "Action wants to move fast, but speed needs control. Focus your energy on one mission. Impatience can start fights or burn bridges. Set a deadline and honor it."
+    },
+    "funFact": "The knight is often paired with the salamander, a symbol of fire.",
+    "stats": {
+      "luck": 55,
+      "power": 80,
+      "love": 52,
+      "clarity": 58
     }
   },
   "wands_01_king": {
     "title": "King of Wands",
-    "keywords": ["vision", "leadership", "confidence"],
+    "keywords": [
+      "vision",
+      "leadership",
+      "confidence"
+    ],
     "meaning": {
       "general": "Lead with clear vision and steady fire.",
       "light": "Inspire others and set direction.",
       "shadow": "Dominating or forcing outcomes.",
-      "advice": "Lead with warmth and integrity."
+      "advice": "Lead with warmth and integrity.",
+      "detailed": "Lead with vision and steady courage. People follow when you are consistent. Do not bully or demand loyalty without earning it. Protect your team and your reputation."
+    },
+    "funFact": "His cloak commonly shows salamanders biting their tails.",
+    "stats": {
+      "luck": 60,
+      "power": 90,
+      "love": 65,
+      "clarity": 72
     }
   },
   "wands_02_queen": {
     "title": "Queen of Wands",
-    "keywords": ["radiance", "creativity", "magnetism"],
+    "keywords": [
+      "radiance",
+      "creativity",
+      "magnetism"
+    ],
     "meaning": {
       "general": "Confidence and creative warmth draw support.",
       "light": "Express yourself and nurture passion.",
       "shadow": "Jealousy or burnout.",
-      "advice": "Share your light without dimming yourself."
+      "advice": "Share your light without dimming yourself.",
+      "detailed": "Confidence and warmth attract support. Use your influence to lift others, not to show off. Keep your boundaries clear and your promises kept. Your creativity works best with a schedule."
+    },
+    "funFact": "She often holds a sunflower as a sign of optimism.",
+    "stats": {
+      "luck": 65,
+      "power": 70,
+      "love": 78,
+      "clarity": 68
     }
   },
   "wands_03_page": {
     "title": "Page of Wands",
-    "keywords": ["curiosity", "messages", "discovery"],
+    "keywords": [
+      "curiosity",
+      "messages",
+      "discovery"
+    ],
     "meaning": {
       "general": "A fresh idea or message sparks interest.",
       "light": "Explore, learn, and play.",
       "shadow": "Naivety or scattered focus.",
-      "advice": "Follow the spark and test it."
+      "advice": "Follow the spark and test it.",
+      "detailed": "A spark is here; learn how to feed it. Start with practice, not perfection. If you get bored, return to the basics and keep going. Curiosity is your fuel."
+    },
+    "funFact": "Pages in tarot often represent messages or apprentices.",
+    "stats": {
+      "luck": 58,
+      "power": 55,
+      "love": 60,
+      "clarity": 62
     }
   },
   "wands_04_two": {
     "title": "Two of Wands",
-    "keywords": ["planning", "choice", "horizon"],
+    "keywords": [
+      "planning",
+      "choice",
+      "horizon"
+    ],
     "meaning": {
       "general": "You stand at a threshold with options.",
       "light": "Plan boldly and commit.",
       "shadow": "Hesitation or fear of change.",
-      "advice": "Choose a direction and take the first step."
+      "advice": "Choose a direction and take the first step.",
+      "detailed": "You are planning your next move, so be honest about what you want. Compare options but do not wait forever. Make a map and then step out. Personal power grows when you choose."
+    },
+    "funFact": "He holds a small globe to show the world as possibility.",
+    "stats": {
+      "luck": 62,
+      "power": 68,
+      "love": 54,
+      "clarity": 70
     }
   },
   "wands_05_three": {
     "title": "Three of Wands",
-    "keywords": ["expansion", "momentum", "foresight"],
+    "keywords": [
+      "expansion",
+      "momentum",
+      "foresight"
+    ],
     "meaning": {
       "general": "Progress grows as you look outward.",
       "light": "Collaborate and expand.",
       "shadow": "Waiting too long for certainty.",
-      "advice": "Keep moving; your reach is widening."
+      "advice": "Keep moving; your reach is widening.",
+      "detailed": "Your first effort is working; now expand. Look outward and build partnerships. Keep your standards and do not accept weak offers. Progress comes from steady follow-through."
+    },
+    "funFact": "The figure looks out to sea, a classic symbol of trade.",
+    "stats": {
+      "luck": 66,
+      "power": 72,
+      "love": 56,
+      "clarity": 74
     }
   },
   "wands_06_four": {
     "title": "Four of Wands",
-    "keywords": ["celebration", "home", "stability"],
+    "keywords": [
+      "celebration",
+      "home",
+      "stability"
+    ],
     "meaning": {
       "general": "A pause to celebrate and anchor.",
       "light": "Community and joyful milestones.",
       "shadow": "Taking comfort for granted.",
-      "advice": "Honor what is steady and shared."
+      "advice": "Honor what is steady and shared.",
+      "detailed": "Pause to celebrate what is stable. Rest is not laziness; it is preparation. Invite support and keep your home base strong. Gratitude keeps success from turning sour."
+    },
+    "funFact": "The four wands form a canopy like a simple ritual arch.",
+    "stats": {
+      "luck": 70,
+      "power": 60,
+      "love": 72,
+      "clarity": 66
     }
   },
   "wands_07_five": {
     "title": "Five of Wands",
-    "keywords": ["friction", "competition", "energy"],
+    "keywords": [
+      "friction",
+      "competition",
+      "energy"
+    ],
     "meaning": {
       "general": "Different forces clash and spark.",
       "light": "Healthy challenge and growth.",
       "shadow": "Ego battles or chaos.",
-      "advice": "Focus the energy on a shared goal."
+      "advice": "Focus the energy on a shared goal.",
+      "detailed": "Competition is noisy; stay focused. Choose which battles are worth your energy. Clear rules prevent chaos. Practice turns conflict into skill."
+    },
+    "funFact": "Many readers see it as a mock fight or training.",
+    "stats": {
+      "luck": 48,
+      "power": 62,
+      "love": 45,
+      "clarity": 50
     }
   },
   "wands_08_six": {
     "title": "Six of Wands",
-    "keywords": ["recognition", "success", "momentum"],
+    "keywords": [
+      "recognition",
+      "success",
+      "momentum"
+    ],
     "meaning": {
       "general": "Effort is noticed and rewarded.",
       "light": "Confidence after a win.",
       "shadow": "Needing applause to move forward.",
-      "advice": "Celebrate, then keep it grounded."
+      "advice": "Celebrate, then keep it grounded.",
+      "detailed": "Recognition arrives, but stay humble. Accept praise and keep working. Your success can inspire others if you share the credit. Do not let pride stop improvement."
+    },
+    "funFact": "The laurel wreath is a traditional sign of victory.",
+    "stats": {
+      "luck": 75,
+      "power": 70,
+      "love": 60,
+      "clarity": 68
     }
   },
   "wands_09_seven": {
     "title": "Seven of Wands",
-    "keywords": ["defense", "courage", "boundaries"],
+    "keywords": [
+      "defense",
+      "courage",
+      "boundaries"
+    ],
     "meaning": {
       "general": "Stand your ground for what matters.",
       "light": "Protect your position and values.",
       "shadow": "Feeling attacked or isolated.",
-      "advice": "Hold firm without closing off."
+      "advice": "Hold firm without closing off.",
+      "detailed": "Stand your ground with calm confidence. You may be outnumbered, but your position is strong. Protect your boundaries and keep your plan simple. Courage grows with consistency."
+    },
+    "funFact": "The high ground signals advantage despite pressure.",
+    "stats": {
+      "luck": 54,
+      "power": 74,
+      "love": 50,
+      "clarity": 60
     }
   },
   "wands_10_eight": {
     "title": "Eight of Wands",
-    "keywords": ["speed", "messages", "movement"],
+    "keywords": [
+      "speed",
+      "messages",
+      "movement"
+    ],
     "meaning": {
       "general": "Things move quickly and align.",
       "light": "Swift progress and clear signals.",
       "shadow": "Overwhelm or rushing.",
-      "advice": "Ride the momentum with focus."
+      "advice": "Ride the momentum with focus.",
+      "detailed": "Things move quickly; be ready. Respond to messages promptly and follow through. Do not overpromise when speed is high. Keep your target clear."
+    },
+    "funFact": "Flying wands suggest momentum and swift travel.",
+    "stats": {
+      "luck": 68,
+      "power": 66,
+      "love": 58,
+      "clarity": 65
     }
   },
   "wands_11_nine": {
     "title": "Nine of Wands",
-    "keywords": ["resilience", "persistence", "guarded"],
+    "keywords": [
+      "resilience",
+      "persistence",
+      "guarded"
+    ],
     "meaning": {
       "general": "You are close to the finish; stay steady.",
       "light": "Endurance and learned strength.",
       "shadow": "Exhaustion or mistrust.",
-      "advice": "Rest, then hold the line."
+      "advice": "Rest, then hold the line.",
+      "detailed": "You are tired but still standing. Guard what you have earned and take care of your body. Do not let old wounds make you harsh. A final push is possible with rest."
+    },
+    "funFact": "The bandage hints at past battles, not defeat.",
+    "stats": {
+      "luck": 52,
+      "power": 70,
+      "love": 48,
+      "clarity": 63
     }
   },
   "wands_12_ten": {
     "title": "Ten of Wands",
-    "keywords": ["burden", "responsibility", "pressure"],
+    "keywords": [
+      "burden",
+      "responsibility",
+      "pressure"
+    ],
     "meaning": {
       "general": "Responsibilities feel heavy.",
       "light": "Commitment and hard work.",
       "shadow": "Overload or martyrdom.",
-      "advice": "Delegate and set limits."
+      "advice": "Delegate and set limits.",
+      "detailed": "Too many duties are crushing you. Put down what is not yours. Ask for help and set limits. Real strength knows when to simplify."
+    },
+    "funFact": "The figure can barely see ahead, showing the burden.",
+    "stats": {
+      "luck": 40,
+      "power": 65,
+      "love": 42,
+      "clarity": 55
     }
   },
   "wands_13_ace": {
     "title": "Ace of Wands",
-    "keywords": ["spark", "inspiration", "potential"],
+    "keywords": [
+      "spark",
+      "inspiration",
+      "potential"
+    ],
     "meaning": {
       "general": "A new spark of passion arrives.",
       "light": "Creative surge and bold start.",
       "shadow": "Impulsive flare with no follow-through.",
-      "advice": "Take the first step and nurture it."
+      "advice": "Take the first step and nurture it.",
+      "detailed": "A clean spark starts a new fire. Say yes to initiative and take the first step. Keep your focus narrow and practical. Energy grows when you act, not when you wait."
+    },
+    "funFact": "A hand from a cloud presents the wand as a gift.",
+    "stats": {
+      "luck": 72,
+      "power": 78,
+      "love": 60,
+      "clarity": 70
     }
   },
   "cups_00_knight": {
     "title": "Knight of Cups",
-    "keywords": ["romance", "invitation", "gentle pursuit", "dreams"],
+    "keywords": [
+      "romance",
+      "invitation",
+      "gentle pursuit",
+      "dreams"
+    ],
     "meaning": {
       "general": "A tender offer approaches, led by feeling more than plan.",
       "light": "Sincere affection and graceful pursuit.",
@@ -379,7 +816,12 @@
   },
   "cups_01_king": {
     "title": "King of Cups",
-    "keywords": ["emotional mastery", "compassion", "diplomacy", "steady heart"],
+    "keywords": [
+      "emotional mastery",
+      "compassion",
+      "diplomacy",
+      "steady heart"
+    ],
     "meaning": {
       "general": "Maturity of heart asks you to lead with calm.",
       "light": "Wise compassion and balanced support.",
@@ -397,7 +839,12 @@
   },
   "cups_02_queen": {
     "title": "Queen of Cups",
-    "keywords": ["intuition", "empathy", "nurture", "inner tides"],
+    "keywords": [
+      "intuition",
+      "empathy",
+      "nurture",
+      "inner tides"
+    ],
     "meaning": {
       "general": "Deep sensitivity reveals what is unspoken.",
       "light": "Warm care and intuitive insight.",
@@ -415,7 +862,12 @@
   },
   "cups_03_page": {
     "title": "Page of Cups",
-    "keywords": ["surprise", "curiosity", "messages", "playfulness"],
+    "keywords": [
+      "surprise",
+      "curiosity",
+      "messages",
+      "playfulness"
+    ],
     "meaning": {
       "general": "A gentle surprise or message stirs the heart.",
       "light": "Fresh feelings and open curiosity.",
@@ -433,7 +885,12 @@
   },
   "cups_04_two": {
     "title": "Two of Cups",
-    "keywords": ["union", "trust", "balance", "mutual respect"],
+    "keywords": [
+      "union",
+      "trust",
+      "balance",
+      "mutual respect"
+    ],
     "meaning": {
       "general": "A mutual bond asks to be honored.",
       "light": "Shared affection and fair exchange.",
@@ -451,7 +908,12 @@
   },
   "cups_05_three": {
     "title": "Three of Cups",
-    "keywords": ["celebration", "friends", "support", "joy"],
+    "keywords": [
+      "celebration",
+      "friends",
+      "support",
+      "joy"
+    ],
     "meaning": {
       "general": "Community lifts the spirit.",
       "light": "Shared joy and loyal support.",
@@ -469,7 +931,12 @@
   },
   "cups_06_four": {
     "title": "Four of Cups",
-    "keywords": ["apathy", "rest", "reassessment", "missed chance"],
+    "keywords": [
+      "apathy",
+      "rest",
+      "reassessment",
+      "missed chance"
+    ],
     "meaning": {
       "general": "Disinterest hides a choice you are avoiding.",
       "light": "Taking space to reconsider what you want.",
@@ -487,7 +954,12 @@
   },
   "cups_07_five": {
     "title": "Five of Cups",
-    "keywords": ["grief", "regret", "acceptance", "healing"],
+    "keywords": [
+      "grief",
+      "regret",
+      "acceptance",
+      "healing"
+    ],
     "meaning": {
       "general": "Loss is present, but not all is gone.",
       "light": "Acknowledging sadness opens healing.",
@@ -505,7 +977,12 @@
   },
   "cups_08_six": {
     "title": "Six of Cups",
-    "keywords": ["nostalgia", "innocence", "kindness", "memory"],
+    "keywords": [
+      "nostalgia",
+      "innocence",
+      "kindness",
+      "memory"
+    ],
     "meaning": {
       "general": "Past sweetness returns to soften the moment.",
       "light": "Simple joys and gentle remembrance.",
@@ -523,7 +1000,12 @@
   },
   "cups_09_seven": {
     "title": "Seven of Cups",
-    "keywords": ["choices", "fantasy", "temptation", "confusion"],
+    "keywords": [
+      "choices",
+      "fantasy",
+      "temptation",
+      "confusion"
+    ],
     "meaning": {
       "general": "Many options shimmer, and not all are true.",
       "light": "Imagination opens possibilities.",
@@ -541,7 +1023,12 @@
   },
   "cups_10_eight": {
     "title": "Eight of Cups",
-    "keywords": ["walking away", "search", "release", "truth"],
+    "keywords": [
+      "walking away",
+      "search",
+      "release",
+      "truth"
+    ],
     "meaning": {
       "general": "It may be time to leave what no longer feeds you.",
       "light": "Courage to seek deeper meaning.",
@@ -559,7 +1046,12 @@
   },
   "cups_11_nine": {
     "title": "Nine of Cups",
-    "keywords": ["contentment", "wish", "gratitude", "comfort"],
+    "keywords": [
+      "contentment",
+      "wish",
+      "gratitude",
+      "comfort"
+    ],
     "meaning": {
       "general": "A wish comes close, and gratitude steadies it.",
       "light": "Satisfaction and earned comfort.",
@@ -577,7 +1069,12 @@
   },
   "cups_12_ten": {
     "title": "Ten of Cups",
-    "keywords": ["harmony", "family", "shared joy", "blessing"],
+    "keywords": [
+      "harmony",
+      "family",
+      "shared joy",
+      "blessing"
+    ],
     "meaning": {
       "general": "Harmony grows when hearts align.",
       "light": "Peace at home and emotional fulfillment.",
@@ -595,7 +1092,12 @@
   },
   "cups_13_ace": {
     "title": "Ace of Cups",
-    "keywords": ["new feelings", "renewal", "open heart", "blessing"],
+    "keywords": [
+      "new feelings",
+      "renewal",
+      "open heart",
+      "blessing"
+    ],
     "meaning": {
       "general": "A new wave of feeling rises.",
       "light": "Emotional renewal and sincere openness.",
