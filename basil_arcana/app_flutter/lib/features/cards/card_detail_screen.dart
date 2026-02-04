@@ -16,6 +16,19 @@ class CardDetailScreen extends StatelessWidget {
     final keywordLimit = 4;
     final visibleKeywords = card.keywords.take(keywordLimit).toList();
     final remainingKeywords = card.keywords.length - visibleKeywords.length;
+    final detailedText = card.meaning.detailed.trim().isNotEmpty
+        ? card.meaning.detailed
+        : l10n.cardDetailedFallback;
+    final funFactText = card.funFact.trim().isNotEmpty
+        ? card.funFact
+        : l10n.cardFunFactFallback;
+    final stats = card.stats ??
+        const CardStats(
+          luck: 0,
+          power: 0,
+          love: 0,
+          clarity: 0,
+        );
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.cardsDetailTitle),
@@ -82,48 +95,42 @@ class CardDetailScreen extends StatelessWidget {
             card.meaning.general,
             style: Theme.of(context).textTheme.bodyMedium,
           ),
-          if (card.meaning.detailed.trim().isNotEmpty) ...[
-            const SizedBox(height: 20),
-            Text(
-              l10n.cardDetailedTitle,
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium
-                  ?.copyWith(color: colorScheme.primary),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              card.meaning.detailed,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-          ],
-          if (card.funFact.trim().isNotEmpty) ...[
-            const SizedBox(height: 20),
-            Text(
-              l10n.cardFunFactTitle,
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium
-                  ?.copyWith(color: colorScheme.primary),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              card.funFact,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-          ],
-          if (card.stats != null) ...[
-            const SizedBox(height: 20),
-            Text(
-              l10n.cardStatsTitle,
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium
-                  ?.copyWith(color: colorScheme.primary),
-            ),
-            const SizedBox(height: 12),
-            _StatsGrid(stats: card.stats!),
-          ],
+          const SizedBox(height: 20),
+          Text(
+            l10n.cardDetailedTitle,
+            style: Theme.of(context)
+                .textTheme
+                .titleMedium
+                ?.copyWith(color: colorScheme.primary),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            detailedText,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          const SizedBox(height: 20),
+          Text(
+            l10n.cardFunFactTitle,
+            style: Theme.of(context)
+                .textTheme
+                .titleMedium
+                ?.copyWith(color: colorScheme.primary),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            funFactText,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          const SizedBox(height: 20),
+          Text(
+            l10n.cardStatsTitle,
+            style: Theme.of(context)
+                .textTheme
+                .titleMedium
+                ?.copyWith(color: colorScheme.primary),
+          ),
+          const SizedBox(height: 12),
+          _StatsGrid(stats: stats),
         ],
       ),
     );
