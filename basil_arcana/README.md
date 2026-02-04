@@ -73,16 +73,66 @@ curl -X POST http://localhost:3000/api/reading/generate \
 3. Ensure the `start` script runs (`npm start`). Railway uses `process.env.PORT`.
 4. Use the Railway public URL to test `/health`.
 
-## Telegram bot (Railway)
+## Telegram Mini App (Flutter Web)
+
+The web build is served from a small Node/Express server and proxies API
+requests so the API key never reaches the browser.
+
+### Local webapp build + run
+
+```bash
+cd app_flutter
+npm install
+flutter pub get
+flutter gen-l10n
+flutter build web --release --base-href "/"
+ARCANA_API_KEY=your_arcana_key_here PORT=3000 node server.js
+```
+
+### Flutter web API proxy behavior
+- On web, the app calls `/proxy/reading/*` on the same origin.
+- The Node server forwards to `https://api.basilarcana.com` and attaches
+  `x-api-key` from `ARCANA_API_KEY`.
+
+## Telegram bot (Railway launcher)
 
 1. Set bot variables in Railway:
    - `TELEGRAM_BOT_TOKEN`
-   - `ARCANA_API_KEY`
-   - `API_BASE_URL` (optional, defaults to `https://api.basilarcana.com`)
-   - `DEFAULT_LOCALE` (`en`, `ru`, or `kk`)
-   - `FLUTTER_ASSETS_ROOT=/app/basil_arcana/app_flutter/assets`
+   - `TELEGRAM_WEBAPP_URL` (https URL of the webapp service)
+   - `DEFAULT_LOCALE` (`en`, `ru`, or `kk`, optional)
 2. Build command: `cd bot && npm ci && npm run build`
 3. Start command: `cd bot && npm run start`
+
+### Local bot run
+
+```bash
+cd bot
+npm install
+npm run build
+TELEGRAM_BOT_TOKEN=your_bot_token \
+TELEGRAM_WEBAPP_URL=http://localhost:3000 \
+npm run start
+```
+
+## Railway deploy: two services (webapp + bot)
+
+Create two Railway services from the same repo:
+
+### Service A: WebApp (Flutter Web)
+- Root directory: `basil_arcana/app_flutter`
+- Dockerfile: `Dockerfile.web`
+- Environment variables:
+  - `ARCANA_API_KEY` (required, server-side proxy)
+  - `NODE_ENV=production` (optional)
+
+### Service B: Bot (launcher)
+- Root directory: `basil_arcana/bot`
+- Build command: `npm ci && npm run build`
+- Start command: `npm run start`
+- Environment variables:
+  - `TELEGRAM_BOT_TOKEN` (required)
+  - `TELEGRAM_WEBAPP_URL` (required, https URL for the webapp service)
+  - `DEFAULT_LOCALE` (optional)
 
 ## Attach custom domain: api.basilarcana.com
 

@@ -1,18 +1,18 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
 
+import '../../core/utils/network_exceptions.dart';
 import '../models/ai_result_model.dart';
 import '../models/card_model.dart';
 import '../models/drawn_card_model.dart';
 import '../models/spread_model.dart';
 
-const apiBaseUrl = String.fromEnvironment(
+const _defaultApiBaseUrl = String.fromEnvironment(
   'API_BASE_URL',
   defaultValue: 'https://api.basilarcana.com',
 );
@@ -66,10 +66,21 @@ class AiRepositoryException implements Exception {
 }
 
 class AiRepository {
+  String get _effectiveApiBaseUrl =>
+      kIsWeb ? Uri.base.origin : _defaultApiBaseUrl;
+
+  String get _generatePath =>
+      kIsWeb ? '/proxy/reading/generate' : '/api/reading/generate';
+
+  String get _detailsPath =>
+      kIsWeb ? '/proxy/reading/details' : '/api/reading/details';
+
   String get _resolvedApiKey =>
       arcanaApiKey.trim().isNotEmpty ? arcanaApiKey : legacyApiKey;
 
-  bool get hasApiKey => _resolvedApiKey.trim().isNotEmpty;
+  bool get _hasApiKey => _resolvedApiKey.trim().isNotEmpty;
+
+  bool get _shouldSendApiKey => !kIsWeb && _hasApiKey;
 
   Future<AiResultModel> generateReading({
     required String question,
@@ -82,9 +93,10 @@ class AiRepository {
     http.Client? client,
     Duration timeout = _requestTimeout,
   }) async {
-    if (!hasApiKey) {
+    if (!_hasApiKey && !kIsWeb) {
       print(
-        '[AiRepository] requestId=unknown url=$apiBaseUrl/api/reading/generate '
+        '[AiRepository] requestId=unknown '
+        'url=$_defaultApiBaseUrl/api/reading/generate '
         'status=n/a duration_ms=0 error=${AiErrorType.missingApiKey.name}',
       );
       throw const AiRepositoryException(
@@ -93,8 +105,8 @@ class AiRepository {
       );
     }
 
-    final uri = Uri.parse(apiBaseUrl).replace(
-      path: '/api/reading/generate',
+    final uri = Uri.parse(_effectiveApiBaseUrl).replace(
+      path: _generatePath,
       queryParameters: {
         'mode': _modeParam(mode),
       },
@@ -141,7 +153,7 @@ class AiRepository {
 
     final headers = {
       'Content-Type': 'application/json',
-      if (hasApiKey) 'x-api-key': _resolvedApiKey,
+      if (_shouldSendApiKey) 'x-api-key': _resolvedApiKey,
       'x-request-id': requestId,
     };
 
@@ -170,15 +182,28 @@ class AiRepository {
         exception: error,
       );
       throw const AiRepositoryException(AiErrorType.timeout);
-    } on SocketException catch (error) {
-      _logFailure(
-        uri,
-        stopwatch,
-        requestId: requestId,
-        errorType: AiErrorType.noInternet,
-        exception: error,
-      );
-      throw const AiRepositoryException(AiErrorType.noInternet);
+    } catch (error) {
+      if (error is TimeoutException) {
+        _logFailure(
+          uri,
+          stopwatch,
+          requestId: requestId,
+          errorType: AiErrorType.timeout,
+          exception: error,
+        );
+        throw const AiRepositoryException(AiErrorType.timeout);
+      }
+      if (isNetworkException(error)) {
+        _logFailure(
+          uri,
+          stopwatch,
+          requestId: requestId,
+          errorType: AiErrorType.noInternet,
+          exception: error,
+        );
+        throw const AiRepositoryException(AiErrorType.noInternet);
+      }
+      rethrow;
     } finally {
       if (client == null) {
         httpClient.close();
@@ -286,9 +311,10 @@ class AiRepository {
     http.Client? client,
     Duration timeout = const Duration(seconds: 35),
   }) async {
-    if (!hasApiKey) {
+    if (!_hasApiKey && !kIsWeb) {
       print(
-        '[AiRepository] requestId=unknown url=$apiBaseUrl/api/reading/details '
+        '[AiRepository] requestId=unknown '
+        'url=$_defaultApiBaseUrl/api/reading/details '
         'status=n/a duration_ms=0 error=${AiErrorType.missingApiKey.name}',
       );
       throw const AiRepositoryException(
@@ -297,8 +323,8 @@ class AiRepository {
       );
     }
 
-    final uri = Uri.parse(apiBaseUrl).replace(
-      path: '/api/reading/details',
+    final uri = Uri.parse(_effectiveApiBaseUrl).replace(
+      path: _detailsPath,
     );
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     final randomSuffix = Random().nextInt(900000) + 100000;
@@ -318,7 +344,7 @@ class AiRepository {
 
     final headers = {
       'Content-Type': 'application/json',
-      if (hasApiKey) 'x-api-key': _resolvedApiKey,
+      if (_shouldSendApiKey) 'x-api-key': _resolvedApiKey,
       'x-request-id': requestId,
     };
 
@@ -338,24 +364,28 @@ class AiRepository {
             body: jsonEncode(payload),
           )
           .timeout(timeout);
-    } on TimeoutException catch (error) {
-      _logFailure(
-        uri,
-        stopwatch,
-        requestId: requestId,
-        errorType: AiErrorType.timeout,
-        exception: error,
-      );
-      throw const AiRepositoryException(AiErrorType.timeout);
-    } on SocketException catch (error) {
-      _logFailure(
-        uri,
-        stopwatch,
-        requestId: requestId,
-        errorType: AiErrorType.noInternet,
-        exception: error,
-      );
-      throw const AiRepositoryException(AiErrorType.noInternet);
+    } catch (error) {
+      if (error is TimeoutException) {
+        _logFailure(
+          uri,
+          stopwatch,
+          requestId: requestId,
+          errorType: AiErrorType.timeout,
+          exception: error,
+        );
+        throw const AiRepositoryException(AiErrorType.timeout);
+      }
+      if (isNetworkException(error)) {
+        _logFailure(
+          uri,
+          stopwatch,
+          requestId: requestId,
+          errorType: AiErrorType.noInternet,
+          exception: error,
+        );
+        throw const AiRepositoryException(AiErrorType.noInternet);
+      }
+      rethrow;
     } finally {
       if (client == null) {
         httpClient.close();
@@ -511,7 +541,7 @@ class AiRepository {
         meaning: meaning,
       ),
     ];
-    print('[AiRepository] smokeTest:start baseUrl=$apiBaseUrl');
+    print('[AiRepository] smokeTest:start baseUrl=$_effectiveApiBaseUrl');
     final result = await generateReading(
       question: 'Smoke test',
       spread: spread,
