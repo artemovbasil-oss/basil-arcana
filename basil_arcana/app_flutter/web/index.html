@@ -13,13 +13,23 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
     />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="apple-mobile-web-app-title" content="Arcana" />
 
     <title>Basil’s Arcana</title>
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
       window.addEventListener("DOMContentLoaded", () => {
-        if (window.Telegram && window.Telegram.WebApp) {
+        // Keep the Telegram WebApp in full-height mode and expose a web flag.
+        window.__IS_TELEGRAM__ = Boolean(
+          window.Telegram && window.Telegram.WebApp
+        );
+        if (window.__IS_TELEGRAM__) {
           window.Telegram.WebApp.ready();
           window.Telegram.WebApp.expand();
           document.body.classList.add("telegram-webapp");
