@@ -9,6 +9,10 @@ String cardAssetPath(String cardId, {DeckId deckId = DeckId.major}) {
       (deckId == DeckId.all && cardId.startsWith('wands_'))) {
     return 'assets/cards/wands/$cardId.webp';
   }
+  if (deckId == DeckId.cups ||
+      (deckId == DeckId.all && cardId.startsWith('cups_'))) {
+    return 'assets/cards/cups/$cardId.webp';
+  }
   switch (cardId) {
     case 'major_10_wheel':
       return 'assets/cards/major/major_10_wheel_of_fortune.webp';
@@ -21,6 +25,7 @@ String deckCoverAssetPath(DeckId deckId) {
   switch (deckId) {
     case DeckId.wands:
       return 'assets/deck/wands_cover.webp';
+    case DeckId.cups:
     case DeckId.major:
     case DeckId.all:
     default:

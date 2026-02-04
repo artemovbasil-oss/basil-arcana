@@ -34,9 +34,17 @@ class CardsRepository {
               data[id] as Map<String, dynamic>,
             ))
         .toList();
+    final cupsCards = cupsCardIds
+        .where(data.containsKey)
+        .map((id) => CardModel.fromLocalizedEntry(
+              id,
+              data[id] as Map<String, dynamic>,
+            ))
+        .toList();
     final deckRegistry = <DeckId, List<CardModel>>{
       DeckId.major: majorCards,
       DeckId.wands: wandsCards,
+      DeckId.cups: cupsCards,
     };
     return getActiveDeckCards(deckId, deckRegistry);
   }

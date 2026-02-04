@@ -32,9 +32,12 @@ flutter:
     - assets/data/spreads_en.json
     - assets/data/spreads_ru.json
     - assets/data/spreads_kk.json
+    - assets/data/
     - assets/deck/
+    - assets/cards/
     - assets/cards/major/
     - assets/cards/wands/
+    - assets/cards/cups/
     - assets/icon/
 
 flutter_launcher_icons:

@@ -414,6 +414,8 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                           name: drawn.cardName,
                           keywords: drawn.keywords,
                           meaning: drawn.meaning,
+                          funFact: drawn.funFact,
+                          stats: drawn.stats,
                         ),
                       ),
                     ),

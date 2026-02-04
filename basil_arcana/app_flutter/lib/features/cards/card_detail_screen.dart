@@ -13,6 +13,9 @@ class CardDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final colorScheme = Theme.of(context).colorScheme;
+    final keywordLimit = 4;
+    final visibleKeywords = card.keywords.take(keywordLimit).toList();
+    final remainingKeywords = card.keywords.length - visibleKeywords.length;
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.cardsDetailTitle),
@@ -35,7 +38,7 @@ class CardDetailScreen extends StatelessWidget {
           const SizedBox(height: 16),
           if (card.keywords.isNotEmpty) ...[
             Text(
-              l10n.cardsDetailKeywordsTitle,
+              l10n.cardKeywordsTitle,
               style: Theme.of(context)
                   .textTheme
                   .titleMedium
@@ -45,21 +48,30 @@ class CardDetailScreen extends StatelessWidget {
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: card.keywords
-                  .map(
-                    (keyword) => Chip(
-                      label: Text(keyword),
-                      backgroundColor: colorScheme.surface,
-                      side: BorderSide(color: colorScheme.outlineVariant),
-                      labelStyle: TextStyle(color: colorScheme.onSurface),
-                    ),
-                  )
-                  .toList(),
+              children: [
+                ...visibleKeywords.map(
+                  (keyword) => Chip(
+                    label: Text(keyword),
+                    backgroundColor: colorScheme.surface,
+                    side: BorderSide(color: colorScheme.outlineVariant),
+                    labelStyle: TextStyle(color: colorScheme.onSurface),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                ),
+                if (remainingKeywords > 0)
+                  Chip(
+                    label: Text('+$remainingKeywords'),
+                    backgroundColor: colorScheme.surfaceVariant,
+                    side: BorderSide(color: colorScheme.outlineVariant),
+                    labelStyle: TextStyle(color: colorScheme.onSurface),
+                    visualDensity: VisualDensity.compact,
+                  ),
+              ],
             ),
             const SizedBox(height: 20),
           ],
           Text(
-            l10n.cardsDetailMeaningTitle,
+            l10n.cardGeneralTitle,
             style: Theme.of(context)
                 .textTheme
                 .titleMedium
@@ -69,6 +81,163 @@ class CardDetailScreen extends StatelessWidget {
           Text(
             card.meaning.general,
             style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          if (card.meaning.detailed.trim().isNotEmpty) ...[
+            const SizedBox(height: 20),
+            Text(
+              l10n.cardDetailedTitle,
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium
+                  ?.copyWith(color: colorScheme.primary),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              card.meaning.detailed,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ],
+          if (card.funFact.trim().isNotEmpty) ...[
+            const SizedBox(height: 20),
+            Text(
+              l10n.cardFunFactTitle,
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium
+                  ?.copyWith(color: colorScheme.primary),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              card.funFact,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ],
+          if (card.stats != null) ...[
+            const SizedBox(height: 20),
+            Text(
+              l10n.cardStatsTitle,
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium
+                  ?.copyWith(color: colorScheme.primary),
+            ),
+            const SizedBox(height: 12),
+            _StatsGrid(stats: card.stats!),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _StatsGrid extends StatelessWidget {
+  const _StatsGrid({required this.stats});
+
+  final CardStats stats;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final tiles = [
+      _StatTileData(
+        icon: Icons.auto_awesome,
+        label: l10n.statLuck,
+        value: stats.luck,
+      ),
+      _StatTileData(
+        icon: Icons.flash_on,
+        label: l10n.statPower,
+        value: stats.power,
+      ),
+      _StatTileData(
+        icon: Icons.favorite,
+        label: l10n.statLove,
+        value: stats.love,
+      ),
+      _StatTileData(
+        icon: Icons.visibility,
+        label: l10n.statClarity,
+        value: stats.clarity,
+      ),
+    ];
+
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(child: _StatTile(data: tiles[0])),
+            const SizedBox(width: 12),
+            Expanded(child: _StatTile(data: tiles[1])),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(child: _StatTile(data: tiles[2])),
+            const SizedBox(width: 12),
+            Expanded(child: _StatTile(data: tiles[3])),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _StatTileData {
+  const _StatTileData({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  final IconData icon;
+  final String label;
+  final int value;
+}
+
+class _StatTile extends StatelessWidget {
+  const _StatTile({required this.data});
+
+  final _StatTileData data;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceVariant.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: colorScheme.outlineVariant),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(data.icon, color: colorScheme.primary, size: 18),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  data.label,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ),
+              Text(
+                '${data.value}%',
+                style: Theme.of(context)
+                    .textTheme
+                    .labelMedium
+                    ?.copyWith(color: colorScheme.onSurface),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          LinearProgressIndicator(
+            value: data.value / 100,
+            minHeight: 6,
+            backgroundColor: colorScheme.surface,
+            color: colorScheme.primary,
           ),
         ],
       ),

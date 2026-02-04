@@ -61,7 +61,7 @@ class SettingsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           _DeckOption(
-            label: l10n.deckAllName,
+            label: l10n.deckAll,
             deckId: DeckId.all,
             groupValue: deckId,
             onSelected: (value) {
@@ -69,7 +69,7 @@ class SettingsScreen extends ConsumerWidget {
             },
           ),
           _DeckOption(
-            label: l10n.deckMajorName,
+            label: l10n.deckMajor,
             deckId: DeckId.major,
             groupValue: deckId,
             onSelected: (value) {
@@ -77,8 +77,16 @@ class SettingsScreen extends ConsumerWidget {
             },
           ),
           _DeckOption(
-            label: l10n.deckWandsName,
+            label: l10n.deckWands,
             deckId: DeckId.wands,
+            groupValue: deckId,
+            onSelected: (value) {
+              ref.read(deckProvider.notifier).setDeck(value);
+            },
+          ),
+          _DeckOption(
+            label: l10n.deckCups,
+            deckId: DeckId.cups,
             groupValue: deckId,
             onSelected: (value) {
               ref.read(deckProvider.notifier).setDeck(value);
