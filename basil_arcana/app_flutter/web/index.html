@@ -11,9 +11,10 @@
     />
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+      content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
     />
     <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-touch-fullscreen" content="yes" />
     <meta
       name="apple-mobile-web-app-status-bar-style"
       content="black-translucent"
@@ -32,15 +33,32 @@
         if (window.__IS_TELEGRAM__) {
           window.Telegram.WebApp.ready();
           window.Telegram.WebApp.expand();
+          window.Telegram.WebApp.disableVerticalSwipes();
           document.body.classList.add("telegram-webapp");
         }
       });
     </script>
 
+    <style>
+      html,
+      body {
+        height: 100%;
+        overflow: hidden;
+        overscroll-behavior: none;
+      }
+
+      #flutter_container {
+        height: 100%;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+    </style>
+
     <link rel="manifest" href="manifest.json" />
     <script defer src="flutter.js"></script>
   </head>
   <body>
+    <div id="flutter_container"></div>
     <script>
       const serviceWorkerVersion = null;
       window.addEventListener("load", () => {
@@ -49,7 +67,11 @@
             serviceWorkerVersion: serviceWorkerVersion,
           },
           onEntrypointLoaded: (engineInitializer) => {
-            engineInitializer.initializeEngine().then((appRunner) => {
+            engineInitializer
+              .initializeEngine({
+                hostElement: document.getElementById("flutter_container"),
+              })
+              .then((appRunner) => {
               appRunner.runApp();
             });
           },
