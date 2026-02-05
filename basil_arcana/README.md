@@ -64,14 +64,15 @@ curl -X POST http://localhost:3000/api/reading/generate \
 ## Deploy to Railway
 
 1. Create a Railway project from this GitHub repo.
-2. In Railway Variables, set:
+2. For the Flutter web service, point Railway to `basil_arcana/app_flutter/Dockerfile.web` and set `API_BASE_URL`.
+3. In Railway Variables, set:
    - `OPENAI_API_KEY`
    - `ARCANA_API_KEY`
    - `OPENAI_MODEL` (optional)
    - `RATE_LIMIT_WINDOW_MS` (optional, default 60000)
    - `RATE_LIMIT_MAX` (optional, default 60)
-3. Ensure the `start` script runs (`npm start`). Railway uses `process.env.PORT`.
-4. Use the Railway public URL to test `/health`.
+4. Ensure the `start` script runs (`npm start`). Railway uses `process.env.PORT`.
+5. Use the Railway public URL to test `/health`.
 
 ## Telegram bot (Railway)
 
