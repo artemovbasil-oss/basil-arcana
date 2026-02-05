@@ -1,5 +1,9 @@
 enum DeckId { all, major, wands, swords, pentacles, cups }
 
+const Map<String, String> _cardIdAliases = {
+  'major_10_wheel_of_fortune': 'major_10_wheel',
+};
+
 const List<String> wandsCardIds = [
   'wands_00_knight',
   'wands_01_king',
@@ -76,6 +80,15 @@ const Map<DeckId, String> deckStorageValues = {
   DeckId.pentacles: 'pentacles',
   DeckId.cups: 'cups',
 };
+
+String canonicalCardId(String rawId) {
+  var normalized = rawId.toLowerCase().trim();
+  normalized = normalized.replaceAll(RegExp(r'\.[a-z0-9]+$'), '');
+  normalized = normalized.replaceAll(RegExp(r'[^a-z0-9_]+'), '_');
+  normalized = normalized.replaceAll(RegExp(r'_+'), '_');
+  normalized = normalized.replaceAll(RegExp(r'^_+|_+$'), '');
+  return _cardIdAliases[normalized] ?? normalized;
+}
 
 DeckId deckIdFromStorage(String? value) {
   for (final entry in deckStorageValues.entries) {
