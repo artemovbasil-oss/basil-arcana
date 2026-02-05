@@ -16,8 +16,10 @@ const {
   PORT,
   RATE_LIMIT_MAX,
   RATE_LIMIT_WINDOW_MS,
-  OPENAI_API_KEY
+  OPENAI_API_KEY,
+  TELEGRAM_BOT_TOKEN
 } = require('./src/config');
+const { validateTelegramInitData } = require('./src/telegram');
 
 const app = express();
 
@@ -199,6 +201,82 @@ app.post('/api/reading/generate', async (req, res) => {
   const startTime = Date.now();
   try {
     const messages = buildPromptMessages(req.body, mode);
+    const result = await createResponse(messages, {
+      requestId: req.requestId
+    });
+    return res.json({ ...result.parsed, requestId: req.requestId });
+  } catch (err) {
+    const durationMs = Date.now() - startTime;
+    const upstream = {
+      status: err instanceof OpenAIRequestError ? err.status : null,
+      code: err instanceof OpenAIRequestError ? err.errorCode : null,
+      type: err instanceof OpenAIRequestError ? err.errorType : err.name,
+      message: err.message ? err.message.slice(0, 300) : null
+    };
+
+    console.error(
+      JSON.stringify({
+        event: 'openai_upstream_error',
+        requestId: req.requestId,
+        model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+        duration_ms: durationMs,
+        status: upstream.status,
+        errorCode: upstream.code,
+        errorType: upstream.type
+      })
+    );
+
+    return res
+      .status(502)
+      .json({
+        error: 'upstream_failed',
+        requestId: req.requestId,
+        upstream
+      });
+  }
+});
+
+app.post('/api/reading/generate_web', async (req, res) => {
+  if (!OPENAI_API_KEY || !TELEGRAM_BOT_TOKEN) {
+    return res.status(503).json({
+      error: 'server_misconfig',
+      requestId: req.requestId
+    });
+  }
+  const mode = req.query.mode || 'deep';
+  if (
+    mode !== 'fast' &&
+    mode !== 'deep' &&
+    mode !== 'life_areas' &&
+    mode !== 'details_relationships_career'
+  ) {
+    return res.status(400).json({
+      error: 'invalid_mode',
+      requestId: req.requestId
+    });
+  }
+  const { initData, payload } = req.body || {};
+  if (typeof initData !== 'string' || !initData.trim()) {
+    return res.status(400).json({
+      error: 'missing_init_data',
+      requestId: req.requestId
+    });
+  }
+  const validation = validateTelegramInitData(initData, TELEGRAM_BOT_TOKEN);
+  if (!validation.ok) {
+    return res.status(401).json({
+      error: validation.error || 'invalid_init_data',
+      requestId: req.requestId
+    });
+  }
+  const error = validateReadingRequest(payload);
+  if (error) {
+    return res.status(400).json({ error, requestId: req.requestId });
+  }
+
+  const startTime = Date.now();
+  try {
+    const messages = buildPromptMessages(payload, mode);
     const result = await createResponse(messages, {
       requestId: req.requestId
     });

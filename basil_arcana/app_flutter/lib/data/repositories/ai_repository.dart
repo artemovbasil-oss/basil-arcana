@@ -8,6 +8,8 @@ import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
 
 import '../../core/config/app_config.dart';
+import '../../core/telegram/telegram_web_app.dart';
+import '../../core/telemetry/web_error_reporter.dart';
 import '../models/ai_result_model.dart';
 import '../models/card_model.dart';
 import '../models/drawn_card_model.dart';
@@ -162,14 +164,32 @@ class AiRepository {
           'status=n/a duration_ms=0 error=${AiErrorType.serverError.name}',
         );
       }
+      _reportWebError(
+        AiErrorType.misconfigured,
+        message: 'Missing API_BASE_URL',
+      );
       throw const AiRepositoryException(
         AiErrorType.misconfigured,
         message: 'Missing API_BASE_URL',
       );
     }
 
+    final useTelegramAuth = kIsWeb && TelegramWebApp.isAvailable;
+    if (kIsWeb && !useTelegramAuth && apiKey.trim().isEmpty) {
+      _reportWebError(
+        AiErrorType.unauthorized,
+        message: 'Open this experience inside Telegram to continue.',
+      );
+      throw const AiRepositoryException(
+        AiErrorType.unauthorized,
+        message: 'Telegram WebApp required',
+      );
+    }
+    final endpoint = useTelegramAuth
+        ? '/api/reading/generate_web'
+        : '/api/reading/generate';
     final uri = Uri.parse(apiBaseUrl).replace(
-      path: '/api/reading/generate',
+      path: endpoint,
       queryParameters: {
         'mode': _modeParam(mode),
       },
@@ -219,6 +239,22 @@ class AiRepository {
       'x-request-id': requestId,
       if (apiKey.trim().isNotEmpty) 'x-api-key': apiKey,
     };
+    if (useTelegramAuth && (TelegramWebApp.initData ?? '').trim().isEmpty) {
+      _reportWebError(
+        AiErrorType.unauthorized,
+        message: 'Missing Telegram initData',
+      );
+      throw const AiRepositoryException(
+        AiErrorType.unauthorized,
+        message: 'Missing Telegram initData',
+      );
+    }
+    final requestPayload = useTelegramAuth
+        ? {
+            'initData': TelegramWebApp.initData,
+            'payload': payload,
+          }
+        : payload;
 
     final httpClient = client ?? http.Client();
     http.Response response;
@@ -233,7 +269,7 @@ class AiRepository {
           .post(
             uri,
             headers: headers,
-            body: jsonEncode(payload),
+            body: jsonEncode(requestPayload),
           )
           .timeout(timeout);
     } on TimeoutException catch (error) {
@@ -244,6 +280,7 @@ class AiRepository {
         errorType: AiErrorType.timeout,
         exception: error,
       );
+      _reportWebError(AiErrorType.timeout, message: error.toString());
       throw const AiRepositoryException(AiErrorType.timeout);
     } on SocketException catch (error) {
       _logFailure(
@@ -253,6 +290,7 @@ class AiRepository {
         errorType: AiErrorType.noInternet,
         exception: error,
       );
+      _reportWebError(AiErrorType.noInternet, message: error.toString());
       throw const AiRepositoryException(AiErrorType.noInternet);
     } finally {
       if (client == null) {
@@ -269,6 +307,11 @@ class AiRepository {
         errorType: AiErrorType.unauthorized,
         responseBody: response.body,
       );
+      _reportWebError(
+        AiErrorType.unauthorized,
+        statusCode: response.statusCode,
+        responseBody: response.body,
+      );
       throw const AiRepositoryException(AiErrorType.unauthorized);
     }
 
@@ -281,6 +324,11 @@ class AiRepository {
         errorType: AiErrorType.rateLimited,
         responseBody: response.body,
       );
+      _reportWebError(
+        AiErrorType.rateLimited,
+        statusCode: response.statusCode,
+        responseBody: response.body,
+      );
       throw const AiRepositoryException(AiErrorType.rateLimited);
     }
 
@@ -291,6 +339,11 @@ class AiRepository {
         requestId: requestId,
         statusCode: response.statusCode,
         errorType: AiErrorType.serverError,
+        responseBody: response.body,
+      );
+      _reportWebError(
+        AiErrorType.serverError,
+        statusCode: response.statusCode,
         responseBody: response.body,
       );
       throw AiRepositoryException(
@@ -306,6 +359,11 @@ class AiRepository {
         requestId: requestId,
         statusCode: response.statusCode,
         errorType: AiErrorType.badResponse,
+        responseBody: response.body,
+      );
+      _reportWebError(
+        AiErrorType.badResponse,
+        statusCode: response.statusCode,
         responseBody: response.body,
       );
       throw AiRepositoryException(
@@ -345,6 +403,11 @@ class AiRepository {
         errorType: AiErrorType.badResponse,
         responseBody: response.body,
       );
+      _reportWebError(
+        AiErrorType.badResponse,
+        statusCode: response.statusCode,
+        responseBody: response.body,
+      );
       throw AiRepositoryException(
         AiErrorType.badResponse,
         message: error.toString(),
@@ -368,6 +431,10 @@ class AiRepository {
           'status=n/a duration_ms=0 error=${AiErrorType.serverError.name}',
         );
       }
+      _reportWebError(
+        AiErrorType.misconfigured,
+        message: 'Missing API_BASE_URL',
+      );
       throw const AiRepositoryException(
         AiErrorType.misconfigured,
         message: 'Missing API_BASE_URL',
@@ -423,6 +490,7 @@ class AiRepository {
         errorType: AiErrorType.timeout,
         exception: error,
       );
+      _reportWebError(AiErrorType.timeout, message: error.toString());
       throw const AiRepositoryException(AiErrorType.timeout);
     } on SocketException catch (error) {
       _logFailure(
@@ -432,6 +500,7 @@ class AiRepository {
         errorType: AiErrorType.noInternet,
         exception: error,
       );
+      _reportWebError(AiErrorType.noInternet, message: error.toString());
       throw const AiRepositoryException(AiErrorType.noInternet);
     } finally {
       if (client == null) {
@@ -448,6 +517,11 @@ class AiRepository {
         errorType: AiErrorType.unauthorized,
         responseBody: response.body,
       );
+      _reportWebError(
+        AiErrorType.unauthorized,
+        statusCode: response.statusCode,
+        responseBody: response.body,
+      );
       throw const AiRepositoryException(AiErrorType.unauthorized);
     }
 
@@ -460,6 +534,11 @@ class AiRepository {
         errorType: AiErrorType.rateLimited,
         responseBody: response.body,
       );
+      _reportWebError(
+        AiErrorType.rateLimited,
+        statusCode: response.statusCode,
+        responseBody: response.body,
+      );
       throw const AiRepositoryException(AiErrorType.rateLimited);
     }
 
@@ -470,6 +549,11 @@ class AiRepository {
         requestId: requestId,
         statusCode: response.statusCode,
         errorType: AiErrorType.serverError,
+        responseBody: response.body,
+      );
+      _reportWebError(
+        AiErrorType.serverError,
+        statusCode: response.statusCode,
         responseBody: response.body,
       );
       throw AiRepositoryException(
@@ -485,6 +569,11 @@ class AiRepository {
         requestId: requestId,
         statusCode: response.statusCode,
         errorType: AiErrorType.badResponse,
+        responseBody: response.body,
+      );
+      _reportWebError(
+        AiErrorType.badResponse,
+        statusCode: response.statusCode,
         responseBody: response.body,
       );
       throw AiRepositoryException(
@@ -526,6 +615,11 @@ class AiRepository {
         requestId: requestId,
         statusCode: response.statusCode,
         errorType: AiErrorType.badResponse,
+        responseBody: response.body,
+      );
+      _reportWebError(
+        AiErrorType.badResponse,
+        statusCode: response.statusCode,
         responseBody: response.body,
       );
       throw AiRepositoryException(
@@ -681,5 +775,30 @@ class AiRepository {
       return null;
     }
     return null;
+  }
+
+  void _reportWebError(
+    AiErrorType type, {
+    int? statusCode,
+    String? message,
+    String? responseBody,
+  }) {
+    if (!kIsWeb) {
+      return;
+    }
+    final preview = responseBody == null
+        ? ''
+        : responseBody.substring(
+            0,
+            responseBody.length > 240 ? 240 : responseBody.length,
+          );
+    final parts = [
+      'API error: ${type.name}',
+      if (statusCode != null) 'status=$statusCode',
+      if (message != null && message.trim().isNotEmpty)
+        'message=${message.trim()}',
+      if (preview.trim().isNotEmpty) 'body=${preview.trim()}',
+    ];
+    WebErrorReporter.instance.report(parts.join(' | '));
   }
 }

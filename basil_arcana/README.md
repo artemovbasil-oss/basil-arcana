@@ -68,6 +68,7 @@ curl -X POST http://localhost:3000/api/reading/generate \
 3. In Railway Variables, set:
    - `OPENAI_API_KEY`
    - `ARCANA_API_KEY`
+   - `TELEGRAM_BOT_TOKEN` (required for Telegram WebApp auth)
    - `OPENAI_MODEL` (optional)
    - `RATE_LIMIT_WINDOW_MS` (optional, default 60000)
    - `RATE_LIMIT_MAX` (optional, default 60)
@@ -111,4 +112,5 @@ Production default: `https://api.basilarcana.com`.
 
 ## Notes
 - Secrets are never committed to the repo. Use Railway Variables or local environment variables.
+- The web client loads `/config.json` at runtime; set `API_BASE_URL` in the web service environment. No `API_KEY` is embedded in the web bundle.
 - No binary assets are included; all card faces are rendered with Flutter UI components.
