@@ -21,6 +21,7 @@ class ConfigService {
   );
 
   String _apiBaseUrl = _apiBaseUrlEnv;
+  String _apiKey = _apiKeyEnv;
   String? _build;
   String? _lastError;
 
@@ -29,7 +30,7 @@ class ConfigService {
   String? get lastError => _lastError;
   bool get isConfigured => _apiBaseUrl.trim().isNotEmpty;
 
-  String get apiKey => kIsWeb ? '' : _apiKeyEnv;
+  String get apiKey => kIsWeb ? _apiKey : _apiKeyEnv;
 
   Future<void> load() async {
     if (!kIsWeb) {
@@ -57,8 +58,12 @@ class ConfigService {
       }
       final runtimeApiBaseUrl = payload['apiBaseUrl'];
       final runtimeBuild = payload['build'];
+      final runtimeApiKey = payload['apiKey'];
       if (runtimeApiBaseUrl is String && runtimeApiBaseUrl.trim().isNotEmpty) {
         _apiBaseUrl = runtimeApiBaseUrl.trim();
+      }
+      if (runtimeApiKey is String) {
+        _apiKey = runtimeApiKey.trim();
       }
       if (runtimeBuild is String && runtimeBuild.trim().isNotEmpty) {
         _build = runtimeBuild.trim();
