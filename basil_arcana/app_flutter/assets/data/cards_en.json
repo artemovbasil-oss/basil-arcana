@@ -12,8 +12,8 @@
       "shadow": "Naivety or avoidance could blur the risks.",
       "advice": "Take a small step that keeps the door open to learning."
     },
-    "detailedDescription": "A fresh start invites openness and experimentation. Take a small step that keeps the door open to learning.",
-    "funFact": "Key themes for this card: beginnings, curiosity, leap of faith.",
+    "detailedDescription": "A fresh start invites openness and experimentation. Optimism and curiosity are helping you move forward. Naivety or avoidance could blur the risks. Take a small step that keeps the door open to learning.",
+    "funFact": "The Fool opens the journey with risk and curiosity.",
     "stats": {
       "luck": 56,
       "power": 66,
@@ -34,8 +34,8 @@
       "shadow": "Scattered energy may dilute your impact.",
       "advice": "Choose one priority and direct your attention there."
     },
-    "detailedDescription": "You already have tools available to shape the outcome. Choose one priority and direct your attention there.",
-    "funFact": "Key themes for this card: focus, resources, initiative.",
+    "detailedDescription": "You already have tools available to shape the outcome. Aligned intention makes your efforts more effective. Scattered energy may dilute your impact. Choose one priority and direct your attention there.",
+    "funFact": "The Magician is the first figure to claim personal power.",
     "stats": {
       "luck": 58,
       "power": 68,
@@ -56,8 +56,8 @@
       "shadow": "Keeping too much hidden can create distance.",
       "advice": "Give yourself space to listen before acting."
     },
-    "detailedDescription": "Quiet insight is available beneath the surface. Give yourself space to listen before acting.",
-    "funFact": "Key themes for this card: intuition, stillness, inner knowing.",
+    "detailedDescription": "Quiet insight is available beneath the surface. Trusting your intuition brings clarity. Keeping too much hidden can create distance. Give yourself space to listen before acting.",
+    "funFact": "The High Priestess guards knowledge that isn't spoken.",
     "stats": {
       "luck": 60,
       "power": 70,
@@ -78,8 +78,8 @@
       "shadow": "Overextending yourself may sap vitality.",
       "advice": "Nourish what matters most and simplify the rest."
     },
-    "detailedDescription": "Supportive conditions allow something to grow. Nourish what matters most and simplify the rest.",
-    "funFact": "Key themes for this card: nurture, abundance, growth.",
+    "detailedDescription": "Supportive conditions allow something to grow. Care and patience are strengthening your foundation. Overextending yourself may sap vitality. Nourish what matters most and simplify the rest.",
+    "funFact": "The Empress represents creation, comfort, and embodied care.",
     "stats": {
       "luck": 62,
       "power": 72,
@@ -100,8 +100,8 @@
       "shadow": "Rigidity could block needed flexibility.",
       "advice": "Define boundaries that support your priorities."
     },
-    "detailedDescription": "Clear structure helps you move with confidence. Define boundaries that support your priorities.",
-    "funFact": "Key themes for this card: structure, leadership, boundaries.",
+    "detailedDescription": "Clear structure helps you move with confidence. Taking responsibility brings stability. Rigidity could block needed flexibility. Define boundaries that support your priorities.",
+    "funFact": "The Emperor is the archetype of structure and authority.",
     "stats": {
       "luck": 64,
       "power": 74,
@@ -122,8 +122,8 @@
       "shadow": "Following rules blindly can limit growth.",
       "advice": "Seek mentors, but adapt advice to your reality."
     },
-    "detailedDescription": "Guidance from trusted sources can be helpful. Seek mentors, but adapt advice to your reality.",
-    "funFact": "Key themes for this card: tradition, guidance, learning.",
+    "detailedDescription": "Guidance from trusted sources can be helpful. Shared values offer a steady compass. Following rules blindly can limit growth. Seek mentors, but adapt advice to your reality.",
+    "funFact": "The Hierophant points to tradition and shared systems.",
     "stats": {
       "luck": 56,
       "power": 66,
@@ -144,8 +144,8 @@
       "shadow": "Avoiding a decision can create tension.",
       "advice": "Name what matters most and choose accordingly."
     },
-    "detailedDescription": "A meaningful choice asks for alignment with values. Name what matters most and choose accordingly.",
-    "funFact": "Key themes for this card: choice, alignment, relationships.",
+    "detailedDescription": "A meaningful choice asks for alignment with values. Connection and honesty deepen trust. Avoiding a decision can create tension. Name what matters most and choose accordingly.",
+    "funFact": "The Lovers centers on alignment before commitment.",
     "stats": {
       "luck": 58,
       "power": 68,
@@ -166,8 +166,8 @@
       "shadow": "Forcing progress may create resistance.",
       "advice": "Move steadily and keep your intention clear."
     },
-    "detailedDescription": "Focused effort creates forward momentum. Move steadily and keep your intention clear.",
-    "funFact": "Key themes for this card: drive, direction, self-control.",
+    "detailedDescription": "Focused effort creates forward momentum. Determination helps you navigate obstacles. Forcing progress may create resistance. Move steadily and keep your intention clear.",
+    "funFact": "The Chariot is about willpower steering opposing forces.",
     "stats": {
       "luck": 60,
       "power": 70,
@@ -188,8 +188,8 @@
       "shadow": "Self-doubt could soften your resolve.",
       "advice": "Lead with kindness, and trust your endurance."
     },
-    "detailedDescription": "Inner steadiness is more powerful than force. Lead with kindness, and trust your endurance.",
-    "funFact": "Key themes for this card: resilience, compassion, gentle power.",
+    "detailedDescription": "Inner steadiness is more powerful than force. Patience and empathy help you hold the moment. Self-doubt could soften your resolve. Lead with kindness, and trust your endurance.",
+    "funFact": "Strength highlights calm control rather than brute force.",
     "stats": {
       "luck": 62,
       "power": 72,
@@ -210,8 +210,8 @@
       "shadow": "Withdrawing too far can reduce support.",
       "advice": "Take quiet time, then return with a plan."
     },
-    "detailedDescription": "Solitude offers perspective and clarity. Take quiet time, then return with a plan.",
-    "funFact": "Key themes for this card: reflection, solitude, guidance.",
+    "detailedDescription": "Solitude offers perspective and clarity. Intentional reflection reveals the next step. Withdrawing too far can reduce support. Take quiet time, then return with a plan.",
+    "funFact": "The Hermit steps back to find a private light.",
     "stats": {
       "luck": 64,
       "power": 74,
@@ -232,8 +232,8 @@
       "shadow": "Feeling out of control may cloud decisions.",
       "advice": "Notice the cycle you are in and respond calmly."
     },
-    "detailedDescription": "Circumstances are shifting in meaningful ways. Notice the cycle you are in and respond calmly.",
-    "funFact": "Key themes for this card: change, cycles, timing.",
+    "detailedDescription": "Circumstances are shifting in meaningful ways. Good timing can open a helpful window. Feeling out of control may cloud decisions. Notice the cycle you are in and respond calmly.",
+    "funFact": "The Wheel of Fortune speaks to cycles you can't fully steer.",
     "stats": {
       "luck": 56,
       "power": 66,
@@ -254,8 +254,8 @@
       "shadow": "Overanalyzing could delay action.",
       "advice": "Weigh facts and values before deciding."
     },
-    "detailedDescription": "Balance and honesty clarify the situation. Weigh facts and values before deciding.",
-    "funFact": "Key themes for this card: fairness, truth, accountability.",
+    "detailedDescription": "Balance and honesty clarify the situation. Clear choices bring integrity and calm. Overanalyzing could delay action. Weigh facts and values before deciding.",
+    "funFact": "Justice weighs actions with clear consequences.",
     "stats": {
       "luck": 58,
       "power": 68,
@@ -276,8 +276,8 @@
       "shadow": "Stagnation may feel like being stuck.",
       "advice": "Release urgency and allow insight to emerge."
     },
-    "detailedDescription": "A pause can shift how you see the issue. Release urgency and allow insight to emerge.",
-    "funFact": "Key themes for this card: pause, perspective, surrender.",
+    "detailedDescription": "A pause can shift how you see the issue. Letting go invites a new perspective. Stagnation may feel like being stuck. Release urgency and allow insight to emerge.",
+    "funFact": "The Hanged Man flips the view to unlock insight.",
     "stats": {
       "luck": 60,
       "power": 70,
@@ -298,8 +298,8 @@
       "shadow": "Holding on may prolong discomfort.",
       "advice": "Acknowledge what is complete and turn forward."
     },
-    "detailedDescription": "An ending clears space for a new chapter. Acknowledge what is complete and turn forward.",
-    "funFact": "Key themes for this card: transition, release, renewal.",
+    "detailedDescription": "An ending clears space for a new chapter. Letting go helps renewal begin. Holding on may prolong discomfort. Acknowledge what is complete and turn forward.",
+    "funFact": "Death marks an ending that makes room for the next phase.",
     "stats": {
       "luck": 62,
       "power": 72,
@@ -320,8 +320,8 @@
       "shadow": "Imbalance can create unnecessary strain.",
       "advice": "Aim for small adjustments rather than extremes."
     },
-    "detailedDescription": "Steady blending creates harmony over time. Aim for small adjustments rather than extremes.",
-    "funFact": "Key themes for this card: balance, integration, patience.",
+    "detailedDescription": "Steady blending creates harmony over time. Moderation keeps things sustainable. Imbalance can create unnecessary strain. Aim for small adjustments rather than extremes.",
+    "funFact": "Temperance is the art of blending extremes into balance.",
     "stats": {
       "luck": 64,
       "power": 74,
@@ -342,8 +342,8 @@
       "shadow": "Feeling trapped can cloud possibilities.",
       "advice": "Name the pattern and choose one way to loosen it."
     },
-    "detailedDescription": "A pattern or attachment wants your attention. Name the pattern and choose one way to loosen it.",
-    "funFact": "Key themes for this card: attachment, temptation, patterns.",
+    "detailedDescription": "A pattern or attachment wants your attention. Awareness creates choice and freedom. Feeling trapped can cloud possibilities. Name the pattern and choose one way to loosen it.",
+    "funFact": "The Devil exposes attachments that feel like control.",
     "stats": {
       "luck": 56,
       "power": 66,
@@ -364,8 +364,8 @@
       "shadow": "Unexpected shifts can feel destabilizing.",
       "advice": "Stay grounded and rebuild with what remains true."
     },
-    "detailedDescription": "A reset clears away what no longer holds. Stay grounded and rebuild with what remains true.",
-    "funFact": "Key themes for this card: disruption, truth, reset.",
+    "detailedDescription": "A reset clears away what no longer holds. Honest change makes room for growth. Unexpected shifts can feel destabilizing. Stay grounded and rebuild with what remains true.",
+    "funFact": "The Tower breaks what is unstable so truth can surface.",
     "stats": {
       "luck": 58,
       "power": 68,
@@ -386,8 +386,8 @@
       "shadow": "Doubt could dim your optimism.",
       "advice": "Focus on what brings steadiness and ease."
     },
-    "detailedDescription": "A calm sense of hope is returning. Focus on what brings steadiness and ease.",
-    "funFact": "Key themes for this card: hope, healing, renewal.",
+    "detailedDescription": "A calm sense of hope is returning. Gentle healing restores confidence. Doubt could dim your optimism. Focus on what brings steadiness and ease.",
+    "funFact": "The Star is a quiet promise of renewal.",
     "stats": {
       "luck": 60,
       "power": 70,
@@ -408,8 +408,8 @@
       "shadow": "Anxiety might amplify what is unknown.",
       "advice": "Take things slowly and verify assumptions."
     },
-    "detailedDescription": "The situation is unclear, but insight is possible. Take things slowly and verify assumptions.",
-    "funFact": "Key themes for this card: uncertainty, intuition, mystery.",
+    "detailedDescription": "The situation is unclear, but insight is possible. Listening inward reveals subtle truths. Anxiety might amplify what is unknown. Take things slowly and verify assumptions.",
+    "funFact": "The Moon rules the night of doubt and intuition.",
     "stats": {
       "luck": 62,
       "power": 72,
@@ -430,8 +430,8 @@
       "shadow": "Overconfidence could miss important details.",
       "advice": "Celebrate progress while staying attentive."
     },
-    "detailedDescription": "Clarity brings warmth and forward movement. Celebrate progress while staying attentive.",
-    "funFact": "Key themes for this card: clarity, joy, confidence.",
+    "detailedDescription": "Clarity brings warmth and forward movement. Optimism helps you see the path ahead. Overconfidence could miss important details. Celebrate progress while staying attentive.",
+    "funFact": "The Sun brings clarity, warmth, and visible results.",
     "stats": {
       "luck": 64,
       "power": 74,
@@ -452,8 +452,8 @@
       "shadow": "Harsh self-judgment may limit growth.",
       "advice": "Assess honestly, then commit to a fresh start."
     },
-    "detailedDescription": "A clear review points to a renewed direction. Assess honestly, then commit to a fresh start.",
-    "funFact": "Key themes for this card: awakening, review, decision.",
+    "detailedDescription": "A clear review points to a renewed direction. Learning from the past supports a wise choice. Harsh self-judgment may limit growth. Assess honestly, then commit to a fresh start.",
+    "funFact": "Judgement is a call to answer for who you've become.",
     "stats": {
       "luck": 56,
       "power": 66,
@@ -474,8 +474,8 @@
       "shadow": "Delaying closure can drain momentum.",
       "advice": "Honor the finish and define the next horizon."
     },
-    "detailedDescription": "Completion brings a sense of wholeness. Honor the finish and define the next horizon.",
-    "funFact": "Key themes for this card: completion, integration, wholeness.",
+    "detailedDescription": "Completion brings a sense of wholeness. You are ready to integrate what you have learned. Delaying closure can drain momentum. Honor the finish and define the next horizon.",
+    "funFact": "The World closes a cycle with earned completion.",
     "stats": {
       "luck": 58,
       "power": 68,
@@ -496,8 +496,8 @@
       "shadow": "Rushing ahead without a plan.",
       "advice": "Channel the rush into a focused aim."
     },
-    "detailedDescription": "Momentum surges and you feel ready to move. Channel the rush into a focused aim.",
-    "funFact": "Key themes for this card: drive, adventure, impulse.",
+    "detailedDescription": "Momentum surges and you feel ready to move. Bold action and charismatic pursuit. Rushing ahead without a plan. Channel the rush into a focused aim.",
+    "funFact": "Knights in Wands act fast, driven by the suit's energy.",
     "stats": {
       "luck": 54,
       "power": 68,
@@ -518,8 +518,8 @@
       "shadow": "Dominating or forcing outcomes.",
       "advice": "Lead with warmth and integrity."
     },
-    "detailedDescription": "Lead with clear vision and steady fire. Lead with warmth and integrity.",
-    "funFact": "Key themes for this card: vision, leadership, confidence.",
+    "detailedDescription": "Lead with clear vision and steady fire. Inspire others and set direction. Dominating or forcing outcomes. Lead with warmth and integrity.",
+    "funFact": "Kings in Wands express mastery outwardly and confidently.",
     "stats": {
       "luck": 56,
       "power": 70,
@@ -540,8 +540,8 @@
       "shadow": "Jealousy or burnout.",
       "advice": "Share your light without dimming yourself."
     },
-    "detailedDescription": "Confidence and creative warmth draw support. Share your light without dimming yourself.",
-    "funFact": "Key themes for this card: radiance, creativity, magnetism.",
+    "detailedDescription": "Confidence and creative warmth draw support. Express yourself and nurture passion. Jealousy or burnout. Share your light without dimming yourself.",
+    "funFact": "Queens in Wands hold power inward with steady control.",
     "stats": {
       "luck": 58,
       "power": 72,
@@ -562,8 +562,8 @@
       "shadow": "Naivety or scattered focus.",
       "advice": "Follow the spark and test it."
     },
-    "detailedDescription": "A fresh idea or message sparks interest. Follow the spark and test it.",
-    "funFact": "Key themes for this card: curiosity, messages, discovery.",
+    "detailedDescription": "A fresh idea or message sparks interest. Explore, learn, and play. Naivety or scattered focus. Follow the spark and test it.",
+    "funFact": "Pages in Wands point to learning, news, and curiosity.",
     "stats": {
       "luck": 60,
       "power": 74,
@@ -584,8 +584,8 @@
       "shadow": "Hesitation or fear of change.",
       "advice": "Choose a direction and take the first step."
     },
-    "detailedDescription": "You stand at a threshold with options. Choose a direction and take the first step.",
-    "funFact": "Key themes for this card: planning, choice, horizon.",
+    "detailedDescription": "You stand at a threshold with options. Plan boldly and commit. Hesitation or fear of change. Choose a direction and take the first step.",
+    "funFact": "Twos in Wands highlight balance and early partnership.",
     "stats": {
       "luck": 62,
       "power": 76,
@@ -606,8 +606,8 @@
       "shadow": "Waiting too long for certainty.",
       "advice": "Keep moving; your reach is widening."
     },
-    "detailedDescription": "Progress grows as you look outward. Keep moving; your reach is widening.",
-    "funFact": "Key themes for this card: expansion, momentum, foresight.",
+    "detailedDescription": "Progress grows as you look outward. Collaborate and expand. Waiting too long for certainty. Keep moving; your reach is widening.",
+    "funFact": "Threes in Wands mark growth and the first results.",
     "stats": {
       "luck": 54,
       "power": 68,
@@ -628,8 +628,8 @@
       "shadow": "Taking comfort for granted.",
       "advice": "Honor what is steady and shared."
     },
-    "detailedDescription": "A pause to celebrate and anchor. Honor what is steady and shared.",
-    "funFact": "Key themes for this card: celebration, home, stability.",
+    "detailedDescription": "A pause to celebrate and anchor. Community and joyful milestones. Taking comfort for granted. Honor what is steady and shared.",
+    "funFact": "Fours in Wands bring stability and a needed pause.",
     "stats": {
       "luck": 56,
       "power": 70,
@@ -650,8 +650,8 @@
       "shadow": "Ego battles or chaos.",
       "advice": "Focus the energy on a shared goal."
     },
-    "detailedDescription": "Different forces clash and spark. Focus the energy on a shared goal.",
-    "funFact": "Key themes for this card: friction, competition, energy.",
+    "detailedDescription": "Different forces clash and spark. Healthy challenge and growth. Ego battles or chaos. Focus the energy on a shared goal.",
+    "funFact": "Fives in Wands introduce friction that tests resolve.",
     "stats": {
       "luck": 58,
       "power": 72,
@@ -672,8 +672,8 @@
       "shadow": "Needing applause to move forward.",
       "advice": "Celebrate, then keep it grounded."
     },
-    "detailedDescription": "Effort is noticed and rewarded. Celebrate, then keep it grounded.",
-    "funFact": "Key themes for this card: recognition, success, momentum.",
+    "detailedDescription": "Effort is noticed and rewarded. Confidence after a win. Needing applause to move forward. Celebrate, then keep it grounded.",
+    "funFact": "Sixes in Wands show progress and shared momentum.",
     "stats": {
       "luck": 60,
       "power": 74,
@@ -694,8 +694,8 @@
       "shadow": "Feeling attacked or isolated.",
       "advice": "Hold firm without closing off."
     },
-    "detailedDescription": "Stand your ground for what matters. Hold firm without closing off.",
-    "funFact": "Key themes for this card: defense, courage, boundaries.",
+    "detailedDescription": "Stand your ground for what matters. Protect your position and values. Feeling attacked or isolated. Hold firm without closing off.",
+    "funFact": "Sevens in Wands signal tests of focus and stamina.",
     "stats": {
       "luck": 62,
       "power": 76,
@@ -716,8 +716,8 @@
       "shadow": "Overwhelm or rushing.",
       "advice": "Ride the momentum with focus."
     },
-    "detailedDescription": "Things move quickly and align. Ride the momentum with focus.",
-    "funFact": "Key themes for this card: speed, messages, movement.",
+    "detailedDescription": "Things move quickly and align. Swift progress and clear signals. Overwhelm or rushing. Ride the momentum with focus.",
+    "funFact": "Eights in Wands accelerate movement and decisive action.",
     "stats": {
       "luck": 54,
       "power": 68,
@@ -738,8 +738,8 @@
       "shadow": "Exhaustion or mistrust.",
       "advice": "Rest, then hold the line."
     },
-    "detailedDescription": "You are close to the finish; stay steady. Rest, then hold the line.",
-    "funFact": "Key themes for this card: resilience, persistence, guarded.",
+    "detailedDescription": "You are close to the finish; stay steady. Endurance and learned strength. Exhaustion or mistrust. Rest, then hold the line.",
+    "funFact": "Nines in Wands reflect resilience near the finish.",
     "stats": {
       "luck": 56,
       "power": 70,
@@ -760,8 +760,8 @@
       "shadow": "Overload or martyrdom.",
       "advice": "Delegate and set limits."
     },
-    "detailedDescription": "Responsibilities feel heavy. Delegate and set limits.",
-    "funFact": "Key themes for this card: burden, responsibility, pressure.",
+    "detailedDescription": "Responsibilities feel heavy. Commitment and hard work. Overload or martyrdom. Delegate and set limits.",
+    "funFact": "Tens in Wands close the cycle with full weight.",
     "stats": {
       "luck": 58,
       "power": 72,
@@ -782,8 +782,8 @@
       "shadow": "Impulsive flare with no follow-through.",
       "advice": "Take the first step and nurture it."
     },
-    "detailedDescription": "A new spark of passion arrives. Take the first step and nurture it.",
-    "funFact": "Key themes for this card: spark, inspiration, potential.",
+    "detailedDescription": "A new spark of passion arrives. Creative surge and bold start. Impulsive flare with no follow-through. Take the first step and nurture it.",
+    "funFact": "Aces in Wands are the first pulse of the element.",
     "stats": {
       "luck": 60,
       "power": 74,
@@ -1420,8 +1420,8 @@
       "shadow": "Idealizing or overpromising.",
       "advice": "Express feelings with clarity and care."
     },
-    "detailedDescription": "An emotional offer arrives and your heart wants to respond. Express feelings with clarity and care.",
-    "funFact": "Key themes for this card: romance, invitation, intuition.",
+    "detailedDescription": "An emotional offer arrives or you feel ready to share. Sincere affection and gentle pursuit. Idealizing or overpromising. Express feelings with clarity and care.",
+    "funFact": "Knights in Cups act fast, driven by the suit's energy.",
     "stats": {
       "luck": 55,
       "power": 52,
@@ -1442,8 +1442,8 @@
       "shadow": "Suppressing feelings or growing distant.",
       "advice": "Hold steady and respond with kindness."
     },
-    "detailedDescription": "Calm leadership is guided by the heart. Hold steady and respond with kindness.",
-    "funFact": "Key themes for this card: emotional mastery, compassion, stability.",
+    "detailedDescription": "Calm leadership is guided by the heart. Balanced empathy and wise counsel. Suppressing feelings or growing distant. Hold steady and respond with kindness.",
+    "funFact": "Kings in Cups express mastery outwardly and confidently.",
     "stats": {
       "luck": 58,
       "power": 60,
@@ -1464,8 +1464,8 @@
       "shadow": "Absorbing others' moods or losing boundaries.",
       "advice": "Listen, then protect your energy."
     },
-    "detailedDescription": "Deep sensitivity tunes you to what is unspoken. Listen, then protect your energy.",
-    "funFact": "Key themes for this card: intuition, nurture, empathy.",
+    "detailedDescription": "Deep sensitivity tunes you to what is unspoken. Supportive care and emotional insight. Absorbing others' moods or losing boundaries. Listen, then protect your energy.",
+    "funFact": "Queens in Cups hold power inward with steady control.",
     "stats": {
       "luck": 57,
       "power": 54,
@@ -1486,8 +1486,8 @@
       "shadow": "Moodiness or uncertainty about feelings.",
       "advice": "Name what you feel and explore it."
     },
-    "detailedDescription": "A sweet message or new feeling emerges. Name what you feel and explore it.",
-    "funFact": "Key themes for this card: curiosity, message, tenderness.",
+    "detailedDescription": "A sweet message or new feeling emerges. Open-hearted learning and gentle play. Moodiness or uncertainty about feelings. Name what you feel and explore it.",
+    "funFact": "Pages in Cups point to learning, news, and curiosity.",
     "stats": {
       "luck": 60,
       "power": 48,
@@ -1508,8 +1508,8 @@
       "shadow": "Unequal effort or projection.",
       "advice": "Meet in the middle and speak plainly."
     },
-    "detailedDescription": "A bond forms through shared respect and care. Meet in the middle and speak plainly.",
-    "funFact": "Key themes for this card: partnership, mutuality, harmony.",
+    "detailedDescription": "A bond forms through shared respect. Balanced give-and-take and honest connection. Unequal effort or projection. Meet in the middle and speak plainly.",
+    "funFact": "Twos in Cups highlight balance and early partnership.",
     "stats": {
       "luck": 62,
       "power": 50,
@@ -1530,8 +1530,8 @@
       "shadow": "Overindulgence or scattered focus.",
       "advice": "Celebrate, then return to what matters."
     },
-    "detailedDescription": "Community brings joy and uplift. Celebrate, then return to what matters.",
-    "funFact": "Key themes for this card: celebration, friends, support.",
+    "detailedDescription": "Community brings joy and uplift. Shared wins and warm support. Overindulgence or scattered focus. Celebrate, then return to what matters.",
+    "funFact": "Threes in Cups mark growth and the first results.",
     "stats": {
       "luck": 64,
       "power": 52,
@@ -1552,8 +1552,8 @@
       "shadow": "Withdrawing too long or missing an offer.",
       "advice": "Look again with fresh eyes."
     },
-    "detailedDescription": "A pause reveals what you truly want. Look again with fresh eyes.",
-    "funFact": "Key themes for this card: apathy, reevaluation, pause.",
+    "detailedDescription": "A pause reveals what you truly want. Quiet reflection before choosing. Withdrawing too long or missing an offer. Look again with fresh eyes.",
+    "funFact": "Fours in Cups bring stability and a needed pause.",
     "stats": {
       "luck": 52,
       "power": 46,
@@ -1574,8 +1574,8 @@
       "shadow": "Stuck in regret.",
       "advice": "Honor the loss and notice what still stands."
     },
-    "detailedDescription": "Disappointment asks for gentle processing. Honor the loss and notice what still stands.",
-    "funFact": "Key themes for this card: loss, grief, perspective.",
+    "detailedDescription": "Disappointment asks for gentle processing. Accepting what changed and keeping what remains. Stuck in regret. Honor the loss and notice what still stands.",
+    "funFact": "Fives in Cups introduce friction that tests resolve.",
     "stats": {
       "luck": 48,
       "power": 44,
@@ -1596,8 +1596,8 @@
       "shadow": "Clinging to the past.",
       "advice": "Bring the best of then into today."
     },
-    "detailedDescription": "Warm memories inspire softness now. Bring the best of then into today.",
-    "funFact": "Key themes for this card: nostalgia, kindness, memory.",
+    "detailedDescription": "Warm memories inspire softness now. Innocent joy and generosity. Clinging to the past. Bring the best of then into today.",
+    "funFact": "Sixes in Cups show progress and shared momentum.",
     "stats": {
       "luck": 59,
       "power": 50,
@@ -1618,8 +1618,8 @@
       "shadow": "Confusion or wishful thinking.",
       "advice": "Pick one vision and ground it."
     },
-    "detailedDescription": "Many options blur the path. Pick one vision and ground it.",
-    "funFact": "Key themes for this card: choices, dreams, illusion.",
+    "detailedDescription": "Many options blur the path. Imagination opens possibilities. Confusion or wishful thinking. Pick one vision and ground it.",
+    "funFact": "Sevens in Cups signal tests of focus and stamina.",
     "stats": {
       "luck": 53,
       "power": 47,
@@ -1640,8 +1640,8 @@
       "shadow": "Avoiding a hard conversation.",
       "advice": "Walk toward what feels more true."
     },
-    "detailedDescription": "You are ready to leave what no longer nourishes. Walk toward what feels more true.",
-    "funFact": "Key themes for this card: departure, search, release.",
+    "detailedDescription": "You are ready to leave what no longer nourishes. Choosing growth over comfort. Avoiding a hard conversation. Walk toward what feels more true.",
+    "funFact": "Eights in Cups accelerate movement and decisive action.",
     "stats": {
       "luck": 50,
       "power": 52,
@@ -1662,8 +1662,8 @@
       "shadow": "Complacency or self-absorption.",
       "advice": "Celebrate and share the abundance."
     },
-    "detailedDescription": "Satisfaction grows when you savor it. Celebrate and share the abundance.",
-    "funFact": "Key themes for this card: contentment, gratitude, wish.",
+    "detailedDescription": "Satisfaction grows when you savor it. A wish is close and joy is available. Complacency or self-absorption. Celebrate and share the abundance.",
+    "funFact": "Nines in Cups reflect resilience near the finish.",
     "stats": {
       "luck": 70,
       "power": 54,
@@ -1684,8 +1684,8 @@
       "shadow": "Idealizing perfection.",
       "advice": "Nurture the bonds that make you feel safe."
     },
-    "detailedDescription": "Emotional fulfillment comes through connection. Nurture the bonds that make you feel safe.",
-    "funFact": "Key themes for this card: fulfillment, belonging, harmony.",
+    "detailedDescription": "Emotional fulfillment comes through connection. A peaceful home and shared happiness. Idealizing perfection. Nurture the bonds that make you feel safe.",
+    "funFact": "Tens in Cups close the cycle with full weight.",
     "stats": {
       "luck": 72,
       "power": 56,
@@ -1706,8 +1706,8 @@
       "shadow": "Holding back or fearing vulnerability.",
       "advice": "Let the heart speak and keep it simple."
     },
-    "detailedDescription": "A new wave of feeling begins and softens your outlook. Let the heart speak and keep it simple.",
-    "funFact": "Key themes for this card: renewal, love, openness.",
+    "detailedDescription": "A new wave of feeling begins. Open-hearted care and spiritual refresh. Holding back or fearing vulnerability. Let the heart speak and keep it simple.",
+    "funFact": "Aces in Cups are the first pulse of the element.",
     "stats": {
       "luck": 68,
       "power": 52,
