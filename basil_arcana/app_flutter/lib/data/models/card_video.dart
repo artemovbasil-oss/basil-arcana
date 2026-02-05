@@ -83,14 +83,21 @@ String? resolveCardVideoAsset(
   String cardId, {
   Set<String>? availableAssets,
 }) {
+  final normalizedId = canonicalCardId(cardId);
   if (availableAssets != null && availableAssets.isNotEmpty) {
-    final asset = _videoAssetFromKey(_videoKeyForCardId(cardId));
-    if (asset != null && availableAssets.contains(asset)) {
-      return asset;
+    final asset = normalizeVideoAssetPath(
+      _videoAssetFromKey(_videoKeyForCardId(normalizedId)),
+    );
+    if (asset == null) {
+      return null;
     }
-    return null;
+    final assetLower = asset.toLowerCase();
+    final matches = availableAssets.any(
+      (value) => value.toLowerCase() == assetLower,
+    );
+    return matches ? asset : null;
   }
-  return _cardVideoAssets[cardId];
+  return _cardVideoAssets[normalizedId];
 }
 
 String? normalizeVideoAssetPath(String? path) {
@@ -135,10 +142,11 @@ Map<String, String> _buildCardVideoAssets() {
 }
 
 String? _videoKeyForCardId(String cardId) {
-  if (cardId.startsWith('major_')) {
-    return _majorVideoKeys[cardId];
+  final normalizedId = canonicalCardId(cardId);
+  if (normalizedId.startsWith('major_')) {
+    return _majorVideoKeys[normalizedId];
   }
-  final parts = cardId.split('_');
+  final parts = normalizedId.split('_');
   if (parts.length < 3) {
     return null;
   }
@@ -169,6 +177,8 @@ Future<Set<String>> loadVideoAssetManifest() {
       final manifest = jsonDecode(raw) as Map<String, dynamic>;
       final assets = manifest.keys
           .where((path) => path.contains('assets/cards/video/'))
+          .map((path) => normalizeVideoAssetPath(path))
+          .whereType<String>()
           .toSet();
       _videoAssetManifestCache = assets;
       return assets;

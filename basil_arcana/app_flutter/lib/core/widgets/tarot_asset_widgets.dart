@@ -7,27 +7,28 @@ import '../../data/models/deck_model.dart';
 import '../../state/providers.dart';
 
 String cardAssetPath(String cardId, {DeckId deckId = DeckId.major}) {
+  final normalizedId = canonicalCardId(cardId);
   if (deckId == DeckId.wands ||
-      (deckId == DeckId.all && cardId.startsWith('wands_'))) {
-    return 'assets/cards/wands/$cardId.webp';
+      (deckId == DeckId.all && normalizedId.startsWith('wands_'))) {
+    return 'assets/cards/wands/$normalizedId.webp';
   }
   if (deckId == DeckId.swords ||
-      (deckId == DeckId.all && cardId.startsWith('swords_'))) {
-    return 'assets/cards/swords/$cardId.webp';
+      (deckId == DeckId.all && normalizedId.startsWith('swords_'))) {
+    return 'assets/cards/swords/$normalizedId.webp';
   }
   if (deckId == DeckId.pentacles ||
-      (deckId == DeckId.all && cardId.startsWith('pentacles_'))) {
-    return 'assets/cards/pentacles/$cardId.webp';
+      (deckId == DeckId.all && normalizedId.startsWith('pentacles_'))) {
+    return 'assets/cards/pentacles/$normalizedId.webp';
   }
   if (deckId == DeckId.cups ||
-      (deckId == DeckId.all && cardId.startsWith('cups_'))) {
-    return 'assets/cards/cups/$cardId.webp';
+      (deckId == DeckId.all && normalizedId.startsWith('cups_'))) {
+    return 'assets/cards/cups/$normalizedId.webp';
   }
-  switch (cardId) {
+  switch (normalizedId) {
     case 'major_10_wheel':
       return 'assets/cards/major/major_10_wheel_of_fortune.webp';
     default:
-      return 'assets/cards/major/$cardId.webp';
+      return 'assets/cards/major/$normalizedId.webp';
   }
 }
 
