@@ -23,6 +23,17 @@ CONFIG_PATH: str | None = None
 class WebAppHandler(SimpleHTTPRequestHandler):
     def do_GET(self):
         parsed = urlparse(self.path)
+        if parsed.path in ("/manifest.json", "/flutter.js"):
+            print(f"Request for {parsed.path}")
+        if parsed.path == "/healthz":
+            body = b"ok"
+            self.send_response(200)
+            self.send_header("Content-Type", "text/plain; charset=utf-8")
+            self.send_header("Cache-Control", "no-store, max-age=0")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
         if parsed.path == "/config.json":
             if not CONFIG_PATH:
                 self.send_error(500, "config.json is not initialized")
@@ -58,27 +69,36 @@ class WebAppHandler(SimpleHTTPRequestHandler):
 
 
 def resolve_config_dir(preferred: str, fallback: str) -> str:
-    attempts = []
-    for candidate in (preferred, fallback):
-        attempts.append(candidate)
-        if os.path.isdir(candidate) and os.access(candidate, os.W_OK):
-            return candidate
-        parent = os.path.dirname(candidate) or "."
-        if os.access(parent, os.W_OK):
-            try:
-                os.makedirs(candidate, exist_ok=True)
-            except OSError:
-                continue
-            if os.access(candidate, os.W_OK):
-                return candidate
+    attempts = [preferred, fallback]
+    if os.path.isdir(preferred) and os.access(preferred, os.W_OK):
+        return preferred
+    if not os.path.isdir(fallback):
+        try:
+            os.makedirs(fallback, exist_ok=True)
+        except OSError:
+            pass
+    if os.path.isdir(fallback) and os.access(fallback, os.W_OK):
+        return fallback
     raise RuntimeError(f"No writable config directory found (attempted: {attempts})")
 
 
 def main() -> None:
     port = int(os.environ.get("PORT", "8080"))
-    directory = os.environ.get("WEB_ROOT", "/app")
+    directory = os.environ.get("WEB_ROOT", "/app/static")
     preferred_dir = os.environ.get("CONFIG_DIR", "/app/static")
     config_dir = resolve_config_dir(preferred_dir, "/tmp/static")
+    required_files = ("index.html", "manifest.json", "flutter.js", "main.dart.js")
+    missing_files = [
+        name
+        for name in required_files
+        if not os.path.isfile(os.path.join(directory, name))
+    ]
+    if missing_files:
+        print(
+            f"Warning: missing static files in {directory}: {', '.join(missing_files)}"
+        )
+    else:
+        print(f"Static files present in {directory}: {', '.join(required_files)}")
     build_id = (
         os.environ.get("WEB_BUILD")
         or os.environ.get("RAILWAY_GIT_COMMIT_SHA")
@@ -105,7 +125,7 @@ def main() -> None:
     CONFIG_PATH = config_path
     handler = functools.partial(WebAppHandler, directory=directory)
     server = ThreadingHTTPServer(("0.0.0.0", port), handler)
-    print(f"Serving {directory} on port {port}")
+    print(f"Listening on 0.0.0.0:{port}, serving {directory}")
     server.serve_forever()
 
 
