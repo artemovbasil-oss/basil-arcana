@@ -16,19 +16,11 @@ const apiBaseUrl = String.fromEnvironment(
   'API_BASE_URL',
   defaultValue: 'https://api.basilarcana.com',
 );
-const arcanaApiKey = String.fromEnvironment(
-  'ARCANA_API_KEY',
-  defaultValue: '',
-);
-const legacyApiKey = String.fromEnvironment(
-  'API_KEY',
-  defaultValue: '',
-);
 
 const Duration _requestTimeout = Duration(seconds: 60);
+const Duration _availabilityTimeout = Duration(seconds: 8);
 
 enum AiErrorType {
-  missingApiKey,
   unauthorized,
   rateLimited,
   noInternet,
@@ -66,10 +58,84 @@ class AiRepositoryException implements Exception {
 }
 
 class AiRepository {
-  String get _resolvedApiKey =>
-      arcanaApiKey.trim().isNotEmpty ? arcanaApiKey : legacyApiKey;
+  bool get isApiConfigured => apiBaseUrl.trim().isNotEmpty;
 
-  bool get hasApiKey => _resolvedApiKey.trim().isNotEmpty;
+  Future<bool> isBackendAvailable({
+    http.Client? client,
+    Duration timeout = _availabilityTimeout,
+  }) async {
+    if (!isApiConfigured) {
+      return false;
+    }
+    final uri = Uri.parse(apiBaseUrl).replace(
+      path: '/api/reading/availability',
+    );
+    final requestId = const Uuid().v4();
+    final httpClient = client ?? http.Client();
+    http.Response response;
+    try {
+      response = await httpClient
+          .get(
+            uri,
+            headers: {'x-request-id': requestId},
+          )
+          .timeout(timeout);
+    } on TimeoutException catch (error) {
+      if (kDebugMode) {
+        debugPrint(
+          '[AiRepository] availabilityTimeout requestId=$requestId '
+          'message="${error.toString()}"',
+        );
+      }
+      throw const AiRepositoryException(AiErrorType.timeout);
+    } on SocketException catch (error) {
+      if (kDebugMode) {
+        debugPrint(
+          '[AiRepository] availabilityNoInternet requestId=$requestId '
+          'message="${error.toString()}"',
+        );
+      }
+      throw const AiRepositoryException(AiErrorType.noInternet);
+    } finally {
+      if (client == null) {
+        httpClient.close();
+      }
+    }
+
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      if (kDebugMode) {
+        debugPrint(
+          '[AiRepository] availabilityBadStatus requestId=$requestId '
+          'status=${response.statusCode}',
+        );
+      }
+      return false;
+    }
+
+    try {
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      final available = data['available'];
+      if (available is bool) {
+        return available;
+      }
+      final ok = data['ok'];
+      if (ok is bool) {
+        return ok;
+      }
+    } catch (error) {
+      if (kDebugMode) {
+        debugPrint(
+          '[AiRepository] availabilityParseError requestId=$requestId '
+          'message="${error.toString()}"',
+        );
+      }
+      throw AiRepositoryException(
+        AiErrorType.badResponse,
+        message: error.toString(),
+      );
+    }
+    return false;
+  }
 
   Future<AiResultModel> generateReading({
     required String question,
@@ -82,15 +148,14 @@ class AiRepository {
     http.Client? client,
     Duration timeout = _requestTimeout,
   }) async {
-    if (!hasApiKey) {
-      print(
-        '[AiRepository] requestId=unknown url=$apiBaseUrl/api/reading/generate '
-        'status=n/a duration_ms=0 error=${AiErrorType.missingApiKey.name}',
-      );
-      throw const AiRepositoryException(
-        AiErrorType.missingApiKey,
-        message: 'API key not included in this build.',
-      );
+    if (!isApiConfigured) {
+      if (kDebugMode) {
+        debugPrint(
+          '[AiRepository] requestId=unknown url=$apiBaseUrl/api/reading/generate '
+          'status=n/a duration_ms=0 error=${AiErrorType.serverError.name}',
+        );
+      }
+      throw const AiRepositoryException(AiErrorType.serverError);
     }
 
     final uri = Uri.parse(apiBaseUrl).replace(
@@ -141,7 +206,6 @@ class AiRepository {
 
     final headers = {
       'Content-Type': 'application/json',
-      if (hasApiKey) 'x-api-key': _resolvedApiKey,
       'x-request-id': requestId,
     };
 
@@ -286,15 +350,14 @@ class AiRepository {
     http.Client? client,
     Duration timeout = const Duration(seconds: 35),
   }) async {
-    if (!hasApiKey) {
-      print(
-        '[AiRepository] requestId=unknown url=$apiBaseUrl/api/reading/details '
-        'status=n/a duration_ms=0 error=${AiErrorType.missingApiKey.name}',
-      );
-      throw const AiRepositoryException(
-        AiErrorType.missingApiKey,
-        message: 'API key not included in this build.',
-      );
+    if (!isApiConfigured) {
+      if (kDebugMode) {
+        debugPrint(
+          '[AiRepository] requestId=unknown url=$apiBaseUrl/api/reading/details '
+          'status=n/a duration_ms=0 error=${AiErrorType.serverError.name}',
+        );
+      }
+      throw const AiRepositoryException(AiErrorType.serverError);
     }
 
     final uri = Uri.parse(apiBaseUrl).replace(
@@ -318,7 +381,6 @@ class AiRepository {
 
     final headers = {
       'Content-Type': 'application/json',
-      if (hasApiKey) 'x-api-key': _resolvedApiKey,
       'x-request-id': requestId,
     };
 

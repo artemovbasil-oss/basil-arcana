@@ -251,8 +251,6 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
 
   String _messageForError(AiRepositoryException error, AppLocalizations l10n) {
     switch (error.type) {
-      case AiErrorType.missingApiKey:
-        return l10n.resultStatusMissingApiKey;
       case AiErrorType.unauthorized:
         return l10n.resultStatusServerUnavailable;
       case AiErrorType.rateLimited:
@@ -365,6 +363,22 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
     _activeClient = client;
     try {
       final aiRepository = ref.read(aiRepositoryProvider);
+      final backendAvailable =
+          await aiRepository.isBackendAvailable(client: client);
+      if (_activeRequestId != requestId) {
+        return;
+      }
+      if (!backendAvailable) {
+        state = state.copyWith(
+          aiResult: null,
+          isLoading: false,
+          aiUsed: false,
+          showDetailsCta: false,
+          aiErrorType: AiErrorType.serverError,
+          errorMessage: l10n.resultStatusServerUnavailable,
+        );
+        return;
+      }
       final locale = ref.read(localeProvider);
       final result = await aiRepository.generateReading(
         question: state.question,

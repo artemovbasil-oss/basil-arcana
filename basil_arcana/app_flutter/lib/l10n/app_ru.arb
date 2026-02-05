@@ -116,7 +116,6 @@
   "resultSaveButton": "Сохранить расклад",
   "resultNewButton": "Новый расклад",
   "resultWantMoreButton": "Хочу больше",
-  "resultStatusMissingApiKey": "ИИ отключен — API-ключ не включен в эту сборку",
   "resultStatusUnauthorized": "Сервис недоступен — попробуйте снова чуть позже.",
   "resultStatusNoInternet": "Нет интернета — показываем офлайн-расклад",
   "resultStatusTimeout": "Оракул на паузе — нажмите, чтобы повторить.",

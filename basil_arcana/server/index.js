@@ -62,6 +62,15 @@ app.get('/health', (req, res) => {
   res.json({ ok: true, name: 'basils-arcana', requestId: req.requestId });
 });
 
+app.get('/api/reading/availability', (req, res) => {
+  const available = Boolean(OPENAI_API_KEY) && Boolean(ARCANA_API_KEY);
+  return res.json({
+    ok: available,
+    available,
+    requestId: req.requestId
+  });
+});
+
 app.get('/debug/openai', async (req, res) => {
   if (!OPENAI_API_KEY) {
     return res.json({
@@ -162,26 +171,14 @@ if (RATE_LIMIT_MAX != null) {
   });
   app.use('/api', apiLimiter);
 }
-app.use('/api', (req, res, next) => {
-  if (!ARCANA_API_KEY) {
-    return res.status(500).json({
+
+app.post('/api/reading/generate', async (req, res) => {
+  if (!OPENAI_API_KEY || !ARCANA_API_KEY) {
+    return res.status(503).json({
       error: 'server_misconfig',
       requestId: req.requestId
     });
   }
-
-  const providedKey = req.get('x-api-key');
-  if (!providedKey || providedKey !== ARCANA_API_KEY) {
-    return res.status(401).json({
-      error: 'unauthorized',
-      requestId: req.requestId
-    });
-  }
-
-  return next();
-});
-
-app.post('/api/reading/generate', async (req, res) => {
   const mode = req.query.mode || 'deep';
   if (
     mode !== 'fast' &&
@@ -238,6 +235,12 @@ app.post('/api/reading/generate', async (req, res) => {
 });
 
 app.post('/api/reading/details', async (req, res) => {
+  if (!OPENAI_API_KEY || !ARCANA_API_KEY) {
+    return res.status(503).json({
+      error: 'server_misconfig',
+      requestId: req.requestId
+    });
+  }
   const error = validateDetailsRequest(req.body);
   if (error) {
     return res.status(400).json({ error, requestId: req.requestId });
