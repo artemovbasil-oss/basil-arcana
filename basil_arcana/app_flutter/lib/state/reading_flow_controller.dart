@@ -6,6 +6,8 @@ import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
 
+import '../core/config/app_config.dart';
+import '../core/telegram/telegram_env.dart';
 import '../data/models/ai_result_model.dart';
 import '../data/models/card_model.dart';
 import '../data/models/drawn_card_model.dart';
@@ -32,6 +34,7 @@ class ReadingFlowState {
   final String? errorMessage;
   final String? deepErrorMessage;
   final bool aiUsed;
+  final bool requiresTelegram;
   final AiErrorType? aiErrorType;
   final AiErrorType? deepErrorType;
   final int? aiErrorStatusCode;
@@ -52,6 +55,7 @@ class ReadingFlowState {
     required this.errorMessage,
     required this.deepErrorMessage,
     required this.aiUsed,
+    required this.requiresTelegram,
     required this.aiErrorType,
     required this.deepErrorType,
     required this.aiErrorStatusCode,
@@ -74,6 +78,7 @@ class ReadingFlowState {
       errorMessage: null,
       deepErrorMessage: null,
       aiUsed: true,
+      requiresTelegram: false,
       aiErrorType: null,
       deepErrorType: null,
       aiErrorStatusCode: null,
@@ -96,6 +101,7 @@ class ReadingFlowState {
     String? errorMessage,
     String? deepErrorMessage,
     bool? aiUsed,
+    bool? requiresTelegram,
     AiErrorType? aiErrorType,
     AiErrorType? deepErrorType,
     int? aiErrorStatusCode,
@@ -119,6 +125,7 @@ class ReadingFlowState {
       deepErrorMessage:
           clearDeepError ? null : (deepErrorMessage ?? this.deepErrorMessage),
       aiUsed: aiUsed ?? this.aiUsed,
+      requiresTelegram: requiresTelegram ?? this.requiresTelegram,
       aiErrorType: clearError ? null : (aiErrorType ?? this.aiErrorType),
       deepErrorType:
           clearDeepError ? null : (deepErrorType ?? this.deepErrorType),
@@ -142,6 +149,16 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
   int _deepRequestCounter = 0;
   int _activeDeepRequestId = 0;
 
+  bool _requiresTelegramAccess() {
+    if (!kIsWeb) {
+      return false;
+    }
+    if (AppConfig.apiKey.trim().isNotEmpty) {
+      return false;
+    }
+    return !TelegramEnv.instance.isTelegram;
+  }
+
   void setQuestion(String question) {
     state = state.copyWith(question: question, clearError: true);
   }
@@ -157,6 +174,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       detailsError: null,
       showDetailsCta: false,
       isDeepLoading: false,
+      requiresTelegram: false,
       deepErrorType: null,
       deepErrorMessage: null,
       clearDeepError: true,
@@ -178,6 +196,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       detailsText: null,
       detailsError: null,
       showDetailsCta: false,
+      requiresTelegram: false,
       clearError: true,
     );
   }
@@ -227,9 +246,10 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       );
     }
 
+    final requiresTelegram = _requiresTelegramAccess();
     state = state.copyWith(
       drawnCards: drawnCards,
-      isLoading: true,
+      isLoading: !requiresTelegram,
       aiResult: null,
       deepResult: null,
       detailsStatus: DetailsStatus.idle,
@@ -237,10 +257,14 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       detailsError: null,
       showDetailsCta: false,
       isDeepLoading: false,
+      requiresTelegram: requiresTelegram,
       clearDeepError: true,
       clearError: true,
     );
 
+    if (requiresTelegram) {
+      return;
+    }
     await _generateReading(spread: spread, drawnCards: drawnCards, l10n: l10n);
   }
 
@@ -336,6 +360,20 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       return;
     }
 
+    if (_requiresTelegramAccess()) {
+      state = state.copyWith(
+        isLoading: false,
+        aiResult: null,
+        detailsStatus: DetailsStatus.idle,
+        detailsText: null,
+        detailsError: null,
+        showDetailsCta: false,
+        requiresTelegram: true,
+        clearError: true,
+      );
+      return;
+    }
+
     state = state.copyWith(
       isLoading: true,
       aiResult: null,
@@ -358,6 +396,17 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
     required List<DrawnCardModel> drawnCards,
     required AppLocalizations l10n,
   }) async {
+    if (_requiresTelegramAccess()) {
+      state = state.copyWith(
+        aiResult: null,
+        isLoading: false,
+        aiUsed: false,
+        showDetailsCta: false,
+        requiresTelegram: true,
+        clearError: true,
+      );
+      return;
+    }
     final requestId = ++_requestCounter;
     _activeRequestId = requestId;
     final client = http.Client();
