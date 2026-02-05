@@ -78,10 +78,7 @@ curl -X POST http://localhost:3000/api/reading/generate \
 
 1. Set bot variables in Railway:
    - `TELEGRAM_BOT_TOKEN`
-   - `ARCANA_API_KEY`
-   - `API_BASE_URL` (optional, defaults to `https://api.basilarcana.com`)
-   - `DEFAULT_LOCALE` (`en`, `ru`, or `kk`)
-   - `FLUTTER_ASSETS_ROOT=/app/basil_arcana/app_flutter/assets`
+   - `TELEGRAM_WEBAPP_URL`
 2. Build command: `cd bot && npm ci && npm run build`
 3. Start command: `cd bot && npm run start`
 
@@ -108,6 +105,11 @@ flutter run --dart-define=API_BASE_URL=http://10.0.2.2:3000
 ```
 
 Production default: `https://api.basilarcana.com`.
+
+## iOS Telegram WebApp fixes
+- The web entrypoint detects Telegram, calls `ready()`/`expand()`, and disables vertical swipes when available to keep the mini app expanded.
+- Telegram viewport changes update the `--tg-vh` CSS variable so the Flutter mount stays full height, while the body scroll is locked and the inner scroll root handles momentum scrolling.
+- Service worker registration is skipped inside Telegram to avoid stale cached bundles, and a lightweight debug overlay logs boot stages and runtime errors for Telegram WebViews.
 
 ## Notes
 - Secrets are never committed to the repo. Use Railway Variables or local environment variables.

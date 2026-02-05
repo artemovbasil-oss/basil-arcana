@@ -47,6 +47,22 @@
       min-height: 100%;
       width: 100%;
     }
+
+    #tg-debug-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      max-height: 40vh;
+      overflow: auto;
+      background: rgba(0, 0, 0, 0.75);
+      color: #fff;
+      font: 12px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      padding: 8px 10px;
+      z-index: 9999;
+      display: none;
+      white-space: pre-wrap;
+    }
   </style>
 </head>
 <body>
@@ -62,6 +78,49 @@
       return userAgent.toLowerCase().indexOf('telegram') !== -1;
     }
 
+    var tgDebugOverlay = (function () {
+      var enabled = false;
+      var container = null;
+
+      function ensureContainer() {
+        if (!enabled) {
+          return;
+        }
+        if (container) {
+          return;
+        }
+        container = document.createElement('div');
+        container.id = 'tg-debug-overlay';
+        container.textContent = 'Telegram WebApp debug log:\n';
+        container.style.display = 'block';
+        document.body.appendChild(container);
+      }
+
+      function log(message) {
+        if (!enabled) {
+          return;
+        }
+        ensureContainer();
+        if (!container) {
+          return;
+        }
+        var timestamp = new Date().toISOString().split('T')[1].split('Z')[0];
+        container.textContent += '[' + timestamp + '] ' + message + '\n';
+      }
+
+      function setEnabled(value) {
+        enabled = value;
+        if (!enabled && container) {
+          container.style.display = 'none';
+        }
+      }
+
+      return {
+        log: log,
+        setEnabled: setEnabled,
+      };
+    })();
+
     (function setupTelegramWebApp() {
       if (!window.Telegram || !window.Telegram.WebApp) {
         return;
@@ -69,29 +128,38 @@
 
       var tg = window.Telegram.WebApp;
       document.documentElement.classList.add('tg-webview');
+      tgDebugOverlay.setEnabled(true);
+      tgDebugOverlay.log('Telegram WebApp detected.');
 
       function updateTelegramViewportHeight() {
-        var height = tg.viewportHeight || window.innerHeight || 0;
+        var height = tg.viewportHeight ||
+          (window.visualViewport && window.visualViewport.height) ||
+          window.innerHeight || 0;
         document.documentElement.style.setProperty('--tg-vh', (height * 0.01) + 'px');
       }
 
       try {
         tg.ready();
         tg.expand();
+        tgDebugOverlay.log('tg.ready() and tg.expand() invoked.');
       } catch (error) {
         console.warn('Telegram WebApp init failed', error);
+        tgDebugOverlay.log('Telegram init failed: ' + (error && error.message ? error.message : error));
       }
 
       updateTelegramViewportHeight();
       if (typeof tg.onEvent === 'function') {
         tg.onEvent('viewportChanged', updateTelegramViewportHeight);
       }
+      window.addEventListener('resize', updateTelegramViewportHeight);
 
       if (typeof tg.disableVerticalSwipes === 'function') {
         try {
           tg.disableVerticalSwipes();
+          tgDebugOverlay.log('tg.disableVerticalSwipes() enabled.');
         } catch (error) {
           console.warn('Telegram disableVerticalSwipes failed', error);
+          tgDebugOverlay.log('disableVerticalSwipes failed: ' + (error && error.message ? error.message : error));
         }
       }
 
@@ -122,6 +190,16 @@
         }, { passive: false });
       });
     })();
+
+    if (isTelegramWebView()) {
+      window.addEventListener('error', function (event) {
+        tgDebugOverlay.log('Error: ' + (event && event.message ? event.message : 'unknown'));
+      });
+      window.addEventListener('unhandledrejection', function (event) {
+        var reason = event && event.reason ? event.reason : 'unknown';
+        tgDebugOverlay.log('Unhandled rejection: ' + reason);
+      });
+    }
   </script>
   <div id="tg-scroll-root">
     <div id="flutter_mount"></div>
@@ -129,17 +207,30 @@
   <script src="flutter.js?v={{flutter_service_worker_version}}" defer></script>
   <script>
     window.addEventListener('load', function (ev) {
-      var disableServiceWorker = true || isTelegramWebView();
+      var disableServiceWorker = isTelegramWebView();
+      if (disableServiceWorker) {
+        tgDebugOverlay.log('Service worker disabled for Telegram WebApp.');
+      }
+      tgDebugOverlay.log('Flutter loader start.');
       _flutter.loader.loadEntrypoint({
         serviceWorker: disableServiceWorker
           ? null
           : { serviceWorkerVersion: serviceWorkerVersion },
         onEntrypointLoaded: function (engineInitializer) {
+          tgDebugOverlay.log('Flutter entrypoint loaded.');
           engineInitializer.initializeEngine({
             hostElement: document.getElementById('flutter_mount')
           }).then(function (appRunner) {
+            tgDebugOverlay.log('Flutter engine initialized. Running app.');
             appRunner.runApp();
+          }).catch(function (error) {
+            console.error('Flutter initializeEngine failed', error);
+            tgDebugOverlay.log('Flutter initializeEngine failed: ' + (error && error.message ? error.message : error));
           });
+        },
+        onEntrypointLoadedError: function (error) {
+          console.error('Flutter entrypoint load failed', error);
+          tgDebugOverlay.log('Flutter entrypoint load failed: ' + (error && error.message ? error.message : error));
         }
       });
     });
