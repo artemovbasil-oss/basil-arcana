@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:video_player/video_player.dart';
 
+import '../../data/models/card_video.dart';
 import '../../data/models/deck_model.dart';
 import '../../state/providers.dart';
 
@@ -8,6 +10,18 @@ String cardAssetPath(String cardId, {DeckId deckId = DeckId.major}) {
   if (deckId == DeckId.wands ||
       (deckId == DeckId.all && cardId.startsWith('wands_'))) {
     return 'assets/cards/wands/$cardId.webp';
+  }
+  if (deckId == DeckId.swords ||
+      (deckId == DeckId.all && cardId.startsWith('swords_'))) {
+    return 'assets/cards/swords/$cardId.webp';
+  }
+  if (deckId == DeckId.pentacles ||
+      (deckId == DeckId.all && cardId.startsWith('pentacles_'))) {
+    return 'assets/cards/pentacles/$cardId.webp';
+  }
+  if (deckId == DeckId.cups ||
+      (deckId == DeckId.all && cardId.startsWith('cups_'))) {
+    return 'assets/cards/cups/$cardId.webp';
   }
   switch (cardId) {
     case 'major_10_wheel':
@@ -110,6 +124,203 @@ class CardAssetImage extends ConsumerWidget {
       child: ClipRRect(
         borderRadius: radius,
         child: image,
+      ),
+    );
+  }
+}
+
+class CardMedia extends StatefulWidget {
+  const CardMedia({
+    super.key,
+    required this.cardId,
+    this.videoAssetPath,
+    this.width,
+    this.height,
+    this.borderRadius,
+    this.fit = BoxFit.cover,
+    this.showGlow = true,
+    this.enableVideo = false,
+    this.playLabel,
+  });
+
+  final String cardId;
+  final String? videoAssetPath;
+  final double? width;
+  final double? height;
+  final BorderRadius? borderRadius;
+  final BoxFit fit;
+  final bool showGlow;
+  final bool enableVideo;
+  final String? playLabel;
+
+  @override
+  State<CardMedia> createState() => _CardMediaState();
+}
+
+class _CardMediaState extends State<CardMedia> {
+  VideoPlayerController? _controller;
+  bool _showVideo = false;
+  bool _autoPlayFailed = false;
+  String? _resolvedVideoPath;
+
+  @override
+  void initState() {
+    super.initState();
+    _setupController();
+  }
+
+  @override
+  void didUpdateWidget(CardMedia oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.cardId != widget.cardId ||
+        oldWidget.videoAssetPath != widget.videoAssetPath ||
+        oldWidget.enableVideo != widget.enableVideo) {
+      _disposeController();
+      _setupController();
+    }
+  }
+
+  @override
+  void dispose() {
+    _disposeController();
+    super.dispose();
+  }
+
+  void _disposeController() {
+    _controller?.removeListener(_handlePlayback);
+    _controller?.dispose();
+    _controller = null;
+  }
+
+  void _setupController() {
+    _resolvedVideoPath =
+        widget.videoAssetPath ?? resolveCardVideoAsset(widget.cardId);
+    if (!widget.enableVideo || _resolvedVideoPath == null) {
+      return;
+    }
+    final controller = VideoPlayerController.asset(_resolvedVideoPath!);
+    _controller = controller;
+    controller
+      ..setLooping(false)
+      ..initialize().then((_) {
+        if (!mounted) {
+          return;
+        }
+        _playOnce(autoPlay: true);
+      });
+    controller.addListener(_handlePlayback);
+  }
+
+  void _handlePlayback() {
+    final controller = _controller;
+    if (controller == null || !controller.value.isInitialized) {
+      return;
+    }
+    if (controller.value.position >= controller.value.duration &&
+        !controller.value.isPlaying) {
+      if (mounted && _showVideo) {
+        setState(() {
+          _showVideo = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _playOnce({required bool autoPlay}) async {
+    final controller = _controller;
+    if (controller == null || !controller.value.isInitialized) {
+      return;
+    }
+    try {
+      await controller.seekTo(Duration.zero);
+      await controller.play();
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _showVideo = true;
+        _autoPlayFailed = false;
+      });
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+      if (autoPlay) {
+        setState(() {
+          _showVideo = false;
+          _autoPlayFailed = true;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final radius = widget.borderRadius ?? BorderRadius.circular(18);
+    final hasVideo = widget.enableVideo && _resolvedVideoPath != null;
+    return GestureDetector(
+      onTap: hasVideo ? () => _playOnce(autoPlay: false) : null,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          CardAssetImage(
+            cardId: widget.cardId,
+            width: widget.width,
+            height: widget.height,
+            borderRadius: radius,
+            fit: widget.fit,
+            showGlow: widget.showGlow,
+          ),
+          if (hasVideo &&
+              _controller != null &&
+              _controller!.value.isInitialized &&
+              _showVideo)
+            Positioned.fill(
+              child: ClipRRect(
+                borderRadius: radius,
+                child: FittedBox(
+                  fit: widget.fit,
+                  clipBehavior: Clip.hardEdge,
+                  child: SizedBox(
+                    width: _controller!.value.size.width,
+                    height: _controller!.value.size.height,
+                    child: VideoPlayer(_controller!),
+                  ),
+                ),
+              ),
+            ),
+          if (hasVideo && _autoPlayFailed && !_showVideo)
+            Positioned.fill(
+              child: ClipRRect(
+                borderRadius: radius,
+                child: ColoredBox(
+                  color: Colors.black.withOpacity(0.35),
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.play_circle_fill,
+                          size: 48,
+                          color: Colors.white,
+                        ),
+                        if (widget.playLabel != null) ...[
+                          const SizedBox(height: 8),
+                          Text(
+                            widget.playLabel!,
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelMedium
+                                ?.copyWith(color: Colors.white),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

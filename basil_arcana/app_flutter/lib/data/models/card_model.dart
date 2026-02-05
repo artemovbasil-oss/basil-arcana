@@ -1,5 +1,7 @@
 import 'package:hive/hive.dart';
 
+import 'card_video.dart';
+
 @HiveType(typeId: 0)
 class CardMeaning {
   @HiveField(0)
@@ -40,12 +42,20 @@ class CardModel {
   final String name;
   final List<String> keywords;
   final CardMeaning meaning;
+  final String? detailedDescription;
+  final String? funFact;
+  final CardStats? stats;
+  final String? videoAssetPath;
 
   const CardModel({
     required this.id,
     required this.name,
     required this.keywords,
     required this.meaning,
+    this.detailedDescription,
+    this.funFact,
+    this.stats,
+    this.videoAssetPath,
   });
 
   factory CardModel.fromJson(Map<String, dynamic> json) {
@@ -54,6 +64,10 @@ class CardModel {
       name: json['name'] as String,
       keywords: (json['keywords'] as List<dynamic>).cast<String>(),
       meaning: CardMeaning.fromJson(json['meaning'] as Map<String, dynamic>),
+      detailedDescription: json['detailedDescription'] as String?,
+      funFact: json['funFact'] as String?,
+      stats: CardStats.fromJson(json['stats'] as Map<String, dynamic>?),
+      videoAssetPath: resolveCardVideoAsset(json['id'] as String),
     );
   }
 
@@ -66,6 +80,36 @@ class CardModel {
       name: json['title'] as String,
       keywords: (json['keywords'] as List<dynamic>).cast<String>(),
       meaning: CardMeaning.fromJson(json['meaning'] as Map<String, dynamic>),
+      detailedDescription: json['detailedDescription'] as String?,
+      funFact: json['funFact'] as String?,
+      stats: CardStats.fromJson(json['stats'] as Map<String, dynamic>?),
+      videoAssetPath: resolveCardVideoAsset(id),
+    );
+  }
+}
+
+class CardStats {
+  final int luck;
+  final int power;
+  final int love;
+  final int clarity;
+
+  const CardStats({
+    required this.luck,
+    required this.power,
+    required this.love,
+    required this.clarity,
+  });
+
+  static CardStats? fromJson(Map<String, dynamic>? json) {
+    if (json == null) {
+      return null;
+    }
+    return CardStats(
+      luck: json['luck'] as int,
+      power: json['power'] as int,
+      love: json['love'] as int,
+      clarity: json['clarity'] as int,
     );
   }
 }

@@ -18,6 +18,7 @@ dependencies:
   intl: ^0.20.2
   url_launcher: ^6.3.0
   uuid: ^4.4.2
+  video_player: ^2.9.2
 
 dev_dependencies:
   flutter_launcher_icons: ^0.13.1
@@ -35,6 +36,10 @@ flutter:
     - assets/deck/
     - assets/cards/major/
     - assets/cards/wands/
+    - assets/cards/swords/
+    - assets/cards/pentacles/
+    - assets/cards/cups/
+    - assets/cards/video/
     - assets/icon/
 
 flutter_launcher_icons:
