@@ -67,7 +67,7 @@ class CardDetailScreen extends ConsumerWidget {
           const SizedBox(height: 16),
           if (resolvedCard.keywords.isNotEmpty) ...[
             Text(
-              l10n.cardsDetailKeywordsTitle,
+              l10n.cardKeywordsTitle,
               style: Theme.of(context)
                   .textTheme
                   .titleMedium
@@ -91,7 +91,7 @@ class CardDetailScreen extends ConsumerWidget {
             const SizedBox(height: 20),
           ],
           Text(
-            l10n.cardsDetailMeaningTitle,
+            l10n.cardGeneralTitle,
             style: Theme.of(context)
                 .textTheme
                 .titleMedium
@@ -105,7 +105,7 @@ class CardDetailScreen extends ConsumerWidget {
           if (resolvedCard.detailedDescription?.isNotEmpty ?? false) ...[
             const SizedBox(height: 20),
             Text(
-              l10n.cardsDetailDescriptionTitle,
+              l10n.cardDetailedTitle,
               style: Theme.of(context)
                   .textTheme
                   .titleMedium
@@ -120,7 +120,7 @@ class CardDetailScreen extends ConsumerWidget {
           if (resolvedCard.funFact?.isNotEmpty ?? false) ...[
             const SizedBox(height: 20),
             Text(
-              l10n.cardsDetailFunFactTitle,
+              l10n.cardFunFactTitle,
               style: Theme.of(context)
                   .textTheme
                   .titleMedium
@@ -135,7 +135,7 @@ class CardDetailScreen extends ConsumerWidget {
           if (resolvedCard.stats != null) ...[
             const SizedBox(height: 20),
             Text(
-              l10n.cardsDetailStatsTitle,
+              l10n.cardStatsTitle,
               style: Theme.of(context)
                   .textTheme
                   .titleMedium
@@ -143,22 +143,22 @@ class CardDetailScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 12),
             _StatsRow(
-              label: l10n.cardsDetailStatLuck,
+              label: l10n.statLuck,
               value: resolvedCard.stats!.luck,
             ),
             const SizedBox(height: 10),
             _StatsRow(
-              label: l10n.cardsDetailStatPower,
+              label: l10n.statPower,
               value: resolvedCard.stats!.power,
             ),
             const SizedBox(height: 10),
             _StatsRow(
-              label: l10n.cardsDetailStatLove,
+              label: l10n.statLove,
               value: resolvedCard.stats!.love,
             ),
             const SizedBox(height: 10),
             _StatsRow(
-              label: l10n.cardsDetailStatClarity,
+              label: l10n.statClarity,
               value: resolvedCard.stats!.clarity,
             ),
           ],

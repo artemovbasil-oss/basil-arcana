@@ -1,3 +1,5 @@
+import 'deck_model.dart';
+
 const List<String> _videoFileNames = [
   'Pentacles_queen.MP4',
   'chariot.MP4',
@@ -66,15 +68,40 @@ const Map<String, String> _majorVideoKeys = {
 
 final Map<String, String> _videoAssetsByKey = {
   for (final file in _videoFileNames)
-    _normalize(_stripExtension(file)): 'assets/cards/video/$file',
+    _normalizeKey(_stripExtension(file)): 'assets/cards/video/$file',
 };
 
+final Map<String, String> _cardVideoAssets = _buildCardVideoAssets();
+
 String? resolveCardVideoAsset(String cardId) {
-  final key = _videoKeyForCardId(cardId);
-  if (key == null) {
-    return null;
+  return _cardVideoAssets[cardId];
+}
+
+Map<String, String> _buildCardVideoAssets() {
+  final assets = <String, String>{};
+  for (final entry in _majorVideoKeys.entries) {
+    final asset = _videoAssetsByKey[_normalizeKey(entry.value)];
+    if (asset != null) {
+      assets[entry.key] = asset;
+    }
   }
-  return _videoAssetsByKey[_normalize(key)];
+  final minorIds = <String>[
+    ...wandsCardIds,
+    ...swordsCardIds,
+    ...pentaclesCardIds,
+    ...cupsCardIds,
+  ];
+  for (final cardId in minorIds) {
+    final key = _videoKeyForCardId(cardId);
+    if (key == null) {
+      continue;
+    }
+    final asset = _videoAssetsByKey[_normalizeKey(key)];
+    if (asset != null) {
+      assets[cardId] = asset;
+    }
+  }
+  return assets;
 }
 
 String? _videoKeyForCardId(String cardId) {
@@ -94,6 +121,11 @@ String _stripExtension(String filename) {
   return filename.replaceFirst(RegExp(r'\.mp4$', caseSensitive: false), '');
 }
 
-String _normalize(String value) {
-  return value.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '');
+String _normalizeKey(String value) {
+  var normalized = value.toLowerCase().trim();
+  normalized = normalized.replaceAll(RegExp(r'\s+'), '_');
+  normalized = normalized.replaceAll(RegExp(r'[^a-z0-9_]+'), '');
+  normalized = normalized.replaceAll(RegExp(r'_+'), '_');
+  normalized = normalized.replaceAll(RegExp(r'^_+|_+$'), '');
+  return normalized;
 }
