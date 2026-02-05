@@ -68,6 +68,41 @@
       return userAgent.toLowerCase().indexOf('telegram') !== -1;
     }
 
+    function isTelegramIOS() {
+      if (!isTelegramWebView()) {
+        return false;
+      }
+      if (window.Telegram && window.Telegram.WebApp) {
+        return window.Telegram.WebApp.platform === 'ios';
+      }
+      var userAgent = navigator.userAgent || '';
+      return /iphone|ipad|ipod/i.test(userAgent);
+    }
+
+    (function clearTelegramIOSCache() {
+      if (!isTelegramIOS()) {
+        return;
+      }
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function (registrations) {
+          registrations.forEach(function (registration) {
+            registration.unregister();
+          });
+        }).catch(function (error) {
+          console.warn('Telegram iOS service worker cleanup failed', error);
+        });
+      }
+      if (window.caches && caches.keys) {
+        caches.keys().then(function (keys) {
+          return Promise.all(keys.map(function (key) {
+            return caches.delete(key);
+          }));
+        }).catch(function (error) {
+          console.warn('Telegram iOS cache cleanup failed', error);
+        });
+      }
+    })();
+
     (function setupTelegramWebApp() {
       if (!window.Telegram || !window.Telegram.WebApp) {
         return;
@@ -90,9 +125,6 @@
         var isMobilePlatform = platform === 'ios' || platform === 'android';
         if (isMobilePlatform && typeof tg.expand === 'function') {
           tg.expand();
-        }
-        if (isMobilePlatform && typeof tg.requestFullscreen === 'function') {
-          tg.requestFullscreen();
         }
       } catch (error) {
         console.warn('Telegram WebApp init failed', error);
