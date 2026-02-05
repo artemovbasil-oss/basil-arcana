@@ -62,6 +62,21 @@ class CardsRepository {
       DeckId.pentacles: pentaclesCards,
       DeckId.cups: cupsCards,
     };
+    assert(() {
+      final missing = deckRegistry.values
+          .expand((cards) => cards)
+          .where(
+            (card) =>
+                card.detailedDescription == null ||
+                card.detailedDescription!.trim().isEmpty,
+          )
+          .map((card) => card.id)
+          .toList();
+      if (missing.isNotEmpty) {
+        debugPrint('Missing detailedDescription for: ${missing.join(', ')}');
+      }
+      return missing.isEmpty;
+    }());
     return getActiveDeckCards(deckId, deckRegistry);
   }
 }

@@ -24,6 +24,7 @@ class CardDetailScreen extends ConsumerWidget {
     final useTelegramAppBar =
         TelegramWebApp.isTelegramWebView && TelegramWebApp.isTelegramMobile;
     final deckId = ref.watch(deckProvider);
+    final videoAssets = ref.watch(videoAssetManifestProvider).asData?.value;
     final resolvedCardId = card?.id ?? cardId;
     final cardsAsync = ref.watch(cardsProvider);
     final resolvedCard = _resolveCard(
@@ -65,9 +66,13 @@ class CardDetailScreen extends ConsumerWidget {
             Center(
               child: Builder(
                 builder: (context) {
-                  final mediaAssets = CardMediaResolver(deckId: deckId).resolve(
+                  final mediaAssets = CardMediaResolver(
+                    deckId: deckId,
+                    availableVideoAssets: videoAssets,
+                  ).resolve(
                     resolvedCard.id,
-                    videoAssetPathOverride: resolvedCard.videoAssetPath,
+                    videoAssetPathOverride:
+                        videoAssets == null ? resolvedCard.videoAssetPath : null,
                   );
                   return CardMedia(
                     cardId: resolvedCard.id,

@@ -1,3 +1,7 @@
+import 'dart:convert';
+
+import 'package:flutter/services.dart';
+
 import 'deck_model.dart';
 
 const List<String> _videoFileNames = [
@@ -72,8 +76,20 @@ final Map<String, String> _videoAssetsByKey = {
 };
 
 final Map<String, String> _cardVideoAssets = _buildCardVideoAssets();
+Set<String>? _videoAssetManifestCache;
+Future<Set<String>>? _videoAssetManifestFuture;
 
-String? resolveCardVideoAsset(String cardId) {
+String? resolveCardVideoAsset(
+  String cardId, {
+  Set<String>? availableAssets,
+}) {
+  if (availableAssets != null && availableAssets.isNotEmpty) {
+    final asset = _videoAssetFromKey(_videoKeyForCardId(cardId));
+    if (asset != null && availableAssets.contains(asset)) {
+      return asset;
+    }
+    return null;
+  }
   return _cardVideoAssets[cardId];
 }
 
@@ -129,6 +145,36 @@ String? _videoKeyForCardId(String cardId) {
   final suit = parts.first;
   final rank = parts.sublist(2).join('_');
   return '${suit}_$rank';
+}
+
+String? _videoAssetFromKey(String? key) {
+  if (key == null) {
+    return null;
+  }
+  final fileName = normalizeVideoFileName(key);
+  return 'assets/cards/video/$fileName';
+}
+
+Future<Set<String>> loadVideoAssetManifest() {
+  final cached = _videoAssetManifestCache;
+  if (cached != null) {
+    return Future.value(cached);
+  }
+  final future = _videoAssetManifestFuture;
+  if (future != null) {
+    return future;
+  }
+  _videoAssetManifestFuture = rootBundle.loadString('AssetManifest.json').then(
+    (raw) {
+      final manifest = jsonDecode(raw) as Map<String, dynamic>;
+      final assets = manifest.keys
+          .where((path) => path.contains('assets/cards/video/'))
+          .toSet();
+      _videoAssetManifestCache = assets;
+      return assets;
+    },
+  );
+  return _videoAssetManifestFuture!;
 }
 
 String _stripExtension(String filename) {

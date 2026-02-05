@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
 import 'tarot_asset_widgets.dart';
+import '../../state/providers.dart';
 
-class CardFaceWidget extends StatelessWidget {
+class CardFaceWidget extends ConsumerWidget {
   final String cardName;
   final List<String> keywords;
   final String? cardId;
@@ -18,9 +20,11 @@ class CardFaceWidget extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context)!;
+    final deckId = ref.watch(deckProvider);
+    final videoAssets = ref.watch(videoAssetManifestProvider).asData?.value;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -36,9 +40,15 @@ class CardFaceWidget extends StatelessWidget {
               builder: (context, constraints) {
                 final cardWidth = constraints.maxWidth;
                 final cardHeight = cardWidth * 1.5;
+                final mediaAssets = CardMediaResolver(
+                  deckId: deckId,
+                  availableVideoAssets: videoAssets,
+                ).resolve(cardId!);
                 final image = CardMedia(
                   cardId: cardId!,
+                  videoAssetPath: mediaAssets.videoAssetPath,
                   enableVideo: true,
+                  autoPlayOnce: true,
                   playLabel: l10n.videoTapToPlay,
                   width: cardWidth,
                   height: cardHeight,
