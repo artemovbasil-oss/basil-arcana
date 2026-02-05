@@ -9,6 +9,7 @@ import '../data/repositories/readings_repository.dart';
 import '../data/repositories/spreads_repository.dart';
 import '../data/models/deck_model.dart';
 import '../data/models/card_video.dart';
+import '../data/models/card_asset_manifest.dart';
 import 'reading_flow_controller.dart';
 
 final cardsRepositoryProvider = Provider<CardsRepository>((ref) {
@@ -102,4 +103,9 @@ final spreadsProvider = FutureProvider((ref) async {
 
 final videoAssetManifestProvider = FutureProvider<Set<String>>((ref) async {
   return loadVideoAssetManifest();
+});
+
+final cardAssetManifestProvider =
+    FutureProvider<CardAssetManifest>((ref) async {
+  return loadCardAssetManifest();
 });
