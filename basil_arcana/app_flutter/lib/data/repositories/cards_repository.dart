@@ -12,8 +12,8 @@ class CardsRepository {
     required Locale locale,
     required DeckId deckId,
   }) async {
-    if (kDebugMode) {
-      await _debugValidateLocalizedData();
+    if (kDebugMode || kProfileMode) {
+      await debugValidateLocalizedCardData(assertOnFailure: false);
     }
     final filename = switch (locale.languageCode) {
       'ru' => 'cards_ru.json',
@@ -94,7 +94,9 @@ const List<String> _cardLocaleFiles = [
 
 bool _didValidateLocalizedData = false;
 
-Future<void> _debugValidateLocalizedData() async {
+Future<void> debugValidateLocalizedCardData({
+  bool assertOnFailure = false,
+}) async {
   if (_didValidateLocalizedData) {
     return;
   }
@@ -128,6 +130,7 @@ Future<void> _debugValidateLocalizedData() async {
     localeData[file] = _canonicalizeCardData(data);
   }
 
+  var hasIssues = false;
   for (final entry in deckAssetIds.entries) {
     final deckName = entry.key;
     final ids = entry.value;
@@ -136,33 +139,74 @@ Future<void> _debugValidateLocalizedData() async {
       final data = localeEntry.value;
       final missing = ids.where((id) => !data.containsKey(id)).toList();
       if (missing.isNotEmpty) {
+        hasIssues = true;
         debugPrint(
           'Missing localized entries for deck=$deckName in $file: ${missing.join(', ')}',
         );
       }
       final incomplete = <String>[];
+      final invalid = <String>[];
       for (final id in ids) {
         final entryData = data[id];
         if (entryData == null) {
           continue;
         }
+        final keywords = (entryData['keywords'] as List<dynamic>?)
+            ?.whereType<String>()
+            .toList();
+        final meaning = entryData['meaning'] as Map<String, dynamic>?;
         final detailed = (entryData['detailedDescription'] as String?)?.trim();
         final funFact = (entryData['funFact'] as String?)?.trim();
         final stats = entryData['stats'];
+        final generalMeaning = (meaning?['general'] as String?)?.trim();
         if (detailed == null ||
             detailed.isEmpty ||
             funFact == null ||
-            funFact.isEmpty ||
-            stats == null) {
+            funFact.isEmpty) {
           incomplete.add(id);
+          continue;
+        }
+        if (stats is! Map<String, dynamic>) {
+          incomplete.add(id);
+          continue;
+        }
+        if (generalMeaning == null || generalMeaning.isEmpty) {
+          invalid.add(id);
+        }
+        if (keywords == null || keywords.isEmpty) {
+          invalid.add(id);
+        } else if (keywords.length < 3 || keywords.length > 5) {
+          invalid.add(id);
+        }
+        final statValues = [
+          stats['luck'],
+          stats['power'],
+          stats['love'],
+          stats['clarity'],
+        ];
+        if (statValues.any(
+          (value) =>
+              value is! int || value < 0 || value > 100,
+        )) {
+          invalid.add(id);
         }
       }
       if (incomplete.isNotEmpty) {
+        hasIssues = true;
         debugPrint(
           'Missing details for deck=$deckName in $file: ${incomplete.join(', ')}',
         );
       }
+      if (invalid.isNotEmpty) {
+        hasIssues = true;
+        debugPrint(
+          'Invalid details for deck=$deckName in $file: ${invalid.join(', ')}',
+        );
+      }
     }
+  }
+  if (assertOnFailure) {
+    assert(!hasIssues, 'Card data validation failed. Check logs.');
   }
 }
 

@@ -35,7 +35,9 @@ String cardAssetPath(String cardId, {DeckId deckId = DeckId.major}) {
 String deckCoverAssetPath(DeckId deckId) {
   switch (deckId) {
     case DeckId.wands:
-      return 'assets/deck/wands_cover.webp';
+    case DeckId.swords:
+    case DeckId.pentacles:
+    case DeckId.cups:
     case DeckId.major:
     case DeckId.all:
     default:
