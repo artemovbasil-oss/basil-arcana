@@ -116,7 +116,6 @@
   "resultSaveButton": "Save reading",
   "resultNewButton": "New reading",
   "resultWantMoreButton": "Want more",
-  "resultStatusMissingApiKey": "AI disabled — API key not included in this build",
   "resultStatusUnauthorized": "Service unavailable — try again in a moment.",
   "resultStatusNoInternet": "No internet — showing offline reading",
   "resultStatusTimeout": "The oracle paused — tap to retry.",

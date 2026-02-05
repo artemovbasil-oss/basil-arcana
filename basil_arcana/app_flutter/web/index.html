@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="Basil's Arcana">
+
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Basil's Arcana">
+
+  <title>Basil's Arcana</title>
+  <link rel="manifest" href="manifest.json">
+</head>
+<body>
+  <script>
+    // This is used by Flutter build to replace with a concrete version.
+    var serviceWorkerVersion = null;
+
+    function isTelegramWebView() {
+      if (window.Telegram && window.Telegram.WebApp) {
+        return true;
+      }
+      var userAgent = navigator.userAgent || '';
+      return userAgent.toLowerCase().indexOf('telegram') !== -1;
+    }
+  </script>
+  <script src="flutter.js?v={{flutter_service_worker_version}}" defer></script>
+  <script>
+    window.addEventListener('load', function (ev) {
+      var disableServiceWorker = true || isTelegramWebView();
+      _flutter.loader.loadEntrypoint({
+        serviceWorker: disableServiceWorker
+          ? null
+          : { serviceWorkerVersion: serviceWorkerVersion },
+        onEntrypointLoaded: function (engineInitializer) {
+          engineInitializer.initializeEngine().then(function (appRunner) {
+            appRunner.runApp();
+          });
+        }
+      });
+    });
+  </script>
+</body>
+</html>
