@@ -507,6 +507,8 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
 
   String _statusMessage(ReadingFlowState state, AppLocalizations l10n) {
     switch (state.aiErrorType) {
+      case AiErrorType.misconfigured:
+        return l10n.resultStatusMissingApiBaseUrl;
       case AiErrorType.unauthorized:
         return l10n.resultStatusServerUnavailable;
       case AiErrorType.rateLimited:

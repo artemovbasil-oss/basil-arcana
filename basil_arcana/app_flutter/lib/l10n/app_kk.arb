@@ -129,6 +129,7 @@
     }
   },
   "resultStatusServerUnavailable": "Оракул көмескі — сәл кейінірек қайталап көріңіз.",
+  "resultStatusMissingApiBaseUrl": "Баптау қатесі — API базалық URL жоқ.",
   "resultStatusUnexpectedResponse": "Күтілмеген жауап — қайта көру үшін түртіңіз.",
   "resultStatusInterpretationUnavailable": "AI түсіндірмесі қолжетімсіз — қайта көру үшін түртіңіз.",
   "oracleWaitingTitle": "Оракул тыңдап тұр…",

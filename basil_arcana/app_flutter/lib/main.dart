@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import 'app.dart';
+import 'core/config/app_config.dart';
 import 'data/models/drawn_card_model.dart';
 import 'data/models/ai_result_model.dart';
 import 'data/models/reading_model.dart';
@@ -10,6 +11,7 @@ import 'data/models/card_model.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await AppConfig.init();
   await Hive.initFlutter();
   Hive.registerAdapter(CardMeaningAdapter());
   Hive.registerAdapter(DrawnCardModelAdapter());

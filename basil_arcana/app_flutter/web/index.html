@@ -16,6 +16,7 @@
   <meta name="apple-mobile-web-app-title" content="Basil's Arcana">
 
   <title>Basil's Arcana</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <link rel="manifest" href="manifest.json">
   <style>
     :root {
@@ -27,6 +28,7 @@
       height: 100%;
       margin: 0;
       padding: 0;
+      background: #0f0f12;
       overscroll-behavior: none;
     }
 
@@ -72,12 +74,18 @@
 
       function updateTelegramViewportHeight() {
         var height = tg.viewportHeight || window.innerHeight || 0;
+        var heightPx = height + 'px';
         document.documentElement.style.setProperty('--tg-vh', (height * 0.01) + 'px');
+        document.documentElement.style.height = heightPx;
+        document.body.style.height = heightPx;
       }
 
       try {
         tg.ready();
         tg.expand();
+        if (typeof tg.requestFullscreen === 'function') {
+          tg.requestFullscreen();
+        }
       } catch (error) {
         console.warn('Telegram WebApp init failed', error);
       }

@@ -129,6 +129,7 @@
     }
   },
   "resultStatusServerUnavailable": "Оракул затуманен — попробуйте снова чуть позже.",
+  "resultStatusMissingApiBaseUrl": "Ошибка конфигурации — отсутствует базовый URL API.",
   "resultStatusUnexpectedResponse": "Неожиданный ответ — нажмите, чтобы повторить.",
   "resultStatusInterpretationUnavailable": "Интерпретация ИИ недоступна — нажмите, чтобы повторить.",
   "oracleWaitingTitle": "Оракул слушает…",

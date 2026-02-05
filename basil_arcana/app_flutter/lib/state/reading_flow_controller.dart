@@ -251,6 +251,8 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
 
   String _messageForError(AiRepositoryException error, AppLocalizations l10n) {
     switch (error.type) {
+      case AiErrorType.misconfigured:
+        return l10n.resultStatusMissingApiBaseUrl;
       case AiErrorType.unauthorized:
         return l10n.resultStatusServerUnavailable;
       case AiErrorType.rateLimited:
