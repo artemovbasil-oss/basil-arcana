@@ -42,6 +42,36 @@ String deckCoverAssetPath(DeckId deckId) {
   }
 }
 
+class CardMediaAssets {
+  const CardMediaAssets({
+    required this.imageAssetPath,
+    required this.videoAssetPath,
+  });
+
+  final String imageAssetPath;
+  final String? videoAssetPath;
+}
+
+class CardMediaResolver {
+  const CardMediaResolver({this.deckId = DeckId.major});
+
+  final DeckId deckId;
+
+  CardMediaAssets resolve(
+    String cardId, {
+    String? videoAssetPathOverride,
+  }) {
+    final imageAssetPath = cardAssetPath(cardId, deckId: deckId);
+    final resolvedVideo = normalizeVideoAssetPath(
+      videoAssetPathOverride ?? resolveCardVideoAsset(cardId),
+    );
+    return CardMediaAssets(
+      imageAssetPath: imageAssetPath,
+      videoAssetPath: resolvedVideo,
+    );
+  }
+}
+
 class CardAssetImage extends ConsumerWidget {
   const CardAssetImage({
     super.key,
@@ -160,10 +190,15 @@ class CardMedia extends StatefulWidget {
 }
 
 class _CardMediaState extends State<CardMedia> {
+  static final Map<String, _CachedVideoController> _controllerCache = {};
+  static const int _controllerCacheLimit = 3;
+
   VideoPlayerController? _controller;
   bool _showVideo = false;
   bool _videoFailed = false;
   String? _resolvedVideoPath;
+  String? _cacheKey;
+  bool _autoPlayAttempted = false;
 
   @override
   void initState() {
@@ -190,19 +225,32 @@ class _CardMediaState extends State<CardMedia> {
 
   void _disposeController() {
     _controller?.removeListener(_handlePlayback);
-    _controller?.dispose();
+    final cacheKey = _cacheKey;
+    if (cacheKey != null) {
+      _releaseController(cacheKey);
+    } else {
+      _controller?.dispose();
+    }
     _controller = null;
+    _cacheKey = null;
   }
 
   void _setupController() {
     _resolvedVideoPath = normalizeVideoAssetPath(
       widget.videoAssetPath ?? resolveCardVideoAsset(widget.cardId),
     );
+    _videoFailed = false;
+    _showVideo = false;
+    _autoPlayAttempted = false;
     if (!widget.enableVideo || _resolvedVideoPath == null) {
       return;
     }
     if (widget.autoPlayOnce) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_autoPlayAttempted) {
+          return;
+        }
+        _autoPlayAttempted = true;
         _playOnce(autoPlay: true);
       });
     }
@@ -231,13 +279,23 @@ class _CardMediaState extends State<CardMedia> {
     if (resolvedPath == null) {
       return;
     }
-    final controller = VideoPlayerController.asset(resolvedPath);
+    final cacheKey = resolvedPath;
+    _cacheKey = cacheKey;
+    final cached = _controllerCache[cacheKey];
+    final controller = cached?.controller ?? VideoPlayerController.asset(resolvedPath);
     _controller = controller;
+    if (cached == null) {
+      _controllerCache[cacheKey] = _CachedVideoController(controller);
+      _trimControllerCache();
+    }
+    _controllerCache[cacheKey]?.refCount++;
     controller
       ..setLooping(false)
       ..setVolume(0.0);
     try {
-      await controller.initialize();
+      if (!controller.value.isInitialized) {
+        await controller.initialize();
+      }
       if (!mounted) {
         return;
       }
@@ -250,7 +308,8 @@ class _CardMediaState extends State<CardMedia> {
       } else {
         _videoFailed = true;
       }
-      _disposeController();
+      _releaseController(cacheKey, forceDispose: true);
+      _controller = null;
     }
   }
 
@@ -273,11 +332,44 @@ class _CardMediaState extends State<CardMedia> {
       if (!mounted) {
         return;
       }
-      if (autoPlay) {
+      if (autoPlay && _showVideo) {
         setState(() {
           _showVideo = false;
         });
       }
+    }
+  }
+
+  void _releaseController(String cacheKey, {bool forceDispose = false}) {
+    final cached = _controllerCache[cacheKey];
+    if (cached == null) {
+      _controller?.dispose();
+      return;
+    }
+    if (cached.refCount > 0) {
+      cached.refCount -= 1;
+    }
+    if (cached.refCount <= 0 || forceDispose) {
+      cached.controller.dispose();
+      _controllerCache.remove(cacheKey);
+    }
+  }
+
+  void _trimControllerCache() {
+    if (_controllerCache.length <= _controllerCacheLimit) {
+      return;
+    }
+    final keys = _controllerCache.keys.toList();
+    for (final key in keys) {
+      if (_controllerCache.length <= _controllerCacheLimit) {
+        break;
+      }
+      final cached = _controllerCache[key];
+      if (cached == null || cached.refCount > 0) {
+        continue;
+      }
+      cached.controller.dispose();
+      _controllerCache.remove(key);
     }
   }
 
@@ -287,6 +379,7 @@ class _CardMediaState extends State<CardMedia> {
     final hasVideo =
         widget.enableVideo && _resolvedVideoPath != null && !_videoFailed;
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: hasVideo ? () => _playOnce(autoPlay: false) : null,
       child: Stack(
         alignment: Alignment.center,
@@ -317,7 +410,7 @@ class _CardMediaState extends State<CardMedia> {
                 ),
               ),
             ),
-          if (hasVideo && !_showVideo)
+          if (hasVideo && !_showVideo && !widget.autoPlayOnce)
             Positioned.fill(
               child: ClipRRect(
                 borderRadius: radius,
@@ -352,6 +445,13 @@ class _CardMediaState extends State<CardMedia> {
       ),
     );
   }
+}
+
+class _CachedVideoController {
+  _CachedVideoController(this.controller);
+
+  final VideoPlayerController controller;
+  int refCount = 0;
 }
 
 class _MissingCardPlaceholder extends StatelessWidget {
