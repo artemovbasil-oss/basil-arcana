@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
 import 'core/theme/app_theme.dart';
+import 'core/telemetry/web_error_overlay.dart';
 import 'features/history/history_screen.dart';
 import 'features/settings/settings_screen.dart';
 import 'features/splash/splash_screen.dart';
@@ -18,6 +19,14 @@ class BasilArcanaApp extends ConsumerWidget {
       onGenerateTitle: (context) =>
           AppLocalizations.of(context)?.appTitle ?? 'Basil\'s Arcana',
       theme: buildAppTheme(),
+      builder: (context, child) {
+        return Stack(
+          children: [
+            if (child != null) child,
+            const WebErrorOverlay(),
+          ],
+        );
+      },
       locale: locale,
       supportedLocales: const [
         Locale('en'),

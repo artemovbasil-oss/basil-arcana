@@ -29,6 +29,7 @@
       margin: 0;
       padding: 0;
       background: #0f0f12;
+      overflow: hidden;
       overscroll-behavior: none;
     }
 
@@ -103,6 +104,14 @@
         }
       }
 
+      if (typeof tg.enableClosingConfirmation === 'function') {
+        try {
+          tg.enableClosingConfirmation();
+        } catch (error) {
+          console.warn('Telegram enableClosingConfirmation failed', error);
+        }
+      }
+
       window.addEventListener('DOMContentLoaded', function () {
         var scrollRoot = document.getElementById('tg-scroll-root');
         if (!scrollRoot) {
@@ -125,6 +134,12 @@
           var scrollTop = scrollRoot.scrollTop;
           var maxScroll = scrollRoot.scrollHeight - scrollRoot.clientHeight;
           if ((scrollTop <= 0 && deltaY > 0) || (scrollTop >= maxScroll && deltaY < 0)) {
+            event.preventDefault();
+          }
+        }, { passive: false });
+
+        document.body.addEventListener('touchmove', function (event) {
+          if (!scrollRoot.contains(event.target)) {
             event.preventDefault();
           }
         }, { passive: false });

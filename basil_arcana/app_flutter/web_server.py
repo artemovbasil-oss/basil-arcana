@@ -21,9 +21,15 @@ class WebAppHandler(SimpleHTTPRequestHandler):
     def do_GET(self):
         parsed = urlparse(self.path)
         if parsed.path == "/config.json":
+            build_id = (
+                os.environ.get("WEB_BUILD")
+                or os.environ.get("RAILWAY_GIT_COMMIT_SHA")
+                or os.environ.get("GIT_SHA")
+                or ""
+            )
             payload = {
                 "apiBaseUrl": os.environ.get("API_BASE_URL", ""),
-                "apiKey": os.environ.get("API_KEY", ""),
+                "build": build_id,
             }
             body = json.dumps(payload).encode("utf-8")
             self.send_response(200)
@@ -52,6 +58,21 @@ class WebAppHandler(SimpleHTTPRequestHandler):
 def main() -> None:
     port = int(os.environ.get("PORT", "8080"))
     directory = os.environ.get("WEB_ROOT", "/app")
+    config_dir = os.environ.get("CONFIG_DIR", "/app/static")
+    os.makedirs(config_dir, exist_ok=True)
+    build_id = (
+        os.environ.get("WEB_BUILD")
+        or os.environ.get("RAILWAY_GIT_COMMIT_SHA")
+        or os.environ.get("GIT_SHA")
+        or ""
+    )
+    config_path = os.path.join(config_dir, "config.json")
+    payload = {
+        "apiBaseUrl": os.environ.get("API_BASE_URL", ""),
+        "build": build_id,
+    }
+    with open(config_path, "w", encoding="utf-8") as handle:
+        json.dump(payload, handle)
     handler = functools.partial(WebAppHandler, directory=directory)
     server = ThreadingHTTPServer(("0.0.0.0", port), handler)
     print(f"Serving {directory} on port {port}")
