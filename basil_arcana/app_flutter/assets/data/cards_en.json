@@ -358,5 +358,369 @@
       "shadow": "Impulsive flare with no follow-through.",
       "advice": "Take the first step and nurture it."
     }
+  },
+  "swords_00_knight": {
+    "title": "Knight of Swords",
+    "keywords": ["decisive", "swift action", "truth"],
+    "meaning": {
+      "general": "Momentum builds around a clear decision.",
+      "light": "Directness and speed bring progress.",
+      "shadow": "Impulsiveness or cutting words.",
+      "advice": "Act quickly, but keep compassion."
+    },
+    "detailedDescription": "The Knight of Swords charges forward with sharp focus, inviting you to cut through hesitation and speak plainly.",
+    "funFact": "This knight is often linked to debate, strategy, and the power of clear reasoning.",
+    "stats": {"luck": 45, "power": 78, "love": 34, "clarity": 90}
+  },
+  "swords_01_king": {
+    "title": "King of Swords",
+    "keywords": ["authority", "logic", "fairness"],
+    "meaning": {
+      "general": "Lead with clarity and balanced judgment.",
+      "light": "Objective thinking sets the tone.",
+      "shadow": "Cold detachment or harsh decisions.",
+      "advice": "Be firm and fair; explain your reasoning."
+    },
+    "detailedDescription": "The King of Swords represents wise authority—using intellect to guide outcomes with integrity.",
+    "funFact": "In tarot lore he is associated with air signs and ethical leadership.",
+    "stats": {"luck": 50, "power": 85, "love": 38, "clarity": 92}
+  },
+  "swords_02_queen": {
+    "title": "Queen of Swords",
+    "keywords": ["discernment", "honesty", "boundaries"],
+    "meaning": {
+      "general": "Truth and boundaries bring relief.",
+      "light": "Clear communication and healthy limits.",
+      "shadow": "Sharp criticism or emotional distance.",
+      "advice": "Speak with honesty and care."
+    },
+    "detailedDescription": "The Queen of Swords invites you to honor feelings while choosing the most truthful path.",
+    "funFact": "She is sometimes called the “clear-eyed” queen for her insight.",
+    "stats": {"luck": 52, "power": 74, "love": 40, "clarity": 88}
+  },
+  "swords_03_page": {
+    "title": "Page of Swords",
+    "keywords": ["curiosity", "messages", "learning"],
+    "meaning": {
+      "general": "New ideas arrive; stay alert.",
+      "light": "Curiosity and fresh perspective.",
+      "shadow": "Restlessness or gossip.",
+      "advice": "Stay open, but verify facts."
+    },
+    "detailedDescription": "The Page of Swords signals a learning phase, where questions and information shape your next move.",
+    "funFact": "Pages are linked to students, beginners, and messenger energy.",
+    "stats": {"luck": 55, "power": 60, "love": 42, "clarity": 80}
+  },
+  "swords_04_two": {
+    "title": "Two of Swords",
+    "keywords": ["stalemate", "choice", "balance"],
+    "meaning": {
+      "general": "A decision waits for calm clarity.",
+      "light": "Pause to weigh options evenly.",
+      "shadow": "Avoidance or overthinking.",
+      "advice": "Gather one more fact, then choose."
+    },
+    "detailedDescription": "The Two of Swords highlights a quiet pause, where peace depends on a balanced decision.",
+    "funFact": "The crossed swords symbolize protection and a temporary truce.",
+    "stats": {"luck": 48, "power": 58, "love": 46, "clarity": 72}
+  },
+  "swords_05_three": {
+    "title": "Three of Swords",
+    "keywords": ["heartache", "release", "truth"],
+    "meaning": {
+      "general": "A painful truth clears the air.",
+      "light": "Honest grief leads to healing.",
+      "shadow": "Dwelling on hurt or blame.",
+      "advice": "Let the truth out and make space to mend."
+    },
+    "detailedDescription": "The Three of Swords acknowledges sorrow so it can pass through, not stay stuck.",
+    "funFact": "The classic image of a heart pierced by swords is one of tarot’s most recognized.",
+    "stats": {"luck": 32, "power": 55, "love": 28, "clarity": 78}
+  },
+  "swords_06_four": {
+    "title": "Four of Swords",
+    "keywords": ["rest", "recovery", "pause"],
+    "meaning": {
+      "general": "Rest is the medicine now.",
+      "light": "Recovery and quiet reflection.",
+      "shadow": "Withdrawal or avoidance.",
+      "advice": "Pause long enough to reset."
+    },
+    "detailedDescription": "The Four of Swords signals a restorative pause—step back and let your mind settle.",
+    "funFact": "This card is tied to retreats, meditation, and convalescence.",
+    "stats": {"luck": 50, "power": 40, "love": 45, "clarity": 70}
+  },
+  "swords_07_five": {
+    "title": "Five of Swords",
+    "keywords": ["conflict", "tension", "ego"],
+    "meaning": {
+      "general": "Tension lingers after a clash.",
+      "light": "See the cost of winning.",
+      "shadow": "Pride or needless conflict.",
+      "advice": "Choose peace over proving a point."
+    },
+    "detailedDescription": "The Five of Swords warns that victory at any price can leave you isolated.",
+    "funFact": "It is often read as a lesson in humility and repair.",
+    "stats": {"luck": 35, "power": 62, "love": 30, "clarity": 68}
+  },
+  "swords_08_six": {
+    "title": "Six of Swords",
+    "keywords": ["transition", "healing", "passage"],
+    "meaning": {
+      "general": "You are moving toward calmer waters.",
+      "light": "Gentle progress and relief.",
+      "shadow": "Carrying old worries too far.",
+      "advice": "Travel light; leave what hurts behind."
+    },
+    "detailedDescription": "The Six of Swords speaks of a quiet journey from turbulence to peace.",
+    "funFact": "This card is linked to travel, therapy, and gradual recovery.",
+    "stats": {"luck": 58, "power": 52, "love": 50, "clarity": 76}
+  },
+  "swords_09_seven": {
+    "title": "Seven of Swords",
+    "keywords": ["strategy", "caution", "secrecy"],
+    "meaning": {
+      "general": "Act wisely and choose your approach.",
+      "light": "Smart planning and discretion.",
+      "shadow": "Avoidance or deception.",
+      "advice": "Be strategic, but stay ethical."
+    },
+    "detailedDescription": "The Seven of Swords highlights the need for careful planning and selective sharing.",
+    "funFact": "It is sometimes called the card of stealth or tactics.",
+    "stats": {"luck": 46, "power": 65, "love": 36, "clarity": 74}
+  },
+  "swords_10_eight": {
+    "title": "Eight of Swords",
+    "keywords": ["restriction", "fear", "perspective"],
+    "meaning": {
+      "general": "Feeling trapped may be a mindset.",
+      "light": "Awareness opens a path.",
+      "shadow": "Self-imposed limits.",
+      "advice": "Name the fear and loosen the ties."
+    },
+    "detailedDescription": "The Eight of Swords reminds you that new options appear when your perspective shifts.",
+    "funFact": "This card often points to mental blocks rather than physical ones.",
+    "stats": {"luck": 38, "power": 48, "love": 34, "clarity": 66}
+  },
+  "swords_11_nine": {
+    "title": "Nine of Swords",
+    "keywords": ["anxiety", "worry", "sleeplessness"],
+    "meaning": {
+      "general": "Worry is loud; seek support.",
+      "light": "Acknowledging fears reduces their grip.",
+      "shadow": "Spiraling thoughts or guilt.",
+      "advice": "Speak your fears to someone you trust."
+    },
+    "detailedDescription": "The Nine of Swords points to mental stress and urges gentle care for your mind.",
+    "funFact": "Traditionally, this card is linked to nightmares and overthinking.",
+    "stats": {"luck": 30, "power": 44, "love": 32, "clarity": 60}
+  },
+  "swords_12_ten": {
+    "title": "Ten of Swords",
+    "keywords": ["ending", "release", "acceptance"],
+    "meaning": {
+      "general": "An ending clears the way forward.",
+      "light": "Release and renewal after closure.",
+      "shadow": "Drama or hopelessness.",
+      "advice": "Let it finish so you can rebuild."
+    },
+    "detailedDescription": "The Ten of Swords marks a hard finale that makes space for a new chapter.",
+    "funFact": "Despite its image, it signals that the worst is over.",
+    "stats": {"luck": 36, "power": 50, "love": 30, "clarity": 72}
+  },
+  "swords_13_ace": {
+    "title": "Ace of Swords",
+    "keywords": ["breakthrough", "truth", "clarity"],
+    "meaning": {
+      "general": "A clear insight cuts through confusion.",
+      "light": "Mental clarity and decisive action.",
+      "shadow": "Harsh judgment or rigidity.",
+      "advice": "Use truth as a tool, not a weapon."
+    },
+    "detailedDescription": "The Ace of Swords brings a crisp beginning in thought—an idea that can change everything.",
+    "funFact": "Aces are often seen as the pure essence of their suit.",
+    "stats": {"luck": 60, "power": 70, "love": 40, "clarity": 92}
+  },
+  "pentacles_00_knight": {
+    "title": "Knight of Pentacles",
+    "keywords": ["consistency", "duty", "patience"],
+    "meaning": {
+      "general": "Steady work builds lasting results.",
+      "light": "Reliability and discipline.",
+      "shadow": "Stagnation or stubbornness.",
+      "advice": "Stick to the plan; small steps matter."
+    },
+    "detailedDescription": "The Knight of Pentacles encourages methodical progress and honoring commitments.",
+    "funFact": "This knight is known for being the most dependable in the deck.",
+    "stats": {"luck": 55, "power": 70, "love": 50, "clarity": 68}
+  },
+  "pentacles_01_king": {
+    "title": "King of Pentacles",
+    "keywords": ["stability", "prosperity", "leadership"],
+    "meaning": {
+      "general": "Practical leadership creates security.",
+      "light": "Generosity and wise stewardship.",
+      "shadow": "Control or materialism.",
+      "advice": "Lead with care for people and resources."
+    },
+    "detailedDescription": "The King of Pentacles embodies mature success—building wealth that supports the community.",
+    "funFact": "He is often associated with financial savvy and grounded authority.",
+    "stats": {"luck": 62, "power": 82, "love": 55, "clarity": 72}
+  },
+  "pentacles_02_queen": {
+    "title": "Queen of Pentacles",
+    "keywords": ["nurture", "comfort", "resourcefulness"],
+    "meaning": {
+      "general": "Care and practicality go hand in hand.",
+      "light": "Supportive presence and abundance.",
+      "shadow": "Over-giving or worrying about security.",
+      "advice": "Tend the roots and your world will flourish."
+    },
+    "detailedDescription": "The Queen of Pentacles blends warmth with practicality, reminding you to care for body and home.",
+    "funFact": "She is sometimes linked to earth signs and domestic magic.",
+    "stats": {"luck": 60, "power": 68, "love": 70, "clarity": 66}
+  },
+  "pentacles_03_page": {
+    "title": "Page of Pentacles",
+    "keywords": ["opportunity", "learning", "practice"],
+    "meaning": {
+      "general": "A new practical path opens.",
+      "light": "Curiosity about skills and resources.",
+      "shadow": "Procrastination or fear of failure.",
+      "advice": "Start small and practice daily."
+    },
+    "detailedDescription": "The Page of Pentacles signals a fresh start with money, study, or health routines.",
+    "funFact": "Pages are the students of the suit, eager to learn by doing.",
+    "stats": {"luck": 58, "power": 55, "love": 46, "clarity": 62}
+  },
+  "pentacles_04_two": {
+    "title": "Two of Pentacles",
+    "keywords": ["balance", "adaptability", "flow"],
+    "meaning": {
+      "general": "Juggling priorities calls for flexibility.",
+      "light": "Balance and resourceful timing.",
+      "shadow": "Overextension or scattered energy.",
+      "advice": "Simplify and keep what moves you."
+    },
+    "detailedDescription": "The Two of Pentacles highlights the dance of managing time, money, and energy.",
+    "funFact": "The infinity loop in the imagery symbolizes ongoing motion.",
+    "stats": {"luck": 56, "power": 60, "love": 52, "clarity": 64}
+  },
+  "pentacles_05_three": {
+    "title": "Three of Pentacles",
+    "keywords": ["teamwork", "craft", "recognition"],
+    "meaning": {
+      "general": "Skill grows through collaboration.",
+      "light": "Shared effort and mastery.",
+      "shadow": "Misalignment or lack of feedback.",
+      "advice": "Invite input and refine your craft."
+    },
+    "detailedDescription": "The Three of Pentacles celebrates building something solid with others.",
+    "funFact": "It often points to apprenticeships and learning from mentors.",
+    "stats": {"luck": 60, "power": 72, "love": 55, "clarity": 70}
+  },
+  "pentacles_06_four": {
+    "title": "Four of Pentacles",
+    "keywords": ["security", "control", "saving"],
+    "meaning": {
+      "general": "Hold gently to what you value.",
+      "light": "Stability and mindful saving.",
+      "shadow": "Clinging or fear of loss.",
+      "advice": "Protect your resources without closing your heart."
+    },
+    "detailedDescription": "The Four of Pentacles asks you to balance security with openness.",
+    "funFact": "It is often read as a lesson about healthy boundaries with money.",
+    "stats": {"luck": 48, "power": 65, "love": 38, "clarity": 58}
+  },
+  "pentacles_07_five": {
+    "title": "Five of Pentacles",
+    "keywords": ["hardship", "support", "recovery"],
+    "meaning": {
+      "general": "Help exists even in hard moments.",
+      "light": "Resilience and mutual aid.",
+      "shadow": "Isolation or shame.",
+      "advice": "Reach out; you do not have to do this alone."
+    },
+    "detailedDescription": "The Five of Pentacles points to temporary struggle and the strength of shared support.",
+    "funFact": "This card is linked to community care and recovery.",
+    "stats": {"luck": 35, "power": 50, "love": 45, "clarity": 52}
+  },
+  "pentacles_08_six": {
+    "title": "Six of Pentacles",
+    "keywords": ["generosity", "exchange", "fairness"],
+    "meaning": {
+      "general": "Give and receive in balance.",
+      "light": "Supportive generosity.",
+      "shadow": "Strings attached or imbalance.",
+      "advice": "Offer help with clear boundaries."
+    },
+    "detailedDescription": "The Six of Pentacles focuses on fair exchange and mindful giving.",
+    "funFact": "It often appears during loans, gifts, or mentorship.",
+    "stats": {"luck": 62, "power": 58, "love": 60, "clarity": 64}
+  },
+  "pentacles_09_seven": {
+    "title": "Seven of Pentacles",
+    "keywords": ["patience", "assessment", "growth"],
+    "meaning": {
+      "general": "Pause to review your progress.",
+      "light": "Long-term vision and steady growth.",
+      "shadow": "Impatience or doubt.",
+      "advice": "Let your efforts mature before changing course."
+    },
+    "detailedDescription": "The Seven of Pentacles is about tending what you planted and checking results.",
+    "funFact": "It is often called the card of cultivation.",
+    "stats": {"luck": 55, "power": 62, "love": 50, "clarity": 70}
+  },
+  "pentacles_10_eight": {
+    "title": "Eight of Pentacles",
+    "keywords": ["skill", "dedication", "practice"],
+    "meaning": {
+      "general": "Focused practice improves results.",
+      "light": "Craftsmanship and learning.",
+      "shadow": "Monotony or perfectionism.",
+      "advice": "Keep refining one step at a time."
+    },
+    "detailedDescription": "The Eight of Pentacles celebrates dedicated work and mastery in progress.",
+    "funFact": "It is a classic card for apprenticeships and skill-building.",
+    "stats": {"luck": 58, "power": 70, "love": 48, "clarity": 68}
+  },
+  "pentacles_11_nine": {
+    "title": "Nine of Pentacles",
+    "keywords": ["independence", "comfort", "reward"],
+    "meaning": {
+      "general": "Your efforts bring comfort and ease.",
+      "light": "Self-sufficiency and enjoyment.",
+      "shadow": "Isolation or overindulgence.",
+      "advice": "Enjoy what you've built and share wisely."
+    },
+    "detailedDescription": "The Nine of Pentacles marks a season of earned confidence and quiet luxury.",
+    "funFact": "In readings it can point to solo success or refinement.",
+    "stats": {"luck": 64, "power": 66, "love": 58, "clarity": 72}
+  },
+  "pentacles_12_ten": {
+    "title": "Ten of Pentacles",
+    "keywords": ["legacy", "family", "foundation"],
+    "meaning": {
+      "general": "Long-term stability is in focus.",
+      "light": "Shared prosperity and roots.",
+      "shadow": "Rigid traditions or entitlement.",
+      "advice": "Build a foundation that supports future growth."
+    },
+    "detailedDescription": "The Ten of Pentacles highlights legacy—what you build that lasts.",
+    "funFact": "It is often associated with inheritance or family resources.",
+    "stats": {"luck": 68, "power": 74, "love": 62, "clarity": 70}
+  },
+  "pentacles_13_ace": {
+    "title": "Ace of Pentacles",
+    "keywords": ["opportunity", "prosperity", "seed"],
+    "meaning": {
+      "general": "A tangible opportunity appears.",
+      "light": "New resources and grounded beginnings.",
+      "shadow": "Missing the chance through doubt.",
+      "advice": "Plant the seed and nurture it daily."
+    },
+    "detailedDescription": "The Ace of Pentacles is the spark of a practical new start—money, health, or home.",
+    "funFact": "Aces in Pentacles often signal new income or projects.",
+    "stats": {"luck": 70, "power": 68, "love": 54, "clarity": 66}
   }
 }

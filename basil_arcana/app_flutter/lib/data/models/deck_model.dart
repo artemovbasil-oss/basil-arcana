@@ -1,4 +1,4 @@
-enum DeckId { all, major, wands }
+enum DeckId { all, major, wands, swords, pentacles, cups }
 
 const List<String> wandsCardIds = [
   'wands_00_knight',
@@ -17,10 +17,64 @@ const List<String> wandsCardIds = [
   'wands_13_ace',
 ];
 
+const List<String> swordsCardIds = [
+  'swords_00_knight',
+  'swords_01_king',
+  'swords_02_queen',
+  'swords_03_page',
+  'swords_04_two',
+  'swords_05_three',
+  'swords_06_four',
+  'swords_07_five',
+  'swords_08_six',
+  'swords_09_seven',
+  'swords_10_eight',
+  'swords_11_nine',
+  'swords_12_ten',
+  'swords_13_ace',
+];
+
+const List<String> pentaclesCardIds = [
+  'pentacles_00_knight',
+  'pentacles_01_king',
+  'pentacles_02_queen',
+  'pentacles_03_page',
+  'pentacles_04_two',
+  'pentacles_05_three',
+  'pentacles_06_four',
+  'pentacles_07_five',
+  'pentacles_08_six',
+  'pentacles_09_seven',
+  'pentacles_10_eight',
+  'pentacles_11_nine',
+  'pentacles_12_ten',
+  'pentacles_13_ace',
+];
+
+const List<String> cupsCardIds = [
+  'cups_00_knight',
+  'cups_01_king',
+  'cups_02_queen',
+  'cups_03_page',
+  'cups_04_two',
+  'cups_05_three',
+  'cups_06_four',
+  'cups_07_five',
+  'cups_08_six',
+  'cups_09_seven',
+  'cups_10_eight',
+  'cups_11_nine',
+  'cups_12_ten',
+  'cups_13_ace',
+];
+
 const Map<DeckId, String> deckStorageValues = {
   DeckId.all: 'all',
   DeckId.major: 'major',
   DeckId.wands: 'wands',
+  DeckId.swords: 'swords',
+  DeckId.pentacles: 'pentacles',
+  DeckId.cups: 'cups',
 };
 
 DeckId deckIdFromStorage(String? value) {

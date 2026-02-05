@@ -84,6 +84,22 @@ class SettingsScreen extends ConsumerWidget {
               ref.read(deckProvider.notifier).setDeck(value);
             },
           ),
+          _DeckOption(
+            label: l10n.deckSwordsName,
+            deckId: DeckId.swords,
+            groupValue: deckId,
+            onSelected: (value) {
+              ref.read(deckProvider.notifier).setDeck(value);
+            },
+          ),
+          _DeckOption(
+            label: l10n.deckPentaclesName,
+            deckId: DeckId.pentacles,
+            groupValue: deckId,
+            onSelected: (value) {
+              ref.read(deckProvider.notifier).setDeck(value);
+            },
+          ),
           if (kDebugMode) ...[
             const SizedBox(height: 12),
             ListTile(

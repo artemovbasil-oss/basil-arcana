@@ -8,7 +8,6 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/widgets/card_face_widget.dart';
 import '../../core/widgets/tarot_asset_widgets.dart';
-import '../../data/models/card_model.dart';
 import '../../data/models/deck_model.dart';
 import '../../data/models/drawn_card_model.dart';
 import '../../data/models/spread_model.dart';
@@ -409,12 +408,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                     context,
                     MaterialPageRoute(
                       builder: (_) => CardDetailScreen(
-                        card: CardModel(
-                          id: drawn.cardId,
-                          name: drawn.cardName,
-                          keywords: drawn.keywords,
-                          meaning: drawn.meaning,
-                        ),
+                        cardId: drawn.cardId,
                       ),
                     ),
                   );

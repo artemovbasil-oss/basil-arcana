@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
 import 'tarot_asset_widgets.dart';
 
@@ -19,6 +20,7 @@ class CardFaceWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -34,8 +36,10 @@ class CardFaceWidget extends StatelessWidget {
               builder: (context, constraints) {
                 final cardWidth = constraints.maxWidth;
                 final cardHeight = cardWidth * 1.5;
-                final image = CardAssetImage(
+                final image = CardMedia(
                   cardId: cardId!,
+                  enableVideo: true,
+                  playLabel: l10n.videoTapToPlay,
                   width: cardWidth,
                   height: cardHeight,
                   borderRadius: BorderRadius.circular(8),
@@ -43,11 +47,7 @@ class CardFaceWidget extends StatelessWidget {
                 );
                 return Material(
                   color: Colors.transparent,
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(10),
-                    onTap: onCardTap,
-                    child: image,
-                  ),
+                  child: image,
                 );
               },
             ),
@@ -72,6 +72,16 @@ class CardFaceWidget extends StatelessWidget {
                 )
                 .toList(),
           ),
+          if (onCardTap != null) ...[
+            const SizedBox(height: 12),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton(
+                onPressed: onCardTap,
+                child: Text(l10n.cardsDetailTitle),
+              ),
+            ),
+          ],
         ],
       ),
     );
