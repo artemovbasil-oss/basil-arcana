@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import '../telemetry/web_error_reporter.dart';
+import 'web_build_version.dart';
 
 class ConfigService {
   ConfigService._();
@@ -36,9 +37,9 @@ class ConfigService {
     if (!kIsWeb) {
       return;
     }
-    final cacheBust = DateTime.now().millisecondsSinceEpoch.toString();
+    final cacheBust = readWebBuildVersion();
     final uri = Uri.parse('/config.json').replace(
-      queryParameters: {'v': cacheBust},
+      queryParameters: {'v': cacheBust.isEmpty ? 'dev' : cacheBust},
     );
     try {
       final response = await http.get(
