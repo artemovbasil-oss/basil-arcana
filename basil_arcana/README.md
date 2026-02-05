@@ -65,10 +65,9 @@ curl -X POST http://localhost:3000/api/reading/generate \
 
 1. Create a Railway project from this GitHub repo.
 2. For the Flutter web service, point Railway to `basil_arcana/app_flutter/Dockerfile.web` and set `API_BASE_URL`.
-3. In Railway Variables, set:
+3. In Railway Variables for the API service, set:
    - `OPENAI_API_KEY`
    - `ARCANA_API_KEY`
-   - `TELEGRAM_BOT_TOKEN` (required for Telegram WebApp auth)
    - `OPENAI_MODEL` (optional)
    - `RATE_LIMIT_WINDOW_MS` (optional, default 60000)
    - `RATE_LIMIT_MAX` (optional, default 60)
@@ -79,10 +78,7 @@ curl -X POST http://localhost:3000/api/reading/generate \
 
 1. Set bot variables in Railway:
    - `TELEGRAM_BOT_TOKEN`
-   - `ARCANA_API_KEY`
-   - `API_BASE_URL` (optional, defaults to `https://api.basilarcana.com`)
-   - `DEFAULT_LOCALE` (`en`, `ru`, or `kk`)
-   - `FLUTTER_ASSETS_ROOT=/app/basil_arcana/app_flutter/assets`
+   - `TELEGRAM_WEBAPP_URL`
 2. Build command: `cd bot && npm ci && npm run build`
 3. Start command: `cd bot && npm run start`
 
@@ -114,3 +110,23 @@ Production default: `https://api.basilarcana.com`.
 - Secrets are never committed to the repo. Use Railway Variables or local environment variables.
 - The web client loads `/config.json` at runtime; set `API_BASE_URL` in the web service environment. No `API_KEY` is embedded in the web bundle.
 - No binary assets are included; all card faces are rendered with Flutter UI components.
+
+## Release checklist (web + bot + iOS Telegram)
+- **Local web build**:
+  - `cd app_flutter`
+  - `flutter pub get`
+  - `flutter gen-l10n`
+  - `flutter build web --release --pwa-strategy=none`
+- **Local bot build**:
+  - `cd bot`
+  - `npm ci`
+  - `npm run build`
+  - `npm run start`
+- **Railway environment variables**:
+  - Web service: `API_BASE_URL`
+  - API service: `OPENAI_API_KEY`, `ARCANA_API_KEY` (+ optional `OPENAI_MODEL`, rate limit vars)
+  - Bot service: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBAPP_URL`
+- **iOS Telegram verification**:
+  - Open the mini app via the bot button on iOS.
+  - Confirm full-height layout (no black screen, no half-height), header not overlapping, and swipe-down doesn’t collapse the webview.
+  - Open a card detail: video auto-plays once, then falls back to the static image; tapping the image replays the video once.

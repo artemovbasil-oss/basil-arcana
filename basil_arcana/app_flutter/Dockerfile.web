@@ -18,7 +18,7 @@ RUN if [ ! -d "web" ]; then \
     fi
 
 RUN flutter gen-l10n && \
-    flutter build web --release --web-renderer html --pwa-strategy=none \
+    flutter build web --release --pwa-strategy=none \
       --dart-define=API_BASE_URL="${API_BASE_URL}"
 
 FROM python:3.12-slim AS runtime

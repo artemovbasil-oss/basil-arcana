@@ -95,7 +95,14 @@ class CardDetailScreen extends ConsumerWidget {
                         label: Text(keyword),
                         backgroundColor: colorScheme.surface,
                         side: BorderSide(color: colorScheme.outlineVariant),
-                        labelStyle: TextStyle(color: colorScheme.onSurface),
+                        labelStyle: TextStyle(
+                          color: colorScheme.onSurface,
+                          fontSize: 12,
+                        ),
+                        visualDensity: VisualDensity.compact,
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        padding:
+                            const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
                       ),
                     )
                     .toList(),
@@ -154,24 +161,35 @@ class CardDetailScreen extends ConsumerWidget {
                     ?.copyWith(color: colorScheme.primary),
               ),
               const SizedBox(height: 12),
-              _StatsRow(
-                label: l10n.statLuck,
-                value: resolvedCard.stats!.luck,
-              ),
-              const SizedBox(height: 10),
-              _StatsRow(
-                label: l10n.statPower,
-                value: resolvedCard.stats!.power,
-              ),
-              const SizedBox(height: 10),
-              _StatsRow(
-                label: l10n.statLove,
-                value: resolvedCard.stats!.love,
-              ),
-              const SizedBox(height: 10),
-              _StatsRow(
-                label: l10n.statClarity,
-                value: resolvedCard.stats!.clarity,
+              GridView.count(
+                crossAxisCount: 2,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 12,
+                childAspectRatio: 2.4,
+                children: [
+                  _StatTile(
+                    label: l10n.statLuck,
+                    value: resolvedCard.stats!.luck,
+                    icon: Icons.auto_awesome,
+                  ),
+                  _StatTile(
+                    label: l10n.statPower,
+                    value: resolvedCard.stats!.power,
+                    icon: Icons.flash_on,
+                  ),
+                  _StatTile(
+                    label: l10n.statLove,
+                    value: resolvedCard.stats!.love,
+                    icon: Icons.favorite,
+                  ),
+                  _StatTile(
+                    label: l10n.statClarity,
+                    value: resolvedCard.stats!.clarity,
+                    icon: Icons.visibility,
+                  ),
+                ],
               ),
             ],
           ],
@@ -200,46 +218,66 @@ CardModel? _resolveCard(
   return null;
 }
 
-class _StatsRow extends StatelessWidget {
-  const _StatsRow({
+class _StatTile extends StatelessWidget {
+  const _StatTile({
     required this.label,
     required this.value,
+    required this.icon,
   });
 
   final String label;
   final int value;
+  final IconData icon;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                label,
-                style: Theme.of(context).textTheme.bodyMedium,
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceVariant.withOpacity(0.35),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: colorScheme.outlineVariant),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                icon,
+                size: 18,
+                color: colorScheme.primary,
               ),
-            ),
-            Text(
-              '$value',
-              style: Theme.of(context).textTheme.labelLarge,
-            ),
-          ],
-        ),
-        const SizedBox(height: 6),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(999),
-          child: LinearProgressIndicator(
-            value: (value / 100).clamp(0.0, 1.0),
-            minHeight: 6,
-            backgroundColor: colorScheme.surfaceVariant.withOpacity(0.4),
-            valueColor: AlwaysStoppedAnimation<Color>(colorScheme.primary),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  label,
+                  style: Theme.of(context).textTheme.labelMedium,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              Text(
+                '$value%',
+                style: Theme.of(context)
+                    .textTheme
+                    .labelLarge
+                    ?.copyWith(color: colorScheme.onSurface),
+              ),
+            ],
           ),
-        ),
-      ],
+          const SizedBox(height: 8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(999),
+            child: LinearProgressIndicator(
+              value: (value / 100).clamp(0.0, 1.0),
+              minHeight: 6,
+              backgroundColor: colorScheme.surfaceVariant.withOpacity(0.5),
+              valueColor: AlwaysStoppedAnimation<Color>(colorScheme.primary),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
