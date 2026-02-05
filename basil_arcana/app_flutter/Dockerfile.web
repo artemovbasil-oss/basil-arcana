@@ -2,7 +2,8 @@ FROM ghcr.io/cirruslabs/flutter:stable AS build
 
 WORKDIR /app
 
-COPY pubspec.yaml pubspec.lock ./
+COPY pubspec.yaml ./
+# pubspec.lock is not committed for Flutter apps; avoid failing builds when it's absent.
 RUN flutter pub get
 
 COPY . .
