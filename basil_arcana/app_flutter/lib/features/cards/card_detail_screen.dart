@@ -23,6 +23,7 @@ class CardDetailScreen extends ConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final useTelegramAppBar =
         TelegramWebApp.isTelegramWebView && TelegramWebApp.isTelegramMobile;
+    final deckId = ref.watch(deckProvider);
     final resolvedCardId = card?.id ?? cardId;
     final cardsAsync = ref.watch(cardsProvider);
     final resolvedCard = _resolveCard(
@@ -62,14 +63,22 @@ class CardDetailScreen extends ConsumerWidget {
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
           children: [
             Center(
-              child: CardMedia(
-                cardId: resolvedCard.id,
-                videoAssetPath: resolvedCard.videoAssetPath,
-                width: 240,
-                height: 360,
-                enableVideo: true,
-                autoPlayOnce: true,
-                playLabel: l10n.videoTapToPlay,
+              child: Builder(
+                builder: (context) {
+                  final mediaAssets = CardMediaResolver(deckId: deckId).resolve(
+                    resolvedCard.id,
+                    videoAssetPathOverride: resolvedCard.videoAssetPath,
+                  );
+                  return CardMedia(
+                    cardId: resolvedCard.id,
+                    videoAssetPath: mediaAssets.videoAssetPath,
+                    width: 240,
+                    height: 360,
+                    enableVideo: true,
+                    autoPlayOnce: true,
+                    playLabel: l10n.videoTapToPlay,
+                  );
+                },
               ),
             ),
             const SizedBox(height: 20),
