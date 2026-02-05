@@ -28,7 +28,7 @@ class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
   bool _showCta = false;
   bool _hasTriggeredFall = false;
 
-  static const _deckCount = 8;
+  static const _deckCount = 3;
   static const _cardWidth = 120.0;
   static const _cardHeight = 176.0;
 
@@ -84,7 +84,8 @@ class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
   Widget build(BuildContext context) {
     final state = ref.watch(readingFlowControllerProvider);
     final cardsAsync = ref.watch(cardsProvider);
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context)!;
     final hasDrawnCards = state.drawnCards.isNotEmpty;
     final keptCount = state.spread?.positions.length ?? 0;
@@ -94,134 +95,96 @@ class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
 
     return Scaffold(
       appBar: useTelegramAppBar ? null : AppBar(title: Text(l10n.shuffleTitle)),
+      backgroundColor: colorScheme.background,
       body: SafeArea(
         top: useTelegramAppBar,
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            children: [
-              Expanded(
-                child: Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      SizedBox(
-                        width: 280,
-                        height: 300,
-                        child: hasDrawnCards
-                            ? _DrawnStack(
-                                keptCount: keptCount,
-                                fallAnimation: CurvedAnimation(
-                                  parent: _fallController,
-                                  curve: Curves.easeIn,
-                                ),
-                                showGlow: showGlow,
-                                glowAnimation: CurvedAnimation(
-                                  parent: _glowController,
-                                  curve: Curves.easeInOut,
-                                ),
-                              )
-                            : AnimatedBuilder(
-                                animation: _controller,
-                                builder: (context, child) {
-                                  final t = _controller.value * 2 * pi;
-                                  final phases = <double>[
-                                    0,
-                                    pi / 2,
-                                    pi,
-                                    3 * pi / 2,
-                                    pi / 3,
-                                  ];
-                                  final baseOffsets = <Offset>[
-                                    const Offset(0, 24),
-                                    const Offset(-20, 12),
-                                    const Offset(18, 6),
-                                    const Offset(-12, -4),
-                                    const Offset(12, -10),
-                                  ];
-                                  final baseAngles = <double>[
-                                    -0.12,
-                                    -0.06,
-                                    0.05,
-                                    0.11,
-                                    -0.02,
-                                  ];
-                                  return Stack(
-                                    alignment: Alignment.center,
-                                    children:
-                                        List.generate(phases.length, (index) {
-                                      final wave = sin(t + phases[index]);
-                                      final sway = cos(t + phases[index]);
-                                      final offset = baseOffsets[index] +
-                                          Offset(wave * 10, sway * 6);
-                                      final angle =
-                                          baseAngles[index] + wave * 0.08;
-                                      return Transform.translate(
-                                        offset: offset,
-                                        child: Transform.rotate(
-                                          angle: angle,
-                                          child: const DeckCoverBack(),
-                                        ),
-                                      );
-                                    }),
-                                  );
-                                },
-                              ),
+        child: Stack(
+          children: [
+            const Positioned.fill(child: _ShuffleBackground()),
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                children: [
+                  Expanded(
+                    child: Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SizedBox(
+                            width: 280,
+                            height: 300,
+                            child: hasDrawnCards
+                                ? _DrawnStack(
+                                    keptCount: keptCount,
+                                    fallAnimation: CurvedAnimation(
+                                      parent: _fallController,
+                                      curve: Curves.easeOutCubic,
+                                    ),
+                                    showGlow: showGlow,
+                                    glowAnimation: CurvedAnimation(
+                                      parent: _glowController,
+                                      curve: Curves.easeInOut,
+                                    ),
+                                  )
+                                : _ShufflingStack(animation: _controller),
+                          ),
+                          const SizedBox(height: 24),
+                          Text(
+                            l10n.shuffleSubtitle,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              color: colorScheme.onSurface,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 24),
-                      Text(
-                        l10n.shuffleSubtitle,
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleMedium
-                            ?.copyWith(color: colorScheme.onSurface),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              if (state.isLoading) const LinearProgressIndicator(),
-              const SizedBox(height: 16),
-              AnimatedSlide(
-                duration: const Duration(milliseconds: 360),
-                curve: Curves.easeOutCubic,
-                offset: _showCta ? Offset.zero : const Offset(0, 0.2),
-                child: AnimatedOpacity(
-                  duration: const Duration(milliseconds: 360),
-                  opacity: _showCta ? 1 : 0,
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: !_showCta || state.isLoading
-                          ? null
-                          : () async {
-                              final cards = await cardsAsync.valueOrNull;
-                              if (cards == null) {
-                                return;
-                              }
-                              await ref
-                                  .read(readingFlowControllerProvider.notifier)
-                                  .drawAndGenerate(cards);
-                              if (mounted) {
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => const ResultScreen(),
-                                  ),
-                                );
-                              }
-                            },
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: const StadiumBorder(),
-                      ),
-                      child: Text(l10n.shuffleDrawButton),
                     ),
                   ),
-                ),
+                  if (state.isLoading) const LinearProgressIndicator(),
+                  const SizedBox(height: 16),
+                  AnimatedSlide(
+                    duration: const Duration(milliseconds: 360),
+                    curve: Curves.easeOutCubic,
+                    offset: _showCta ? Offset.zero : const Offset(0, 0.2),
+                    child: AnimatedOpacity(
+                      duration: const Duration(milliseconds: 360),
+                      opacity: _showCta ? 1 : 0,
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: !_showCta || state.isLoading
+                              ? null
+                              : () async {
+                                  final cards = await cardsAsync.valueOrNull;
+                                  if (cards == null) {
+                                    return;
+                                  }
+                                  await ref
+                                      .read(
+                                        readingFlowControllerProvider.notifier,
+                                      )
+                                      .drawAndGenerate(cards);
+                                  if (mounted) {
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => const ResultScreen(),
+                                      ),
+                                    );
+                                  }
+                                },
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: const StadiumBorder(),
+                          ),
+                          child: Text(l10n.shuffleDrawButton),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -243,49 +206,27 @@ class _DrawnStack extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final stackCount = max(keptCount, 1);
-    final fallCount = _ShuffleScreenState._deckCount - stackCount;
-    final fallOffsetBase = MediaQuery.of(context).size.height * 0.45;
-    final baseOffsets = <Offset>[
-      const Offset(0, 0),
-      const Offset(-38, 6),
-      const Offset(38, 6),
-      const Offset(-24, -10),
-      const Offset(24, -10),
-      const Offset(-52, 14),
-      const Offset(52, 14),
-      const Offset(0, -18),
-    ];
-    final baseAngles = <double>[
-      0,
-      -0.08,
-      0.08,
-      -0.12,
-      0.12,
-      -0.18,
-      0.18,
-      0.04,
-    ];
+    final drawnCount = max(keptCount, 1);
+    final targets = _drawTargets(drawnCount);
+    final rotations = _drawRotations(drawnCount);
 
     return AnimatedBuilder(
-      animation: fallAnimation,
+      animation: Listenable.merge([fallAnimation, glowAnimation]),
       builder: (context, child) {
+        final glowStrength = showGlow
+            ? (0.45 + sin(glowAnimation.value * pi) * 0.35)
+            : 0.0;
         return Stack(
           alignment: Alignment.center,
           children: [
-            for (var i = 0; i < fallCount; i++)
-              _FallingCard(
+            _DeckStack(glowStrength: glowStrength),
+            for (var i = 0; i < drawnCount; i++)
+              _DrawnCard(
                 index: i,
-                offset: baseOffsets[i % baseOffsets.length],
-                angle: baseAngles[i % baseAngles.length],
-                fallOffset: fallOffsetBase + (i * 16),
-                progress: fallAnimation.value,
+                targetOffset: targets[i],
+                targetRotation: rotations[i],
+                progress: fallAnimation,
               ),
-            _RemainingCards(
-              keptCount: stackCount,
-              showGlow: showGlow,
-              glowAnimation: glowAnimation,
-            ),
           ],
         );
       },
@@ -293,80 +234,141 @@ class _DrawnStack extends StatelessWidget {
   }
 }
 
-class _RemainingCards extends StatelessWidget {
-  const _RemainingCards({
-    required this.keptCount,
-    required this.showGlow,
-    required this.glowAnimation,
+List<Offset> _drawTargets(int count) {
+  if (count <= 1) {
+    return [const Offset(0, -6)];
+  }
+  if (count == 2) {
+    return const [Offset(-64, -8), Offset(64, 8)];
+  }
+  return const [
+    Offset(-78, -10),
+    Offset(0, 12),
+    Offset(78, -10),
+  ];
+}
+
+List<double> _drawRotations(int count) {
+  if (count <= 1) {
+    return [0.02];
+  }
+  if (count == 2) {
+    return [-0.06, 0.06];
+  }
+  return [-0.08, 0.02, 0.08];
+}
+
+class _DrawnCard extends StatelessWidget {
+  const _DrawnCard({
+    required this.index,
+    required this.targetOffset,
+    required this.targetRotation,
+    required this.progress,
   });
 
-  final int keptCount;
-  final bool showGlow;
-  final Animation<double> glowAnimation;
+  final int index;
+  final Offset targetOffset;
+  final double targetRotation;
+  final Animation<double> progress;
 
   @override
   Widget build(BuildContext context) {
-    final spacing = keptCount == 1 ? 0.0 : 74.0;
-    final offsets = List.generate(keptCount, (index) {
-      if (keptCount == 1) {
-        return Offset.zero;
-      }
-      final start = -((keptCount - 1) / 2) * spacing;
-      return Offset(start + index * spacing, 0);
-    });
-
+    final start = index * 0.14;
+    final curve = CurvedAnimation(
+      parent: progress,
+      curve: Interval(start, 1.0, curve: Curves.easeOutCubic),
+    );
     return AnimatedBuilder(
-      animation: glowAnimation,
+      animation: curve,
       builder: (context, child) {
-        final glowStrength = showGlow
-            ? (0.6 + sin(glowAnimation.value * pi) * 0.4)
-            : 0.0;
+        final t = curve.value;
+        final offset = Offset.lerp(Offset.zero, targetOffset, t)!;
+        final rotation = lerpDouble(0, targetRotation, t) ?? 0;
+        final scale = lerpDouble(0.96, 1.0, t) ?? 1.0;
+        return Transform.translate(
+          offset: offset,
+          child: Transform.rotate(
+            angle: rotation,
+            child: Transform.scale(
+              scale: scale,
+              child: child,
+            ),
+          ),
+        );
+      },
+      child: const DeckCoverBack(
+        width: _ShuffleScreenState._cardWidth,
+        height: _ShuffleScreenState._cardHeight,
+      ),
+    );
+  }
+}
+
+class _DeckStack extends StatelessWidget {
+  const _DeckStack({required this.glowStrength});
+
+  final double glowStrength;
+
+  @override
+  Widget build(BuildContext context) {
+    final offsets = <Offset>[
+      const Offset(6, 6),
+      const Offset(-4, -4),
+    ];
+    final angles = <double>[0.03, -0.02];
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        for (var i = 0; i < offsets.length; i++)
+          Transform.translate(
+            offset: offsets[i],
+            child: Transform.rotate(
+              angle: angles[i],
+              child: const DeckCoverBack(
+                width: _ShuffleScreenState._cardWidth,
+                height: _ShuffleScreenState._cardHeight,
+              ),
+            ),
+          ),
+        _MagicalGlowCard(glowStrength: glowStrength),
+      ],
+    );
+  }
+}
+
+class _ShufflingStack extends StatelessWidget {
+  const _ShufflingStack({required this.animation});
+
+  final Animation<double> animation;
+
+  @override
+  Widget build(BuildContext context) {
+    final baseOffsets = <Offset>[
+      const Offset(0, 4),
+      const Offset(-6, 8),
+      const Offset(6, -6),
+    ];
+    final baseAngles = <double>[-0.04, 0.03, -0.02];
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, child) {
+        final t = animation.value * 2 * pi;
         return Stack(
           alignment: Alignment.center,
-          children: List.generate(keptCount, (index) {
+          children: List.generate(baseOffsets.length, (index) {
+            final wave = sin(t + index * 1.4);
+            final offset = baseOffsets[index] + Offset(wave * 6, wave * 4);
+            final angle = baseAngles[index] + wave * 0.04;
             return Transform.translate(
-              offset: offsets[index],
-              child: _MagicalGlowCard(
-                glowStrength: glowStrength,
+              offset: offset,
+              child: Transform.rotate(
+                angle: angle,
+                child: const DeckCoverBack(),
               ),
             );
           }),
         );
       },
-    );
-  }
-}
-
-class _FallingCard extends StatelessWidget {
-  const _FallingCard({
-    required this.index,
-    required this.offset,
-    required this.angle,
-    required this.fallOffset,
-    required this.progress,
-  });
-
-  final int index;
-  final Offset offset;
-  final double angle;
-  final double fallOffset;
-  final double progress;
-
-  @override
-  Widget build(BuildContext context) {
-    final drift = sin((index + 1) * 1.3) * 18;
-    final yOffset = fallOffset * progress;
-    final xOffset = offset.dx + drift * progress;
-    final rotation = angle + progress * (index.isEven ? 0.22 : -0.18);
-    return Transform.translate(
-      offset: Offset(xOffset, offset.dy + yOffset),
-      child: Transform.rotate(
-        angle: rotation,
-        child: const DeckCoverBack(
-          width: _ShuffleScreenState._cardWidth,
-          height: _ShuffleScreenState._cardHeight,
-        ),
-      ),
     );
   }
 }
@@ -424,6 +426,83 @@ class _MagicalGlowCard extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _ShuffleBackground extends StatelessWidget {
+  const _ShuffleBackground();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final background = theme.colorScheme.background;
+    final glowColor = theme.colorScheme.primary;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            background,
+            background.withOpacity(0.92),
+            background,
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: Stack(
+        children: [
+          _GlowOrb(
+            alignment: const Alignment(-0.9, -0.7),
+            color: glowColor,
+            size: 220,
+            opacity: 0.22,
+          ),
+          _GlowOrb(
+            alignment: const Alignment(0.9, 0.7),
+            color: glowColor,
+            size: 280,
+            opacity: 0.2,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GlowOrb extends StatelessWidget {
+  const _GlowOrb({
+    required this.alignment,
+    required this.color,
+    required this.size,
+    required this.opacity,
+  });
+
+  final Alignment alignment;
+  final Color color;
+  final double size;
+  final double opacity;
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: alignment,
+      child: ImageFiltered(
+        imageFilter: ImageFilter.blur(sigmaX: 60, sigmaY: 60),
+        child: Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: RadialGradient(
+              colors: [
+                color.withOpacity(opacity),
+                color.withOpacity(0.0),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

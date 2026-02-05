@@ -53,9 +53,13 @@ class CardMediaAssets {
 }
 
 class CardMediaResolver {
-  const CardMediaResolver({this.deckId = DeckId.major});
+  const CardMediaResolver({
+    this.deckId = DeckId.major,
+    this.availableVideoAssets,
+  });
 
   final DeckId deckId;
+  final Set<String>? availableVideoAssets;
 
   CardMediaAssets resolve(
     String cardId, {
@@ -63,7 +67,11 @@ class CardMediaResolver {
   }) {
     final imageAssetPath = cardAssetPath(cardId, deckId: deckId);
     final resolvedVideo = normalizeVideoAssetPath(
-      videoAssetPathOverride ?? resolveCardVideoAsset(cardId),
+      videoAssetPathOverride ??
+          resolveCardVideoAsset(
+            cardId,
+            availableAssets: availableVideoAssets,
+          ),
     );
     return CardMediaAssets(
       imageAssetPath: imageAssetPath,
@@ -199,6 +207,7 @@ class _CardMediaState extends State<CardMedia> {
   String? _resolvedVideoPath;
   String? _cacheKey;
   bool _autoPlayAttempted = false;
+  bool _autoPlayFailed = false;
 
   @override
   void initState() {
@@ -242,6 +251,7 @@ class _CardMediaState extends State<CardMedia> {
     _videoFailed = false;
     _showVideo = false;
     _autoPlayAttempted = false;
+    _autoPlayFailed = false;
     if (!widget.enableVideo || _resolvedVideoPath == null) {
       return;
     }
@@ -282,7 +292,14 @@ class _CardMediaState extends State<CardMedia> {
     final cacheKey = resolvedPath;
     _cacheKey = cacheKey;
     final cached = _controllerCache[cacheKey];
-    final controller = cached?.controller ?? VideoPlayerController.asset(resolvedPath);
+    final controller = cached?.controller ??
+        VideoPlayerController.asset(
+          resolvedPath,
+          videoPlayerOptions: const VideoPlayerOptions(
+            mixWithOthers: true,
+            allowBackgroundPlayback: false,
+          ),
+        );
     _controller = controller;
     if (cached == null) {
       _controllerCache[cacheKey] = _CachedVideoController(controller);
@@ -327,16 +344,20 @@ class _CardMediaState extends State<CardMedia> {
       }
       setState(() {
         _showVideo = true;
+        if (autoPlay) {
+          _autoPlayFailed = false;
+        }
       });
     } catch (_) {
       if (!mounted) {
         return;
       }
-      if (autoPlay && _showVideo) {
-        setState(() {
-          _showVideo = false;
-        });
-      }
+      setState(() {
+        _showVideo = false;
+        if (autoPlay) {
+          _autoPlayFailed = true;
+        }
+      });
     }
   }
 
@@ -410,7 +431,9 @@ class _CardMediaState extends State<CardMedia> {
                 ),
               ),
             ),
-          if (hasVideo && !_showVideo && !widget.autoPlayOnce)
+          if (hasVideo &&
+              !_showVideo &&
+              (!widget.autoPlayOnce || _autoPlayFailed))
             Positioned.fill(
               child: ClipRRect(
                 borderRadius: radius,
