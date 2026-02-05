@@ -2,6 +2,10 @@ enum DeckId { all, major, wands, swords, pentacles, cups }
 
 const Map<String, String> _cardIdAliases = {
   'major_10_wheel_of_fortune': 'major_10_wheel',
+  'cups_13_king': 'cups_01_king',
+  'cups_12_queen': 'cups_02_queen',
+  'cups_11_page': 'cups_03_page',
+  'cups_10_knight': 'cups_00_knight',
 };
 
 const List<String> wandsCardIds = [

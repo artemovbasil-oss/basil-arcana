@@ -91,11 +91,19 @@ class _CardsScreenState extends ConsumerState<CardsScreen> {
     }
     _precacheDone = true;
     final deckId = ref.read(deckProvider);
+    final assetManifest =
+        ref.read(cardAssetManifestProvider).asData?.value;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final initialCards = cards.take(6);
       for (final card in initialCards) {
         precacheImage(
-          AssetImage(cardAssetPath(card.id, deckId: deckId)),
+          AssetImage(
+            resolveCardAssetPath(
+              card.id,
+              deckId: deckId,
+              manifest: assetManifest,
+            ),
+          ),
           context,
         );
       }

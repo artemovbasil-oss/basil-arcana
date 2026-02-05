@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:video_player/video_player.dart';
 
+import '../../data/models/card_asset_manifest.dart';
 import '../../data/models/card_video.dart';
 import '../../data/models/deck_model.dart';
 import '../../state/providers.dart';
@@ -30,6 +31,18 @@ String cardAssetPath(String cardId, {DeckId deckId = DeckId.major}) {
     default:
       return 'assets/cards/major/$normalizedId.webp';
   }
+}
+
+String resolveCardAssetPath(
+  String cardId, {
+  DeckId deckId = DeckId.major,
+  CardAssetManifest? manifest,
+}) {
+  final resolved = manifest?.resolveAssetPath(cardId);
+  if (resolved != null) {
+    return resolved;
+  }
+  return cardAssetPath(cardId, deckId: deckId);
 }
 
 String deckCoverAssetPath(DeckId deckId) {
@@ -106,8 +119,14 @@ class CardAssetImage extends ConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final radius = borderRadius ?? BorderRadius.circular(18);
     final deckId = ref.watch(deckProvider);
+    final assetManifest = ref.watch(cardAssetManifestProvider).asData?.value;
+    final resolvedPath = resolveCardAssetPath(
+      cardId,
+      deckId: deckId,
+      manifest: assetManifest,
+    );
     final image = Image.asset(
-      cardAssetPath(cardId, deckId: deckId),
+      resolvedPath,
       width: width,
       height: height,
       fit: fit,
@@ -115,7 +134,11 @@ class CardAssetImage extends ConsumerWidget {
       errorBuilder: (context, error, stackTrace) {
         if (deckId != DeckId.major) {
           return Image.asset(
-            cardAssetPath(cardId, deckId: DeckId.major),
+            resolveCardAssetPath(
+              cardId,
+              deckId: DeckId.major,
+              manifest: assetManifest,
+            ),
             width: width,
             height: height,
             fit: fit,
