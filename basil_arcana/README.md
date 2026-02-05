@@ -79,8 +79,9 @@ curl -X POST http://localhost:3000/api/reading/generate \
 1. Set bot variables in Railway:
    - `TELEGRAM_BOT_TOKEN`
    - `TELEGRAM_WEBAPP_URL`
-2. Build command: `cd bot && npm ci && npm run build`
-3. Start command: `cd bot && npm run start`
+2. WebApp must be opened via web_app button.
+3. Build command: `cd bot && npm ci && npm run build`
+4. Start command: `cd bot && npm run start`
 
 ## Attach custom domain: api.basilarcana.com
 
