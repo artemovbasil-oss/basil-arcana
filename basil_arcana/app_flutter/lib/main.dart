@@ -1,26 +1,16 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
 import 'app.dart';
 import 'core/config/app_config.dart';
-import 'data/models/drawn_card_model.dart';
-import 'data/models/ai_result_model.dart';
-import 'data/models/reading_model.dart';
-import 'data/models/card_model.dart';
+import 'core/storage/hive_storage.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
     await AppConfig.init();
-    await Hive.initFlutter();
-    Hive.registerAdapter(CardMeaningAdapter());
-    Hive.registerAdapter(DrawnCardModelAdapter());
-    Hive.registerAdapter(AiSectionModelAdapter());
-    Hive.registerAdapter(ReadingModelAdapter());
-    await Hive.openBox<ReadingModel>('readings');
-    await Hive.openBox<String>('settings');
-    await Hive.openBox<int>('card_stats');
+    await HiveStorage.init();
 
     runApp(const ProviderScope(child: BasilArcanaApp()));
   } catch (error, stackTrace) {
@@ -68,6 +58,18 @@ class _BootstrapErrorApp extends StatelessWidget {
                   style: const TextStyle(color: Colors.white70),
                   textAlign: TextAlign.center,
                 ),
+                if (kIsWeb) ...[
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton(
+                      onPressed: () async {
+                        await HiveStorage.resetAndReload();
+                      },
+                      child: const Text('Reset data'),
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 16),
                 Flexible(
                   child: SingleChildScrollView(
