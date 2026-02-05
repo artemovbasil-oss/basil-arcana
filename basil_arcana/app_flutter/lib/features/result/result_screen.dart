@@ -70,6 +70,20 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
       );
     }
 
+    if (state.requiresTelegram) {
+      return _OpenInTelegramScreen(
+        onOpen: () async {
+          final url = Uri.parse('https://t.me/tarot_arkana_bot');
+          await launchUrl(url, mode: LaunchMode.externalApplication);
+        },
+        onBack: () {
+          ref.read(readingFlowControllerProvider.notifier).reset();
+          Navigator.popUntil(context, (route) => route.isFirst);
+        },
+        useTelegramAppBar: useTelegramAppBar,
+      );
+    }
+
     if (aiResult == null) {
       if (state.isLoading) {
         return OracleWaitingScreen(
@@ -689,6 +703,67 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
       cleanedLines.add(withoutBullet);
     }
     return cleanedLines.join('\n').trim();
+  }
+}
+
+class _OpenInTelegramScreen extends StatelessWidget {
+  const _OpenInTelegramScreen({
+    required this.onOpen,
+    required this.onBack,
+    required this.useTelegramAppBar,
+  });
+
+  final VoidCallback onBack;
+  final VoidCallback onOpen;
+  final bool useTelegramAppBar;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
+    return Scaffold(
+      appBar:
+          useTelegramAppBar ? null : AppBar(title: Text(l10n.resultTitle)),
+      backgroundColor: colorScheme.surface,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Open in Telegram to draw cards',
+                style: Theme.of(context).textTheme.titleLarge,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'This experience needs Telegram to authenticate your reading.',
+                style: Theme.of(context).textTheme.bodyMedium,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: onOpen,
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: const StadiumBorder(),
+                  ),
+                  child: const Text('Open in Telegram'),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextButton(
+                onPressed: onBack,
+                child: const Text('Back'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 

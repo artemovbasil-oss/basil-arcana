@@ -20,7 +20,43 @@
   <meta name="apple-mobile-web-app-title" content="Basil's Arcana">
 
   <title>Basil's Arcana</title>
+  <script>
+    window.__bootError = null;
+    window.addEventListener('error', function (event) {
+      window.__bootError = {
+        message: event.message || 'Unknown error',
+        source: event.filename || '',
+        line: event.lineno || 0,
+        column: event.colno || 0,
+      };
+      console.error('[boot] error', window.__bootError);
+    });
+    window.addEventListener('unhandledrejection', function (event) {
+      window.__bootError = {
+        message: event.reason ? String(event.reason) : 'Unhandled rejection',
+      };
+      console.error('[boot] unhandledrejection', window.__bootError);
+    });
+  </script>
+  <script>
+    // This is used by Flutter build to replace with a concrete version.
+    var serviceWorkerVersion = null;
+    var buildVersion = '{{flutter_service_worker_version}}';
+    if (!buildVersion ||
+        buildVersion === 'null' ||
+        buildVersion === '{{flutter_service_worker_version}}') {
+      buildVersion = 'dev';
+    }
+    window.__buildVersion = buildVersion;
+    window.__flutterBootstrapUrl = 'flutter_bootstrap.js?v=' + buildVersion;
+  </script>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="telegram_bridge.js?v={{flutter_service_worker_version}}"></script>
+  <link
+    rel="preload"
+    href="flutter_bootstrap.js?v={{flutter_service_worker_version}}"
+    as="script"
+  >
   <link rel="manifest" href="manifest.json">
   <style>
     :root {
@@ -63,16 +99,6 @@
 </head>
 <body>
   <script>
-    // This is used by Flutter build to replace with a concrete version.
-    var serviceWorkerVersion = null;
-    var buildVersion = '{{flutter_service_worker_version}}';
-    if (!buildVersion ||
-        buildVersion === 'null' ||
-        buildVersion === '{{flutter_service_worker_version}}') {
-      buildVersion = 'dev';
-    }
-    window.__buildVersion = buildVersion;
-
     function isTelegramWebView() {
       if (window.Telegram && window.Telegram.WebApp) {
         return true;
