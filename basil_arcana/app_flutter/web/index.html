@@ -17,6 +17,37 @@
 
   <title>Basil's Arcana</title>
   <link rel="manifest" href="manifest.json">
+  <style>
+    :root {
+      --tg-vh: 1vh;
+    }
+
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overscroll-behavior: none;
+    }
+
+    html.tg-webview body {
+      overflow: hidden;
+    }
+
+    #tg-scroll-root {
+      height: calc(var(--tg-vh) * 100);
+      width: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: none;
+    }
+
+    #flutter_mount {
+      min-height: 100%;
+      width: 100%;
+    }
+  </style>
 </head>
 <body>
   <script>
@@ -30,7 +61,71 @@
       var userAgent = navigator.userAgent || '';
       return userAgent.toLowerCase().indexOf('telegram') !== -1;
     }
+
+    (function setupTelegramWebApp() {
+      if (!window.Telegram || !window.Telegram.WebApp) {
+        return;
+      }
+
+      var tg = window.Telegram.WebApp;
+      document.documentElement.classList.add('tg-webview');
+
+      function updateTelegramViewportHeight() {
+        var height = tg.viewportHeight || window.innerHeight || 0;
+        document.documentElement.style.setProperty('--tg-vh', (height * 0.01) + 'px');
+      }
+
+      try {
+        tg.ready();
+        tg.expand();
+      } catch (error) {
+        console.warn('Telegram WebApp init failed', error);
+      }
+
+      updateTelegramViewportHeight();
+      if (typeof tg.onEvent === 'function') {
+        tg.onEvent('viewportChanged', updateTelegramViewportHeight);
+      }
+
+      if (typeof tg.disableVerticalSwipes === 'function') {
+        try {
+          tg.disableVerticalSwipes();
+        } catch (error) {
+          console.warn('Telegram disableVerticalSwipes failed', error);
+        }
+      }
+
+      window.addEventListener('DOMContentLoaded', function () {
+        var scrollRoot = document.getElementById('tg-scroll-root');
+        if (!scrollRoot) {
+          return;
+        }
+
+        var startY = 0;
+        scrollRoot.addEventListener('touchstart', function (event) {
+          if (event.touches && event.touches.length) {
+            startY = event.touches[0].clientY;
+          }
+        }, { passive: true });
+
+        scrollRoot.addEventListener('touchmove', function (event) {
+          if (!event.touches || event.touches.length !== 1) {
+            return;
+          }
+          var currentY = event.touches[0].clientY;
+          var deltaY = currentY - startY;
+          var scrollTop = scrollRoot.scrollTop;
+          var maxScroll = scrollRoot.scrollHeight - scrollRoot.clientHeight;
+          if ((scrollTop <= 0 && deltaY > 0) || (scrollTop >= maxScroll && deltaY < 0)) {
+            event.preventDefault();
+          }
+        }, { passive: false });
+      });
+    })();
   </script>
+  <div id="tg-scroll-root">
+    <div id="flutter_mount"></div>
+  </div>
   <script src="flutter.js?v={{flutter_service_worker_version}}" defer></script>
   <script>
     window.addEventListener('load', function (ev) {
@@ -40,7 +135,9 @@
           ? null
           : { serviceWorkerVersion: serviceWorkerVersion },
         onEntrypointLoaded: function (engineInitializer) {
-          engineInitializer.initializeEngine().then(function (appRunner) {
+          engineInitializer.initializeEngine({
+            hostElement: document.getElementById('flutter_mount')
+          }).then(function (appRunner) {
             appRunner.runApp();
           });
         }
