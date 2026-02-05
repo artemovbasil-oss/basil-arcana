@@ -121,6 +121,12 @@
 
       try {
         tg.ready();
+        if (typeof tg.setBackgroundColor === 'function') {
+          tg.setBackgroundColor('#0f0f12');
+        }
+        if (typeof tg.setHeaderColor === 'function') {
+          tg.setHeaderColor('#0f0f12');
+        }
         var platform = tg.platform;
         var isMobilePlatform = platform === 'ios' || platform === 'android';
         if (isMobilePlatform && typeof tg.expand === 'function') {
@@ -140,14 +146,6 @@
           tg.disableVerticalSwipes();
         } catch (error) {
           console.warn('Telegram disableVerticalSwipes failed', error);
-        }
-      }
-
-      if (typeof tg.enableClosingConfirmation === 'function') {
-        try {
-          tg.enableClosingConfirmation();
-        } catch (error) {
-          console.warn('Telegram enableClosingConfirmation failed', error);
         }
       }
 

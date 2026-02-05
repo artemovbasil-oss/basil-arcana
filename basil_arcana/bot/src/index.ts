@@ -10,12 +10,7 @@ const HELP_TEXT =
 const NUDGE_TEXT = "Open Basil’s Arcana from the button below.";
 
 function buildKeyboard(): InlineKeyboard {
-  const keyboard = new InlineKeyboard().webApp(
-    "Open Basil’s Arcana",
-    config.webAppUrl
-  );
-  keyboard.text("Reload", "action:reload");
-  return keyboard;
+  return new InlineKeyboard().webApp("Open Basil’s Arcana", config.webAppUrl);
 }
 
 async function sendLauncherMessage(ctx: Context): Promise<void> {
@@ -31,11 +26,6 @@ async function main(): Promise<void> {
 
   bot.command("help", async (ctx) => {
     await ctx.reply(HELP_TEXT, { reply_markup: buildKeyboard() });
-  });
-
-  bot.callbackQuery("action:reload", async (ctx) => {
-    await ctx.answerCallbackQuery();
-    await sendLauncherMessage(ctx);
   });
 
   bot.on("message:text", async (ctx) => {

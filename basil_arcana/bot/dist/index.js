@@ -7,9 +7,7 @@ const WELCOME_TEXT = "Welcome to Basil’s Arcana. Tap below to open the mini ap
 const HELP_TEXT = "Use the button below to open the Basil’s Arcana mini app inside Telegram.";
 const NUDGE_TEXT = "Open Basil’s Arcana from the button below.";
 function buildKeyboard() {
-    const keyboard = new grammy_1.InlineKeyboard().webApp("Open Basil’s Arcana", config.webAppUrl);
-    keyboard.text("Reload", "action:reload");
-    return keyboard;
+    return new grammy_1.InlineKeyboard().webApp("Open Basil’s Arcana", config.webAppUrl);
 }
 async function sendLauncherMessage(ctx) {
     await ctx.reply(WELCOME_TEXT, { reply_markup: buildKeyboard() });
@@ -21,10 +19,6 @@ async function main() {
     });
     bot.command("help", async (ctx) => {
         await ctx.reply(HELP_TEXT, { reply_markup: buildKeyboard() });
-    });
-    bot.callbackQuery("action:reload", async (ctx) => {
-        await ctx.answerCallbackQuery();
-        await sendLauncherMessage(ctx);
     });
     bot.on("message:text", async (ctx) => {
         await ctx.reply(NUDGE_TEXT, { reply_markup: buildKeyboard() });
