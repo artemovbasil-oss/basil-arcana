@@ -295,7 +295,7 @@ class _CardMediaState extends State<CardMedia> {
     final controller = cached?.controller ??
         VideoPlayerController.asset(
           resolvedPath,
-          videoPlayerOptions: const VideoPlayerOptions(
+          videoPlayerOptions: VideoPlayerOptions(
             mixWithOthers: true,
             allowBackgroundPlayback: false,
           ),
