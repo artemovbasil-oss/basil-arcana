@@ -1,6 +1,7 @@
 import functools
 import json
 import os
+import re
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse
 
@@ -61,6 +62,48 @@ def log_config_presence() -> None:
 
 
 class WebAppHandler(SimpleHTTPRequestHandler):
+    def _handle_video_range(self, file_path: str) -> bool:
+        range_header = self.headers.get("Range")
+        if not range_header:
+            return False
+        try:
+            file_size = os.path.getsize(file_path)
+        except OSError:
+            return False
+        match = re.match(r"bytes=(\d*)-(\d*)", range_header)
+        if not match:
+            return False
+        start_str, end_str = match.groups()
+        if not start_str and not end_str:
+            return False
+        if start_str:
+            start = int(start_str)
+            end = int(end_str) if end_str else file_size - 1
+        else:
+            suffix = int(end_str)
+            start = max(file_size - suffix, 0)
+            end = file_size - 1
+        if start >= file_size or end < start:
+            self.send_response(416)
+            self.send_header("Content-Range", f"bytes */{file_size}")
+            self.end_headers()
+            return True
+        end = min(end, file_size - 1)
+        length = end - start + 1
+        self.send_response(206)
+        self.send_header("Content-Type", self.guess_type(file_path))
+        self.send_header("Accept-Ranges", "bytes")
+        self.send_header("Content-Range", f"bytes {start}-{end}/{file_size}")
+        self.send_header("Content-Length", str(length))
+        self.end_headers()
+        try:
+            with open(file_path, "rb") as handle:
+                handle.seek(start)
+                self.wfile.write(handle.read(length))
+        except BrokenPipeError:
+            return True
+        return True
+
     def do_GET(self):
         parsed = urlparse(self.path)
         if parsed.path in ("/manifest.json", "/flutter.js"):
@@ -84,6 +127,10 @@ class WebAppHandler(SimpleHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(body)
             return
+        if parsed.path.endswith(".mp4"):
+            file_path = self.translate_path(parsed.path)
+            if os.path.isfile(file_path) and self._handle_video_range(file_path):
+                return
         super().do_GET()
 
     def end_headers(self):
@@ -98,6 +145,8 @@ class WebAppHandler(SimpleHTTPRequestHandler):
             self.send_header("Expires", "0")
         else:
             self.send_header("Cache-Control", "public, max-age=31536000, immutable")
+        if path.endswith(".mp4"):
+            self.send_header("Accept-Ranges", "bytes")
         super().end_headers()
 
 

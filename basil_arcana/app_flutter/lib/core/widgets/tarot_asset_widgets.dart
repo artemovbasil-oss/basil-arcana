@@ -140,6 +140,7 @@ class CardMedia extends StatefulWidget {
     this.fit = BoxFit.cover,
     this.showGlow = true,
     this.enableVideo = false,
+    this.autoPlayOnce = false,
     this.playLabel,
   });
 
@@ -151,6 +152,7 @@ class CardMedia extends StatefulWidget {
   final BoxFit fit;
   final bool showGlow;
   final bool enableVideo;
+  final bool autoPlayOnce;
   final String? playLabel;
 
   @override
@@ -160,7 +162,7 @@ class CardMedia extends StatefulWidget {
 class _CardMediaState extends State<CardMedia> {
   VideoPlayerController? _controller;
   bool _showVideo = false;
-  bool _autoPlayFailed = false;
+  bool _videoFailed = false;
   String? _resolvedVideoPath;
 
   @override
@@ -193,22 +195,17 @@ class _CardMediaState extends State<CardMedia> {
   }
 
   void _setupController() {
-    _resolvedVideoPath =
-        widget.videoAssetPath ?? resolveCardVideoAsset(widget.cardId);
+    _resolvedVideoPath = normalizeVideoAssetPath(
+      widget.videoAssetPath ?? resolveCardVideoAsset(widget.cardId),
+    );
     if (!widget.enableVideo || _resolvedVideoPath == null) {
       return;
     }
-    final controller = VideoPlayerController.asset(_resolvedVideoPath!);
-    _controller = controller;
-    controller
-      ..setLooping(false)
-      ..initialize().then((_) {
-        if (!mounted) {
-          return;
-        }
+    if (widget.autoPlayOnce) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
         _playOnce(autoPlay: true);
       });
-    controller.addListener(_handlePlayback);
+    }
   }
 
   void _handlePlayback() {
@@ -226,7 +223,39 @@ class _CardMediaState extends State<CardMedia> {
     }
   }
 
+  Future<void> _ensureInitialized() async {
+    if (_controller != null || _videoFailed) {
+      return;
+    }
+    final resolvedPath = _resolvedVideoPath;
+    if (resolvedPath == null) {
+      return;
+    }
+    final controller = VideoPlayerController.asset(resolvedPath);
+    _controller = controller;
+    controller
+      ..setLooping(false)
+      ..setVolume(0.0);
+    try {
+      await controller.initialize();
+      if (!mounted) {
+        return;
+      }
+      controller.addListener(_handlePlayback);
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _videoFailed = true;
+        });
+      } else {
+        _videoFailed = true;
+      }
+      _disposeController();
+    }
+  }
+
   Future<void> _playOnce({required bool autoPlay}) async {
+    await _ensureInitialized();
     final controller = _controller;
     if (controller == null || !controller.value.isInitialized) {
       return;
@@ -239,7 +268,6 @@ class _CardMediaState extends State<CardMedia> {
       }
       setState(() {
         _showVideo = true;
-        _autoPlayFailed = false;
       });
     } catch (_) {
       if (!mounted) {
@@ -248,7 +276,6 @@ class _CardMediaState extends State<CardMedia> {
       if (autoPlay) {
         setState(() {
           _showVideo = false;
-          _autoPlayFailed = true;
         });
       }
     }
@@ -257,7 +284,8 @@ class _CardMediaState extends State<CardMedia> {
   @override
   Widget build(BuildContext context) {
     final radius = widget.borderRadius ?? BorderRadius.circular(18);
-    final hasVideo = widget.enableVideo && _resolvedVideoPath != null;
+    final hasVideo =
+        widget.enableVideo && _resolvedVideoPath != null && !_videoFailed;
     return GestureDetector(
       onTap: hasVideo ? () => _playOnce(autoPlay: false) : null,
       child: Stack(
@@ -289,7 +317,7 @@ class _CardMediaState extends State<CardMedia> {
                 ),
               ),
             ),
-          if (hasVideo && _autoPlayFailed && !_showVideo)
+          if (hasVideo && !_showVideo)
             Positioned.fill(
               child: ClipRRect(
                 borderRadius: radius,

@@ -68,6 +68,7 @@ class CardDetailScreen extends ConsumerWidget {
                 width: 240,
                 height: 360,
                 enableVideo: true,
+                autoPlayOnce: true,
                 playLabel: l10n.videoTapToPlay,
               ),
             ),

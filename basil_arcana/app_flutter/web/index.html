@@ -6,6 +6,10 @@
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="Basil's Arcana">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  >
 
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
@@ -46,6 +50,8 @@
       overscroll-behavior: none;
       box-sizing: border-box;
       padding-top: env(safe-area-inset-top);
+      padding-left: env(safe-area-inset-left);
+      padding-right: env(safe-area-inset-right);
       padding-bottom: env(safe-area-inset-bottom);
     }
 
@@ -59,6 +65,13 @@
   <script>
     // This is used by Flutter build to replace with a concrete version.
     var serviceWorkerVersion = null;
+    var buildVersion = '{{flutter_service_worker_version}}';
+    if (!buildVersion ||
+        buildVersion === 'null' ||
+        buildVersion === '{{flutter_service_worker_version}}') {
+      buildVersion = 'dev';
+    }
+    window.__buildVersion = buildVersion;
 
     function isTelegramWebView() {
       if (window.Telegram && window.Telegram.WebApp) {
@@ -182,6 +195,55 @@
         }, { passive: false });
       });
     })();
+
+    (function setupDebugOverlay() {
+      var params = new URLSearchParams(window.location.search || '');
+      if (params.get('debug') !== '1') {
+        return;
+      }
+      var overlay = document.createElement('div');
+      overlay.id = 'web-debug-overlay';
+      overlay.style.position = 'fixed';
+      overlay.style.zIndex = '9999';
+      overlay.style.left = '12px';
+      overlay.style.right = '12px';
+      overlay.style.bottom = '12px';
+      overlay.style.maxHeight = '40vh';
+      overlay.style.overflow = 'auto';
+      overlay.style.background = 'rgba(20, 16, 24, 0.92)';
+      overlay.style.border = '1px solid rgba(255, 255, 255, 0.2)';
+      overlay.style.borderRadius = '10px';
+      overlay.style.padding = '10px';
+      overlay.style.fontFamily = 'system-ui, sans-serif';
+      overlay.style.fontSize = '12px';
+      overlay.style.color = '#fff';
+
+      var title = document.createElement('div');
+      title.textContent = 'Debug errors';
+      title.style.fontWeight = '600';
+      title.style.marginBottom = '6px';
+      overlay.appendChild(title);
+
+      var list = document.createElement('div');
+      overlay.appendChild(list);
+
+      function appendMessage(message) {
+        var item = document.createElement('div');
+        item.textContent = message;
+        item.style.marginTop = '6px';
+        item.style.whiteSpace = 'pre-wrap';
+        list.appendChild(item);
+      }
+
+      window.addEventListener('error', function (event) {
+        appendMessage(event.message || 'Unknown error');
+      });
+      window.addEventListener('unhandledrejection', function (event) {
+        appendMessage(event.reason ? String(event.reason) : 'Unhandled rejection');
+      });
+
+      document.body.appendChild(overlay);
+    })();
   </script>
   <div id="tg-scroll-root">
     <div id="flutter_mount"></div>
@@ -191,6 +253,7 @@
     window.addEventListener('load', function (ev) {
       var disableServiceWorker = true || isTelegramWebView();
       _flutter.loader.loadEntrypoint({
+        entrypointUrl: 'main.dart.js?v=' + window.__buildVersion,
         serviceWorker: disableServiceWorker
           ? null
           : { serviceWorkerVersion: serviceWorkerVersion },

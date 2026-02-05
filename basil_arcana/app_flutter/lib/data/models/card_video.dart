@@ -77,6 +77,20 @@ String? resolveCardVideoAsset(String cardId) {
   return _cardVideoAssets[cardId];
 }
 
+String? normalizeVideoAssetPath(String? path) {
+  if (path == null || path.trim().isEmpty) {
+    return null;
+  }
+  final normalized = path.trim();
+  if (!normalized.contains('/')) {
+    return 'assets/cards/video/${normalizeVideoFileName(normalized)}';
+  }
+  final parts = normalized.split('/');
+  final fileName = parts.removeLast();
+  parts.add(normalizeVideoFileName(fileName));
+  return parts.join('/');
+}
+
 Map<String, String> _buildCardVideoAssets() {
   final assets = <String, String>{};
   for (final entry in _majorVideoKeys.entries) {
