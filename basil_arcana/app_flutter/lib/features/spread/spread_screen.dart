@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
+import '../../core/telegram/telegram_web_app.dart';
 import '../../data/models/spread_model.dart';
 import '../../state/providers.dart';
 import '../shuffle/shuffle_screen.dart';
@@ -15,47 +16,53 @@ class SpreadScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final spreadsAsync = ref.watch(spreadsProvider);
     final l10n = AppLocalizations.of(context)!;
+    final useTelegramAppBar =
+        TelegramWebApp.isTelegramWebView && TelegramWebApp.isTelegramMobile;
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.spreadTitle)),
-      body: spreadsAsync.when(
-        data: (spreads) {
-          final oneCardSpread = _findSpread(spreads, 1);
-          final threeCardSpread = _findSpread(spreads, 3, fallbackIndex: 1);
+      appBar: useTelegramAppBar ? null : AppBar(title: Text(l10n.spreadTitle)),
+      body: SafeArea(
+        top: useTelegramAppBar,
+        child: spreadsAsync.when(
+          data: (spreads) {
+            final oneCardSpread = _findSpread(spreads, 1);
+            final threeCardSpread = _findSpread(spreads, 3, fallbackIndex: 1);
 
-          return Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              children: [
-                if (oneCardSpread != null)
-                  Expanded(
-                    child: _SpreadOptionCard(
-                      spread: oneCardSpread,
-                      title: l10n.spreadOneCardTitle,
-                      subtitle: l10n.spreadOneCardSubtitle,
-                      animation:
-                          const SpreadIconDeck(mode: SpreadIconMode.oneCard),
+            return Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                children: [
+                  if (oneCardSpread != null)
+                    Expanded(
+                      child: _SpreadOptionCard(
+                        spread: oneCardSpread,
+                        title: l10n.spreadOneCardTitle,
+                        subtitle: l10n.spreadOneCardSubtitle,
+                        animation:
+                            const SpreadIconDeck(mode: SpreadIconMode.oneCard),
+                      ),
                     ),
-                  ),
-                if (oneCardSpread != null && threeCardSpread != null)
-                  const SizedBox(height: 18),
-                if (threeCardSpread != null)
-                  Expanded(
-                    child: _SpreadOptionCard(
-                      spread: threeCardSpread,
-                      title: l10n.spreadThreeCardTitle,
-                      subtitle: l10n.spreadThreeCardSubtitle,
-                      animation:
-                          const SpreadIconDeck(mode: SpreadIconMode.threeCards),
+                  if (oneCardSpread != null && threeCardSpread != null)
+                    const SizedBox(height: 18),
+                  if (threeCardSpread != null)
+                    Expanded(
+                      child: _SpreadOptionCard(
+                        spread: threeCardSpread,
+                        title: l10n.spreadThreeCardTitle,
+                        subtitle: l10n.spreadThreeCardSubtitle,
+                        animation: const SpreadIconDeck(
+                          mode: SpreadIconMode.threeCards,
+                        ),
+                      ),
                     ),
-                  ),
-              ],
-            ),
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) =>
-            Center(child: Text(l10n.spreadLoadError(error.toString()))),
+                ],
+              ),
+            );
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, _) =>
+              Center(child: Text(l10n.spreadLoadError(error.toString()))),
+        ),
       ),
     );
   }
