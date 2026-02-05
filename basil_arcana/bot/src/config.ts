@@ -1,14 +1,6 @@
-import { resolveFlutterAssetsRoot } from "./assets";
-
-type Locale = "en" | "ru" | "kk";
-
 export interface BotConfig {
   telegramToken: string;
-  apiBaseUrl: string;
-  arcanaApiKey: string;
-  defaultLocale: Locale;
-  assetsBasePath: string;
-  requestTimeoutMs: number;
+  webAppUrl: string;
 }
 
 function requireEnv(name: string): string {
@@ -19,30 +11,12 @@ function requireEnv(name: string): string {
   return value;
 }
 
-function parseLocale(value: string | undefined, fallback: Locale): Locale {
-  if (value === "en" || value === "ru" || value === "kk") {
-    return value;
-  }
-  return fallback;
-}
-
 export function loadConfig(): BotConfig {
   const telegramToken = requireEnv("TELEGRAM_BOT_TOKEN");
-  const apiBaseUrl = process.env.API_BASE_URL || "https://api.basilarcana.com";
-  const arcanaApiKey = requireEnv("ARCANA_API_KEY");
-  const defaultLocale = parseLocale(process.env.DEFAULT_LOCALE, "en");
-  const assetsBasePath =
-    process.env.ASSETS_BASE_PATH || resolveFlutterAssetsRoot();
-  const requestTimeoutMs = 35000;
+  const webAppUrl = requireEnv("TELEGRAM_WEBAPP_URL");
 
   return {
     telegramToken,
-    apiBaseUrl,
-    arcanaApiKey,
-    defaultLocale,
-    assetsBasePath,
-    requestTimeoutMs,
+    webAppUrl,
   };
 }
-
-export type { Locale };
