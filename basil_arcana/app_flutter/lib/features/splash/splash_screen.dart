@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/telegram/telegram_web_app.dart';
 import '../home/home_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -52,18 +53,23 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final useTelegramSafeArea =
+        TelegramWebApp.isTelegramWebView && TelegramWebApp.isTelegramMobile;
     return Scaffold(
       backgroundColor: colorScheme.background,
-      body: Center(
-        child: FadeTransition(
-          opacity: _opacity,
-          child: ScaleTransition(
-            scale: _scale,
-            child: SizedBox.expand(
-              child: Image.asset(
-                'assets/deck/cover.webp',
-                fit: BoxFit.cover,
-                filterQuality: FilterQuality.high,
+      body: SafeArea(
+        top: useTelegramSafeArea,
+        child: Center(
+          child: FadeTransition(
+            opacity: _opacity,
+            child: ScaleTransition(
+              scale: _scale,
+              child: SizedBox.expand(
+                child: Image.asset(
+                  'assets/deck/cover.webp',
+                  fit: BoxFit.cover,
+                  filterQuality: FilterQuality.high,
+                ),
               ),
             ),
           ),

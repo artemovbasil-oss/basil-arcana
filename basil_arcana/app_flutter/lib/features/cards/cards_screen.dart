@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
+import '../../core/telegram/telegram_web_app.dart';
 import '../../core/widgets/tarot_asset_widgets.dart';
 import '../../data/models/card_model.dart';
 import '../../state/providers.dart';
@@ -22,59 +23,62 @@ class _CardsScreenState extends ConsumerState<CardsScreen> {
     final cardsAsync = ref.watch(cardsProvider);
     final l10n = AppLocalizations.of(context)!;
     final statsRepository = ref.watch(cardStatsRepositoryProvider);
+    final useTelegramAppBar =
+        TelegramWebApp.isTelegramWebView && TelegramWebApp.isTelegramMobile;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.cardsTitle),
-      ),
-      body: cardsAsync.when(
-        data: (cards) {
-          if (cards.isEmpty) {
-            return _EmptyState(
-              title: l10n.cardsEmptyTitle,
-              subtitle: l10n.cardsEmptySubtitle,
-            );
-          }
-          _precacheFirstCards(cards);
-          return ValueListenableBuilder(
-            valueListenable: statsRepository.listenable(),
-            builder: (context, box, _) {
-              return GridView.builder(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 16,
-                  crossAxisSpacing: 16,
-                  childAspectRatio: 0.62,
-                ),
-                itemCount: cards.length,
-                itemBuilder: (context, index) {
-                  final card = cards[index];
-                  final count = statsRepository.getCount(card.id);
-                  return _CardTile(
-                    card: card,
-                    drawnCount: count,
-                    drawnLabel: l10n.cardsDrawnCount(count),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => CardDetailScreen(card: card),
-                        ),
-                      );
-                    },
-                  );
-                },
+      appBar: useTelegramAppBar ? null : AppBar(title: Text(l10n.cardsTitle)),
+      body: SafeArea(
+        top: useTelegramAppBar,
+        child: cardsAsync.when(
+          data: (cards) {
+            if (cards.isEmpty) {
+              return _EmptyState(
+                title: l10n.cardsEmptyTitle,
+                subtitle: l10n.cardsEmptySubtitle,
               );
-            },
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stackTrace) => Center(
-          child: Text(
-            l10n.cardsLoadError,
-            style: Theme.of(context).textTheme.bodyMedium,
-            textAlign: TextAlign.center,
+            }
+            _precacheFirstCards(cards);
+            return ValueListenableBuilder(
+              valueListenable: statsRepository.listenable(),
+              builder: (context, box, _) {
+                return GridView.builder(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 16,
+                    crossAxisSpacing: 16,
+                    childAspectRatio: 0.62,
+                  ),
+                  itemCount: cards.length,
+                  itemBuilder: (context, index) {
+                    final card = cards[index];
+                    final count = statsRepository.getCount(card.id);
+                    return _CardTile(
+                      card: card,
+                      drawnCount: count,
+                      drawnLabel: l10n.cardsDrawnCount(count),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => CardDetailScreen(card: card),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                );
+              },
+            );
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stackTrace) => Center(
+            child: Text(
+              l10n.cardsLoadError,
+              style: Theme.of(context).textTheme.bodyMedium,
+              textAlign: TextAlign.center,
+            ),
           ),
         ),
       ),

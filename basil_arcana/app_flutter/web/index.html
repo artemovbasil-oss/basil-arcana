@@ -35,6 +35,12 @@
 
     html.tg-webview body {
       overflow: hidden;
+      box-sizing: border-box;
+      padding-top: max(
+        env(safe-area-inset-top),
+        var(--tg-safe-area-inset-top, 0px),
+        var(--tg-content-safe-area-inset-top, 0px)
+      );
     }
 
     #tg-scroll-root {
@@ -66,11 +72,10 @@
     }
 
     (function setupTelegramWebApp() {
-      if (!window.Telegram || !window.Telegram.WebApp) {
+      var tg = window.Telegram ? window.Telegram.WebApp : null;
+      if (!tg) {
         return;
       }
-
-      var tg = window.Telegram.WebApp;
       document.documentElement.classList.add('tg-webview');
 
       function updateTelegramViewportHeight() {
@@ -81,11 +86,29 @@
         document.body.style.height = heightPx;
       }
 
+      var flutterBuildMode = '{{flutter_build_mode}}';
+      var isDebugBuild = Boolean(flutterBuildMode) &&
+        !flutterBuildMode.includes('{{') &&
+        flutterBuildMode !== 'release' &&
+        flutterBuildMode !== 'profile';
+      var didExpand = false;
+      var didRequestFullscreen = false;
+
       try {
         tg.ready();
-        tg.expand();
-        if (typeof tg.requestFullscreen === 'function') {
+        var platform = tg.platform;
+        var isMobilePlatform = platform === 'ios' || platform === 'android';
+        if (isMobilePlatform && typeof tg.expand === 'function') {
+          tg.expand();
+          didExpand = true;
+        }
+        if (isMobilePlatform && typeof tg.requestFullscreen === 'function') {
           tg.requestFullscreen();
+          didRequestFullscreen = true;
+        }
+        if (isDebugBuild) {
+          console.log('[Telegram WebApp] platform:', platform);
+          console.log('[Telegram WebApp] expand:', didExpand, 'fullscreen:', didRequestFullscreen);
         }
       } catch (error) {
         console.warn('Telegram WebApp init failed', error);
@@ -149,23 +172,53 @@
   <div id="tg-scroll-root">
     <div id="flutter_mount"></div>
   </div>
-  <script src="flutter.js?v={{flutter_service_worker_version}}" defer></script>
   <script>
-    window.addEventListener('load', function (ev) {
-      var disableServiceWorker = true || isTelegramWebView();
-      _flutter.loader.loadEntrypoint({
-        serviceWorker: disableServiceWorker
-          ? null
-          : { serviceWorkerVersion: serviceWorkerVersion },
-        onEntrypointLoaded: function (engineInitializer) {
-          engineInitializer.initializeEngine({
-            hostElement: document.getElementById('flutter_mount')
-          }).then(function (appRunner) {
-            appRunner.runApp();
-          });
-        }
-      });
+    var flutterBuildMode = '{{flutter_build_mode}}';
+    var isDebugBuild = Boolean(flutterBuildMode) &&
+      !flutterBuildMode.includes('{{') &&
+      flutterBuildMode !== 'release' &&
+      flutterBuildMode !== 'profile';
+
+    function showFlutterLoadError(message) {
+      if (!isDebugBuild) {
+        return;
+      }
+      var overlay = document.getElementById('flutter-error-overlay');
+      if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'flutter-error-overlay';
+        overlay.style.position = 'fixed';
+        overlay.style.top = '16px';
+        overlay.style.left = '16px';
+        overlay.style.right = '16px';
+        overlay.style.padding = '12px';
+        overlay.style.background = 'rgba(98, 0, 0, 0.92)';
+        overlay.style.color = '#fff';
+        overlay.style.fontFamily = 'sans-serif';
+        overlay.style.fontSize = '14px';
+        overlay.style.borderRadius = '10px';
+        overlay.style.zIndex = '9999';
+        document.body.appendChild(overlay);
+      }
+      overlay.textContent = message;
+    }
+
+    window.addEventListener('error', function (event) {
+      if (event && event.message) {
+        showFlutterLoadError('Flutter error: ' + event.message);
+      }
     });
+    window.addEventListener('unhandledrejection', function (event) {
+      if (event && event.reason) {
+        showFlutterLoadError('Flutter error: ' + event.reason);
+      }
+    });
+
+    window.flutterConfiguration = {
+      hostElement: document.getElementById('flutter_mount'),
+      serviceWorker: null
+    };
   </script>
+  <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

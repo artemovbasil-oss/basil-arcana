@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
+import '../../core/telegram/telegram_web_app.dart';
 import '../../core/widgets/tarot_asset_widgets.dart';
 import '../../state/reading_flow_controller.dart';
 import '../../state/providers.dart';
@@ -88,133 +89,139 @@ class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
     final hasDrawnCards = state.drawnCards.isNotEmpty;
     final keptCount = state.spread?.positions.length ?? 0;
     final showGlow = state.isLoading && hasDrawnCards;
+    final useTelegramAppBar =
+        TelegramWebApp.isTelegramWebView && TelegramWebApp.isTelegramMobile;
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.shuffleTitle)),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            Expanded(
-              child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SizedBox(
-                      width: 280,
-                      height: 300,
-                      child: hasDrawnCards
-                          ? _DrawnStack(
-                              keptCount: keptCount,
-                              fallAnimation: CurvedAnimation(
-                                parent: _fallController,
-                                curve: Curves.easeIn,
-                              ),
-                              showGlow: showGlow,
-                              glowAnimation: CurvedAnimation(
-                                parent: _glowController,
-                                curve: Curves.easeInOut,
-                              ),
-                            )
-                          : AnimatedBuilder(
-                              animation: _controller,
-                              builder: (context, child) {
-                                final t = _controller.value * 2 * pi;
-                                final phases = <double>[
-                                  0,
-                                  pi / 2,
-                                  pi,
-                                  3 * pi / 2,
-                                  pi / 3,
-                                ];
-                                final baseOffsets = <Offset>[
-                                  const Offset(0, 24),
-                                  const Offset(-20, 12),
-                                  const Offset(18, 6),
-                                  const Offset(-12, -4),
-                                  const Offset(12, -10),
-                                ];
-                                final baseAngles = <double>[
-                                  -0.12,
-                                  -0.06,
-                                  0.05,
-                                  0.11,
-                                  -0.02,
-                                ];
-                                return Stack(
-                                  alignment: Alignment.center,
-                                  children:
-                                      List.generate(phases.length, (index) {
-                                    final wave = sin(t + phases[index]);
-                                    final sway = cos(t + phases[index]);
-                                    final offset = baseOffsets[index] +
-                                        Offset(wave * 10, sway * 6);
-                                    final angle = baseAngles[index] + wave * 0.08;
-                                    return Transform.translate(
-                                      offset: offset,
-                                      child: Transform.rotate(
-                                        angle: angle,
-                                        child: const DeckCoverBack(),
-                                      ),
-                                    );
-                                  }),
-                                );
-                              },
-                            ),
-                    ),
-                    const SizedBox(height: 24),
-                    Text(
-                      l10n.shuffleSubtitle,
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleMedium
-                          ?.copyWith(color: colorScheme.onSurface),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            if (state.isLoading) const LinearProgressIndicator(),
-            const SizedBox(height: 16),
-            AnimatedSlide(
-              duration: const Duration(milliseconds: 360),
-              curve: Curves.easeOutCubic,
-              offset: _showCta ? Offset.zero : const Offset(0, 0.2),
-              child: AnimatedOpacity(
-                duration: const Duration(milliseconds: 360),
-                opacity: _showCta ? 1 : 0,
-                child: SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: !_showCta || state.isLoading
-                        ? null
-                        : () async {
-                            final cards = await cardsAsync.valueOrNull;
-                            if (cards == null) {
-                              return;
-                            }
-                            await ref
-                                .read(readingFlowControllerProvider.notifier)
-                                .drawAndGenerate(cards);
-                            if (mounted) {
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const ResultScreen(),
+      appBar: useTelegramAppBar ? null : AppBar(title: Text(l10n.shuffleTitle)),
+      body: SafeArea(
+        top: useTelegramAppBar,
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            children: [
+              Expanded(
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        width: 280,
+                        height: 300,
+                        child: hasDrawnCards
+                            ? _DrawnStack(
+                                keptCount: keptCount,
+                                fallAnimation: CurvedAnimation(
+                                  parent: _fallController,
+                                  curve: Curves.easeIn,
                                 ),
-                              );
-                            }
-                          },
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: const StadiumBorder(),
-                    ),
-                    child: Text(l10n.shuffleDrawButton),
+                                showGlow: showGlow,
+                                glowAnimation: CurvedAnimation(
+                                  parent: _glowController,
+                                  curve: Curves.easeInOut,
+                                ),
+                              )
+                            : AnimatedBuilder(
+                                animation: _controller,
+                                builder: (context, child) {
+                                  final t = _controller.value * 2 * pi;
+                                  final phases = <double>[
+                                    0,
+                                    pi / 2,
+                                    pi,
+                                    3 * pi / 2,
+                                    pi / 3,
+                                  ];
+                                  final baseOffsets = <Offset>[
+                                    const Offset(0, 24),
+                                    const Offset(-20, 12),
+                                    const Offset(18, 6),
+                                    const Offset(-12, -4),
+                                    const Offset(12, -10),
+                                  ];
+                                  final baseAngles = <double>[
+                                    -0.12,
+                                    -0.06,
+                                    0.05,
+                                    0.11,
+                                    -0.02,
+                                  ];
+                                  return Stack(
+                                    alignment: Alignment.center,
+                                    children:
+                                        List.generate(phases.length, (index) {
+                                      final wave = sin(t + phases[index]);
+                                      final sway = cos(t + phases[index]);
+                                      final offset = baseOffsets[index] +
+                                          Offset(wave * 10, sway * 6);
+                                      final angle =
+                                          baseAngles[index] + wave * 0.08;
+                                      return Transform.translate(
+                                        offset: offset,
+                                        child: Transform.rotate(
+                                          angle: angle,
+                                          child: const DeckCoverBack(),
+                                        ),
+                                      );
+                                    }),
+                                  );
+                                },
+                              ),
+                      ),
+                      const SizedBox(height: 24),
+                      Text(
+                        l10n.shuffleSubtitle,
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(color: colorScheme.onSurface),
+                      ),
+                    ],
                   ),
                 ),
               ),
-            ),
-          ],
+              if (state.isLoading) const LinearProgressIndicator(),
+              const SizedBox(height: 16),
+              AnimatedSlide(
+                duration: const Duration(milliseconds: 360),
+                curve: Curves.easeOutCubic,
+                offset: _showCta ? Offset.zero : const Offset(0, 0.2),
+                child: AnimatedOpacity(
+                  duration: const Duration(milliseconds: 360),
+                  opacity: _showCta ? 1 : 0,
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: !_showCta || state.isLoading
+                          ? null
+                          : () async {
+                              final cards = await cardsAsync.valueOrNull;
+                              if (cards == null) {
+                                return;
+                              }
+                              await ref
+                                  .read(readingFlowControllerProvider.notifier)
+                                  .drawAndGenerate(cards);
+                              if (mounted) {
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const ResultScreen(),
+                                  ),
+                                );
+                              }
+                            },
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: const StadiumBorder(),
+                      ),
+                      child: Text(l10n.shuffleDrawButton),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

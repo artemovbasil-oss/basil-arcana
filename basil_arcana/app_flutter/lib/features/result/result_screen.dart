@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../core/telegram/telegram_web_app.dart';
 import '../../core/widgets/card_face_widget.dart';
 import '../../core/widgets/tarot_asset_widgets.dart';
 import '../../data/models/deck_model.dart';
@@ -60,6 +61,8 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
     final aiResult = state.aiResult;
     final spread = state.spread;
     final l10n = AppLocalizations.of(context)!;
+    final useTelegramAppBar =
+        TelegramWebApp.isTelegramWebView && TelegramWebApp.isTelegramMobile;
 
     if (spread == null) {
       return const Scaffold(
@@ -94,7 +97,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
           : _statusMessage(state, l10n);
       final canRetry = !state.isLoading && state.aiErrorType != null;
       return Scaffold(
-        appBar: AppBar(title: Text(l10n.resultTitle)),
+        appBar: useTelegramAppBar ? null : AppBar(title: Text(l10n.resultTitle)),
         backgroundColor: Theme.of(context).colorScheme.surface,
         body: SafeArea(
           child: Center(
@@ -138,7 +141,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
         ? l10n.resultStatusAiReading
         : _statusMessage(state, l10n);
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.resultTitle)),
+      appBar: useTelegramAppBar ? null : AppBar(title: Text(l10n.resultTitle)),
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
         child: Column(
