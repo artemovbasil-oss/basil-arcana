@@ -1,44 +1,44 @@
 import 'deck_model.dart';
 
 const List<String> _videoFileNames = [
-  'Pentacles_queen.MP4',
-  'chariot.MP4',
-  'cups_king.MP4',
-  'cups_knight.MP4',
-  'cups_page.MP4',
-  'cups_queen.MP4',
-  'death.MP4',
-  'devil.MP4',
-  'emperor.MP4',
-  'empress.MP4',
-  'fool.MP4',
-  'hanged man.MP4',
-  'hermit.MP4',
-  'hierophant.MP4',
-  'high_priestess.MP4',
-  'judgement.MP4',
-  'justice.MP4',
-  'lovers.MP4',
-  'magician.MP4',
-  'moon.MP4',
-  'pentacles_king.MP4',
-  'pentacles_knight.MP4',
-  'pentacles_page.MP4',
-  'star.MP4',
-  'strength.MP4',
-  'sun.MP4',
-  'swords_king.MP4',
-  'swords_knight.MP4',
-  'swords_page.MP4',
-  'swords_queen.MP4',
-  'temperance.MP4',
-  'tower.MP4',
-  'wands_king.MP4',
-  'wands_knight.MP4',
-  'wands_page.MP4',
-  'wands_queen.MP4',
-  'wheel_of fortune.MP4',
-  'world.MP4',
+  'pentacles_queen.mp4',
+  'chariot.mp4',
+  'cups_king.mp4',
+  'cups_knight.mp4',
+  'cups_page.mp4',
+  'cups_queen.mp4',
+  'death.mp4',
+  'devil.mp4',
+  'emperor.mp4',
+  'empress.mp4',
+  'fool.mp4',
+  'hanged_man.mp4',
+  'hermit.mp4',
+  'hierophant.mp4',
+  'high_priestess.mp4',
+  'judgement.mp4',
+  'justice.mp4',
+  'lovers.mp4',
+  'magician.mp4',
+  'moon.mp4',
+  'pentacles_king.mp4',
+  'pentacles_knight.mp4',
+  'pentacles_page.mp4',
+  'star.mp4',
+  'strength.mp4',
+  'sun.mp4',
+  'swords_king.mp4',
+  'swords_knight.mp4',
+  'swords_page.mp4',
+  'swords_queen.mp4',
+  'temperance.mp4',
+  'tower.mp4',
+  'wands_king.mp4',
+  'wands_knight.mp4',
+  'wands_page.mp4',
+  'wands_queen.mp4',
+  'wheel_of_fortune.mp4',
+  'world.mp4',
 ];
 
 const Map<String, String> _majorVideoKeys = {
@@ -68,7 +68,7 @@ const Map<String, String> _majorVideoKeys = {
 
 final Map<String, String> _videoAssetsByKey = {
   for (final file in _videoFileNames)
-    _normalizeKey(_stripExtension(file)): 'assets/cards/video/$file',
+    _normalizeKey(_stripExtension(file)): 'assets/cards/video/${normalizeVideoFileName(file)}',
 };
 
 final Map<String, String> _cardVideoAssets = _buildCardVideoAssets();
@@ -127,5 +127,18 @@ String _normalizeKey(String value) {
   normalized = normalized.replaceAll(RegExp(r'[^a-z0-9_]+'), '');
   normalized = normalized.replaceAll(RegExp(r'_+'), '_');
   normalized = normalized.replaceAll(RegExp(r'^_+|_+$'), '');
+  return normalized;
+}
+
+String normalizeVideoFileName(String name) {
+  var normalized = name.toLowerCase().trim();
+  normalized = normalized.replaceAll(RegExp(r'\s+'), '_');
+  normalized = normalized.replaceAll(RegExp(r'[^a-z0-9_\\.]+'), '');
+  normalized = normalized.replaceAll(RegExp(r'_+'), '_');
+  normalized = normalized.replaceAll(RegExp(r'^_+|_+$'), '');
+  if (!normalized.endsWith('.mp4')) {
+    normalized = _stripExtension(normalized);
+    normalized = '$normalized.mp4';
+  }
   return normalized;
 }

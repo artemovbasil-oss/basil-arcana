@@ -7,20 +7,21 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
 
+import '../../core/config/app_config.dart';
 import '../models/ai_result_model.dart';
 import '../models/card_model.dart';
 import '../models/drawn_card_model.dart';
 import '../models/spread_model.dart';
 
-const apiBaseUrl = String.fromEnvironment(
-  'API_BASE_URL',
-  defaultValue: 'https://api.basilarcana.com',
-);
+String get apiBaseUrl => AppConfig.apiBaseUrl;
+
+String get apiKey => AppConfig.apiKey;
 
 const Duration _requestTimeout = Duration(seconds: 60);
 const Duration _availabilityTimeout = Duration(seconds: 8);
 
 enum AiErrorType {
+  misconfigured,
   unauthorized,
   rateLimited,
   noInternet,
@@ -65,7 +66,10 @@ class AiRepository {
     Duration timeout = _availabilityTimeout,
   }) async {
     if (!isApiConfigured) {
-      return false;
+      throw const AiRepositoryException(
+        AiErrorType.misconfigured,
+        message: 'Missing API_BASE_URL',
+      );
     }
     final uri = Uri.parse(apiBaseUrl).replace(
       path: '/api/reading/availability',
@@ -77,7 +81,10 @@ class AiRepository {
       response = await httpClient
           .get(
             uri,
-            headers: {'x-request-id': requestId},
+            headers: {
+              'x-request-id': requestId,
+              if (apiKey.trim().isNotEmpty) 'x-api-key': apiKey,
+            },
           )
           .timeout(timeout);
     } on TimeoutException catch (error) {
@@ -155,7 +162,10 @@ class AiRepository {
           'status=n/a duration_ms=0 error=${AiErrorType.serverError.name}',
         );
       }
-      throw const AiRepositoryException(AiErrorType.serverError);
+      throw const AiRepositoryException(
+        AiErrorType.misconfigured,
+        message: 'Missing API_BASE_URL',
+      );
     }
 
     final uri = Uri.parse(apiBaseUrl).replace(
@@ -207,6 +217,7 @@ class AiRepository {
     final headers = {
       'Content-Type': 'application/json',
       'x-request-id': requestId,
+      if (apiKey.trim().isNotEmpty) 'x-api-key': apiKey,
     };
 
     final httpClient = client ?? http.Client();
@@ -357,7 +368,10 @@ class AiRepository {
           'status=n/a duration_ms=0 error=${AiErrorType.serverError.name}',
         );
       }
-      throw const AiRepositoryException(AiErrorType.serverError);
+      throw const AiRepositoryException(
+        AiErrorType.misconfigured,
+        message: 'Missing API_BASE_URL',
+      );
     }
 
     final uri = Uri.parse(apiBaseUrl).replace(
@@ -382,6 +396,7 @@ class AiRepository {
     final headers = {
       'Content-Type': 'application/json',
       'x-request-id': requestId,
+      if (apiKey.trim().isNotEmpty) 'x-api-key': apiKey,
     };
 
     final httpClient = client ?? http.Client();

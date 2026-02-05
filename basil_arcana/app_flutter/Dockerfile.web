@@ -8,8 +8,10 @@ RUN flutter pub get
 
 COPY . .
 
-ARG API_BASE_URL=https://api.basilarcana.com
+ARG API_BASE_URL
+ARG API_KEY
 ENV API_BASE_URL=${API_BASE_URL}
+ENV API_KEY=${API_KEY}
 
 RUN if [ ! -d "web" ]; then \
       flutter config --enable-web && \
@@ -17,7 +19,9 @@ RUN if [ ! -d "web" ]; then \
     fi
 
 RUN flutter gen-l10n
-RUN flutter build web --release --dart-define=API_BASE_URL=${API_BASE_URL}
+RUN flutter build web --release --pwa-strategy=none \\
+      --dart-define=API_BASE_URL=${API_BASE_URL} \\
+      --dart-define=API_KEY=${API_KEY}
 
 FROM python:3.12-slim AS runtime
 
@@ -27,7 +31,8 @@ RUN useradd --create-home appuser
 USER appuser
 
 COPY --from=build /app/build/web ./
+COPY --from=build /app/web_server.py ./web_server.py
 
 EXPOSE 8080
 
-CMD ["python", "-m", "http.server", "8080", "--directory", "/app"]
+CMD ["python", "/app/web_server.py"]
