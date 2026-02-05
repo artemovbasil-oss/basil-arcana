@@ -5,12 +5,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app.dart';
 import 'core/config/app_config.dart';
 import 'core/storage/hive_storage.dart';
+import 'data/repositories/cards_repository.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
     await AppConfig.init();
     await HiveStorage.init();
+    if (kDebugMode || kProfileMode) {
+      await debugValidateLocalizedCardData(assertOnFailure: kDebugMode);
+    }
 
     runApp(const ProviderScope(child: BasilArcanaApp()));
   } catch (error, stackTrace) {

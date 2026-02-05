@@ -5,6 +5,7 @@ import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 import '../../core/telegram/telegram_web_app.dart';
 import '../../core/widgets/tarot_asset_widgets.dart';
 import '../../data/models/card_model.dart';
+import '../../data/models/deck_model.dart';
 import '../../state/providers.dart';
 
 class CardDetailScreen extends ConsumerWidget {
@@ -92,15 +93,15 @@ class CardDetailScreen extends ConsumerWidget {
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 16),
-            if (resolvedCard.keywords.isNotEmpty) ...[
-              Text(
-                l10n.cardKeywordsTitle,
-                style: Theme.of(context)
-                    .textTheme
-                    .titleMedium
-                    ?.copyWith(color: colorScheme.primary),
-              ),
-              const SizedBox(height: 8),
+            Text(
+              l10n.cardKeywordsTitle,
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium
+                  ?.copyWith(color: colorScheme.primary),
+            ),
+            const SizedBox(height: 8),
+            if (resolvedCard.keywords.isNotEmpty)
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
@@ -121,9 +122,13 @@ class CardDetailScreen extends ConsumerWidget {
                       ),
                     )
                     .toList(),
+              )
+            else
+              Text(
+                l10n.cardDetailsFallback,
+                style: Theme.of(context).textTheme.bodyMedium,
               ),
-              const SizedBox(height: 20),
-            ],
+            const SizedBox(height: 20),
             Text(
               l10n.cardGeneralTitle,
               style: Theme.of(context)
@@ -136,46 +141,46 @@ class CardDetailScreen extends ConsumerWidget {
               resolvedCard.meaning.general,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
-            if (resolvedCard.detailedDescription?.isNotEmpty ?? false) ...[
-              const SizedBox(height: 20),
-              Text(
-                l10n.cardDetailedTitle,
-                style: Theme.of(context)
-                    .textTheme
-                    .titleMedium
-                    ?.copyWith(color: colorScheme.primary),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                resolvedCard.detailedDescription!,
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            ],
-            if (resolvedCard.funFact?.isNotEmpty ?? false) ...[
-              const SizedBox(height: 20),
-              Text(
-                l10n.cardFunFactTitle,
-                style: Theme.of(context)
-                    .textTheme
-                    .titleMedium
-                    ?.copyWith(color: colorScheme.primary),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                resolvedCard.funFact!,
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            ],
-            if (resolvedCard.stats != null) ...[
-              const SizedBox(height: 20),
-              Text(
-                l10n.cardStatsTitle,
-                style: Theme.of(context)
-                    .textTheme
-                    .titleMedium
-                    ?.copyWith(color: colorScheme.primary),
-              ),
-              const SizedBox(height: 12),
+            const SizedBox(height: 20),
+            Text(
+              l10n.cardDetailedTitle,
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium
+                  ?.copyWith(color: colorScheme.primary),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              resolvedCard.detailedDescription?.trim().isNotEmpty ?? false
+                  ? resolvedCard.detailedDescription!
+                  : l10n.cardDetailsFallback,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 20),
+            Text(
+              l10n.cardFunFactTitle,
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium
+                  ?.copyWith(color: colorScheme.primary),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              resolvedCard.funFact?.trim().isNotEmpty ?? false
+                  ? resolvedCard.funFact!
+                  : l10n.cardDetailsFallback,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 20),
+            Text(
+              l10n.cardStatsTitle,
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium
+                  ?.copyWith(color: colorScheme.primary),
+            ),
+            const SizedBox(height: 12),
+            if (resolvedCard.stats != null)
               GridView.count(
                 crossAxisCount: 2,
                 shrinkWrap: true,
@@ -205,8 +210,12 @@ class CardDetailScreen extends ConsumerWidget {
                     icon: Icons.visibility,
                   ),
                 ],
+              )
+            else
+              Text(
+                l10n.cardDetailsFallback,
+                style: Theme.of(context).textTheme.bodyMedium,
               ),
-            ],
           ],
         ),
       ),
@@ -225,8 +234,9 @@ CardModel? _resolveCard(
   if (cards == null || cardId == null) {
     return null;
   }
+  final normalizedId = canonicalCardId(cardId);
   for (final card in cards) {
-    if (card.id == cardId) {
+    if (canonicalCardId(card.id) == normalizedId) {
       return card;
     }
   }
