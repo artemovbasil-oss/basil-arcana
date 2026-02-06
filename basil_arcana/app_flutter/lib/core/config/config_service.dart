@@ -11,6 +11,8 @@ class ConfigService {
 
   static final ConfigService instance = ConfigService._();
 
+  static const String _defaultAssetsBaseUrl = 'https://cdn.basilarcana.com';
+
   static const String _apiBaseUrlEnv = String.fromEnvironment(
     'API_BASE_URL',
     defaultValue: '',
@@ -21,8 +23,14 @@ class ConfigService {
     defaultValue: '',
   );
 
+  static const String _assetsBaseUrlEnv = String.fromEnvironment(
+    'ASSETS_BASE_URL',
+    defaultValue: _defaultAssetsBaseUrl,
+  );
+
   String _apiBaseUrl = _apiBaseUrlEnv;
   String _apiKey = _apiKeyEnv;
+  String _assetsBaseUrl = _normalizeBaseUrl(_assetsBaseUrlEnv);
   String? _build;
   String? _lastError;
 
@@ -32,6 +40,7 @@ class ConfigService {
   bool get isConfigured => _apiBaseUrl.trim().isNotEmpty;
 
   String get apiKey => kIsWeb ? _apiKey : _apiKeyEnv;
+  String get assetsBaseUrl => _assetsBaseUrl;
 
   Future<void> load() async {
     if (!kIsWeb) {
@@ -60,11 +69,16 @@ class ConfigService {
       final runtimeApiBaseUrl = payload['apiBaseUrl'];
       final runtimeBuild = payload['build'];
       final runtimeApiKey = payload['apiKey'];
+      final runtimeAssetsBaseUrl = payload['assetsBaseUrl'];
       if (runtimeApiBaseUrl is String && runtimeApiBaseUrl.trim().isNotEmpty) {
         _apiBaseUrl = runtimeApiBaseUrl.trim();
       }
       if (runtimeApiKey is String) {
         _apiKey = runtimeApiKey.trim();
+      }
+      if (runtimeAssetsBaseUrl is String &&
+          runtimeAssetsBaseUrl.trim().isNotEmpty) {
+        _assetsBaseUrl = _normalizeBaseUrl(runtimeAssetsBaseUrl);
       }
       if (runtimeBuild is String && runtimeBuild.trim().isNotEmpty) {
         _build = runtimeBuild.trim();
@@ -74,4 +88,12 @@ class ConfigService {
       WebErrorReporter.instance.report(_lastError!);
     }
   }
+}
+
+String _normalizeBaseUrl(String value) {
+  final trimmed = value.trim();
+  if (trimmed.isEmpty) {
+    return trimmed;
+  }
+  return trimmed.replaceAll(RegExp(r'/+$'), '');
 }

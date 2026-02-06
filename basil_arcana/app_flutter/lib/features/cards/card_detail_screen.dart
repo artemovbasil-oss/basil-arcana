@@ -3,9 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
 import '../../core/telegram/telegram_web_app.dart';
+import '../../core/widgets/data_load_error.dart';
 import '../../core/widgets/tarot_asset_widgets.dart';
 import '../../data/models/card_model.dart';
-import '../../data/models/deck_model.dart';
 import '../../state/providers.dart';
 
 class CardDetailScreen extends ConsumerWidget {
@@ -25,7 +25,9 @@ class CardDetailScreen extends ConsumerWidget {
     final useTelegramAppBar =
         TelegramWebApp.isTelegramWebView && TelegramWebApp.isTelegramMobile;
     final deckId = ref.watch(deckProvider);
-    final videoAssets = ref.watch(videoAssetManifestProvider).asData?.value;
+    final videoIndex = ref.watch(videoIndexProvider).asData?.value;
+    final availableVideos =
+        videoIndex == null || videoIndex.isEmpty ? null : videoIndex;
     final resolvedCardId = card?.id ?? cardId;
     final cardsAsync = ref.watch(cardsProvider);
     final resolvedCard = _resolveCard(
@@ -45,9 +47,11 @@ class CardDetailScreen extends ConsumerWidget {
           child: Center(
             child: cardsAsync.isLoading
                 ? const CircularProgressIndicator()
-                : Text(
-                    l10n.cardsLoadError,
-                    style: Theme.of(context).textTheme.bodyMedium,
+                : DataLoadError(
+                    title: l10n.dataLoadTitle,
+                    message: l10n.cardsLoadError,
+                    retryLabel: l10n.dataLoadRetry,
+                    onRetry: () => ref.invalidate(cardsProvider),
                   ),
           ),
         ),
@@ -69,15 +73,14 @@ class CardDetailScreen extends ConsumerWidget {
                 builder: (context) {
                   final mediaAssets = CardMediaResolver(
                     deckId: deckId,
-                    availableVideoAssets: videoAssets,
+                    availableVideoFiles: availableVideos,
                   ).resolve(
                     resolvedCard.id,
-                    videoAssetPathOverride:
-                        videoAssets == null ? resolvedCard.videoAssetPath : null,
+                    videoFileNameOverride: resolvedCard.videoFileName,
                   );
                   return CardMedia(
                     cardId: resolvedCard.id,
-                    videoAssetPath: mediaAssets.videoAssetPath,
+                    videoUrl: mediaAssets.videoUrl,
                     width: 240,
                     height: 360,
                     enableVideo: true,
@@ -228,19 +231,16 @@ CardModel? _resolveCard(
   String? cardId,
   CardModel? fallback,
 ) {
-  if (fallback != null) {
+  if (cardId == null || cardId.isEmpty) {
     return fallback;
   }
-  if (cards == null || cardId == null) {
-    return null;
+  if (cards == null || cards.isEmpty) {
+    return fallback;
   }
-  final normalizedId = canonicalCardId(cardId);
-  for (final card in cards) {
-    if (canonicalCardId(card.id) == normalizedId) {
-      return card;
-    }
-  }
-  return null;
+  return cards.firstWhere(
+    (card) => card.id == cardId,
+    orElse: () => fallback ?? cards.first,
+  );
 }
 
 class _StatTile extends StatelessWidget {
@@ -256,49 +256,41 @@ class _StatTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       decoration: BoxDecoration(
-        color: colorScheme.surfaceVariant.withOpacity(0.35),
+        color: colorScheme.surfaceVariant.withOpacity(0.4),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: colorScheme.outlineVariant),
+        border: Border.all(color: colorScheme.outlineVariant.withOpacity(0.7)),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Row(
-            children: [
-              Icon(
-                icon,
-                size: 18,
-                color: colorScheme.primary,
-              ),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Text(
-                  label,
-                  style: Theme.of(context).textTheme.labelMedium,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              Text(
-                '$value%',
-                style: Theme.of(context)
-                    .textTheme
-                    .labelLarge
-                    ?.copyWith(color: colorScheme.onSurface),
-              ),
-            ],
+          Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              color: colorScheme.primary.withOpacity(0.12),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: colorScheme.primary, size: 18),
           ),
-          const SizedBox(height: 8),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(999),
-            child: LinearProgressIndicator(
-              value: (value / 100).clamp(0.0, 1.0),
-              minHeight: 6,
-              backgroundColor: colorScheme.surfaceVariant.withOpacity(0.5),
-              valueColor: AlwaysStoppedAnimation<Color>(colorScheme.primary),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: theme.textTheme.labelMedium,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '$value',
+                  style: theme.textTheme.titleMedium,
+                ),
+              ],
             ),
           ),
         ],

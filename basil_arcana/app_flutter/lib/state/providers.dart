@@ -3,21 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 
 import '../data/repositories/ai_repository.dart';
-import '../data/repositories/cards_repository.dart';
 import '../data/repositories/card_stats_repository.dart';
+import '../data/repositories/data_repository.dart';
 import '../data/repositories/readings_repository.dart';
-import '../data/repositories/spreads_repository.dart';
 import '../data/models/deck_model.dart';
-import '../data/models/card_video.dart';
-import '../data/models/card_asset_manifest.dart';
 import 'reading_flow_controller.dart';
 
-final cardsRepositoryProvider = Provider<CardsRepository>((ref) {
-  return CardsRepository();
-});
-
-final spreadsRepositoryProvider = Provider<SpreadsRepository>((ref) {
-  return SpreadsRepository();
+final dataRepositoryProvider = Provider<DataRepository>((ref) {
+  return DataRepository();
 });
 
 final aiRepositoryProvider = Provider<AiRepository>((ref) {
@@ -88,24 +81,31 @@ final deckProvider = StateNotifierProvider<DeckNotifier, DeckId>((ref) {
   return DeckNotifier(box);
 });
 
+final useCachedCardsProvider = StateProvider<bool>((ref) => false);
+final useCachedSpreadsProvider = StateProvider<bool>((ref) => false);
+
 final cardsProvider = FutureProvider((ref) async {
   final locale = ref.watch(localeProvider);
   final deckId = ref.watch(deckProvider);
-  final repo = ref.watch(cardsRepositoryProvider);
+  final repo = ref.watch(dataRepositoryProvider);
+  final useCached = ref.watch(useCachedCardsProvider);
+  if (useCached) {
+    return repo.loadCachedCards(locale: locale, deckId: deckId);
+  }
   return repo.fetchCards(locale: locale, deckId: deckId);
 });
 
 final spreadsProvider = FutureProvider((ref) async {
   final locale = ref.watch(localeProvider);
-  final repo = ref.watch(spreadsRepositoryProvider);
+  final repo = ref.watch(dataRepositoryProvider);
+  final useCached = ref.watch(useCachedSpreadsProvider);
+  if (useCached) {
+    return repo.loadCachedSpreads(locale: locale);
+  }
   return repo.fetchSpreads(locale: locale);
 });
 
-final videoAssetManifestProvider = FutureProvider<Set<String>>((ref) async {
-  return loadVideoAssetManifest();
-});
-
-final cardAssetManifestProvider =
-    FutureProvider<CardAssetManifest>((ref) async {
-  return loadCardAssetManifest();
+final videoIndexProvider = FutureProvider<Set<String>?>((ref) async {
+  final repo = ref.watch(dataRepositoryProvider);
+  return repo.fetchVideoIndex();
 });

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
 import '../../core/telegram/telegram_web_app.dart';
+import '../../core/widgets/data_load_error.dart';
 import '../../core/widgets/tarot_asset_widgets.dart';
 import '../../data/models/card_model.dart';
 import '../../state/providers.dart';
@@ -73,13 +74,36 @@ class _CardsScreenState extends ConsumerState<CardsScreen> {
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stackTrace) => Center(
-            child: Text(
-              l10n.cardsLoadError,
-              style: Theme.of(context).textTheme.bodyMedium,
-              textAlign: TextAlign.center,
-            ),
-          ),
+          error: (error, stackTrace) {
+            final repo = ref.read(dataRepositoryProvider);
+            final locale = ref.read(localeProvider);
+            final cacheKey = repo.cardsCacheKey(locale);
+            return Center(
+              child: FutureBuilder<bool>(
+                future: repo.hasCachedData(cacheKey),
+                builder: (context, snapshot) {
+                  final hasCache = snapshot.data ?? false;
+                  return DataLoadError(
+                    title: l10n.dataLoadTitle,
+                    message: l10n.cardsLoadError,
+                    retryLabel: l10n.dataLoadRetry,
+                    onRetry: () {
+                      ref.read(useCachedCardsProvider.notifier).state = false;
+                      ref.invalidate(cardsProvider);
+                    },
+                    secondaryLabel: hasCache ? l10n.dataLoadUseCache : null,
+                    onSecondary: hasCache
+                        ? () {
+                            ref.read(useCachedCardsProvider.notifier).state =
+                                true;
+                            ref.invalidate(cardsProvider);
+                          }
+                        : null,
+                  );
+                },
+              ),
+            );
+          },
         ),
       ),
     );
@@ -91,17 +115,14 @@ class _CardsScreenState extends ConsumerState<CardsScreen> {
     }
     _precacheDone = true;
     final deckId = ref.read(deckProvider);
-    final assetManifest =
-        ref.read(cardAssetManifestProvider).asData?.value;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final initialCards = cards.take(6);
       for (final card in initialCards) {
         precacheImage(
-          AssetImage(
-            resolveCardAssetPath(
+          NetworkImage(
+            cardImageUrl(
               card.id,
               deckId: deckId,
-              manifest: assetManifest,
             ),
           ),
           context,
@@ -222,16 +243,14 @@ class _EmptyState extends StatelessWidget {
           children: [
             Text(
               title,
-              style: textTheme.titleMedium,
               textAlign: TextAlign.center,
+              style: textTheme.titleLarge,
             ),
             const SizedBox(height: 8),
             Text(
               subtitle,
-              style: textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
-              ),
               textAlign: TextAlign.center,
+              style: textTheme.bodyMedium,
             ),
           ],
         ),

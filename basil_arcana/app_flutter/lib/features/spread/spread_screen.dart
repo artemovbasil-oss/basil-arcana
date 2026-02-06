@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
 import '../../core/telegram/telegram_web_app.dart';
+import '../../core/widgets/data_load_error.dart';
 import '../../data/models/spread_model.dart';
 import '../../state/providers.dart';
 import '../shuffle/shuffle_screen.dart';
@@ -60,8 +61,36 @@ class SpreadScreen extends ConsumerWidget {
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, _) =>
-              Center(child: Text(l10n.spreadLoadError(error.toString()))),
+          error: (error, _) {
+            final repo = ref.read(dataRepositoryProvider);
+            final locale = ref.read(localeProvider);
+            final cacheKey = repo.spreadsCacheKey(locale);
+            return Center(
+              child: FutureBuilder<bool>(
+                future: repo.hasCachedData(cacheKey),
+                builder: (context, snapshot) {
+                  final hasCache = snapshot.data ?? false;
+                  return DataLoadError(
+                    title: l10n.dataLoadTitle,
+                    message: l10n.dataLoadSpreadsError,
+                    retryLabel: l10n.dataLoadRetry,
+                    onRetry: () {
+                      ref.read(useCachedSpreadsProvider.notifier).state = false;
+                      ref.invalidate(spreadsProvider);
+                    },
+                    secondaryLabel: hasCache ? l10n.dataLoadUseCache : null,
+                    onSecondary: hasCache
+                        ? () {
+                            ref.read(useCachedSpreadsProvider.notifier).state =
+                                true;
+                            ref.invalidate(spreadsProvider);
+                          }
+                        : null,
+                  );
+                },
+              ),
+            );
+          },
         ),
       ),
     );
@@ -219,90 +248,54 @@ class _SpreadIconDeckState extends State<SpreadIconDeck>
     return LayoutBuilder(
       builder: (context, constraints) {
         final size = constraints.biggest;
-        final deckWidth = size.width * 0.46;
-        final deckHeight = size.height * 0.68;
-        final cardWidth = deckWidth;
-        final cardHeight = deckHeight;
-        const cardRadius = 16.0;
-
+        final cardWidth = size.width * 0.45;
+        final cardHeight = size.height * 0.62;
+        final center = Offset(size.width * 0.48, size.height * 0.52);
         return AnimatedBuilder(
           animation: _progress,
-          builder: (context, _) {
-            final t = _progress.value;
-            final baseOffset = Offset(size.width * 0.03, size.height * 0.04);
+          builder: (context, child) {
+            final offset = lerpDouble(-10, 10, _progress.value) ?? 0;
+            final secondOffset = lerpDouble(8, -8, _progress.value) ?? 0;
             return Stack(
               alignment: Alignment.center,
               children: [
-                _deckCard(
-                  width: deckWidth,
-                  height: deckHeight,
-                  color: deckColor.withOpacity(0.82),
-                  borderColor: deckBorder.withOpacity(0.5),
-                  borderRadius: cardRadius,
-                  offset: baseOffset,
-                ),
-                _deckCard(
-                  width: deckWidth,
-                  height: deckHeight,
+                _CardShape(
+                  width: cardWidth,
+                  height: cardHeight,
                   color: deckColor,
                   borderColor: deckBorder,
-                  borderRadius: cardRadius,
+                  shadowColor: shadow,
+                  offset: center,
+                  rotation: -0.04,
                 ),
-                if (widget.mode == SpreadIconMode.oneCard)
-                  _movingCard(
+                _CardShape(
+                  width: cardWidth,
+                  height: cardHeight,
+                  color: deckColor,
+                  borderColor: deckBorder,
+                  shadowColor: shadow,
+                  offset: center + Offset(-18, 8),
+                  rotation: 0.04,
+                ),
+                if (widget.mode == SpreadIconMode.threeCards)
+                  _CardShape(
                     width: cardWidth,
                     height: cardHeight,
                     color: cardColor,
                     borderColor: cardBorder,
                     shadowColor: shadow,
-                    borderRadius: cardRadius,
-                    offset: Offset(
-                      lerpDouble(0, -11, t)!,
-                      lerpDouble(0, -22, t)!,
-                    ),
-                    rotation: lerpDouble(0, -0.05, t)!,
+                    offset: center + Offset(offset, -20),
+                    rotation: -0.08,
                   ),
-                if (widget.mode == SpreadIconMode.threeCards) ...[
-                  _movingCard(
-                    width: cardWidth,
-                    height: cardHeight,
-                    color: cardColor,
-                    borderColor: cardBorder,
-                    shadowColor: shadow,
-                    borderRadius: cardRadius,
-                    offset: Offset(
-                      lerpDouble(0, -13, t)!,
-                      lerpDouble(0, -16, t)!,
-                    ),
-                    rotation: lerpDouble(0, -0.12, t)!,
-                  ),
-                  _movingCard(
-                    width: cardWidth,
-                    height: cardHeight,
-                    color: cardColor,
-                    borderColor: cardBorder,
-                    shadowColor: shadow,
-                    borderRadius: cardRadius,
-                    offset: Offset(
-                      lerpDouble(0, 0, t)!,
-                      lerpDouble(0, -21, t)!,
-                    ),
-                    rotation: lerpDouble(0, 0, t)!,
-                  ),
-                  _movingCard(
-                    width: cardWidth,
-                    height: cardHeight,
-                    color: cardColor,
-                    borderColor: cardBorder,
-                    shadowColor: shadow,
-                    borderRadius: cardRadius,
-                    offset: Offset(
-                      lerpDouble(0, 13, t)!,
-                      lerpDouble(0, -16, t)!,
-                    ),
-                    rotation: lerpDouble(0, 0.12, t)!,
-                  ),
-                ],
+                _CardShape(
+                  width: cardWidth,
+                  height: cardHeight,
+                  color: cardColor,
+                  borderColor: cardBorder,
+                  shadowColor: shadow,
+                  offset: center + Offset(secondOffset, 10),
+                  rotation: 0.08,
+                ),
               ],
             );
           },
@@ -312,65 +305,55 @@ class _SpreadIconDeckState extends State<SpreadIconDeck>
   }
 }
 
-Widget _deckCard({
-  required double width,
-  required double height,
-  required Color color,
-  required Color borderColor,
-  required double borderRadius,
-  Offset offset = Offset.zero,
-}) {
-  return Transform.translate(
-    offset: offset,
-    child: Container(
-      width: width,
-      height: height,
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(borderRadius),
-        border: Border.all(color: borderColor, width: 1.1),
-      ),
-    ),
-  );
-}
+class _CardShape extends StatelessWidget {
+  const _CardShape({
+    required this.width,
+    required this.height,
+    required this.color,
+    required this.borderColor,
+    required this.shadowColor,
+    required this.offset,
+    required this.rotation,
+  });
 
-Widget _movingCard({
-  required double width,
-  required double height,
-  required Color color,
-  required Color borderColor,
-  required Color shadowColor,
-  required double borderRadius,
-  required Offset offset,
-  required double rotation,
-}) {
-  return Transform.translate(
-    offset: offset,
-    child: Transform.rotate(
-      angle: rotation,
-      child: Container(
-        width: width,
-        height: height,
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(borderRadius),
-          border: Border.all(color: borderColor, width: 0.8),
-          boxShadow: [
-            BoxShadow(
-              color: shadowColor,
-              blurRadius: 12,
-              offset: const Offset(0, 6),
-            ),
-          ],
+  final double width;
+  final double height;
+  final Color color;
+  final Color borderColor;
+  final Color shadowColor;
+  final Offset offset;
+  final double rotation;
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      left: offset.dx - width / 2,
+      top: offset.dy - height / 2,
+      child: Transform.rotate(
+        angle: rotation,
+        child: Container(
+          width: width,
+          height: height,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: borderColor, width: 1.2),
+            boxShadow: [
+              BoxShadow(
+                color: shadowColor,
+                blurRadius: 16,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 Color _shiftLightness(Color color, double amount) {
   final hsl = HSLColor.fromColor(color);
-  return hsl
-      .withLightness((hsl.lightness + amount).clamp(0.0, 1.0))
-      .toColor();
+  final lightness = (hsl.lightness + amount).clamp(0.0, 1.0);
+  return hsl.withLightness(lightness).toColor();
 }

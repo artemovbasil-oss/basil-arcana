@@ -2,47 +2,36 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:video_player/video_player.dart';
 
-import '../../data/models/card_asset_manifest.dart';
+import '../../core/config/app_config.dart';
 import '../../data/models/card_video.dart';
 import '../../data/models/deck_model.dart';
 import '../../state/providers.dart';
 
-String cardAssetPath(String cardId, {DeckId deckId = DeckId.major}) {
+String cardImageUrl(String cardId, {DeckId deckId = DeckId.major}) {
   final normalizedId = canonicalCardId(cardId);
+  final base = AppConfig.assetsBaseUrl;
   if (deckId == DeckId.wands ||
       (deckId == DeckId.all && normalizedId.startsWith('wands_'))) {
-    return 'assets/cards/wands/$normalizedId.webp';
+    return '$base/cards/wands/$normalizedId.webp';
   }
   if (deckId == DeckId.swords ||
       (deckId == DeckId.all && normalizedId.startsWith('swords_'))) {
-    return 'assets/cards/swords/$normalizedId.webp';
+    return '$base/cards/swords/$normalizedId.webp';
   }
   if (deckId == DeckId.pentacles ||
       (deckId == DeckId.all && normalizedId.startsWith('pentacles_'))) {
-    return 'assets/cards/pentacles/$normalizedId.webp';
+    return '$base/cards/pentacles/$normalizedId.webp';
   }
   if (deckId == DeckId.cups ||
       (deckId == DeckId.all && normalizedId.startsWith('cups_'))) {
-    return 'assets/cards/cups/$normalizedId.webp';
+    return '$base/cards/cups/$normalizedId.webp';
   }
   switch (normalizedId) {
     case 'major_10_wheel':
-      return 'assets/cards/major/major_10_wheel_of_fortune.webp';
+      return '$base/cards/major/major_10_wheel_of_fortune.webp';
     default:
-      return 'assets/cards/major/$normalizedId.webp';
+      return '$base/cards/major/$normalizedId.webp';
   }
-}
-
-String resolveCardAssetPath(
-  String cardId, {
-  DeckId deckId = DeckId.major,
-  CardAssetManifest? manifest,
-}) {
-  final resolved = manifest?.resolveAssetPath(cardId);
-  if (resolved != null) {
-    return resolved;
-  }
-  return cardAssetPath(cardId, deckId: deckId);
 }
 
 String deckCoverAssetPath(DeckId deckId) {
@@ -58,40 +47,52 @@ String deckCoverAssetPath(DeckId deckId) {
   }
 }
 
+String? resolveCardVideoUrl(
+  String cardId, {
+  Set<String>? availableVideoFiles,
+  String? videoFileNameOverride,
+}) {
+  final fileName = videoFileNameOverride ??
+      resolveCardVideoFileName(cardId, availableFiles: availableVideoFiles);
+  if (fileName == null) {
+    return null;
+  }
+  final base = AppConfig.assetsBaseUrl;
+  return '$base/video/${normalizeVideoFileName(fileName)}';
+}
+
 class CardMediaAssets {
   const CardMediaAssets({
-    required this.imageAssetPath,
-    required this.videoAssetPath,
+    required this.imageUrl,
+    required this.videoUrl,
   });
 
-  final String imageAssetPath;
-  final String? videoAssetPath;
+  final String imageUrl;
+  final String? videoUrl;
 }
 
 class CardMediaResolver {
   const CardMediaResolver({
     this.deckId = DeckId.major,
-    this.availableVideoAssets,
+    this.availableVideoFiles,
   });
 
   final DeckId deckId;
-  final Set<String>? availableVideoAssets;
+  final Set<String>? availableVideoFiles;
 
   CardMediaAssets resolve(
     String cardId, {
-    String? videoAssetPathOverride,
+    String? videoFileNameOverride,
   }) {
-    final imageAssetPath = cardAssetPath(cardId, deckId: deckId);
-    final resolvedVideo = normalizeVideoAssetPath(
-      videoAssetPathOverride ??
-          resolveCardVideoAsset(
-            cardId,
-            availableAssets: availableVideoAssets,
-          ),
+    final imageUrl = cardImageUrl(cardId, deckId: deckId);
+    final resolvedVideo = resolveCardVideoUrl(
+      cardId,
+      availableVideoFiles: availableVideoFiles,
+      videoFileNameOverride: videoFileNameOverride,
     );
     return CardMediaAssets(
-      imageAssetPath: imageAssetPath,
-      videoAssetPath: resolvedVideo,
+      imageUrl: imageUrl,
+      videoUrl: resolvedVideo,
     );
   }
 }
@@ -119,13 +120,8 @@ class CardAssetImage extends ConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final radius = borderRadius ?? BorderRadius.circular(18);
     final deckId = ref.watch(deckProvider);
-    final assetManifest = ref.watch(cardAssetManifestProvider).asData?.value;
-    final resolvedPath = resolveCardAssetPath(
-      cardId,
-      deckId: deckId,
-      manifest: assetManifest,
-    );
-    final image = Image.asset(
+    final resolvedPath = cardImageUrl(cardId, deckId: deckId);
+    final image = Image.network(
       resolvedPath,
       width: width,
       height: height,
@@ -133,12 +129,8 @@ class CardAssetImage extends ConsumerWidget {
       filterQuality: FilterQuality.high,
       errorBuilder: (context, error, stackTrace) {
         if (deckId != DeckId.major) {
-          return Image.asset(
-            resolveCardAssetPath(
-              cardId,
-              deckId: DeckId.major,
-              manifest: assetManifest,
-            ),
+          return Image.network(
+            cardImageUrl(cardId, deckId: DeckId.major),
             width: width,
             height: height,
             fit: fit,
@@ -197,7 +189,7 @@ class CardMedia extends StatefulWidget {
   const CardMedia({
     super.key,
     required this.cardId,
-    this.videoAssetPath,
+    this.videoUrl,
     this.width,
     this.height,
     this.borderRadius,
@@ -209,7 +201,7 @@ class CardMedia extends StatefulWidget {
   });
 
   final String cardId;
-  final String? videoAssetPath;
+  final String? videoUrl;
   final double? width;
   final double? height;
   final BorderRadius? borderRadius;
@@ -230,7 +222,7 @@ class _CardMediaState extends State<CardMedia> {
   VideoPlayerController? _controller;
   bool _showVideo = false;
   bool _videoFailed = false;
-  String? _resolvedVideoPath;
+  String? _resolvedVideoUrl;
   String? _cacheKey;
   bool _autoPlayAttempted = false;
   bool _autoPlayFailed = false;
@@ -245,7 +237,7 @@ class _CardMediaState extends State<CardMedia> {
   void didUpdateWidget(CardMedia oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.cardId != widget.cardId ||
-        oldWidget.videoAssetPath != widget.videoAssetPath ||
+        oldWidget.videoUrl != widget.videoUrl ||
         oldWidget.enableVideo != widget.enableVideo) {
       _disposeController();
       _setupController();
@@ -271,14 +263,12 @@ class _CardMediaState extends State<CardMedia> {
   }
 
   void _setupController() {
-    _resolvedVideoPath = normalizeVideoAssetPath(
-      widget.videoAssetPath ?? resolveCardVideoAsset(widget.cardId),
-    );
+    _resolvedVideoUrl = widget.videoUrl;
     _videoFailed = false;
     _showVideo = false;
     _autoPlayAttempted = false;
     _autoPlayFailed = false;
-    if (!widget.enableVideo || _resolvedVideoPath == null) {
+    if (!widget.enableVideo || _resolvedVideoUrl == null) {
       return;
     }
     if (widget.autoPlayOnce) {
@@ -311,16 +301,16 @@ class _CardMediaState extends State<CardMedia> {
     if (_controller != null || _videoFailed) {
       return;
     }
-    final resolvedPath = _resolvedVideoPath;
-    if (resolvedPath == null) {
+    final resolvedUrl = _resolvedVideoUrl;
+    if (resolvedUrl == null) {
       return;
     }
-    final cacheKey = resolvedPath;
+    final cacheKey = resolvedUrl;
     _cacheKey = cacheKey;
     final cached = _controllerCache[cacheKey];
     final controller = cached?.controller ??
-        VideoPlayerController.asset(
-          resolvedPath,
+        VideoPlayerController.networkUrl(
+          Uri.parse(resolvedUrl),
           videoPlayerOptions: VideoPlayerOptions(
             mixWithOthers: true,
             allowBackgroundPlayback: false,
@@ -424,7 +414,7 @@ class _CardMediaState extends State<CardMedia> {
   Widget build(BuildContext context) {
     final radius = widget.borderRadius ?? BorderRadius.circular(18);
     final hasVideo =
-        widget.enableVideo && _resolvedVideoPath != null && !_videoFailed;
+        widget.enableVideo && _resolvedVideoUrl != null && !_videoFailed;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: hasVideo ? () => _playOnce(autoPlay: false) : null,

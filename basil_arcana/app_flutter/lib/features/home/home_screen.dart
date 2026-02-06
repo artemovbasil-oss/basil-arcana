@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
 import '../../state/providers.dart';
+import '../debug/cdn_health_screen.dart';
 import '../history/history_screen.dart';
 import '../cards/cards_screen.dart';
 import '../settings/settings_screen.dart';
@@ -66,7 +67,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(readingFlowControllerProvider);
     final colorScheme = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context)!;
     final examples = [
@@ -113,14 +113,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           Row(
                             children: [
                               Expanded(
-                                child: Text(
-                                  l10n.appTitle,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleLarge
-                                      ?.copyWith(
-                                        color: colorScheme.onSurface,
+                                child: GestureDetector(
+                                  onLongPress: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (_) => const CdnHealthScreen(),
                                       ),
+                                    );
+                                  },
+                                  child: Text(
+                                    l10n.appTitle,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleLarge
+                                        ?.copyWith(
+                                          color: colorScheme.onSurface,
+                                        ),
+                                  ),
                                 ),
                               ),
                               IconButton(
@@ -222,9 +231,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   ),
                                   child: Icon(
                                     Icons.close,
-                                    size: 16,
-                                    color:
-                                        colorScheme.onSurface.withOpacity(0.7),
+                                    size: 18,
+                                    color: colorScheme.onSurface
+                                        .withOpacity(0.75),
                                   ),
                                 ),
                               ),
@@ -233,106 +242,237 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    AnimatedOpacity(
-                      duration: const Duration(milliseconds: 200),
-                      opacity: isFocusMode ? 0.45 : 1,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Wrap(
-                            spacing: 12,
-                            runSpacing: 8,
-                            children: examples
-                                .map(
-                                  (example) => InkWell(
-                                    onTap: () => _applyExample(example),
-                                    borderRadius: BorderRadius.circular(20),
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 6,
-                                        vertical: 4,
-                                      ),
-                                      child: Text(
-                                        example,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .labelLarge
-                                            ?.copyWith(
-                                              color: colorScheme.onSurface
-                                                  .withOpacity(0.65),
-                                            ),
-                                      ),
-                                    ),
-                                  ),
-                                )
-                                .toList(),
+                    Text(
+                      l10n.homeTryPrompt,
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            color: colorScheme.onSurface.withOpacity(0.7),
                           ),
-                          const SizedBox(height: 20),
-                          SizedBox(
-                            width: double.infinity,
-                            child: OutlinedButton.icon(
-                              icon: const Icon(Icons.style_outlined),
-                              label: Text(l10n.homeAllCardsButton),
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => const CardsScreen(),
-                                  ),
-                                );
-                              },
+                    ),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 10,
+                      children: examples
+                          .map(
+                            (example) => _ExampleChip(
+                              text: example,
+                              onTap: () => _applyExample(example),
                             ),
+                          )
+                          .toList(),
+                    ),
+                    const SizedBox(height: 28),
+                    Text(
+                      l10n.homeSubtitle,
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            color: colorScheme.onSurface.withOpacity(0.7),
                           ),
-                        ],
-                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    _HomeNavCard(
+                      title: l10n.homeAllCardsButton,
+                      description: l10n.cardsTitle,
+                      icon: Icons.auto_awesome,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const CardsScreen()),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    _HomeNavCard(
+                      title: l10n.spreadTitle,
+                      description: l10n.homeContinueButton,
+                      icon: Icons.auto_stories,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const SpreadScreen()),
+                        );
+                      },
                     ),
                   ],
                 ),
               ),
             ),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: SafeArea(
-                top: false,
-                minimum: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-                child: AnimatedPadding(
-                  duration: const Duration(milliseconds: 250),
-                  curve: Curves.easeOut,
-                  padding: EdgeInsets.only(bottom: bottomInset + buttonGap),
-                  child: SizedBox(
-                    height: buttonHeight,
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: primaryColor,
-                        disabledBackgroundColor: disabledColor,
-                        foregroundColor: colorScheme.onPrimary,
-                        disabledForegroundColor:
-                            colorScheme.onSurface.withOpacity(0.7),
-                        elevation: isFocusMode ? 5 : 2,
-                        shadowColor:
-                            isFocusMode ? primaryColor.withOpacity(0.45) : null,
-                        shape: const StadiumBorder(),
-                        textStyle: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      icon: const Icon(Icons.auto_awesome),
-                      onPressed: state.question.trim().isEmpty
-                          ? null
-                          : () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const SpreadScreen(),
-                                ),
-                              );
-                            },
-                      label: Text(l10n.homeContinueButton),
-                    ),
-                  ),
+            Positioned(
+              left: 20,
+              right: 20,
+              bottom: 20 + bottomInset,
+              child: AnimatedOpacity(
+                opacity: isFocusMode ? 0 : 1,
+                duration: const Duration(milliseconds: 200),
+                child: _PrimaryActionButton(
+                  enabled: hasQuestion,
+                  primaryColor: primaryColor,
+                  disabledColor: disabledColor,
+                  label: l10n.homeContinueButton,
+                  onPressed: hasQuestion
+                      ? () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const SpreadScreen(),
+                            ),
+                          );
+                        }
+                      : null,
                 ),
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ExampleChip extends StatelessWidget {
+  const _ExampleChip({
+    required this.text,
+    required this.onTap,
+  });
+
+  final String text;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: colorScheme.surfaceVariant.withOpacity(0.25),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: colorScheme.outlineVariant),
+        ),
+        child: Text(
+          text,
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+      ),
+    );
+  }
+}
+
+class _HomeNavCard extends StatelessWidget {
+  const _HomeNavCard({
+    required this.title,
+    required this.description,
+    required this.icon,
+    required this.onTap,
+  });
+
+  final String title;
+  final String description;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return InkWell(
+      borderRadius: BorderRadius.circular(20),
+      onTap: onTap,
+      child: Ink(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          color: colorScheme.surfaceVariant.withOpacity(0.3),
+          border: Border.all(color: colorScheme.outlineVariant),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: colorScheme.primary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(icon, color: colorScheme.primary),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    description,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurface.withOpacity(0.65),
+                        ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.chevron_right,
+              color: colorScheme.onSurface.withOpacity(0.4),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PrimaryActionButton extends StatelessWidget {
+  const _PrimaryActionButton({
+    required this.enabled,
+    required this.primaryColor,
+    required this.disabledColor,
+    required this.label,
+    this.onPressed,
+  });
+
+  final bool enabled;
+  final Color primaryColor;
+  final Color disabledColor;
+  final String label;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      decoration: BoxDecoration(
+        color: enabled ? primaryColor : disabledColor,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: enabled
+            ? [
+                BoxShadow(
+                  color: primaryColor.withOpacity(0.35),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
+                ),
+              ]
+            : null,
+      ),
+      child: FilledButton(
+        style: FilledButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+          ),
+        ),
+        onPressed: enabled ? onPressed : null,
+        child: Text(
+          label,
+          style: Theme.of(context)
+              .textTheme
+              .titleMedium
+              ?.copyWith(color: Colors.white),
         ),
       ),
     );
