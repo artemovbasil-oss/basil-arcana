@@ -6,7 +6,6 @@ import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
 import '../../core/config/assets_config.dart';
 import '../../core/config/diagnostics.dart';
-import '../../core/telegram/telegram_web_app.dart';
 import '../../core/widgets/data_load_error.dart';
 import '../../data/models/spread_model.dart';
 import '../../state/providers.dart';
@@ -19,13 +18,15 @@ class SpreadScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final spreadsAsync = ref.watch(spreadsProvider);
     final l10n = AppLocalizations.of(context)!;
-    final useTelegramAppBar =
-        TelegramWebApp.isTelegramWebView && TelegramWebApp.isTelegramMobile;
 
     return Scaffold(
-      appBar: useTelegramAppBar ? null : AppBar(title: Text(l10n.spreadTitle)),
+      appBar: AppBar(
+        title: Text(l10n.spreadTitle),
+        leading: Navigator.canPop(context) ? const BackButton() : null,
+        automaticallyImplyLeading: Navigator.canPop(context),
+      ),
       body: SafeArea(
-        top: useTelegramAppBar,
+        top: false,
         child: spreadsAsync.when(
           data: (spreads) {
             final oneCardSpread = _findSpread(spreads, 1);
@@ -246,11 +247,12 @@ class _SpreadIconDeckState extends State<SpreadIconDeck>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1500),
+      duration: const Duration(milliseconds: 1800),
     )..repeat(reverse: true);
     _progress = CurvedAnimation(
       parent: _controller,
-      curve: Curves.easeInOut,
+      curve: Curves.easeOutCubic,
+      reverseCurve: Curves.easeInCubic,
     );
   }
 
@@ -264,62 +266,100 @@ class _SpreadIconDeckState extends State<SpreadIconDeck>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
-    final deckColor = _shiftLightness(primary, -0.18).withOpacity(0.95);
-    final deckBorder = primary.withOpacity(0.75);
-    final cardColor = _shiftLightness(primary, 0.1).withOpacity(0.92);
-    final cardBorder = Colors.white.withOpacity(0.35);
-    final shadow = primary.withOpacity(0.25);
+    final deckColor = _shiftLightness(primary, -0.22).withOpacity(0.96);
+    final deckHighlight = _shiftLightness(primary, -0.05).withOpacity(0.9);
+    final deckBorder = _shiftLightness(primary, 0.2).withOpacity(0.85);
+    final cardColor = _shiftLightness(primary, -0.12).withOpacity(0.95);
+    final cardHighlight = _shiftLightness(primary, 0.05).withOpacity(0.92);
+    final cardBorder = _shiftLightness(primary, 0.28).withOpacity(0.9);
+    final shadow = primary.withOpacity(0.28);
 
     return LayoutBuilder(
       builder: (context, constraints) {
         final size = constraints.biggest;
-        final cardWidth = size.width * 0.45;
-        final cardHeight = size.height * 0.62;
-        final center = Offset(size.width * 0.48, size.height * 0.52);
+        final cardWidth = size.width * 0.48;
+        final cardHeight = size.height * 0.68;
+        final center = Offset(size.width * 0.5, size.height * 0.54);
         return AnimatedBuilder(
           animation: _progress,
           builder: (context, child) {
-            final offset = lerpDouble(-10, 10, _progress.value) ?? 0;
-            final secondOffset = lerpDouble(8, -8, _progress.value) ?? 0;
+            final pullY = lerpDouble(-14, -6, _progress.value) ?? 0;
+            final pullX = lerpDouble(6, 10, _progress.value) ?? 0;
+            final fanProgress = _progress.value;
             return Stack(
               alignment: Alignment.center,
               children: [
                 _CardShape(
                   width: cardWidth,
                   height: cardHeight,
-                  color: deckColor,
+                  gradient: LinearGradient(
+                    colors: [deckColor, deckHighlight],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
                   borderColor: deckBorder,
                   shadowColor: shadow,
-                  offset: center,
-                  rotation: -0.04,
+                  offset: center + const Offset(0, 10),
+                  rotation: -0.02,
                 ),
                 _CardShape(
                   width: cardWidth,
                   height: cardHeight,
-                  color: deckColor,
+                  gradient: LinearGradient(
+                    colors: [deckColor, deckHighlight],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
                   borderColor: deckBorder,
                   shadowColor: shadow,
-                  offset: center + Offset(-18, 8),
-                  rotation: 0.04,
+                  offset: center + const Offset(-8, 4),
+                  rotation: 0.02,
                 ),
                 if (widget.mode == SpreadIconMode.threeCards)
                   _CardShape(
                     width: cardWidth,
                     height: cardHeight,
-                    color: cardColor,
+                    gradient: LinearGradient(
+                      colors: [cardColor, cardHighlight],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
                     borderColor: cardBorder,
                     shadowColor: shadow,
-                    offset: center + Offset(offset, -20),
-                    rotation: -0.08,
+                    offset:
+                        center + Offset(-14 * fanProgress, -14 * fanProgress),
+                    rotation: -0.14 * fanProgress,
+                  ),
+                if (widget.mode == SpreadIconMode.threeCards)
+                  _CardShape(
+                    width: cardWidth,
+                    height: cardHeight,
+                    gradient: LinearGradient(
+                      colors: [cardColor, cardHighlight],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderColor: cardBorder,
+                    shadowColor: shadow,
+                    offset: center + Offset(0, -10 * fanProgress),
+                    rotation: 0,
                   ),
                 _CardShape(
                   width: cardWidth,
                   height: cardHeight,
-                  color: cardColor,
+                  gradient: LinearGradient(
+                    colors: [cardColor, cardHighlight],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
                   borderColor: cardBorder,
                   shadowColor: shadow,
-                  offset: center + Offset(secondOffset, 10),
-                  rotation: 0.08,
+                  offset: widget.mode == SpreadIconMode.oneCard
+                      ? center + Offset(pullX, pullY)
+                      : center + Offset(14 * fanProgress, -12 * fanProgress),
+                  rotation: widget.mode == SpreadIconMode.oneCard
+                      ? 0.05
+                      : 0.14 * fanProgress,
                 ),
               ],
             );
@@ -334,7 +374,7 @@ class _CardShape extends StatelessWidget {
   const _CardShape({
     required this.width,
     required this.height,
-    required this.color,
+    required this.gradient,
     required this.borderColor,
     required this.shadowColor,
     required this.offset,
@@ -343,7 +383,7 @@ class _CardShape extends StatelessWidget {
 
   final double width;
   final double height;
-  final Color color;
+  final Gradient gradient;
   final Color borderColor;
   final Color shadowColor;
   final Offset offset;
@@ -360,9 +400,9 @@ class _CardShape extends StatelessWidget {
           width: width,
           height: height,
           decoration: BoxDecoration(
-            color: color,
+            gradient: gradient,
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: borderColor, width: 1.2),
+            border: Border.all(color: borderColor, width: 1.6),
             boxShadow: [
               BoxShadow(
                 color: shadowColor,

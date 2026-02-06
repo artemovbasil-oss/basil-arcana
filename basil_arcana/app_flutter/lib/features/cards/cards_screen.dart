@@ -4,7 +4,6 @@ import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
 import '../../core/config/assets_config.dart';
 import '../../core/config/diagnostics.dart';
-import '../../core/telegram/telegram_web_app.dart';
 import '../../core/widgets/data_load_error.dart';
 import '../../core/widgets/tarot_asset_widgets.dart';
 import '../../data/models/card_model.dart';
@@ -26,13 +25,14 @@ class _CardsScreenState extends ConsumerState<CardsScreen> {
     final cardsAsync = ref.watch(cardsProvider);
     final l10n = AppLocalizations.of(context)!;
     final statsRepository = ref.watch(cardStatsRepositoryProvider);
-    final useTelegramAppBar =
-        TelegramWebApp.isTelegramWebView && TelegramWebApp.isTelegramMobile;
-
     return Scaffold(
-      appBar: useTelegramAppBar ? null : AppBar(title: Text(l10n.cardsTitle)),
+      appBar: AppBar(
+        title: Text(l10n.cardsTitle),
+        leading: Navigator.canPop(context) ? const BackButton() : null,
+        automaticallyImplyLeading: Navigator.canPop(context),
+      ),
       body: SafeArea(
-        top: useTelegramAppBar,
+        top: false,
         child: cardsAsync.when(
           data: (cards) {
             if (cards.isEmpty) {

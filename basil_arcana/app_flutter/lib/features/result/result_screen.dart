@@ -6,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../core/telegram/telegram_web_app.dart';
 import '../../core/widgets/card_face_widget.dart';
 import '../../core/assets/asset_paths.dart';
 import '../../core/widgets/tarot_asset_widgets.dart';
@@ -67,8 +66,6 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
     final aiResult = state.aiResult;
     final spread = state.spread;
     final l10n = AppLocalizations.of(context)!;
-    final useTelegramAppBar =
-        TelegramWebApp.isTelegramWebView && TelegramWebApp.isTelegramMobile;
 
     if (spread == null) {
       return const Scaffold(
@@ -86,7 +83,6 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
           ref.read(readingFlowControllerProvider.notifier).reset();
           Navigator.popUntil(context, (route) => route.isFirst);
         },
-        useTelegramAppBar: useTelegramAppBar,
       );
     }
 
@@ -117,9 +113,14 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
           : _statusMessage(state, l10n);
       final canRetry = !state.isLoading && state.aiErrorType != null;
       return Scaffold(
-        appBar: useTelegramAppBar ? null : AppBar(title: Text(l10n.resultTitle)),
+        appBar: AppBar(
+          title: Text(l10n.resultTitle),
+          leading: Navigator.canPop(context) ? const BackButton() : null,
+          automaticallyImplyLeading: Navigator.canPop(context),
+        ),
         backgroundColor: Theme.of(context).colorScheme.surface,
         body: SafeArea(
+          top: false,
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -165,9 +166,14 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
         _ActionBar.baseHeight +
         (_sequenceComplete ? _ActionBar.extraHeight : 0);
     return Scaffold(
-      appBar: useTelegramAppBar ? null : AppBar(title: Text(l10n.resultTitle)),
+      appBar: AppBar(
+        title: Text(l10n.resultTitle),
+        leading: Navigator.canPop(context) ? const BackButton() : null,
+        automaticallyImplyLeading: Navigator.canPop(context),
+      ),
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
+        top: false,
         child: Stack(
           children: [
             Positioned.fill(
@@ -757,22 +763,24 @@ class _OpenInTelegramScreen extends StatelessWidget {
   const _OpenInTelegramScreen({
     required this.onOpen,
     required this.onBack,
-    required this.useTelegramAppBar,
   });
 
   final VoidCallback onBack;
   final VoidCallback onOpen;
-  final bool useTelegramAppBar;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar:
-          useTelegramAppBar ? null : AppBar(title: Text(l10n.resultTitle)),
+      appBar: AppBar(
+        title: Text(l10n.resultTitle),
+        leading: Navigator.canPop(context) ? const BackButton() : null,
+        automaticallyImplyLeading: Navigator.canPop(context),
+      ),
       backgroundColor: colorScheme.surface,
       body: SafeArea(
+        top: false,
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Column(

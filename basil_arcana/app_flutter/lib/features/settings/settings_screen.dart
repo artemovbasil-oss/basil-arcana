@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
-import '../../core/telegram/telegram_web_app.dart';
 import '../../data/models/card_model.dart';
 import '../../data/models/deck_model.dart';
 import '../../state/providers.dart';
@@ -19,13 +18,14 @@ class SettingsScreen extends ConsumerWidget {
     final locale = ref.watch(localeProvider);
     final deckId = ref.watch(deckProvider);
     final cards = ref.watch(cardsProvider).asData?.value ?? const <CardModel>[];
-    final useTelegramAppBar =
-        TelegramWebApp.isTelegramWebView && TelegramWebApp.isTelegramMobile;
-
     return Scaffold(
-      appBar: useTelegramAppBar ? null : AppBar(title: Text(l10n.settingsTitle)),
+      appBar: AppBar(
+        title: Text(l10n.settingsTitle),
+        leading: Navigator.canPop(context) ? const BackButton() : null,
+        automaticallyImplyLeading: Navigator.canPop(context),
+      ),
       body: SafeArea(
-        top: useTelegramAppBar,
+        top: false,
         child: ListView(
           padding: const EdgeInsets.all(20),
           children: [

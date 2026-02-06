@@ -4,7 +4,6 @@ import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
 import '../../core/config/assets_config.dart';
 import '../../core/config/diagnostics.dart';
-import '../../core/telegram/telegram_web_app.dart';
 import '../../core/widgets/data_load_error.dart';
 import '../../core/widgets/tarot_asset_widgets.dart';
 import '../../data/models/card_model.dart';
@@ -24,8 +23,6 @@ class CardDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final colorScheme = Theme.of(context).colorScheme;
-    final useTelegramAppBar =
-        TelegramWebApp.isTelegramWebView && TelegramWebApp.isTelegramMobile;
     final deckId = ref.watch(deckProvider);
     final videoIndex = ref.watch(videoIndexProvider).asData?.value;
     final availableVideos =
@@ -62,13 +59,13 @@ class CardDetailScreen extends ConsumerWidget {
             )
           : null;
       return Scaffold(
-        appBar: useTelegramAppBar
-            ? null
-            : AppBar(
-                title: Text(l10n.cardsDetailTitle),
-              ),
+        appBar: AppBar(
+          title: Text(l10n.cardsDetailTitle),
+          leading: Navigator.canPop(context) ? const BackButton() : null,
+          automaticallyImplyLeading: Navigator.canPop(context),
+        ),
         body: SafeArea(
-          top: useTelegramAppBar,
+          top: false,
           child: Center(
             child: cardsAsync.isLoading
                 ? const CircularProgressIndicator()
@@ -84,13 +81,13 @@ class CardDetailScreen extends ConsumerWidget {
       );
     }
     return Scaffold(
-      appBar: useTelegramAppBar
-          ? null
-          : AppBar(
-              title: Text(l10n.cardsDetailTitle),
-            ),
+      appBar: AppBar(
+        title: Text(l10n.cardsDetailTitle),
+        leading: Navigator.canPop(context) ? const BackButton() : null,
+        automaticallyImplyLeading: Navigator.canPop(context),
+      ),
       body: SafeArea(
-        top: useTelegramAppBar,
+        top: false,
         child: CustomScrollView(
           slivers: [
             SliverToBoxAdapter(
@@ -105,23 +102,41 @@ class CardDetailScreen extends ConsumerWidget {
                     imageUrlOverride: resolvedCard.imageUrl,
                     videoUrlOverride: resolvedCard.videoUrl,
                   );
-                  return SizedBox(
-                    width: double.infinity,
-                    height: 380,
-                    child: ClipRRect(
-                      borderRadius: const BorderRadius.vertical(
-                        bottom: Radius.circular(28),
-                      ),
-                      child: CardMedia(
-                        cardId: resolvedCard.id,
-                        imageUrl: mediaAssets.imageUrl,
-                        videoUrl: mediaAssets.videoUrl,
-                        width: MediaQuery.of(context).size.width,
-                        height: 380,
-                        enableVideo: true,
-                        autoPlayOnce: true,
-                        playLabel: l10n.videoTapToPlay,
-                        fit: BoxFit.cover,
+                  return Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 440),
+                        child: AspectRatio(
+                          aspectRatio: 2 / 3,
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: colorScheme.surfaceVariant.withOpacity(0.35),
+                              borderRadius: BorderRadius.circular(26),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: colorScheme.primary.withOpacity(0.18),
+                                  blurRadius: 24,
+                                  offset: const Offset(0, 12),
+                                ),
+                              ],
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(26),
+                              child: CardMedia(
+                                cardId: resolvedCard.id,
+                                imageUrl: mediaAssets.imageUrl,
+                                videoUrl: mediaAssets.videoUrl,
+                                width: double.infinity,
+                                height: double.infinity,
+                                enableVideo: true,
+                                autoPlayOnce: true,
+                                playLabel: l10n.videoTapToPlay,
+                                fit: BoxFit.contain,
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   );
@@ -129,20 +144,18 @@ class CardDetailScreen extends ConsumerWidget {
               ),
             ),
             SliverToBoxAdapter(
-              child: Transform.translate(
-                offset: const Offset(0, -48),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
                 child: Container(
                   padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
                   decoration: BoxDecoration(
-                    color: colorScheme.surface.withOpacity(0.94),
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(28),
-                    ),
+                    color: colorScheme.surface.withOpacity(0.96),
+                    borderRadius: BorderRadius.circular(28),
                     boxShadow: [
                       BoxShadow(
-                        color: colorScheme.primary.withOpacity(0.18),
-                        blurRadius: 30,
-                        offset: const Offset(0, -6),
+                        color: colorScheme.primary.withOpacity(0.14),
+                        blurRadius: 26,
+                        offset: const Offset(0, 14),
                       ),
                     ],
                   ),
@@ -171,8 +184,9 @@ class CardDetailScreen extends ConsumerWidget {
                                 (keyword) => Chip(
                                   label: Text(keyword),
                                   backgroundColor: colorScheme.surface,
-                                  side:
-                                      BorderSide(color: colorScheme.outlineVariant),
+                                  side: BorderSide(
+                                    color: colorScheme.outlineVariant,
+                                  ),
                                   labelStyle: TextStyle(
                                     color: colorScheme.onSurface,
                                     fontSize: 12,
@@ -258,21 +272,53 @@ class CardDetailScreen extends ConsumerWidget {
                               label: l10n.statLuck,
                               value: resolvedCard.stats!.luck,
                               icon: Icons.auto_awesome,
+                              gradient: LinearGradient(
+                                colors: [
+                                  colorScheme.primary.withOpacity(0.22),
+                                  colorScheme.surfaceVariant.withOpacity(0.55),
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
                             ),
                             _StatTile(
                               label: l10n.statPower,
                               value: resolvedCard.stats!.power,
                               icon: Icons.bolt,
+                              gradient: LinearGradient(
+                                colors: [
+                                  colorScheme.secondary.withOpacity(0.22),
+                                  colorScheme.surfaceVariant.withOpacity(0.5),
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
                             ),
                             _StatTile(
                               label: l10n.statLove,
                               value: resolvedCard.stats!.love,
                               icon: Icons.favorite,
+                              gradient: LinearGradient(
+                                colors: [
+                                  colorScheme.tertiary.withOpacity(0.2),
+                                  colorScheme.surfaceVariant.withOpacity(0.5),
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
                             ),
                             _StatTile(
                               label: l10n.statClarity,
                               value: resolvedCard.stats!.clarity,
                               icon: Icons.visibility,
+                              gradient: LinearGradient(
+                                colors: [
+                                  colorScheme.primary.withOpacity(0.14),
+                                  colorScheme.surface.withOpacity(0.7),
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
                             ),
                           ],
                         )
@@ -315,11 +361,13 @@ class _StatTile extends StatelessWidget {
     required this.label,
     required this.value,
     required this.icon,
+    required this.gradient,
   });
 
   final String label;
   final int value;
   final IconData icon;
+  final Gradient gradient;
 
   @override
   Widget build(BuildContext context) {
@@ -328,7 +376,7 @@ class _StatTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       decoration: BoxDecoration(
-        color: colorScheme.surfaceVariant.withOpacity(0.4),
+        gradient: gradient,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: colorScheme.outlineVariant.withOpacity(0.7)),
       ),
