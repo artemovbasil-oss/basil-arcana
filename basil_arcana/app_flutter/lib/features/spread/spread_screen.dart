@@ -68,9 +68,13 @@ class SpreadScreen extends ConsumerWidget {
             final cacheKey = repo.spreadsCacheKey(locale);
             final debugInfo = DataLoadDebugInfo(
               assetsBaseUrl: AssetsConfig.assetsBaseUrl,
-              attemptedUrls: {
+              requests: {
                 'spreads (${repo.spreadsFileNameForLocale(locale)})':
-                    repo.lastAttemptedUrls[cacheKey] ?? '—',
+                    DataLoadRequestDebugInfo(
+                  url: repo.lastAttemptedUrls[cacheKey] ?? '—',
+                  statusCode: repo.lastStatusCodes[cacheKey],
+                  responseSnippet: repo.lastResponseBodies[cacheKey],
+                ),
               },
               lastError: repo.lastError,
             );

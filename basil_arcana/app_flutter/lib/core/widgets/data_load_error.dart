@@ -1,15 +1,26 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+
+class DataLoadRequestDebugInfo {
+  const DataLoadRequestDebugInfo({
+    required this.url,
+    this.statusCode,
+    this.responseSnippet,
+  });
+
+  final String url;
+  final int? statusCode;
+  final String? responseSnippet;
+}
 
 class DataLoadDebugInfo {
   const DataLoadDebugInfo({
     required this.assetsBaseUrl,
-    required this.attemptedUrls,
+    required this.requests,
     required this.lastError,
   });
 
   final String assetsBaseUrl;
-  final Map<String, String> attemptedUrls;
+  final Map<String, DataLoadRequestDebugInfo> requests;
   final String? lastError;
 }
 
@@ -76,60 +87,86 @@ class DataLoadError extends StatelessWidget {
               ),
             ),
           ],
-          if (kDebugMode && debugInfo != null) ...[
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: TextButton(
-                onPressed: () {
-                  _showDebugPanel(context, debugInfo!);
-                },
-                child: const Text('Debug errors'),
-              ),
-            ),
+          if (debugInfo != null) ...[
+            const SizedBox(height: 16),
+            _DebugInfoPanel(info: debugInfo!),
           ],
         ],
       ),
     );
   }
+}
 
-  void _showDebugPanel(BuildContext context, DataLoadDebugInfo info) {
-    showModalBottomSheet<void>(
-      context: context,
-      showDragHandle: true,
-      builder: (context) {
-        final textTheme = Theme.of(context).textTheme;
-        return Padding(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
-          child: ListView(
-            shrinkWrap: true,
-            children: [
-              Text('CDN debug info', style: textTheme.titleMedium),
-              const SizedBox(height: 12),
-              Text('ASSETS_BASE_URL', style: textTheme.labelLarge),
-              SelectableText(info.assetsBaseUrl),
-              const SizedBox(height: 12),
-              Text('Last attempted URLs', style: textTheme.labelLarge),
-              const SizedBox(height: 4),
-              ...info.attemptedUrls.entries.map(
-                (entry) => Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(entry.key, style: textTheme.labelMedium),
-                      SelectableText(entry.value),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text('Last error', style: textTheme.labelLarge),
-              SelectableText(info.lastError ?? '—'),
-            ],
+class _DebugInfoPanel extends StatelessWidget {
+  const _DebugInfoPanel({required this.info});
+
+  final DataLoadDebugInfo info;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.4),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outlineVariant,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Diagnostics', style: textTheme.labelLarge),
+          const SizedBox(height: 8),
+          Text('ASSETS_BASE_URL', style: textTheme.labelMedium),
+          SelectableText(info.assetsBaseUrl),
+          const SizedBox(height: 12),
+          ...info.requests.entries.map(
+            (entry) => _DebugRequestSection(
+              label: entry.key,
+              info: entry.value,
+            ),
           ),
-        );
-      },
+          const SizedBox(height: 12),
+          Text('Exception', style: textTheme.labelMedium),
+          SelectableText(info.lastError ?? '—'),
+        ],
+      ),
+    );
+  }
+}
+
+class _DebugRequestSection extends StatelessWidget {
+  const _DebugRequestSection({
+    required this.label,
+    required this.info,
+  });
+
+  final String label;
+  final DataLoadRequestDebugInfo info;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: textTheme.labelMedium),
+          SelectableText(info.url),
+          const SizedBox(height: 6),
+          Text('HTTP status', style: textTheme.labelSmall),
+          SelectableText(info.statusCode?.toString() ?? '—'),
+          const SizedBox(height: 6),
+          Text('Response snippet', style: textTheme.labelSmall),
+          SelectableText(info.responseSnippet?.trim().isNotEmpty == true
+              ? info.responseSnippet!
+              : '—'),
+        ],
+      ),
     );
   }
 }
