@@ -10,6 +10,7 @@ import '../../core/telegram/telegram_web_app.dart';
 import '../../core/widgets/card_face_widget.dart';
 import '../../core/assets/asset_paths.dart';
 import '../../core/widgets/tarot_asset_widgets.dart';
+import '../../data/models/card_model.dart';
 import '../../data/models/deck_model.dart';
 import '../../data/models/drawn_card_model.dart';
 import '../../data/models/spread_model.dart';
@@ -601,13 +602,15 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
 
   void _precacheDrawnCards(ReadingFlowState state) {
     _precacheDone = true;
-    final deckId = ref.read(deckProvider);
+    final cards = ref.read(cardsProvider).asData?.value ?? const <CardModel>[];
     WidgetsBinding.instance.addPostFrameCallback((_) {
       for (final drawn in state.drawnCards) {
+        final imageUrl = _resolveImageUrl(cards, drawn.cardId);
+        if (imageUrl == null || imageUrl.isEmpty) {
+          continue;
+        }
         precacheImage(
-          NetworkImage(
-            cardImageUrl(drawn.cardId, deckId: deckId),
-          ),
+          NetworkImage(imageUrl),
           context,
         );
       }
@@ -1121,6 +1124,27 @@ class _DetailThumbnailCard extends ConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final radius = BorderRadius.circular(12);
     final deckId = ref.watch(deckProvider);
+    final cards = ref.watch(cardsProvider).asData?.value;
+    final resolvedImageUrl = cardId == null
+        ? null
+        : cards
+            ?.firstWhere(
+              (card) => card.id == cardId,
+              orElse: () => const CardModel(
+                id: '',
+                deckId: DeckId.major,
+                name: '',
+                keywords: [],
+                meaning: CardMeaning(
+                  general: '',
+                  light: '',
+                  shadow: '',
+                  advice: '',
+                ),
+                imageUrl: '',
+              ),
+            )
+            .imageUrl;
     final card = isBack
         ? DecoratedBox(
             decoration: BoxDecoration(
@@ -1164,6 +1188,7 @@ class _DetailThumbnailCard extends ConsumerWidget {
           )
         : CardAssetImage(
             cardId: cardId ?? '',
+            imageUrl: resolvedImageUrl,
             width: 56,
             height: 88,
             borderRadius: radius,
@@ -1186,4 +1211,16 @@ class _ThumbnailCardData {
   final String? cardId;
   final bool isBack;
   final bool highlight;
+}
+
+String? _resolveImageUrl(List<CardModel> cards, String cardId) {
+  if (cards.isEmpty) {
+    return null;
+  }
+  for (final card in cards) {
+    if (card.id == cardId) {
+      return card.imageUrl;
+    }
+  }
+  return null;
 }

@@ -4,6 +4,7 @@ import 'package:hive/hive.dart';
 
 import '../data/repositories/ai_repository.dart';
 import '../data/repositories/card_stats_repository.dart';
+import '../data/repositories/cards_repository.dart';
 import '../data/repositories/data_repository.dart';
 import '../data/repositories/readings_repository.dart';
 import '../data/models/deck_model.dart';
@@ -11,6 +12,10 @@ import 'reading_flow_controller.dart';
 
 final dataRepositoryProvider = Provider<DataRepository>((ref) {
   return DataRepository();
+});
+
+final cardsRepositoryProvider = Provider<CardsRepository>((ref) {
+  return CardsRepository();
 });
 
 final aiRepositoryProvider = Provider<AiRepository>((ref) {
@@ -87,7 +92,7 @@ final useCachedSpreadsProvider = StateProvider<bool>((ref) => false);
 final cardsProvider = FutureProvider((ref) async {
   final locale = ref.watch(localeProvider);
   final deckId = ref.watch(deckProvider);
-  final repo = ref.watch(dataRepositoryProvider);
+  final repo = ref.watch(cardsRepositoryProvider);
   final useCached = ref.watch(useCachedCardsProvider);
   if (useCached) {
     return repo.loadCachedCards(locale: locale, deckId: deckId);

@@ -3,8 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
-import '../../core/assets/asset_paths.dart';
 import '../../core/telegram/telegram_web_app.dart';
+import '../../data/models/card_model.dart';
 import '../../data/models/deck_model.dart';
 import '../../state/providers.dart';
 
@@ -18,6 +18,7 @@ class SettingsScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final locale = ref.watch(localeProvider);
     final deckId = ref.watch(deckProvider);
+    final cards = ref.watch(cardsProvider).asData?.value ?? const <CardModel>[];
     final useTelegramAppBar =
         TelegramWebApp.isTelegramWebView && TelegramWebApp.isTelegramMobile;
 
@@ -66,6 +67,7 @@ class SettingsScreen extends ConsumerWidget {
             _DeckOption(
               label: l10n.deckAll,
               deckId: DeckId.all,
+              previewUrl: _previewImageUrl(cards, DeckId.all),
               groupValue: deckId,
               onSelected: (value) {
                 ref.read(deckProvider.notifier).setDeck(value);
@@ -74,6 +76,7 @@ class SettingsScreen extends ConsumerWidget {
             _DeckOption(
               label: l10n.deckMajor,
               deckId: DeckId.major,
+              previewUrl: _previewImageUrl(cards, DeckId.major),
               groupValue: deckId,
               onSelected: (value) {
                 ref.read(deckProvider.notifier).setDeck(value);
@@ -82,6 +85,7 @@ class SettingsScreen extends ConsumerWidget {
             _DeckOption(
               label: l10n.deckWands,
               deckId: DeckId.wands,
+              previewUrl: _previewImageUrl(cards, DeckId.wands),
               groupValue: deckId,
               onSelected: (value) {
                 ref.read(deckProvider.notifier).setDeck(value);
@@ -90,6 +94,7 @@ class SettingsScreen extends ConsumerWidget {
             _DeckOption(
               label: l10n.deckSwords,
               deckId: DeckId.swords,
+              previewUrl: _previewImageUrl(cards, DeckId.swords),
               groupValue: deckId,
               onSelected: (value) {
                 ref.read(deckProvider.notifier).setDeck(value);
@@ -98,6 +103,7 @@ class SettingsScreen extends ConsumerWidget {
             _DeckOption(
               label: l10n.deckPentacles,
               deckId: DeckId.pentacles,
+              previewUrl: _previewImageUrl(cards, DeckId.pentacles),
               groupValue: deckId,
               onSelected: (value) {
                 ref.read(deckProvider.notifier).setDeck(value);
@@ -106,6 +112,7 @@ class SettingsScreen extends ConsumerWidget {
             _DeckOption(
               label: l10n.deckCups,
               deckId: DeckId.cups,
+              previewUrl: _previewImageUrl(cards, DeckId.cups),
               groupValue: deckId,
               onSelected: (value) {
                 ref.read(deckProvider.notifier).setDeck(value);
@@ -118,11 +125,8 @@ class SettingsScreen extends ConsumerWidget {
                 leading: const Icon(Icons.bug_report_outlined),
                 title: Text(l10n.deckDebugLogLabel),
                 onTap: () {
-                  final path = cardImageUrl(
-                    'wands_13_ace',
-                    deckId: DeckId.wands,
-                  );
-                  debugPrint('Wands sample asset: $path');
+                  final path = _previewImageUrl(cards, DeckId.wands) ?? '—';
+                  debugPrint('Wands sample image: $path');
                 },
               ),
             ],
@@ -137,20 +141,19 @@ class _DeckOption extends StatelessWidget {
   const _DeckOption({
     required this.label,
     required this.deckId,
+    required this.previewUrl,
     required this.groupValue,
     required this.onSelected,
   });
 
   final String label;
   final DeckId deckId;
+  final String? previewUrl;
   final DeckId groupValue;
   final ValueChanged<DeckId> onSelected;
 
   @override
   Widget build(BuildContext context) {
-    final previewId = _previewCardId(deckId);
-    final previewUrl = cardImageUrl(previewId, deckId: deckId);
-
     return Card(
       child: RadioListTile<DeckId>(
         value: deckId,
@@ -164,23 +167,6 @@ class _DeckOption extends StatelessWidget {
         secondary: _DeckPreviewThumbnail(imageUrl: previewUrl),
       ),
     );
-  }
-
-  String _previewCardId(DeckId deckId) {
-    switch (deckId) {
-      case DeckId.wands:
-        return 'wands_13_ace';
-      case DeckId.swords:
-        return 'swords_13_ace';
-      case DeckId.pentacles:
-        return 'pentacles_13_ace';
-      case DeckId.cups:
-        return 'cups_13_ace';
-      case DeckId.major:
-      case DeckId.all:
-      default:
-        return 'major_00_fool';
-    }
   }
 }
 
@@ -217,7 +203,7 @@ class _LanguageOption extends StatelessWidget {
 class _DeckPreviewThumbnail extends StatelessWidget {
   const _DeckPreviewThumbnail({required this.imageUrl});
 
-  final String imageUrl;
+  final String? imageUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -225,40 +211,78 @@ class _DeckPreviewThumbnail extends StatelessWidget {
     const height = 54.0;
     return ClipRRect(
       borderRadius: BorderRadius.circular(6),
-      child: Image.network(
-        imageUrl,
-        width: width,
-        height: height,
-        fit: BoxFit.cover,
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) {
-            return child;
-          }
-          return const SizedBox(
-            width: width,
-            height: height,
-            child: Center(
-              child: SizedBox(
-                width: 12,
-                height: 12,
-                child: CircularProgressIndicator(strokeWidth: 2),
+      child: imageUrl == null || imageUrl!.isEmpty
+          ? Container(
+              width: width,
+              height: height,
+              color: Theme.of(context).colorScheme.surfaceVariant,
+              alignment: Alignment.center,
+              child: const Icon(
+                Icons.image_not_supported_outlined,
+                size: 16,
               ),
+            )
+          : Image.network(
+              imageUrl!,
+              width: width,
+              height: height,
+              fit: BoxFit.cover,
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) {
+                  return child;
+                }
+                return const SizedBox(
+                  width: width,
+                  height: height,
+                  child: Center(
+                    child: SizedBox(
+                      width: 12,
+                      height: 12,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  ),
+                );
+              },
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  width: width,
+                  height: height,
+                  color: Theme.of(context).colorScheme.surfaceVariant,
+                  alignment: Alignment.center,
+                  child: const Icon(
+                    Icons.image_not_supported_outlined,
+                    size: 16,
+                  ),
+                );
+              },
             ),
-          );
-        },
-        errorBuilder: (context, error, stackTrace) {
-          return Container(
-            width: width,
-            height: height,
-            color: Theme.of(context).colorScheme.surfaceVariant,
-            alignment: Alignment.center,
-            child: const Icon(
-              Icons.image_not_supported_outlined,
-              size: 16,
-            ),
-          );
-        },
-      ),
     );
   }
+}
+
+String? _previewImageUrl(List<CardModel> cards, DeckId deckId) {
+  if (cards.isEmpty) {
+    return null;
+  }
+  String previewId;
+  switch (deckId) {
+    case DeckId.wands:
+      previewId = 'wands_13_ace';
+    case DeckId.swords:
+      previewId = 'swords_13_ace';
+    case DeckId.pentacles:
+      previewId = 'pentacles_13_ace';
+    case DeckId.cups:
+      previewId = 'cups_13_ace';
+    case DeckId.major:
+    case DeckId.all:
+      previewId = 'major_00_fool';
+  }
+  final normalizedId = canonicalCardId(previewId);
+  for (final card in cards) {
+    if (card.id == normalizedId) {
+      return card.imageUrl;
+    }
+  }
+  return cards.first.imageUrl;
 }

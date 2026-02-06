@@ -13,10 +13,10 @@ void main() {
 
     for (final file in files) {
       final contents = File(file).readAsStringSync();
-      final data = jsonDecode(contents) as Map<String, dynamic>;
-      final missing = data.entries.where((entry) {
-        final value = entry.value as Map<String, dynamic>;
-        final detailed = value['detailedDescription'] as String?;
+      final data = jsonDecode(contents);
+      final entries = _coerceEntries(data);
+      final missing = entries.where((entry) {
+        final detailed = entry['detailedDescription'] as String?;
         return detailed == null || detailed.trim().isEmpty;
       });
       expect(
@@ -36,9 +36,33 @@ void main() {
 
     for (final file in files) {
       final contents = File(file).readAsStringSync();
-      final data = jsonDecode(contents) as Map<String, dynamic>;
-      final cups = data.keys.where((key) => key.startsWith('cups_')).toList();
+      final data = jsonDecode(contents);
+      final entries = _coerceEntries(data);
+      final cups = entries.where((entry) {
+        final deck = entry['deck'] as String?;
+        final id = entry['id'] as String? ?? '';
+        return deck == 'cups' || id.startsWith('cups_');
+      });
       expect(cups.length, 14, reason: 'Expected 14 cups cards in $file.');
     }
   });
+}
+
+List<Map<String, dynamic>> _coerceEntries(Object? payload) {
+  if (payload is List<dynamic>) {
+    return payload.whereType<Map<String, dynamic>>().toList();
+  }
+  if (payload is Map<String, dynamic>) {
+    return payload.entries
+        .where((entry) => entry.value is Map<String, dynamic>)
+        .map((entry) {
+          final value = Map<String, dynamic>.from(
+            entry.value as Map<String, dynamic>,
+          );
+          value['id'] ??= entry.key;
+          return value;
+        })
+        .toList();
+  }
+  return [];
 }

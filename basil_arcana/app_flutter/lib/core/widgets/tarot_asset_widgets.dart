@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../core/assets/asset_paths.dart';
+import '../../data/models/card_model.dart';
 import '../../data/models/deck_model.dart';
 import '../../state/providers.dart';
 
@@ -27,14 +28,17 @@ class CardMediaResolver {
 
   CardMediaAssets resolve(
     String cardId, {
+    String? imageUrlOverride,
+    String? videoUrlOverride,
     String? videoFileNameOverride,
   }) {
-    final imageUrl = cardImageUrl(cardId, deckId: deckId);
-    final resolvedVideo = videoUrlForCard(
-      cardId,
-      availableVideoFiles: availableVideoFiles,
-      videoFileNameOverride: videoFileNameOverride,
-    );
+    final imageUrl = imageUrlOverride ?? cardImageUrl(cardId, deckId: deckId);
+    final resolvedVideo = videoUrlOverride ??
+        videoUrlForCard(
+          cardId,
+          availableVideoFiles: availableVideoFiles,
+          videoFileNameOverride: videoFileNameOverride,
+        );
     return CardMediaAssets(
       imageUrl: imageUrl,
       videoUrl: resolvedVideo,
@@ -46,6 +50,7 @@ class CardAssetImage extends ConsumerWidget {
   const CardAssetImage({
     super.key,
     required this.cardId,
+    this.imageUrl,
     this.width,
     this.height,
     this.borderRadius,
@@ -54,6 +59,7 @@ class CardAssetImage extends ConsumerWidget {
   });
 
   final String cardId;
+  final String? imageUrl;
   final double? width;
   final double? height;
   final BorderRadius? borderRadius;
@@ -64,37 +70,35 @@ class CardAssetImage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
     final radius = borderRadius ?? BorderRadius.circular(18);
-    final deckId = ref.watch(deckProvider);
-    final resolvedPath = cardImageUrl(cardId, deckId: deckId);
+    final cardsAsync = ref.watch(cardsProvider);
+    final resolvedPath = imageUrl ??
+        cardsAsync.asData?.value
+            .firstWhere(
+              (card) => card.id == cardId,
+              orElse: () => const CardModel(
+                id: '',
+                deckId: DeckId.major,
+                name: '',
+                keywords: [],
+                meaning: CardMeaning(
+                  general: '',
+                  light: '',
+                  shadow: '',
+                  advice: '',
+                ),
+                imageUrl: '',
+              ),
+            )
+            .imageUrl;
     final image = Image.network(
-      resolvedPath,
+      resolvedPath ?? '',
       width: width,
       height: height,
       fit: fit,
       filterQuality: FilterQuality.high,
       errorBuilder: (context, error, stackTrace) {
-        if (deckId != DeckId.major) {
-          return Image.network(
-            cardImageUrl(cardId, deckId: DeckId.major),
-            width: width,
-            height: height,
-            fit: fit,
-            filterQuality: FilterQuality.high,
-            errorBuilder: (context, error, stackTrace) {
-              assert(() {
-                debugPrint('Missing card asset for $cardId');
-                return true;
-              }());
-              return _MissingCardPlaceholder(
-                width: width,
-                height: height,
-                borderRadius: radius,
-              );
-            },
-          );
-        }
         assert(() {
-          debugPrint('Missing card asset for $cardId');
+          debugPrint('Missing card image for $cardId');
           return true;
         }());
         return _MissingCardPlaceholder(
@@ -134,6 +138,7 @@ class CardMedia extends StatefulWidget {
   const CardMedia({
     super.key,
     required this.cardId,
+    this.imageUrl,
     this.videoUrl,
     this.width,
     this.height,
@@ -146,6 +151,7 @@ class CardMedia extends StatefulWidget {
   });
 
   final String cardId;
+  final String? imageUrl;
   final String? videoUrl;
   final double? width;
   final double? height;
@@ -368,6 +374,7 @@ class _CardMediaState extends State<CardMedia> {
         children: [
           CardAssetImage(
             cardId: widget.cardId,
+            imageUrl: widget.imageUrl,
             width: widget.width,
             height: widget.height,
             borderRadius: radius,

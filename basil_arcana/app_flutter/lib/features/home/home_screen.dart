@@ -78,10 +78,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   void _showDebugOverlay(BuildContext context, Locale locale) {
     final config = ConfigService.instance;
-    final repo = ref.read(dataRepositoryProvider);
-    final cacheKey = repo.spreadsCacheKey(locale);
-    final lastRequestedUrl = repo.lastAttemptedUrls[cacheKey] ?? '—';
-    final lastError = repo.lastError ?? config.lastError ?? 'None';
+    final cardsRepo = ref.read(cardsRepositoryProvider);
+    final spreadsRepo = ref.read(dataRepositoryProvider);
+    final cardsCacheKey = cardsRepo.cardsCacheKey(locale);
+    final spreadsCacheKey = spreadsRepo.spreadsCacheKey(locale);
+    final lastRequestedCardsUrl =
+        cardsRepo.lastAttemptedUrls[cardsCacheKey] ?? '—';
+    final lastRequestedSpreadsUrl =
+        spreadsRepo.lastAttemptedUrls[spreadsCacheKey] ?? '—';
+    final cardsStatusCode = cardsRepo.lastStatusCodes[cardsCacheKey];
+    final lastError = cardsRepo.lastError ??
+        spreadsRepo.lastError ??
+        config.lastError ??
+        'None';
     showDialog<void>(
       context: context,
       builder: (dialogContext) {
@@ -110,8 +119,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   textTheme: textTheme,
                 ),
                 _DebugLine(
-                  label: 'Last requested URL',
-                  value: lastRequestedUrl,
+                  label: 'Cards URL',
+                  value: cardsRepo.cardsUrlForLocale(locale),
+                  textTheme: textTheme,
+                ),
+                _DebugLine(
+                  label: 'Cards last requested URL',
+                  value: lastRequestedCardsUrl,
+                  textTheme: textTheme,
+                ),
+                _DebugLine(
+                  label: 'Cards last status',
+                  value: cardsStatusCode?.toString() ?? '—',
+                  textTheme: textTheme,
+                ),
+                _DebugLine(
+                  label: 'Spreads last requested URL',
+                  value: lastRequestedSpreadsUrl,
                   textTheme: textTheme,
                 ),
                 _DebugLine(
