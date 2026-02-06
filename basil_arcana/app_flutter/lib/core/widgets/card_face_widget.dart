@@ -59,6 +59,7 @@ class CardFaceWidget extends ConsumerWidget {
                   availableVideoFiles: availableVideos,
                 ).resolve(
                   cardId!,
+                  card: resolvedCard,
                   imageUrlOverride: resolvedCard?.imageUrl,
                   videoUrlOverride: resolvedCard?.videoUrl,
                 );

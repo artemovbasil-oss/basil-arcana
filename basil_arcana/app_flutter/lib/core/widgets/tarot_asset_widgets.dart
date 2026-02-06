@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../core/assets/asset_paths.dart';
+import '../../core/config/assets_config.dart';
 import '../../data/models/card_model.dart';
 import '../../data/models/deck_model.dart';
 import '../../state/providers.dart';
@@ -28,17 +29,35 @@ class CardMediaResolver {
 
   CardMediaAssets resolve(
     String cardId, {
+    CardModel? card,
     String? imageUrlOverride,
     String? videoUrlOverride,
-    String? videoFileNameOverride,
   }) {
     final imageUrl = imageUrlOverride ?? cardImageUrl(cardId, deckId: deckId);
-    final resolvedVideo = videoUrlOverride ??
-        videoUrlForCard(
-          cardId,
-          availableVideoFiles: availableVideoFiles,
-          videoFileNameOverride: videoFileNameOverride,
+    final fallbackCard = card ??
+        CardModel(
+          id: cardId,
+          deckId: deckId,
+          name: '',
+          keywords: const [],
+          meaning: const CardMeaning(
+            general: '',
+            light: '',
+            shadow: '',
+            advice: '',
+          ),
+          imageUrl: imageUrl,
         );
+    String? resolvedVideo =
+        videoUrlOverride ?? cardVideoUrl(fallbackCard, AssetsConfig.assetsBaseUrl);
+    if (resolvedVideo != null &&
+        availableVideoFiles != null &&
+        availableVideoFiles!.isNotEmpty) {
+      final fileName = resolvedVideo.split('/').last.toLowerCase();
+      if (!availableVideoFiles!.contains(fileName)) {
+        resolvedVideo = null;
+      }
+    }
     return CardMediaAssets(
       imageUrl: imageUrl,
       videoUrl: resolvedVideo,
@@ -274,7 +293,7 @@ class _CardMediaState extends State<CardMedia> {
     }
     _controllerCache[cacheKey]?.refCount++;
     controller
-      ..setLooping(false)
+      ..setLooping(true)
       ..setVolume(0.0);
     try {
       if (!controller.value.isInitialized) {
@@ -512,7 +531,7 @@ class DeckCoverBack extends ConsumerWidget {
       ),
       child: ClipRRect(
         borderRadius: radius,
-        child: Image.asset(
+        child: Image.network(
           coverPath,
           width: width,
           height: height,
@@ -520,7 +539,7 @@ class DeckCoverBack extends ConsumerWidget {
           filterQuality: FilterQuality.high,
           errorBuilder: (context, error, stackTrace) {
             if (deckId != DeckId.major) {
-              return Image.asset(
+              return Image.network(
                 deckCoverAssetPath(DeckId.major),
                 width: width,
                 height: height,

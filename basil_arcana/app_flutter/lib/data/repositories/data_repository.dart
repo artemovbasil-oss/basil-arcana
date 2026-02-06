@@ -263,7 +263,8 @@ bool _isValidCardsJson(Object? payload) {
     return false;
   }
   final sample = firstEntry.value as Map<String, dynamic>;
-  return sample.containsKey('title') && sample.containsKey('meaning');
+  return sample.containsKey('title') &&
+      (sample.containsKey('meaning') || sample.containsKey('summary'));
 }
 
 bool _isValidSpreadsJson(Object? payload) {

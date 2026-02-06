@@ -76,9 +76,9 @@ class CardDetailScreen extends ConsumerWidget {
                     availableVideoFiles: availableVideos,
                   ).resolve(
                     resolvedCard.id,
+                    card: resolvedCard,
                     imageUrlOverride: resolvedCard.imageUrl,
                     videoUrlOverride: resolvedCard.videoUrl,
-                    videoFileNameOverride: resolvedCard.videoFileName,
                   );
                   return CardMedia(
                     cardId: resolvedCard.id,

@@ -1,4 +1,3 @@
-import '../../data/models/card_video.dart';
 import '../../data/models/deck_model.dart';
 import '../config/assets_config.dart';
 
@@ -58,18 +57,16 @@ String cardsUrl(String languageCode) {
   return '$base/data/cards_${lang}.json';
 }
 
-String? videoUrlForCard(
-  String cardId, {
-  Set<String>? availableVideoFiles,
-  String? videoFileNameOverride,
-}) {
-  final fileName = videoFileNameOverride ??
-      resolveCardVideoFileName(cardId, availableFiles: availableVideoFiles);
-  if (fileName == null) {
-    return null;
-  }
-  final base = AssetsConfig.assetsBaseUrl;
-  return '$base/video/${normalizeVideoFileName(fileName)}';
+String deckPreviewImageUrl(DeckId deckId) {
+  final previewId = switch (deckId) {
+    DeckId.major => majorCardIds.first,
+    DeckId.wands => wandsCardIds.first,
+    DeckId.swords => swordsCardIds.first,
+    DeckId.pentacles => pentaclesCardIds.first,
+    DeckId.cups => cupsCardIds.first,
+    DeckId.all => majorCardIds.first,
+  };
+  return cardImageUrl(previewId, deckId: deckId);
 }
 
 String deckCoverAssetPath(DeckId deckId) {
@@ -81,6 +78,6 @@ String deckCoverAssetPath(DeckId deckId) {
     case DeckId.major:
     case DeckId.all:
     default:
-      return 'assets/deck/cover.webp';
+      return deckPreviewImageUrl(deckId);
   }
 }
