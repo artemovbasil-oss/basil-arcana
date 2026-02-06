@@ -1,6 +1,5 @@
 import 'dart:collection';
 import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -8,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/assets/asset_paths.dart';
 import '../../core/config/assets_config.dart';
+import '../../core/network/json_loader.dart';
 import '../models/card_model.dart';
 import '../models/deck_model.dart';
 import '../models/spread_model.dart';
@@ -22,7 +22,13 @@ class DataRepository {
   final Map<String, DateTime> _lastCacheTimes = {};
   final Map<String, String> _lastAttemptedUrls = {};
   final Map<String, int> _lastStatusCodes = {};
-  final Map<String, String> _lastResponseBodies = {};
+  final Map<String, String> _lastResponseSnippetsStart = {};
+  final Map<String, String> _lastResponseSnippetsEnd = {};
+  final Map<String, String?> _lastContentTypes = {};
+  final Map<String, String?> _lastContentLengths = {};
+  final Map<String, int> _lastResponseStringLengths = {};
+  final Map<String, int> _lastResponseByteLengths = {};
+  final Map<String, String> _lastResponseRootTypes = {};
   SharedPreferences? _preferences;
   String? _lastError;
 
@@ -38,8 +44,20 @@ class DataRepository {
       UnmodifiableMapView(_lastAttemptedUrls);
   UnmodifiableMapView<String, int> get lastStatusCodes =>
       UnmodifiableMapView(_lastStatusCodes);
-  UnmodifiableMapView<String, String> get lastResponseBodies =>
-      UnmodifiableMapView(_lastResponseBodies);
+  UnmodifiableMapView<String, String> get lastResponseSnippetsStart =>
+      UnmodifiableMapView(_lastResponseSnippetsStart);
+  UnmodifiableMapView<String, String> get lastResponseSnippetsEnd =>
+      UnmodifiableMapView(_lastResponseSnippetsEnd);
+  UnmodifiableMapView<String, String?> get lastContentTypes =>
+      UnmodifiableMapView(_lastContentTypes);
+  UnmodifiableMapView<String, String?> get lastContentLengths =>
+      UnmodifiableMapView(_lastContentLengths);
+  UnmodifiableMapView<String, int> get lastResponseStringLengths =>
+      UnmodifiableMapView(_lastResponseStringLengths);
+  UnmodifiableMapView<String, int> get lastResponseByteLengths =>
+      UnmodifiableMapView(_lastResponseByteLengths);
+  UnmodifiableMapView<String, String> get lastResponseRootTypes =>
+      UnmodifiableMapView(_lastResponseRootTypes);
   String? get lastError => _lastError;
 
   String get assetsBaseUrl => AssetsConfig.assetsBaseUrl;
@@ -72,23 +90,23 @@ class DataRepository {
     required Locale locale,
     required DeckId deckId,
   }) async {
-    final filename = cardsFileNameForLocale(locale);
     final cacheKey = cardsCacheKey(locale);
     final raw = await _loadJsonWithFallback(
       uri: Uri.parse(cardsUrl(locale.languageCode)),
       cacheKey: cacheKey,
       validator: _isValidCardsJson,
+      expectedRootTypes: {'Map'},
     );
     return _parseCards(raw: raw, deckId: deckId);
   }
 
   Future<List<SpreadModel>> fetchSpreads({required Locale locale}) async {
-    final filename = spreadsFileNameForLocale(locale);
     final cacheKey = spreadsCacheKey(locale);
     final raw = await _loadJsonWithFallback(
       uri: Uri.parse(spreadsUrl(locale.languageCode)),
       cacheKey: cacheKey,
       validator: _isValidSpreadsJson,
+      expectedRootTypes: {'List'},
     );
     return _parseSpreads(raw: raw);
   }
@@ -98,6 +116,7 @@ class DataRepository {
       uri: Uri.parse('$assetsBaseUrl/data/video_index.json'),
       cacheKey: _videoIndexKey,
       validator: _isValidVideoIndex,
+      expectedRootTypes: {'List', 'Map'},
     );
     if (raw == null) {
       return null;
@@ -119,34 +138,36 @@ class DataRepository {
     required Uri uri,
     required String cacheKey,
     required bool Function(Object?) validator,
+    required Set<String> expectedRootTypes,
   }) async {
     _lastAttemptedUrls[cacheKey] = uri.toString();
     try {
-      final response = await _client.get(uri);
-      _lastStatusCodes[cacheKey] = response.statusCode;
-      _lastResponseBodies[cacheKey] = _responseSnippet(response.body);
-      if (response.statusCode < 200 || response.statusCode >= 300) {
+      final result = await fetchJson(client: _client, uri: uri);
+      _recordResponseInfo(cacheKey, result.response);
+      final rootType = jsonRootType(result.decoded);
+      _lastResponseRootTypes[cacheKey] = rootType;
+      if (!expectedRootTypes.contains(rootType)) {
+        final expected = expectedRootTypes.join(' or ');
         throw DataLoadException(
-          'HTTP ${response.statusCode}',
+          'Unexpected JSON root type: $rootType (expected $expected)',
           cacheKey: cacheKey,
         );
       }
-      try {
-        if (!validator(jsonDecode(response.body))) {
-          throw DataLoadException('Invalid JSON payload', cacheKey: cacheKey);
-        }
-      } on FormatException catch (error) {
+      if (!validator(result.decoded)) {
         throw DataLoadException(
-          'Invalid JSON payload: ${error.message}',
+          'Invalid JSON payload: unexpected structure',
           cacheKey: cacheKey,
         );
       }
-      await _storeCache(cacheKey, response.body);
+      await _storeCache(cacheKey, result.raw);
       _lastFetchTimes[cacheKey] = DateTime.now();
       _lastError = null;
-      return response.body;
-    } catch (error) {
-      _lastError = error.toString();
+      return result.raw;
+    } catch (error, stackTrace) {
+      _lastError = '${error.toString()}\n$stackTrace';
+      if (error is JsonFetchException && error.response != null) {
+        _recordResponseInfo(cacheKey, error.response!);
+      }
       if (kDebugMode) {
         debugPrint(
           '[DataRepository] fetchError url=${uri.toString()} '
@@ -155,10 +176,17 @@ class DataRepository {
       }
       final cached = await _readCache(cacheKey);
       if (cached != null) {
-        final decoded = jsonDecode(cached);
-        if (validator(decoded)) {
-          _lastCacheTimes[cacheKey] = DateTime.now();
-          return cached;
+        try {
+          final parsed = parseJsonString(cached);
+          final rootType = jsonRootType(parsed.decoded);
+          _lastResponseRootTypes[cacheKey] = rootType;
+          if (expectedRootTypes.contains(rootType) &&
+              validator(parsed.decoded)) {
+            _lastCacheTimes[cacheKey] = DateTime.now();
+            return parsed.raw;
+          }
+        } on FormatException {
+          // ignore invalid cache
         }
       }
       if (error is DataLoadException) {
@@ -172,27 +200,38 @@ class DataRepository {
     required Uri uri,
     required String cacheKey,
     required bool Function(Object?) validator,
+    required Set<String> expectedRootTypes,
   }) async {
     _lastAttemptedUrls[cacheKey] = uri.toString();
     try {
-      final response = await _client.get(uri);
-      _lastStatusCodes[cacheKey] = response.statusCode;
-      _lastResponseBodies[cacheKey] = _responseSnippet(response.body);
-      if (response.statusCode == 404) {
+      final response = await _client.get(
+        uri,
+        headers: const {
+          'Accept': 'application/json',
+        },
+      );
+      final parsed = decodeJsonResponse(response: response, uri: uri);
+      _recordResponseInfo(cacheKey, parsed.response);
+      if (response.statusCode == 404 ||
+          response.statusCode < 200 ||
+          response.statusCode >= 300) {
         return await _readCache(cacheKey);
       }
-      if (response.statusCode < 200 || response.statusCode >= 300) {
+      final rootType = jsonRootType(parsed.decoded);
+      _lastResponseRootTypes[cacheKey] = rootType;
+      if (!expectedRootTypes.contains(rootType) ||
+          !validator(parsed.decoded)) {
         return await _readCache(cacheKey);
       }
-      if (!validator(jsonDecode(response.body))) {
-        return await _readCache(cacheKey);
-      }
-      await _storeCache(cacheKey, response.body);
+      await _storeCache(cacheKey, parsed.raw);
       _lastFetchTimes[cacheKey] = DateTime.now();
       _lastError = null;
-      return response.body;
-    } catch (error) {
-      _lastError = error.toString();
+      return parsed.raw;
+    } catch (error, stackTrace) {
+      _lastError = '${error.toString()}\n$stackTrace';
+      if (error is JsonFetchException && error.response != null) {
+        _recordResponseInfo(cacheKey, error.response!);
+      }
       return await _readCache(cacheKey);
     }
   }
@@ -234,11 +273,14 @@ class DataRepository {
     if (raw == null) {
       throw DataLoadException('No cached cards available', cacheKey: cacheKey);
     }
-    if (!_isValidCardsJson(jsonDecode(raw))) {
+    final parsed = parseJsonString(raw);
+    final rootType = jsonRootType(parsed.decoded);
+    _lastResponseRootTypes[cacheKey] = rootType;
+    if (rootType != 'Map' || !_isValidCardsJson(parsed.decoded)) {
       throw DataLoadException('Cached cards are invalid', cacheKey: cacheKey);
     }
     _lastCacheTimes[cacheKey] = DateTime.now();
-    return _parseCards(raw: raw, deckId: deckId);
+    return _parseCards(raw: parsed.raw, deckId: deckId);
   }
 
   Future<List<SpreadModel>> loadCachedSpreads({required Locale locale}) async {
@@ -247,19 +289,25 @@ class DataRepository {
     if (raw == null) {
       throw DataLoadException('No cached spreads available', cacheKey: cacheKey);
     }
-    if (!_isValidSpreadsJson(jsonDecode(raw))) {
+    final parsed = parseJsonString(raw);
+    final rootType = jsonRootType(parsed.decoded);
+    _lastResponseRootTypes[cacheKey] = rootType;
+    if (rootType != 'List' || !_isValidSpreadsJson(parsed.decoded)) {
       throw DataLoadException('Cached spreads are invalid', cacheKey: cacheKey);
     }
     _lastCacheTimes[cacheKey] = DateTime.now();
-    return _parseSpreads(raw: raw);
+    return _parseSpreads(raw: parsed.raw);
   }
-}
 
-String _responseSnippet(String body) {
-  if (body.isEmpty) {
-    return '';
+  void _recordResponseInfo(String cacheKey, JsonResponseInfo response) {
+    _lastStatusCodes[cacheKey] = response.statusCode;
+    _lastContentTypes[cacheKey] = response.contentType;
+    _lastContentLengths[cacheKey] = response.contentLengthHeader;
+    _lastResponseSnippetsStart[cacheKey] = response.responseSnippetStart;
+    _lastResponseSnippetsEnd[cacheKey] = response.responseSnippetEnd;
+    _lastResponseStringLengths[cacheKey] = response.stringLength;
+    _lastResponseByteLengths[cacheKey] = response.bytesLength;
   }
-  return body.length <= 200 ? body : body.substring(0, 200);
 }
 
 class DataLoadException implements Exception {

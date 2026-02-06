@@ -79,3 +79,30 @@ String deckCoverAssetPath(DeckId deckId) {
       return deckPreviewImageUrl(deckId);
   }
 }
+
+String? videoUrlForCard(String cardId) {
+  final normalizedId = canonicalCardId(cardId);
+  final base = AssetsConfig.assetsBaseUrl;
+  if (normalizedId.startsWith('major_')) {
+    final parts = normalizedId.split('_');
+    if (parts.length >= 3) {
+      var name = parts.sublist(2).join('_');
+      if (normalizedId == 'major_10_wheel') {
+        name = 'wheel_of_fortune';
+      }
+      return '$base/video/$name.mp4';
+    }
+  }
+  final parts = normalizedId.split('_');
+  if (parts.length >= 3) {
+    final suit = parts.first;
+    final rank = parts.sublist(2).join('_');
+    if (rank == 'king' ||
+        rank == 'queen' ||
+        rank == 'knight' ||
+        rank == 'page') {
+      return '$base/video/${suit}_$rank.mp4';
+    }
+  }
+  return null;
+}
