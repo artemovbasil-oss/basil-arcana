@@ -2,6 +2,9 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_text_styles.dart';
+import '../../../core/widgets/app_buttons.dart';
+
 class AvatarCircle extends StatelessWidget {
   const AvatarCircle({
     super.key,
@@ -27,7 +30,7 @@ class AvatarCircle extends StatelessWidget {
       alignment: Alignment.center,
       child: Text(
         emoji,
-        style: const TextStyle(fontSize: 18),
+        style: AppTextStyles.subtitle(context),
       ),
     );
   }
@@ -163,15 +166,9 @@ class OracleTypingBubble extends StatelessWidget {
           ),
           if (cancelLabel != null && onCancel != null) ...[
             const SizedBox(height: 6),
-            TextButton(
+            AppSmallButton(
+              label: cancelLabel!,
               onPressed: onCancel,
-              style: TextButton.styleFrom(
-                padding: EdgeInsets.zero,
-                minimumSize: const Size(0, 0),
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                alignment: Alignment.centerLeft,
-              ),
-              child: Text(cancelLabel!),
             ),
           ],
         ],

@@ -70,18 +70,18 @@ final localeProvider =
   return LocaleNotifier(box);
 });
 
-class DeckNotifier extends StateNotifier<DeckId> {
+class DeckNotifier extends StateNotifier<DeckType> {
   DeckNotifier(this._box) : super(deckIdFromStorage(_box.get(_deckIdKey)));
 
   final Box<String> _box;
 
-  Future<void> setDeck(DeckId deckId) async {
+  Future<void> setDeck(DeckType deckId) async {
     state = deckId;
     await _box.put(_deckIdKey, deckStorageValues[deckId] ?? 'all');
   }
 }
 
-final deckProvider = StateNotifierProvider<DeckNotifier, DeckId>((ref) {
+final deckProvider = StateNotifierProvider<DeckNotifier, DeckType>((ref) {
   final box = Hive.box<String>(_settingsBoxName);
   return DeckNotifier(box);
 });

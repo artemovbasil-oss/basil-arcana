@@ -4,6 +4,7 @@ import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
 import '../../core/config/assets_config.dart';
 import '../../core/config/diagnostics.dart';
+import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/data_load_error.dart';
 import '../../core/widgets/tarot_asset_widgets.dart';
 import '../../data/models/card_model.dart';
@@ -187,10 +188,8 @@ class CardDetailScreen extends ConsumerWidget {
                                   side: BorderSide(
                                     color: colorScheme.outlineVariant,
                                   ),
-                                  labelStyle: TextStyle(
-                                    color: colorScheme.onSurface,
-                                    fontSize: 12,
-                                  ),
+                                  labelStyle: AppTextStyles.caption(context)
+                                      .copyWith(color: colorScheme.onSurface),
                                   visualDensity: VisualDensity.compact,
                                   materialTapTargetSize:
                                       MaterialTapTargetSize.shrinkWrap,

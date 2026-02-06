@@ -3,9 +3,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
+import '../../core/theme/app_text_styles.dart';
+import '../../core/widgets/app_buttons.dart';
+import '../../data/models/app_enums.dart';
 import '../../data/models/card_model.dart';
 import '../../data/models/deck_model.dart';
 import '../../state/providers.dart';
+import '../../state/settings_controller.dart';
+import '../home/home_screen.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -15,107 +20,133 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final locale = ref.watch(localeProvider);
-    final deckId = ref.watch(deckProvider);
+    final settingsState = ref.watch(settingsControllerProvider);
+    final settingsController = ref.read(settingsControllerProvider.notifier);
     final cards = ref.watch(cardsProvider).asData?.value ?? const <CardModel>[];
+    final isDirty = settingsState.isDirty;
+    final bottomPadding = isDirty ? 120.0 : 32.0;
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.settingsTitle),
         leading: Navigator.canPop(context) ? const BackButton() : null,
         automaticallyImplyLeading: Navigator.canPop(context),
       ),
+      bottomNavigationBar: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 220),
+        child: isDirty
+            ? SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+                  child: AppPrimaryButton(
+                    label: l10n.actionApply,
+                    onPressed: () async {
+                      await settingsController.apply();
+                      if (!context.mounted) {
+                        return;
+                      }
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(builder: (_) => const HomeScreen()),
+                        (route) => false,
+                      );
+                    },
+                  ),
+                ),
+              )
+            : const SizedBox.shrink(),
+      ),
       body: SafeArea(
         top: false,
         child: ListView(
-          padding: const EdgeInsets.all(20),
+          padding: EdgeInsets.fromLTRB(20, 20, 20, bottomPadding),
           children: [
             Text(
               l10n.languageLabel,
-              style: Theme.of(context).textTheme.titleSmall,
+              style: AppTextStyles.subtitle(context),
             ),
             const SizedBox(height: 8),
             _LanguageOption(
               label: l10n.languageEnglish,
-              locale: const Locale('en'),
-              groupValue: locale,
+              language: AppLanguage.en,
+              groupValue: settingsState.language,
               onSelected: (value) {
-                ref.read(localeProvider.notifier).setLocale(value);
+                settingsController.updateLanguage(value);
               },
             ),
             _LanguageOption(
               label: l10n.languageRussian,
-              locale: const Locale('ru'),
-              groupValue: locale,
+              language: AppLanguage.ru,
+              groupValue: settingsState.language,
               onSelected: (value) {
-                ref.read(localeProvider.notifier).setLocale(value);
+                settingsController.updateLanguage(value);
               },
             ),
             _LanguageOption(
               label: l10n.languageKazakh,
-              locale: const Locale('kk'),
-              groupValue: locale,
+              language: AppLanguage.kz,
+              groupValue: settingsState.language,
               onSelected: (value) {
-                ref.read(localeProvider.notifier).setLocale(value);
+                settingsController.updateLanguage(value);
               },
             ),
             const SizedBox(height: 20),
             Text(
               l10n.deckLabel,
-              style: Theme.of(context).textTheme.titleSmall,
+              style: AppTextStyles.subtitle(context),
             ),
             const SizedBox(height: 8),
             _DeckOption(
               label: l10n.deckAll,
-              deckId: DeckId.all,
-              previewUrl: _previewImageUrl(cards, DeckId.all),
-              groupValue: deckId,
+              deckType: DeckType.all,
+              previewUrl: _previewImageUrl(cards, DeckType.all),
+              groupValue: settingsState.deckType,
               onSelected: (value) {
-                ref.read(deckProvider.notifier).setDeck(value);
+                settingsController.updateDeck(value);
               },
             ),
             _DeckOption(
               label: l10n.deckMajor,
-              deckId: DeckId.major,
-              previewUrl: _previewImageUrl(cards, DeckId.major),
-              groupValue: deckId,
+              deckType: DeckType.major,
+              previewUrl: _previewImageUrl(cards, DeckType.major),
+              groupValue: settingsState.deckType,
               onSelected: (value) {
-                ref.read(deckProvider.notifier).setDeck(value);
+                settingsController.updateDeck(value);
               },
             ),
             _DeckOption(
               label: l10n.deckWands,
-              deckId: DeckId.wands,
-              previewUrl: _previewImageUrl(cards, DeckId.wands),
-              groupValue: deckId,
+              deckType: DeckType.wands,
+              previewUrl: _previewImageUrl(cards, DeckType.wands),
+              groupValue: settingsState.deckType,
               onSelected: (value) {
-                ref.read(deckProvider.notifier).setDeck(value);
+                settingsController.updateDeck(value);
               },
             ),
             _DeckOption(
               label: l10n.deckSwords,
-              deckId: DeckId.swords,
-              previewUrl: _previewImageUrl(cards, DeckId.swords),
-              groupValue: deckId,
+              deckType: DeckType.swords,
+              previewUrl: _previewImageUrl(cards, DeckType.swords),
+              groupValue: settingsState.deckType,
               onSelected: (value) {
-                ref.read(deckProvider.notifier).setDeck(value);
+                settingsController.updateDeck(value);
               },
             ),
             _DeckOption(
               label: l10n.deckPentacles,
-              deckId: DeckId.pentacles,
-              previewUrl: _previewImageUrl(cards, DeckId.pentacles),
-              groupValue: deckId,
+              deckType: DeckType.pentacles,
+              previewUrl: _previewImageUrl(cards, DeckType.pentacles),
+              groupValue: settingsState.deckType,
               onSelected: (value) {
-                ref.read(deckProvider.notifier).setDeck(value);
+                settingsController.updateDeck(value);
               },
             ),
             _DeckOption(
               label: l10n.deckCups,
-              deckId: DeckId.cups,
-              previewUrl: _previewImageUrl(cards, DeckId.cups),
-              groupValue: deckId,
+              deckType: DeckType.cups,
+              previewUrl: _previewImageUrl(cards, DeckType.cups),
+              groupValue: settingsState.deckType,
               onSelected: (value) {
-                ref.read(deckProvider.notifier).setDeck(value);
+                settingsController.updateDeck(value);
               },
             ),
             if (kDebugMode) ...[
@@ -125,7 +156,7 @@ class SettingsScreen extends ConsumerWidget {
                 leading: const Icon(Icons.bug_report_outlined),
                 title: Text(l10n.deckDebugLogLabel),
                 onTap: () {
-                  final path = _previewImageUrl(cards, DeckId.wands) ?? '—';
+                  final path = _previewImageUrl(cards, DeckType.wands) ?? '—';
                   debugPrint('Wands sample image: $path');
                 },
               ),
@@ -140,23 +171,26 @@ class SettingsScreen extends ConsumerWidget {
 class _DeckOption extends StatelessWidget {
   const _DeckOption({
     required this.label,
-    required this.deckId,
+    required this.deckType,
     required this.previewUrl,
     required this.groupValue,
     required this.onSelected,
   });
 
   final String label;
-  final DeckId deckId;
+  final DeckType deckType;
   final String? previewUrl;
-  final DeckId groupValue;
-  final ValueChanged<DeckId> onSelected;
+  final DeckType groupValue;
+  final ValueChanged<DeckType> onSelected;
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isSelected = deckType == groupValue;
     return Card(
-      child: RadioListTile<DeckId>(
-        value: deckId,
+      color: isSelected ? colorScheme.primary.withOpacity(0.12) : null,
+      child: RadioListTile<DeckType>(
+        value: deckType,
         groupValue: groupValue,
         onChanged: (value) {
           if (value != null) {
@@ -173,21 +207,24 @@ class _DeckOption extends StatelessWidget {
 class _LanguageOption extends StatelessWidget {
   const _LanguageOption({
     required this.label,
-    required this.locale,
+    required this.language,
     required this.groupValue,
     required this.onSelected,
   });
 
   final String label;
-  final Locale locale;
-  final Locale groupValue;
-  final ValueChanged<Locale> onSelected;
+  final AppLanguage language;
+  final AppLanguage groupValue;
+  final ValueChanged<AppLanguage> onSelected;
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isSelected = language == groupValue;
     return Card(
-      child: RadioListTile<Locale>(
-        value: locale,
+      color: isSelected ? colorScheme.primary.withOpacity(0.12) : null,
+      child: RadioListTile<AppLanguage>(
+        value: language,
         groupValue: groupValue,
         onChanged: (value) {
           if (value != null) {
@@ -260,22 +297,22 @@ class _DeckPreviewThumbnail extends StatelessWidget {
   }
 }
 
-String? _previewImageUrl(List<CardModel> cards, DeckId deckId) {
+String? _previewImageUrl(List<CardModel> cards, DeckType deckId) {
   if (cards.isEmpty) {
     return null;
   }
   String previewId;
   switch (deckId) {
-    case DeckId.wands:
+    case DeckType.wands:
       previewId = wandsCardIds.first;
-    case DeckId.swords:
+    case DeckType.swords:
       previewId = swordsCardIds.first;
-    case DeckId.pentacles:
+    case DeckType.pentacles:
       previewId = pentaclesCardIds.first;
-    case DeckId.cups:
+    case DeckType.cups:
       previewId = cupsCardIds.first;
-    case DeckId.major:
-    case DeckId.all:
+    case DeckType.major:
+    case DeckType.all:
       previewId = majorCardIds.first;
   }
   final normalizedId = canonicalCardId(previewId);

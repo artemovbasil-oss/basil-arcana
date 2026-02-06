@@ -3,24 +3,24 @@ import '../config/assets_config.dart';
 
 String cardImageUrl(
   String cardId, {
-  DeckId deckId = DeckId.major,
+  DeckType deckId = DeckType.major,
 }) {
   final normalizedId = canonicalCardId(cardId);
   final base = AssetsConfig.assetsBaseUrl;
-  if (deckId == DeckId.wands ||
-      (deckId == DeckId.all && normalizedId.startsWith('wands_'))) {
+  if (deckId == DeckType.wands ||
+      (deckId == DeckType.all && normalizedId.startsWith('wands_'))) {
     return '$base/cards/wands/$normalizedId.webp';
   }
-  if (deckId == DeckId.swords ||
-      (deckId == DeckId.all && normalizedId.startsWith('swords_'))) {
+  if (deckId == DeckType.swords ||
+      (deckId == DeckType.all && normalizedId.startsWith('swords_'))) {
     return '$base/cards/swords/$normalizedId.webp';
   }
-  if (deckId == DeckId.pentacles ||
-      (deckId == DeckId.all && normalizedId.startsWith('pentacles_'))) {
+  if (deckId == DeckType.pentacles ||
+      (deckId == DeckType.all && normalizedId.startsWith('pentacles_'))) {
     return '$base/cards/pentacles/$normalizedId.webp';
   }
-  if (deckId == DeckId.cups ||
-      (deckId == DeckId.all && normalizedId.startsWith('cups_'))) {
+  if (deckId == DeckType.cups ||
+      (deckId == DeckType.all && normalizedId.startsWith('cups_'))) {
     return '$base/cards/cups/$normalizedId.webp';
   }
   switch (normalizedId) {
@@ -55,26 +55,26 @@ String cardsUrl(String languageCode) {
   return '$base/data/cards_${lang}.json';
 }
 
-String deckPreviewImageUrl(DeckId deckId) {
+String deckPreviewImageUrl(DeckType deckId) {
   final previewId = switch (deckId) {
-    DeckId.major => majorCardIds.first,
-    DeckId.wands => wandsCardIds.first,
-    DeckId.swords => swordsCardIds.first,
-    DeckId.pentacles => pentaclesCardIds.first,
-    DeckId.cups => cupsCardIds.first,
-    DeckId.all => majorCardIds.first,
+    DeckType.major => majorCardIds.first,
+    DeckType.wands => wandsCardIds.first,
+    DeckType.swords => swordsCardIds.first,
+    DeckType.pentacles => pentaclesCardIds.first,
+    DeckType.cups => cupsCardIds.first,
+    DeckType.all => majorCardIds.first,
   };
   return cardImageUrl(previewId, deckId: deckId);
 }
 
-String deckCoverAssetPath(DeckId deckId) {
+String deckCoverAssetPath(DeckType deckId) {
   switch (deckId) {
-    case DeckId.wands:
-    case DeckId.swords:
-    case DeckId.pentacles:
-    case DeckId.cups:
-    case DeckId.major:
-    case DeckId.all:
+    case DeckType.wands:
+    case DeckType.swords:
+    case DeckType.pentacles:
+    case DeckType.cups:
+    case DeckType.major:
+    case DeckType.all:
     default:
       return deckPreviewImageUrl(deckId);
   }

@@ -78,7 +78,7 @@ class CardsRepository {
 
   Future<List<CardModel>> fetchCards({
     required Locale locale,
-    required DeckId deckId,
+    required DeckType deckId,
   }) async {
     final cacheKey = cardsCacheKey(locale);
     final raw = await _loadJsonWithFallback(
@@ -92,7 +92,7 @@ class CardsRepository {
 
   Future<List<CardModel>> loadCachedCards({
     required Locale locale,
-    required DeckId deckId,
+    required DeckType deckId,
   }) async {
     final cacheKey = cardsCacheKey(locale);
     final raw = await _readCache(cacheKey);
@@ -253,7 +253,7 @@ bool _isValidCardEntry(Map<String, dynamic> card) {
   return card.containsKey('id') && hasTitle && hasMeaning;
 }
 
-List<CardModel> _parseCards({required String raw, required DeckId deckId}) {
+List<CardModel> _parseCards({required String raw, required DeckType deckId}) {
   final decoded = parseJsonString(raw).decoded;
   final entries = <Map<String, dynamic>>[];
   if (decoded is Map<String, dynamic>) {
@@ -267,12 +267,12 @@ List<CardModel> _parseCards({required String raw, required DeckId deckId}) {
     }
   }
 
-  final deckRegistry = <DeckId, List<CardModel>>{
-    DeckId.major: [],
-    DeckId.wands: [],
-    DeckId.swords: [],
-    DeckId.pentacles: [],
-    DeckId.cups: [],
+  final deckRegistry = <DeckType, List<CardModel>>{
+    DeckType.major: [],
+    DeckType.wands: [],
+    DeckType.swords: [],
+    DeckType.pentacles: [],
+    DeckType.cups: [],
   };
 
   for (final entry in entries) {
@@ -291,16 +291,16 @@ List<CardModel> _parseCards({required String raw, required DeckId deckId}) {
     }
   }
 
-  _sortDeckCards(deckRegistry[DeckId.major] ?? const [], majorCardIds);
-  _sortDeckCards(deckRegistry[DeckId.wands] ?? const [], wandsCardIds);
-  _sortDeckCards(deckRegistry[DeckId.swords] ?? const [], swordsCardIds);
-  _sortDeckCards(deckRegistry[DeckId.pentacles] ?? const [], pentaclesCardIds);
-  _sortDeckCards(deckRegistry[DeckId.cups] ?? const [], cupsCardIds);
+  _sortDeckCards(deckRegistry[DeckType.major] ?? const [], majorCardIds);
+  _sortDeckCards(deckRegistry[DeckType.wands] ?? const [], wandsCardIds);
+  _sortDeckCards(deckRegistry[DeckType.swords] ?? const [], swordsCardIds);
+  _sortDeckCards(deckRegistry[DeckType.pentacles] ?? const [], pentaclesCardIds);
+  _sortDeckCards(deckRegistry[DeckType.cups] ?? const [], cupsCardIds);
 
   return _getActiveDeckCards(deckId, deckRegistry);
 }
 
-String _resolveImageUrl(String rawUrl, String cardId, DeckId deckId) {
+String _resolveImageUrl(String rawUrl, String cardId, DeckType deckId) {
   final trimmed = rawUrl.trim();
   if (trimmed.isEmpty) {
     return cardImageUrl(cardId, deckId: deckId);
@@ -333,11 +333,11 @@ void _sortDeckCards(List<CardModel> cards, List<String> order) {
 }
 
 List<CardModel> _getActiveDeckCards(
-  DeckId? selectedDeckId,
-  Map<DeckId, List<CardModel>> deckRegistry,
+  DeckType? selectedDeckType,
+  Map<DeckType, List<CardModel>> deckRegistry,
 ) {
-  if (selectedDeckId == null || selectedDeckId == DeckId.all) {
+  if (selectedDeckType == null || selectedDeckType == DeckType.all) {
     return deckRegistry.values.expand((cards) => cards).toList();
   }
-  return deckRegistry[selectedDeckId] ?? const [];
+  return deckRegistry[selectedDeckType] ?? const [];
 }

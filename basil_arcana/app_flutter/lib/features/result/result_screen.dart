@@ -6,11 +6,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../core/theme/app_text_styles.dart';
+import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/card_face_widget.dart';
 import '../../core/assets/asset_paths.dart';
 import '../../core/widgets/tarot_asset_widgets.dart';
 import '../../data/models/card_model.dart';
 import '../../data/models/deck_model.dart';
+import '../../data/models/app_enums.dart';
 import '../../data/models/drawn_card_model.dart';
 import '../../data/models/spread_model.dart';
 import '../../data/repositories/ai_repository.dart';
@@ -239,6 +242,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                         avatarEmoji: '🪄',
                         child: _DetailsCardThumbnails(
                           spread: spread,
+                          spreadType: state.spreadType,
                           drawnCards: state.drawnCards,
                         ),
                       ),
@@ -318,11 +322,12 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                 padding: EdgeInsets.only(bottom: bottomInset),
                 child: _ActionBar(
                   showExtra: _sequenceComplete,
+                  isSaved: state.isSaved,
                   onSave: () async {
-                    await ref
+                    final saved = await ref
                         .read(readingFlowControllerProvider.notifier)
                         .saveReading();
-                    if (context.mounted) {
+                    if (saved && context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text(l10n.resultSnackSaved)),
                       );
@@ -788,31 +793,24 @@ class _OpenInTelegramScreen extends StatelessWidget {
             children: [
               Text(
                 'Open in Telegram to draw cards',
-                style: Theme.of(context).textTheme.titleLarge,
+                style: AppTextStyles.title(context),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 12),
               Text(
                 'This experience needs Telegram to authenticate your reading.',
-                style: Theme.of(context).textTheme.bodyMedium,
+                style: AppTextStyles.body(context),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: onOpen,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: const StadiumBorder(),
-                  ),
-                  child: const Text('Open in Telegram'),
-                ),
+              AppPrimaryButton(
+                label: 'Open in Telegram',
+                onPressed: onOpen,
               ),
               const SizedBox(height: 12),
-              TextButton(
+              AppSmallButton(
                 onPressed: onBack,
-                child: const Text('Back'),
+                label: 'Back',
               ),
             ],
           ),
@@ -867,36 +865,28 @@ class _DeepPromptBubble extends StatelessWidget {
       children: [
         Text(
           l10n.resultDeepPrompt,
-          style: Theme.of(context).textTheme.bodyMedium,
+          style: AppTextStyles.body(context),
         ),
         const SizedBox(height: 8),
         Row(
           children: [
             Expanded(
-              child: OutlinedButton(
+              child: AppSmallButton(
+                label: l10n.resultDeepNotNow,
                 onPressed: isActionable ? onDecline : null,
-                style: OutlinedButton.styleFrom(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  minimumSize: const Size(0, 36),
-                ),
-                child: Text(l10n.resultDeepNotNow),
+                fullWidth: true,
               ),
             ),
             const SizedBox(width: 10),
             Expanded(
-              child: ElevatedButton(
+              child: AppSmallButton(
+                label: l10n.resultDeepShowDetails,
                 onPressed: isActionable
                     ? () async {
                         await onAccept();
                       }
                     : null,
-                style: ElevatedButton.styleFrom(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  minimumSize: const Size(0, 36),
-                ),
-                child: Text(l10n.resultDeepShowDetails),
+                fullWidth: true,
               ),
             ),
           ],
@@ -925,32 +915,24 @@ class _DeepErrorBubble extends StatelessWidget {
       children: [
         Text(
           message,
-          style: Theme.of(context).textTheme.bodyMedium,
+          style: AppTextStyles.body(context),
         ),
         const SizedBox(height: 8),
         Row(
           children: [
             Expanded(
-              child: OutlinedButton(
+              child: AppSmallButton(
+                label: l10n.resultDeepNotNow,
                 onPressed: onCancel,
-                style: OutlinedButton.styleFrom(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  minimumSize: const Size(0, 36),
-                ),
-                child: Text(l10n.resultDeepNotNow),
+                fullWidth: true,
               ),
             ),
             const SizedBox(width: 10),
             Expanded(
-              child: ElevatedButton(
+              child: AppSmallButton(
+                label: l10n.resultDeepTryAgain,
                 onPressed: onRetry,
-                style: ElevatedButton.styleFrom(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  minimumSize: const Size(0, 36),
-                ),
-                child: Text(l10n.resultDeepTryAgain),
+                fullWidth: true,
               ),
             ),
           ],
@@ -1021,6 +1003,7 @@ class _StatusPill extends StatelessWidget {
 class _ActionBar extends StatelessWidget {
   const _ActionBar({
     required this.showExtra,
+    required this.isSaved,
     required this.onSave,
     required this.onNew,
     required this.onShare,
@@ -1033,6 +1016,7 @@ class _ActionBar extends StatelessWidget {
   static const double extraHeight = 70;
 
   final bool showExtra;
+  final bool isSaved;
   final VoidCallback onSave;
   final VoidCallback onNew;
   final VoidCallback onShare;
@@ -1070,28 +1054,18 @@ class _ActionBar extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: onSave,
-                        icon: const Icon(Icons.bookmark_add),
-                        label: Text(saveLabel),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: const StadiumBorder(),
-                          backgroundColor: colorScheme.primary,
-                        ),
+                      child: AppPrimaryButton(
+                        label: saveLabel,
+                        icon: Icons.bookmark_add,
+                        onPressed: isSaved ? null : onSave,
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: OutlinedButton.icon(
+                      child: AppGhostButton(
+                        label: newLabel,
+                        icon: Icons.auto_awesome,
                         onPressed: onNew,
-                        icon: const Icon(Icons.auto_awesome),
-                        label: Text(newLabel),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: const StadiumBorder(),
-                          side: BorderSide(color: colorScheme.primary),
-                        ),
                       ),
                     ),
                   ],
@@ -1115,16 +1089,10 @@ class _ActionBar extends StatelessWidget {
                           padding: const EdgeInsets.only(top: 12),
                           child: SizedBox(
                             width: double.infinity,
-                            child: OutlinedButton.icon(
+                            child: AppGhostButton(
+                              label: moreLabel,
+                              icon: Icons.auto_awesome_outlined,
                               onPressed: onShare,
-                              icon: const Icon(Icons.auto_awesome_outlined),
-                              label: Text(moreLabel),
-                              style: OutlinedButton.styleFrom(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 14),
-                                shape: const StadiumBorder(),
-                                side: BorderSide(color: colorScheme.primary),
-                              ),
                             ),
                           ),
                         )
@@ -1142,10 +1110,12 @@ class _ActionBar extends StatelessWidget {
 class _DetailsCardThumbnails extends StatelessWidget {
   const _DetailsCardThumbnails({
     required this.spread,
+    required this.spreadType,
     required this.drawnCards,
   });
 
   final SpreadModel spread;
+  final SpreadType? spreadType;
   final List<DrawnCardModel> drawnCards;
 
   @override
@@ -1167,7 +1137,11 @@ class _DetailsCardThumbnails extends StatelessWidget {
   }
 
   List<_ThumbnailCardData> _thumbnailCards() {
-    if (spread.positions.length >= 3 && drawnCards.length >= 3) {
+    final resolvedType = spreadType ??
+        (spread.positions.length >= 3 ? SpreadType.three : SpreadType.one);
+    final isThreeCard =
+        resolvedType.cardCount >= 3 && drawnCards.length >= 3;
+    if (isThreeCard) {
       final cards = drawnCards.take(3).toList();
       return [
         _ThumbnailCardData(cardId: cards[0].cardId),
@@ -1217,7 +1191,7 @@ class _DetailThumbnailCard extends ConsumerWidget {
               (card) => card.id == cardId,
               orElse: () => const CardModel(
                 id: '',
-                deckId: DeckId.major,
+                deckId: DeckType.major,
                 name: '',
                 keywords: [],
                 meaning: CardMeaning(
@@ -1257,9 +1231,9 @@ class _DetailThumbnailCard extends ConsumerWidget {
                 fit: BoxFit.cover,
                 filterQuality: FilterQuality.high,
                 errorBuilder: (context, error, stackTrace) {
-                  if (deckId != DeckId.major) {
+                  if (deckId != DeckType.major) {
                     return Image.network(
-                      deckCoverAssetPath(DeckId.major),
+                      deckCoverAssetPath(DeckType.major),
                       width: 56,
                       height: 88,
                       fit: BoxFit.cover,

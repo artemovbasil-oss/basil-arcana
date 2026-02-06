@@ -156,6 +156,7 @@
   "oracleTimeoutBody": "Sometimes clarity needs another breath.",
   "actionCancel": "Cancel",
   "actionTryAgain": "Try again",
+  "actionApply": "Apply",
   "historyTitle": "Reading history",
   "historyEmpty": "No saved readings yet.",
   "historyDetailTitle": "Reading detail",

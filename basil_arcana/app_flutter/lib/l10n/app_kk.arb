@@ -156,6 +156,7 @@
   "oracleTimeoutBody": "Кейде айқындыққа тағы бір дем керек.",
   "actionCancel": "Болдырмау",
   "actionTryAgain": "Қайта көру",
+  "actionApply": "Қолдану",
   "historyTitle": "Оқылым тарихы",
   "historyEmpty": "Әзірге сақталған оқылымдар жоқ.",
   "historyDetailTitle": "Оқылым мәліметі",

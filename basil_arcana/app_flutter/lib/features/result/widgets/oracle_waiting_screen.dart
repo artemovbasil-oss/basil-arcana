@@ -3,6 +3,9 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
+import '../../../core/theme/app_text_styles.dart';
+import '../../../core/widgets/app_buttons.dart';
+
 class OracleWaitingScreen extends StatefulWidget {
   const OracleWaitingScreen({
     super.key,
@@ -88,7 +91,7 @@ class _OracleWaitingScreenState extends State<OracleWaitingScreen>
                   Text(
                     title,
                     textAlign: TextAlign.center,
-                    style: theme.textTheme.headlineSmall?.copyWith(
+                    style: AppTextStyles.title(context).copyWith(
                       color: theme.colorScheme.onBackground,
                       letterSpacing: 0.5,
                     ),
@@ -97,7 +100,7 @@ class _OracleWaitingScreenState extends State<OracleWaitingScreen>
                   Text(
                     subtitle,
                     textAlign: TextAlign.center,
-                    style: theme.textTheme.bodyMedium?.copyWith(
+                    style: AppTextStyles.body(context).copyWith(
                       color: theme.colorScheme.onBackground.withOpacity(0.75),
                       height: 1.4,
                     ),
@@ -106,20 +109,18 @@ class _OracleWaitingScreenState extends State<OracleWaitingScreen>
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      ElevatedButton(
+                      AppPrimaryButton(
                         onPressed:
                             widget.isTimeout ? widget.onRetry : widget.onCancel,
-                        child: Text(
-                          widget.isTimeout
-                              ? l10n.actionTryAgain
-                              : l10n.actionCancel,
-                        ),
+                        label: widget.isTimeout
+                            ? l10n.actionTryAgain
+                            : l10n.actionCancel,
                       ),
                       if (widget.isTimeout) ...[
                         const SizedBox(height: 12),
-                        OutlinedButton(
+                        AppGhostButton(
                           onPressed: widget.onCancel,
-                          child: Text(l10n.actionCancel),
+                          label: l10n.actionCancel,
                         ),
                       ],
                     ],

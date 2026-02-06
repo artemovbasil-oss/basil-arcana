@@ -24,11 +24,13 @@ class SpreadModel {
   final String id;
   final String name;
   final List<SpreadPosition> positions;
+  final int? cardsCount;
 
   const SpreadModel({
     required this.id,
     required this.name,
     required this.positions,
+    this.cardsCount,
   });
 
   factory SpreadModel.fromJson(Map<String, dynamic> json) {
@@ -38,6 +40,7 @@ class SpreadModel {
       positions: (json['positions'] as List<dynamic>)
           .map((position) => SpreadPosition.fromJson(position))
           .toList(),
+      cardsCount: json['cardsCount'] as int?,
     );
   }
 
@@ -45,5 +48,6 @@ class SpreadModel {
         'id': id,
         'name': name,
         'positions': positions.map((position) => position.toJson()).toList(),
+        if (cardsCount != null) 'cardsCount': cardsCount,
       };
 }

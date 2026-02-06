@@ -88,7 +88,7 @@ class DataRepository {
 
   Future<List<CardModel>> fetchCards({
     required Locale locale,
-    required DeckId deckId,
+    required DeckType deckId,
   }) async {
     final cacheKey = cardsCacheKey(locale);
     final raw = await _loadJsonWithFallback(
@@ -266,7 +266,7 @@ class DataRepository {
 
   Future<List<CardModel>> loadCachedCards({
     required Locale locale,
-    required DeckId deckId,
+    required DeckType deckId,
   }) async {
     final cacheKey = cardsCacheKey(locale);
     final raw = await _readCache(cacheKey);
@@ -380,7 +380,7 @@ Set<String> _parseVideoIndex(String raw) {
       .toSet();
 }
 
-List<CardModel> _parseCards({required String raw, required DeckId deckId}) {
+List<CardModel> _parseCards({required String raw, required DeckType deckId}) {
   final data = jsonDecode(raw) as Map<String, dynamic>;
   final canonicalData = _canonicalizeCardData(data);
   final majorCards = majorCardIds
@@ -418,12 +418,12 @@ List<CardModel> _parseCards({required String raw, required DeckId deckId}) {
             canonicalData[id] as Map<String, dynamic>,
           ))
       .toList();
-  final deckRegistry = <DeckId, List<CardModel>>{
-    DeckId.major: majorCards,
-    DeckId.wands: wandsCards,
-    DeckId.swords: swordsCards,
-    DeckId.pentacles: pentaclesCards,
-    DeckId.cups: cupsCards,
+  final deckRegistry = <DeckType, List<CardModel>>{
+    DeckType.major: majorCards,
+    DeckType.wands: wandsCards,
+    DeckType.swords: swordsCards,
+    DeckType.pentacles: pentaclesCards,
+    DeckType.cups: cupsCards,
   };
   return getActiveDeckCards(deckId, deckRegistry);
 }
@@ -445,11 +445,11 @@ Map<String, Map<String, dynamic>> _canonicalizeCardData(
 }
 
 List<CardModel> getActiveDeckCards(
-  DeckId? selectedDeckId,
-  Map<DeckId, List<CardModel>> deckRegistry,
+  DeckType? selectedDeckType,
+  Map<DeckType, List<CardModel>> deckRegistry,
 ) {
-  if (selectedDeckId == null || selectedDeckId == DeckId.all) {
+  if (selectedDeckType == null || selectedDeckType == DeckType.all) {
     return deckRegistry.values.expand((cards) => cards).toList();
   }
-  return deckRegistry[selectedDeckId] ?? const [];
+  return deckRegistry[selectedDeckType] ?? const [];
 }

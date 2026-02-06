@@ -7,7 +7,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
 import '../../core/assets/asset_paths.dart';
+import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/tarot_asset_widgets.dart';
+import '../../data/models/app_enums.dart';
 import '../../data/models/deck_model.dart';
 import '../../state/reading_flow_controller.dart';
 import '../../state/providers.dart';
@@ -50,7 +52,7 @@ class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
     )..repeat(reverse: true);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       precacheImage(
-        NetworkImage(deckPreviewImageUrl(DeckId.major)),
+        NetworkImage(deckPreviewImageUrl(DeckType.major)),
         context,
       );
     });
@@ -89,7 +91,8 @@ class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
     final colorScheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context)!;
     final hasDrawnCards = state.drawnCards.isNotEmpty;
-    final keptCount = state.spread?.positions.length ?? 0;
+    final keptCount =
+        state.spreadType?.cardCount ?? state.spread?.positions.length ?? 0;
     final showGlow = state.isLoading && hasDrawnCards;
     return Scaffold(
       appBar: AppBar(
@@ -150,36 +153,30 @@ class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
                     child: AnimatedOpacity(
                       duration: const Duration(milliseconds: 360),
                       opacity: _showCta ? 1 : 0,
-                      child: SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: !_showCta || state.isLoading
-                              ? null
-                              : () async {
-                                  final cards = await cardsAsync.valueOrNull;
-                                  if (cards == null) {
-                                    return;
-                                  }
-                                  await ref
-                                      .read(
-                                        readingFlowControllerProvider.notifier,
-                                      )
-                                      .drawAndGenerate(cards);
-                                  if (mounted) {
-                                    Navigator.pushReplacement(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => const ResultScreen(),
-                                      ),
-                                    );
-                                  }
-                                },
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: const StadiumBorder(),
-                          ),
-                          child: Text(l10n.shuffleDrawButton),
-                        ),
+                      child: AppPrimaryButton(
+                        label: l10n.shuffleDrawButton,
+                        onPressed: !_showCta || state.isLoading
+                            ? null
+                            : () async {
+                                final cards = await cardsAsync.valueOrNull;
+                                if (cards == null) {
+                                  return;
+                                }
+                                await ref
+                                    .read(
+                                      readingFlowControllerProvider.notifier,
+                                    )
+                                    .drawAndGenerate(cards);
+                                if (mounted) {
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => const ResultScreen(),
+                                    ),
+                                  );
+                                }
+                              },
+                        padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
                     ),
                   ),
