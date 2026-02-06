@@ -50,6 +50,7 @@ class CardMediaResolver {
         );
     String? resolvedVideo =
         videoUrlOverride ?? cardVideoUrl(fallbackCard, AssetsConfig.assetsBaseUrl);
+    resolvedVideo ??= videoUrlForCard(cardId);
     if (resolvedVideo != null &&
         availableVideoFiles != null &&
         availableVideoFiles!.isNotEmpty) {

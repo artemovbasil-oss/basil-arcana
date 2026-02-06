@@ -4,12 +4,24 @@ class DataLoadRequestDebugInfo {
   const DataLoadRequestDebugInfo({
     required this.url,
     this.statusCode,
-    this.responseSnippet,
+    this.contentType,
+    this.contentLength,
+    this.responseSnippetStart,
+    this.responseSnippetEnd,
+    this.responseLength,
+    this.bytesLength,
+    this.rootType,
   });
 
   final String url;
   final int? statusCode;
-  final String? responseSnippet;
+  final String? contentType;
+  final String? contentLength;
+  final String? responseSnippetStart;
+  final String? responseSnippetEnd;
+  final int? responseLength;
+  final int? bytesLength;
+  final String? rootType;
 }
 
 class DataLoadDebugInfo {
@@ -161,10 +173,38 @@ class _DebugRequestSection extends StatelessWidget {
           Text('HTTP status', style: textTheme.labelSmall),
           SelectableText(info.statusCode?.toString() ?? '—'),
           const SizedBox(height: 6),
-          Text('Response snippet', style: textTheme.labelSmall),
-          SelectableText(info.responseSnippet?.trim().isNotEmpty == true
-              ? info.responseSnippet!
-              : '—'),
+          Text('Content-Type', style: textTheme.labelSmall),
+          SelectableText(info.contentType ?? '—'),
+          const SizedBox(height: 6),
+          Text('Content-Length', style: textTheme.labelSmall),
+          SelectableText(info.contentLength ?? '—'),
+          const SizedBox(height: 6),
+          Text('Response length', style: textTheme.labelSmall),
+          SelectableText(
+            info.responseLength != null ? '${info.responseLength} chars' : '—',
+          ),
+          const SizedBox(height: 6),
+          Text('Bytes length', style: textTheme.labelSmall),
+          SelectableText(
+            info.bytesLength != null ? '${info.bytesLength} bytes' : '—',
+          ),
+          const SizedBox(height: 6),
+          Text('Root type', style: textTheme.labelSmall),
+          SelectableText(info.rootType ?? '—'),
+          const SizedBox(height: 6),
+          Text('Response snippet (start)', style: textTheme.labelSmall),
+          SelectableText(
+            info.responseSnippetStart?.trim().isNotEmpty == true
+                ? info.responseSnippetStart!
+                : '—',
+          ),
+          const SizedBox(height: 6),
+          Text('Response snippet (end)', style: textTheme.labelSmall),
+          SelectableText(
+            info.responseSnippetEnd?.trim().isNotEmpty == true
+                ? info.responseSnippetEnd!
+                : '—',
+          ),
         ],
       ),
     );

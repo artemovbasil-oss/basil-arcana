@@ -1,6 +1,4 @@
 import 'dart:collection';
-import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -8,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/assets/asset_paths.dart';
 import '../../core/config/assets_config.dart';
+import '../../core/network/json_loader.dart';
 import '../models/card_model.dart';
 import '../models/deck_model.dart';
 
@@ -21,7 +20,13 @@ class CardsRepository {
   final Map<String, DateTime> _lastCacheTimes = {};
   final Map<String, String> _lastAttemptedUrls = {};
   final Map<String, int> _lastStatusCodes = {};
-  final Map<String, String> _lastResponseBodies = {};
+  final Map<String, String> _lastResponseSnippetsStart = {};
+  final Map<String, String> _lastResponseSnippetsEnd = {};
+  final Map<String, String?> _lastContentTypes = {};
+  final Map<String, String?> _lastContentLengths = {};
+  final Map<String, int> _lastResponseStringLengths = {};
+  final Map<String, int> _lastResponseByteLengths = {};
+  final Map<String, String> _lastResponseRootTypes = {};
   SharedPreferences? _preferences;
   String? _lastError;
 
@@ -33,8 +38,20 @@ class CardsRepository {
       UnmodifiableMapView(_lastAttemptedUrls);
   UnmodifiableMapView<String, int> get lastStatusCodes =>
       UnmodifiableMapView(_lastStatusCodes);
-  UnmodifiableMapView<String, String> get lastResponseBodies =>
-      UnmodifiableMapView(_lastResponseBodies);
+  UnmodifiableMapView<String, String> get lastResponseSnippetsStart =>
+      UnmodifiableMapView(_lastResponseSnippetsStart);
+  UnmodifiableMapView<String, String> get lastResponseSnippetsEnd =>
+      UnmodifiableMapView(_lastResponseSnippetsEnd);
+  UnmodifiableMapView<String, String?> get lastContentTypes =>
+      UnmodifiableMapView(_lastContentTypes);
+  UnmodifiableMapView<String, String?> get lastContentLengths =>
+      UnmodifiableMapView(_lastContentLengths);
+  UnmodifiableMapView<String, int> get lastResponseStringLengths =>
+      UnmodifiableMapView(_lastResponseStringLengths);
+  UnmodifiableMapView<String, int> get lastResponseByteLengths =>
+      UnmodifiableMapView(_lastResponseByteLengths);
+  UnmodifiableMapView<String, String> get lastResponseRootTypes =>
+      UnmodifiableMapView(_lastResponseRootTypes);
   String? get lastError => _lastError;
 
   String cardsCacheKey(Locale locale) =>
@@ -68,6 +85,7 @@ class CardsRepository {
       uri: Uri.parse(cardsUrlForLocale(locale)),
       cacheKey: cacheKey,
       validator: _isValidCardsJson,
+      expectedRootTypes: {'Map'},
     );
     return _parseCards(raw: raw, deckId: deckId);
   }
@@ -81,11 +99,14 @@ class CardsRepository {
     if (raw == null) {
       throw CardsLoadException('No cached cards available', cacheKey: cacheKey);
     }
-    if (!_isValidCardsJson(jsonDecode(raw))) {
+    final parsed = parseJsonString(raw);
+    final rootType = jsonRootType(parsed.decoded);
+    _lastResponseRootTypes[cacheKey] = rootType;
+    if (rootType != 'Map' || !_isValidCardsJson(parsed.decoded)) {
       throw CardsLoadException('Cached cards are invalid', cacheKey: cacheKey);
     }
     _lastCacheTimes[cacheKey] = DateTime.now();
-    return _parseCards(raw: raw, deckId: deckId);
+    return _parseCards(raw: parsed.raw, deckId: deckId);
   }
 
   Future<bool> hasCachedData(String cacheKey) async {
@@ -111,34 +132,36 @@ class CardsRepository {
     required Uri uri,
     required String cacheKey,
     required bool Function(Object?) validator,
+    required Set<String> expectedRootTypes,
   }) async {
     _lastAttemptedUrls[cacheKey] = uri.toString();
     try {
-      final response = await _client.get(uri);
-      _lastStatusCodes[cacheKey] = response.statusCode;
-      _lastResponseBodies[cacheKey] = _responseSnippet(response.body);
-      if (response.statusCode < 200 || response.statusCode >= 300) {
+      final result = await fetchJson(client: _client, uri: uri);
+      _recordResponseInfo(cacheKey, result.response);
+      final rootType = jsonRootType(result.decoded);
+      _lastResponseRootTypes[cacheKey] = rootType;
+      if (!expectedRootTypes.contains(rootType)) {
+        final expected = expectedRootTypes.join(' or ');
         throw CardsLoadException(
-          'HTTP ${response.statusCode} for ${uri.toString()}',
+          'Unexpected JSON root type: $rootType (expected $expected)',
           cacheKey: cacheKey,
         );
       }
-      try {
-        if (!validator(jsonDecode(response.body))) {
-          throw CardsLoadException('Invalid JSON payload', cacheKey: cacheKey);
-        }
-      } on FormatException catch (error) {
+      if (!validator(result.decoded)) {
         throw CardsLoadException(
-          'Invalid JSON payload: ${error.message}',
+          'Invalid JSON payload: unexpected structure',
           cacheKey: cacheKey,
         );
       }
-      await _storeCache(cacheKey, response.body);
+      await _storeCache(cacheKey, result.raw);
       _lastFetchTimes[cacheKey] = DateTime.now();
       _lastError = null;
-      return response.body;
-    } catch (error) {
-      _lastError = error.toString();
+      return result.raw;
+    } catch (error, stackTrace) {
+      _lastError = '${error.toString()}\n$stackTrace';
+      if (error is JsonFetchException && error.response != null) {
+        _recordResponseInfo(cacheKey, error.response!);
+      }
       if (kDebugMode) {
         debugPrint(
           '[CardsRepository] fetchError url=${uri.toString()} '
@@ -147,10 +170,17 @@ class CardsRepository {
       }
       final cached = await _readCache(cacheKey);
       if (cached != null) {
-        final decoded = jsonDecode(cached);
-        if (validator(decoded)) {
-          _lastCacheTimes[cacheKey] = DateTime.now();
-          return cached;
+        try {
+          final parsed = parseJsonString(cached);
+          final rootType = jsonRootType(parsed.decoded);
+          _lastResponseRootTypes[cacheKey] = rootType;
+          if (expectedRootTypes.contains(rootType) &&
+              validator(parsed.decoded)) {
+            _lastCacheTimes[cacheKey] = DateTime.now();
+            return parsed.raw;
+          }
+        } on FormatException {
+          // ignore invalid cache
         }
       }
       if (error is CardsLoadException) {
@@ -178,6 +208,16 @@ class CardsRepository {
     final prefs = await _prefs();
     await prefs.setString(cacheKey, raw);
   }
+
+  void _recordResponseInfo(String cacheKey, JsonResponseInfo response) {
+    _lastStatusCodes[cacheKey] = response.statusCode;
+    _lastContentTypes[cacheKey] = response.contentType;
+    _lastContentLengths[cacheKey] = response.contentLengthHeader;
+    _lastResponseSnippetsStart[cacheKey] = response.responseSnippetStart;
+    _lastResponseSnippetsEnd[cacheKey] = response.responseSnippetEnd;
+    _lastResponseStringLengths[cacheKey] = response.stringLength;
+    _lastResponseByteLengths[cacheKey] = response.bytesLength;
+  }
 }
 
 class CardsLoadException implements Exception {
@@ -191,25 +231,18 @@ class CardsLoadException implements Exception {
 }
 
 bool _isValidCardsJson(Object? payload) {
-  if (payload is List<dynamic>) {
-    return payload.isNotEmpty &&
-        payload.whereType<Map<String, dynamic>>().every(_isValidCardEntry);
+  if (payload is! Map<String, dynamic> || payload.isEmpty) {
+    return false;
   }
-  if (payload is Map<String, dynamic>) {
-    if (payload.isEmpty) {
+  return payload.entries.every((entry) {
+    final value = entry.value;
+    if (value is! Map<String, dynamic>) {
       return false;
     }
-    return payload.entries.every((entry) {
-      final value = entry.value;
-      if (value is! Map<String, dynamic>) {
-        return false;
-      }
-      final card = Map<String, dynamic>.from(value);
-      card['id'] ??= entry.key;
-      return _isValidCardEntry(card);
-    });
-  }
-  return false;
+    final card = Map<String, dynamic>.from(value);
+    card['id'] ??= entry.key;
+    return _isValidCardEntry(card);
+  });
 }
 
 bool _isValidCardEntry(Map<String, dynamic> card) {
@@ -219,15 +252,9 @@ bool _isValidCardEntry(Map<String, dynamic> card) {
 }
 
 List<CardModel> _parseCards({required String raw, required DeckId deckId}) {
-  final decoded = jsonDecode(raw);
+  final decoded = parseJsonString(raw).decoded;
   final entries = <Map<String, dynamic>>[];
-  if (decoded is List<dynamic>) {
-    for (final item in decoded) {
-      if (item is Map<String, dynamic>) {
-        entries.add(item);
-      }
-    }
-  } else if (decoded is Map<String, dynamic>) {
+  if (decoded is Map<String, dynamic>) {
     for (final entry in decoded.entries) {
       final value = entry.value;
       if (value is Map<String, dynamic>) {
@@ -269,13 +296,6 @@ List<CardModel> _parseCards({required String raw, required DeckId deckId}) {
   _sortDeckCards(deckRegistry[DeckId.cups] ?? const [], cupsCardIds);
 
   return _getActiveDeckCards(deckId, deckRegistry);
-}
-
-String _responseSnippet(String body) {
-  if (body.isEmpty) {
-    return '';
-  }
-  return body.length <= 200 ? body : body.substring(0, 200);
 }
 
 String _resolveImageUrl(String rawUrl, String cardId, DeckId deckId) {
