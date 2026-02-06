@@ -6,9 +6,9 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('all cards include detailedDescription for every locale', () {
     const files = [
-      'assets/data/cards_en.json',
-      'assets/data/cards_ru.json',
-      'assets/data/cards_kk.json',
+      '../cdn/data/cards_en.json',
+      '../cdn/data/cards_ru.json',
+      '../cdn/data/cards_kz.json',
     ];
 
     for (final file in files) {
@@ -29,9 +29,9 @@ void main() {
 
   test('cups deck contains 14 cards per locale', () {
     const files = [
-      'assets/data/cards_en.json',
-      'assets/data/cards_ru.json',
-      'assets/data/cards_kk.json',
+      '../cdn/data/cards_en.json',
+      '../cdn/data/cards_ru.json',
+      '../cdn/data/cards_kz.json',
     ];
 
     for (final file in files) {

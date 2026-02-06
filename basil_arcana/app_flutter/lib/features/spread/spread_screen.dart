@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
+import '../../core/config/assets_config.dart';
 import '../../core/telegram/telegram_web_app.dart';
 import '../../core/widgets/data_load_error.dart';
 import '../../data/models/spread_model.dart';
@@ -65,6 +66,14 @@ class SpreadScreen extends ConsumerWidget {
             final repo = ref.read(dataRepositoryProvider);
             final locale = ref.read(localeProvider);
             final cacheKey = repo.spreadsCacheKey(locale);
+            final debugInfo = DataLoadDebugInfo(
+              assetsBaseUrl: AssetsConfig.assetsBaseUrl,
+              attemptedUrls: {
+                'spreads (${repo.spreadsFileNameForLocale(locale)})':
+                    repo.lastAttemptedUrls[cacheKey] ?? '—',
+              },
+              lastError: repo.lastError,
+            );
             return Center(
               child: FutureBuilder<bool>(
                 future: repo.hasCachedData(cacheKey),
@@ -86,6 +95,7 @@ class SpreadScreen extends ConsumerWidget {
                             ref.invalidate(spreadsProvider);
                           }
                         : null,
+                    debugInfo: debugInfo,
                   );
                 },
               ),

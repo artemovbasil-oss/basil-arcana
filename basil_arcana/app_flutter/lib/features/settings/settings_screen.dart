@@ -3,8 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
+import '../../core/assets/asset_paths.dart';
 import '../../core/telegram/telegram_web_app.dart';
-import '../../core/widgets/tarot_asset_widgets.dart';
 import '../../data/models/deck_model.dart';
 import '../../state/providers.dart';
 
@@ -118,9 +118,9 @@ class SettingsScreen extends ConsumerWidget {
                 leading: const Icon(Icons.bug_report_outlined),
                 title: Text(l10n.deckDebugLogLabel),
                 onTap: () {
-                  final path = cardAssetPath(
+                  final path = cardImageUrl(
                     'wands_13_ace',
-                    deckId: DeckId.wands.name,
+                    deckId: DeckId.wands,
                   );
                   debugPrint('Wands sample asset: $path');
                 },
@@ -149,7 +149,7 @@ class _DeckOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final previewId = _previewCardId(deckId);
-    final previewUrl = cardAssetPath(previewId, deckId: deckId.name);
+    final previewUrl = cardImageUrl(previewId, deckId: deckId);
 
     return Card(
       child: RadioListTile<DeckId>(

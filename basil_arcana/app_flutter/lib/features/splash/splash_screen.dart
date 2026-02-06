@@ -22,6 +22,10 @@ class _SplashScreenState extends State<SplashScreen>
   void initState() {
     super.initState();
     _canNavigate = AppConfig.isConfigured;
+    if (TelegramWebApp.isTelegramWebView) {
+      TelegramWebApp.expand();
+      TelegramWebApp.disableVerticalSwipes();
+    }
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 900),

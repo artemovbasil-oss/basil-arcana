@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
+import '../../core/config/assets_config.dart';
+import '../../core/assets/asset_paths.dart';
 import '../../core/telegram/telegram_web_app.dart';
 import '../../core/widgets/data_load_error.dart';
 import '../../core/widgets/tarot_asset_widgets.dart';
@@ -78,6 +80,14 @@ class _CardsScreenState extends ConsumerState<CardsScreen> {
             final repo = ref.read(dataRepositoryProvider);
             final locale = ref.read(localeProvider);
             final cacheKey = repo.cardsCacheKey(locale);
+            final debugInfo = DataLoadDebugInfo(
+              assetsBaseUrl: AssetsConfig.assetsBaseUrl,
+              attemptedUrls: {
+                'cards (${repo.cardsFileNameForLocale(locale)})':
+                    repo.lastAttemptedUrls[cacheKey] ?? '—',
+              },
+              lastError: repo.lastError,
+            );
             return Center(
               child: FutureBuilder<bool>(
                 future: repo.hasCachedData(cacheKey),
@@ -99,6 +109,7 @@ class _CardsScreenState extends ConsumerState<CardsScreen> {
                             ref.invalidate(cardsProvider);
                           }
                         : null,
+                    debugInfo: debugInfo,
                   );
                 },
               ),

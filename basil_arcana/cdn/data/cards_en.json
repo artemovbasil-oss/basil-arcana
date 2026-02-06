@@ -1,0 +1,1718 @@
+{
+  "major_00_fool": {
+    "title": "The Fool",
+    "keywords": [
+      "beginnings",
+      "freedom",
+      "trust"
+    ],
+    "meaning": {
+      "general": "The Fool speaks of a fresh start and open-hearted curiosity.",
+      "light": "At its best, it brings playful courage and optimism.",
+      "shadow": "In shadow, it can show naivety or reckless leaps.",
+      "advice": "Advice: step forward, but keep one hand on the rope."
+    },
+    "detailedDescription": "This card marks a fresh start and open-hearted curiosity. It encourages step forward, but keep one hand on the rope.",
+    "funFact": "The Fool is numbered zero, symbolizing limitless potential.",
+    "stats": {
+      "luck": 70,
+      "power": 60,
+      "love": 55,
+      "clarity": 50
+    }
+  },
+  "major_01_magician": {
+    "title": "The Magician",
+    "keywords": [
+      "will",
+      "skill",
+      "manifestation"
+    ],
+    "meaning": {
+      "general": "The Magician speaks of focused intent and the tools to create change.",
+      "light": "At its best, it brings confidence and resourceful action.",
+      "shadow": "In shadow, it can show manipulation or scattered energy.",
+      "advice": "Advice: align your skills with a clear goal."
+    },
+    "detailedDescription": "This card marks focused intent and the tools to create change. It encourages align your skills with a clear goal.",
+    "funFact": "The Magician is often shown with all four suit symbols.",
+    "stats": {
+      "luck": 55,
+      "power": 85,
+      "love": 45,
+      "clarity": 75
+    }
+  },
+  "major_02_high_priestess": {
+    "title": "The High Priestess",
+    "keywords": [
+      "intuition",
+      "mystery",
+      "inner voice"
+    ],
+    "meaning": {
+      "general": "The High Priestess speaks of quiet wisdom and what is hidden beneath the surface.",
+      "light": "At its best, it brings deep listening and spiritual insight.",
+      "shadow": "In shadow, it can show withholding or confusion from silence.",
+      "advice": "Advice: pause, observe, and trust what you feel."
+    },
+    "detailedDescription": "This card marks quiet wisdom and what is hidden beneath the surface. It encourages pause, observe, and trust what you feel.",
+    "funFact": "She sits between pillars marked Boaz and Jachin.",
+    "stats": {
+      "luck": 60,
+      "power": 50,
+      "love": 70,
+      "clarity": 80
+    }
+  },
+  "major_03_empress": {
+    "title": "The Empress",
+    "keywords": [
+      "abundance",
+      "nurture",
+      "creativity"
+    ],
+    "meaning": {
+      "general": "The Empress speaks of growth, beauty, and compassionate care.",
+      "light": "At its best, it brings fertility and generous support.",
+      "shadow": "In shadow, it can show overindulgence or smothering.",
+      "advice": "Advice: create space for steady, life-giving growth."
+    },
+    "detailedDescription": "This card marks growth, beauty, and compassionate care. It encourages create space for steady, life-giving growth.",
+    "funFact": "The Empress is linked to the planet Venus.",
+    "stats": {
+      "luck": 75,
+      "power": 65,
+      "love": 85,
+      "clarity": 55
+    }
+  },
+  "major_04_emperor": {
+    "title": "The Emperor",
+    "keywords": [
+      "structure",
+      "authority",
+      "stability"
+    ],
+    "meaning": {
+      "general": "The Emperor speaks of order, boundaries, and steady leadership.",
+      "light": "At its best, it brings protection and disciplined action.",
+      "shadow": "In shadow, it can show rigidity or control issues.",
+      "advice": "Advice: lead with fairness and clear rules."
+    },
+    "detailedDescription": "This card marks order, boundaries, and steady leadership. It encourages lead with fairness and clear rules.",
+    "funFact": "The Emperor corresponds with the sign Aries.",
+    "stats": {
+      "luck": 55,
+      "power": 85,
+      "love": 45,
+      "clarity": 70
+    }
+  },
+  "major_05_hierophant": {
+    "title": "The Hierophant",
+    "keywords": [
+      "tradition",
+      "learning",
+      "guidance"
+    ],
+    "meaning": {
+      "general": "The Hierophant speaks of shared wisdom, rituals, and belonging.",
+      "light": "At its best, it brings mentorship and moral grounding.",
+      "shadow": "In shadow, it can show conformity or dogma.",
+      "advice": "Advice: learn the rules, then apply them wisely."
+    },
+    "detailedDescription": "This card marks shared wisdom, rituals, and belonging. It encourages learn the rules, then apply them wisely.",
+    "funFact": "This card is associated with Taurus.",
+    "stats": {
+      "luck": 50,
+      "power": 60,
+      "love": 55,
+      "clarity": 75
+    }
+  },
+  "major_06_lovers": {
+    "title": "The Lovers",
+    "keywords": [
+      "union",
+      "choice",
+      "values"
+    ],
+    "meaning": {
+      "general": "The Lovers speaks of meaningful connection and aligned choices.",
+      "light": "At its best, it brings harmony and heartfelt commitment.",
+      "shadow": "In shadow, it can show indecision or divided loyalties.",
+      "advice": "Advice: choose what honors your core values."
+    },
+    "detailedDescription": "This card marks meaningful connection and aligned choices. It encourages choose what honors your core values.",
+    "funFact": "The Lovers correspond with the sign Gemini.",
+    "stats": {
+      "luck": 65,
+      "power": 55,
+      "love": 90,
+      "clarity": 60
+    }
+  },
+  "major_07_chariot": {
+    "title": "The Chariot",
+    "keywords": [
+      "drive",
+      "victory",
+      "discipline"
+    ],
+    "meaning": {
+      "general": "The Chariot speaks of momentum through focused will.",
+      "light": "At its best, it brings confidence and decisive progress.",
+      "shadow": "In shadow, it can show recklessness or forcing outcomes.",
+      "advice": "Advice: hold the reins with calm determination."
+    },
+    "detailedDescription": "This card marks momentum through focused will. It encourages hold the reins with calm determination.",
+    "funFact": "The Chariot is linked with Cancer.",
+    "stats": {
+      "luck": 60,
+      "power": 85,
+      "love": 45,
+      "clarity": 70
+    }
+  },
+  "major_08_strength": {
+    "title": "Strength",
+    "keywords": [
+      "courage",
+      "patience",
+      "inner power"
+    ],
+    "meaning": {
+      "general": "Strength speaks of gentle mastery and calm bravery.",
+      "light": "At its best, it brings compassionate confidence.",
+      "shadow": "In shadow, it can show insecurity or suppressed anger.",
+      "advice": "Advice: lead with the heart, not force."
+    },
+    "detailedDescription": "This card marks gentle mastery and calm bravery. It encourages lead with the heart, not force.",
+    "funFact": "This card is associated with Leo.",
+    "stats": {
+      "luck": 55,
+      "power": 80,
+      "love": 70,
+      "clarity": 65
+    }
+  },
+  "major_09_hermit": {
+    "title": "The Hermit",
+    "keywords": [
+      "introspection",
+      "wisdom",
+      "solitude"
+    ],
+    "meaning": {
+      "general": "The Hermit speaks of inner guidance and quiet reflection.",
+      "light": "At its best, it brings clarity through contemplation.",
+      "shadow": "In shadow, it can show isolation or withdrawal from help.",
+      "advice": "Advice: seek truth within before acting."
+    },
+    "detailedDescription": "This card marks inner guidance and quiet reflection. It encourages seek truth within before acting.",
+    "funFact": "The Hermit is linked with Virgo.",
+    "stats": {
+      "luck": 50,
+      "power": 55,
+      "love": 40,
+      "clarity": 85
+    }
+  },
+  "major_10_wheel": {
+    "title": "Wheel of Fortune",
+    "keywords": [
+      "change",
+      "cycles",
+      "destiny"
+    ],
+    "meaning": {
+      "general": "Wheel of Fortune speaks of turning points and the ebb and flow of fate.",
+      "light": "At its best, it brings lucky breaks and timely shifts.",
+      "shadow": "In shadow, it can show feeling stuck in repetition.",
+      "advice": "Advice: adapt with grace and ride the wave."
+    },
+    "detailedDescription": "This card marks turning points and the ebb and flow of fate. It encourages adapt with grace and ride the wave.",
+    "funFact": "The wheel includes symbols from all four suits.",
+    "stats": {
+      "luck": 90,
+      "power": 55,
+      "love": 55,
+      "clarity": 60
+    }
+  },
+  "major_11_justice": {
+    "title": "Justice",
+    "keywords": [
+      "truth",
+      "balance",
+      "accountability"
+    ],
+    "meaning": {
+      "general": "Justice speaks of fair decisions and clear consequences.",
+      "light": "At its best, it brings integrity and wise judgment.",
+      "shadow": "In shadow, it can show bias or avoidance of responsibility.",
+      "advice": "Advice: act honestly and accept the outcome."
+    },
+    "detailedDescription": "This card marks fair decisions and clear consequences. It encourages act honestly and accept the outcome.",
+    "funFact": "Justice is linked with the sign Libra.",
+    "stats": {
+      "luck": 55,
+      "power": 60,
+      "love": 50,
+      "clarity": 85
+    }
+  },
+  "major_12_hanged_man": {
+    "title": "The Hanged Man",
+    "keywords": [
+      "pause",
+      "surrender",
+      "perspective"
+    ],
+    "meaning": {
+      "general": "The Hanged Man speaks of a reset gained by letting go.",
+      "light": "At its best, it brings patience and new insight.",
+      "shadow": "In shadow, it can show stalling or martyrdom.",
+      "advice": "Advice: allow a pause to reveal the answer."
+    },
+    "detailedDescription": "This card marks a reset gained by letting go. It encourages allow a pause to reveal the answer.",
+    "funFact": "His upside-down posture symbolizes a new view.",
+    "stats": {
+      "luck": 50,
+      "power": 45,
+      "love": 55,
+      "clarity": 75
+    }
+  },
+  "major_13_death": {
+    "title": "Death",
+    "keywords": [
+      "transformation",
+      "endings",
+      "renewal"
+    ],
+    "meaning": {
+      "general": "Death speaks of necessary endings that open new doors.",
+      "light": "At its best, it brings release and powerful rebirth.",
+      "shadow": "In shadow, it can show fear of change or clinging to the past.",
+      "advice": "Advice: let go so something truer can begin."
+    },
+    "detailedDescription": "This card marks necessary endings that open new doors. It encourages let go so something truer can begin.",
+    "funFact": "Despite its name, this card often signals renewal.",
+    "stats": {
+      "luck": 60,
+      "power": 75,
+      "love": 50,
+      "clarity": 70
+    }
+  },
+  "major_14_temperance": {
+    "title": "Temperance",
+    "keywords": [
+      "balance",
+      "healing",
+      "moderation"
+    ],
+    "meaning": {
+      "general": "Temperance speaks of blending opposites into harmony.",
+      "light": "At its best, it brings peaceful flow and patience.",
+      "shadow": "In shadow, it can show extremes or imbalance.",
+      "advice": "Advice: choose the middle path."
+    },
+    "detailedDescription": "This card marks blending opposites into harmony. It encourages choose the middle path.",
+    "funFact": "Temperance is linked with Sagittarius.",
+    "stats": {
+      "luck": 60,
+      "power": 55,
+      "love": 65,
+      "clarity": 75
+    }
+  },
+  "major_15_devil": {
+    "title": "The Devil",
+    "keywords": [
+      "temptation",
+      "bondage",
+      "shadow"
+    ],
+    "meaning": {
+      "general": "The Devil speaks of attachments that keep you stuck.",
+      "light": "At its best, it brings awareness of hidden desires.",
+      "shadow": "In shadow, it can show addiction, fear, or self-sabotage.",
+      "advice": "Advice: name the chain so you can remove it."
+    },
+    "detailedDescription": "This card marks attachments that keep you stuck. It encourages name the chain so you can remove it.",
+    "funFact": "The Devil card is associated with Capricorn.",
+    "stats": {
+      "luck": 45,
+      "power": 70,
+      "love": 40,
+      "clarity": 55
+    }
+  },
+  "major_16_tower": {
+    "title": "The Tower",
+    "keywords": [
+      "upheaval",
+      "revelation",
+      "liberation"
+    ],
+    "meaning": {
+      "general": "The Tower speaks of sudden change that clears the truth.",
+      "light": "At its best, it brings breakthrough and freedom.",
+      "shadow": "In shadow, it can show chaos or resistance to the inevitable.",
+      "advice": "Advice: let false structures fall."
+    },
+    "detailedDescription": "This card marks sudden change that clears the truth. It encourages let false structures fall.",
+    "funFact": "The Tower is linked with Mars.",
+    "stats": {
+      "luck": 50,
+      "power": 80,
+      "love": 40,
+      "clarity": 65
+    }
+  },
+  "major_17_star": {
+    "title": "The Star",
+    "keywords": [
+      "hope",
+      "healing",
+      "guidance"
+    ],
+    "meaning": {
+      "general": "The Star speaks of renewal and a clear guiding light.",
+      "light": "At its best, it brings inspiration and quiet faith.",
+      "shadow": "In shadow, it can show discouragement or doubt.",
+      "advice": "Advice: follow the light, one step at a time."
+    },
+    "detailedDescription": "This card marks renewal and a clear guiding light. It encourages follow the light, one step at a time.",
+    "funFact": "The Star is linked with Aquarius.",
+    "stats": {
+      "luck": 75,
+      "power": 55,
+      "love": 70,
+      "clarity": 80
+    }
+  },
+  "major_18_moon": {
+    "title": "The Moon",
+    "keywords": [
+      "illusion",
+      "intuition",
+      "dreams"
+    ],
+    "meaning": {
+      "general": "The Moon speaks of uncertainty, imagination, and the unseen.",
+      "light": "At its best, it brings creative insight and psychic sensitivity.",
+      "shadow": "In shadow, it can show confusion or fear of the unknown.",
+      "advice": "Advice: move slowly and check what is real."
+    },
+    "detailedDescription": "This card marks uncertainty, imagination, and the unseen. It encourages move slowly and check what is real.",
+    "funFact": "The Moon is linked with Pisces.",
+    "stats": {
+      "luck": 55,
+      "power": 50,
+      "love": 65,
+      "clarity": 55
+    }
+  },
+  "major_19_sun": {
+    "title": "The Sun",
+    "keywords": [
+      "joy",
+      "clarity",
+      "success"
+    ],
+    "meaning": {
+      "general": "The Sun speaks of vitality, warmth, and clear success.",
+      "light": "At its best, it brings confidence and celebration.",
+      "shadow": "In shadow, it can show overconfidence or burnout.",
+      "advice": "Advice: share your light and keep it balanced."
+    },
+    "detailedDescription": "This card marks vitality, warmth, and clear success. It encourages share your light and keep it balanced.",
+    "funFact": "The Sun is linked with the sign Leo.",
+    "stats": {
+      "luck": 85,
+      "power": 70,
+      "love": 75,
+      "clarity": 85
+    }
+  },
+  "major_20_judgement": {
+    "title": "Judgement",
+    "keywords": [
+      "awakening",
+      "calling",
+      "release"
+    ],
+    "meaning": {
+      "general": "Judgement speaks of a wake-up call and renewal.",
+      "light": "At its best, it brings forgiveness and a higher purpose.",
+      "shadow": "In shadow, it can show harsh self-judgment.",
+      "advice": "Advice: answer the call and release the past."
+    },
+    "detailedDescription": "This card marks a wake-up call and renewal. It encourages answer the call and release the past.",
+    "funFact": "Judgement is linked with Pluto in modern astrology.",
+    "stats": {
+      "luck": 70,
+      "power": 65,
+      "love": 60,
+      "clarity": 80
+    }
+  },
+  "major_21_world": {
+    "title": "The World",
+    "keywords": [
+      "completion",
+      "wholeness",
+      "integration"
+    ],
+    "meaning": {
+      "general": "The World speaks of fulfillment and the closing of a cycle.",
+      "light": "At its best, it brings success and harmony.",
+      "shadow": "In shadow, it can show delayed closure.",
+      "advice": "Advice: celebrate what is complete and integrate the lesson."
+    },
+    "detailedDescription": "This card marks fulfillment and the closing of a cycle. It encourages celebrate what is complete and integrate the lesson.",
+    "funFact": "The World represents the final major arcana card.",
+    "stats": {
+      "luck": 80,
+      "power": 70,
+      "love": 70,
+      "clarity": 85
+    }
+  },
+  "wands_00_knight": {
+    "title": "Knight of Wands",
+    "keywords": [
+      "passion",
+      "drive",
+      "bold"
+    ],
+    "meaning": {
+      "general": "The Knight of Wands highlights bold momentum in the realm of passion and action.",
+      "light": "At its best, it brings channel your energy with warmth.",
+      "shadow": "In shadow, it can slip into reckless rushing.",
+      "advice": "Act with channel your energy and stay aligned with passion and action."
+    },
+    "detailedDescription": "This card asks you to express passion and action through bold momentum. Watch for reckless rushing and choose a steadier path.",
+    "funFact": "In traditional decks, the Knight of Wands signals bold momentum around passion and action.",
+    "stats": {
+      "luck": 55,
+      "power": 88,
+      "love": 50,
+      "clarity": 53
+    }
+  },
+  "wands_01_king": {
+    "title": "King of Wands",
+    "keywords": [
+      "passion",
+      "drive",
+      "mastery"
+    ],
+    "meaning": {
+      "general": "The King of Wands highlights mastery and authority in the realm of passion and action.",
+      "light": "At its best, it brings lead with wisdom with warmth.",
+      "shadow": "In shadow, it can slip into rigidity or dominance.",
+      "advice": "Act with lead with wisdom and stay aligned with passion and action."
+    },
+    "detailedDescription": "This card asks you to express passion and action through mastery and authority. Watch for rigidity or dominance and choose a steadier path.",
+    "funFact": "In traditional decks, the King of Wands signals mastery and authority around passion and action.",
+    "stats": {
+      "luck": 55,
+      "power": 90,
+      "love": 48,
+      "clarity": 57
+    }
+  },
+  "wands_02_queen": {
+    "title": "Queen of Wands",
+    "keywords": [
+      "passion",
+      "drive",
+      "nurturing"
+    ],
+    "meaning": {
+      "general": "The Queen of Wands highlights nurturing confidence in the realm of passion and action.",
+      "light": "At its best, it brings support without control with warmth.",
+      "shadow": "In shadow, it can slip into overprotection.",
+      "advice": "Act with support without control and stay aligned with passion and action."
+    },
+    "detailedDescription": "This card asks you to express passion and action through nurturing confidence. Watch for overprotection and choose a steadier path.",
+    "funFact": "In traditional decks, the Queen of Wands signals nurturing confidence around passion and action.",
+    "stats": {
+      "luck": 55,
+      "power": 84,
+      "love": 58,
+      "clarity": 57
+    }
+  },
+  "wands_03_page": {
+    "title": "Page of Wands",
+    "keywords": [
+      "passion",
+      "drive",
+      "curiosity"
+    ],
+    "meaning": {
+      "general": "The Page of Wands highlights curiosity and messages in the realm of passion and action.",
+      "light": "At its best, it brings learn and explore with warmth.",
+      "shadow": "In shadow, it can slip into immaturity or gossip.",
+      "advice": "Act with learn and explore and stay aligned with passion and action."
+    },
+    "detailedDescription": "This card asks you to express passion and action through curiosity and messages. Watch for immaturity or gossip and choose a steadier path.",
+    "funFact": "In traditional decks, the Page of Wands signals curiosity and messages around passion and action.",
+    "stats": {
+      "luck": 57,
+      "power": 80,
+      "love": 52,
+      "clarity": 61
+    }
+  },
+  "wands_04_two": {
+    "title": "Two of Wands",
+    "keywords": [
+      "passion",
+      "drive",
+      "balance"
+    ],
+    "meaning": {
+      "general": "The Two of Wands highlights balance and choice in the realm of passion and action.",
+      "light": "At its best, it brings weigh both sides with warmth.",
+      "shadow": "In shadow, it can slip into indecision.",
+      "advice": "Act with weigh both sides and stay aligned with passion and action."
+    },
+    "detailedDescription": "This card asks you to express passion and action through balance and choice. Watch for indecision and choose a steadier path.",
+    "funFact": "In traditional decks, the Two of Wands signals balance and choice around passion and action.",
+    "stats": {
+      "luck": 57,
+      "power": 80,
+      "love": 52,
+      "clarity": 59
+    }
+  },
+  "wands_05_three": {
+    "title": "Three of Wands",
+    "keywords": [
+      "passion",
+      "drive",
+      "collaboration"
+    ],
+    "meaning": {
+      "general": "The Three of Wands highlights collaboration and growth in the realm of passion and action.",
+      "light": "At its best, it brings build together with warmth.",
+      "shadow": "In shadow, it can slip into scattered focus.",
+      "advice": "Act with build together and stay aligned with passion and action."
+    },
+    "detailedDescription": "This card asks you to express passion and action through collaboration and growth. Watch for scattered focus and choose a steadier path.",
+    "funFact": "In traditional decks, the Three of Wands signals collaboration and growth around passion and action.",
+    "stats": {
+      "luck": 57,
+      "power": 82,
+      "love": 54,
+      "clarity": 57
+    }
+  },
+  "wands_06_four": {
+    "title": "Four of Wands",
+    "keywords": [
+      "passion",
+      "drive",
+      "stability"
+    ],
+    "meaning": {
+      "general": "The Four of Wands highlights stability and rest in the realm of passion and action.",
+      "light": "At its best, it brings ground yourself with warmth.",
+      "shadow": "In shadow, it can slip into stagnation.",
+      "advice": "Act with ground yourself and stay aligned with passion and action."
+    },
+    "detailedDescription": "This card asks you to express passion and action through stability and rest. Watch for stagnation and choose a steadier path.",
+    "funFact": "In traditional decks, the Four of Wands signals stability and rest around passion and action.",
+    "stats": {
+      "luck": 55,
+      "power": 80,
+      "love": 52,
+      "clarity": 59
+    }
+  },
+  "wands_07_five": {
+    "title": "Five of Wands",
+    "keywords": [
+      "passion",
+      "drive",
+      "challenge"
+    ],
+    "meaning": {
+      "general": "The Five of Wands highlights challenge and tension in the realm of passion and action.",
+      "light": "At its best, it brings face the lesson with warmth.",
+      "shadow": "In shadow, it can slip into conflict or loss.",
+      "advice": "Act with face the lesson and stay aligned with passion and action."
+    },
+    "detailedDescription": "This card asks you to express passion and action through challenge and tension. Watch for conflict or loss and choose a steadier path.",
+    "funFact": "In traditional decks, the Five of Wands signals challenge and tension around passion and action.",
+    "stats": {
+      "luck": 55,
+      "power": 82,
+      "love": 48,
+      "clarity": 57
+    }
+  },
+  "wands_08_six": {
+    "title": "Six of Wands",
+    "keywords": [
+      "passion",
+      "drive",
+      "harmony"
+    ],
+    "meaning": {
+      "general": "The Six of Wands highlights harmony and progress in the realm of passion and action.",
+      "light": "At its best, it brings move forward gently with warmth.",
+      "shadow": "In shadow, it can slip into nostalgia traps.",
+      "advice": "Act with move forward gently and stay aligned with passion and action."
+    },
+    "detailedDescription": "This card asks you to express passion and action through harmony and progress. Watch for nostalgia traps and choose a steadier path.",
+    "funFact": "In traditional decks, the Six of Wands signals harmony and progress around passion and action.",
+    "stats": {
+      "luck": 59,
+      "power": 82,
+      "love": 54,
+      "clarity": 57
+    }
+  },
+  "wands_09_seven": {
+    "title": "Seven of Wands",
+    "keywords": [
+      "passion",
+      "drive",
+      "strategy"
+    ],
+    "meaning": {
+      "general": "The Seven of Wands highlights strategy and perseverance in the realm of passion and action.",
+      "light": "At its best, it brings defend what matters with warmth.",
+      "shadow": "In shadow, it can slip into doubt or secrecy.",
+      "advice": "Act with defend what matters and stay aligned with passion and action."
+    },
+    "detailedDescription": "This card asks you to express passion and action through strategy and perseverance. Watch for doubt or secrecy and choose a steadier path.",
+    "funFact": "In traditional decks, the Seven of Wands signals strategy and perseverance around passion and action.",
+    "stats": {
+      "luck": 57,
+      "power": 84,
+      "love": 50,
+      "clarity": 59
+    }
+  },
+  "wands_10_eight": {
+    "title": "Eight of Wands",
+    "keywords": [
+      "passion",
+      "drive",
+      "movement"
+    ],
+    "meaning": {
+      "general": "The Eight of Wands highlights movement and skill in the realm of passion and action.",
+      "light": "At its best, it brings pace yourself with warmth.",
+      "shadow": "In shadow, it can slip into haste or burnout.",
+      "advice": "Act with pace yourself and stay aligned with passion and action."
+    },
+    "detailedDescription": "This card asks you to express passion and action through movement and skill. Watch for haste or burnout and choose a steadier path.",
+    "funFact": "In traditional decks, the Eight of Wands signals movement and skill around passion and action.",
+    "stats": {
+      "luck": 57,
+      "power": 84,
+      "love": 50,
+      "clarity": 57
+    }
+  },
+  "wands_11_nine": {
+    "title": "Nine of Wands",
+    "keywords": [
+      "passion",
+      "drive",
+      "resilience"
+    ],
+    "meaning": {
+      "general": "The Nine of Wands highlights resilience and boundaries in the realm of passion and action.",
+      "light": "At its best, it brings protect your energy with warmth.",
+      "shadow": "In shadow, it can slip into defensiveness.",
+      "advice": "Act with protect your energy and stay aligned with passion and action."
+    },
+    "detailedDescription": "This card asks you to express passion and action through resilience and boundaries. Watch for defensiveness and choose a steadier path.",
+    "funFact": "In traditional decks, the Nine of Wands signals resilience and boundaries around passion and action.",
+    "stats": {
+      "luck": 57,
+      "power": 84,
+      "love": 50,
+      "clarity": 59
+    }
+  },
+  "wands_12_ten": {
+    "title": "Ten of Wands",
+    "keywords": [
+      "passion",
+      "drive",
+      "completion"
+    ],
+    "meaning": {
+      "general": "The Ten of Wands highlights completion and weight in the realm of passion and action.",
+      "light": "At its best, it brings close the cycle wisely with warmth.",
+      "shadow": "In shadow, it can slip into overburden.",
+      "advice": "Act with close the cycle wisely and stay aligned with passion and action."
+    },
+    "detailedDescription": "This card asks you to express passion and action through completion and weight. Watch for overburden and choose a steadier path.",
+    "funFact": "In traditional decks, the Ten of Wands signals completion and weight around passion and action.",
+    "stats": {
+      "luck": 59,
+      "power": 82,
+      "love": 50,
+      "clarity": 59
+    }
+  },
+  "wands_13_ace": {
+    "title": "Ace of Wands",
+    "keywords": [
+      "passion",
+      "drive",
+      "new"
+    ],
+    "meaning": {
+      "general": "The Ace of Wands highlights new spark in the realm of passion and action.",
+      "light": "At its best, it brings say yes to the beginning with warmth.",
+      "shadow": "In shadow, it can slip into missed opportunity.",
+      "advice": "Act with say yes to the beginning and stay aligned with passion and action."
+    },
+    "detailedDescription": "This card asks you to express passion and action through new spark. Watch for missed opportunity and choose a steadier path.",
+    "funFact": "In traditional decks, the Ace of Wands signals new spark around passion and action.",
+    "stats": {
+      "luck": 61,
+      "power": 86,
+      "love": 52,
+      "clarity": 57
+    }
+  },
+  "swords_00_knight": {
+    "title": "Knight of Swords",
+    "keywords": [
+      "truth",
+      "clarity",
+      "bold"
+    ],
+    "meaning": {
+      "general": "The Knight of Swords highlights bold momentum in the realm of truth and intellect.",
+      "light": "At its best, it brings channel your energy with warmth.",
+      "shadow": "In shadow, it can slip into reckless rushing.",
+      "advice": "Act with channel your energy and stay aligned with truth and intellect."
+    },
+    "detailedDescription": "This card asks you to express truth and intellect through bold momentum. Watch for reckless rushing and choose a steadier path.",
+    "funFact": "In traditional decks, the Knight of Swords signals bold momentum around truth and intellect.",
+    "stats": {
+      "luck": 50,
+      "power": 73,
+      "love": 40,
+      "clarity": 83
+    }
+  },
+  "swords_01_king": {
+    "title": "King of Swords",
+    "keywords": [
+      "truth",
+      "clarity",
+      "mastery"
+    ],
+    "meaning": {
+      "general": "The King of Swords highlights mastery and authority in the realm of truth and intellect.",
+      "light": "At its best, it brings lead with wisdom with warmth.",
+      "shadow": "In shadow, it can slip into rigidity or dominance.",
+      "advice": "Act with lead with wisdom and stay aligned with truth and intellect."
+    },
+    "detailedDescription": "This card asks you to express truth and intellect through mastery and authority. Watch for rigidity or dominance and choose a steadier path.",
+    "funFact": "In traditional decks, the King of Swords signals mastery and authority around truth and intellect.",
+    "stats": {
+      "luck": 50,
+      "power": 75,
+      "love": 38,
+      "clarity": 87
+    }
+  },
+  "swords_02_queen": {
+    "title": "Queen of Swords",
+    "keywords": [
+      "truth",
+      "clarity",
+      "nurturing"
+    ],
+    "meaning": {
+      "general": "The Queen of Swords highlights nurturing confidence in the realm of truth and intellect.",
+      "light": "At its best, it brings support without control with warmth.",
+      "shadow": "In shadow, it can slip into overprotection.",
+      "advice": "Act with support without control and stay aligned with truth and intellect."
+    },
+    "detailedDescription": "This card asks you to express truth and intellect through nurturing confidence. Watch for overprotection and choose a steadier path.",
+    "funFact": "In traditional decks, the Queen of Swords signals nurturing confidence around truth and intellect.",
+    "stats": {
+      "luck": 50,
+      "power": 69,
+      "love": 48,
+      "clarity": 87
+    }
+  },
+  "swords_03_page": {
+    "title": "Page of Swords",
+    "keywords": [
+      "truth",
+      "clarity",
+      "curiosity"
+    ],
+    "meaning": {
+      "general": "The Page of Swords highlights curiosity and messages in the realm of truth and intellect.",
+      "light": "At its best, it brings learn and explore with warmth.",
+      "shadow": "In shadow, it can slip into immaturity or gossip.",
+      "advice": "Act with learn and explore and stay aligned with truth and intellect."
+    },
+    "detailedDescription": "This card asks you to express truth and intellect through curiosity and messages. Watch for immaturity or gossip and choose a steadier path.",
+    "funFact": "In traditional decks, the Page of Swords signals curiosity and messages around truth and intellect.",
+    "stats": {
+      "luck": 52,
+      "power": 65,
+      "love": 42,
+      "clarity": 91
+    }
+  },
+  "swords_04_two": {
+    "title": "Two of Swords",
+    "keywords": [
+      "truth",
+      "clarity",
+      "balance"
+    ],
+    "meaning": {
+      "general": "The Two of Swords highlights balance and choice in the realm of truth and intellect.",
+      "light": "At its best, it brings weigh both sides with warmth.",
+      "shadow": "In shadow, it can slip into indecision.",
+      "advice": "Act with weigh both sides and stay aligned with truth and intellect."
+    },
+    "detailedDescription": "This card asks you to express truth and intellect through balance and choice. Watch for indecision and choose a steadier path.",
+    "funFact": "In traditional decks, the Two of Swords signals balance and choice around truth and intellect.",
+    "stats": {
+      "luck": 52,
+      "power": 65,
+      "love": 42,
+      "clarity": 89
+    }
+  },
+  "swords_05_three": {
+    "title": "Three of Swords",
+    "keywords": [
+      "truth",
+      "clarity",
+      "collaboration"
+    ],
+    "meaning": {
+      "general": "The Three of Swords highlights collaboration and growth in the realm of truth and intellect.",
+      "light": "At its best, it brings build together with warmth.",
+      "shadow": "In shadow, it can slip into scattered focus.",
+      "advice": "Act with build together and stay aligned with truth and intellect."
+    },
+    "detailedDescription": "This card asks you to express truth and intellect through collaboration and growth. Watch for scattered focus and choose a steadier path.",
+    "funFact": "In traditional decks, the Three of Swords signals collaboration and growth around truth and intellect.",
+    "stats": {
+      "luck": 52,
+      "power": 67,
+      "love": 44,
+      "clarity": 87
+    }
+  },
+  "swords_06_four": {
+    "title": "Four of Swords",
+    "keywords": [
+      "truth",
+      "clarity",
+      "stability"
+    ],
+    "meaning": {
+      "general": "The Four of Swords highlights stability and rest in the realm of truth and intellect.",
+      "light": "At its best, it brings ground yourself with warmth.",
+      "shadow": "In shadow, it can slip into stagnation.",
+      "advice": "Act with ground yourself and stay aligned with truth and intellect."
+    },
+    "detailedDescription": "This card asks you to express truth and intellect through stability and rest. Watch for stagnation and choose a steadier path.",
+    "funFact": "In traditional decks, the Four of Swords signals stability and rest around truth and intellect.",
+    "stats": {
+      "luck": 50,
+      "power": 65,
+      "love": 42,
+      "clarity": 89
+    }
+  },
+  "swords_07_five": {
+    "title": "Five of Swords",
+    "keywords": [
+      "truth",
+      "clarity",
+      "challenge"
+    ],
+    "meaning": {
+      "general": "The Five of Swords highlights challenge and tension in the realm of truth and intellect.",
+      "light": "At its best, it brings face the lesson with warmth.",
+      "shadow": "In shadow, it can slip into conflict or loss.",
+      "advice": "Act with face the lesson and stay aligned with truth and intellect."
+    },
+    "detailedDescription": "This card asks you to express truth and intellect through challenge and tension. Watch for conflict or loss and choose a steadier path.",
+    "funFact": "In traditional decks, the Five of Swords signals challenge and tension around truth and intellect.",
+    "stats": {
+      "luck": 50,
+      "power": 67,
+      "love": 38,
+      "clarity": 87
+    }
+  },
+  "swords_08_six": {
+    "title": "Six of Swords",
+    "keywords": [
+      "truth",
+      "clarity",
+      "harmony"
+    ],
+    "meaning": {
+      "general": "The Six of Swords highlights harmony and progress in the realm of truth and intellect.",
+      "light": "At its best, it brings move forward gently with warmth.",
+      "shadow": "In shadow, it can slip into nostalgia traps.",
+      "advice": "Act with move forward gently and stay aligned with truth and intellect."
+    },
+    "detailedDescription": "This card asks you to express truth and intellect through harmony and progress. Watch for nostalgia traps and choose a steadier path.",
+    "funFact": "In traditional decks, the Six of Swords signals harmony and progress around truth and intellect.",
+    "stats": {
+      "luck": 54,
+      "power": 67,
+      "love": 44,
+      "clarity": 87
+    }
+  },
+  "swords_09_seven": {
+    "title": "Seven of Swords",
+    "keywords": [
+      "truth",
+      "clarity",
+      "strategy"
+    ],
+    "meaning": {
+      "general": "The Seven of Swords highlights strategy and perseverance in the realm of truth and intellect.",
+      "light": "At its best, it brings defend what matters with warmth.",
+      "shadow": "In shadow, it can slip into doubt or secrecy.",
+      "advice": "Act with defend what matters and stay aligned with truth and intellect."
+    },
+    "detailedDescription": "This card asks you to express truth and intellect through strategy and perseverance. Watch for doubt or secrecy and choose a steadier path.",
+    "funFact": "In traditional decks, the Seven of Swords signals strategy and perseverance around truth and intellect.",
+    "stats": {
+      "luck": 52,
+      "power": 69,
+      "love": 40,
+      "clarity": 89
+    }
+  },
+  "swords_10_eight": {
+    "title": "Eight of Swords",
+    "keywords": [
+      "truth",
+      "clarity",
+      "movement"
+    ],
+    "meaning": {
+      "general": "The Eight of Swords highlights movement and skill in the realm of truth and intellect.",
+      "light": "At its best, it brings pace yourself with warmth.",
+      "shadow": "In shadow, it can slip into haste or burnout.",
+      "advice": "Act with pace yourself and stay aligned with truth and intellect."
+    },
+    "detailedDescription": "This card asks you to express truth and intellect through movement and skill. Watch for haste or burnout and choose a steadier path.",
+    "funFact": "In traditional decks, the Eight of Swords signals movement and skill around truth and intellect.",
+    "stats": {
+      "luck": 52,
+      "power": 69,
+      "love": 40,
+      "clarity": 87
+    }
+  },
+  "swords_11_nine": {
+    "title": "Nine of Swords",
+    "keywords": [
+      "truth",
+      "clarity",
+      "resilience"
+    ],
+    "meaning": {
+      "general": "The Nine of Swords highlights resilience and boundaries in the realm of truth and intellect.",
+      "light": "At its best, it brings protect your energy with warmth.",
+      "shadow": "In shadow, it can slip into defensiveness.",
+      "advice": "Act with protect your energy and stay aligned with truth and intellect."
+    },
+    "detailedDescription": "This card asks you to express truth and intellect through resilience and boundaries. Watch for defensiveness and choose a steadier path.",
+    "funFact": "In traditional decks, the Nine of Swords signals resilience and boundaries around truth and intellect.",
+    "stats": {
+      "luck": 52,
+      "power": 69,
+      "love": 40,
+      "clarity": 89
+    }
+  },
+  "swords_12_ten": {
+    "title": "Ten of Swords",
+    "keywords": [
+      "truth",
+      "clarity",
+      "completion"
+    ],
+    "meaning": {
+      "general": "The Ten of Swords highlights completion and weight in the realm of truth and intellect.",
+      "light": "At its best, it brings close the cycle wisely with warmth.",
+      "shadow": "In shadow, it can slip into overburden.",
+      "advice": "Act with close the cycle wisely and stay aligned with truth and intellect."
+    },
+    "detailedDescription": "This card asks you to express truth and intellect through completion and weight. Watch for overburden and choose a steadier path.",
+    "funFact": "In traditional decks, the Ten of Swords signals completion and weight around truth and intellect.",
+    "stats": {
+      "luck": 54,
+      "power": 67,
+      "love": 40,
+      "clarity": 89
+    }
+  },
+  "swords_13_ace": {
+    "title": "Ace of Swords",
+    "keywords": [
+      "truth",
+      "clarity",
+      "new"
+    ],
+    "meaning": {
+      "general": "The Ace of Swords highlights new spark in the realm of truth and intellect.",
+      "light": "At its best, it brings say yes to the beginning with warmth.",
+      "shadow": "In shadow, it can slip into missed opportunity.",
+      "advice": "Act with say yes to the beginning and stay aligned with truth and intellect."
+    },
+    "detailedDescription": "This card asks you to express truth and intellect through new spark. Watch for missed opportunity and choose a steadier path.",
+    "funFact": "In traditional decks, the Ace of Swords signals new spark around truth and intellect.",
+    "stats": {
+      "luck": 56,
+      "power": 71,
+      "love": 42,
+      "clarity": 87
+    }
+  },
+  "pentacles_00_knight": {
+    "title": "Knight of Pentacles",
+    "keywords": [
+      "stability",
+      "resources",
+      "bold"
+    ],
+    "meaning": {
+      "general": "The Knight of Pentacles highlights bold momentum in the realm of stability and material growth.",
+      "light": "At its best, it brings channel your energy with warmth.",
+      "shadow": "In shadow, it can slip into reckless rushing.",
+      "advice": "Act with channel your energy and stay aligned with stability and material growth."
+    },
+    "detailedDescription": "This card asks you to express stability and material growth through bold momentum. Watch for reckless rushing and choose a steadier path.",
+    "funFact": "In traditional decks, the Knight of Pentacles signals bold momentum around stability and material growth.",
+    "stats": {
+      "luck": 70,
+      "power": 68,
+      "love": 55,
+      "clarity": 63
+    }
+  },
+  "pentacles_01_king": {
+    "title": "King of Pentacles",
+    "keywords": [
+      "stability",
+      "resources",
+      "mastery"
+    ],
+    "meaning": {
+      "general": "The King of Pentacles highlights mastery and authority in the realm of stability and material growth.",
+      "light": "At its best, it brings lead with wisdom with warmth.",
+      "shadow": "In shadow, it can slip into rigidity or dominance.",
+      "advice": "Act with lead with wisdom and stay aligned with stability and material growth."
+    },
+    "detailedDescription": "This card asks you to express stability and material growth through mastery and authority. Watch for rigidity or dominance and choose a steadier path.",
+    "funFact": "In traditional decks, the King of Pentacles signals mastery and authority around stability and material growth.",
+    "stats": {
+      "luck": 70,
+      "power": 70,
+      "love": 53,
+      "clarity": 67
+    }
+  },
+  "pentacles_02_queen": {
+    "title": "Queen of Pentacles",
+    "keywords": [
+      "stability",
+      "resources",
+      "nurturing"
+    ],
+    "meaning": {
+      "general": "The Queen of Pentacles highlights nurturing confidence in the realm of stability and material growth.",
+      "light": "At its best, it brings support without control with warmth.",
+      "shadow": "In shadow, it can slip into overprotection.",
+      "advice": "Act with support without control and stay aligned with stability and material growth."
+    },
+    "detailedDescription": "This card asks you to express stability and material growth through nurturing confidence. Watch for overprotection and choose a steadier path.",
+    "funFact": "In traditional decks, the Queen of Pentacles signals nurturing confidence around stability and material growth.",
+    "stats": {
+      "luck": 70,
+      "power": 64,
+      "love": 63,
+      "clarity": 67
+    }
+  },
+  "pentacles_03_page": {
+    "title": "Page of Pentacles",
+    "keywords": [
+      "stability",
+      "resources",
+      "curiosity"
+    ],
+    "meaning": {
+      "general": "The Page of Pentacles highlights curiosity and messages in the realm of stability and material growth.",
+      "light": "At its best, it brings learn and explore with warmth.",
+      "shadow": "In shadow, it can slip into immaturity or gossip.",
+      "advice": "Act with learn and explore and stay aligned with stability and material growth."
+    },
+    "detailedDescription": "This card asks you to express stability and material growth through curiosity and messages. Watch for immaturity or gossip and choose a steadier path.",
+    "funFact": "In traditional decks, the Page of Pentacles signals curiosity and messages around stability and material growth.",
+    "stats": {
+      "luck": 72,
+      "power": 60,
+      "love": 57,
+      "clarity": 71
+    }
+  },
+  "pentacles_04_two": {
+    "title": "Two of Pentacles",
+    "keywords": [
+      "stability",
+      "resources",
+      "balance"
+    ],
+    "meaning": {
+      "general": "The Two of Pentacles highlights balance and choice in the realm of stability and material growth.",
+      "light": "At its best, it brings weigh both sides with warmth.",
+      "shadow": "In shadow, it can slip into indecision.",
+      "advice": "Act with weigh both sides and stay aligned with stability and material growth."
+    },
+    "detailedDescription": "This card asks you to express stability and material growth through balance and choice. Watch for indecision and choose a steadier path.",
+    "funFact": "In traditional decks, the Two of Pentacles signals balance and choice around stability and material growth.",
+    "stats": {
+      "luck": 72,
+      "power": 60,
+      "love": 57,
+      "clarity": 69
+    }
+  },
+  "pentacles_05_three": {
+    "title": "Three of Pentacles",
+    "keywords": [
+      "stability",
+      "resources",
+      "collaboration"
+    ],
+    "meaning": {
+      "general": "The Three of Pentacles highlights collaboration and growth in the realm of stability and material growth.",
+      "light": "At its best, it brings build together with warmth.",
+      "shadow": "In shadow, it can slip into scattered focus.",
+      "advice": "Act with build together and stay aligned with stability and material growth."
+    },
+    "detailedDescription": "This card asks you to express stability and material growth through collaboration and growth. Watch for scattered focus and choose a steadier path.",
+    "funFact": "In traditional decks, the Three of Pentacles signals collaboration and growth around stability and material growth.",
+    "stats": {
+      "luck": 72,
+      "power": 62,
+      "love": 59,
+      "clarity": 67
+    }
+  },
+  "pentacles_06_four": {
+    "title": "Four of Pentacles",
+    "keywords": [
+      "stability",
+      "resources",
+      "stability"
+    ],
+    "meaning": {
+      "general": "The Four of Pentacles highlights stability and rest in the realm of stability and material growth.",
+      "light": "At its best, it brings ground yourself with warmth.",
+      "shadow": "In shadow, it can slip into stagnation.",
+      "advice": "Act with ground yourself and stay aligned with stability and material growth."
+    },
+    "detailedDescription": "This card asks you to express stability and material growth through stability and rest. Watch for stagnation and choose a steadier path.",
+    "funFact": "In traditional decks, the Four of Pentacles signals stability and rest around stability and material growth.",
+    "stats": {
+      "luck": 70,
+      "power": 60,
+      "love": 57,
+      "clarity": 69
+    }
+  },
+  "pentacles_07_five": {
+    "title": "Five of Pentacles",
+    "keywords": [
+      "stability",
+      "resources",
+      "challenge"
+    ],
+    "meaning": {
+      "general": "The Five of Pentacles highlights challenge and tension in the realm of stability and material growth.",
+      "light": "At its best, it brings face the lesson with warmth.",
+      "shadow": "In shadow, it can slip into conflict or loss.",
+      "advice": "Act with face the lesson and stay aligned with stability and material growth."
+    },
+    "detailedDescription": "This card asks you to express stability and material growth through challenge and tension. Watch for conflict or loss and choose a steadier path.",
+    "funFact": "In traditional decks, the Five of Pentacles signals challenge and tension around stability and material growth.",
+    "stats": {
+      "luck": 70,
+      "power": 62,
+      "love": 53,
+      "clarity": 67
+    }
+  },
+  "pentacles_08_six": {
+    "title": "Six of Pentacles",
+    "keywords": [
+      "stability",
+      "resources",
+      "harmony"
+    ],
+    "meaning": {
+      "general": "The Six of Pentacles highlights harmony and progress in the realm of stability and material growth.",
+      "light": "At its best, it brings move forward gently with warmth.",
+      "shadow": "In shadow, it can slip into nostalgia traps.",
+      "advice": "Act with move forward gently and stay aligned with stability and material growth."
+    },
+    "detailedDescription": "This card asks you to express stability and material growth through harmony and progress. Watch for nostalgia traps and choose a steadier path.",
+    "funFact": "In traditional decks, the Six of Pentacles signals harmony and progress around stability and material growth.",
+    "stats": {
+      "luck": 74,
+      "power": 62,
+      "love": 59,
+      "clarity": 67
+    }
+  },
+  "pentacles_09_seven": {
+    "title": "Seven of Pentacles",
+    "keywords": [
+      "stability",
+      "resources",
+      "strategy"
+    ],
+    "meaning": {
+      "general": "The Seven of Pentacles highlights strategy and perseverance in the realm of stability and material growth.",
+      "light": "At its best, it brings defend what matters with warmth.",
+      "shadow": "In shadow, it can slip into doubt or secrecy.",
+      "advice": "Act with defend what matters and stay aligned with stability and material growth."
+    },
+    "detailedDescription": "This card asks you to express stability and material growth through strategy and perseverance. Watch for doubt or secrecy and choose a steadier path.",
+    "funFact": "In traditional decks, the Seven of Pentacles signals strategy and perseverance around stability and material growth.",
+    "stats": {
+      "luck": 72,
+      "power": 64,
+      "love": 55,
+      "clarity": 69
+    }
+  },
+  "pentacles_10_eight": {
+    "title": "Eight of Pentacles",
+    "keywords": [
+      "stability",
+      "resources",
+      "movement"
+    ],
+    "meaning": {
+      "general": "The Eight of Pentacles highlights movement and skill in the realm of stability and material growth.",
+      "light": "At its best, it brings pace yourself with warmth.",
+      "shadow": "In shadow, it can slip into haste or burnout.",
+      "advice": "Act with pace yourself and stay aligned with stability and material growth."
+    },
+    "detailedDescription": "This card asks you to express stability and material growth through movement and skill. Watch for haste or burnout and choose a steadier path.",
+    "funFact": "In traditional decks, the Eight of Pentacles signals movement and skill around stability and material growth.",
+    "stats": {
+      "luck": 72,
+      "power": 64,
+      "love": 55,
+      "clarity": 67
+    }
+  },
+  "pentacles_11_nine": {
+    "title": "Nine of Pentacles",
+    "keywords": [
+      "stability",
+      "resources",
+      "resilience"
+    ],
+    "meaning": {
+      "general": "The Nine of Pentacles highlights resilience and boundaries in the realm of stability and material growth.",
+      "light": "At its best, it brings protect your energy with warmth.",
+      "shadow": "In shadow, it can slip into defensiveness.",
+      "advice": "Act with protect your energy and stay aligned with stability and material growth."
+    },
+    "detailedDescription": "This card asks you to express stability and material growth through resilience and boundaries. Watch for defensiveness and choose a steadier path.",
+    "funFact": "In traditional decks, the Nine of Pentacles signals resilience and boundaries around stability and material growth.",
+    "stats": {
+      "luck": 72,
+      "power": 64,
+      "love": 55,
+      "clarity": 69
+    }
+  },
+  "pentacles_12_ten": {
+    "title": "Ten of Pentacles",
+    "keywords": [
+      "stability",
+      "resources",
+      "completion"
+    ],
+    "meaning": {
+      "general": "The Ten of Pentacles highlights completion and weight in the realm of stability and material growth.",
+      "light": "At its best, it brings close the cycle wisely with warmth.",
+      "shadow": "In shadow, it can slip into overburden.",
+      "advice": "Act with close the cycle wisely and stay aligned with stability and material growth."
+    },
+    "detailedDescription": "This card asks you to express stability and material growth through completion and weight. Watch for overburden and choose a steadier path.",
+    "funFact": "In traditional decks, the Ten of Pentacles signals completion and weight around stability and material growth.",
+    "stats": {
+      "luck": 74,
+      "power": 62,
+      "love": 55,
+      "clarity": 69
+    }
+  },
+  "pentacles_13_ace": {
+    "title": "Ace of Pentacles",
+    "keywords": [
+      "stability",
+      "resources",
+      "new"
+    ],
+    "meaning": {
+      "general": "The Ace of Pentacles highlights new spark in the realm of stability and material growth.",
+      "light": "At its best, it brings say yes to the beginning with warmth.",
+      "shadow": "In shadow, it can slip into missed opportunity.",
+      "advice": "Act with say yes to the beginning and stay aligned with stability and material growth."
+    },
+    "detailedDescription": "This card asks you to express stability and material growth through new spark. Watch for missed opportunity and choose a steadier path.",
+    "funFact": "In traditional decks, the Ace of Pentacles signals new spark around stability and material growth.",
+    "stats": {
+      "luck": 76,
+      "power": 66,
+      "love": 57,
+      "clarity": 67
+    }
+  },
+  "cups_00_knight": {
+    "title": "Knight of Cups",
+    "keywords": [
+      "emotion",
+      "connection",
+      "bold"
+    ],
+    "meaning": {
+      "general": "The Knight of Cups highlights bold momentum in the realm of emotion and connection.",
+      "light": "At its best, it brings channel your energy with warmth.",
+      "shadow": "In shadow, it can slip into reckless rushing.",
+      "advice": "Act with channel your energy and stay aligned with emotion and connection."
+    },
+    "detailedDescription": "This card asks you to express emotion and connection through bold momentum. Watch for reckless rushing and choose a steadier path.",
+    "funFact": "In traditional decks, the Knight of Cups signals bold momentum around emotion and connection.",
+    "stats": {
+      "luck": 60,
+      "power": 58,
+      "love": 85,
+      "clarity": 53
+    }
+  },
+  "cups_01_king": {
+    "title": "King of Cups",
+    "keywords": [
+      "emotion",
+      "connection",
+      "mastery"
+    ],
+    "meaning": {
+      "general": "The King of Cups highlights mastery and authority in the realm of emotion and connection.",
+      "light": "At its best, it brings lead with wisdom with warmth.",
+      "shadow": "In shadow, it can slip into rigidity or dominance.",
+      "advice": "Act with lead with wisdom and stay aligned with emotion and connection."
+    },
+    "detailedDescription": "This card asks you to express emotion and connection through mastery and authority. Watch for rigidity or dominance and choose a steadier path.",
+    "funFact": "In traditional decks, the King of Cups signals mastery and authority around emotion and connection.",
+    "stats": {
+      "luck": 60,
+      "power": 60,
+      "love": 83,
+      "clarity": 57
+    }
+  },
+  "cups_02_queen": {
+    "title": "Queen of Cups",
+    "keywords": [
+      "emotion",
+      "connection",
+      "nurturing"
+    ],
+    "meaning": {
+      "general": "The Queen of Cups highlights nurturing confidence in the realm of emotion and connection.",
+      "light": "At its best, it brings support without control with warmth.",
+      "shadow": "In shadow, it can slip into overprotection.",
+      "advice": "Act with support without control and stay aligned with emotion and connection."
+    },
+    "detailedDescription": "This card asks you to express emotion and connection through nurturing confidence. Watch for overprotection and choose a steadier path.",
+    "funFact": "In traditional decks, the Queen of Cups signals nurturing confidence around emotion and connection.",
+    "stats": {
+      "luck": 60,
+      "power": 54,
+      "love": 93,
+      "clarity": 57
+    }
+  },
+  "cups_03_page": {
+    "title": "Page of Cups",
+    "keywords": [
+      "emotion",
+      "connection",
+      "curiosity"
+    ],
+    "meaning": {
+      "general": "The Page of Cups highlights curiosity and messages in the realm of emotion and connection.",
+      "light": "At its best, it brings learn and explore with warmth.",
+      "shadow": "In shadow, it can slip into immaturity or gossip.",
+      "advice": "Act with learn and explore and stay aligned with emotion and connection."
+    },
+    "detailedDescription": "This card asks you to express emotion and connection through curiosity and messages. Watch for immaturity or gossip and choose a steadier path.",
+    "funFact": "In traditional decks, the Page of Cups signals curiosity and messages around emotion and connection.",
+    "stats": {
+      "luck": 62,
+      "power": 50,
+      "love": 87,
+      "clarity": 61
+    }
+  },
+  "cups_04_two": {
+    "title": "Two of Cups",
+    "keywords": [
+      "emotion",
+      "connection",
+      "balance"
+    ],
+    "meaning": {
+      "general": "The Two of Cups highlights balance and choice in the realm of emotion and connection.",
+      "light": "At its best, it brings weigh both sides with warmth.",
+      "shadow": "In shadow, it can slip into indecision.",
+      "advice": "Act with weigh both sides and stay aligned with emotion and connection."
+    },
+    "detailedDescription": "This card asks you to express emotion and connection through balance and choice. Watch for indecision and choose a steadier path.",
+    "funFact": "In traditional decks, the Two of Cups signals balance and choice around emotion and connection.",
+    "stats": {
+      "luck": 62,
+      "power": 50,
+      "love": 87,
+      "clarity": 59
+    }
+  },
+  "cups_05_three": {
+    "title": "Three of Cups",
+    "keywords": [
+      "emotion",
+      "connection",
+      "collaboration"
+    ],
+    "meaning": {
+      "general": "The Three of Cups highlights collaboration and growth in the realm of emotion and connection.",
+      "light": "At its best, it brings build together with warmth.",
+      "shadow": "In shadow, it can slip into scattered focus.",
+      "advice": "Act with build together and stay aligned with emotion and connection."
+    },
+    "detailedDescription": "This card asks you to express emotion and connection through collaboration and growth. Watch for scattered focus and choose a steadier path.",
+    "funFact": "In traditional decks, the Three of Cups signals collaboration and growth around emotion and connection.",
+    "stats": {
+      "luck": 62,
+      "power": 52,
+      "love": 89,
+      "clarity": 57
+    }
+  },
+  "cups_06_four": {
+    "title": "Four of Cups",
+    "keywords": [
+      "emotion",
+      "connection",
+      "stability"
+    ],
+    "meaning": {
+      "general": "The Four of Cups highlights stability and rest in the realm of emotion and connection.",
+      "light": "At its best, it brings ground yourself with warmth.",
+      "shadow": "In shadow, it can slip into stagnation.",
+      "advice": "Act with ground yourself and stay aligned with emotion and connection."
+    },
+    "detailedDescription": "This card asks you to express emotion and connection through stability and rest. Watch for stagnation and choose a steadier path.",
+    "funFact": "In traditional decks, the Four of Cups signals stability and rest around emotion and connection.",
+    "stats": {
+      "luck": 60,
+      "power": 50,
+      "love": 87,
+      "clarity": 59
+    }
+  },
+  "cups_07_five": {
+    "title": "Five of Cups",
+    "keywords": [
+      "emotion",
+      "connection",
+      "challenge"
+    ],
+    "meaning": {
+      "general": "The Five of Cups highlights challenge and tension in the realm of emotion and connection.",
+      "light": "At its best, it brings face the lesson with warmth.",
+      "shadow": "In shadow, it can slip into conflict or loss.",
+      "advice": "Act with face the lesson and stay aligned with emotion and connection."
+    },
+    "detailedDescription": "This card asks you to express emotion and connection through challenge and tension. Watch for conflict or loss and choose a steadier path.",
+    "funFact": "In traditional decks, the Five of Cups signals challenge and tension around emotion and connection.",
+    "stats": {
+      "luck": 60,
+      "power": 52,
+      "love": 83,
+      "clarity": 57
+    }
+  },
+  "cups_08_six": {
+    "title": "Six of Cups",
+    "keywords": [
+      "emotion",
+      "connection",
+      "harmony"
+    ],
+    "meaning": {
+      "general": "The Six of Cups highlights harmony and progress in the realm of emotion and connection.",
+      "light": "At its best, it brings move forward gently with warmth.",
+      "shadow": "In shadow, it can slip into nostalgia traps.",
+      "advice": "Act with move forward gently and stay aligned with emotion and connection."
+    },
+    "detailedDescription": "This card asks you to express emotion and connection through harmony and progress. Watch for nostalgia traps and choose a steadier path.",
+    "funFact": "In traditional decks, the Six of Cups signals harmony and progress around emotion and connection.",
+    "stats": {
+      "luck": 64,
+      "power": 52,
+      "love": 89,
+      "clarity": 57
+    }
+  },
+  "cups_09_seven": {
+    "title": "Seven of Cups",
+    "keywords": [
+      "emotion",
+      "connection",
+      "strategy"
+    ],
+    "meaning": {
+      "general": "The Seven of Cups highlights strategy and perseverance in the realm of emotion and connection.",
+      "light": "At its best, it brings defend what matters with warmth.",
+      "shadow": "In shadow, it can slip into doubt or secrecy.",
+      "advice": "Act with defend what matters and stay aligned with emotion and connection."
+    },
+    "detailedDescription": "This card asks you to express emotion and connection through strategy and perseverance. Watch for doubt or secrecy and choose a steadier path.",
+    "funFact": "In traditional decks, the Seven of Cups signals strategy and perseverance around emotion and connection.",
+    "stats": {
+      "luck": 62,
+      "power": 54,
+      "love": 85,
+      "clarity": 59
+    }
+  },
+  "cups_10_eight": {
+    "title": "Eight of Cups",
+    "keywords": [
+      "emotion",
+      "connection",
+      "movement"
+    ],
+    "meaning": {
+      "general": "The Eight of Cups highlights movement and skill in the realm of emotion and connection.",
+      "light": "At its best, it brings pace yourself with warmth.",
+      "shadow": "In shadow, it can slip into haste or burnout.",
+      "advice": "Act with pace yourself and stay aligned with emotion and connection."
+    },
+    "detailedDescription": "This card asks you to express emotion and connection through movement and skill. Watch for haste or burnout and choose a steadier path.",
+    "funFact": "In traditional decks, the Eight of Cups signals movement and skill around emotion and connection.",
+    "stats": {
+      "luck": 62,
+      "power": 54,
+      "love": 85,
+      "clarity": 57
+    }
+  },
+  "cups_11_nine": {
+    "title": "Nine of Cups",
+    "keywords": [
+      "emotion",
+      "connection",
+      "resilience"
+    ],
+    "meaning": {
+      "general": "The Nine of Cups highlights resilience and boundaries in the realm of emotion and connection.",
+      "light": "At its best, it brings protect your energy with warmth.",
+      "shadow": "In shadow, it can slip into defensiveness.",
+      "advice": "Act with protect your energy and stay aligned with emotion and connection."
+    },
+    "detailedDescription": "This card asks you to express emotion and connection through resilience and boundaries. Watch for defensiveness and choose a steadier path.",
+    "funFact": "In traditional decks, the Nine of Cups signals resilience and boundaries around emotion and connection.",
+    "stats": {
+      "luck": 62,
+      "power": 54,
+      "love": 85,
+      "clarity": 59
+    }
+  },
+  "cups_12_ten": {
+    "title": "Ten of Cups",
+    "keywords": [
+      "emotion",
+      "connection",
+      "completion"
+    ],
+    "meaning": {
+      "general": "The Ten of Cups highlights completion and weight in the realm of emotion and connection.",
+      "light": "At its best, it brings close the cycle wisely with warmth.",
+      "shadow": "In shadow, it can slip into overburden.",
+      "advice": "Act with close the cycle wisely and stay aligned with emotion and connection."
+    },
+    "detailedDescription": "This card asks you to express emotion and connection through completion and weight. Watch for overburden and choose a steadier path.",
+    "funFact": "In traditional decks, the Ten of Cups signals completion and weight around emotion and connection.",
+    "stats": {
+      "luck": 64,
+      "power": 52,
+      "love": 85,
+      "clarity": 59
+    }
+  },
+  "cups_13_ace": {
+    "title": "Ace of Cups",
+    "keywords": [
+      "emotion",
+      "connection",
+      "new"
+    ],
+    "meaning": {
+      "general": "The Ace of Cups highlights new spark in the realm of emotion and connection.",
+      "light": "At its best, it brings say yes to the beginning with warmth.",
+      "shadow": "In shadow, it can slip into missed opportunity.",
+      "advice": "Act with say yes to the beginning and stay aligned with emotion and connection."
+    },
+    "detailedDescription": "This card asks you to express emotion and connection through new spark. Watch for missed opportunity and choose a steadier path.",
+    "funFact": "In traditional decks, the Ace of Cups signals new spark around emotion and connection.",
+    "stats": {
+      "luck": 66,
+      "power": 56,
+      "love": 87,
+      "clarity": 57
+    }
+  }
+}

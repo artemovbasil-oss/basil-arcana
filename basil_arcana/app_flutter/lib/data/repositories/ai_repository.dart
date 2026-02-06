@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
 
+import '../../core/config/api_config.dart';
 import '../../core/config/app_config.dart';
 import '../../core/telegram/telegram_env.dart';
 import '../../core/telemetry/web_error_reporter.dart';
@@ -15,7 +16,7 @@ import '../models/card_model.dart';
 import '../models/drawn_card_model.dart';
 import '../models/spread_model.dart';
 
-String get apiBaseUrl => AppConfig.apiBaseUrl;
+String get apiBaseUrl => ApiConfig.apiBaseUrl;
 
 String get apiKey => AppConfig.apiKey;
 

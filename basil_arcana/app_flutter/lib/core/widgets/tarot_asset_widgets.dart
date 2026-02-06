@@ -2,110 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:video_player/video_player.dart';
 
-import '../../core/config/app_config.dart';
-import '../../data/models/card_video.dart';
+import '../../core/assets/asset_paths.dart';
 import '../../data/models/deck_model.dart';
 import '../../state/providers.dart';
-
-String cardImageUrl(String cardId, {DeckId deckId = DeckId.major}) {
-  final normalizedId = canonicalCardId(cardId);
-  final base = AppConfig.assetsBaseUrl;
-  if (deckId == DeckId.wands ||
-      (deckId == DeckId.all && normalizedId.startsWith('wands_'))) {
-    return '$base/cards/wands/$normalizedId.webp';
-  }
-  if (deckId == DeckId.swords ||
-      (deckId == DeckId.all && normalizedId.startsWith('swords_'))) {
-    return '$base/cards/swords/$normalizedId.webp';
-  }
-  if (deckId == DeckId.pentacles ||
-      (deckId == DeckId.all && normalizedId.startsWith('pentacles_'))) {
-    return '$base/cards/pentacles/$normalizedId.webp';
-  }
-  if (deckId == DeckId.cups ||
-      (deckId == DeckId.all && normalizedId.startsWith('cups_'))) {
-    return '$base/cards/cups/$normalizedId.webp';
-  }
-  switch (normalizedId) {
-    case 'major_10_wheel':
-      return '$base/cards/major/major_10_wheel_of_fortune.webp';
-    default:
-      return '$base/cards/major/$normalizedId.webp';
-  }
-}
-
-String cardAssetPath(String cardId, {String? deckId}) {
-  final normalizedId = canonicalCardId(cardId);
-  final resolvedDeckId = _deckIdFromString(deckId);
-  final imageUrl = cardImageUrl(
-    normalizedId,
-    deckId: resolvedDeckId ?? DeckId.all,
-  );
-  if (deckId == null && !_matchesKnownDeckPrefix(normalizedId)) {
-    assert(() {
-      debugPrint(
-        'Unknown card prefix for "$cardId"; falling back to major deck.',
-      );
-      return true;
-    }());
-  }
-  return imageUrl;
-}
-
-String deckCoverAssetPath(DeckId deckId) {
-  switch (deckId) {
-    case DeckId.wands:
-    case DeckId.swords:
-    case DeckId.pentacles:
-    case DeckId.cups:
-    case DeckId.major:
-    case DeckId.all:
-    default:
-      return 'assets/deck/cover.webp';
-  }
-}
-
-DeckId? _deckIdFromString(String? value) {
-  if (value == null) {
-    return null;
-  }
-  final trimmed = value.trim();
-  if (trimmed.isEmpty) {
-    return null;
-  }
-  final normalized = trimmed.toLowerCase();
-  final sanitized = normalized.contains('.')
-      ? normalized.split('.').last
-      : normalized;
-  for (final entry in deckStorageValues.entries) {
-    if (entry.value == sanitized || entry.key.name == sanitized) {
-      return entry.key;
-    }
-  }
-  return null;
-}
-
-bool _matchesKnownDeckPrefix(String cardId) {
-  return cardId.startsWith('major_') ||
-      cardId.startsWith('wands_') ||
-      cardId.startsWith('cups_') ||
-      cardId.startsWith('swords_') ||
-      cardId.startsWith('pentacles_');
-}
-
-String? resolveCardVideoUrl(
-  String cardId, {
-  Set<String>? availableVideoFiles,
-  String? videoFileNameOverride,
-}) {
-  final fileName = videoFileNameOverride ??
-      resolveCardVideoFileName(cardId, availableFiles: availableVideoFiles);
-  if (fileName == null) {
-    return null;
-  }
-  final base = AppConfig.assetsBaseUrl;
-  return '$base/video/${normalizeVideoFileName(fileName)}';
-}
 
 class CardMediaAssets {
   const CardMediaAssets({
@@ -131,7 +30,7 @@ class CardMediaResolver {
     String? videoFileNameOverride,
   }) {
     final imageUrl = cardImageUrl(cardId, deckId: deckId);
-    final resolvedVideo = resolveCardVideoUrl(
+    final resolvedVideo = videoUrlForCard(
       cardId,
       availableVideoFiles: availableVideoFiles,
       videoFileNameOverride: videoFileNameOverride,
