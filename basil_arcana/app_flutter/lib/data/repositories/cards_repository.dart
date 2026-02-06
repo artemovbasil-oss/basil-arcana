@@ -246,9 +246,11 @@ bool _isValidCardsJson(Object? payload) {
 }
 
 bool _isValidCardEntry(Map<String, dynamic> card) {
-  return card.containsKey('id') &&
-      card.containsKey('deck') &&
-      (card.containsKey('title') || card.containsKey('name'));
+  final hasTitle = card.containsKey('title') || card.containsKey('name');
+  final hasMeaning = card.containsKey('meaning') ||
+      card.containsKey('summary') ||
+      card.containsKey('generalMeaning');
+  return card.containsKey('id') && hasTitle && hasMeaning;
 }
 
 List<CardModel> _parseCards({required String raw, required DeckId deckId}) {
