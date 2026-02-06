@@ -43,7 +43,8 @@ class ConfigService {
   bool get isConfigured => _apiBaseUrl.trim().isNotEmpty;
 
   String get apiKey => kIsWeb ? _apiKey : _apiKeyEnv;
-  String get assetsBaseUrl => _assetsBaseUrl;
+  String get assetsBaseUrl =>
+      _normalizeBaseUrl(_assetsBaseUrl, fallback: _defaultAssetsBaseUrl);
 
   Future<void> load() async {
     if (!kIsWeb) {
