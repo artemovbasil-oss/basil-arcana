@@ -503,11 +503,13 @@ class DeckCoverBack extends ConsumerWidget {
     this.width = 160,
     this.height = 230,
     this.highlight = false,
+    this.imageUrl,
   });
 
   final double width;
   final double height;
   final bool highlight;
+  final String? imageUrl;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -515,6 +517,44 @@ class DeckCoverBack extends ConsumerWidget {
     final radius = BorderRadius.circular(18);
     final deckId = ref.watch(deckProvider);
     final coverPath = deckCoverAssetPath(deckId);
+    final resolvedUrl = imageUrl ?? coverPath;
+    Widget buildPlaceholder() {
+      return Container(
+        width: width,
+        height: height,
+        color: colorScheme.surfaceVariant.withOpacity(0.6),
+        alignment: Alignment.center,
+        child: Icon(
+          Icons.auto_awesome,
+          color: colorScheme.primary.withOpacity(0.5),
+          size: 28,
+        ),
+      );
+    }
+
+    Widget buildImage(String url, {bool allowFallback = false}) {
+      return Image.network(
+        url,
+        width: width,
+        height: height,
+        fit: BoxFit.cover,
+        filterQuality: FilterQuality.high,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) {
+            return child;
+          }
+          return buildPlaceholder();
+        },
+        errorBuilder: (context, error, stackTrace) {
+          if (allowFallback && deckId != DeckType.major) {
+            return buildImage(
+              deckCoverAssetPath(DeckType.major),
+            );
+          }
+          return buildPlaceholder();
+        },
+      );
+    }
     return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: radius,
@@ -532,25 +572,7 @@ class DeckCoverBack extends ConsumerWidget {
       ),
       child: ClipRRect(
         borderRadius: radius,
-        child: Image.network(
-          coverPath,
-          width: width,
-          height: height,
-          fit: BoxFit.cover,
-          filterQuality: FilterQuality.high,
-          errorBuilder: (context, error, stackTrace) {
-            if (deckId != DeckType.major) {
-              return Image.network(
-                deckCoverAssetPath(DeckType.major),
-                width: width,
-                height: height,
-                fit: BoxFit.cover,
-                filterQuality: FilterQuality.high,
-              );
-            }
-            return const SizedBox.shrink();
-          },
-        ),
+        child: buildImage(resolvedUrl, allowFallback: imageUrl == null),
       ),
     );
   }

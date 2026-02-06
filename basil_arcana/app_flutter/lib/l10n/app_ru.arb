@@ -99,6 +99,7 @@
   },
   "shuffleTitle": "Перетасуйте колоду",
   "shuffleSubtitle": "Перетасовываем колоду",
+  "shuffleReadingSubtitle": "Читаем расклад",
   "shuffleDrawButton": "Вытянуть карты",
   "resultTitle": "Ваш расклад",
   "resultStatusAiReading": "Базилик толкует…",

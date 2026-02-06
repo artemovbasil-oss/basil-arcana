@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
-import '../../core/assets/asset_paths.dart';
 import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/tarot_asset_widgets.dart';
 import '../../data/models/app_enums.dart';
@@ -27,13 +26,16 @@ class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
   late final AnimationController _controller;
   late final AnimationController _fallController;
   late final AnimationController _glowController;
+  late final AnimationController _backgroundController;
   Timer? _ctaTimer;
   bool _showCta = false;
   bool _hasTriggeredFall = false;
+  bool _hasTriggeredBackground = false;
 
-  static const _deckCount = 3;
-  static const _cardWidth = 120.0;
-  static const _cardHeight = 176.0;
+  static const _cardWidth = 140.0;
+  static const _cardHeight = 210.0;
+  static const _deckCoverUrl =
+      'https://basilarcana-assets.b-cdn.net/deck/new-deck.webp';
 
   @override
   void initState() {
@@ -50,9 +52,13 @@ class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
       vsync: this,
       duration: const Duration(milliseconds: 2400),
     )..repeat(reverse: true);
+    _backgroundController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 14),
+    );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       precacheImage(
-        NetworkImage(deckPreviewImageUrl(DeckType.major)),
+        const NetworkImage(_deckCoverUrl),
         context,
       );
     });
@@ -71,6 +77,10 @@ class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
         _controller.stop();
         _fallController.forward(from: 0);
       }
+      if (!_hasTriggeredBackground && next.drawnCards.isNotEmpty) {
+        _hasTriggeredBackground = true;
+        _backgroundController.repeat(reverse: true);
+      }
     });
   }
 
@@ -79,6 +89,7 @@ class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
     _controller.dispose();
     _fallController.dispose();
     _glowController.dispose();
+    _backgroundController.dispose();
     _ctaTimer?.cancel();
     super.dispose();
   }
@@ -105,7 +116,12 @@ class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
         top: false,
         child: Stack(
           children: [
-            const Positioned.fill(child: _ShuffleBackground()),
+            Positioned.fill(
+              child: _ShuffleBackground(
+                animation: _backgroundController,
+                isActive: hasDrawnCards,
+              ),
+            ),
             Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
@@ -116,8 +132,8 @@ class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           SizedBox(
-                            width: 280,
-                            height: 300,
+                            width: 320,
+                            height: 340,
                             child: hasDrawnCards
                                 ? _DrawnStack(
                                     keptCount: keptCount,
@@ -135,7 +151,9 @@ class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
                           ),
                           const SizedBox(height: 24),
                           Text(
-                            l10n.shuffleSubtitle,
+                            hasDrawnCards
+                                ? l10n.shuffleReadingSubtitle
+                                : l10n.shuffleSubtitle,
                             style: theme.textTheme.titleMedium?.copyWith(
                               color: colorScheme.onSurface,
                             ),
@@ -235,15 +253,15 @@ class _DrawnStack extends StatelessWidget {
 
 List<Offset> _drawTargets(int count) {
   if (count <= 1) {
-    return [const Offset(0, -6)];
+    return [const Offset(0, -8)];
   }
   if (count == 2) {
-    return const [Offset(-64, -8), Offset(64, 8)];
+    return const [Offset(-72, -10), Offset(72, 10)];
   }
   return const [
-    Offset(-78, -10),
-    Offset(0, 12),
-    Offset(78, -10),
+    Offset(-90, -12),
+    Offset(0, 14),
+    Offset(90, -12),
   ];
 }
 
@@ -298,6 +316,7 @@ class _DrawnCard extends StatelessWidget {
       child: const DeckCoverBack(
         width: _ShuffleScreenState._cardWidth,
         height: _ShuffleScreenState._cardHeight,
+        imageUrl: _ShuffleScreenState._deckCoverUrl,
       ),
     );
   }
@@ -326,6 +345,7 @@ class _DeckStack extends StatelessWidget {
               child: const DeckCoverBack(
                 width: _ShuffleScreenState._cardWidth,
                 height: _ShuffleScreenState._cardHeight,
+                imageUrl: _ShuffleScreenState._deckCoverUrl,
               ),
             ),
           ),
@@ -343,9 +363,9 @@ class _ShufflingStack extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final baseOffsets = <Offset>[
-      const Offset(0, 4),
-      const Offset(-6, 8),
-      const Offset(6, -6),
+      const Offset(0, 5),
+      const Offset(-7, 9),
+      const Offset(7, -7),
     ];
     final baseAngles = <double>[-0.04, 0.03, -0.02];
     return AnimatedBuilder(
@@ -362,7 +382,9 @@ class _ShufflingStack extends StatelessWidget {
               offset: offset,
               child: Transform.rotate(
                 angle: angle,
-                child: const DeckCoverBack(),
+                child: const DeckCoverBack(
+                  imageUrl: _ShuffleScreenState._deckCoverUrl,
+                ),
               ),
             );
           }),
@@ -422,6 +444,7 @@ class _MagicalGlowCard extends StatelessWidget {
           child: const DeckCoverBack(
             width: _ShuffleScreenState._cardWidth,
             height: _ShuffleScreenState._cardHeight,
+            imageUrl: _ShuffleScreenState._deckCoverUrl,
           ),
         ),
       ],
@@ -430,41 +453,71 @@ class _MagicalGlowCard extends StatelessWidget {
 }
 
 class _ShuffleBackground extends StatelessWidget {
-  const _ShuffleBackground();
+  const _ShuffleBackground({
+    required this.animation,
+    required this.isActive,
+  });
+
+  final Animation<double> animation;
+  final bool isActive;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final background = theme.colorScheme.background;
     final glowColor = theme.colorScheme.primary;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            background,
-            background.withOpacity(0.92),
-            background,
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-      ),
-      child: Stack(
-        children: [
-          _GlowOrb(
-            alignment: const Alignment(-0.9, -0.7),
-            color: glowColor,
-            size: 220,
-            opacity: 0.22,
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, child) {
+        final t = animation.value;
+        final begin = Alignment(-1.0 + (0.6 * t), -0.8 + (0.4 * t));
+        final end = Alignment(1.0 - (0.6 * t), 0.8 - (0.4 * t));
+        return DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                background,
+                background.withOpacity(0.92),
+                background,
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
           ),
-          _GlowOrb(
-            alignment: const Alignment(0.9, 0.7),
-            color: glowColor,
-            size: 280,
-            opacity: 0.2,
+          child: Stack(
+            children: [
+              if (isActive)
+                Positioned.fill(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: begin,
+                        end: end,
+                        colors: [
+                          glowColor.withOpacity(0.16),
+                          glowColor.withOpacity(0.06),
+                          const Color(0xFF5D4BFF).withOpacity(0.14),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              _GlowOrb(
+                alignment: const Alignment(-0.9, -0.7),
+                color: glowColor,
+                size: 220,
+                opacity: 0.22,
+              ),
+              _GlowOrb(
+                alignment: const Alignment(0.9, 0.7),
+                color: glowColor,
+                size: 280,
+                opacity: 0.2,
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
