@@ -34,6 +34,24 @@ String cardImageUrl(String cardId, {DeckId deckId = DeckId.major}) {
   }
 }
 
+String cardAssetPath(String cardId, {String? deckId}) {
+  final normalizedId = canonicalCardId(cardId);
+  final resolvedDeckId = _deckIdFromString(deckId);
+  final imageUrl = cardImageUrl(
+    normalizedId,
+    deckId: resolvedDeckId ?? DeckId.all,
+  );
+  if (deckId == null && !_matchesKnownDeckPrefix(normalizedId)) {
+    assert(() {
+      debugPrint(
+        'Unknown card prefix for "$cardId"; falling back to major deck.',
+      );
+      return true;
+    }());
+  }
+  return imageUrl;
+}
+
 String deckCoverAssetPath(DeckId deckId) {
   switch (deckId) {
     case DeckId.wands:
@@ -45,6 +63,34 @@ String deckCoverAssetPath(DeckId deckId) {
     default:
       return 'assets/deck/cover.webp';
   }
+}
+
+DeckId? _deckIdFromString(String? value) {
+  if (value == null) {
+    return null;
+  }
+  final trimmed = value.trim();
+  if (trimmed.isEmpty) {
+    return null;
+  }
+  final normalized = trimmed.toLowerCase();
+  final sanitized = normalized.contains('.')
+      ? normalized.split('.').last
+      : normalized;
+  for (final entry in deckStorageValues.entries) {
+    if (entry.value == sanitized || entry.key.name == sanitized) {
+      return entry.key;
+    }
+  }
+  return null;
+}
+
+bool _matchesKnownDeckPrefix(String cardId) {
+  return cardId.startsWith('major_') ||
+      cardId.startsWith('wands_') ||
+      cardId.startsWith('cups_') ||
+      cardId.startsWith('swords_') ||
+      cardId.startsWith('pentacles_');
 }
 
 String? resolveCardVideoUrl(
