@@ -99,6 +99,7 @@
   },
   "shuffleTitle": "Shuffle the deck",
   "shuffleSubtitle": "Shuffling the deck",
+  "shuffleReadingSubtitle": "Reading your spread",
   "shuffleDrawButton": "Draw cards",
   "resultTitle": "Your reading",
   "resultStatusAiReading": "Basil is interpreting…",
