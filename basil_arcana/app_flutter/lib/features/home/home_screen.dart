@@ -4,6 +4,7 @@ import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
 import '../../core/assets/asset_paths.dart';
 import '../../core/config/config_service.dart';
+import '../../core/config/diagnostics.dart';
 import '../../state/providers.dart';
 import '../history/history_screen.dart';
 import '../cards/cards_screen.dart';
@@ -18,7 +19,6 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  static const bool kShowDebug = false;
   final TextEditingController _controller = TextEditingController();
   final FocusNode _focusNode = FocusNode();
   final ScrollController _scrollController = ScrollController();
@@ -29,7 +29,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void initState() {
     super.initState();
     _focusNode.addListener(_handleFocusChange);
-    if (kShowDebug) {
+    if (kShowDiagnostics) {
       _buildMarker = _resolveBuildMarker();
     }
   }
@@ -80,7 +80,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   void _showDebugOverlay(BuildContext context, Locale locale) {
-    if (!kShowDebug) {
+    if (!kShowDiagnostics) {
       return;
     }
     final config = ConfigService.instance;
@@ -202,7 +202,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       children: [
                         Expanded(
                           child: GestureDetector(
-                            onLongPress: kShowDebug
+                            onLongPress: kShowDiagnostics
                                 ? () {
                                     _showDebugOverlay(context, locale);
                                   }
@@ -296,27 +296,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             Positioned(
                               right: 10,
                               bottom: 10,
-                              child: GestureDetector(
-                                onTap: _clearQuestion,
-                                child: Container(
-                                  width: 28,
-                                  height: 28,
-                                  decoration: BoxDecoration(
-                                    color: colorScheme.surface
-                                        .withOpacity(0.85),
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: colorScheme.primary
-                                          .withOpacity(0.35),
-                                    ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  _InlineIconButton(
+                                    icon: Icons.close,
+                                    tooltip: l10n.homeClearQuestionTooltip,
+                                    onTap: _clearQuestion,
                                   ),
-                                  child: Icon(
-                                    Icons.close,
-                                    size: 18,
-                                    color: colorScheme.onSurface
-                                        .withOpacity(0.75),
+                                  const SizedBox(width: 8),
+                                  _InlineIconButton(
+                                    icon: Icons.arrow_forward,
+                                    tooltip: l10n.homeContinueButton,
+                                    onTap: () => _handlePrimaryAction(hasQuestion),
+                                    backgroundColor:
+                                        colorScheme.primary.withOpacity(0.2),
+                                    iconColor: colorScheme.primary,
                                   ),
-                                ),
+                                ],
                               ),
                             ),
                         ],
@@ -365,7 +362,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ),
             ),
-            if (kShowDebug && _buildMarker != null)
+            if (kShowDiagnostics && _buildMarker != null)
               Padding(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: Text(
@@ -385,22 +382,29 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           curve: Curves.easeOut,
           padding: EdgeInsets.fromLTRB(20, 12, 20, 20 + bottomInset),
           child: _PrimaryActionButton(
-            enabled: hasQuestion,
+            enabled: true,
+            isActive: hasQuestion,
             primaryColor: primaryColor,
             disabledColor: disabledColor,
             label: l10n.homeContinueButton,
-            onPressed: hasQuestion
-                ? () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const SpreadScreen(),
-                      ),
-                    );
-                  }
-                : null,
+            onPressed: () => _handlePrimaryAction(hasQuestion),
           ),
         ),
+      ),
+    );
+  }
+
+  void _handlePrimaryAction(bool hasQuestion) {
+    if (!hasQuestion) {
+      if (!_focusNode.hasFocus) {
+        _focusNode.requestFocus();
+      }
+      return;
+    }
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const SpreadScreen(),
       ),
     );
   }
@@ -536,6 +540,7 @@ class _HomeNavCard extends StatelessWidget {
 class _PrimaryActionButton extends StatelessWidget {
   const _PrimaryActionButton({
     required this.enabled,
+    required this.isActive,
     required this.primaryColor,
     required this.disabledColor,
     required this.label,
@@ -543,6 +548,7 @@ class _PrimaryActionButton extends StatelessWidget {
   });
 
   final bool enabled;
+  final bool isActive;
   final Color primaryColor;
   final Color disabledColor;
   final String label;
@@ -553,9 +559,9 @@ class _PrimaryActionButton extends StatelessWidget {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       decoration: BoxDecoration(
-        color: enabled ? primaryColor : disabledColor,
+        color: isActive ? primaryColor : disabledColor,
         borderRadius: BorderRadius.circular(18),
-        boxShadow: enabled
+        boxShadow: isActive
             ? [
                 BoxShadow(
                   color: primaryColor.withOpacity(0.35),
@@ -581,6 +587,54 @@ class _PrimaryActionButton extends StatelessWidget {
               .textTheme
               .titleMedium
               ?.copyWith(color: Colors.white),
+        ),
+      ),
+    );
+  }
+}
+
+class _InlineIconButton extends StatelessWidget {
+  const _InlineIconButton({
+    required this.icon,
+    required this.tooltip,
+    required this.onTap,
+    this.backgroundColor,
+    this.iconColor,
+  });
+
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback onTap;
+  final Color? backgroundColor;
+  final Color? iconColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final resolvedBackground =
+        backgroundColor ?? colorScheme.surface.withOpacity(0.85);
+    final resolvedIconColor =
+        iconColor ?? colorScheme.onSurface.withOpacity(0.75);
+    return Semantics(
+      button: true,
+      label: tooltip,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          width: 28,
+          height: 28,
+          decoration: BoxDecoration(
+            color: resolvedBackground,
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: colorScheme.primary.withOpacity(0.35),
+            ),
+          ),
+          child: Icon(
+            icon,
+            size: 18,
+            color: resolvedIconColor,
+          ),
         ),
       ),
     );

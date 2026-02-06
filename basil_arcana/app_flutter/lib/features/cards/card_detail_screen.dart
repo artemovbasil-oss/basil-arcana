@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
 import '../../core/config/assets_config.dart';
+import '../../core/config/diagnostics.dart';
 import '../../core/telegram/telegram_web_app.dart';
 import '../../core/widgets/data_load_error.dart';
 import '../../core/widgets/tarot_asset_widgets.dart';
@@ -40,24 +41,26 @@ class CardDetailScreen extends ConsumerWidget {
       final repo = ref.read(cardsRepositoryProvider);
       final locale = ref.read(localeProvider);
       final cacheKey = repo.cardsCacheKey(locale);
-      final debugInfo = DataLoadDebugInfo(
-        assetsBaseUrl: AssetsConfig.assetsBaseUrl,
-        requests: {
-          'cards (${repo.cardsFileNameForLocale(locale)})':
-              DataLoadRequestDebugInfo(
-            url: repo.lastAttemptedUrls[cacheKey] ?? '—',
-            statusCode: repo.lastStatusCodes[cacheKey],
-            contentType: repo.lastContentTypes[cacheKey],
-            contentLength: repo.lastContentLengths[cacheKey],
-            responseSnippetStart: repo.lastResponseSnippetsStart[cacheKey],
-            responseSnippetEnd: repo.lastResponseSnippetsEnd[cacheKey],
-            responseLength: repo.lastResponseStringLengths[cacheKey],
-            bytesLength: repo.lastResponseByteLengths[cacheKey],
-            rootType: repo.lastResponseRootTypes[cacheKey],
-          ),
-        },
-        lastError: repo.lastError,
-      );
+      final debugInfo = kShowDiagnostics
+          ? DataLoadDebugInfo(
+              assetsBaseUrl: AssetsConfig.assetsBaseUrl,
+              requests: {
+                'cards (${repo.cardsFileNameForLocale(locale)})':
+                    DataLoadRequestDebugInfo(
+                  url: repo.lastAttemptedUrls[cacheKey] ?? '—',
+                  statusCode: repo.lastStatusCodes[cacheKey],
+                  contentType: repo.lastContentTypes[cacheKey],
+                  contentLength: repo.lastContentLengths[cacheKey],
+                  responseSnippetStart: repo.lastResponseSnippetsStart[cacheKey],
+                  responseSnippetEnd: repo.lastResponseSnippetsEnd[cacheKey],
+                  responseLength: repo.lastResponseStringLengths[cacheKey],
+                  bytesLength: repo.lastResponseByteLengths[cacheKey],
+                  rootType: repo.lastResponseRootTypes[cacheKey],
+                ),
+              },
+              lastError: repo.lastError,
+            )
+          : null;
       return Scaffold(
         appBar: useTelegramAppBar
             ? null
@@ -104,17 +107,22 @@ class CardDetailScreen extends ConsumerWidget {
                   );
                   return SizedBox(
                     width: double.infinity,
-                    height: 320,
-                    child: CardMedia(
-                      cardId: resolvedCard.id,
-                      imageUrl: mediaAssets.imageUrl,
-                      videoUrl: mediaAssets.videoUrl,
-                      width: MediaQuery.of(context).size.width,
-                      height: 320,
-                      enableVideo: true,
-                      autoPlayOnce: true,
-                      playLabel: l10n.videoTapToPlay,
-                      fit: BoxFit.cover,
+                    height: 380,
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.vertical(
+                        bottom: Radius.circular(28),
+                      ),
+                      child: CardMedia(
+                        cardId: resolvedCard.id,
+                        imageUrl: mediaAssets.imageUrl,
+                        videoUrl: mediaAssets.videoUrl,
+                        width: MediaQuery.of(context).size.width,
+                        height: 380,
+                        enableVideo: true,
+                        autoPlayOnce: true,
+                        playLabel: l10n.videoTapToPlay,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   );
                 },
@@ -122,11 +130,11 @@ class CardDetailScreen extends ConsumerWidget {
             ),
             SliverToBoxAdapter(
               child: Transform.translate(
-                offset: const Offset(0, -28),
+                offset: const Offset(0, -48),
                 child: Container(
                   padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
                   decoration: BoxDecoration(
-                    color: colorScheme.surface,
+                    color: colorScheme.surface.withOpacity(0.94),
                     borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(28),
                     ),
@@ -254,7 +262,7 @@ class CardDetailScreen extends ConsumerWidget {
                             _StatTile(
                               label: l10n.statPower,
                               value: resolvedCard.stats!.power,
-                              icon: Icons.flash_on,
+                              icon: Icons.bolt,
                             ),
                             _StatTile(
                               label: l10n.statLove,

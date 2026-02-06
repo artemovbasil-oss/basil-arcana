@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
 import '../../core/config/assets_config.dart';
+import '../../core/config/diagnostics.dart';
 import '../../core/telegram/telegram_web_app.dart';
 import '../../core/widgets/data_load_error.dart';
 import '../../core/widgets/tarot_asset_widgets.dart';
@@ -79,24 +80,28 @@ class _CardsScreenState extends ConsumerState<CardsScreen> {
             final repo = ref.read(cardsRepositoryProvider);
             final locale = ref.read(localeProvider);
             final cacheKey = repo.cardsCacheKey(locale);
-            final debugInfo = DataLoadDebugInfo(
-              assetsBaseUrl: AssetsConfig.assetsBaseUrl,
-              requests: {
-                'cards (${repo.cardsFileNameForLocale(locale)})':
-                    DataLoadRequestDebugInfo(
-                  url: repo.lastAttemptedUrls[cacheKey] ?? '—',
-                  statusCode: repo.lastStatusCodes[cacheKey],
-                  contentType: repo.lastContentTypes[cacheKey],
-                  contentLength: repo.lastContentLengths[cacheKey],
-                  responseSnippetStart: repo.lastResponseSnippetsStart[cacheKey],
-                  responseSnippetEnd: repo.lastResponseSnippetsEnd[cacheKey],
-                  responseLength: repo.lastResponseStringLengths[cacheKey],
-                  bytesLength: repo.lastResponseByteLengths[cacheKey],
-                  rootType: repo.lastResponseRootTypes[cacheKey],
-                ),
-              },
-              lastError: repo.lastError,
-            );
+            final debugInfo = kShowDiagnostics
+                ? DataLoadDebugInfo(
+                    assetsBaseUrl: AssetsConfig.assetsBaseUrl,
+                    requests: {
+                      'cards (${repo.cardsFileNameForLocale(locale)})':
+                          DataLoadRequestDebugInfo(
+                        url: repo.lastAttemptedUrls[cacheKey] ?? '—',
+                        statusCode: repo.lastStatusCodes[cacheKey],
+                        contentType: repo.lastContentTypes[cacheKey],
+                        contentLength: repo.lastContentLengths[cacheKey],
+                        responseSnippetStart:
+                            repo.lastResponseSnippetsStart[cacheKey],
+                        responseSnippetEnd:
+                            repo.lastResponseSnippetsEnd[cacheKey],
+                        responseLength: repo.lastResponseStringLengths[cacheKey],
+                        bytesLength: repo.lastResponseByteLengths[cacheKey],
+                        rootType: repo.lastResponseRootTypes[cacheKey],
+                      ),
+                    },
+                    lastError: repo.lastError,
+                  )
+                : null;
             return Center(
               child: FutureBuilder<bool>(
                 future: repo.hasCachedData(cacheKey),
