@@ -30,7 +30,10 @@ class ConfigService {
 
   String _apiBaseUrl = _apiBaseUrlEnv;
   String _apiKey = _apiKeyEnv;
-  String _assetsBaseUrl = _normalizeBaseUrl(_assetsBaseUrlEnv);
+  String _assetsBaseUrl = _normalizeBaseUrl(
+    _assetsBaseUrlEnv,
+    fallback: _defaultAssetsBaseUrl,
+  );
   String? _build;
   String? _lastError;
 
@@ -76,9 +79,11 @@ class ConfigService {
       if (runtimeApiKey is String) {
         _apiKey = runtimeApiKey.trim();
       }
-      if (runtimeAssetsBaseUrl is String &&
-          runtimeAssetsBaseUrl.trim().isNotEmpty) {
-        _assetsBaseUrl = _normalizeBaseUrl(runtimeAssetsBaseUrl);
+      if (runtimeAssetsBaseUrl is String) {
+        _assetsBaseUrl = _normalizeBaseUrl(
+          runtimeAssetsBaseUrl,
+          fallback: _defaultAssetsBaseUrl,
+        );
       }
       if (runtimeBuild is String && runtimeBuild.trim().isNotEmpty) {
         _build = runtimeBuild.trim();
@@ -90,10 +95,10 @@ class ConfigService {
   }
 }
 
-String _normalizeBaseUrl(String value) {
+String _normalizeBaseUrl(String value, {required String fallback}) {
   final trimmed = value.trim();
   if (trimmed.isEmpty) {
-    return trimmed;
+    return fallback;
   }
   return trimmed.replaceAll(RegExp(r'/+$'), '');
 }

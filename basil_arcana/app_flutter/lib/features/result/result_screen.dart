@@ -604,7 +604,9 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       for (final drawn in state.drawnCards) {
         precacheImage(
-          AssetImage(cardAssetPath(drawn.cardId, deckId: deckId)),
+          NetworkImage(
+            cardAssetPath(drawn.cardId, deckId: deckId.name),
+          ),
           context,
         );
       }

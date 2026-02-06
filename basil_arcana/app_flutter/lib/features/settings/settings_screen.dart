@@ -120,7 +120,7 @@ class SettingsScreen extends ConsumerWidget {
                 onTap: () {
                   final path = cardAssetPath(
                     'wands_13_ace',
-                    deckId: DeckId.wands,
+                    deckId: DeckId.wands.name,
                   );
                   debugPrint('Wands sample asset: $path');
                 },
@@ -148,6 +148,9 @@ class _DeckOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final previewId = _previewCardId(deckId);
+    final previewUrl = cardAssetPath(previewId, deckId: deckId.name);
+
     return Card(
       child: RadioListTile<DeckId>(
         value: deckId,
@@ -158,8 +161,26 @@ class _DeckOption extends StatelessWidget {
           }
         },
         title: Text(label),
+        secondary: _DeckPreviewThumbnail(imageUrl: previewUrl),
       ),
     );
+  }
+
+  String _previewCardId(DeckId deckId) {
+    switch (deckId) {
+      case DeckId.wands:
+        return 'wands_13_ace';
+      case DeckId.swords:
+        return 'swords_13_ace';
+      case DeckId.pentacles:
+        return 'pentacles_13_ace';
+      case DeckId.cups:
+        return 'cups_13_ace';
+      case DeckId.major:
+      case DeckId.all:
+      default:
+        return 'major_00_fool';
+    }
   }
 }
 
@@ -188,6 +209,55 @@ class _LanguageOption extends StatelessWidget {
           }
         },
         title: Text(label),
+      ),
+    );
+  }
+}
+
+class _DeckPreviewThumbnail extends StatelessWidget {
+  const _DeckPreviewThumbnail({required this.imageUrl});
+
+  final String imageUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    const width = 36.0;
+    const height = 54.0;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(6),
+      child: Image.network(
+        imageUrl,
+        width: width,
+        height: height,
+        fit: BoxFit.cover,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) {
+            return child;
+          }
+          return const SizedBox(
+            width: width,
+            height: height,
+            child: Center(
+              child: SizedBox(
+                width: 12,
+                height: 12,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            ),
+          );
+        },
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            width: width,
+            height: height,
+            color: Theme.of(context).colorScheme.surfaceVariant,
+            alignment: Alignment.center,
+            child: const Icon(
+              Icons.image_not_supported_outlined,
+              size: 16,
+            ),
+          );
+        },
       ),
     );
   }
