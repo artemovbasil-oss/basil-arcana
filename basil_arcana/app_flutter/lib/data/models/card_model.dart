@@ -45,7 +45,7 @@ class CardModel {
   final String? detailedDescription;
   final String? funFact;
   final CardStats? stats;
-  final String? videoAssetPath;
+  final String? videoFileName;
 
   const CardModel({
     required this.id,
@@ -55,7 +55,7 @@ class CardModel {
     this.detailedDescription,
     this.funFact,
     this.stats,
-    this.videoAssetPath,
+    this.videoFileName,
   });
 
   factory CardModel.fromJson(Map<String, dynamic> json) {
@@ -67,7 +67,7 @@ class CardModel {
       detailedDescription: json['detailedDescription'] as String?,
       funFact: json['funFact'] as String?,
       stats: CardStats.fromJson(json['stats'] as Map<String, dynamic>?),
-      videoAssetPath: resolveCardVideoAsset(json['id'] as String),
+      videoFileName: resolveCardVideoFileName(json['id'] as String),
     );
   }
 
@@ -83,7 +83,7 @@ class CardModel {
       detailedDescription: json['detailedDescription'] as String?,
       funFact: json['funFact'] as String?,
       stats: CardStats.fromJson(json['stats'] as Map<String, dynamic>?),
-      videoAssetPath: resolveCardVideoAsset(id),
+      videoFileName: resolveCardVideoFileName(id),
     );
   }
 }

@@ -1,7 +1,3 @@
-import 'dart:convert';
-
-import 'package:flutter/services.dart';
-
 import 'deck_model.dart';
 
 const List<String> _videoFileNames = [
@@ -70,56 +66,36 @@ const Map<String, String> _majorVideoKeys = {
   'major_21_world': 'world',
 };
 
-final Map<String, String> _videoAssetsByKey = {
+final Map<String, String> _videoFilesByKey = {
   for (final file in _videoFileNames)
-    _normalizeKey(_stripExtension(file)): 'assets/cards/video/${normalizeVideoFileName(file)}',
+    _normalizeKey(_stripExtension(file)): normalizeVideoFileName(file),
 };
 
-final Map<String, String> _cardVideoAssets = _buildCardVideoAssets();
-Set<String>? _videoAssetManifestCache;
-Future<Set<String>>? _videoAssetManifestFuture;
+final Map<String, String> _cardVideoFiles = _buildCardVideoFiles();
 
-String? resolveCardVideoAsset(
+String? resolveCardVideoFileName(
   String cardId, {
-  Set<String>? availableAssets,
+  Set<String>? availableFiles,
 }) {
   final normalizedId = canonicalCardId(cardId);
-  if (availableAssets != null && availableAssets.isNotEmpty) {
-    final asset = normalizeVideoAssetPath(
-      _videoAssetFromKey(_videoKeyForCardId(normalizedId)),
-    );
-    if (asset == null) {
+  if (availableFiles != null && availableFiles.isNotEmpty) {
+    final fileName = _videoFileFromKey(_videoKeyForCardId(normalizedId));
+    if (fileName == null) {
       return null;
     }
-    final assetLower = asset.toLowerCase();
-    final matches = availableAssets.any(
-      (value) => value.toLowerCase() == assetLower,
-    );
-    return matches ? asset : null;
+    final normalized = normalizeVideoFileName(fileName).toLowerCase();
+    final matches = availableFiles.contains(normalized);
+    return matches ? fileName : null;
   }
-  return _cardVideoAssets[normalizedId];
+  return _cardVideoFiles[normalizedId];
 }
 
-String? normalizeVideoAssetPath(String? path) {
-  if (path == null || path.trim().isEmpty) {
-    return null;
-  }
-  final normalized = path.trim();
-  if (!normalized.contains('/')) {
-    return 'assets/cards/video/${normalizeVideoFileName(normalized)}';
-  }
-  final parts = normalized.split('/');
-  final fileName = parts.removeLast();
-  parts.add(normalizeVideoFileName(fileName));
-  return parts.join('/');
-}
-
-Map<String, String> _buildCardVideoAssets() {
+Map<String, String> _buildCardVideoFiles() {
   final assets = <String, String>{};
   for (final entry in _majorVideoKeys.entries) {
-    final asset = _videoAssetsByKey[_normalizeKey(entry.value)];
-    if (asset != null) {
-      assets[entry.key] = asset;
+    final fileName = _videoFilesByKey[_normalizeKey(entry.value)];
+    if (fileName != null) {
+      assets[entry.key] = fileName;
     }
   }
   final minorIds = <String>[
@@ -133,9 +109,9 @@ Map<String, String> _buildCardVideoAssets() {
     if (key == null) {
       continue;
     }
-    final asset = _videoAssetsByKey[_normalizeKey(key)];
-    if (asset != null) {
-      assets[cardId] = asset;
+    final fileName = _videoFilesByKey[_normalizeKey(key)];
+    if (fileName != null) {
+      assets[cardId] = fileName;
     }
   }
   return assets;
@@ -155,36 +131,11 @@ String? _videoKeyForCardId(String cardId) {
   return '${suit}_$rank';
 }
 
-String? _videoAssetFromKey(String? key) {
+String? _videoFileFromKey(String? key) {
   if (key == null) {
     return null;
   }
-  final fileName = normalizeVideoFileName(key);
-  return 'assets/cards/video/$fileName';
-}
-
-Future<Set<String>> loadVideoAssetManifest() {
-  final cached = _videoAssetManifestCache;
-  if (cached != null) {
-    return Future.value(cached);
-  }
-  final future = _videoAssetManifestFuture;
-  if (future != null) {
-    return future;
-  }
-  _videoAssetManifestFuture = rootBundle.loadString('AssetManifest.json').then(
-    (raw) {
-      final manifest = jsonDecode(raw) as Map<String, dynamic>;
-      final assets = manifest.keys
-          .where((path) => path.contains('assets/cards/video/'))
-          .map((path) => normalizeVideoAssetPath(path))
-          .whereType<String>()
-          .toSet();
-      _videoAssetManifestCache = assets;
-      return assets;
-    },
-  );
-  return _videoAssetManifestFuture!;
+  return _videoFilesByKey[_normalizeKey(key)];
 }
 
 String _stripExtension(String filename) {

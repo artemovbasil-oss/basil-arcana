@@ -24,7 +24,9 @@ class CardFaceWidget extends ConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context)!;
     final deckId = ref.watch(deckProvider);
-    final videoAssets = ref.watch(videoAssetManifestProvider).asData?.value;
+    final videoIndex = ref.watch(videoIndexProvider).asData?.value;
+    final availableVideos =
+        videoIndex == null || videoIndex.isEmpty ? null : videoIndex;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -42,11 +44,11 @@ class CardFaceWidget extends ConsumerWidget {
                 final cardHeight = cardWidth * 1.5;
                 final mediaAssets = CardMediaResolver(
                   deckId: deckId,
-                  availableVideoAssets: videoAssets,
+                  availableVideoFiles: availableVideos,
                 ).resolve(cardId!);
                 final image = CardMedia(
                   cardId: cardId!,
-                  videoAssetPath: mediaAssets.videoAssetPath,
+                  videoUrl: mediaAssets.videoUrl,
                   enableVideo: true,
                   autoPlayOnce: true,
                   playLabel: l10n.videoTapToPlay,

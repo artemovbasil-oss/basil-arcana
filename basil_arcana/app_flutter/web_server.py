@@ -33,9 +33,11 @@ def _read_env(*keys: str) -> str:
 def build_config_payload() -> dict[str, str]:
     api_base_url = _read_env("API_BASE_URL", "BASE_URL")
     api_key = _read_env("API_KEY", "ARCANA_API_KEY")
+    assets_base_url = _read_env("ASSETS_BASE_URL")
     payload: dict[str, str] = {
         "apiBaseUrl": api_base_url,
         "apiKey": api_key,
+        "assetsBaseUrl": assets_base_url,
         "build": CONFIG_BUILD,
     }
     if not api_base_url or not api_key:
@@ -53,11 +55,14 @@ def build_config_payload() -> dict[str, str]:
 def log_config_presence() -> None:
     api_base_url_present = bool(_read_env("API_BASE_URL", "BASE_URL"))
     api_key_present = bool(_read_env("API_KEY", "ARCANA_API_KEY"))
+    assets_base_url_present = bool(_read_env("ASSETS_BASE_URL"))
     print(
         "Config env presence - API_BASE_URL/BASE_URL: "
         f"{'present' if api_base_url_present else 'missing'}, "
         "API_KEY/ARCANA_API_KEY: "
-        f"{'present' if api_key_present else 'missing'}"
+        f"{'present' if api_key_present else 'missing'}, "
+        "ASSETS_BASE_URL: "
+        f"{'present' if assets_base_url_present else 'missing'}"
     )
 
 
@@ -136,6 +141,7 @@ class WebAppHandler(SimpleHTTPRequestHandler):
     def end_headers(self):
         path = urlparse(self.path).path
         if path == "/config.json":
+            self.send_header("Access-Control-Allow-Origin", "*")
             super().end_headers()
             return
         filename = os.path.basename(path)
@@ -147,6 +153,7 @@ class WebAppHandler(SimpleHTTPRequestHandler):
             self.send_header("Cache-Control", "public, max-age=31536000, immutable")
         if path.endswith(".mp4"):
             self.send_header("Accept-Ranges", "bytes")
+        self.send_header("Access-Control-Allow-Origin", "*")
         super().end_headers()
 
 
