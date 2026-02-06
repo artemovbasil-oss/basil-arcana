@@ -1165,7 +1165,7 @@ class _DetailThumbnailCard extends ConsumerWidget {
             ),
             child: ClipRRect(
               borderRadius: radius,
-              child: Image.asset(
+              child: Image.network(
                 deckCoverAssetPath(deckId),
                 width: 56,
                 height: 88,
@@ -1173,7 +1173,7 @@ class _DetailThumbnailCard extends ConsumerWidget {
                 filterQuality: FilterQuality.high,
                 errorBuilder: (context, error, stackTrace) {
                   if (deckId != DeckId.major) {
-                    return Image.asset(
+                    return Image.network(
                       deckCoverAssetPath(DeckId.major),
                       width: 56,
                       height: 88,

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/assets/asset_paths.dart';
+import '../../data/models/deck_model.dart';
 import '../../core/config/app_config.dart';
 import '../../core/telegram/telegram_web_app.dart';
 import '../home/home_screen.dart';
@@ -79,8 +81,8 @@ class _SplashScreenState extends State<SplashScreen>
                   child: ScaleTransition(
                     scale: _scale,
                     child: SizedBox.expand(
-                      child: Image.asset(
-                        'assets/deck/cover.webp',
+                      child: Image.network(
+                        deckPreviewImageUrl(DeckId.major),
                         fit: BoxFit.cover,
                         filterQuality: FilterQuality.high,
                       ),

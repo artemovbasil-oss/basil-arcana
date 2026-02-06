@@ -267,16 +267,16 @@ String? _previewImageUrl(List<CardModel> cards, DeckId deckId) {
   String previewId;
   switch (deckId) {
     case DeckId.wands:
-      previewId = 'wands_13_ace';
+      previewId = wandsCardIds.first;
     case DeckId.swords:
-      previewId = 'swords_13_ace';
+      previewId = swordsCardIds.first;
     case DeckId.pentacles:
-      previewId = 'pentacles_13_ace';
+      previewId = pentaclesCardIds.first;
     case DeckId.cups:
-      previewId = 'cups_13_ace';
+      previewId = cupsCardIds.first;
     case DeckId.major:
     case DeckId.all:
-      previewId = 'major_00_fool';
+      previewId = majorCardIds.first;
   }
   final normalizedId = canonicalCardId(previewId);
   for (final card in cards) {
