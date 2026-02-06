@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
-import '../../core/telegram/telegram_web_app.dart';
 import '../../core/utils/date_format.dart';
 import '../../core/widgets/card_face_widget.dart';
 import '../../data/models/reading_model.dart';
@@ -18,13 +17,14 @@ class HistoryDetailScreen extends StatelessWidget {
     };
     final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context).toString();
-    final useTelegramAppBar =
-        TelegramWebApp.isTelegramWebView && TelegramWebApp.isTelegramMobile;
-
     return Scaffold(
-      appBar:
-          useTelegramAppBar ? null : AppBar(title: Text(l10n.historyDetailTitle)),
+      appBar: AppBar(
+        title: Text(l10n.historyDetailTitle),
+        leading: Navigator.canPop(context) ? const BackButton() : null,
+        automaticallyImplyLeading: Navigator.canPop(context),
+      ),
       body: SafeArea(
+        top: false,
         child: Column(
           children: [
             if (!reading.aiUsed)

@@ -7,7 +7,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
 import '../../core/assets/asset_paths.dart';
-import '../../core/telegram/telegram_web_app.dart';
 import '../../core/widgets/tarot_asset_widgets.dart';
 import '../../data/models/deck_model.dart';
 import '../../state/reading_flow_controller.dart';
@@ -92,14 +91,15 @@ class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
     final hasDrawnCards = state.drawnCards.isNotEmpty;
     final keptCount = state.spread?.positions.length ?? 0;
     final showGlow = state.isLoading && hasDrawnCards;
-    final useTelegramAppBar =
-        TelegramWebApp.isTelegramWebView && TelegramWebApp.isTelegramMobile;
-
     return Scaffold(
-      appBar: useTelegramAppBar ? null : AppBar(title: Text(l10n.shuffleTitle)),
+      appBar: AppBar(
+        title: Text(l10n.shuffleTitle),
+        leading: Navigator.canPop(context) ? const BackButton() : null,
+        automaticallyImplyLeading: Navigator.canPop(context),
+      ),
       backgroundColor: colorScheme.background,
       body: SafeArea(
-        top: useTelegramAppBar,
+        top: false,
         child: Stack(
           children: [
             const Positioned.fill(child: _ShuffleBackground()),

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
-import '../../core/telegram/telegram_web_app.dart';
 import '../../core/utils/date_format.dart';
 import '../../data/models/reading_model.dart';
 import '../../state/providers.dart';
@@ -17,12 +16,14 @@ class HistoryScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final repository = ref.watch(readingsRepositoryProvider);
     final l10n = AppLocalizations.of(context)!;
-    final useTelegramAppBar =
-        TelegramWebApp.isTelegramWebView && TelegramWebApp.isTelegramMobile;
     return Scaffold(
-      appBar: useTelegramAppBar ? null : AppBar(title: Text(l10n.historyTitle)),
+      appBar: AppBar(
+        title: Text(l10n.historyTitle),
+        leading: Navigator.canPop(context) ? const BackButton() : null,
+        automaticallyImplyLeading: Navigator.canPop(context),
+      ),
       body: SafeArea(
-        top: useTelegramAppBar,
+        top: false,
         child: ValueListenableBuilder(
           valueListenable: repository.listenable(),
           builder: (context, box, _) {
