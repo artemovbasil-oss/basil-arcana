@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
 import '../../core/utils/date_format.dart';
+import '../../core/navigation/app_route_config.dart';
+import '../../core/widgets/app_top_bar.dart';
 import '../../data/models/reading_model.dart';
 import '../../state/providers.dart';
 import 'history_detail_screen.dart';
@@ -17,10 +19,10 @@ class HistoryScreen extends ConsumerWidget {
     final repository = ref.watch(readingsRepositoryProvider);
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(
+      appBar: buildTopBar(
+        context,
         title: Text(l10n.historyTitle),
-        leading: Navigator.canPop(context) ? const BackButton() : null,
-        automaticallyImplyLeading: Navigator.canPop(context),
+        showBack: true,
       ),
       body: SafeArea(
         top: false,
@@ -76,6 +78,7 @@ class _HistoryTile extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
+              settings: appRouteSettings(showBackButton: true),
               builder: (_) => HistoryDetailScreen(reading: reading),
             ),
           );

@@ -5,6 +5,7 @@ import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 import '../../core/assets/asset_paths.dart';
 import '../../core/config/config_service.dart';
 import '../../core/config/diagnostics.dart';
+import '../../core/navigation/app_route_config.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/app_buttons.dart';
 import '../../state/providers.dart';
@@ -223,6 +224,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             Navigator.pushNamed(
                               context,
                               HistoryScreen.routeName,
+                              arguments:
+                                  const AppRouteConfig(showBackButton: true),
                             );
                           },
                         ),
@@ -233,6 +236,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             Navigator.pushNamed(
                               context,
                               SettingsScreen.routeName,
+                              arguments:
+                                  const AppRouteConfig(showBackButton: true),
                             );
                           },
                         ),
@@ -352,7 +357,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => const CardsScreen()),
+                          MaterialPageRoute(
+                            settings:
+                                appRouteSettings(showBackButton: true),
+                            builder: (_) => const CardsScreen(),
+                          ),
                         );
                       },
                     ),
@@ -401,6 +410,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
+        settings: appRouteSettings(showBackButton: false),
         builder: (_) => const SpreadScreen(),
       ),
     );

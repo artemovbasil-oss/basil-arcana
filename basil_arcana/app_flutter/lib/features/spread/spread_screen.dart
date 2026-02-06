@@ -6,7 +6,9 @@ import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
 import '../../core/config/assets_config.dart';
 import '../../core/config/diagnostics.dart';
+import '../../core/navigation/app_route_config.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/widgets/app_top_bar.dart';
 import '../../core/widgets/data_load_error.dart';
 import '../../data/models/app_enums.dart';
 import '../../data/models/spread_model.dart';
@@ -22,10 +24,9 @@ class SpreadScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: buildTopBar(
+        context,
         title: Text(l10n.spreadTitle),
-        leading: Navigator.canPop(context) ? const BackButton() : null,
-        automaticallyImplyLeading: Navigator.canPop(context),
       ),
       body: SafeArea(
         top: false,
@@ -175,7 +176,10 @@ class _SpreadOptionCard extends ConsumerWidget {
             .selectSpread(spread, spreadType);
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => const ShuffleScreen()),
+          MaterialPageRoute(
+            settings: appRouteSettings(showBackButton: true),
+            builder: (_) => const ShuffleScreen(),
+          ),
         );
       },
       child: Ink(

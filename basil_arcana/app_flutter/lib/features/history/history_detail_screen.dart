@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
 import '../../core/utils/date_format.dart';
+import '../../core/widgets/app_top_bar.dart';
 import '../../core/widgets/card_face_widget.dart';
 import '../../data/models/reading_model.dart';
 
@@ -18,10 +19,10 @@ class HistoryDetailScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context).toString();
     return Scaffold(
-      appBar: AppBar(
+      appBar: buildTopBar(
+        context,
         title: Text(l10n.historyDetailTitle),
-        leading: Navigator.canPop(context) ? const BackButton() : null,
-        automaticallyImplyLeading: Navigator.canPop(context),
+        showBack: true,
       ),
       body: SafeArea(
         top: false,

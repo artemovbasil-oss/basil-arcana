@@ -5,6 +5,7 @@ import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 import '../../core/config/assets_config.dart';
 import '../../core/config/diagnostics.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/widgets/app_top_bar.dart';
 import '../../core/widgets/data_load_error.dart';
 import '../../core/widgets/tarot_asset_widgets.dart';
 import '../../data/models/card_model.dart';
@@ -60,10 +61,10 @@ class CardDetailScreen extends ConsumerWidget {
             )
           : null;
       return Scaffold(
-        appBar: AppBar(
+        appBar: buildTopBar(
+          context,
           title: Text(l10n.cardsDetailTitle),
-          leading: Navigator.canPop(context) ? const BackButton() : null,
-          automaticallyImplyLeading: Navigator.canPop(context),
+          showBack: true,
         ),
         body: SafeArea(
           top: false,
@@ -82,10 +83,10 @@ class CardDetailScreen extends ConsumerWidget {
       );
     }
     return Scaffold(
-      appBar: AppBar(
+      appBar: buildTopBar(
+        context,
         title: Text(l10n.cardsDetailTitle),
-        leading: Navigator.canPop(context) ? const BackButton() : null,
-        automaticallyImplyLeading: Navigator.canPop(context),
+        showBack: true,
       ),
       body: SafeArea(
         top: false,
