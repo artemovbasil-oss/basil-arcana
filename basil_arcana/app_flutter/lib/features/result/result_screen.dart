@@ -36,6 +36,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
   bool _sequenceComplete = false;
   bool _initialized = false;
   bool _precacheDone = false;
+  bool _autoScrollEnabled = false;
   int _itemCounter = 0;
   String? _warmTip;
 
@@ -159,16 +160,20 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
     final statusText = state.aiUsed
         ? l10n.resultStatusAiReading
         : _statusMessage(state, l10n);
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    final listBottomPadding = 24 +
+        _ActionBar.baseHeight +
+        (_sequenceComplete ? _ActionBar.extraHeight : 0);
     return Scaffold(
       appBar: useTelegramAppBar ? null : AppBar(title: Text(l10n.resultTitle)),
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
-        child: Column(
+        child: Stack(
           children: [
-            Expanded(
+            Positioned.fill(
               child: ListView(
                 controller: _scrollController,
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+                padding: EdgeInsets.fromLTRB(20, 16, 20, listBottomPadding),
                 children: [
                   Align(
                     alignment: Alignment.centerLeft,
@@ -297,29 +302,42 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                 ],
               ),
             ),
-            _ActionBar(
-              isVisible: _sequenceComplete,
-              onSave: () async {
-                await ref
-                    .read(readingFlowControllerProvider.notifier)
-                    .saveReading();
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(l10n.resultSnackSaved)),
-                  );
-                }
-              },
-              onNew: () {
-                ref.read(readingFlowControllerProvider.notifier).reset();
-                Navigator.popUntil(context, (route) => route.isFirst);
-              },
-              onShare: () async {
-                final url = Uri.parse('https://t.me/tarot_arkana_bot');
-                await launchUrl(url, mode: LaunchMode.externalApplication);
-              },
-              saveLabel: l10n.resultSaveButton,
-              newLabel: l10n.resultNewButton,
-              moreLabel: l10n.resultWantMoreButton,
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: AnimatedPadding(
+                duration: const Duration(milliseconds: 220),
+                curve: Curves.easeOut,
+                padding: EdgeInsets.only(bottom: bottomInset),
+                child: _ActionBar(
+                  showExtra: _sequenceComplete,
+                  onSave: () async {
+                    await ref
+                        .read(readingFlowControllerProvider.notifier)
+                        .saveReading();
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(l10n.resultSnackSaved)),
+                      );
+                    }
+                  },
+                  onNew: () {
+                    ref.read(readingFlowControllerProvider.notifier).reset();
+                    Navigator.popUntil(context, (route) => route.isFirst);
+                  },
+                  onShare: () async {
+                    final url = Uri.parse('https://t.me/tarot_arkana_bot');
+                    await launchUrl(
+                      url,
+                      mode: LaunchMode.externalApplication,
+                    );
+                  },
+                  saveLabel: l10n.resultSaveButton,
+                  newLabel: l10n.resultNewButton,
+                  moreLabel: l10n.resultWantMoreButton,
+                ),
+              ),
             ),
           ],
         ),
@@ -334,6 +352,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
   void _initializeSequence(ReadingFlowState state) {
     _initialized = true;
     _sequenceComplete = false;
+    _autoScrollEnabled = false;
     _warmTip = _maybeWarmTip(state);
     _items
       ..clear()
@@ -348,6 +367,9 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
       ..addAll(_buildBasilMessages(state));
     setState(() {});
     _jumpToTop();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _autoScrollEnabled = true;
+    });
     _queueNextBasilMessage();
   }
 
@@ -609,7 +631,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
 
   void _maybeScrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_isNearBottom()) {
+      if (_autoScrollEnabled && _isNearBottom()) {
         _scrollController.animateTo(
           _scrollController.position.maxScrollExtent,
           duration: const Duration(milliseconds: 300),
@@ -990,7 +1012,7 @@ class _StatusPill extends StatelessWidget {
 
 class _ActionBar extends StatelessWidget {
   const _ActionBar({
-    required this.isVisible,
+    required this.showExtra,
     required this.onSave,
     required this.onNew,
     required this.onShare,
@@ -999,7 +1021,10 @@ class _ActionBar extends StatelessWidget {
     required this.moreLabel,
   });
 
-  final bool isVisible;
+  static const double baseHeight = 86;
+  static const double extraHeight = 70;
+
+  final bool showExtra;
   final VoidCallback onSave;
   final VoidCallback onNew;
   final VoidCallback onShare;
@@ -1010,59 +1035,92 @@ class _ActionBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    return AnimatedSlide(
-      duration: const Duration(milliseconds: 360),
-      curve: Curves.easeOutCubic,
-      offset: isVisible ? Offset.zero : const Offset(0, 0.2),
-      child: AnimatedOpacity(
-        duration: const Duration(milliseconds: 360),
-        opacity: isVisible ? 1 : 0,
-        child: SafeArea(
-          top: false,
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: colorScheme.surface.withOpacity(0.92),
+            borderRadius: BorderRadius.circular(22),
+            boxShadow: [
+              BoxShadow(
+                color: colorScheme.primary.withOpacity(0.18),
+                blurRadius: 24,
+                offset: const Offset(0, 10),
+              ),
+            ],
+            border: Border.all(
+              color: colorScheme.outlineVariant.withOpacity(0.4),
+            ),
+          ),
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+            padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: isVisible ? onSave : null,
-                    icon: const Icon(Icons.bookmark_add),
-                    label: Text(saveLabel),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: const StadiumBorder(),
-                      backgroundColor: colorScheme.primary,
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: onSave,
+                        icon: const Icon(Icons.bookmark_add),
+                        label: Text(saveLabel),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: const StadiumBorder(),
+                          backgroundColor: colorScheme.primary,
+                        ),
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: onNew,
+                        icon: const Icon(Icons.auto_awesome),
+                        label: Text(newLabel),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: const StadiumBorder(),
+                          side: BorderSide(color: colorScheme.primary),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    onPressed: isVisible ? onNew : null,
-                    icon: const Icon(Icons.auto_awesome),
-                    label: Text(newLabel),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: const StadiumBorder(),
-                      side: BorderSide(color: colorScheme.primary),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    onPressed: isVisible ? onShare : null,
-                    icon: const Icon(Icons.auto_awesome_outlined),
-                    label: Text(moreLabel),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: const StadiumBorder(),
-                      side: BorderSide(color: colorScheme.primary),
-                    ),
-                  ),
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 280),
+                  switchInCurve: Curves.easeOut,
+                  switchOutCurve: Curves.easeIn,
+                  transitionBuilder: (child, animation) {
+                    return FadeTransition(
+                      opacity: animation,
+                      child: SizeTransition(
+                        sizeFactor: animation,
+                        axisAlignment: -1,
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: showExtra
+                      ? Padding(
+                          padding: const EdgeInsets.only(top: 12),
+                          child: SizedBox(
+                            width: double.infinity,
+                            child: OutlinedButton.icon(
+                              onPressed: onShare,
+                              icon: const Icon(Icons.auto_awesome_outlined),
+                              label: Text(moreLabel),
+                              style: OutlinedButton.styleFrom(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 14),
+                                shape: const StadiumBorder(),
+                                side: BorderSide(color: colorScheme.primary),
+                              ),
+                            ),
+                          ),
+                        )
+                      : const SizedBox.shrink(),
                 ),
               ],
             ),

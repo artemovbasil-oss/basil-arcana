@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
 import '../../core/config/assets_config.dart';
+import '../../core/config/diagnostics.dart';
 import '../../core/telegram/telegram_web_app.dart';
 import '../../core/widgets/data_load_error.dart';
 import '../../data/models/spread_model.dart';
@@ -66,24 +67,28 @@ class SpreadScreen extends ConsumerWidget {
             final repo = ref.read(dataRepositoryProvider);
             final locale = ref.read(localeProvider);
             final cacheKey = repo.spreadsCacheKey(locale);
-            final debugInfo = DataLoadDebugInfo(
-              assetsBaseUrl: AssetsConfig.assetsBaseUrl,
-              requests: {
-                'spreads (${repo.spreadsFileNameForLocale(locale)})':
-                    DataLoadRequestDebugInfo(
-                  url: repo.lastAttemptedUrls[cacheKey] ?? '—',
-                  statusCode: repo.lastStatusCodes[cacheKey],
-                  contentType: repo.lastContentTypes[cacheKey],
-                  contentLength: repo.lastContentLengths[cacheKey],
-                  responseSnippetStart: repo.lastResponseSnippetsStart[cacheKey],
-                  responseSnippetEnd: repo.lastResponseSnippetsEnd[cacheKey],
-                  responseLength: repo.lastResponseStringLengths[cacheKey],
-                  bytesLength: repo.lastResponseByteLengths[cacheKey],
-                  rootType: repo.lastResponseRootTypes[cacheKey],
-                ),
-              },
-              lastError: repo.lastError,
-            );
+            final debugInfo = kShowDiagnostics
+                ? DataLoadDebugInfo(
+                    assetsBaseUrl: AssetsConfig.assetsBaseUrl,
+                    requests: {
+                      'spreads (${repo.spreadsFileNameForLocale(locale)})':
+                          DataLoadRequestDebugInfo(
+                        url: repo.lastAttemptedUrls[cacheKey] ?? '—',
+                        statusCode: repo.lastStatusCodes[cacheKey],
+                        contentType: repo.lastContentTypes[cacheKey],
+                        contentLength: repo.lastContentLengths[cacheKey],
+                        responseSnippetStart:
+                            repo.lastResponseSnippetsStart[cacheKey],
+                        responseSnippetEnd:
+                            repo.lastResponseSnippetsEnd[cacheKey],
+                        responseLength: repo.lastResponseStringLengths[cacheKey],
+                        bytesLength: repo.lastResponseByteLengths[cacheKey],
+                        rootType: repo.lastResponseRootTypes[cacheKey],
+                      ),
+                    },
+                    lastError: repo.lastError,
+                  )
+                : null;
             return Center(
               child: FutureBuilder<bool>(
                 future: repo.hasCachedData(cacheKey),

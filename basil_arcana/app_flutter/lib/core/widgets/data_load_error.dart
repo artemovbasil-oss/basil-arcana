@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../config/diagnostics.dart';
+
 class DataLoadRequestDebugInfo {
   const DataLoadRequestDebugInfo({
     required this.url,
@@ -99,7 +101,7 @@ class DataLoadError extends StatelessWidget {
               ),
             ),
           ],
-          if (debugInfo != null) ...[
+          if (kShowDiagnostics && debugInfo != null) ...[
             const SizedBox(height: 16),
             _DebugInfoPanel(info: debugInfo!),
           ],
