@@ -127,3 +127,24 @@ DeckId deckIdFromStorage(String? value) {
   }
   return DeckId.all;
 }
+
+DeckId? deckIdFromString(String? value) {
+  if (value == null) {
+    return null;
+  }
+  switch (value.trim().toLowerCase()) {
+    case 'major':
+      return DeckId.major;
+    case 'wands':
+      return DeckId.wands;
+    case 'swords':
+      return DeckId.swords;
+    case 'pentacles':
+      return DeckId.pentacles;
+    case 'cups':
+      return DeckId.cups;
+    case 'all':
+      return DeckId.all;
+  }
+  return null;
+}

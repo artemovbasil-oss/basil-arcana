@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
 import '../../core/config/assets_config.dart';
-import '../../core/assets/asset_paths.dart';
 import '../../core/telegram/telegram_web_app.dart';
 import '../../core/widgets/data_load_error.dart';
 import '../../core/widgets/tarot_asset_widgets.dart';
@@ -77,7 +76,7 @@ class _CardsScreenState extends ConsumerState<CardsScreen> {
           },
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, stackTrace) {
-            final repo = ref.read(dataRepositoryProvider);
+            final repo = ref.read(cardsRepositoryProvider);
             final locale = ref.read(localeProvider);
             final cacheKey = repo.cardsCacheKey(locale);
             final debugInfo = DataLoadDebugInfo(
@@ -125,17 +124,11 @@ class _CardsScreenState extends ConsumerState<CardsScreen> {
       return;
     }
     _precacheDone = true;
-    final deckId = ref.read(deckProvider);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final initialCards = cards.take(6);
       for (final card in initialCards) {
         precacheImage(
-          NetworkImage(
-            cardImageUrl(
-              card.id,
-              deckId: deckId,
-            ),
-          ),
+          NetworkImage(card.imageUrl),
           context,
         );
       }
@@ -187,6 +180,7 @@ class _CardTile extends StatelessWidget {
                 child: Center(
                   child: CardAssetImage(
                     cardId: card.id,
+                    imageUrl: card.imageUrl,
                     width: double.infinity,
                     height: double.infinity,
                   ),

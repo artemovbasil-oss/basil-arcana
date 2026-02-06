@@ -1,6 +1,7 @@
 import 'package:hive/hive.dart';
 
 import 'card_video.dart';
+import 'deck_model.dart';
 
 @HiveType(typeId: 0)
 class CardMeaning {
@@ -29,6 +30,16 @@ class CardMeaning {
     );
   }
 
+  factory CardMeaning.fromGeneralMeaning(String general) {
+    final normalized = general.trim();
+    return CardMeaning(
+      general: normalized,
+      light: normalized,
+      shadow: normalized,
+      advice: normalized,
+    );
+  }
+
   Map<String, dynamic> toJson() => {
         'general': general,
         'light': light,
@@ -39,6 +50,7 @@ class CardMeaning {
 
 class CardModel {
   final String id;
+  final DeckId deckId;
   final String name;
   final List<String> keywords;
   final CardMeaning meaning;
@@ -46,9 +58,12 @@ class CardModel {
   final String? funFact;
   final CardStats? stats;
   final String? videoFileName;
+  final String imageUrl;
+  final String? videoUrl;
 
   const CardModel({
     required this.id,
+    required this.deckId,
     required this.name,
     required this.keywords,
     required this.meaning,
@@ -56,11 +71,15 @@ class CardModel {
     this.funFact,
     this.stats,
     this.videoFileName,
+    required this.imageUrl,
+    this.videoUrl,
   });
 
   factory CardModel.fromJson(Map<String, dynamic> json) {
     return CardModel(
       id: json['id'] as String,
+      deckId: deckIdFromString(json['deck'] as String?) ??
+          _deckIdFromCardId(json['id'] as String),
       name: json['name'] as String,
       keywords: (json['keywords'] as List<dynamic>).cast<String>(),
       meaning: CardMeaning.fromJson(json['meaning'] as Map<String, dynamic>),
@@ -68,15 +87,16 @@ class CardModel {
       funFact: json['funFact'] as String?,
       stats: CardStats.fromJson(json['stats'] as Map<String, dynamic>?),
       videoFileName: resolveCardVideoFileName(json['id'] as String),
+      imageUrl: json['imageUrl'] as String? ?? '',
+      videoUrl: json['videoUrl'] as String?,
     );
   }
 
-  factory CardModel.fromLocalizedEntry(
-    String id,
-    Map<String, dynamic> json,
-  ) {
+  factory CardModel.fromLocalizedEntry(String id, Map<String, dynamic> json) {
     return CardModel(
       id: id,
+      deckId: deckIdFromString(json['deck'] as String?) ??
+          _deckIdFromCardId(id),
       name: json['title'] as String,
       keywords: (json['keywords'] as List<dynamic>).cast<String>(),
       meaning: CardMeaning.fromJson(json['meaning'] as Map<String, dynamic>),
@@ -84,6 +104,33 @@ class CardModel {
       funFact: json['funFact'] as String?,
       stats: CardStats.fromJson(json['stats'] as Map<String, dynamic>?),
       videoFileName: resolveCardVideoFileName(id),
+      imageUrl: json['imageUrl'] as String? ?? '',
+      videoUrl: json['videoUrl'] as String?,
+    );
+  }
+
+  factory CardModel.fromCdnEntry(Map<String, dynamic> json) {
+    final id = canonicalCardId(json['id'] as String? ?? '');
+    final deck = deckIdFromString(json['deck'] as String?) ??
+        _deckIdFromCardId(id);
+    final generalMeaning = json['generalMeaning'] as String? ??
+        (json['meaning'] as Map<String, dynamic>?)?['general'] as String? ??
+        '';
+    final meaning = json['meaning'] is Map<String, dynamic>
+        ? CardMeaning.fromJson(json['meaning'] as Map<String, dynamic>)
+        : CardMeaning.fromGeneralMeaning(generalMeaning);
+    return CardModel(
+      id: id,
+      deckId: deck,
+      name: json['title'] as String? ?? json['name'] as String? ?? id,
+      keywords: (json['keywords'] as List<dynamic>? ?? const []).cast<String>(),
+      meaning: meaning,
+      detailedDescription: json['detailedDescription'] as String?,
+      funFact: json['interestingFact'] as String? ?? json['funFact'] as String?,
+      stats: CardStats.fromJson(json['stats'] as Map<String, dynamic>?),
+      videoFileName: resolveCardVideoFileName(id),
+      imageUrl: json['imageUrl'] as String? ?? '',
+      videoUrl: json['videoUrl'] as String?,
     );
   }
 }
@@ -106,12 +153,29 @@ class CardStats {
       return null;
     }
     return CardStats(
-      luck: json['luck'] as int,
-      power: json['power'] as int,
-      love: json['love'] as int,
-      clarity: json['clarity'] as int,
+      luck: json['luck'] as int? ?? 0,
+      power: json['power'] as int? ?? 0,
+      love: json['love'] as int? ?? 0,
+      clarity: json['clarity'] as int? ?? 0,
     );
   }
+}
+
+DeckId _deckIdFromCardId(String id) {
+  final normalized = canonicalCardId(id);
+  if (normalized.startsWith('wands_')) {
+    return DeckId.wands;
+  }
+  if (normalized.startsWith('swords_')) {
+    return DeckId.swords;
+  }
+  if (normalized.startsWith('pentacles_')) {
+    return DeckId.pentacles;
+  }
+  if (normalized.startsWith('cups_')) {
+    return DeckId.cups;
+  }
+  return DeckId.major;
 }
 
 class CardMeaningAdapter extends TypeAdapter<CardMeaning> {

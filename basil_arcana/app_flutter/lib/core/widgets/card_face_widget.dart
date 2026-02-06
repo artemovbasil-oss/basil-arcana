@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
 import 'tarot_asset_widgets.dart';
+import '../../data/models/card_model.dart';
 import '../../state/providers.dart';
 
 class CardFaceWidget extends ConsumerWidget {
@@ -24,6 +25,17 @@ class CardFaceWidget extends ConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context)!;
     final deckId = ref.watch(deckProvider);
+    final cardsAsync = ref.watch(cardsProvider);
+    CardModel? resolvedCard;
+    final cards = cardsAsync.asData?.value;
+    if (cardId != null && cards != null) {
+      for (final card in cards) {
+        if (card.id == cardId) {
+          resolvedCard = card;
+          break;
+        }
+      }
+    }
     final videoIndex = ref.watch(videoIndexProvider).asData?.value;
     final availableVideos =
         videoIndex == null || videoIndex.isEmpty ? null : videoIndex;
@@ -45,9 +57,14 @@ class CardFaceWidget extends ConsumerWidget {
                 final mediaAssets = CardMediaResolver(
                   deckId: deckId,
                   availableVideoFiles: availableVideos,
-                ).resolve(cardId!);
+                ).resolve(
+                  cardId!,
+                  imageUrlOverride: resolvedCard?.imageUrl,
+                  videoUrlOverride: resolvedCard?.videoUrl,
+                );
                 final image = CardMedia(
                   cardId: cardId!,
+                  imageUrl: resolvedCard?.imageUrl,
                   videoUrl: mediaAssets.videoUrl,
                   enableVideo: true,
                   autoPlayOnce: true,
