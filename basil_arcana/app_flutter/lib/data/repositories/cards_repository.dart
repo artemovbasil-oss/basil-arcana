@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../core/assets/asset_paths.dart';
+import '../../core/config/assets_config.dart';
 import '../models/card_model.dart';
 import '../models/deck_model.dart';
 
@@ -13,14 +15,13 @@ class CardsRepository {
   CardsRepository({http.Client? client}) : _client = client ?? http.Client();
 
   static const String _cardsPrefix = 'cdn_cards_';
-  static const String _cardsBaseUrl = 'https://cdn.basilarcana.com';
-
   final http.Client _client;
   final Map<String, String> _memoryCache = {};
   final Map<String, DateTime> _lastFetchTimes = {};
   final Map<String, DateTime> _lastCacheTimes = {};
   final Map<String, String> _lastAttemptedUrls = {};
   final Map<String, int> _lastStatusCodes = {};
+  final Map<String, String> _lastResponseBodies = {};
   SharedPreferences? _preferences;
   String? _lastError;
 
@@ -32,6 +33,8 @@ class CardsRepository {
       UnmodifiableMapView(_lastAttemptedUrls);
   UnmodifiableMapView<String, int> get lastStatusCodes =>
       UnmodifiableMapView(_lastStatusCodes);
+  UnmodifiableMapView<String, String> get lastResponseBodies =>
+      UnmodifiableMapView(_lastResponseBodies);
   String? get lastError => _lastError;
 
   String cardsCacheKey(Locale locale) =>
@@ -53,7 +56,7 @@ class CardsRepository {
       'kz' => 'kz',
       _ => 'en',
     };
-    return '$_cardsBaseUrl/data/cards_$lang.json';
+    return '${AssetsConfig.assetsBaseUrl}/data/cards_$lang.json';
   }
 
   Future<List<CardModel>> fetchCards({
@@ -111,19 +114,24 @@ class CardsRepository {
   }) async {
     _lastAttemptedUrls[cacheKey] = uri.toString();
     try {
-      final response = await _client.get(
-        uri,
-        headers: const {'Cache-Control': 'no-cache'},
-      );
+      final response = await _client.get(uri);
       _lastStatusCodes[cacheKey] = response.statusCode;
+      _lastResponseBodies[cacheKey] = _responseSnippet(response.body);
       if (response.statusCode < 200 || response.statusCode >= 300) {
         throw CardsLoadException(
           'HTTP ${response.statusCode} for ${uri.toString()}',
           cacheKey: cacheKey,
         );
       }
-      if (!validator(jsonDecode(response.body))) {
-        throw CardsLoadException('Invalid JSON payload', cacheKey: cacheKey);
+      try {
+        if (!validator(jsonDecode(response.body))) {
+          throw CardsLoadException('Invalid JSON payload', cacheKey: cacheKey);
+        }
+      } on FormatException catch (error) {
+        throw CardsLoadException(
+          'Invalid JSON payload: ${error.message}',
+          cacheKey: cacheKey,
+        );
       }
       await _storeCache(cacheKey, response.body);
       _lastFetchTimes[cacheKey] = DateTime.now();
@@ -207,13 +215,7 @@ bool _isValidCardsJson(Object? payload) {
 bool _isValidCardEntry(Map<String, dynamic> card) {
   return card.containsKey('id') &&
       card.containsKey('deck') &&
-      card.containsKey('title') &&
-      card.containsKey('keywords') &&
-      card.containsKey('generalMeaning') &&
-      card.containsKey('detailedDescription') &&
-      card.containsKey('interestingFact') &&
-      card.containsKey('stats') &&
-      card.containsKey('imageUrl');
+      (card.containsKey('title') || card.containsKey('name'));
 }
 
 List<CardModel> _parseCards({required String raw, required DeckId deckId}) {
@@ -246,9 +248,17 @@ List<CardModel> _parseCards({required String raw, required DeckId deckId}) {
 
   for (final entry in entries) {
     final card = CardModel.fromCdnEntry(entry);
+    final resolvedImageUrl = _resolveImageUrl(
+      card.imageUrl,
+      card.id,
+      card.deckId,
+    );
+    final resolvedCard = resolvedImageUrl == card.imageUrl
+        ? card
+        : card.copyWith(imageUrl: resolvedImageUrl);
     final deckList = deckRegistry[card.deckId];
     if (deckList != null) {
-      deckList.add(card);
+      deckList.add(resolvedCard);
     }
   }
 
@@ -259,6 +269,28 @@ List<CardModel> _parseCards({required String raw, required DeckId deckId}) {
   _sortDeckCards(deckRegistry[DeckId.cups] ?? const [], cupsCardIds);
 
   return _getActiveDeckCards(deckId, deckRegistry);
+}
+
+String _responseSnippet(String body) {
+  if (body.isEmpty) {
+    return '';
+  }
+  return body.length <= 200 ? body : body.substring(0, 200);
+}
+
+String _resolveImageUrl(String rawUrl, String cardId, DeckId deckId) {
+  final trimmed = rawUrl.trim();
+  if (trimmed.isEmpty) {
+    return cardImageUrl(cardId, deckId: deckId);
+  }
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+    return trimmed;
+  }
+  final normalized = trimmed.replaceFirst(RegExp(r'^/+'), '');
+  if (normalized.startsWith('cards/')) {
+    return '${AssetsConfig.assetsBaseUrl}/$normalized';
+  }
+  return '${AssetsConfig.assetsBaseUrl}/$normalized';
 }
 
 void _sortDeckCards(List<CardModel> cards, List<String> order) {

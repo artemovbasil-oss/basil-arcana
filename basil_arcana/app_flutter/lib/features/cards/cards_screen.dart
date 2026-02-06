@@ -81,9 +81,13 @@ class _CardsScreenState extends ConsumerState<CardsScreen> {
             final cacheKey = repo.cardsCacheKey(locale);
             final debugInfo = DataLoadDebugInfo(
               assetsBaseUrl: AssetsConfig.assetsBaseUrl,
-              attemptedUrls: {
+              requests: {
                 'cards (${repo.cardsFileNameForLocale(locale)})':
-                    repo.lastAttemptedUrls[cacheKey] ?? '—',
+                    DataLoadRequestDebugInfo(
+                  url: repo.lastAttemptedUrls[cacheKey] ?? '—',
+                  statusCode: repo.lastStatusCodes[cacheKey],
+                  responseSnippet: repo.lastResponseBodies[cacheKey],
+                ),
               },
               lastError: repo.lastError,
             );

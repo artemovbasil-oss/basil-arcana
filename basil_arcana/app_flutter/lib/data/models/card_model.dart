@@ -75,6 +75,34 @@ class CardModel {
     this.videoUrl,
   });
 
+  CardModel copyWith({
+    String? id,
+    DeckId? deckId,
+    String? name,
+    List<String>? keywords,
+    CardMeaning? meaning,
+    String? detailedDescription,
+    String? funFact,
+    CardStats? stats,
+    String? videoFileName,
+    String? imageUrl,
+    String? videoUrl,
+  }) {
+    return CardModel(
+      id: id ?? this.id,
+      deckId: deckId ?? this.deckId,
+      name: name ?? this.name,
+      keywords: keywords ?? this.keywords,
+      meaning: meaning ?? this.meaning,
+      detailedDescription: detailedDescription ?? this.detailedDescription,
+      funFact: funFact ?? this.funFact,
+      stats: stats ?? this.stats,
+      videoFileName: videoFileName ?? this.videoFileName,
+      imageUrl: imageUrl ?? this.imageUrl,
+      videoUrl: videoUrl ?? this.videoUrl,
+    );
+  }
+
   factory CardModel.fromJson(Map<String, dynamic> json) {
     return CardModel(
       id: json['id'] as String,
@@ -86,7 +114,7 @@ class CardModel {
       detailedDescription: json['detailedDescription'] as String?,
       funFact: json['funFact'] as String?,
       stats: CardStats.fromJson(json['stats'] as Map<String, dynamic>?),
-      videoFileName: resolveCardVideoFileName(json['id'] as String),
+      videoFileName: _videoFileNameFromJson(json),
       imageUrl: json['imageUrl'] as String? ?? '',
       videoUrl: json['videoUrl'] as String?,
     );
@@ -109,7 +137,7 @@ class CardModel {
           json['detailedDescription'] as String?,
       funFact: json['fact'] as String? ?? json['funFact'] as String?,
       stats: CardStats.fromJson(json['stats'] as Map<String, dynamic>?),
-      videoFileName: resolveCardVideoFileName(id),
+      videoFileName: _videoFileNameFromJson(json),
       imageUrl: json['imageUrl'] as String? ?? '',
       videoUrl: json['videoUrl'] as String?,
     );
@@ -138,54 +166,40 @@ class CardModel {
           json['fact'] as String? ??
           json['funFact'] as String?,
       stats: CardStats.fromJson(json['stats'] as Map<String, dynamic>?),
-      videoFileName: resolveCardVideoFileName(id),
+      videoFileName: _videoFileNameFromJson(json),
       imageUrl: json['imageUrl'] as String? ?? '',
       videoUrl: json['videoUrl'] as String?,
     );
   }
 }
 
-const Map<String, String> _majorVideoSlugs = {
-  'major_00_fool': 'fool',
-  'major_01_magician': 'magician',
-  'major_02_high_priestess': 'high_priestess',
-  'major_03_empress': 'empress',
-  'major_04_emperor': 'emperor',
-  'major_05_hierophant': 'hierophant',
-  'major_06_lovers': 'lovers',
-  'major_07_chariot': 'chariot',
-  'major_08_strength': 'strength',
-  'major_09_hermit': 'hermit',
-  'major_10_wheel': 'wheel_of_fortune',
-  'major_11_justice': 'justice',
-  'major_12_hanged_man': 'hanged_man',
-  'major_13_death': 'death',
-  'major_14_temperance': 'temperance',
-  'major_15_devil': 'devil',
-  'major_16_tower': 'tower',
-  'major_17_star': 'star',
-  'major_18_moon': 'moon',
-  'major_19_sun': 'sun',
-  'major_20_judgement': 'judgement',
-  'major_21_world': 'world',
-};
-
 String? cardVideoUrl(CardModel card, String assetsBaseUrl) {
-  final normalizedId = canonicalCardId(card.id);
-  final majorSlug = _majorVideoSlugs[normalizedId];
-  if (majorSlug != null) {
-    return '$assetsBaseUrl/video/$majorSlug.mp4';
+  final fileName = card.videoFileName?.trim();
+  if (fileName != null && fileName.isNotEmpty) {
+    final normalized = normalizeVideoFileName(fileName);
+    return '$assetsBaseUrl/video/$normalized';
   }
-  final parts = normalizedId.split('_');
-  if (parts.length < 3) {
+  final explicitUrl = card.videoUrl?.trim();
+  if (explicitUrl == null || explicitUrl.isEmpty) {
     return null;
   }
-  final rank = parts.sublist(2).join('_');
-  const courtRanks = {'king', 'queen', 'knight', 'page'};
-  if (!courtRanks.contains(rank)) {
+  if (explicitUrl.startsWith('http://') || explicitUrl.startsWith('https://')) {
+    return explicitUrl;
+  }
+  final normalized = explicitUrl.replaceFirst(RegExp(r'^/+'), '');
+  return '$assetsBaseUrl/video/$normalized';
+}
+
+String? _videoFileNameFromJson(Map<String, dynamic> json) {
+  final raw = json['video'] ?? json['videoFileName'];
+  if (raw is! String) {
     return null;
   }
-  return '$assetsBaseUrl/video/${parts.first}_$rank.mp4';
+  final trimmed = raw.trim();
+  if (trimmed.isEmpty) {
+    return null;
+  }
+  return normalizeVideoFileName(trimmed);
 }
 
 class CardStats {

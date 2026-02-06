@@ -1,8 +1,6 @@
 import '../../data/models/deck_model.dart';
 import '../config/assets_config.dart';
 
-const String _spreadsBaseUrl = 'https://cdn.basilarcana.com';
-
 String cardImageUrl(
   String cardId, {
   DeckId deckId = DeckId.major,
@@ -34,7 +32,7 @@ String cardImageUrl(
 }
 
 String spreadsUrl(String languageCode) {
-  final base = _spreadsBaseUrl;
+  final base = AssetsConfig.assetsBaseUrl;
   final normalized = languageCode.trim().toLowerCase();
   final lang = switch (normalized) {
     'ru' => 'ru',

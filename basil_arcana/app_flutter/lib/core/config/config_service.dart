@@ -25,14 +25,14 @@ class ConfigService {
 
   static const String _assetsBaseUrlEnv = String.fromEnvironment(
     'ASSETS_BASE_URL',
-    defaultValue: _defaultAssetsBaseUrl,
+    defaultValue: '',
   );
 
   String _apiBaseUrl = _apiBaseUrlEnv;
   String _apiKey = _apiKeyEnv;
   String _assetsBaseUrl = _normalizeBaseUrl(
     _assetsBaseUrlEnv,
-    fallback: _defaultAssetsBaseUrl,
+    fallback: '',
   );
   String? _build;
   String? _lastError;
@@ -80,7 +80,7 @@ class ConfigService {
       if (runtimeApiKey is String) {
         _apiKey = runtimeApiKey.trim();
       }
-      if (runtimeAssetsBaseUrl is String) {
+      if (_assetsBaseUrlEnv.trim().isEmpty && runtimeAssetsBaseUrl is String) {
         _assetsBaseUrl = _normalizeBaseUrl(
           runtimeAssetsBaseUrl,
           fallback: _defaultAssetsBaseUrl,

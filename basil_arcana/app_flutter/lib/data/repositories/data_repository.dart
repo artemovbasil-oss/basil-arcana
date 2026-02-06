@@ -21,6 +21,8 @@ class DataRepository {
   final Map<String, DateTime> _lastFetchTimes = {};
   final Map<String, DateTime> _lastCacheTimes = {};
   final Map<String, String> _lastAttemptedUrls = {};
+  final Map<String, int> _lastStatusCodes = {};
+  final Map<String, String> _lastResponseBodies = {};
   SharedPreferences? _preferences;
   String? _lastError;
 
@@ -34,6 +36,10 @@ class DataRepository {
       UnmodifiableMapView(_lastCacheTimes);
   UnmodifiableMapView<String, String> get lastAttemptedUrls =>
       UnmodifiableMapView(_lastAttemptedUrls);
+  UnmodifiableMapView<String, int> get lastStatusCodes =>
+      UnmodifiableMapView(_lastStatusCodes);
+  UnmodifiableMapView<String, String> get lastResponseBodies =>
+      UnmodifiableMapView(_lastResponseBodies);
   String? get lastError => _lastError;
 
   String get assetsBaseUrl => AssetsConfig.assetsBaseUrl;
@@ -116,18 +122,24 @@ class DataRepository {
   }) async {
     _lastAttemptedUrls[cacheKey] = uri.toString();
     try {
-      final response = await _client.get(
-        uri,
-        headers: const {'Cache-Control': 'no-cache'},
-      );
+      final response = await _client.get(uri);
+      _lastStatusCodes[cacheKey] = response.statusCode;
+      _lastResponseBodies[cacheKey] = _responseSnippet(response.body);
       if (response.statusCode < 200 || response.statusCode >= 300) {
         throw DataLoadException(
           'HTTP ${response.statusCode}',
           cacheKey: cacheKey,
         );
       }
-      if (!validator(jsonDecode(response.body))) {
-        throw DataLoadException('Invalid JSON payload', cacheKey: cacheKey);
+      try {
+        if (!validator(jsonDecode(response.body))) {
+          throw DataLoadException('Invalid JSON payload', cacheKey: cacheKey);
+        }
+      } on FormatException catch (error) {
+        throw DataLoadException(
+          'Invalid JSON payload: ${error.message}',
+          cacheKey: cacheKey,
+        );
       }
       await _storeCache(cacheKey, response.body);
       _lastFetchTimes[cacheKey] = DateTime.now();
@@ -163,10 +175,9 @@ class DataRepository {
   }) async {
     _lastAttemptedUrls[cacheKey] = uri.toString();
     try {
-      final response = await _client.get(
-        uri,
-        headers: const {'Cache-Control': 'no-cache'},
-      );
+      final response = await _client.get(uri);
+      _lastStatusCodes[cacheKey] = response.statusCode;
+      _lastResponseBodies[cacheKey] = _responseSnippet(response.body);
       if (response.statusCode == 404) {
         return await _readCache(cacheKey);
       }
@@ -242,6 +253,13 @@ class DataRepository {
     _lastCacheTimes[cacheKey] = DateTime.now();
     return _parseSpreads(raw: raw);
   }
+}
+
+String _responseSnippet(String body) {
+  if (body.isEmpty) {
+    return '';
+  }
+  return body.length <= 200 ? body : body.substring(0, 200);
 }
 
 class DataLoadException implements Exception {

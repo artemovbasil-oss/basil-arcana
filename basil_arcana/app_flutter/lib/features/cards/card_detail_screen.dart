@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
+import '../../core/config/assets_config.dart';
 import '../../core/telegram/telegram_web_app.dart';
 import '../../core/widgets/data_load_error.dart';
 import '../../core/widgets/tarot_asset_widgets.dart';
@@ -36,6 +37,21 @@ class CardDetailScreen extends ConsumerWidget {
       card,
     );
     if (resolvedCard == null) {
+      final repo = ref.read(cardsRepositoryProvider);
+      final locale = ref.read(localeProvider);
+      final cacheKey = repo.cardsCacheKey(locale);
+      final debugInfo = DataLoadDebugInfo(
+        assetsBaseUrl: AssetsConfig.assetsBaseUrl,
+        requests: {
+          'cards (${repo.cardsFileNameForLocale(locale)})':
+              DataLoadRequestDebugInfo(
+            url: repo.lastAttemptedUrls[cacheKey] ?? '—',
+            statusCode: repo.lastStatusCodes[cacheKey],
+            responseSnippet: repo.lastResponseBodies[cacheKey],
+          ),
+        },
+        lastError: repo.lastError,
+      );
       return Scaffold(
         appBar: useTelegramAppBar
             ? null
@@ -52,6 +68,7 @@ class CardDetailScreen extends ConsumerWidget {
                     message: l10n.cardsLoadError,
                     retryLabel: l10n.dataLoadRetry,
                     onRetry: () => ref.invalidate(cardsProvider),
+                    debugInfo: debugInfo,
                   ),
           ),
         ),
