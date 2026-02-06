@@ -1,0 +1,7 @@
+{
+  "name": "basil-arcana-tools",
+  "private": true,
+  "scripts": {
+    "gen:spreads": "dart run app_flutter/tools/generate_spreads.dart"
+  }
+}
