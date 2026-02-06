@@ -5,6 +5,8 @@ import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
 import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/app_buttons.dart';
+import '../../core/widgets/app_top_bar.dart';
+import '../../core/navigation/app_route_config.dart';
 import '../../data/models/app_enums.dart';
 import '../../data/models/card_model.dart';
 import '../../data/models/deck_model.dart';
@@ -26,10 +28,10 @@ class SettingsScreen extends ConsumerWidget {
     final isDirty = settingsState.isDirty;
     final bottomPadding = isDirty ? 120.0 : 32.0;
     return Scaffold(
-      appBar: AppBar(
+      appBar: buildTopBar(
+        context,
         title: Text(l10n.settingsTitle),
-        leading: Navigator.canPop(context) ? const BackButton() : null,
-        automaticallyImplyLeading: Navigator.canPop(context),
+        showBack: true,
       ),
       bottomNavigationBar: AnimatedSwitcher(
         duration: const Duration(milliseconds: 220),
@@ -46,7 +48,10 @@ class SettingsScreen extends ConsumerWidget {
                         return;
                       }
                       Navigator.of(context).pushAndRemoveUntil(
-                        MaterialPageRoute(builder: (_) => const HomeScreen()),
+                        MaterialPageRoute(
+                          settings: appRouteSettings(showBackButton: false),
+                          builder: (_) => const HomeScreen(),
+                        ),
                         (route) => false,
                       );
                     },

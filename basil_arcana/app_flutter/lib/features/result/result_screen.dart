@@ -19,6 +19,8 @@ import '../../data/models/spread_model.dart';
 import '../../data/repositories/ai_repository.dart';
 import '../../state/reading_flow_controller.dart';
 import '../../state/providers.dart';
+import '../../core/widgets/app_top_bar.dart';
+import '../../core/navigation/app_route_config.dart';
 import '../cards/card_detail_screen.dart';
 import 'widgets/chat_widgets.dart';
 import 'widgets/oracle_waiting_screen.dart';
@@ -116,10 +118,10 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
           : _statusMessage(state, l10n);
       final canRetry = !state.isLoading && state.aiErrorType != null;
       return Scaffold(
-        appBar: AppBar(
+        appBar: buildTopBar(
+          context,
           title: Text(l10n.resultTitle),
-          leading: Navigator.canPop(context) ? const BackButton() : null,
-          automaticallyImplyLeading: Navigator.canPop(context),
+          showBack: true,
         ),
         backgroundColor: Theme.of(context).colorScheme.surface,
         body: SafeArea(
@@ -169,10 +171,10 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
         _ActionBar.baseHeight +
         (_sequenceComplete ? _ActionBar.extraHeight : 0);
     return Scaffold(
-      appBar: AppBar(
+      appBar: buildTopBar(
+        context,
         title: Text(l10n.resultTitle),
-        leading: Navigator.canPop(context) ? const BackButton() : null,
-        automaticallyImplyLeading: Navigator.canPop(context),
+        showBack: true,
       ),
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
@@ -462,6 +464,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
+                      settings: appRouteSettings(showBackButton: true),
                       builder: (_) => CardDetailScreen(
                         cardId: drawn.cardId,
                       ),
@@ -778,10 +781,10 @@ class _OpenInTelegramScreen extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(
+      appBar: buildTopBar(
+        context,
         title: Text(l10n.resultTitle),
-        leading: Navigator.canPop(context) ? const BackButton() : null,
-        automaticallyImplyLeading: Navigator.canPop(context),
+        showBack: true,
       ),
       backgroundColor: colorScheme.surface,
       body: SafeArea(

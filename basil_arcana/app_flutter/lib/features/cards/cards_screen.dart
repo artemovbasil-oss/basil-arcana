@@ -4,6 +4,8 @@ import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
 import '../../core/config/assets_config.dart';
 import '../../core/config/diagnostics.dart';
+import '../../core/navigation/app_route_config.dart';
+import '../../core/widgets/app_top_bar.dart';
 import '../../core/widgets/data_load_error.dart';
 import '../../core/widgets/tarot_asset_widgets.dart';
 import '../../data/models/card_model.dart';
@@ -26,10 +28,10 @@ class _CardsScreenState extends ConsumerState<CardsScreen> {
     final l10n = AppLocalizations.of(context)!;
     final statsRepository = ref.watch(cardStatsRepositoryProvider);
     return Scaffold(
-      appBar: AppBar(
+      appBar: buildTopBar(
+        context,
         title: Text(l10n.cardsTitle),
-        leading: Navigator.canPop(context) ? const BackButton() : null,
-        automaticallyImplyLeading: Navigator.canPop(context),
+        showBack: true,
       ),
       body: SafeArea(
         top: false,
@@ -65,6 +67,7 @@ class _CardsScreenState extends ConsumerState<CardsScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
+                            settings: appRouteSettings(showBackButton: true),
                             builder: (_) => CardDetailScreen(card: card),
                           ),
                         );

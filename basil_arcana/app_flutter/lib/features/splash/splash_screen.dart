@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../core/config/app_config.dart';
+import '../../core/navigation/app_route_config.dart';
 import '../../core/telegram/telegram_web_app.dart';
 import '../home/home_screen.dart';
 
@@ -37,7 +38,10 @@ class _SplashScreenState extends State<SplashScreen> {
           return;
         }
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const HomeScreen()),
+          MaterialPageRoute(
+            settings: appRouteSettings(showBackButton: false),
+            builder: (_) => const HomeScreen(),
+          ),
         );
       });
     }

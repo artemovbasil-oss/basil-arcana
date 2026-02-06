@@ -7,7 +7,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
 import '../../core/widgets/app_buttons.dart';
+import '../../core/widgets/app_top_bar.dart';
 import '../../core/widgets/tarot_asset_widgets.dart';
+import '../../core/navigation/app_route_config.dart';
 import '../../data/models/app_enums.dart';
 import '../../data/models/deck_model.dart';
 import '../../state/reading_flow_controller.dart';
@@ -106,10 +108,10 @@ class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
         state.spreadType?.cardCount ?? state.spread?.positions.length ?? 0;
     final showGlow = state.isLoading && hasDrawnCards;
     return Scaffold(
-      appBar: AppBar(
+      appBar: buildTopBar(
+        context,
         title: Text(l10n.shuffleTitle),
-        leading: Navigator.canPop(context) ? const BackButton() : null,
-        automaticallyImplyLeading: Navigator.canPop(context),
+        showBack: true,
       ),
       backgroundColor: colorScheme.background,
       body: SafeArea(
@@ -189,6 +191,8 @@ class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
                                   Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(
+                                      settings:
+                                          appRouteSettings(showBackButton: true),
                                       builder: (_) => const ResultScreen(),
                                     ),
                                   );

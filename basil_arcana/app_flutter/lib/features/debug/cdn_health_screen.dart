@@ -5,6 +5,7 @@ import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 import '../../core/config/assets_config.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/app_buttons.dart';
+import '../../core/widgets/app_top_bar.dart';
 import '../../state/providers.dart';
 
 class CdnHealthScreen extends ConsumerStatefulWidget {
@@ -82,7 +83,11 @@ class _CdnHealthScreenState extends ConsumerState<CdnHealthScreen> {
     };
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.cdnHealthTitle)),
+      appBar: buildTopBar(
+        context,
+        title: Text(l10n.cdnHealthTitle),
+        showBack: true,
+      ),
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
