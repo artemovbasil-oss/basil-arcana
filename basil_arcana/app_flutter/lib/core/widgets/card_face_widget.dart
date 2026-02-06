@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
 import 'tarot_asset_widgets.dart';
+import '../theme/app_text_styles.dart';
+import 'app_buttons.dart';
 import '../../data/models/card_model.dart';
 import '../../state/providers.dart';
 
@@ -85,7 +87,7 @@ class CardFaceWidget extends ConsumerWidget {
           ],
           Text(
             cardName,
-            style: Theme.of(context).textTheme.titleLarge,
+            style: AppTextStyles.title(context),
           ),
           const SizedBox(height: 8),
           Wrap(
@@ -97,7 +99,8 @@ class CardFaceWidget extends ConsumerWidget {
                     label: Text(keyword),
                     backgroundColor: colorScheme.surface,
                     side: BorderSide(color: colorScheme.outlineVariant),
-                    labelStyle: TextStyle(color: colorScheme.onSurface),
+                    labelStyle: AppTextStyles.caption(context)
+                        .copyWith(color: colorScheme.onSurface),
                   ),
                 )
                 .toList(),
@@ -106,9 +109,9 @@ class CardFaceWidget extends ConsumerWidget {
             const SizedBox(height: 12),
             Align(
               alignment: Alignment.centerLeft,
-              child: TextButton(
+              child: AppSmallButton(
                 onPressed: onCardTap,
-                child: Text(l10n.cardsDetailTitle),
+                label: l10n.cardsDetailTitle,
               ),
             ),
           ],

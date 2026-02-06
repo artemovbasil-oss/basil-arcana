@@ -13,6 +13,7 @@ import '../data/models/card_model.dart';
 import '../data/models/drawn_card_model.dart';
 import '../data/models/reading_model.dart';
 import '../data/models/spread_model.dart';
+import '../data/models/app_enums.dart';
 import '../data/repositories/ai_repository.dart';
 import '../data/repositories/readings_repository.dart';
 import 'providers.dart';
@@ -22,6 +23,7 @@ enum DetailsStatus { idle, loading, success, error }
 class ReadingFlowState {
   final String question;
   final SpreadModel? spread;
+  final SpreadType? spreadType;
   final List<DrawnCardModel> drawnCards;
   final AiResultModel? aiResult;
   final AiResultModel? deepResult;
@@ -35,6 +37,7 @@ class ReadingFlowState {
   final String? deepErrorMessage;
   final bool aiUsed;
   final bool requiresTelegram;
+  final bool isSaved;
   final AiErrorType? aiErrorType;
   final AiErrorType? deepErrorType;
   final int? aiErrorStatusCode;
@@ -43,6 +46,7 @@ class ReadingFlowState {
   const ReadingFlowState({
     required this.question,
     required this.spread,
+    required this.spreadType,
     required this.drawnCards,
     required this.aiResult,
     required this.deepResult,
@@ -56,6 +60,7 @@ class ReadingFlowState {
     required this.deepErrorMessage,
     required this.aiUsed,
     required this.requiresTelegram,
+    required this.isSaved,
     required this.aiErrorType,
     required this.deepErrorType,
     required this.aiErrorStatusCode,
@@ -66,6 +71,7 @@ class ReadingFlowState {
     return const ReadingFlowState(
       question: '',
       spread: null,
+      spreadType: null,
       drawnCards: [],
       aiResult: null,
       deepResult: null,
@@ -79,6 +85,7 @@ class ReadingFlowState {
       deepErrorMessage: null,
       aiUsed: true,
       requiresTelegram: false,
+      isSaved: false,
       aiErrorType: null,
       deepErrorType: null,
       aiErrorStatusCode: null,
@@ -89,6 +96,7 @@ class ReadingFlowState {
   ReadingFlowState copyWith({
     String? question,
     SpreadModel? spread,
+    SpreadType? spreadType,
     List<DrawnCardModel>? drawnCards,
     AiResultModel? aiResult,
     AiResultModel? deepResult,
@@ -102,6 +110,7 @@ class ReadingFlowState {
     String? deepErrorMessage,
     bool? aiUsed,
     bool? requiresTelegram,
+    bool? isSaved,
     AiErrorType? aiErrorType,
     AiErrorType? deepErrorType,
     int? aiErrorStatusCode,
@@ -112,6 +121,7 @@ class ReadingFlowState {
     return ReadingFlowState(
       question: question ?? this.question,
       spread: spread ?? this.spread,
+      spreadType: spreadType ?? this.spreadType,
       drawnCards: drawnCards ?? this.drawnCards,
       aiResult: aiResult ?? this.aiResult,
       deepResult: deepResult ?? this.deepResult,
@@ -126,6 +136,7 @@ class ReadingFlowState {
           clearDeepError ? null : (deepErrorMessage ?? this.deepErrorMessage),
       aiUsed: aiUsed ?? this.aiUsed,
       requiresTelegram: requiresTelegram ?? this.requiresTelegram,
+      isSaved: isSaved ?? this.isSaved,
       aiErrorType: clearError ? null : (aiErrorType ?? this.aiErrorType),
       deepErrorType:
           clearDeepError ? null : (deepErrorType ?? this.deepErrorType),
@@ -163,9 +174,11 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
     state = state.copyWith(question: question, clearError: true);
   }
 
-  void selectSpread(SpreadModel spread) {
+  void selectSpread(SpreadModel spread, SpreadType spreadType) {
+    final normalizedSpread = _normalizeSpread(spread, spreadType);
     state = state.copyWith(
-      spread: spread,
+      spread: normalizedSpread,
+      spreadType: spreadType,
       drawnCards: [],
       aiResult: null,
       deepResult: null,
@@ -175,6 +188,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       showDetailsCta: false,
       isDeepLoading: false,
       requiresTelegram: false,
+      isSaved: false,
       deepErrorType: null,
       deepErrorMessage: null,
       clearDeepError: true,
@@ -227,6 +241,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
     if (spread == null) {
       return;
     }
+    state = state.copyWith(isSaved: false);
     final l10n = _l10n();
 
     final drawn = drawCards(spread.positions.length, cards);
@@ -612,11 +627,11 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
     );
   }
 
-  Future<void> saveReading() async {
+  Future<bool> saveReading() async {
     final spread = state.spread;
     final aiResult = state.deepResult ?? state.aiResult;
     if (spread == null || aiResult == null) {
-      return;
+      return false;
     }
 
     final readingsRepository = ref.read(readingsRepositoryProvider);
@@ -636,6 +651,8 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       requestId: aiResult.requestId,
     );
     await readingsRepository.saveReading(reading);
+    state = state.copyWith(isSaved: true);
+    return true;
   }
 
   Future<void> runSmokeTest() async {
@@ -649,5 +666,23 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
     for (final drawn in drawnCards) {
       await statsRepository.increment(drawn.cardId);
     }
+  }
+
+  SpreadModel _normalizeSpread(SpreadModel spread, SpreadType spreadType) {
+    final count = spreadType.cardCount;
+    if (spread.positions.length == count) {
+      return spread;
+    }
+    final positions = spread.positions.isNotEmpty
+        ? spread.positions.take(count).toList()
+        : [
+            const SpreadPosition(id: 'focus', title: 'Focus'),
+          ];
+    return SpreadModel(
+      id: spread.id,
+      name: spread.name,
+      positions: positions,
+      cardsCount: count,
+    );
   }
 }

@@ -156,6 +156,7 @@
   "oracleTimeoutBody": "Иногда ясности нужен ещё один вдох.",
   "actionCancel": "Отмена",
   "actionTryAgain": "Попробовать снова",
+  "actionApply": "Применить",
   "historyTitle": "История раскладов",
   "historyEmpty": "Сохраненных раскладов пока нет.",
   "historyDetailTitle": "Детали расклада",

@@ -82,7 +82,7 @@ class _SplashScreenState extends State<SplashScreen>
                     scale: _scale,
                     child: SizedBox.expand(
                       child: Image.network(
-                        deckPreviewImageUrl(DeckId.major),
+                        deckPreviewImageUrl(DeckType.major),
                         fit: BoxFit.cover,
                         filterQuality: FilterQuality.high,
                       ),

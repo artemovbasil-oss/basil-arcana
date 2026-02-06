@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
 import '../../core/config/assets_config.dart';
+import '../../core/theme/app_text_styles.dart';
+import '../../core/widgets/app_buttons.dart';
 import '../../state/providers.dart';
 
 class CdnHealthScreen extends ConsumerStatefulWidget {
@@ -131,21 +133,15 @@ class _CdnHealthScreenState extends ConsumerState<CdnHealthScreen> {
             value: _formatTimestamp(lastCache[videoKey]),
           ),
           const SizedBox(height: 20),
-          FilledButton(
+          AppPrimaryButton(
             onPressed: _isLoading ? null : _runTest,
-            child: _isLoading
-                ? const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : Text(l10n.cdnHealthTestFetch),
+            label: l10n.cdnHealthTestFetch,
           ),
           const SizedBox(height: 12),
           Center(
             child: Text(
               statusText,
-              style: Theme.of(context).textTheme.bodyMedium,
+              style: AppTextStyles.body(context),
             ),
           ),
         ],

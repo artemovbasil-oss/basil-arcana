@@ -20,11 +20,11 @@ class CardMediaAssets {
 
 class CardMediaResolver {
   const CardMediaResolver({
-    this.deckId = DeckId.major,
+    this.deckId = DeckType.major,
     this.availableVideoFiles,
   });
 
-  final DeckId deckId;
+  final DeckType deckId;
   final Set<String>? availableVideoFiles;
 
   CardMediaAssets resolve(
@@ -97,7 +97,7 @@ class CardAssetImage extends ConsumerWidget {
               (card) => card.id == cardId,
               orElse: () => const CardModel(
                 id: '',
-                deckId: DeckId.major,
+                deckId: DeckType.major,
                 name: '',
                 keywords: [],
                 meaning: CardMeaning(
@@ -539,9 +539,9 @@ class DeckCoverBack extends ConsumerWidget {
           fit: BoxFit.cover,
           filterQuality: FilterQuality.high,
           errorBuilder: (context, error, stackTrace) {
-            if (deckId != DeckId.major) {
+            if (deckId != DeckType.major) {
               return Image.network(
-                deckCoverAssetPath(DeckId.major),
+                deckCoverAssetPath(DeckType.major),
                 width: width,
                 height: height,
                 fit: BoxFit.cover,

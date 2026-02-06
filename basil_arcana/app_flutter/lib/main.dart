@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app.dart';
 import 'core/config/app_config.dart';
+import 'core/theme/app_text_styles.dart';
+import 'core/widgets/app_buttons.dart';
 import 'core/storage/hive_storage.dart';
 
 Future<void> main() async {
@@ -43,31 +45,26 @@ class _BootstrapErrorApp extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text(
+                Text(
                   'Unable to start Basil’s Arcana',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: AppTextStyles.title(context)
+                      .copyWith(color: Colors.white),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 12),
                 Text(
                   error.toString(),
-                  style: const TextStyle(color: Colors.white70),
+                  style: AppTextStyles.body(context)
+                      .copyWith(color: Colors.white70),
                   textAlign: TextAlign.center,
                 ),
                 if (kIsWeb) ...[
                   const SizedBox(height: 16),
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton(
-                      onPressed: () async {
-                        await HiveStorage.resetAndReload();
-                      },
-                      child: const Text('Reset data'),
-                    ),
+                  AppPrimaryButton(
+                    onPressed: () async {
+                      await HiveStorage.resetAndReload();
+                    },
+                    label: 'Reset data',
                   ),
                 ],
                 const SizedBox(height: 16),
@@ -75,9 +72,8 @@ class _BootstrapErrorApp extends StatelessWidget {
                   child: SingleChildScrollView(
                     child: Text(
                       stackTrace.toString(),
-                      style: const TextStyle(
+                      style: AppTextStyles.caption(context).copyWith(
                         color: Colors.white38,
-                        fontSize: 12,
                       ),
                     ),
                   ),

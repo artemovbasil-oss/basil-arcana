@@ -1,4 +1,4 @@
-enum DeckId { all, major, wands, swords, pentacles, cups }
+enum DeckType { all, major, wands, swords, pentacles, cups }
 
 const Map<String, String> _cardIdAliases = {
   'major_10_wheel_of_fortune': 'major_10_wheel',
@@ -101,13 +101,13 @@ const List<String> cupsCardIds = [
   'cups_13_ace',
 ];
 
-const Map<DeckId, String> deckStorageValues = {
-  DeckId.all: 'all',
-  DeckId.major: 'major',
-  DeckId.wands: 'wands',
-  DeckId.swords: 'swords',
-  DeckId.pentacles: 'pentacles',
-  DeckId.cups: 'cups',
+const Map<DeckType, String> deckStorageValues = {
+  DeckType.all: 'all',
+  DeckType.major: 'major',
+  DeckType.wands: 'wands',
+  DeckType.swords: 'swords',
+  DeckType.pentacles: 'pentacles',
+  DeckType.cups: 'cups',
 };
 
 String canonicalCardId(String rawId) {
@@ -119,32 +119,32 @@ String canonicalCardId(String rawId) {
   return _cardIdAliases[normalized] ?? normalized;
 }
 
-DeckId deckIdFromStorage(String? value) {
+DeckType deckIdFromStorage(String? value) {
   for (final entry in deckStorageValues.entries) {
     if (entry.value == value) {
       return entry.key;
     }
   }
-  return DeckId.all;
+  return DeckType.all;
 }
 
-DeckId? deckIdFromString(String? value) {
+DeckType? deckIdFromString(String? value) {
   if (value == null) {
     return null;
   }
   switch (value.trim().toLowerCase()) {
     case 'major':
-      return DeckId.major;
+      return DeckType.major;
     case 'wands':
-      return DeckId.wands;
+      return DeckType.wands;
     case 'swords':
-      return DeckId.swords;
+      return DeckType.swords;
     case 'pentacles':
-      return DeckId.pentacles;
+      return DeckType.pentacles;
     case 'cups':
-      return DeckId.cups;
+      return DeckType.cups;
     case 'all':
-      return DeckId.all;
+      return DeckType.all;
   }
   return null;
 }

@@ -5,6 +5,8 @@ import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 import '../../core/assets/asset_paths.dart';
 import '../../core/config/config_service.dart';
 import '../../core/config/diagnostics.dart';
+import '../../core/theme/app_text_styles.dart';
+import '../../core/widgets/app_buttons.dart';
 import '../../state/providers.dart';
 import '../history/history_screen.dart';
 import '../cards/cards_screen.dart';
@@ -153,9 +155,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ),
           actions: [
-            TextButton(
+            AppSmallButton(
               onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text('Close'),
+              label: 'Close',
             ),
           ],
         );
@@ -209,12 +211,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 : null,
                             child: Text(
                               l10n.appTitle,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleLarge
-                                  ?.copyWith(
-                                    color: colorScheme.onSurface,
-                                  ),
+                              style: AppTextStyles.title(context)
+                                  .copyWith(color: colorScheme.onSurface),
                             ),
                           ),
                         ),
@@ -382,7 +380,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           curve: Curves.easeOut,
           padding: EdgeInsets.fromLTRB(20, 12, 20, 20 + bottomInset),
           child: _PrimaryActionButton(
-            enabled: true,
             isActive: hasQuestion,
             primaryColor: primaryColor,
             disabledColor: disabledColor,
@@ -539,7 +536,6 @@ class _HomeNavCard extends StatelessWidget {
 
 class _PrimaryActionButton extends StatelessWidget {
   const _PrimaryActionButton({
-    required this.enabled,
     required this.isActive,
     required this.primaryColor,
     required this.disabledColor,
@@ -547,7 +543,6 @@ class _PrimaryActionButton extends StatelessWidget {
     this.onPressed,
   });
 
-  final bool enabled;
   final bool isActive;
   final Color primaryColor;
   final Color disabledColor;
@@ -556,39 +551,11 @@ class _PrimaryActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      decoration: BoxDecoration(
-        color: isActive ? primaryColor : disabledColor,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: isActive
-            ? [
-                BoxShadow(
-                  color: primaryColor.withOpacity(0.35),
-                  blurRadius: 20,
-                  offset: const Offset(0, 8),
-                ),
-              ]
-            : null,
-      ),
-      child: FilledButton(
-        style: FilledButton.styleFrom(
-          backgroundColor: Colors.transparent,
-          shadowColor: Colors.transparent,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18),
-          ),
-        ),
-        onPressed: enabled ? onPressed : null,
-        child: Text(
-          label,
-          style: Theme.of(context)
-              .textTheme
-              .titleMedium
-              ?.copyWith(color: Colors.white),
-        ),
-      ),
+    return AppPrimaryButton(
+      label: label,
+      onPressed: onPressed,
+      backgroundColor: isActive ? primaryColor : disabledColor,
+      padding: const EdgeInsets.symmetric(vertical: 16),
     );
   }
 }

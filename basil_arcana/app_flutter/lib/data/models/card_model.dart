@@ -50,7 +50,7 @@ class CardMeaning {
 
 class CardModel {
   final String id;
-  final DeckId deckId;
+  final DeckType deckId;
   final String name;
   final List<String> keywords;
   final CardMeaning meaning;
@@ -77,7 +77,7 @@ class CardModel {
 
   CardModel copyWith({
     String? id,
-    DeckId? deckId,
+    DeckType? deckId,
     String? name,
     List<String>? keywords,
     CardMeaning? meaning,
@@ -228,21 +228,21 @@ class CardStats {
   }
 }
 
-DeckId _deckIdFromCardId(String id) {
+DeckType _deckIdFromCardId(String id) {
   final normalized = canonicalCardId(id);
   if (normalized.startsWith('wands_')) {
-    return DeckId.wands;
+    return DeckType.wands;
   }
   if (normalized.startsWith('swords_')) {
-    return DeckId.swords;
+    return DeckType.swords;
   }
   if (normalized.startsWith('pentacles_')) {
-    return DeckId.pentacles;
+    return DeckType.pentacles;
   }
   if (normalized.startsWith('cups_')) {
-    return DeckId.cups;
+    return DeckType.cups;
   }
-  return DeckId.major;
+  return DeckType.major;
 }
 
 class CardMeaningAdapter extends TypeAdapter<CardMeaning> {

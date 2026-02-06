@@ -94,9 +94,14 @@ ThemeData buildAppTheme() {
       thickness: 1,
     ),
     textTheme: const TextTheme(
-      headlineSmall: TextStyle(fontWeight: FontWeight.w600),
-      titleLarge: TextStyle(fontWeight: FontWeight.w600),
-      titleMedium: TextStyle(fontWeight: FontWeight.w600),
+      headlineSmall: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+      titleLarge: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+      titleMedium: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+      bodyMedium: TextStyle(fontSize: 14, height: 1.4),
+      bodySmall: TextStyle(fontSize: 12, height: 1.3),
+      labelLarge: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+      labelMedium: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+      labelSmall: TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
     ),
   );
 }

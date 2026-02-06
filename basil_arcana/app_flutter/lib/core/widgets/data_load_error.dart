@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../config/diagnostics.dart';
+import '../theme/app_text_styles.dart';
+import 'app_buttons.dart';
 
 class DataLoadRequestDebugInfo {
   const DataLoadRequestDebugInfo({
@@ -75,30 +77,24 @@ class DataLoadError extends StatelessWidget {
           Text(
             title,
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.titleLarge,
+            style: AppTextStyles.title(context),
           ),
           const SizedBox(height: 8),
           Text(
             message,
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium,
+            style: AppTextStyles.body(context),
           ),
           const SizedBox(height: 20),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton(
-              onPressed: onRetry,
-              child: Text(retryLabel),
-            ),
+          AppPrimaryButton(
+            onPressed: onRetry,
+            label: retryLabel,
           ),
           if (secondaryLabel != null && onSecondary != null) ...[
             const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton(
-                onPressed: onSecondary,
-                child: Text(secondaryLabel!),
-              ),
+            AppGhostButton(
+              onPressed: onSecondary,
+              label: secondaryLabel!,
             ),
           ],
           if (kShowDiagnostics && debugInfo != null) ...[

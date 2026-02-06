@@ -6,7 +6,9 @@ import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
 import '../../core/config/assets_config.dart';
 import '../../core/config/diagnostics.dart';
+import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/data_load_error.dart';
+import '../../data/models/app_enums.dart';
 import '../../data/models/spread_model.dart';
 import '../../state/providers.dart';
 import '../shuffle/shuffle_screen.dart';
@@ -29,8 +31,16 @@ class SpreadScreen extends ConsumerWidget {
         top: false,
         child: spreadsAsync.when(
           data: (spreads) {
-            final oneCardSpread = _findSpread(spreads, 1);
-            final threeCardSpread = _findSpread(spreads, 3, fallbackIndex: 1);
+            final oneCardSpread = _resolveSpreadByType(
+              spreads,
+              SpreadType.one,
+              l10n: l10n,
+            );
+            final threeCardSpread = _resolveSpreadByType(
+              spreads,
+              SpreadType.three,
+              l10n: l10n,
+            );
 
             return Padding(
               padding: const EdgeInsets.all(20),
@@ -40,6 +50,7 @@ class SpreadScreen extends ConsumerWidget {
                     Expanded(
                       child: _SpreadOptionCard(
                         spread: oneCardSpread,
+                        spreadType: SpreadType.one,
                         title: l10n.spreadOneCardTitle,
                         subtitle: l10n.spreadOneCardSubtitle,
                         animation:
@@ -52,6 +63,7 @@ class SpreadScreen extends ConsumerWidget {
                     Expanded(
                       child: _SpreadOptionCard(
                         spread: threeCardSpread,
+                        spreadType: SpreadType.three,
                         title: l10n.spreadThreeCardTitle,
                         subtitle: l10n.spreadThreeCardSubtitle,
                         animation: const SpreadIconDeck(
@@ -125,30 +137,28 @@ class SpreadScreen extends ConsumerWidget {
 
 SpreadModel? _findSpread(
   List<SpreadModel> spreads,
-  int count, {
-  int fallbackIndex = 0,
-}) {
+  int count,
+) {
   for (final spread in spreads) {
-    if (spread.positions.length == count) {
+    final cardsCount = spread.cardsCount ?? spread.positions.length;
+    if (cardsCount == count) {
       return spread;
     }
   }
-  if (spreads.isEmpty) {
-    return null;
-  }
-  final index = fallbackIndex < spreads.length ? fallbackIndex : 0;
-  return spreads[index];
+  return null;
 }
 
 class _SpreadOptionCard extends ConsumerWidget {
   const _SpreadOptionCard({
     required this.spread,
+    required this.spreadType,
     required this.title,
     required this.subtitle,
     required this.animation,
   });
 
   final SpreadModel spread;
+  final SpreadType spreadType;
   final String title;
   final String subtitle;
   final Widget animation;
@@ -160,7 +170,9 @@ class _SpreadOptionCard extends ConsumerWidget {
     return InkWell(
       borderRadius: BorderRadius.circular(26),
       onTap: () {
-        ref.read(readingFlowControllerProvider.notifier).selectSpread(spread);
+        ref
+            .read(readingFlowControllerProvider.notifier)
+            .selectSpread(spread, spreadType);
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const ShuffleScreen()),
@@ -193,15 +205,13 @@ class _SpreadOptionCard extends ConsumerWidget {
                   children: [
                     Text(
                       title,
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        color: theme.colorScheme.onSurface,
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: AppTextStyles.title(context)
+                          .copyWith(color: theme.colorScheme.onSurface),
                     ),
                     const SizedBox(height: 6),
                     Text(
                       subtitle,
-                      style: theme.textTheme.bodySmall?.copyWith(
+                      style: AppTextStyles.body(context).copyWith(
                         color: theme.colorScheme.onSurface.withOpacity(0.7),
                         height: 1.35,
                       ),
@@ -221,6 +231,40 @@ class _SpreadOptionCard extends ConsumerWidget {
       ),
     );
   }
+}
+
+SpreadModel? _resolveSpreadByType(
+  List<SpreadModel> spreads,
+  SpreadType spreadType, {
+  required AppLocalizations l10n,
+}) {
+  final desiredCount = spreadType.cardCount;
+  final directMatch = _findSpread(spreads, desiredCount);
+  if (directMatch != null) {
+    return directMatch;
+  }
+  if (spreads.isEmpty) {
+    return null;
+  }
+  final fallback = spreads.first;
+  final fallbackPositions = fallback.positions.isNotEmpty
+      ? fallback.positions.take(desiredCount).toList()
+      : [
+          SpreadPosition(
+            id: spreadType == SpreadType.one ? 'focus' : 'past',
+            title: spreadType == SpreadType.one
+                ? l10n.spreadOneCardTitle
+                : l10n.spreadThreeCardTitle,
+          ),
+        ];
+  return SpreadModel(
+    id: spreadType == SpreadType.one ? 'one_card' : fallback.id,
+    name: spreadType == SpreadType.one
+        ? l10n.spreadOneCardTitle
+        : fallback.name,
+    positions: fallbackPositions,
+    cardsCount: desiredCount,
+  );
 }
 
 enum SpreadIconMode { oneCard, threeCards }
