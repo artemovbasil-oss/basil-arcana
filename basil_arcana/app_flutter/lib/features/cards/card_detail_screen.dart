@@ -88,10 +88,9 @@ class CardDetailScreen extends ConsumerWidget {
             ),
       body: SafeArea(
         top: useTelegramAppBar,
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
-          children: [
-            Center(
+        child: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
               child: Builder(
                 builder: (context) {
                   final mediaAssets = CardMediaResolver(
@@ -103,148 +102,182 @@ class CardDetailScreen extends ConsumerWidget {
                     imageUrlOverride: resolvedCard.imageUrl,
                     videoUrlOverride: resolvedCard.videoUrl,
                   );
-                  return CardMedia(
-                    cardId: resolvedCard.id,
-                    imageUrl: mediaAssets.imageUrl,
-                    videoUrl: mediaAssets.videoUrl,
-                    width: 240,
-                    height: 360,
-                    enableVideo: true,
-                    autoPlayOnce: true,
-                    playLabel: l10n.videoTapToPlay,
+                  return SizedBox(
+                    width: double.infinity,
+                    height: 320,
+                    child: CardMedia(
+                      cardId: resolvedCard.id,
+                      imageUrl: mediaAssets.imageUrl,
+                      videoUrl: mediaAssets.videoUrl,
+                      width: MediaQuery.of(context).size.width,
+                      height: 320,
+                      enableVideo: true,
+                      autoPlayOnce: true,
+                      playLabel: l10n.videoTapToPlay,
+                      fit: BoxFit.cover,
+                    ),
                   );
                 },
               ),
             ),
-            const SizedBox(height: 20),
-            Text(
-              resolvedCard.name,
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              l10n.cardKeywordsTitle,
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium
-                  ?.copyWith(color: colorScheme.primary),
-            ),
-            const SizedBox(height: 8),
-            if (resolvedCard.keywords.isNotEmpty)
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: resolvedCard.keywords
-                    .map(
-                      (keyword) => Chip(
-                        label: Text(keyword),
-                        backgroundColor: colorScheme.surface,
-                        side: BorderSide(color: colorScheme.outlineVariant),
-                        labelStyle: TextStyle(
-                          color: colorScheme.onSurface,
-                          fontSize: 12,
-                        ),
-                        visualDensity: VisualDensity.compact,
-                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        padding:
-                            const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+            SliverToBoxAdapter(
+              child: Transform.translate(
+                offset: const Offset(0, -28),
+                child: Container(
+                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
+                  decoration: BoxDecoration(
+                    color: colorScheme.surface,
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(28),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: colorScheme.primary.withOpacity(0.18),
+                        blurRadius: 30,
+                        offset: const Offset(0, -6),
                       ),
-                    )
-                    .toList(),
-              )
-            else
-              Text(
-                l10n.cardDetailsFallback,
-                style: Theme.of(context).textTheme.bodyMedium,
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        resolvedCard.name,
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        l10n.cardKeywordsTitle,
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(color: colorScheme.primary),
+                      ),
+                      const SizedBox(height: 8),
+                      if (resolvedCard.keywords.isNotEmpty)
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: resolvedCard.keywords
+                              .map(
+                                (keyword) => Chip(
+                                  label: Text(keyword),
+                                  backgroundColor: colorScheme.surface,
+                                  side:
+                                      BorderSide(color: colorScheme.outlineVariant),
+                                  labelStyle: TextStyle(
+                                    color: colorScheme.onSurface,
+                                    fontSize: 12,
+                                  ),
+                                  visualDensity: VisualDensity.compact,
+                                  materialTapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 2,
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                        )
+                      else
+                        Text(
+                          l10n.cardDetailsFallback,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      const SizedBox(height: 20),
+                      Text(
+                        l10n.cardGeneralTitle,
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(color: colorScheme.primary),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        resolvedCard.meaning.general,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        l10n.cardDetailedTitle,
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(color: colorScheme.primary),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        resolvedCard.detailedDescription?.trim().isNotEmpty ?? false
+                            ? resolvedCard.detailedDescription!
+                            : l10n.cardDetailsFallback,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        l10n.cardFunFactTitle,
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(color: colorScheme.primary),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        resolvedCard.funFact?.trim().isNotEmpty ?? false
+                            ? resolvedCard.funFact!
+                            : l10n.cardDetailsFallback,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        l10n.cardStatsTitle,
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(color: colorScheme.primary),
+                      ),
+                      const SizedBox(height: 12),
+                      if (resolvedCard.stats != null)
+                        GridView.count(
+                          crossAxisCount: 2,
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          mainAxisSpacing: 12,
+                          crossAxisSpacing: 12,
+                          childAspectRatio: 2.4,
+                          children: [
+                            _StatTile(
+                              label: l10n.statLuck,
+                              value: resolvedCard.stats!.luck,
+                              icon: Icons.auto_awesome,
+                            ),
+                            _StatTile(
+                              label: l10n.statPower,
+                              value: resolvedCard.stats!.power,
+                              icon: Icons.flash_on,
+                            ),
+                            _StatTile(
+                              label: l10n.statLove,
+                              value: resolvedCard.stats!.love,
+                              icon: Icons.favorite,
+                            ),
+                            _StatTile(
+                              label: l10n.statClarity,
+                              value: resolvedCard.stats!.clarity,
+                              icon: Icons.visibility,
+                            ),
+                          ],
+                        )
+                      else
+                        Text(
+                          l10n.cardDetailsFallback,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                    ],
+                  ),
+                ),
               ),
-            const SizedBox(height: 20),
-            Text(
-              l10n.cardGeneralTitle,
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium
-                  ?.copyWith(color: colorScheme.primary),
             ),
-            const SizedBox(height: 8),
-            Text(
-              resolvedCard.meaning.general,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            const SizedBox(height: 20),
-            Text(
-              l10n.cardDetailedTitle,
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium
-                  ?.copyWith(color: colorScheme.primary),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              resolvedCard.detailedDescription?.trim().isNotEmpty ?? false
-                  ? resolvedCard.detailedDescription!
-                  : l10n.cardDetailsFallback,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            const SizedBox(height: 20),
-            Text(
-              l10n.cardFunFactTitle,
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium
-                  ?.copyWith(color: colorScheme.primary),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              resolvedCard.funFact?.trim().isNotEmpty ?? false
-                  ? resolvedCard.funFact!
-                  : l10n.cardDetailsFallback,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            const SizedBox(height: 20),
-            Text(
-              l10n.cardStatsTitle,
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium
-                  ?.copyWith(color: colorScheme.primary),
-            ),
-            const SizedBox(height: 12),
-            if (resolvedCard.stats != null)
-              GridView.count(
-                crossAxisCount: 2,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
-                childAspectRatio: 2.4,
-                children: [
-                  _StatTile(
-                    label: l10n.statLuck,
-                    value: resolvedCard.stats!.luck,
-                    icon: Icons.auto_awesome,
-                  ),
-                  _StatTile(
-                    label: l10n.statPower,
-                    value: resolvedCard.stats!.power,
-                    icon: Icons.flash_on,
-                  ),
-                  _StatTile(
-                    label: l10n.statLove,
-                    value: resolvedCard.stats!.love,
-                    icon: Icons.favorite,
-                  ),
-                  _StatTile(
-                    label: l10n.statClarity,
-                    value: resolvedCard.stats!.clarity,
-                    icon: Icons.visibility,
-                  ),
-                ],
-              )
-            else
-              Text(
-                l10n.cardDetailsFallback,
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
           ],
         ),
       ),

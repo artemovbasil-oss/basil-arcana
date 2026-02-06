@@ -52,8 +52,11 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
     ref.listen<ReadingFlowState>(readingFlowControllerProvider, (prev, next) {
       if (prev?.detailsStatus != next.detailsStatus ||
           prev?.showDetailsCta != next.showDetailsCta) {
-        _scrollToBottom();
+        _maybeScrollToBottom();
       }
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _jumpToTop();
     });
   }
 
@@ -344,7 +347,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
       ..clear()
       ..addAll(_buildBasilMessages(state));
     setState(() {});
-    _scrollToBottom();
+    _jumpToTop();
     _queueNextBasilMessage();
   }
 
@@ -353,14 +356,14 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
       setState(() {
         _sequenceComplete = true;
       });
-      _scrollToBottom();
+      _maybeScrollToBottom();
       return;
     }
 
     setState(() {
       _items.add(_ChatItem.typing(id: _nextId()));
     });
-    _scrollToBottom();
+    _maybeScrollToBottom();
 
     final delay = Duration(milliseconds: 700 + Random().nextInt(401));
     _typingTimer?.cancel();
@@ -373,7 +376,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
           _items[_items.length - 1] = _basilQueue.removeAt(0);
         }
       });
-      _scrollToBottom();
+      _maybeScrollToBottom();
       Future.delayed(const Duration(milliseconds: 200), () {
         if (mounted) {
           _queueNextBasilMessage();
@@ -588,9 +591,25 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
 
   String _nextId() => 'chat_${_itemCounter++}';
 
-  void _scrollToBottom() {
+  void _jumpToTop() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
+        _scrollController.jumpTo(0);
+      }
+    });
+  }
+
+  bool _isNearBottom() {
+    if (!_scrollController.hasClients) {
+      return false;
+    }
+    final position = _scrollController.position;
+    return position.maxScrollExtent - position.pixels <= 160;
+  }
+
+  void _maybeScrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_isNearBottom()) {
         _scrollController.animateTo(
           _scrollController.position.maxScrollExtent,
           duration: const Duration(milliseconds: 300),

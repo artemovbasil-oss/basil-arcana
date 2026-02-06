@@ -18,17 +18,20 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
+  static const bool kShowDebug = false;
   final TextEditingController _controller = TextEditingController();
   final FocusNode _focusNode = FocusNode();
   final ScrollController _scrollController = ScrollController();
   final GlobalKey _questionKey = GlobalKey();
-  late final String _buildMarker;
+  String? _buildMarker;
 
   @override
   void initState() {
     super.initState();
     _focusNode.addListener(_handleFocusChange);
-    _buildMarker = _resolveBuildMarker();
+    if (kShowDebug) {
+      _buildMarker = _resolveBuildMarker();
+    }
   }
 
   @override
@@ -77,6 +80,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   void _showDebugOverlay(BuildContext context, Locale locale) {
+    if (!kShowDebug) {
+      return;
+    }
     final config = ConfigService.instance;
     final cardsRepo = ref.read(cardsRepositoryProvider);
     final spreadsRepo = ref.read(dataRepositoryProvider);
@@ -170,90 +176,76 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final hasQuestion = _controller.text.trim().isNotEmpty;
 
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
-    final isKeyboardVisible = bottomInset > 0;
-    final isFocusMode = _focusNode.hasFocus && isKeyboardVisible;
     const buttonHeight = 56.0;
-    const buttonGap = 12.0;
-    final primaryColor = isFocusMode
-        ? Color.lerp(colorScheme.primary, Colors.white, 0.08)!
-        : colorScheme.primary;
+    final primaryColor = colorScheme.primary;
     final disabledColor =
         Color.lerp(primaryColor, colorScheme.surface, 0.45)!;
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: SafeArea(
-        child: Stack(
+        child: Column(
           children: [
-            Positioned.fill(
+            Expanded(
               child: SingleChildScrollView(
                 controller: _scrollController,
                 padding: EdgeInsets.fromLTRB(
                   20,
                   12,
                   20,
-                  24 + buttonHeight + buttonGap + bottomInset,
+                  24 + buttonHeight,
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    AnimatedOpacity(
-                      duration: const Duration(milliseconds: 200),
-                      opacity: isFocusMode ? 0.45 : 1,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: GestureDetector(
-                                  onLongPress: () {
+                    Row(
+                      children: [
+                        Expanded(
+                          child: GestureDetector(
+                            onLongPress: kShowDebug
+                                ? () {
                                     _showDebugOverlay(context, locale);
-                                  },
-                                  child: Text(
-                                    l10n.appTitle,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleLarge
-                                        ?.copyWith(
-                                          color: colorScheme.onSurface,
-                                        ),
+                                  }
+                                : null,
+                            child: Text(
+                              l10n.appTitle,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleLarge
+                                  ?.copyWith(
+                                    color: colorScheme.onSurface,
                                   ),
-                                ),
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.history),
-                                tooltip: l10n.historyTooltip,
-                                onPressed: () {
-                                  Navigator.pushNamed(
-                                    context,
-                                    HistoryScreen.routeName,
-                                  );
-                                },
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.settings),
-                                tooltip: l10n.settingsTitle,
-                                onPressed: () {
-                                  Navigator.pushNamed(
-                                    context,
-                                    SettingsScreen.routeName,
-                                  );
-                                },
-                              ),
-                            ],
+                            ),
                           ),
-                          const SizedBox(height: 6),
-                          Text(
-                            l10n.homeDescription,
-                            style:
-                                Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                      color:
-                                          colorScheme.onSurface.withOpacity(0.7),
-                                    ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.history),
+                          tooltip: l10n.historyTooltip,
+                          onPressed: () {
+                            Navigator.pushNamed(
+                              context,
+                              HistoryScreen.routeName,
+                            );
+                          },
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.settings),
+                          tooltip: l10n.settingsTitle,
+                          onPressed: () {
+                            Navigator.pushNamed(
+                              context,
+                              SettingsScreen.routeName,
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      l10n.homeDescription,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: colorScheme.onSurface.withOpacity(0.7),
                           ),
-                        ],
-                      ),
                     ),
                     const SizedBox(height: 22),
                     Container(
@@ -369,58 +361,45 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         );
                       },
                     ),
-                    const SizedBox(height: 12),
-                    _HomeNavCard(
-                      title: l10n.spreadTitle,
-                      description: l10n.homeContinueButton,
-                      icon: Icons.auto_stories,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const SpreadScreen()),
-                        );
-                      },
-                    ),
                   ],
                 ),
               ),
             ),
-            Positioned(
-              top: 8,
-              right: 20,
-              child: Text(
-                'build: $_buildMarker',
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: colorScheme.onSurface.withOpacity(0.55),
-                    ),
-              ),
-            ),
-            Positioned(
-              left: 20,
-              right: 20,
-              bottom: 20 + bottomInset,
-              child: AnimatedOpacity(
-                opacity: isFocusMode ? 0 : 1,
-                duration: const Duration(milliseconds: 200),
-                child: _PrimaryActionButton(
-                  enabled: hasQuestion,
-                  primaryColor: primaryColor,
-                  disabledColor: disabledColor,
-                  label: l10n.homeContinueButton,
-                  onPressed: hasQuestion
-                      ? () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const SpreadScreen(),
-                            ),
-                          );
-                        }
-                      : null,
+            if (kShowDebug && _buildMarker != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Text(
+                  'build: $_buildMarker',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: colorScheme.onSurface.withOpacity(0.55),
+                      ),
                 ),
               ),
-            ),
           ],
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: AnimatedPadding(
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOut,
+          padding: EdgeInsets.fromLTRB(20, 12, 20, 20 + bottomInset),
+          child: _PrimaryActionButton(
+            enabled: hasQuestion,
+            primaryColor: primaryColor,
+            disabledColor: disabledColor,
+            label: l10n.homeContinueButton,
+            onPressed: hasQuestion
+                ? () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const SpreadScreen(),
+                      ),
+                    );
+                  }
+                : null,
+          ),
         ),
       ),
     );
