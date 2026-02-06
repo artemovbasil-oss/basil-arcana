@@ -135,4 +135,28 @@ class TelegramWebApp {
       } catch (_) {}
     }
   }
+
+  static void expand() {
+    final webApp = _webApp;
+    if (webApp == null) {
+      return;
+    }
+    if (js_util.hasProperty(webApp, 'expand')) {
+      try {
+        js_util.callMethod(webApp, 'expand', []);
+      } catch (_) {}
+    }
+  }
+
+  static void disableVerticalSwipes() {
+    final webApp = _webApp;
+    if (webApp == null) {
+      return;
+    }
+    if (js_util.hasProperty(webApp, 'disableVerticalSwipes')) {
+      try {
+        js_util.callMethod(webApp, 'disableVerticalSwipes', []);
+      } catch (_) {}
+    }
+  }
 }

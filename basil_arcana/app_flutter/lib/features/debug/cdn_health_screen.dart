@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
-import '../../core/config/app_config.dart';
+import '../../core/config/assets_config.dart';
 import '../../state/providers.dart';
 
 class CdnHealthScreen extends ConsumerStatefulWidget {
@@ -78,7 +78,7 @@ class _CdnHealthScreenState extends ConsumerState<CdnHealthScreen> {
         children: [
           _InfoTile(
             label: l10n.cdnHealthAssetsBaseLabel,
-            value: AppConfig.assetsBaseUrl,
+            value: AssetsConfig.assetsBaseUrl,
           ),
           _InfoTile(
             label: l10n.cdnHealthLocaleLabel,

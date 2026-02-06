@@ -1,11 +1,13 @@
 import 'dart:collection';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../core/config/app_config.dart';
+import '../../core/assets/asset_paths.dart';
+import '../../core/config/assets_config.dart';
 import '../models/card_model.dart';
 import '../models/deck_model.dart';
 import '../models/spread_model.dart';
@@ -18,7 +20,9 @@ class DataRepository {
   final Map<String, String> _memoryCache = {};
   final Map<String, DateTime> _lastFetchTimes = {};
   final Map<String, DateTime> _lastCacheTimes = {};
+  final Map<String, String> _lastAttemptedUrls = {};
   SharedPreferences? _preferences;
+  String? _lastError;
 
   static const String _cardsPrefix = 'cdn_cards_';
   static const String _spreadsPrefix = 'cdn_spreads_';
@@ -28,8 +32,11 @@ class DataRepository {
       UnmodifiableMapView(_lastFetchTimes);
   UnmodifiableMapView<String, DateTime> get lastCacheTimes =>
       UnmodifiableMapView(_lastCacheTimes);
+  UnmodifiableMapView<String, String> get lastAttemptedUrls =>
+      UnmodifiableMapView(_lastAttemptedUrls);
+  String? get lastError => _lastError;
 
-  String get assetsBaseUrl => AppConfig.assetsBaseUrl;
+  String get assetsBaseUrl => AssetsConfig.assetsBaseUrl;
 
   String cardsCacheKey(Locale locale) =>
       '$_cardsPrefix${locale.languageCode}';
@@ -42,7 +49,7 @@ class DataRepository {
   String cardsFileNameForLocale(Locale locale) {
     return switch (locale.languageCode) {
       'ru' => 'cards_ru.json',
-      'kk' => 'cards_kk.json',
+      'kk' => 'cards_kz.json',
       _ => 'cards_en.json',
     };
   }
@@ -50,7 +57,7 @@ class DataRepository {
   String spreadsFileNameForLocale(Locale locale) {
     return switch (locale.languageCode) {
       'ru' => 'spreads_ru.json',
-      'kk' => 'spreads_kk.json',
+      'kk' => 'spreads_kz.json',
       _ => 'spreads_en.json',
     };
   }
@@ -62,7 +69,7 @@ class DataRepository {
     final filename = cardsFileNameForLocale(locale);
     final cacheKey = cardsCacheKey(locale);
     final raw = await _loadJsonWithFallback(
-      uri: _dataUri(filename),
+      uri: Uri.parse(cardsUrl(locale.languageCode)),
       cacheKey: cacheKey,
       validator: _isValidCardsJson,
     );
@@ -73,7 +80,7 @@ class DataRepository {
     final filename = spreadsFileNameForLocale(locale);
     final cacheKey = spreadsCacheKey(locale);
     final raw = await _loadJsonWithFallback(
-      uri: _dataUri(filename),
+      uri: Uri.parse(spreadsUrl(locale.languageCode)),
       cacheKey: cacheKey,
       validator: _isValidSpreadsJson,
     );
@@ -82,7 +89,7 @@ class DataRepository {
 
   Future<Set<String>?> fetchVideoIndex() async {
     final raw = await _loadOptionalJson(
-      uri: _dataUri('video_index.json'),
+      uri: Uri.parse('$assetsBaseUrl/data/video_index.json'),
       cacheKey: _videoIndexKey,
       validator: _isValidVideoIndex,
     );
@@ -102,31 +109,38 @@ class DataRepository {
     return prefs;
   }
 
-  Uri _dataUri(String filename) {
-    final base = assetsBaseUrl.trim().replaceAll(RegExp(r'/+$'), '');
-    return Uri.parse('$base/data/$filename');
-  }
-
   Future<String> _loadJsonWithFallback({
     required Uri uri,
     required String cacheKey,
     required bool Function(Object?) validator,
   }) async {
+    _lastAttemptedUrls[cacheKey] = uri.toString();
     try {
       final response = await _client.get(
         uri,
         headers: const {'Cache-Control': 'no-cache'},
       );
       if (response.statusCode < 200 || response.statusCode >= 300) {
-        throw DataLoadException('HTTP ${response.statusCode}', cacheKey: cacheKey);
+        throw DataLoadException(
+          'HTTP ${response.statusCode}',
+          cacheKey: cacheKey,
+        );
       }
       if (!validator(jsonDecode(response.body))) {
         throw DataLoadException('Invalid JSON payload', cacheKey: cacheKey);
       }
       await _storeCache(cacheKey, response.body);
       _lastFetchTimes[cacheKey] = DateTime.now();
+      _lastError = null;
       return response.body;
     } catch (error) {
+      _lastError = error.toString();
+      if (kDebugMode) {
+        debugPrint(
+          '[DataRepository] fetchError url=${uri.toString()} '
+          'cacheKey=$cacheKey error=${error.toString()}',
+        );
+      }
       final cached = await _readCache(cacheKey);
       if (cached != null) {
         final decoded = jsonDecode(cached);
@@ -147,6 +161,7 @@ class DataRepository {
     required String cacheKey,
     required bool Function(Object?) validator,
   }) async {
+    _lastAttemptedUrls[cacheKey] = uri.toString();
     try {
       final response = await _client.get(
         uri,
@@ -163,8 +178,10 @@ class DataRepository {
       }
       await _storeCache(cacheKey, response.body);
       _lastFetchTimes[cacheKey] = DateTime.now();
+      _lastError = null;
       return response.body;
-    } catch (_) {
+    } catch (error) {
+      _lastError = error.toString();
       return await _readCache(cacheKey);
     }
   }
@@ -299,14 +316,12 @@ Set<String> _parseVideoIndex(String raw) {
 List<CardModel> _parseCards({required String raw, required DeckId deckId}) {
   final data = jsonDecode(raw) as Map<String, dynamic>;
   final canonicalData = _canonicalizeCardData(data);
-  final majorCards = canonicalData.entries
-      .where((entry) => entry.key.startsWith('major_'))
-      .map((entry) {
-        return CardModel.fromLocalizedEntry(
-          entry.key,
-          entry.value as Map<String, dynamic>,
-        );
-      })
+  final majorCards = majorCardIds
+      .where(canonicalData.containsKey)
+      .map((id) => CardModel.fromLocalizedEntry(
+            id,
+            canonicalData[id] as Map<String, dynamic>,
+          ))
       .toList();
   final wandsCards = wandsCardIds
       .where(canonicalData.containsKey)

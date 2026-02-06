@@ -8,6 +8,31 @@ const Map<String, String> _cardIdAliases = {
   'cups_10_knight': 'cups_00_knight',
 };
 
+const List<String> majorCardIds = [
+  'major_00_fool',
+  'major_01_magician',
+  'major_02_high_priestess',
+  'major_03_empress',
+  'major_04_emperor',
+  'major_05_hierophant',
+  'major_06_lovers',
+  'major_07_chariot',
+  'major_08_strength',
+  'major_09_hermit',
+  'major_10_wheel',
+  'major_11_justice',
+  'major_12_hanged_man',
+  'major_13_death',
+  'major_14_temperance',
+  'major_15_devil',
+  'major_16_tower',
+  'major_17_star',
+  'major_18_moon',
+  'major_19_sun',
+  'major_20_judgement',
+  'major_21_world',
+];
+
 const List<String> wandsCardIds = [
   'wands_00_knight',
   'wands_01_king',

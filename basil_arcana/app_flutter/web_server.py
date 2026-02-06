@@ -34,6 +34,8 @@ def build_config_payload() -> dict[str, str]:
     api_base_url = _read_env("API_BASE_URL", "BASE_URL")
     api_key = _read_env("API_KEY", "ARCANA_API_KEY")
     assets_base_url = _read_env("ASSETS_BASE_URL")
+    if not assets_base_url:
+        assets_base_url = "https://cdn.basilarcana.com"
     payload: dict[str, str] = {
         "apiBaseUrl": api_base_url,
         "apiKey": api_key,

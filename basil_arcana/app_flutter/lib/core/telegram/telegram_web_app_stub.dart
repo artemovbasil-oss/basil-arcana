@@ -7,4 +7,6 @@ class TelegramWebApp {
   static void showBackButton() {}
   static void hideBackButton() {}
   static void onBackButtonClicked(void Function() callback) {}
+  static void expand() {}
+  static void disableVerticalSwipes() {}
 }

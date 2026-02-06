@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/telegram/telegram_web_app.dart';
 import '../../core/widgets/card_face_widget.dart';
+import '../../core/assets/asset_paths.dart';
 import '../../core/widgets/tarot_asset_widgets.dart';
 import '../../data/models/deck_model.dart';
 import '../../data/models/drawn_card_model.dart';
@@ -605,7 +606,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
       for (final drawn in state.drawnCards) {
         precacheImage(
           NetworkImage(
-            cardAssetPath(drawn.cardId, deckId: deckId.name),
+            cardImageUrl(drawn.cardId, deckId: deckId),
           ),
           context,
         );
