@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
+import '../../core/assets/asset_paths.dart';
+import '../../core/config/config_service.dart';
 import '../../state/providers.dart';
-import '../debug/cdn_health_screen.dart';
 import '../history/history_screen.dart';
 import '../cards/cards_screen.dart';
 import '../settings/settings_screen.dart';
@@ -21,11 +22,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   final FocusNode _focusNode = FocusNode();
   final ScrollController _scrollController = ScrollController();
   final GlobalKey _questionKey = GlobalKey();
+  late final String _buildMarker;
 
   @override
   void initState() {
     super.initState();
     _focusNode.addListener(_handleFocusChange);
+    _buildMarker = _resolveBuildMarker();
   }
 
   @override
@@ -34,6 +37,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     _focusNode.dispose();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  String _resolveBuildMarker() {
+    final build = ConfigService.instance.build;
+    if (build != null && build.trim().isNotEmpty) {
+      return build.trim();
+    }
+    return DateTime.now().toIso8601String();
   }
 
   void _applyExample(String example) {
@@ -65,10 +76,68 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
+  void _showDebugOverlay(BuildContext context, Locale locale) {
+    final config = ConfigService.instance;
+    final repo = ref.read(dataRepositoryProvider);
+    final cacheKey = repo.spreadsCacheKey(locale);
+    final lastRequestedUrl = repo.lastAttemptedUrls[cacheKey] ?? '—';
+    final lastError = repo.lastError ?? config.lastError ?? 'None';
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        final textTheme = Theme.of(dialogContext).textTheme;
+        return AlertDialog(
+          title: const Text('Debug info'),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _DebugLine(
+                  label: 'API_BASE_URL',
+                  value: config.apiBaseUrl.trim().isEmpty
+                      ? '—'
+                      : config.apiBaseUrl,
+                  textTheme: textTheme,
+                ),
+                _DebugLine(
+                  label: 'ASSETS_BASE_URL',
+                  value: config.assetsBaseUrl,
+                  textTheme: textTheme,
+                ),
+                _DebugLine(
+                  label: 'Spreads URL',
+                  value: spreadsUrl(locale.languageCode),
+                  textTheme: textTheme,
+                ),
+                _DebugLine(
+                  label: 'Last requested URL',
+                  value: lastRequestedUrl,
+                  textTheme: textTheme,
+                ),
+                _DebugLine(
+                  label: 'Last error',
+                  value: lastError,
+                  textTheme: textTheme,
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context)!;
+    final locale = ref.watch(localeProvider);
     final examples = [
       l10n.homeExample1,
       l10n.homeExample2,
@@ -115,11 +184,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               Expanded(
                                 child: GestureDetector(
                                   onLongPress: () {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (_) => const CdnHealthScreen(),
-                                      ),
-                                    );
+                                    _showDebugOverlay(context, locale);
                                   },
                                   child: Text(
                                     l10n.appTitle,
@@ -297,6 +362,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
             ),
             Positioned(
+              top: 8,
+              right: 20,
+              child: Text(
+                'build: $_buildMarker',
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: colorScheme.onSurface.withOpacity(0.55),
+                    ),
+              ),
+            ),
+            Positioned(
               left: 20,
               right: 20,
               bottom: 20 + bottomInset,
@@ -323,6 +398,36 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _DebugLine extends StatelessWidget {
+  const _DebugLine({
+    required this.label,
+    required this.value,
+    required this.textTheme,
+  });
+
+  final String label;
+  final String value;
+  final TextTheme textTheme;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: textTheme.labelMedium),
+          const SizedBox(height: 4),
+          SelectableText(
+            value,
+            style: textTheme.bodySmall,
+          ),
+        ],
       ),
     );
   }
