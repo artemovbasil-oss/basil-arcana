@@ -317,7 +317,7 @@ class _DrawnCard extends StatelessWidget {
           ),
         );
       },
-      child: const DeckCoverBack(
+      child: DeckCoverBack(
         width: _ShuffleScreenState._cardWidth,
         height: _ShuffleScreenState._cardHeight,
         imageUrl: _ShuffleScreenState._deckCoverUrl,
@@ -346,7 +346,7 @@ class _DeckStack extends StatelessWidget {
             offset: offsets[i],
             child: Transform.rotate(
               angle: angles[i],
-              child: const DeckCoverBack(
+              child: DeckCoverBack(
                 width: _ShuffleScreenState._cardWidth,
                 height: _ShuffleScreenState._cardHeight,
                 imageUrl: _ShuffleScreenState._deckCoverUrl,
@@ -386,7 +386,7 @@ class _ShufflingStack extends StatelessWidget {
               offset: offset,
               child: Transform.rotate(
                 angle: angle,
-                child: const DeckCoverBack(
+                child: DeckCoverBack(
                   imageUrl: _ShuffleScreenState._deckCoverUrl,
                 ),
               ),
@@ -445,7 +445,7 @@ class _MagicalGlowCard extends StatelessWidget {
                   ]
                 : null,
           ),
-          child: const DeckCoverBack(
+          child: DeckCoverBack(
             width: _ShuffleScreenState._cardWidth,
             height: _ShuffleScreenState._cardHeight,
             imageUrl: _ShuffleScreenState._deckCoverUrl,
