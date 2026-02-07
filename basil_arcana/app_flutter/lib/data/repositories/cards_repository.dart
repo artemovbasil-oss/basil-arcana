@@ -1,6 +1,7 @@
 import 'dart:collection';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -198,13 +199,13 @@ class CardsRepository {
     String cacheKey,
     bool Function(Object?) validator,
   ) async {
-    final asset = switch (cacheKey) {
-      _cardsPrefix + 'ru' => 'assets/data/cards_ru.json',
-      _cardsPrefix + 'kk' => 'assets/data/cards_kz.json',
-      _ => 'assets/data/cards_en.json',
-    };
+    final asset = cacheKey == '${_cardsPrefix}ru'
+        ? 'assets/data/cards_ru.json'
+        : cacheKey == '${_cardsPrefix}kk'
+            ? 'assets/data/cards_kz.json'
+            : 'assets/data/cards_en.json';
     try {
-      final bundled = await DefaultAssetBundle.instance.loadString(asset);
+      final bundled = await rootBundle.loadString(asset);
       final parsed = parseJsonString(bundled);
       final rootType = jsonRootType(parsed.decoded);
       _lastResponseRootTypes[cacheKey] = rootType;
