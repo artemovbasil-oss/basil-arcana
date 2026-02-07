@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
-import '../../core/utils/date_format.dart';
-import '../../core/navigation/app_route_config.dart';
+import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/app_top_bar.dart';
 import '../../data/models/reading_model.dart';
 import '../../state/providers.dart';
-import 'history_detail_screen.dart';
 
 class HistoryScreen extends ConsumerWidget {
   const HistoryScreen({super.key});
@@ -30,17 +28,34 @@ class HistoryScreen extends ConsumerWidget {
           valueListenable: repository.listenable(),
           builder: (context, box, _) {
             final readings = repository.getReadings();
-            if (readings.isEmpty) {
-              return Center(child: Text(l10n.historyEmpty));
-            }
-            return ListView.separated(
-              padding: const EdgeInsets.all(20),
-              itemBuilder: (context, index) {
-                final reading = readings[index];
-                return _HistoryTile(reading: reading);
-              },
-              separatorBuilder: (_, __) => const SizedBox(height: 12),
-              itemCount: readings.length,
+            return Column(
+              children: [
+                Expanded(
+                  child: readings.isEmpty
+                      ? Center(child: Text(l10n.historyEmpty))
+                      : ListView.separated(
+                          padding: const EdgeInsets.all(20),
+                          itemBuilder: (context, index) {
+                            final reading = readings[index];
+                            return _HistoryTile(reading: reading);
+                          },
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(height: 12),
+                          itemCount: readings.length,
+                        ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                  child: AppPrimaryButton(
+                    label: l10n.historyClearButton,
+                    onPressed: readings.isEmpty
+                        ? null
+                        : () async {
+                            await repository.clearReadings();
+                          },
+                  ),
+                ),
+              ],
             );
           },
         ),
@@ -56,32 +71,20 @@ class _HistoryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final locale = Localizations.localeOf(context).toString();
     return Card(
       child: ListTile(
-        title: Text(reading.spreadName),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 4),
-            Text(formatDateTime(reading.createdAt, locale: locale)),
-            const SizedBox(height: 4),
-            Text(
-              reading.question,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
+        title: Text(
+          reading.question,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
         trailing: const Icon(Icons.chevron_right),
         onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              settings: appRouteSettings(showBackButton: true),
-              builder: (_) => HistoryDetailScreen(reading: reading),
-            ),
-          );
+          final ref = ProviderScope.containerOf(context, listen: false);
+          ref
+              .read(readingFlowControllerProvider.notifier)
+              .setQuestion(reading.question);
+          Navigator.popUntil(context, (route) => route.isFirst);
         },
       ),
     );

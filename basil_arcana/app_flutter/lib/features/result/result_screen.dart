@@ -324,17 +324,6 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                 padding: EdgeInsets.only(bottom: bottomInset),
                 child: _ActionBar(
                   showExtra: _sequenceComplete,
-                  isSaved: state.isSaved,
-                  onSave: () async {
-                    final saved = await ref
-                        .read(readingFlowControllerProvider.notifier)
-                        .saveReading();
-                    if (saved && context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(l10n.resultSnackSaved)),
-                      );
-                    }
-                  },
                   onNew: () {
                     ref.read(readingFlowControllerProvider.notifier).reset();
                     Navigator.popUntil(context, (route) => route.isFirst);
@@ -346,7 +335,6 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                       mode: LaunchMode.externalApplication,
                     );
                   },
-                  saveLabel: l10n.resultSaveButton,
                   newLabel: l10n.resultNewButton,
                   moreLabel: l10n.resultWantMoreButton,
                 ),
@@ -1006,11 +994,8 @@ class _StatusPill extends StatelessWidget {
 class _ActionBar extends StatelessWidget {
   const _ActionBar({
     required this.showExtra,
-    required this.isSaved,
-    required this.onSave,
     required this.onNew,
     required this.onShare,
-    required this.saveLabel,
     required this.newLabel,
     required this.moreLabel,
   });
@@ -1019,11 +1004,8 @@ class _ActionBar extends StatelessWidget {
   static const double extraHeight = 70;
 
   final bool showExtra;
-  final bool isSaved;
-  final VoidCallback onSave;
   final VoidCallback onNew;
   final VoidCallback onShare;
-  final String saveLabel;
   final String newLabel;
   final String moreLabel;
 
@@ -1054,24 +1036,13 @@ class _ActionBar extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: AppPrimaryButton(
-                        label: saveLabel,
-                        icon: Icons.bookmark_add,
-                        onPressed: isSaved ? null : onSave,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: AppGhostButton(
-                        label: newLabel,
-                        icon: Icons.auto_awesome,
-                        onPressed: onNew,
-                      ),
-                    ),
-                  ],
+                SizedBox(
+                  width: double.infinity,
+                  child: AppPrimaryButton(
+                    label: newLabel,
+                    icon: Icons.auto_awesome,
+                    onPressed: onNew,
+                  ),
                 ),
                 AnimatedSwitcher(
                   duration: const Duration(milliseconds: 280),

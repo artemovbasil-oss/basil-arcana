@@ -20,4 +20,8 @@ class ReadingsRepository {
   ValueListenable<Box<ReadingModel>> listenable() => _box.listenable();
 
   ReadingModel? getReading(String readingId) => _box.get(readingId);
+
+  Future<void> clearReadings() async {
+    await _box.clear();
+  }
 }

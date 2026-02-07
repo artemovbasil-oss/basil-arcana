@@ -2,6 +2,7 @@ import 'dart:collection';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -96,6 +97,7 @@ class DataRepository {
       cacheKey: cacheKey,
       validator: _isValidCardsJson,
       expectedRootTypes: {'Map'},
+      bundledFallback: () => _loadBundledCards(cacheKey),
     );
     return _parseCards(raw: raw, deckId: deckId);
   }
@@ -107,6 +109,7 @@ class DataRepository {
       cacheKey: cacheKey,
       validator: _isValidSpreadsJson,
       expectedRootTypes: {'List'},
+      bundledFallback: () => _loadBundledSpreads(cacheKey),
     );
     return _parseSpreads(raw: raw);
   }
@@ -139,6 +142,7 @@ class DataRepository {
     required String cacheKey,
     required bool Function(Object?) validator,
     required Set<String> expectedRootTypes,
+    Future<String?> Function()? bundledFallback,
   }) async {
     _lastAttemptedUrls[cacheKey] = uri.toString();
     try {
@@ -164,6 +168,12 @@ class DataRepository {
       _lastError = null;
       return result.raw;
     } catch (error, stackTrace) {
+      if (bundledFallback != null) {
+        final bundled = await bundledFallback();
+        if (bundled != null) {
+          return bundled;
+        }
+      }
       _lastError = '${error.toString()}\n$stackTrace';
       if (error is JsonFetchException && error.response != null) {
         _recordResponseInfo(cacheKey, error.response!);
@@ -194,6 +204,58 @@ class DataRepository {
       }
       throw DataLoadException(error.toString(), cacheKey: cacheKey);
     }
+  }
+
+  Future<String?> _loadBundledCards(String cacheKey) async {
+    final asset = cacheKey == '${_cardsPrefix}ru'
+        ? 'assets/data/cards_ru.json'
+        : cacheKey == '${_cardsPrefix}kk'
+            ? 'assets/data/cards_kz.json'
+            : 'assets/data/cards_en.json';
+    return _loadBundledJson(
+      asset: asset,
+      cacheKey: cacheKey,
+      validator: _isValidCardsJson,
+      expectedRootTypes: {'Map'},
+    );
+  }
+
+  Future<String?> _loadBundledSpreads(String cacheKey) async {
+    final asset = cacheKey == '${_spreadsPrefix}ru'
+        ? 'assets/data/spreads_ru.json'
+        : cacheKey == '${_spreadsPrefix}kk'
+            ? 'assets/data/spreads_kz.json'
+            : 'assets/data/spreads_en.json';
+    return _loadBundledJson(
+      asset: asset,
+      cacheKey: cacheKey,
+      validator: _isValidSpreadsJson,
+      expectedRootTypes: {'List'},
+    );
+  }
+
+  Future<String?> _loadBundledJson({
+    required String asset,
+    required String cacheKey,
+    required bool Function(Object?) validator,
+    required Set<String> expectedRootTypes,
+  }) async {
+    try {
+      final bundled = await rootBundle.loadString(asset);
+      final parsed = parseJsonString(bundled);
+      final rootType = jsonRootType(parsed.decoded);
+      _lastResponseRootTypes[cacheKey] = rootType;
+      if (expectedRootTypes.contains(rootType) &&
+          validator(parsed.decoded)) {
+        await _storeCache(cacheKey, parsed.raw);
+        _lastCacheTimes[cacheKey] = DateTime.now();
+        _lastError = null;
+        return parsed.raw;
+      }
+    } on FlutterError {
+      return null;
+    }
+    return null;
   }
 
   Future<String?> _loadOptionalJson({
