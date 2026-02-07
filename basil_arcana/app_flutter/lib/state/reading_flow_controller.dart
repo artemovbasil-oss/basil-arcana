@@ -464,6 +464,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
         aiUsed: true,
         showDetailsCta: true,
       );
+      await _autoSaveReading();
     } on AiRepositoryException catch (error) {
       if (_activeRequestId != requestId) {
         return;
@@ -480,6 +481,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
           aiErrorStatusCode: error.statusCode,
           errorMessage: _messageForError(error, l10n),
         );
+        await _autoSaveReading();
         return;
       }
 
@@ -510,6 +512,13 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       }
       client.close();
     }
+  }
+
+  Future<void> _autoSaveReading() async {
+    if (state.isSaved) {
+      return;
+    }
+    await saveReading();
   }
 
   Future<void> requestDetails() async {

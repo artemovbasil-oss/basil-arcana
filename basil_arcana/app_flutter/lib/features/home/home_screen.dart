@@ -32,6 +32,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void initState() {
     super.initState();
     _focusNode.addListener(_handleFocusChange);
+    final initialQuestion =
+        ref.read(readingFlowControllerProvider).question;
+    if (initialQuestion.isNotEmpty) {
+      _controller.text = initialQuestion;
+    }
+    ref.listen<ReadingFlowState>(
+      readingFlowControllerProvider,
+      (prev, next) {
+        if (_controller.text == next.question) {
+          return;
+        }
+        _controller.value = _controller.value.copyWith(
+          text: next.question,
+          selection:
+              TextSelection.collapsed(offset: next.question.length),
+          composing: TextRange.empty,
+        );
+        setState(() {});
+      },
+    );
     if (kShowDiagnostics) {
       _buildMarker = _resolveBuildMarker();
     }
