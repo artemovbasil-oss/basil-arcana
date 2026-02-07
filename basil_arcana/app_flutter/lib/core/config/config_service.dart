@@ -11,7 +11,8 @@ class ConfigService {
 
   static final ConfigService instance = ConfigService._();
 
-  static const String _defaultAssetsBaseUrl = 'https://cdn.basilarcana.com';
+  static const String _defaultAssetsBaseUrl =
+      'https://basilarcana-assets.b-cdn.net';
 
   static const String _apiBaseUrlEnv = String.fromEnvironment(
     'API_BASE_URL',

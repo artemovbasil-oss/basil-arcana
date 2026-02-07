@@ -278,6 +278,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
     );
 
     if (requiresTelegram) {
+      await _autoSaveReading();
       return;
     }
     await _generateReading(spread: spread, drawnCards: drawnCards, l10n: l10n);
@@ -639,9 +640,11 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
   Future<bool> saveReading() async {
     final spread = state.spread;
     final aiResult = state.deepResult ?? state.aiResult;
-    if (spread == null || aiResult == null) {
+    if (spread == null || state.drawnCards.isEmpty) {
       return false;
     }
+    final resolvedResult =
+        aiResult ?? _offlineFallback(spread, state.drawnCards, _l10n());
 
     final readingsRepository = ref.read(readingsRepositoryProvider);
     final reading = ReadingModel(
@@ -651,13 +654,13 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       spreadId: spread.id,
       spreadName: spread.name,
       drawnCards: state.drawnCards,
-      tldr: aiResult.tldr,
-      sections: aiResult.sections,
-      why: aiResult.why,
-      action: aiResult.action,
-      fullText: aiResult.fullText,
-      aiUsed: state.aiUsed,
-      requestId: aiResult.requestId,
+      tldr: resolvedResult.tldr,
+      sections: resolvedResult.sections,
+      why: resolvedResult.why,
+      action: resolvedResult.action,
+      fullText: resolvedResult.fullText,
+      aiUsed: aiResult != null && state.aiUsed,
+      requestId: aiResult?.requestId,
     );
     await readingsRepository.saveReading(reading);
     state = state.copyWith(isSaved: true);
