@@ -101,5 +101,9 @@ String _normalizeBaseUrl(String value, {required String fallback}) {
   if (trimmed.isEmpty) {
     return fallback;
   }
-  return trimmed.replaceAll(RegExp(r'/+$'), '');
+  final normalized = trimmed.replaceAll(RegExp(r'/+$'), '');
+  if (normalized.endsWith('/data')) {
+    return normalized.substring(0, normalized.length - '/data'.length);
+  }
+  return normalized;
 }
