@@ -63,6 +63,10 @@ class CardsRepository {
     };
   }
 
+  String cardsUrlForLocale(Locale locale) {
+    return cardsUrl(locale.languageCode);
+  }
+
   Future<List<CardModel>> fetchCards({
     required Locale locale,
     required DeckType deckId,
