@@ -7,6 +7,7 @@ import '../data/repositories/card_stats_repository.dart';
 import '../data/repositories/cards_repository.dart';
 import '../data/repositories/data_repository.dart';
 import '../data/repositories/readings_repository.dart';
+import '../data/repositories/spreads_repository.dart';
 import '../data/models/deck_model.dart';
 import 'reading_flow_controller.dart';
 
@@ -14,8 +15,12 @@ final dataRepositoryProvider = Provider<DataRepository>((ref) {
   return DataRepository();
 });
 
-final cardsRepositoryProvider = Provider<CardsRepository>((ref) {
-  return CardsRepository();
+final cardsRepositoryProvider = Provider<CardLibraryRepository>((ref) {
+  return CardLibraryRepository();
+});
+
+final spreadsRepositoryProvider = Provider<SpreadsRepository>((ref) {
+  return SpreadsRepository();
 });
 
 final aiRepositoryProvider = Provider<AiRepository>((ref) {
@@ -95,19 +100,19 @@ final cardsProvider = FutureProvider((ref) async {
   final repo = ref.watch(cardsRepositoryProvider);
   final useCached = ref.watch(useCachedCardsProvider);
   if (useCached) {
-    return repo.loadCachedCards(locale: locale, deckId: deckId);
+    return repo.loadCachedCards(locale.languageCode, deckId: deckId);
   }
-  return repo.fetchCards(locale: locale, deckId: deckId);
+  return repo.loadCards(locale.languageCode, deckId: deckId);
 });
 
 final spreadsProvider = FutureProvider((ref) async {
   final locale = ref.watch(localeProvider);
-  final repo = ref.watch(dataRepositoryProvider);
+  final repo = ref.watch(spreadsRepositoryProvider);
   final useCached = ref.watch(useCachedSpreadsProvider);
   if (useCached) {
-    return repo.loadCachedSpreads(locale: locale);
+    return repo.loadCachedSpreads(locale.languageCode);
   }
-  return repo.fetchSpreads(locale: locale);
+  return repo.loadSpreads(locale.languageCode);
 });
 
 final videoIndexProvider = FutureProvider<Set<String>?>((ref) async {

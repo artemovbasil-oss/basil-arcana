@@ -1,40 +1,42 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/services.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
-import '../../core/assets/asset_paths.dart';
 import '../../core/config/config_service.dart';
 import '../../core/config/diagnostics.dart';
 import '../../core/navigation/app_route_config.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/app_buttons.dart';
+import '../../core/widgets/app_text_field.dart';
+import '../../core/widgets/app_top_bar.dart';
+import '../../data/models/app_enums.dart';
 import '../../state/providers.dart';
-import '../history/history_screen.dart';
 import '../cards/cards_screen.dart';
-import '../settings/settings_screen.dart';
 import '../spread/spread_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
+
+  static const routeName = '/home';
 
   @override
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  final TextEditingController _controller = TextEditingController();
-  final FocusNode _focusNode = FocusNode();
-  final ScrollController _scrollController = ScrollController();
-  final GlobalKey _questionKey = GlobalKey();
-  String? _buildMarker;
+  final _controller = TextEditingController();
+  final _focusNode = FocusNode();
+  final _questionKey = GlobalKey();
+  final _scrollController = ScrollController();
+  bool _autoFocused = false;
 
   @override
   void initState() {
     super.initState();
-    _focusNode.addListener(_handleFocusChange);
-    if (kShowDiagnostics) {
-      _buildMarker = _resolveBuildMarker();
-    }
+    _controller.addListener(_scrollToQuestionField);
   }
 
   @override
@@ -45,28 +47,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     super.dispose();
   }
 
-  String _resolveBuildMarker() {
-    final build = ConfigService.instance.build;
-    if (build != null && build.trim().isNotEmpty) {
-      return build.trim();
-    }
-    return DateTime.now().toIso8601String();
-  }
-
-  void _applyExample(String example) {
-    _controller.text = example;
-    ref.read(readingFlowControllerProvider.notifier).setQuestion(example);
-    setState(() {});
-  }
-
-  void _clearQuestion() {
-    _controller.clear();
-    ref.read(readingFlowControllerProvider.notifier).setQuestion('');
-    setState(() {});
-  }
-
-  void _handleFocusChange() {
-    setState(() {});
+  void _scrollToQuestionField() {
     if (!_focusNode.hasFocus) {
       return;
     }
@@ -88,9 +69,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
     final config = ConfigService.instance;
     final cardsRepo = ref.read(cardsRepositoryProvider);
-    final spreadsRepo = ref.read(dataRepositoryProvider);
-    final cardsCacheKey = cardsRepo.cardsCacheKey(locale);
-    final spreadsCacheKey = spreadsRepo.spreadsCacheKey(locale);
+    final spreadsRepo = ref.read(spreadsRepositoryProvider);
+    final cardsCacheKey = cardsRepo.cardsCacheKey(locale.languageCode);
+    final spreadsCacheKey = spreadsRepo.spreadsCacheKey(locale.languageCode);
     final lastRequestedCardsUrl =
         cardsRepo.lastAttemptedUrls[cardsCacheKey] ?? '—';
     final lastRequestedSpreadsUrl =
@@ -124,12 +105,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
                 _DebugLine(
                   label: 'Spreads URL',
-                  value: spreadsUrl(locale.languageCode),
+                  value: spreadsRepo.spreadsUrlForLanguage(locale.languageCode),
                   textTheme: textTheme,
                 ),
                 _DebugLine(
                   label: 'Cards URL',
-                  value: cardsRepo.cardsUrlForLocale(locale),
+                  value: cardsRepo.cardsUrlForLanguage(locale.languageCode),
                   textTheme: textTheme,
                 ),
                 _DebugLine(
@@ -202,216 +183,300 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(
-                          child: GestureDetector(
-                            onLongPress: kShowDiagnostics
-                                ? () {
-                                    _showDebugOverlay(context, locale);
-                                  }
-                                : null,
-                            child: Text(
-                              l10n.appTitle,
-                              style: AppTextStyles.title(context)
-                                  .copyWith(color: colorScheme.onSurface),
-                            ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                l10n.homeTitle,
+                                style: AppTextStyles.title(context),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                l10n.homeTagline,
+                                style: AppTextStyles.caption(context).copyWith(
+                                  color: colorScheme.onSurface.withOpacity(0.8),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.history),
-                          tooltip: l10n.historyTooltip,
-                          onPressed: () {
-                            Navigator.pushNamed(
-                              context,
-                              HistoryScreen.routeName,
-                              arguments:
-                                  const AppRouteConfig(showBackButton: true),
-                            );
-                          },
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.settings),
-                          tooltip: l10n.settingsTitle,
-                          onPressed: () {
-                            Navigator.pushNamed(
-                              context,
-                              SettingsScreen.routeName,
-                              arguments:
-                                  const AppRouteConfig(showBackButton: true),
-                            );
-                          },
+                          icon: const Icon(Icons.info_outline),
+                          onPressed: () => _showDebugOverlay(context, locale),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 6),
-                    Text(
-                      l10n.homeDescription,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: colorScheme.onSurface.withOpacity(0.7),
-                          ),
+                    const SizedBox(height: 20),
+                    _ExampleGrid(
+                      examples: examples,
+                      onSelected: (value) {
+                        _controller.text = value;
+                        if (!_autoFocused) {
+                          _autoFocused = true;
+                          Future<void>.delayed(const Duration(milliseconds: 80))
+                              .then((_) {
+                            if (mounted) {
+                              FocusScope.of(context).requestFocus(_focusNode);
+                            }
+                          });
+                        }
+                      },
                     ),
                     const SizedBox(height: 22),
-                    Container(
+                    Text(
+                      l10n.homeQuestionLabel,
+                      style: AppTextStyles.sectionTitle(context),
+                    ),
+                    const SizedBox(height: 8),
+                    _QuestionField(
                       key: _questionKey,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(22),
-                        color: colorScheme.surfaceVariant.withOpacity(0.25),
-                        boxShadow: [
-                          BoxShadow(
-                            color: colorScheme.primary.withOpacity(0.18),
-                            blurRadius: 20,
-                            offset: const Offset(0, 10),
-                          ),
-                        ],
-                        border: Border.all(
-                          color: colorScheme.primary.withOpacity(0.35),
-                        ),
-                      ),
-                      child: Stack(
-                        children: [
-                          TextField(
-                            controller: _controller,
-                            focusNode: _focusNode,
-                            maxLines: 6,
-                            minLines: 5,
-                            decoration: InputDecoration(
-                              hintText: l10n.homeQuestionPlaceholder,
-                              hintStyle: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
-                                  ?.copyWith(
-                                    color:
-                                        colorScheme.onSurface.withOpacity(0.45),
-                                  ),
-                              border: InputBorder.none,
-                              contentPadding:
-                                  const EdgeInsets.fromLTRB(16, 16, 48, 32),
-                              alignLabelWithHint: true,
-                            ),
-                            onChanged: (value) {
-                              ref
-                                  .read(readingFlowControllerProvider.notifier)
-                                  .setQuestion(value);
-                              setState(() {});
-                            },
-                          ),
-                          if (hasQuestion)
-                            Positioned(
-                              right: 10,
-                              bottom: 10,
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  _InlineIconButton(
-                                    icon: Icons.close,
-                                    tooltip: l10n.homeClearQuestionTooltip,
-                                    onTap: _clearQuestion,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  _InlineIconButton(
-                                    icon: Icons.arrow_forward,
-                                    tooltip: l10n.homeContinueButton,
-                                    onTap: () => _handlePrimaryAction(hasQuestion),
-                                    backgroundColor:
-                                        colorScheme.primary.withOpacity(0.2),
-                                    iconColor: colorScheme.primary,
-                                  ),
-                                ],
-                              ),
-                            ),
-                        ],
-                      ),
+                      controller: _controller,
+                      focusNode: _focusNode,
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      l10n.homeTryPrompt,
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            color: colorScheme.onSurface.withOpacity(0.7),
-                          ),
+                      l10n.homeQuickActionsLabel,
+                      style: AppTextStyles.sectionTitle(context),
                     ),
                     const SizedBox(height: 12),
-                    Wrap(
-                      spacing: 10,
-                      runSpacing: 10,
-                      children: examples
-                          .map(
-                            (example) => _ExampleChip(
-                              text: example,
-                              onTap: () => _applyExample(example),
-                            ),
-                          )
-                          .toList(),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: AppGhostButton(
+                            label: l10n.homeAllCardsButton,
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  settings:
+                                      appRouteSettings(showBackButton: true),
+                                  builder: (_) => const CardsScreen(),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: AppGhostButton(
+                            label: l10n.homeSpreadsButton,
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  settings:
+                                      appRouteSettings(showBackButton: true),
+                                  builder: (_) => const SpreadScreen(),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 28),
+                    const SizedBox(height: 10),
                     Text(
-                      l10n.homeSubtitle,
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            color: colorScheme.onSurface.withOpacity(0.7),
-                          ),
+                      l10n.homeQuickActionsHint,
+                      style: AppTextStyles.caption(context).copyWith(
+                        color: colorScheme.onSurface.withOpacity(0.75),
+                      ),
                     ),
-                    const SizedBox(height: 12),
-                    _HomeNavCard(
-                      title: l10n.homeAllCardsButton,
-                      description: l10n.cardsTitle,
-                      icon: Icons.auto_awesome,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            settings:
-                                appRouteSettings(showBackButton: true),
-                            builder: (_) => const CardsScreen(),
-                          ),
-                        );
-                      },
-                    ),
+                    const SizedBox(height: 80),
                   ],
                 ),
               ),
             ),
-            if (kShowDiagnostics && _buildMarker != null)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Text(
-                  'build: $_buildMarker',
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: colorScheme.onSurface.withOpacity(0.55),
-                      ),
-                ),
-              ),
+            _BottomActionBar(
+              question: _controller.text,
+              enabled: hasQuestion,
+              bottomInset: bottomInset,
+              onSubmitted: () {
+                if (!hasQuestion) {
+                  return;
+                }
+                ref
+                    .read(readingFlowControllerProvider.notifier)
+                    .setQuestion(_controller.text);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    settings: appRouteSettings(showBackButton: true),
+                    builder: (_) => const SpreadScreen(),
+                  ),
+                );
+              },
+              onCopied: () async {
+                await Clipboard.setData(
+                  ClipboardData(text: _controller.text),
+                );
+                if (!mounted) {
+                  return;
+                }
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(l10n.homeQuestionCopied)),
+                );
+              },
+              backgroundColor: colorScheme.surface,
+              buttonColor: hasQuestion ? primaryColor : disabledColor,
+            ),
           ],
         ),
       ),
-      bottomNavigationBar: SafeArea(
-        top: false,
-        child: AnimatedPadding(
-          duration: const Duration(milliseconds: 220),
-          curve: Curves.easeOut,
-          padding: EdgeInsets.fromLTRB(20, 12, 20, 20 + bottomInset),
-          child: _PrimaryActionButton(
-            isActive: hasQuestion,
-            primaryColor: primaryColor,
-            disabledColor: disabledColor,
-            label: l10n.homeContinueButton,
-            onPressed: () => _handlePrimaryAction(hasQuestion),
+    );
+  }
+}
+
+class _ExampleGrid extends StatelessWidget {
+  const _ExampleGrid({
+    required this.examples,
+    required this.onSelected,
+  });
+
+  final List<String> examples;
+  final ValueChanged<String> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        final crossAxisCount = width >= 640 ? 3 : 2;
+        final spacing = 12.0;
+        final itemWidth = (width - spacing * (crossAxisCount - 1)) / crossAxisCount;
+        return Wrap(
+          spacing: spacing,
+          runSpacing: spacing,
+          children: examples
+              .map(
+                (example) => SizedBox(
+                  width: itemWidth,
+                  child: _ExampleCard(
+                    text: example,
+                    onTap: () => onSelected(example),
+                  ),
+                ),
+              )
+              .toList(),
+        );
+      },
+    );
+  }
+}
+
+class _ExampleCard extends StatelessWidget {
+  const _ExampleCard({
+    required this.text,
+    required this.onTap,
+  });
+
+  final String text;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: onTap,
+      child: Ink(
+        decoration: BoxDecoration(
+          color: colorScheme.surfaceVariant.withOpacity(0.4),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: colorScheme.outlineVariant.withOpacity(0.6),
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Text(
+            text,
+            style: AppTextStyles.body(context),
           ),
         ),
       ),
     );
   }
+}
 
-  void _handlePrimaryAction(bool hasQuestion) {
-    if (!hasQuestion) {
-      if (!_focusNode.hasFocus) {
-        _focusNode.requestFocus();
-      }
-      return;
-    }
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        settings: appRouteSettings(showBackButton: false),
-        builder: (_) => const SpreadScreen(),
+class _QuestionField extends StatelessWidget {
+  const _QuestionField({
+    super.key,
+    required this.controller,
+    required this.focusNode,
+  });
+
+  final TextEditingController controller;
+  final FocusNode focusNode;
+
+  @override
+  Widget build(BuildContext context) {
+    return AppTextField(
+      controller: controller,
+      focusNode: focusNode,
+      minLines: 3,
+      maxLines: 6,
+      hintText: AppLocalizations.of(context)!.homeQuestionPlaceholder,
+      textInputAction: TextInputAction.newline,
+    );
+  }
+}
+
+class _BottomActionBar extends StatelessWidget {
+  const _BottomActionBar({
+    required this.question,
+    required this.enabled,
+    required this.bottomInset,
+    required this.onSubmitted,
+    required this.onCopied,
+    required this.backgroundColor,
+    required this.buttonColor,
+  });
+
+  final String question;
+  final bool enabled;
+  final double bottomInset;
+  final VoidCallback onSubmitted;
+  final VoidCallback onCopied;
+  final Color backgroundColor;
+  final Color buttonColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 180),
+      padding: EdgeInsets.fromLTRB(
+        20,
+        12,
+        20,
+        12 + bottomInset,
+      ),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        border: Border(
+          top: BorderSide(
+            color: Theme.of(context).colorScheme.outlineVariant,
+          ),
+        ),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: AppPrimaryButton(
+              onPressed: enabled ? onSubmitted : null,
+              label: l10n.shuffleDrawButton,
+              color: buttonColor,
+            ),
+          ),
+          const SizedBox(width: 12),
+          AppIconButton(
+            onPressed: enabled ? onCopied : null,
+            icon: Icons.copy_rounded,
+          ),
+        ],
       ),
     );
   }
@@ -431,188 +496,13 @@ class _DebugLine extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(label, style: textTheme.labelMedium),
-          const SizedBox(height: 4),
-          SelectableText(
-            value,
-            style: textTheme.bodySmall,
-          ),
+          SelectableText(value),
         ],
-      ),
-    );
-  }
-}
-
-class _ExampleChip extends StatelessWidget {
-  const _ExampleChip({
-    required this.text,
-    required this.onTap,
-  });
-
-  final String text;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        decoration: BoxDecoration(
-          color: colorScheme.surfaceVariant.withOpacity(0.25),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: colorScheme.outlineVariant),
-        ),
-        child: Text(
-          text,
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
-      ),
-    );
-  }
-}
-
-class _HomeNavCard extends StatelessWidget {
-  const _HomeNavCard({
-    required this.title,
-    required this.description,
-    required this.icon,
-    required this.onTap,
-  });
-
-  final String title;
-  final String description;
-  final IconData icon;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return InkWell(
-      borderRadius: BorderRadius.circular(20),
-      onTap: onTap,
-      child: Ink(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          color: colorScheme.surfaceVariant.withOpacity(0.3),
-          border: Border.all(color: colorScheme.outlineVariant),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: colorScheme.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Icon(icon, color: colorScheme.primary),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    description,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurface.withOpacity(0.65),
-                        ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(
-              Icons.chevron_right,
-              color: colorScheme.onSurface.withOpacity(0.4),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _PrimaryActionButton extends StatelessWidget {
-  const _PrimaryActionButton({
-    required this.isActive,
-    required this.primaryColor,
-    required this.disabledColor,
-    required this.label,
-    this.onPressed,
-  });
-
-  final bool isActive;
-  final Color primaryColor;
-  final Color disabledColor;
-  final String label;
-  final VoidCallback? onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return AppPrimaryButton(
-      label: label,
-      onPressed: onPressed,
-      backgroundColor: isActive ? primaryColor : disabledColor,
-      padding: const EdgeInsets.symmetric(vertical: 16),
-    );
-  }
-}
-
-class _InlineIconButton extends StatelessWidget {
-  const _InlineIconButton({
-    required this.icon,
-    required this.tooltip,
-    required this.onTap,
-    this.backgroundColor,
-    this.iconColor,
-  });
-
-  final IconData icon;
-  final String tooltip;
-  final VoidCallback onTap;
-  final Color? backgroundColor;
-  final Color? iconColor;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final resolvedBackground =
-        backgroundColor ?? colorScheme.surface.withOpacity(0.85);
-    final resolvedIconColor =
-        iconColor ?? colorScheme.onSurface.withOpacity(0.75);
-    return Semantics(
-      button: true,
-      label: tooltip,
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          width: 28,
-          height: 28,
-          decoration: BoxDecoration(
-            color: resolvedBackground,
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: colorScheme.primary.withOpacity(0.35),
-            ),
-          ),
-          child: Icon(
-            icon,
-            size: 18,
-            color: resolvedIconColor,
-          ),
-        ),
       ),
     );
   }

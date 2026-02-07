@@ -78,14 +78,14 @@ class SpreadScreen extends ConsumerWidget {
           },
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, _) {
-            final repo = ref.read(dataRepositoryProvider);
+            final repo = ref.read(spreadsRepositoryProvider);
             final locale = ref.read(localeProvider);
-            final cacheKey = repo.spreadsCacheKey(locale);
+            final cacheKey = repo.spreadsCacheKey(locale.languageCode);
             final debugInfo = kShowDiagnostics
                 ? DataLoadDebugInfo(
                     assetsBaseUrl: AssetsConfig.assetsBaseUrl,
                     requests: {
-                      'spreads (${repo.spreadsFileNameForLocale(locale)})':
+                      'spreads (${repo.spreadsFileNameForLanguage(locale.languageCode)})':
                           DataLoadRequestDebugInfo(
                         url: repo.lastAttemptedUrls[cacheKey] ?? '—',
                         statusCode: repo.lastStatusCodes[cacheKey],
@@ -105,7 +105,10 @@ class SpreadScreen extends ConsumerWidget {
                 : null;
             return Center(
               child: FutureBuilder<bool>(
-                future: repo.hasCachedData(cacheKey),
+                future: repo.hasCachedData(
+                  locale.languageCode,
+                  includeFallback: true,
+                ),
                 builder: (context, snapshot) {
                   final hasCache = snapshot.data ?? false;
                   return DataLoadError(
@@ -198,36 +201,51 @@ class _SpreadOptionCard extends ConsumerWidget {
             ),
           ],
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Row(
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(26),
+          child: Stack(
             children: [
-              Expanded(
+              Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        theme.colorScheme.surfaceVariant.withOpacity(0.18),
+                        theme.colorScheme.surfaceVariant.withOpacity(0.5),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(18),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    Align(
+                      alignment: Alignment.topRight,
+                      child: SizedBox(
+                        width: 96,
+                        height: 96,
+                        child: animation,
+                      ),
+                    ),
+                    const Spacer(),
                     Text(
                       title,
-                      style: AppTextStyles.title(context)
-                          .copyWith(color: theme.colorScheme.onSurface),
+                      style: AppTextStyles.sectionTitle(context),
                     ),
                     const SizedBox(height: 6),
                     Text(
                       subtitle,
-                      style: AppTextStyles.body(context).copyWith(
+                      style: AppTextStyles.caption(context).copyWith(
                         color: theme.colorScheme.onSurface.withOpacity(0.7),
-                        height: 1.35,
                       ),
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(width: 12),
-              SizedBox(
-                width: 140,
-                height: 140,
-                child: animation,
               ),
             ],
           ),
@@ -242,231 +260,22 @@ SpreadModel? _resolveSpreadByType(
   SpreadType spreadType, {
   required AppLocalizations l10n,
 }) {
-  final desiredCount = spreadType.cardCount;
-  final directMatch = _findSpread(spreads, desiredCount);
-  if (directMatch != null) {
-    return directMatch;
+  final count = spreadType.cardCount;
+  final found = _findSpread(spreads, count);
+  if (found != null) {
+    return found;
   }
-  if (spreads.isEmpty) {
-    return null;
-  }
-  final fallback = spreads.first;
-  final fallbackPositions = fallback.positions.isNotEmpty
-      ? fallback.positions.take(desiredCount).toList()
-      : [
-          SpreadPosition(
-            id: spreadType == SpreadType.one ? 'focus' : 'past',
-            title: spreadType == SpreadType.one
-                ? l10n.spreadOneCardTitle
-                : l10n.spreadThreeCardTitle,
-          ),
-        ];
+
   return SpreadModel(
-    id: spreadType == SpreadType.one ? 'one_card' : fallback.id,
-    name: spreadType == SpreadType.one
-        ? l10n.spreadOneCardTitle
-        : fallback.name,
-    positions: fallbackPositions,
-    cardsCount: desiredCount,
-  );
-}
-
-enum SpreadIconMode { oneCard, threeCards }
-
-class SpreadIconDeck extends StatefulWidget {
-  const SpreadIconDeck({
-    super.key,
-    required this.mode,
-  });
-
-  final SpreadIconMode mode;
-
-  @override
-  State<SpreadIconDeck> createState() => _SpreadIconDeckState();
-}
-
-class _SpreadIconDeckState extends State<SpreadIconDeck>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-  late final Animation<double> _progress;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1800),
-    )..repeat(reverse: true);
-    _progress = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOutCubic,
-      reverseCurve: Curves.easeInCubic,
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final primary = theme.colorScheme.primary;
-    final deckColor = _shiftLightness(primary, -0.22).withOpacity(0.96);
-    final deckHighlight = _shiftLightness(primary, -0.05).withOpacity(0.9);
-    final deckBorder = _shiftLightness(primary, 0.2).withOpacity(0.85);
-    final cardColor = _shiftLightness(primary, -0.12).withOpacity(0.95);
-    final cardHighlight = _shiftLightness(primary, 0.05).withOpacity(0.92);
-    final cardBorder = _shiftLightness(primary, 0.28).withOpacity(0.9);
-    final shadow = primary.withOpacity(0.28);
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final size = constraints.biggest;
-        final cardWidth = size.width * 0.48;
-        final cardHeight = size.height * 0.68;
-        final center = Offset(size.width * 0.5, size.height * 0.54);
-        return AnimatedBuilder(
-          animation: _progress,
-          builder: (context, child) {
-            final pullY = lerpDouble(-14, -6, _progress.value) ?? 0;
-            final pullX = lerpDouble(6, 10, _progress.value) ?? 0;
-            final fanProgress = _progress.value;
-            return Stack(
-              alignment: Alignment.center,
-              children: [
-                _CardShape(
-                  width: cardWidth,
-                  height: cardHeight,
-                  gradient: LinearGradient(
-                    colors: [deckColor, deckHighlight],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderColor: deckBorder,
-                  shadowColor: shadow,
-                  offset: center + const Offset(0, 10),
-                  rotation: -0.02,
-                ),
-                _CardShape(
-                  width: cardWidth,
-                  height: cardHeight,
-                  gradient: LinearGradient(
-                    colors: [deckColor, deckHighlight],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderColor: deckBorder,
-                  shadowColor: shadow,
-                  offset: center + const Offset(-8, 4),
-                  rotation: 0.02,
-                ),
-                if (widget.mode == SpreadIconMode.threeCards)
-                  _CardShape(
-                    width: cardWidth,
-                    height: cardHeight,
-                    gradient: LinearGradient(
-                      colors: [cardColor, cardHighlight],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderColor: cardBorder,
-                    shadowColor: shadow,
-                    offset:
-                        center + Offset(-14 * fanProgress, -14 * fanProgress),
-                    rotation: -0.14 * fanProgress,
-                  ),
-                if (widget.mode == SpreadIconMode.threeCards)
-                  _CardShape(
-                    width: cardWidth,
-                    height: cardHeight,
-                    gradient: LinearGradient(
-                      colors: [cardColor, cardHighlight],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderColor: cardBorder,
-                    shadowColor: shadow,
-                    offset: center + Offset(0, -10 * fanProgress),
-                    rotation: 0,
-                  ),
-                _CardShape(
-                  width: cardWidth,
-                  height: cardHeight,
-                  gradient: LinearGradient(
-                    colors: [cardColor, cardHighlight],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderColor: cardBorder,
-                  shadowColor: shadow,
-                  offset: widget.mode == SpreadIconMode.oneCard
-                      ? center + Offset(pullX, pullY)
-                      : center + Offset(14 * fanProgress, -12 * fanProgress),
-                  rotation: widget.mode == SpreadIconMode.oneCard
-                      ? 0.05
-                      : 0.14 * fanProgress,
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
-}
-
-class _CardShape extends StatelessWidget {
-  const _CardShape({
-    required this.width,
-    required this.height,
-    required this.gradient,
-    required this.borderColor,
-    required this.shadowColor,
-    required this.offset,
-    required this.rotation,
-  });
-
-  final double width;
-  final double height;
-  final Gradient gradient;
-  final Color borderColor;
-  final Color shadowColor;
-  final Offset offset;
-  final double rotation;
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      left: offset.dx - width / 2,
-      top: offset.dy - height / 2,
-      child: Transform.rotate(
-        angle: rotation,
-        child: Container(
-          width: width,
-          height: height,
-          decoration: BoxDecoration(
-            gradient: gradient,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: borderColor, width: 1.6),
-            boxShadow: [
-              BoxShadow(
-                color: shadowColor,
-                blurRadius: 16,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-        ),
+    id: spreadType.storageValue,
+    name: spreadType.storageValue,
+    positions: List.generate(
+      count,
+      (index) => SpreadPosition(
+        id: 'position_${index + 1}',
+        title: l10n.spreadCardLabel(index + 1),
       ),
-    );
-  }
-}
-
-Color _shiftLightness(Color color, double amount) {
-  final hsl = HSLColor.fromColor(color);
-  final lightness = (hsl.lightness + amount).clamp(0.0, 1.0);
-  return hsl.withLightness(lightness).toColor();
+    ),
+    cardsCount: count,
+  );
 }

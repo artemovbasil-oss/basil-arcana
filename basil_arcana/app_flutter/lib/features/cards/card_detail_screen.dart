@@ -39,12 +39,12 @@ class CardDetailScreen extends ConsumerWidget {
     if (resolvedCard == null) {
       final repo = ref.read(cardsRepositoryProvider);
       final locale = ref.read(localeProvider);
-      final cacheKey = repo.cardsCacheKey(locale);
+      final cacheKey = repo.cardsCacheKey(locale.languageCode);
       final debugInfo = kShowDiagnostics
           ? DataLoadDebugInfo(
               assetsBaseUrl: AssetsConfig.assetsBaseUrl,
               requests: {
-                'cards (${repo.cardsFileNameForLocale(locale)})':
+                'cards (${repo.cardsFileNameForLanguage(locale.languageCode)})':
                     DataLoadRequestDebugInfo(
                   url: repo.lastAttemptedUrls[cacheKey] ?? '—',
                   statusCode: repo.lastStatusCodes[cacheKey],
@@ -119,22 +119,15 @@ class CardDetailScreen extends ConsumerWidget {
                                 BoxShadow(
                                   color: colorScheme.primary.withOpacity(0.18),
                                   blurRadius: 24,
-                                  offset: const Offset(0, 12),
+                                  offset: const Offset(0, 18),
                                 ),
                               ],
                             ),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(26),
-                              child: CardMedia(
-                                cardId: resolvedCard.id,
-                                imageUrl: mediaAssets.imageUrl,
-                                videoUrl: mediaAssets.videoUrl,
-                                width: double.infinity,
-                                height: double.infinity,
-                                enableVideo: true,
-                                autoPlayOnce: true,
-                                playLabel: l10n.videoTapToPlay,
-                                fit: BoxFit.contain,
+                              child: TarotAssetWidget(
+                                asset: mediaAssets,
+                                fit: BoxFit.cover,
                               ),
                             ),
                           ),
@@ -147,191 +140,61 @@ class CardDetailScreen extends ConsumerWidget {
             ),
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
-                child: Container(
-                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
-                  decoration: BoxDecoration(
-                    color: colorScheme.surface.withOpacity(0.96),
-                    borderRadius: BorderRadius.circular(28),
-                    boxShadow: [
-                      BoxShadow(
-                        color: colorScheme.primary.withOpacity(0.14),
-                        blurRadius: 26,
-                        offset: const Offset(0, 14),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        resolvedCard.name,
-                        style: Theme.of(context).textTheme.headlineSmall,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        l10n.cardKeywordsTitle,
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleMedium
-                            ?.copyWith(color: colorScheme.primary),
-                      ),
-                      const SizedBox(height: 8),
-                      if (resolvedCard.keywords.isNotEmpty)
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: resolvedCard.keywords
-                              .map(
-                                (keyword) => Chip(
-                                  label: Text(keyword),
-                                  backgroundColor: colorScheme.surface,
-                                  side: BorderSide(
-                                    color: colorScheme.outlineVariant,
-                                  ),
-                                  labelStyle: AppTextStyles.caption(context)
-                                      .copyWith(color: colorScheme.onSurface),
-                                  visualDensity: VisualDensity.compact,
-                                  materialTapTargetSize:
-                                      MaterialTapTargetSize.shrinkWrap,
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                    vertical: 2,
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                        )
-                      else
-                        Text(
-                          l10n.cardDetailsFallback,
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                      const SizedBox(height: 20),
-                      Text(
-                        l10n.cardGeneralTitle,
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleMedium
-                            ?.copyWith(color: colorScheme.primary),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        resolvedCard.meaning.general,
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                      const SizedBox(height: 20),
-                      Text(
-                        l10n.cardDetailedTitle,
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleMedium
-                            ?.copyWith(color: colorScheme.primary),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        resolvedCard.detailedDescription?.trim().isNotEmpty ?? false
-                            ? resolvedCard.detailedDescription!
-                            : l10n.cardDetailsFallback,
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                      const SizedBox(height: 20),
-                      Text(
-                        l10n.cardFunFactTitle,
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleMedium
-                            ?.copyWith(color: colorScheme.primary),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        resolvedCard.funFact?.trim().isNotEmpty ?? false
-                            ? resolvedCard.funFact!
-                            : l10n.cardDetailsFallback,
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                      const SizedBox(height: 20),
-                      Text(
-                        l10n.cardStatsTitle,
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleMedium
-                            ?.copyWith(color: colorScheme.primary),
-                      ),
-                      const SizedBox(height: 12),
-                      if (resolvedCard.stats != null)
-                        GridView.count(
-                          crossAxisCount: 2,
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          mainAxisSpacing: 12,
-                          crossAxisSpacing: 12,
-                          childAspectRatio: 2.4,
-                          children: [
-                            _StatTile(
-                              label: l10n.statLuck,
-                              value: resolvedCard.stats!.luck,
-                              icon: Icons.auto_awesome,
-                              gradient: LinearGradient(
-                                colors: [
-                                  colorScheme.primary.withOpacity(0.22),
-                                  colorScheme.surfaceVariant.withOpacity(0.55),
-                                ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                            ),
-                            _StatTile(
-                              label: l10n.statPower,
-                              value: resolvedCard.stats!.power,
-                              icon: Icons.bolt,
-                              gradient: LinearGradient(
-                                colors: [
-                                  colorScheme.secondary.withOpacity(0.22),
-                                  colorScheme.surfaceVariant.withOpacity(0.5),
-                                ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                            ),
-                            _StatTile(
-                              label: l10n.statLove,
-                              value: resolvedCard.stats!.love,
-                              icon: Icons.favorite,
-                              gradient: LinearGradient(
-                                colors: [
-                                  colorScheme.tertiary.withOpacity(0.2),
-                                  colorScheme.surfaceVariant.withOpacity(0.5),
-                                ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                            ),
-                            _StatTile(
-                              label: l10n.statClarity,
-                              value: resolvedCard.stats!.clarity,
-                              icon: Icons.visibility,
-                              gradient: LinearGradient(
-                                colors: [
-                                  colorScheme.primary.withOpacity(0.14),
-                                  colorScheme.surface.withOpacity(0.7),
-                                ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                            ),
-                          ],
-                        )
-                      else
-                        Text(
-                          l10n.cardDetailsFallback,
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                    ],
-                  ),
+                padding: const EdgeInsets.fromLTRB(20, 6, 20, 8),
+                child: Text(
+                  resolvedCard.name,
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.title(context),
                 ),
               ),
             ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+                child: _KeywordsSection(
+                  keywords: resolvedCard.keywords,
+                  label: l10n.cardsDetailKeywordsTitle,
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+                child: _TextSection(
+                  label: l10n.cardsDetailMeaningTitle,
+                  value: resolvedCard.meaning.general,
+                ),
+              ),
+            ),
+            if (resolvedCard.detailedDescription != null)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+                  child: _TextSection(
+                    label: l10n.cardsDetailDescriptionTitle,
+                    value: resolvedCard.detailedDescription!,
+                  ),
+                ),
+              ),
+            if (resolvedCard.funFact != null)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+                  child: _TextSection(
+                    label: l10n.cardsDetailFunFactTitle,
+                    value: resolvedCard.funFact!,
+                  ),
+                ),
+              ),
+            if (resolvedCard.stats != null)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+                  child: _StatsSection(
+                    stats: resolvedCard.stats!,
+                  ),
+                ),
+              ),
           ],
         ),
       ),
@@ -342,70 +205,144 @@ class CardDetailScreen extends ConsumerWidget {
 CardModel? _resolveCard(
   List<CardModel>? cards,
   String? cardId,
-  CardModel? fallback,
+  CardModel? card,
 ) {
-  if (cardId == null || cardId.isEmpty) {
-    return fallback;
+  if (card != null) {
+    return card;
   }
-  if (cards == null || cards.isEmpty) {
-    return fallback;
+  if (cards == null || cardId == null) {
+    return null;
   }
-  return cards.firstWhere(
-    (card) => card.id == cardId,
-    orElse: () => fallback ?? cards.first,
-  );
+  for (final entry in cards) {
+    if (entry.id == cardId) {
+      return entry;
+    }
+  }
+  return null;
 }
 
-class _StatTile extends StatelessWidget {
-  const _StatTile({
+class _KeywordsSection extends StatelessWidget {
+  const _KeywordsSection({
+    required this.keywords,
+    required this.label,
+  });
+
+  final List<String> keywords;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    if (keywords.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: AppTextStyles.sectionTitle(context),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 6,
+          runSpacing: 6,
+          children: keywords
+              .map(
+                (keyword) => Chip(
+                  label: Text(keyword),
+                  backgroundColor: Theme.of(context)
+                      .colorScheme
+                      .surfaceVariant
+                      .withOpacity(0.6),
+                ),
+              )
+              .toList(),
+        ),
+      ],
+    );
+  }
+}
+
+class _TextSection extends StatelessWidget {
+  const _TextSection({
     required this.label,
     required this.value,
-    required this.icon,
-    required this.gradient,
+  });
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: AppTextStyles.sectionTitle(context),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          value,
+          style: AppTextStyles.body(context),
+        ),
+      ],
+    );
+  }
+}
+
+class _StatsSection extends StatelessWidget {
+  const _StatsSection({required this.stats});
+
+  final CardStats stats;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.cardsDetailStatsTitle,
+          style: AppTextStyles.sectionTitle(context),
+        ),
+        const SizedBox(height: 12),
+        _StatRow(label: l10n.cardsDetailStatLuck, value: stats.luck),
+        _StatRow(label: l10n.cardsDetailStatPower, value: stats.power),
+        _StatRow(label: l10n.cardsDetailStatLove, value: stats.love),
+        _StatRow(label: l10n.cardsDetailStatClarity, value: stats.clarity),
+      ],
+    );
+  }
+}
+
+class _StatRow extends StatelessWidget {
+  const _StatRow({
+    required this.label,
+    required this.value,
   });
 
   final String label;
   final int value;
-  final IconData icon;
-  final Gradient gradient;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-      decoration: BoxDecoration(
-        gradient: gradient,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: colorScheme.outlineVariant.withOpacity(0.7)),
-      ),
+    final colorScheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
       child: Row(
         children: [
-          Container(
-            width: 34,
-            height: 34,
-            decoration: BoxDecoration(
-              color: colorScheme.primary.withOpacity(0.12),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, color: colorScheme.primary, size: 18),
-          ),
-          const SizedBox(width: 10),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: theme.textTheme.labelMedium,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '$value',
-                  style: theme.textTheme.titleMedium,
-                ),
-              ],
+            child: Text(
+              label,
+              style: AppTextStyles.body(context),
+            ),
+          ),
+          Text(
+            value.toString(),
+            style: AppTextStyles.body(context).copyWith(
+              color: colorScheme.primary,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ],

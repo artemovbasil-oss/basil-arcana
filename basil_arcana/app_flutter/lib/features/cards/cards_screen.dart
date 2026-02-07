@@ -82,12 +82,12 @@ class _CardsScreenState extends ConsumerState<CardsScreen> {
           error: (error, stackTrace) {
             final repo = ref.read(cardsRepositoryProvider);
             final locale = ref.read(localeProvider);
-            final cacheKey = repo.cardsCacheKey(locale);
+            final cacheKey = repo.cardsCacheKey(locale.languageCode);
             final debugInfo = kShowDiagnostics
                 ? DataLoadDebugInfo(
                     assetsBaseUrl: AssetsConfig.assetsBaseUrl,
                     requests: {
-                      'cards (${repo.cardsFileNameForLocale(locale)})':
+                      'cards (${repo.cardsFileNameForLanguage(locale.languageCode)})':
                           DataLoadRequestDebugInfo(
                         url: repo.lastAttemptedUrls[cacheKey] ?? '—',
                         statusCode: repo.lastStatusCodes[cacheKey],
@@ -107,7 +107,10 @@ class _CardsScreenState extends ConsumerState<CardsScreen> {
                 : null;
             return Center(
               child: FutureBuilder<bool>(
-                future: repo.hasCachedData(cacheKey),
+                future: repo.hasCachedData(
+                  locale.languageCode,
+                  includeFallback: true,
+                ),
                 builder: (context, snapshot) {
                   final hasCache = snapshot.data ?? false;
                   return DataLoadError(
@@ -221,8 +224,55 @@ class _CardTile extends StatelessWidget {
   }
 }
 
+class _EmptyState extends StatelessWidget {
+  const _EmptyState({
+    required this.title,
+    required this.subtitle,
+  });
+
+  final String title;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.auto_awesome_rounded,
+              size: 44,
+              color: colorScheme.primary,
+            ),
+            const SizedBox(height: 14),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              subtitle,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.onSurface.withOpacity(0.7),
+                  ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _DrawnBadge extends StatelessWidget {
-  const _DrawnBadge({required this.label, required this.isEmpty});
+  const _DrawnBadge({
+    required this.label,
+    required this.isEmpty,
+  });
 
   final String label;
   final bool isEmpty;
@@ -230,52 +280,23 @@ class _DrawnBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: colorScheme.primary.withOpacity(isEmpty ? 0.08 : 0.14),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(
-          color: colorScheme.primary.withOpacity(isEmpty ? 0.2 : 0.4),
-        ),
-      ),
-      child: Text(
-        label,
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: colorScheme.onSurface.withOpacity(isEmpty ? 0.6 : 0.9),
-            ),
-      ),
-    );
-  }
-}
-
-class _EmptyState extends StatelessWidget {
-  const _EmptyState({required this.title, required this.subtitle});
-
-  final String title;
-  final String subtitle;
-
-  @override
-  Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    return Center(
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: isEmpty
+            ? colorScheme.surfaceVariant.withOpacity(0.6)
+            : colorScheme.primary.withOpacity(0.2),
+      ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: textTheme.titleLarge,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              subtitle,
-              textAlign: TextAlign.center,
-              style: textTheme.bodyMedium,
-            ),
-          ],
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        child: Text(
+          label,
+          style: textTheme.labelSmall?.copyWith(
+            color: isEmpty
+                ? colorScheme.onSurface.withOpacity(0.7)
+                : colorScheme.primary,
+          ),
         ),
       ),
     );
