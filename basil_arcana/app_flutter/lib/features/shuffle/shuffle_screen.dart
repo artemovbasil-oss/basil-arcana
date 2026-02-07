@@ -36,8 +36,7 @@ class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
 
   static const _cardWidth = 140.0;
   static const _cardHeight = 210.0;
-  static const _deckCoverUrl =
-      'https://basilarcana-assets.b-cdn.net/deck/new-deck.webp';
+  static const _deckCoverUrl = 'https://cdn.basilarcana.com/deck/new-deck.webp';
 
   @override
   void initState() {

@@ -16,9 +16,9 @@ class SplashScreen extends StatefulWidget {
 }
 
 const _deckSplashPosterUrl =
-    'https://basilarcana-assets.b-cdn.net/deck/new-deck.webp';
+    'https://cdn.basilarcana.com/deck/new-deck.webp';
 const _deckSplashVideoUrl =
-    'https://basilarcana-assets.b-cdn.net/deck/cover-video.webm';
+    'https://cdn.basilarcana.com/deck/cover-video.webm';
 
 class _SplashScreenState extends State<SplashScreen> {
   Timer? _navigationTimer;
