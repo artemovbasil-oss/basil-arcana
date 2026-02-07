@@ -143,34 +143,6 @@ class CardModel {
     );
   }
 
-  factory CardModel.fromCdnEntry(Map<String, dynamic> json) {
-    final id = canonicalCardId(json['id'] as String? ?? '');
-    final deck = deckIdFromString(json['deck'] as String?) ??
-        _deckIdFromCardId(id);
-    final generalMeaning = json['generalMeaning'] as String? ??
-        (json['meaning'] as Map<String, dynamic>?)?['general'] as String? ??
-        (json['summary'] as String?) ??
-        '';
-    final meaning = json['meaning'] is Map<String, dynamic>
-        ? CardMeaning.fromJson(json['meaning'] as Map<String, dynamic>)
-        : CardMeaning.fromGeneralMeaning(generalMeaning);
-    return CardModel(
-      id: id,
-      deckId: deck,
-      name: json['title'] as String? ?? json['name'] as String? ?? id,
-      keywords: (json['keywords'] as List<dynamic>? ?? const []).cast<String>(),
-      meaning: meaning,
-      detailedDescription: json['description'] as String? ??
-          json['detailedDescription'] as String?,
-      funFact: json['interestingFact'] as String? ??
-          json['fact'] as String? ??
-          json['funFact'] as String?,
-      stats: CardStats.fromJson(json['stats'] as Map<String, dynamic>?),
-      videoFileName: _videoFileNameFromJson(json),
-      imageUrl: json['imageUrl'] as String? ?? '',
-      videoUrl: json['videoUrl'] as String?,
-    );
-  }
 }
 
 String? cardVideoUrl(CardModel card, String assetsBaseUrl) {

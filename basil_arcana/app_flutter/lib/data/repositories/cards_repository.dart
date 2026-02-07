@@ -232,49 +232,48 @@ bool _isValidCardEntry(Map<String, dynamic> card) {
 
 List<CardModel> _parseCards({required String raw, required DeckType deckId}) {
   final decoded = parseJsonString(raw).decoded;
-  final entries = <Map<String, dynamic>>[];
-  if (decoded is Map<String, dynamic>) {
-    for (final entry in decoded.entries) {
-      final value = entry.value;
-      if (value is Map<String, dynamic>) {
-        final card = Map<String, dynamic>.from(value);
-        card['id'] ??= entry.key;
-        entries.add(card);
-      }
-    }
+  if (decoded is! Map<String, dynamic>) {
+    return const [];
+  }
+  final canonicalData = _canonicalizeCardData(decoded);
+
+  List<CardModel> buildDeckCards(List<String> ids) {
+    return ids.where(canonicalData.containsKey).map((id) {
+      final card = CardModel.fromLocalizedEntry(
+        id,
+        canonicalData[id] as Map<String, dynamic>,
+      );
+      final resolvedImageUrl = _resolveImageUrl(
+        card.imageUrl,
+        card.id,
+        card.deckId,
+      );
+      return resolvedImageUrl == card.imageUrl
+          ? card
+          : card.copyWith(imageUrl: resolvedImageUrl);
+    }).toList();
   }
 
   final deckRegistry = <DeckType, List<CardModel>>{
-    DeckType.major: [],
-    DeckType.wands: [],
-    DeckType.swords: [],
-    DeckType.pentacles: [],
-    DeckType.cups: [],
+    DeckType.major: buildDeckCards(majorCardIds),
+    DeckType.wands: buildDeckCards(wandsCardIds),
+    DeckType.swords: buildDeckCards(swordsCardIds),
+    DeckType.pentacles: buildDeckCards(pentaclesCardIds),
+    DeckType.cups: buildDeckCards(cupsCardIds),
   };
 
-  for (final entry in entries) {
-    final card = CardModel.fromCdnEntry(entry);
-    final resolvedImageUrl = _resolveImageUrl(
-      card.imageUrl,
-      card.id,
-      card.deckId,
-    );
-    final resolvedCard = resolvedImageUrl == card.imageUrl
-        ? card
-        : card.copyWith(imageUrl: resolvedImageUrl);
-    final deckList = deckRegistry[card.deckId];
-    if (deckList != null) {
-      deckList.add(resolvedCard);
-    }
-  }
-
-  _sortDeckCards(deckRegistry[DeckType.major] ?? const [], majorCardIds);
-  _sortDeckCards(deckRegistry[DeckType.wands] ?? const [], wandsCardIds);
-  _sortDeckCards(deckRegistry[DeckType.swords] ?? const [], swordsCardIds);
-  _sortDeckCards(deckRegistry[DeckType.pentacles] ?? const [], pentaclesCardIds);
-  _sortDeckCards(deckRegistry[DeckType.cups] ?? const [], cupsCardIds);
-
   return _getActiveDeckCards(deckId, deckRegistry);
+}
+
+Map<String, Map<String, dynamic>> _canonicalizeCardData(
+  Map<String, dynamic> data,
+) {
+  final canonical = <String, Map<String, dynamic>>{};
+  for (final entry in data.entries) {
+    final key = canonicalCardId(entry.key);
+    canonical[key] = entry.value as Map<String, dynamic>;
+  }
+  return canonical;
 }
 
 String _resolveImageUrl(String rawUrl, String cardId, DeckType deckId) {
@@ -290,23 +289,6 @@ String _resolveImageUrl(String rawUrl, String cardId, DeckType deckId) {
     return '${AssetsConfig.assetsBaseUrl}/$normalized';
   }
   return '${AssetsConfig.assetsBaseUrl}/$normalized';
-}
-
-void _sortDeckCards(List<CardModel> cards, List<String> order) {
-  if (cards.isEmpty) {
-    return;
-  }
-  final orderMap = <String, int>{
-    for (var i = 0; i < order.length; i++) canonicalCardId(order[i]): i,
-  };
-  cards.sort((a, b) {
-    final aIndex = orderMap[a.id] ?? order.length;
-    final bIndex = orderMap[b.id] ?? order.length;
-    if (aIndex != bIndex) {
-      return aIndex.compareTo(bIndex);
-    }
-    return a.id.compareTo(b.id);
-  });
 }
 
 List<CardModel> _getActiveDeckCards(
