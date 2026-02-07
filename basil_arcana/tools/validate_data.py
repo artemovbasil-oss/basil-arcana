@@ -12,7 +12,8 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = REPO_ROOT / "cdn" / "data"
 
 CARD_KEYS = {"title", "keywords", "meaning", "fact", "stats"}
-MEANING_KEYS = {"general", "detailed"}
+OPTIONAL_CARD_KEYS = {"detailedDescription"}
+MEANING_KEYS = {"general", "light", "shadow", "advice"}
 STATS_KEYS = {"luck", "power", "love", "clarity"}
 
 
@@ -28,9 +29,9 @@ def load_json_url(url: str) -> Any:
 
 
 def validate_card(card_id: str, card: Dict[str, Any], errors: List[str]) -> None:
-    if set(card.keys()) != CARD_KEYS:
-        extra = set(card.keys()) - CARD_KEYS
-        missing = CARD_KEYS - set(card.keys())
+    extra = set(card.keys()) - CARD_KEYS - OPTIONAL_CARD_KEYS
+    missing = CARD_KEYS - set(card.keys())
+    if extra or missing:
         if extra:
             errors.append(f"{card_id}: unexpected keys {sorted(extra)}")
         if missing:
@@ -50,8 +51,12 @@ def validate_card(card_id: str, card: Dict[str, Any], errors: List[str]) -> None
     else:
         if not isinstance(meaning["general"], str):
             errors.append(f"{card_id}: meaning.general must be string")
-        if not isinstance(meaning["detailed"], str):
-            errors.append(f"{card_id}: meaning.detailed must be string")
+        if not isinstance(meaning["light"], str):
+            errors.append(f"{card_id}: meaning.light must be string")
+        if not isinstance(meaning["shadow"], str):
+            errors.append(f"{card_id}: meaning.shadow must be string")
+        if not isinstance(meaning["advice"], str):
+            errors.append(f"{card_id}: meaning.advice must be string")
 
     if not isinstance(card["fact"], str):
         errors.append(f"{card_id}: fact must be string")
