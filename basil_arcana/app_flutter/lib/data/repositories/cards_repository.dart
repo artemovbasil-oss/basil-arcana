@@ -158,6 +158,10 @@ class CardsRepository {
       _lastError = null;
       return result.raw;
     } catch (error, stackTrace) {
+      final bundled = await _loadBundledCards(cacheKey, validator);
+      if (bundled != null) {
+        return bundled;
+      }
       _lastError = '${error.toString()}\n$stackTrace';
       if (error is JsonFetchException && error.response != null) {
         _recordResponseInfo(cacheKey, error.response!);
@@ -188,6 +192,32 @@ class CardsRepository {
       }
       throw CardsLoadException(error.toString(), cacheKey: cacheKey);
     }
+  }
+
+  Future<String?> _loadBundledCards(
+    String cacheKey,
+    bool Function(Object?) validator,
+  ) async {
+    final asset = switch (cacheKey) {
+      _cardsPrefix + 'ru' => 'assets/data/cards_ru.json',
+      _cardsPrefix + 'kk' => 'assets/data/cards_kz.json',
+      _ => 'assets/data/cards_en.json',
+    };
+    try {
+      final bundled = await DefaultAssetBundle.instance.loadString(asset);
+      final parsed = parseJsonString(bundled);
+      final rootType = jsonRootType(parsed.decoded);
+      _lastResponseRootTypes[cacheKey] = rootType;
+      if (rootType == 'Map' && validator(parsed.decoded)) {
+        await _storeCache(cacheKey, parsed.raw);
+        _lastCacheTimes[cacheKey] = DateTime.now();
+        _lastError = null;
+        return parsed.raw;
+      }
+    } on FlutterError {
+      return null;
+    }
+    return null;
   }
 
   Future<String?> _readCache(String cacheKey) async {
