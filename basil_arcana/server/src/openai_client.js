@@ -69,6 +69,13 @@ function buildResponseInput(messages) {
   }));
 }
 
+function buildChatMessages(messages) {
+  return messages.map((message) => ({
+    role: message.role,
+    content: String(message.content),
+  }));
+}
+
 function extractResponseText(data) {
   if (typeof data?.output_text === 'string' && data.output_text.trim()) {
     return data.output_text;
@@ -84,6 +91,14 @@ function extractResponseText(data) {
     }
   }
 
+  return null;
+}
+
+function extractChatCompletionText(data) {
+  const message = data?.choices?.[0]?.message?.content;
+  if (typeof message === 'string' && message.trim()) {
+    return message;
+  }
   return null;
 }
 
@@ -140,6 +155,18 @@ async function createResponse(
         const details = extractErrorDetails(text);
         const errorMessage =
           details.errorMessage || `OpenAI error ${response.status}`;
+
+        const canFallback =
+          response.status === 404 || details.errorType === 'invalid_request_error';
+
+        if (canFallback) {
+          return await createChatResponse(messages, {
+            requestId,
+            timeoutMs,
+            retries,
+            fallbackDurationMs: durationMs,
+          });
+        }
 
         if (shouldRetry(response.status) && attempt <= retries) {
           await sleep(RETRY_DELAYS_MS[Math.min(attempt - 1, RETRY_DELAYS_MS.length - 1)]);
@@ -305,6 +332,18 @@ async function createTextResponse(
         const errorMessage =
           details.errorMessage || `OpenAI error ${response.status}`;
 
+        const canFallback =
+          response.status === 404 || details.errorType === 'invalid_request_error';
+
+        if (canFallback) {
+          return await createChatTextResponse(messages, {
+            requestId,
+            timeoutMs,
+            retries,
+            fallbackDurationMs: durationMs,
+          });
+        }
+
         if (shouldRetry(response.status) && attempt <= retries) {
           await sleep(RETRY_DELAYS_MS[Math.min(attempt - 1, RETRY_DELAYS_MS.length - 1)]);
           continue;
@@ -379,6 +418,290 @@ async function createTextResponse(
 
       if (!logged) {
         const durationMs = Date.now() - startTime;
+        logOpenAIEvent({
+          requestId,
+          model: OPENAI_MODEL,
+          timeout_ms: timeoutMs,
+          retries,
+          duration_ms: durationMs,
+          ok: false,
+          errorName: error.name,
+          errorMessage: error.message,
+          attempt,
+        });
+      }
+      throw error;
+    }
+  }
+}
+
+async function createChatResponse(
+  messages,
+  { requestId, timeoutMs, retries, fallbackDurationMs = null } = {}
+) {
+  const startTime = Date.now();
+  let logged = false;
+  let attempt = 0;
+
+  while (attempt <= retries) {
+    attempt += 1;
+    try {
+      const response = await fetchWithTimeout(
+        'https://api.openai.com/v1/chat/completions',
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${OPENAI_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: OPENAI_MODEL,
+            messages: buildChatMessages(messages),
+            temperature: 0,
+            response_format: { type: 'json_object' },
+          }),
+        },
+        timeoutMs
+      );
+
+      const durationMs = Date.now() - startTime + (fallbackDurationMs || 0);
+
+      if (!response.ok) {
+        const text = await response.text();
+        const bodyPreview = buildBodyPreview(text);
+        const details = extractErrorDetails(text);
+        const errorMessage =
+          details.errorMessage || `OpenAI error ${response.status}`;
+
+        if (shouldRetry(response.status) && attempt <= retries) {
+          await sleep(RETRY_DELAYS_MS[Math.min(attempt - 1, RETRY_DELAYS_MS.length - 1)]);
+          continue;
+        }
+
+        logOpenAIEvent({
+          requestId,
+          model: OPENAI_MODEL,
+          timeout_ms: timeoutMs,
+          retries,
+          duration_ms: durationMs,
+          ok: false,
+          status: response.status,
+          errorType: details.errorType,
+          errorCode: details.errorCode,
+          errorName: 'OpenAIRequestError',
+          errorMessage,
+          bodyPreview,
+          attempt,
+        });
+        logged = true;
+
+        throw new OpenAIRequestError(errorMessage, {
+          status: response.status,
+          errorType: details.errorType,
+          errorCode: details.errorCode,
+          bodyPreview,
+          durationMs,
+        });
+      }
+
+      const data = await response.json();
+      const content = extractChatCompletionText(data);
+      if (!content) {
+        const errorMessage = 'Empty OpenAI response';
+        logOpenAIEvent({
+          requestId,
+          model: OPENAI_MODEL,
+          timeout_ms: timeoutMs,
+          retries,
+          duration_ms: durationMs,
+          ok: false,
+          status: response.status,
+          errorName: 'OpenAIRequestError',
+          errorMessage,
+          attempt,
+        });
+        logged = true;
+        throw new OpenAIRequestError(errorMessage, {
+          status: response.status,
+          durationMs,
+        });
+      }
+
+      let parsed;
+      try {
+        parsed = JSON.parse(content);
+      } catch (error) {
+        const bodyPreview = buildBodyPreview(content);
+        const errorMessage = 'Invalid JSON response from OpenAI';
+        logOpenAIEvent({
+          requestId,
+          model: OPENAI_MODEL,
+          timeout_ms: timeoutMs,
+          retries,
+          duration_ms: durationMs,
+          ok: false,
+          status: response.status,
+          errorName: 'OpenAIRequestError',
+          errorMessage,
+          bodyPreview,
+          attempt,
+        });
+        logged = true;
+        throw new OpenAIRequestError(errorMessage, {
+          status: response.status,
+          bodyPreview,
+          durationMs,
+        });
+      }
+
+      logOpenAIEvent({
+        requestId,
+        model: OPENAI_MODEL,
+        timeout_ms: timeoutMs,
+        retries,
+        duration_ms: durationMs,
+        ok: true,
+        status: response.status,
+        attempt,
+      });
+      logged = true;
+
+      return { parsed, meta: { status: response.status, durationMs } };
+    } catch (error) {
+      if (error instanceof OpenAIRequestError) {
+        throw error;
+      }
+
+      if (!logged) {
+        const durationMs = Date.now() - startTime + (fallbackDurationMs || 0);
+        logOpenAIEvent({
+          requestId,
+          model: OPENAI_MODEL,
+          timeout_ms: timeoutMs,
+          retries,
+          duration_ms: durationMs,
+          ok: false,
+          errorName: error.name,
+          errorMessage: error.message,
+          attempt,
+        });
+      }
+      throw error;
+    }
+  }
+}
+
+async function createChatTextResponse(
+  messages,
+  { requestId, timeoutMs, retries, fallbackDurationMs = null } = {}
+) {
+  const startTime = Date.now();
+  let logged = false;
+  let attempt = 0;
+
+  while (attempt <= retries) {
+    attempt += 1;
+    try {
+      const response = await fetchWithTimeout(
+        'https://api.openai.com/v1/chat/completions',
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${OPENAI_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: OPENAI_MODEL,
+            messages: buildChatMessages(messages),
+            temperature: 0,
+          }),
+        },
+        timeoutMs
+      );
+
+      const durationMs = Date.now() - startTime + (fallbackDurationMs || 0);
+
+      if (!response.ok) {
+        const text = await response.text();
+        const bodyPreview = buildBodyPreview(text);
+        const details = extractErrorDetails(text);
+        const errorMessage =
+          details.errorMessage || `OpenAI error ${response.status}`;
+
+        if (shouldRetry(response.status) && attempt <= retries) {
+          await sleep(RETRY_DELAYS_MS[Math.min(attempt - 1, RETRY_DELAYS_MS.length - 1)]);
+          continue;
+        }
+
+        logOpenAIEvent({
+          requestId,
+          model: OPENAI_MODEL,
+          timeout_ms: timeoutMs,
+          retries,
+          duration_ms: durationMs,
+          ok: false,
+          status: response.status,
+          errorType: details.errorType,
+          errorCode: details.errorCode,
+          errorName: 'OpenAIRequestError',
+          errorMessage,
+          bodyPreview,
+          attempt,
+        });
+        logged = true;
+
+        throw new OpenAIRequestError(errorMessage, {
+          status: response.status,
+          errorType: details.errorType,
+          errorCode: details.errorCode,
+          bodyPreview,
+          durationMs,
+        });
+      }
+
+      const data = await response.json();
+      const content = extractChatCompletionText(data);
+      if (!content) {
+        const errorMessage = 'Empty OpenAI response';
+        logOpenAIEvent({
+          requestId,
+          model: OPENAI_MODEL,
+          timeout_ms: timeoutMs,
+          retries,
+          duration_ms: durationMs,
+          ok: false,
+          status: response.status,
+          errorName: 'OpenAIRequestError',
+          errorMessage,
+          attempt,
+        });
+        logged = true;
+        throw new OpenAIRequestError(errorMessage, {
+          status: response.status,
+          durationMs,
+        });
+      }
+
+      logOpenAIEvent({
+        requestId,
+        model: OPENAI_MODEL,
+        timeout_ms: timeoutMs,
+        retries,
+        duration_ms: durationMs,
+        ok: true,
+        status: response.status,
+        attempt,
+      });
+      logged = true;
+
+      return { text: content, meta: { status: response.status, durationMs } };
+    } catch (error) {
+      if (error instanceof OpenAIRequestError) {
+        throw error;
+      }
+
+      if (!logged) {
+        const durationMs = Date.now() - startTime + (fallbackDurationMs || 0);
         logOpenAIEvent({
           requestId,
           model: OPENAI_MODEL,
