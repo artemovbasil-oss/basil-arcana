@@ -10,7 +10,8 @@ CARD_FILES = ["cards_ru.json", "cards_en.json", "cards_kz.json"]
 SPREAD_FILES = ["spreads_ru.json", "spreads_en.json", "spreads_kz.json"]
 
 CARD_KEYS = {"title", "keywords", "meaning", "fact", "stats"}
-MEANING_KEYS = {"general", "detailed"}
+OPTIONAL_CARD_KEYS = {"detailedDescription"}
+MEANING_KEYS = {"general", "light", "shadow", "advice"}
 STAT_KEYS = {"luck", "power", "love", "clarity"}
 SPREAD_KEYS = {"id", "name", "title", "description", "cardsCount", "positions"}
 POSITION_KEYS = {"id", "title", "meaning"}
@@ -41,9 +42,12 @@ def validate_cards(payload: Any, filename: str) -> None:
     for card_id, card in payload.items():
         if not isinstance(card, dict):
             raise ValueError(f"{filename}:{card_id} must be an object")
-        if set(card.keys()) != CARD_KEYS:
+        extra_keys = set(card.keys()) - CARD_KEYS - OPTIONAL_CARD_KEYS
+        missing_keys = CARD_KEYS - set(card.keys())
+        if extra_keys or missing_keys:
             raise ValueError(
-                f"{filename}:{card_id} keys must be {sorted(CARD_KEYS)}"
+                f"{filename}:{card_id} keys must include {sorted(CARD_KEYS)}"
+                f" (extra {sorted(extra_keys)}, missing {sorted(missing_keys)})"
             )
         keywords = card["keywords"]
         if not isinstance(keywords, list) or not (3 <= len(keywords) <= 6):
