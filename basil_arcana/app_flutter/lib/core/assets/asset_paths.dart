@@ -1,6 +1,16 @@
 import '../../data/models/deck_model.dart';
 import '../config/assets_config.dart';
 
+String deckCoverImageUrl() {
+  final base = AssetsConfig.assetsBaseUrl;
+  return '$base/deck/new-deck.webp';
+}
+
+String deckCoverVideoUrl() {
+  final base = AssetsConfig.assetsBaseUrl;
+  return '$base/deck/cover-video.webm';
+}
+
 String cardImageUrl(
   String cardId, {
   DeckType deckId = DeckType.major,
