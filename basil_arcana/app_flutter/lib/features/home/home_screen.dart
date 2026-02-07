@@ -190,7 +190,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                l10n.homeTitle,
+                                l10n.appTitle,
                                 style: AppTextStyles.title(context),
                               ),
                               const SizedBox(height: 6),
@@ -468,7 +468,7 @@ class _BottomActionBar extends StatelessWidget {
             child: AppPrimaryButton(
               onPressed: enabled ? onSubmitted : null,
               label: l10n.shuffleDrawButton,
-              color: buttonColor,
+              backgroundColor: buttonColor,
             ),
           ),
           const SizedBox(width: 12),

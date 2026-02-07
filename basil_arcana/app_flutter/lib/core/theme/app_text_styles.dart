@@ -20,4 +20,9 @@ class AppTextStyles {
     return Theme.of(context).textTheme.bodySmall ??
         const TextStyle(fontSize: 12, height: 1.3);
   }
+
+  static TextStyle sectionTitle(BuildContext context) {
+    return Theme.of(context).textTheme.titleSmall ??
+        const TextStyle(fontSize: 15, fontWeight: FontWeight.w600);
+  }
 }

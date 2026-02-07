@@ -125,9 +125,12 @@ class CardDetailScreen extends ConsumerWidget {
                             ),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(26),
-                              child: TarotAssetWidget(
-                                asset: mediaAssets,
+                              child: CardMedia(
+                                cardId: resolvedCard.id,
+                                imageUrl: mediaAssets.imageUrl,
+                                videoUrl: mediaAssets.videoUrl,
                                 fit: BoxFit.cover,
+                                enableVideo: true,
                               ),
                             ),
                           ),

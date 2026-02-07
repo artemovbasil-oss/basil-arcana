@@ -34,6 +34,10 @@
   "homeExample3": "Қай жерде сабыр керек?",
   "homeContinueButton": "Жаймаға өту",
   "homeAllCardsButton": "Барлық карталар",
+  "homeQuickActionsLabel": "Жылдам әрекеттер",
+  "homeSpreadsButton": "Жаймалар",
+  "homeQuickActionsHint": "Топтамаға өтіңіз немесе жайма таңдаңыз.",
+  "homeQuestionCopied": "Сұрақ алмасу буферіне көшірілді.",
   "cardsTitle": "Барлық карталар",
   "cardsEmptyTitle": "Карталар әзірге жоқ",
   "cardsEmptySubtitle": "Сәл кейінірек қайталап көріңіз.",
@@ -83,6 +87,14 @@
   "spreadLabelPast": "Өткен",
   "spreadLabelPresent": "Қазіргі",
   "spreadLabelFuture": "Болашақ",
+  "spreadCardLabel": "{index}-карта",
+  "@spreadCardLabel": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
   "spreadCardCount": "{count,plural, other{{count} карта}}",
   "@spreadCardCount": {
     "placeholders": {

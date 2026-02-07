@@ -139,6 +139,64 @@ class SpreadScreen extends ConsumerWidget {
   }
 }
 
+enum SpreadIconMode { oneCard, threeCards }
+
+class SpreadIconDeck extends StatelessWidget {
+  const SpreadIconDeck({super.key, required this.mode});
+
+  final SpreadIconMode mode;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final cardsToShow = mode == SpreadIconMode.oneCard ? 1 : 3;
+    final offsets = <Offset>[
+      const Offset(18, 6),
+      const Offset(8, 3),
+      const Offset(0, 0),
+    ];
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        final height = constraints.maxHeight;
+        final cardWidth = width * 0.62;
+        final cardHeight = height * 0.78;
+        return Stack(
+          alignment: Alignment.center,
+          children: List.generate(cardsToShow, (index) {
+            final offset = offsets[index];
+            final opacity = 0.35 + (index / cardsToShow) * 0.4;
+            return Positioned(
+              right: offset.dx,
+              top: offset.dy,
+              child: Container(
+                width: cardWidth,
+                height: cardHeight,
+                decoration: BoxDecoration(
+                  color: colorScheme.surface.withOpacity(opacity),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: colorScheme.primary.withOpacity(0.4),
+                    width: 1.2,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: colorScheme.primary.withOpacity(0.12),
+                      blurRadius: 10,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }),
+        );
+      },
+    );
+  }
+}
+
 SpreadModel? _findSpread(
   List<SpreadModel> spreads,
   int count,

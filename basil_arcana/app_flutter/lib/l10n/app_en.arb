@@ -34,6 +34,10 @@
   "homeExample3": "What needs patience from me?",
   "homeContinueButton": "Continue to your spread",
   "homeAllCardsButton": "All cards",
+  "homeQuickActionsLabel": "Quick actions",
+  "homeSpreadsButton": "Spreads",
+  "homeQuickActionsHint": "Jump to a deck or choose a spread.",
+  "homeQuestionCopied": "Question copied to clipboard.",
   "cardsTitle": "All cards",
   "cardsEmptyTitle": "No cards to show yet",
   "cardsEmptySubtitle": "Please try again in a moment.",
@@ -83,6 +87,14 @@
   "spreadLabelPast": "Past",
   "spreadLabelPresent": "Present",
   "spreadLabelFuture": "Future",
+  "spreadCardLabel": "Card {index}",
+  "@spreadCardLabel": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
   "spreadCardCount": "{count,plural, one{1 card} other{{count} cards}}",
   "@spreadCardCount": {
     "placeholders": {

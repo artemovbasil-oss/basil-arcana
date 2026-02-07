@@ -34,6 +34,10 @@
   "homeExample3": "Где мне стоит проявить терпение?",
   "homeContinueButton": "Перейти к раскладу",
   "homeAllCardsButton": "Все карты",
+  "homeQuickActionsLabel": "Быстрые действия",
+  "homeSpreadsButton": "Расклады",
+  "homeQuickActionsHint": "Перейдите к колоде или выберите расклад.",
+  "homeQuestionCopied": "Вопрос скопирован в буфер обмена.",
   "cardsTitle": "Все карты",
   "cardsEmptyTitle": "Карты пока недоступны",
   "cardsEmptySubtitle": "Попробуйте снова чуть позже.",
@@ -83,6 +87,14 @@
   "spreadLabelPast": "Прошлое",
   "spreadLabelPresent": "Настоящее",
   "spreadLabelFuture": "Будущее",
+  "spreadCardLabel": "Карта {index}",
+  "@spreadCardLabel": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
   "spreadCardCount": "{count,plural, one{1 карта} few{{count} карты} many{{count} карт} other{{count} карты}}",
   "@spreadCardCount": {
     "placeholders": {

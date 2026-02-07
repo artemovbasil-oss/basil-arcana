@@ -8,6 +8,7 @@ class AppPrimaryButton extends StatelessWidget {
     this.icon,
     this.fullWidth = true,
     this.padding,
+    this.color,
     this.backgroundColor,
     this.foregroundColor,
   });
@@ -17,6 +18,7 @@ class AppPrimaryButton extends StatelessWidget {
   final IconData? icon;
   final bool fullWidth;
   final EdgeInsetsGeometry? padding;
+  final Color? color;
   final Color? backgroundColor;
   final Color? foregroundColor;
 
@@ -45,7 +47,7 @@ class AppPrimaryButton extends StatelessWidget {
     return ElevatedButton.styleFrom(
       minimumSize: const Size.fromHeight(54),
       padding: padding ?? const EdgeInsets.symmetric(vertical: 14),
-      backgroundColor: backgroundColor ?? colorScheme.primary,
+      backgroundColor: backgroundColor ?? color ?? colorScheme.primary,
       foregroundColor: foregroundColor ?? colorScheme.onPrimary,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       textStyle: const TextStyle(fontWeight: FontWeight.w600),
@@ -135,5 +137,43 @@ class AppSmallButton extends StatelessWidget {
       return button;
     }
     return SizedBox(width: double.infinity, child: button);
+  }
+}
+
+class AppIconButton extends StatelessWidget {
+  const AppIconButton({
+    super.key,
+    required this.icon,
+    this.onPressed,
+    this.backgroundColor,
+    this.foregroundColor,
+    this.size = 46,
+  });
+
+  final IconData icon;
+  final VoidCallback? onPressed;
+  final Color? backgroundColor;
+  final Color? foregroundColor;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return SizedBox(
+      width: size,
+      height: size,
+      child: IconButton(
+        onPressed: onPressed,
+        icon: Icon(icon),
+        style: IconButton.styleFrom(
+          backgroundColor:
+              backgroundColor ?? colorScheme.surfaceVariant.withOpacity(0.6),
+          foregroundColor: foregroundColor ?? colorScheme.primary,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+      ),
+    );
   }
 }
