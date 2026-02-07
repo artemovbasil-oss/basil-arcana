@@ -1,8 +1,6 @@
 import 'dart:collection';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/assets/asset_paths.dart';
@@ -12,10 +10,9 @@ import '../models/card_model.dart';
 import '../models/deck_model.dart';
 
 class CardsRepository {
-  CardsRepository({http.Client? client}) : _client = client ?? http.Client();
+  CardsRepository();
 
   static const String _cardsPrefix = 'cdn_cards_';
-  final http.Client _client;
   final Map<String, String> _memoryCache = {};
   final Map<String, DateTime> _lastFetchTimes = {};
   final Map<String, DateTime> _lastCacheTimes = {};
@@ -66,28 +63,12 @@ class CardsRepository {
     };
   }
 
-  String cardsUrlForLocale(Locale locale) {
-    final normalized = locale.languageCode.trim().toLowerCase();
-    final lang = switch (normalized) {
-      'ru' => 'ru',
-      'kk' => 'kz',
-      'kz' => 'kz',
-      _ => 'en',
-    };
-    return '${AssetsConfig.assetsBaseUrl}/data/cards_$lang.json';
-  }
-
   Future<List<CardModel>> fetchCards({
     required Locale locale,
     required DeckType deckId,
   }) async {
     final cacheKey = cardsCacheKey(locale);
-    final raw = await _loadJsonWithFallback(
-      uri: Uri.parse(cardsUrlForLocale(locale)),
-      cacheKey: cacheKey,
-      validator: _isValidCardsJson,
-      expectedRootTypes: {'Map'},
-    );
+    final raw = await _loadBundledOnly(cacheKey: cacheKey);
     return _parseCards(raw: raw, deckId: deckId);
   }
 
@@ -129,81 +110,34 @@ class CardsRepository {
     return prefs;
   }
 
-  Future<String> _loadJsonWithFallback({
-    required Uri uri,
-    required String cacheKey,
-    required bool Function(Object?) validator,
-    required Set<String> expectedRootTypes,
-  }) async {
-    _lastAttemptedUrls[cacheKey] = uri.toString();
-    try {
-      final result = await fetchJson(client: _client, uri: uri);
-      _recordResponseInfo(cacheKey, result.response);
-      final rootType = jsonRootType(result.decoded);
-      _lastResponseRootTypes[cacheKey] = rootType;
-      if (!expectedRootTypes.contains(rootType)) {
-        final expected = expectedRootTypes.join(' or ');
-        throw CardsLoadException(
-          'Unexpected JSON root type: $rootType (expected $expected)',
-          cacheKey: cacheKey,
-        );
-      }
-      if (!validator(result.decoded)) {
-        throw CardsLoadException(
-          'Invalid JSON payload: unexpected structure',
-          cacheKey: cacheKey,
-        );
-      }
-      await _storeCache(cacheKey, result.raw);
-      _lastFetchTimes[cacheKey] = DateTime.now();
-      _lastError = null;
-      return result.raw;
-    } catch (error, stackTrace) {
-      final bundled = await _loadBundledCards(cacheKey, validator);
-      if (bundled != null) {
-        return bundled;
-      }
-      _lastError = '${error.toString()}\n$stackTrace';
-      if (error is JsonFetchException && error.response != null) {
-        _recordResponseInfo(cacheKey, error.response!);
-      }
-      if (kDebugMode) {
-        debugPrint(
-          '[CardsRepository] fetchError url=${uri.toString()} '
-          'cacheKey=$cacheKey error=${error.toString()}',
-        );
-      }
-      final cached = await _readCache(cacheKey);
-      if (cached != null) {
-        try {
-          final parsed = parseJsonString(cached);
-          final rootType = jsonRootType(parsed.decoded);
-          _lastResponseRootTypes[cacheKey] = rootType;
-          if (expectedRootTypes.contains(rootType) &&
-              validator(parsed.decoded)) {
-            _lastCacheTimes[cacheKey] = DateTime.now();
-            return parsed.raw;
-          }
-        } on FormatException {
-          // ignore invalid cache
-        }
-      }
-      if (error is CardsLoadException) {
-        throw error;
-      }
-      throw CardsLoadException(error.toString(), cacheKey: cacheKey);
+  Future<String> _loadBundledOnly({required String cacheKey}) async {
+    _lastAttemptedUrls[cacheKey] = _bundledAssetPath(cacheKey);
+    final bundled = await _loadBundledCards(cacheKey, _isValidCardsJson);
+    if (bundled != null) {
+      return bundled;
     }
+    final cached = await _readCache(cacheKey);
+    if (cached != null) {
+      final parsed = parseJsonString(cached);
+      final rootType = jsonRootType(parsed.decoded);
+      _lastResponseRootTypes[cacheKey] = rootType;
+      if (rootType == 'Map' && _isValidCardsJson(parsed.decoded)) {
+        _lastCacheTimes[cacheKey] = DateTime.now();
+        return parsed.raw;
+      }
+    }
+    _lastError = 'Bundled cards data is missing or invalid';
+    throw CardsLoadException(
+      'Bundled cards data is missing or invalid',
+      cacheKey: cacheKey,
+    );
   }
 
   Future<String?> _loadBundledCards(
     String cacheKey,
     bool Function(Object?) validator,
   ) async {
-    final asset = cacheKey == '${_cardsPrefix}ru'
-        ? 'assets/data/cards_ru.json'
-        : cacheKey == '${_cardsPrefix}kk'
-            ? 'assets/data/cards_kz.json'
-            : 'assets/data/cards_en.json';
+    final asset = _bundledAssetPath(cacheKey);
     try {
       final bundled = await rootBundle.loadString(asset);
       final parsed = parseJsonString(bundled);
@@ -219,6 +153,14 @@ class CardsRepository {
       return null;
     }
     return null;
+  }
+
+  String _bundledAssetPath(String cacheKey) {
+    return cacheKey == '${_cardsPrefix}ru'
+        ? 'assets/data/cards_ru.json'
+        : cacheKey == '${_cardsPrefix}kk'
+            ? 'assets/data/cards_kz.json'
+            : 'assets/data/cards_en.json';
   }
 
   Future<String?> _readCache(String cacheKey) async {
