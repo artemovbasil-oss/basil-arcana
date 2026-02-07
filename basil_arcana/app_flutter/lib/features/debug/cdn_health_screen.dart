@@ -27,12 +27,12 @@ class _CdnHealthScreenState extends ConsumerState<CdnHealthScreen> {
       _isLoading = true;
     });
     final repo = ref.read(cardsRepositoryProvider);
-    final spreadsRepo = ref.read(dataRepositoryProvider);
+    final spreadsRepo = ref.read(spreadsRepositoryProvider);
     final locale = ref.read(localeProvider);
     final deckId = ref.read(deckProvider);
     try {
-      await repo.fetchCards(locale: locale, deckId: deckId);
-      await spreadsRepo.fetchSpreads(locale: locale);
+      await repo.loadCards(locale.languageCode, deckId: deckId);
+      await spreadsRepo.loadSpreads(locale.languageCode);
       setState(() {
         _status = 'success';
       });
@@ -60,13 +60,12 @@ class _CdnHealthScreenState extends ConsumerState<CdnHealthScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final repo = ref.watch(cardsRepositoryProvider);
-    final spreadsRepo = ref.watch(dataRepositoryProvider);
+    final spreadsRepo = ref.watch(spreadsRepositoryProvider);
     final locale = ref.watch(localeProvider);
-    final cardsFile = repo.cardsFileNameForLocale(locale);
-    final spreadsFile = spreadsRepo.spreadsFileNameForLocale(locale);
-    final cardsKey = repo.cardsCacheKey(locale);
-    final spreadsKey = spreadsRepo.spreadsCacheKey(locale);
-    final videoKey = spreadsRepo.videoIndexCacheKey;
+    final cardsFile = repo.cardsFileNameForLanguage(locale.languageCode);
+    final spreadsFile = spreadsRepo.spreadsFileNameForLanguage(locale.languageCode);
+    final cardsKey = repo.cardsCacheKey(locale.languageCode);
+    final spreadsKey = spreadsRepo.spreadsCacheKey(locale.languageCode);
     final lastFetch = {
       ...repo.lastFetchTimes,
       ...spreadsRepo.lastFetchTimes,
@@ -107,10 +106,6 @@ class _CdnHealthScreenState extends ConsumerState<CdnHealthScreen> {
             label: l10n.cdnHealthSpreadsFileLabel,
             value: spreadsFile,
           ),
-          _InfoTile(
-            label: l10n.cdnHealthVideoIndexLabel,
-            value: 'video_index.json',
-          ),
           const SizedBox(height: 12),
           _InfoTile(
             label: '${l10n.cdnHealthLastFetchLabel} ($cardsFile)',
@@ -120,10 +115,6 @@ class _CdnHealthScreenState extends ConsumerState<CdnHealthScreen> {
             label: '${l10n.cdnHealthLastFetchLabel} ($spreadsFile)',
             value: _formatTimestamp(lastFetch[spreadsKey]),
           ),
-          _InfoTile(
-            label: '${l10n.cdnHealthLastFetchLabel} (video_index.json)',
-            value: _formatTimestamp(lastFetch[videoKey]),
-          ),
           const SizedBox(height: 12),
           _InfoTile(
             label: '${l10n.cdnHealthLastCacheLabel} ($cardsFile)',
@@ -132,10 +123,6 @@ class _CdnHealthScreenState extends ConsumerState<CdnHealthScreen> {
           _InfoTile(
             label: '${l10n.cdnHealthLastCacheLabel} ($spreadsFile)',
             value: _formatTimestamp(lastCache[spreadsKey]),
-          ),
-          _InfoTile(
-            label: '${l10n.cdnHealthLastCacheLabel} (video_index.json)',
-            value: _formatTimestamp(lastCache[videoKey]),
           ),
           const SizedBox(height: 20),
           AppPrimaryButton(
