@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
+import '../../core/assets/asset_paths.dart';
 import '../../core/config/app_config.dart';
 import '../../core/navigation/app_route_config.dart';
 import '../../core/telegram/telegram_web_app.dart';
@@ -15,10 +16,8 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-const _deckSplashPosterUrl =
-    'https://cdn.basilarcana.com/deck/new-deck.webp';
-const _deckSplashVideoUrl =
-    'https://cdn.basilarcana.com/deck/cover-video.webm';
+String get _deckSplashPosterUrl => deckCoverImageUrl();
+String get _deckSplashVideoUrl => deckCoverVideoUrl();
 
 class _SplashScreenState extends State<SplashScreen> {
   Timer? _navigationTimer;
@@ -66,7 +65,7 @@ class _SplashScreenState extends State<SplashScreen> {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          const DeckSplashMedia(
+          DeckSplashMedia(
             posterUrl: _deckSplashPosterUrl,
             videoUrl: _deckSplashVideoUrl,
           ),

@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 import json
+import os
 import sys
 from typing import Any
 from urllib.request import Request, urlopen
 
-BASE_URL = "https://cdn.basilarcana.com"
+BASE_URL = os.environ.get("ASSETS_BASE_URL", "https://cdn.basilarcana.com").rstrip("/")
 CARD_FILES = ["cards_ru.json", "cards_en.json", "cards_kz.json"]
 SPREAD_FILES = ["spreads_ru.json", "spreads_en.json", "spreads_kz.json"]
 

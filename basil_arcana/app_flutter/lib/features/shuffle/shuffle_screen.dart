@@ -9,6 +9,7 @@ import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/app_top_bar.dart';
 import '../../core/widgets/tarot_asset_widgets.dart';
+import '../../core/assets/asset_paths.dart';
 import '../../core/navigation/app_route_config.dart';
 import '../../data/models/app_enums.dart';
 import '../../data/models/deck_model.dart';
@@ -36,7 +37,7 @@ class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
 
   static const _cardWidth = 140.0;
   static const _cardHeight = 210.0;
-  static const _deckCoverUrl = 'https://cdn.basilarcana.com/deck/new-deck.webp';
+  static String get _deckCoverUrl => deckCoverImageUrl();
 
   @override
   void initState() {
@@ -59,7 +60,7 @@ class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
     );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       precacheImage(
-        const NetworkImage(_deckCoverUrl),
+        NetworkImage(_deckCoverUrl),
         context,
       );
     });
