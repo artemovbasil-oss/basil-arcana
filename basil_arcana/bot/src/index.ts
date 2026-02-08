@@ -156,6 +156,39 @@ async function startPaymentFlow(
   await ctx.reply(STRINGS[locale].paymentStub);
 }
 
+async function sendPlans(ctx: Context): Promise<void> {
+  const userId = ctx.from?.id;
+  if (!userId) {
+    return;
+  }
+  if (!shouldHandleWebAppAction(userId)) {
+    return;
+  }
+  const locale = getLocale(ctx);
+  const state = getUserState(userId);
+  if (state.activeSubscription) {
+    await ctx.reply(STRINGS[locale].alreadyActive);
+    return;
+  }
+  await sendProfessionalReadingOffer(ctx);
+}
+
+function parseStartPayload(ctx: Context): string | null {
+  const match = (ctx.match as string | undefined)?.trim();
+  if (match) {
+    return match.split(/\s+/)[0] ?? null;
+  }
+  const text = ctx.message?.text;
+  if (!text) {
+    return null;
+  }
+  const parts = text.trim().split(/\s+/);
+  if (parts.length < 2) {
+    return null;
+  }
+  return parts[1] ?? null;
+}
+
 async function sendLauncherMessage(ctx: Context): Promise<void> {
   await ctx.reply(WELCOME_TEXT, { reply_markup: buildKeyboard() });
 }
@@ -164,6 +197,11 @@ async function main(): Promise<void> {
   const bot = new Bot(config.telegramToken);
 
   bot.command("start", async (ctx) => {
+    const payload = parseStartPayload(ctx);
+    if (payload === "plans") {
+      await sendPlans(ctx);
+      return;
+    }
     await sendLauncherMessage(ctx);
   });
 
@@ -177,20 +215,7 @@ async function main(): Promise<void> {
     if (action !== "professional_reading" && action !== "show_plans") {
       return;
     }
-    const userId = ctx.from?.id;
-    if (!userId) {
-      return;
-    }
-    if (!shouldHandleWebAppAction(userId)) {
-      return;
-    }
-    const locale = getLocale(ctx);
-    const state = getUserState(userId);
-    if (state.activeSubscription) {
-      await ctx.reply(STRINGS[locale].alreadyActive);
-      return;
-    }
-    await sendProfessionalReadingOffer(ctx);
+    await sendPlans(ctx);
   });
 
   bot.callbackQuery(/^plan:(week|month|year)$/, async (ctx) => {

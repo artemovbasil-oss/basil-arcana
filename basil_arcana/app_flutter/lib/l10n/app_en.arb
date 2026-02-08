@@ -198,5 +198,6 @@
   "professionalReadingDescription": "Deep interpretation of your spread by an oracle.",
   "professionalReadingButton": "Choose plan",
   "professionalReadingOpenBotMessage": "Open the bot to see subscription plans.",
-  "professionalReadingOpenBotAction": "Open bot"
+  "professionalReadingOpenBotAction": "Open bot",
+  "professionalReadingOpenBotSnackbar": "Open bot to choose a plan."
 }

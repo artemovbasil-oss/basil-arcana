@@ -198,5 +198,6 @@
   "professionalReadingDescription": "Таралымды терең кәсіби талдау.",
   "professionalReadingButton": "Тариф таңдау",
   "professionalReadingOpenBotMessage": "Жазылым жоспарларын көру үшін ботты ашыңыз.",
-  "professionalReadingOpenBotAction": "Ботты ашу"
+  "professionalReadingOpenBotAction": "Ботты ашу",
+  "professionalReadingOpenBotSnackbar": "Тарифті таңдау үшін ботты ашыңыз."
 }

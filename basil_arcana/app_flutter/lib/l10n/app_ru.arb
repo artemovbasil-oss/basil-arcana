@@ -198,5 +198,6 @@
   "professionalReadingDescription": "Глубокий разбор расклада с помощью оракула.",
   "professionalReadingButton": "Выбрать тариф",
   "professionalReadingOpenBotMessage": "Открой бота, чтобы увидеть тарифы подписки.",
-  "professionalReadingOpenBotAction": "Открыть бота"
+  "professionalReadingOpenBotAction": "Открыть бота",
+  "professionalReadingOpenBotSnackbar": "Открой бота, чтобы выбрать тариф."
 }

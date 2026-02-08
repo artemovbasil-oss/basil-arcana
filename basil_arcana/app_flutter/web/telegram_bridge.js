@@ -95,4 +95,64 @@
   };
 
   scheduleReadyCheck(60);
+
+  function tgIsAvailable() {
+    return Boolean(getWebApp());
+  }
+
+  function tgSendData(payload) {
+    var webApp = getWebApp();
+    if (!webApp || typeof webApp.sendData !== 'function') {
+      return false;
+    }
+    try {
+      webApp.sendData(String(payload || ''));
+      return true;
+    } catch (error) {
+      console.warn('Telegram sendData failed', error);
+      return false;
+    }
+  }
+
+  function tgClose() {
+    var webApp = getWebApp();
+    if (!webApp || typeof webApp.close !== 'function') {
+      return false;
+    }
+    try {
+      webApp.close();
+      return true;
+    } catch (error) {
+      console.warn('Telegram close failed', error);
+      return false;
+    }
+  }
+
+  function tgOpenTelegramLink(url) {
+    var link = String(url || '');
+    if (!link) {
+      return false;
+    }
+    var webApp = getWebApp();
+    try {
+      if (webApp && typeof webApp.openTelegramLink === 'function') {
+        webApp.openTelegramLink(link);
+        return true;
+      }
+    } catch (error) {
+      console.warn('Telegram openTelegramLink failed', error);
+    }
+    try {
+      window.open(link, '_blank');
+      return true;
+    } catch (error) {
+      console.warn('window.open failed', error);
+      return false;
+    }
+  }
+
+  window.tgIsAvailable = tgIsAvailable;
+  window.tgSendData = tgSendData;
+  window.tgClose = tgClose;
+  window.tgOpenTelegramLink = tgOpenTelegramLink;
 })();

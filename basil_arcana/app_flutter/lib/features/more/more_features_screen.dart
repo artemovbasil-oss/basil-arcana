@@ -1,11 +1,12 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
-import '../../core/telegram/telegram_web_app.dart';
+import '../../core/telegram/telegram_bridge.dart';
 import '../../core/widgets/app_buttons.dart';
 import '../../data/repositories/ai_repository.dart';
 import '../../state/providers.dart';
@@ -24,6 +25,8 @@ class _MoreFeaturesScreenState extends ConsumerState<MoreFeaturesScreen> {
   bool _isLoading = false;
   String? _resultText;
   String? _errorText;
+
+  static const bool _enableDebugLogs = !kReleaseMode;
 
   @override
   void dispose() {
@@ -82,48 +85,80 @@ class _MoreFeaturesScreenState extends ConsumerState<MoreFeaturesScreen> {
     }
   }
 
-  Future<void> _handleProfessionalReading() async {
-    if (TelegramWebApp.isAvailable && TelegramWebApp.canSendData) {
-      final payload = jsonEncode(
-        {
-          'action': 'show_plans',
-          'source': 'want_more',
-        },
-      );
-      TelegramWebApp.sendData(payload);
-      TelegramWebApp.close();
+  void _logDebug(String message, [Object? error]) {
+    if (!_enableDebugLogs) {
       return;
     }
+    if (error != null) {
+      debugPrint('[want-more] $message: $error');
+    } else {
+      debugPrint('[want-more] $message');
+    }
+  }
+
+  void _scheduleClose() {
+    Future.microtask(() {
+      TelegramBridge.close();
+    });
+  }
+
+  Future<void> _requestPlansAndReturnToBot() async {
+    // Previously used TelegramWebApp.sendData/close with a dialog fallback.
+    final payload = jsonEncode(
+      {
+        'action': 'show_plans',
+        'source': 'want_more',
+        'ts': DateTime.now().millisecondsSinceEpoch,
+      },
+    );
+    if (TelegramBridge.isAvailable) {
+      try {
+        final didSend = TelegramBridge.sendData(payload);
+        if (didSend) {
+          _scheduleClose();
+          return;
+        }
+      } catch (error) {
+        _logDebug('sendData failed', error);
+      }
+    }
+
+    final url = Uri.parse('https://t.me/tarot_arkana_bot?start=plans');
+    var didOpen = false;
+    if (TelegramBridge.isAvailable) {
+      try {
+        didOpen = TelegramBridge.openTelegramLink(url.toString());
+      } catch (error) {
+        _logDebug('openTelegramLink failed', error);
+      }
+    }
+    if (!didOpen) {
+      try {
+        didOpen = await launchUrl(url, mode: LaunchMode.externalApplication);
+      } catch (error) {
+        _logDebug('launchUrl failed', error);
+      }
+    }
+    if (didOpen) {
+      _scheduleClose();
+      return;
+    }
+
     if (!mounted) {
       return;
     }
-    await _showOpenBotDialog();
-  }
-
-  Future<void> _showOpenBotDialog() async {
     final l10n = AppLocalizations.of(context)!;
-    final url = Uri.parse('https://t.me/tarot_arkana_bot');
-    await showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.professionalReadingTitle),
-        content: Text(l10n.professionalReadingOpenBotMessage),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(l10n.actionCancel),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.of(context).pop();
-              await launchUrl(
-                url,
-                mode: LaunchMode.externalApplication,
-              );
-            },
-            child: Text(l10n.professionalReadingOpenBotAction),
-          ),
-        ],
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.hideCurrentSnackBar();
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(l10n.professionalReadingOpenBotSnackbar),
+        action: SnackBarAction(
+          label: l10n.professionalReadingOpenBotAction,
+          onPressed: () {
+            launchUrl(url, mode: LaunchMode.externalApplication);
+          },
+        ),
       ),
     );
   }
@@ -250,7 +285,7 @@ class _MoreFeaturesScreenState extends ConsumerState<MoreFeaturesScreen> {
                   child: AppPrimaryButton(
                     label: l10n.professionalReadingButton,
                     icon: Icons.star,
-                    onPressed: _handleProfessionalReading,
+                    onPressed: _requestPlansAndReturnToBot,
                   ),
                 ),
               ],
