@@ -66,10 +66,8 @@ app.use((req, res, next) => {
 });
 
 const APP_VERSION = process.env.APP_VERSION || '2026-02-08-1';
-const VERSION_PREFIX = `/v/${APP_VERSION}`;
 const PUBLIC_ROOT = process.env.PUBLIC_ROOT || path.join(__dirname, 'public');
-const VERSIONED_ROOT = path.join(PUBLIC_ROOT, 'v', APP_VERSION);
-const VERSIONED_INDEX = path.join(VERSIONED_ROOT, 'index.html');
+const PUBLIC_INDEX = path.join(PUBLIC_ROOT, 'index.html');
 const API_BASE_URL_ENV = process.env.API_BASE_URL || process.env.BASE_URL || '';
 const ASSETS_BASE_URL_ENV = process.env.ASSETS_BASE_URL || 'https://cdn.basilarcana.com';
 
@@ -90,25 +88,39 @@ app.get('/config.json', (req, res) => {
   res.json(buildConfigPayload(req));
 });
 
-if (fs.existsSync(VERSIONED_ROOT)) {
+if (fs.existsSync(PUBLIC_ROOT)) {
   app.use(
-    VERSION_PREFIX,
-    express.static(VERSIONED_ROOT, {
+    express.static(PUBLIC_ROOT, {
       index: false,
-      fallthrough: true
+      fallthrough: true,
+      setHeaders: (res, filePath) => {
+        const filename = path.basename(filePath);
+        if (filename === 'index.html') {
+          res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+          res.setHeader('Pragma', 'no-cache');
+          res.setHeader('Expires', '0');
+          return;
+        }
+        if (filename === 'flutter.js' || filename === 'flutter_bootstrap.js') {
+          res.setHeader('Cache-Control', 'no-cache, max-age=0');
+          return;
+        }
+        if (filePath.includes(`${path.sep}assets${path.sep}`)) {
+          res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+        }
+      }
     })
   );
-
-  app.get(`${VERSION_PREFIX}/*`, (req, res) => {
-    if (fs.existsSync(VERSIONED_INDEX)) {
-      return res.sendFile(VERSIONED_INDEX);
-    }
-    return res.status(404).json({ error: 'not_found', requestId: req.requestId });
-  });
 }
 
 app.get('/', (req, res) => {
-  res.json({
+  if (fs.existsSync(PUBLIC_INDEX)) {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    return res.sendFile(PUBLIC_INDEX);
+  }
+  return res.json({
     ok: true,
     name: 'basils-arcana',
     message: 'Basil’s Arcana API',
@@ -448,6 +460,19 @@ app.post('/api/reading/details', async (req, res) => {
         upstream
       });
   }
+});
+
+app.get('*', (req, res) => {
+  if (req.path.startsWith('/api') || req.path === '/health' || req.path === '/config.json') {
+    return res.status(404).json({ error: 'not_found', requestId: req.requestId });
+  }
+  if (fs.existsSync(PUBLIC_INDEX)) {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    return res.sendFile(PUBLIC_INDEX);
+  }
+  return res.status(404).json({ error: 'not_found', requestId: req.requestId });
 });
 
 const missingRequired = [];
