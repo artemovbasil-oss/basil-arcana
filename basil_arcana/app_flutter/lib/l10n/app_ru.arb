@@ -139,7 +139,7 @@
   "resultStatusNoInternet": "Нет интернета — показываем офлайн-расклад",
   "resultStatusTimeout": "Оракул на паузе — нажмите, чтобы повторить.",
   "resultStatusTooManyAttempts": "Слишком много попыток — подождите и попробуйте снова.",
-  "resultStatusServerUnavailableWithStatus": "Оракул затуманен ({status}) — попробуйте снова чуть позже.",
+  "resultStatusServerUnavailableWithStatus": "Сервис недоступен ({status}) — попробуйте снова чуть позже.",
   "@resultStatusServerUnavailableWithStatus": {
     "placeholders": {
       "status": {
@@ -147,7 +147,7 @@
       }
     }
   },
-  "resultStatusServerUnavailable": "Оракул затуманен — попробуйте снова чуть позже.",
+  "resultStatusServerUnavailable": "Сервис недоступен — попробуйте снова чуть позже.",
   "resultStatusMissingApiBaseUrl": "Ошибка конфигурации — отсутствует базовый URL API.",
   "resultStatusUnexpectedResponse": "Неожиданный ответ — нажмите, чтобы повторить.",
   "resultStatusInterpretationUnavailable": "Интерпретация ИИ недоступна — нажмите, чтобы повторить.",
