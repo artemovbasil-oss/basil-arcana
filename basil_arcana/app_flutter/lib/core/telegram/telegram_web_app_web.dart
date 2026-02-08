@@ -29,6 +29,14 @@ class TelegramWebApp {
 
   static bool get isAvailable => _webApp != null;
 
+  static bool get canSendData {
+    final webApp = _webApp;
+    if (webApp == null) {
+      return false;
+    }
+    return js_util.hasProperty(webApp, 'sendData');
+  }
+
   static bool get isTelegramWebView {
     if (isAvailable) {
       return true;
@@ -168,6 +176,18 @@ class TelegramWebApp {
     if (js_util.hasProperty(webApp, 'close')) {
       try {
         js_util.callMethod(webApp, 'close', []);
+      } catch (_) {}
+    }
+  }
+
+  static void sendData(String data) {
+    final webApp = _webApp;
+    if (webApp == null) {
+      return;
+    }
+    if (js_util.hasProperty(webApp, 'sendData')) {
+      try {
+        js_util.callMethod(webApp, 'sendData', [data]);
       } catch (_) {}
     }
   }

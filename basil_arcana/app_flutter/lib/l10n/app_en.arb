@@ -196,5 +196,7 @@
   "natalChartError": "Couldn’t generate the natal chart. Please try again.",
   "professionalReadingTitle": "Professional reading",
   "professionalReadingDescription": "Deep interpretation of your spread by an oracle.",
-  "professionalReadingButton": "Choose plan"
+  "professionalReadingButton": "Choose plan",
+  "professionalReadingOpenBotMessage": "Open the bot to see subscription plans.",
+  "professionalReadingOpenBotAction": "Open bot"
 }

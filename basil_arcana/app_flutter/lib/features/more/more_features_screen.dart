@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -81,12 +83,49 @@ class _MoreFeaturesScreenState extends ConsumerState<MoreFeaturesScreen> {
   }
 
   Future<void> _handleProfessionalReading() async {
-    if (TelegramWebApp.isAvailable || TelegramWebApp.isTelegramWebView) {
+    if (TelegramWebApp.isAvailable && TelegramWebApp.canSendData) {
+      final payload = jsonEncode(
+        {
+          'action': 'show_plans',
+          'source': 'want_more',
+        },
+      );
+      TelegramWebApp.sendData(payload);
       TelegramWebApp.close();
       return;
     }
+    if (!mounted) {
+      return;
+    }
+    await _showOpenBotDialog();
+  }
+
+  Future<void> _showOpenBotDialog() async {
+    final l10n = AppLocalizations.of(context)!;
     final url = Uri.parse('https://t.me/tarot_arkana_bot');
-    await launchUrl(url, mode: LaunchMode.externalApplication);
+    await showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.professionalReadingTitle),
+        content: Text(l10n.professionalReadingOpenBotMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(l10n.actionCancel),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.of(context).pop();
+              await launchUrl(
+                url,
+                mode: LaunchMode.externalApplication,
+              );
+            },
+            child: Text(l10n.professionalReadingOpenBotAction),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
