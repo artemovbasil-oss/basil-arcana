@@ -70,6 +70,25 @@ const VERSION_PREFIX = `/v/${APP_VERSION}`;
 const PUBLIC_ROOT = process.env.PUBLIC_ROOT || path.join(__dirname, 'public');
 const VERSIONED_ROOT = path.join(PUBLIC_ROOT, 'v', APP_VERSION);
 const VERSIONED_INDEX = path.join(VERSIONED_ROOT, 'index.html');
+const API_BASE_URL_ENV = process.env.API_BASE_URL || process.env.BASE_URL || '';
+const ASSETS_BASE_URL_ENV = process.env.ASSETS_BASE_URL || 'https://cdn.basilarcana.com';
+
+function buildConfigPayload(req) {
+  const apiBaseUrl =
+    API_BASE_URL_ENV || `${req.protocol}://${req.get('host')}`;
+  return {
+    apiBaseUrl,
+    assetsBaseUrl: ASSETS_BASE_URL_ENV,
+    appVersion: APP_VERSION
+  };
+}
+
+app.get('/config.json', (req, res) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  res.json(buildConfigPayload(req));
+});
 
 if (fs.existsSync(VERSIONED_ROOT)) {
   app.use(
