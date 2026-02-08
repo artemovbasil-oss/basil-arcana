@@ -74,6 +74,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return DateTime.now().toIso8601String();
   }
 
+  String? _currentBuildLabel() {
+    final build = ConfigService.instance.build;
+    if (build != null && build.trim().isNotEmpty) {
+      return _shortenBuildLabel(build.trim());
+    }
+    return null;
+  }
+
+  String _shortenBuildLabel(String build) {
+    const maxLength = 8;
+    if (build.length <= maxLength) {
+      return build;
+    }
+    return build.substring(0, maxLength);
+  }
+
   void _applyExample(String example) {
     _controller.text = example;
     ref.read(readingFlowControllerProvider.notifier).setQuestion(example);
@@ -192,6 +208,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final colorScheme = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context)!;
     final locale = ref.watch(localeProvider);
+    final buildLabel = _currentBuildLabel();
     final examples = [
       l10n.homeExample1,
       l10n.homeExample2,
@@ -235,9 +252,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               l10n.appTitle,
                               style: AppTextStyles.title(context)
                                   .copyWith(color: colorScheme.onSurface),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ),
+                        if (buildLabel != null) ...[
+                          const SizedBox(width: 8),
+                          Text(
+                            'v$buildLabel',
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelSmall
+                                ?.copyWith(
+                                  color: colorScheme.onSurface.withOpacity(0.6),
+                                ),
+                          ),
+                        ],
                         IconButton(
                           icon: const Icon(Icons.history),
                           tooltip: l10n.historyTooltip,
