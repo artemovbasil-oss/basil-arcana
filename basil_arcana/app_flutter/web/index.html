@@ -51,12 +51,38 @@
     window.__flutterBootstrapUrl = 'flutter_bootstrap.js?v=' + buildVersion;
   </script>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <script src="telegram_bridge.js?v={{flutter_service_worker_version}}"></script>
-  <link
-    rel="preload"
-    href="flutter_bootstrap.js?v={{flutter_service_worker_version}}"
-    as="script"
-  >
+  <script>
+    function loadScript(src, attrs) {
+      return new Promise(function (resolve, reject) {
+        var script = document.createElement('script');
+        script.src = src;
+        if (attrs) {
+          Object.keys(attrs).forEach(function (key) {
+            script.setAttribute(key, attrs[key]);
+          });
+        }
+        script.onload = function () { resolve(); };
+        script.onerror = function () {
+          reject(new Error('Failed to load ' + src));
+        };
+        document.head.appendChild(script);
+      });
+    }
+
+    function resolveBuildVersion() {
+      var fallback = window.__buildVersion || 'dev';
+      return fetch('/config.json', { cache: 'no-store' })
+        .then(function (response) { return response.json(); })
+        .then(function (payload) {
+          if (payload && typeof payload.build === 'string' && payload.build.trim()) {
+            return payload.build.trim();
+          }
+          return fallback;
+        })
+        .catch(function () { return fallback; });
+    }
+
+  </script>
   <link rel="manifest" href="manifest.json">
   <style>
     :root {
@@ -274,22 +300,37 @@
   <div id="tg-scroll-root">
     <div id="flutter_mount"></div>
   </div>
-  <script src="flutter.js?v={{flutter_service_worker_version}}" defer></script>
   <script>
     window.addEventListener('load', function (ev) {
       var disableServiceWorker = true || isTelegramWebView();
-      _flutter.loader.loadEntrypoint({
-        entrypointUrl: 'main.dart.js?v=' + window.__buildVersion,
-        serviceWorker: disableServiceWorker
-          ? null
-          : { serviceWorkerVersion: serviceWorkerVersion },
-        onEntrypointLoaded: function (engineInitializer) {
-          engineInitializer.initializeEngine({
-            hostElement: document.getElementById('flutter_mount')
-          }).then(function (appRunner) {
-            appRunner.runApp();
+      resolveBuildVersion().then(function (version) {
+        var resolvedVersion = version || window.__buildVersion || 'dev';
+        window.__buildVersion = resolvedVersion;
+        window.__flutterBootstrapUrl = 'flutter_bootstrap.js?v=' + resolvedVersion;
+        return loadScript('telegram_bridge.js?v=' + resolvedVersion)
+          .catch(function () {})
+          .then(function () {
+            return loadScript('flutter.js?v=' + resolvedVersion, { defer: '' });
           });
-        }
+      }).then(function () {
+        _flutter.loader.loadEntrypoint({
+          entrypointUrl: 'main.dart.js?v=' + window.__buildVersion,
+          serviceWorker: disableServiceWorker
+            ? null
+            : { serviceWorkerVersion: serviceWorkerVersion },
+          onEntrypointLoaded: function (engineInitializer) {
+            engineInitializer.initializeEngine({
+              hostElement: document.getElementById('flutter_mount')
+            }).then(function (appRunner) {
+              appRunner.runApp();
+            });
+          }
+        });
+      }).catch(function (error) {
+        window.__bootError = {
+          message: error ? String(error) : 'Unknown bootstrap error'
+        };
+        console.error('[boot] load error', error);
       });
     });
   </script>
