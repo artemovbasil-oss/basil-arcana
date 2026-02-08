@@ -90,20 +90,25 @@ class CardFaceWidget extends ConsumerWidget {
             style: AppTextStyles.title(context),
           ),
           const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: keywords
-                .map(
-                  (keyword) => Chip(
-                    label: Text(keyword),
-                    backgroundColor: colorScheme.surface,
-                    side: BorderSide(color: colorScheme.outlineVariant),
-                    labelStyle: AppTextStyles.caption(context)
-                        .copyWith(color: colorScheme.onSurface),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                for (var i = 0; i < keywords.length; i++)
+                  Padding(
+                    padding: EdgeInsets.only(
+                      right: i == keywords.length - 1 ? 0 : 8,
+                    ),
+                    child: Chip(
+                      label: Text(keywords[i]),
+                      backgroundColor: colorScheme.surface,
+                      side: BorderSide(color: colorScheme.outlineVariant),
+                      labelStyle: AppTextStyles.caption(context)
+                          .copyWith(color: colorScheme.onSurface),
+                    ),
                   ),
-                )
-                .toList(),
+              ],
+            ),
           ),
           if (onCardTap != null) ...[
             const SizedBox(height: 12),

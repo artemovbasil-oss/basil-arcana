@@ -71,6 +71,10 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
     final aiResult = state.aiResult;
     final spread = state.spread;
     final l10n = AppLocalizations.of(context)!;
+    void handleBack() {
+      ref.read(readingFlowControllerProvider.notifier).reset();
+      Navigator.popUntil(context, (route) => route.isFirst);
+    }
 
     if (spread == null) {
       return const Scaffold(
@@ -121,6 +125,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
             context,
             title: Text(l10n.resultTitle),
             showBack: true,
+            onBack: handleBack,
           ),
           backgroundColor: Theme.of(context).colorScheme.surface,
           body: SafeArea(
@@ -156,6 +161,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
           context,
           title: Text(l10n.resultTitle),
           showBack: true,
+          onBack: handleBack,
         ),
         backgroundColor: Theme.of(context).colorScheme.surface,
         body: SafeArea(
@@ -209,6 +215,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
         context,
         title: Text(l10n.resultTitle),
         showBack: true,
+        onBack: handleBack,
       ),
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
@@ -229,7 +236,8 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                     _buildChatItem(item, state),
                     const SizedBox(height: 14),
                   ],
-                  if (state.showDetailsCta &&
+                  if (_sequenceComplete &&
+                      state.showDetailsCta &&
                       state.detailsStatus == DetailsStatus.idle) ...[
                     ChatBubbleReveal(
                       child: ChatBubble(
@@ -818,6 +826,7 @@ class _OpenInTelegramScreen extends StatelessWidget {
         context,
         title: Text(l10n.resultTitle),
         showBack: true,
+        onBack: onBack,
       ),
       backgroundColor: colorScheme.surface,
       body: SafeArea(
