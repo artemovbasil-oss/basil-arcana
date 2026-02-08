@@ -19,10 +19,14 @@ class HiveStorage {
   static const String cardStatsBox = 'card_stats';
 
   static const String _buildIdKey = 'basil_arcana_build_id';
-  static const bool _forceBuildReset = bool.fromEnvironment(
-    'ENABLE_HIVE_BUILD_RESET',
-    defaultValue: false,
-  );
+  static const List<String> _cachePrefixesToClear = [
+    'cdn_cards_',
+    'cdn_spreads_',
+    'cdn_video_index',
+    'flutter.cdn_cards_',
+    'flutter.cdn_spreads_',
+    'flutter.cdn_video_index',
+  ];
 
   static Future<void> init() async {
     await Hive.initFlutter();
@@ -80,9 +84,6 @@ class HiveStorage {
     if (!kIsWeb) {
       return;
     }
-    if (kReleaseMode && !_forceBuildReset) {
-      return;
-    }
     final buildId =
         (AppConfig.build ?? readWebBuildVersion()).trim();
     if (buildId.isEmpty) {
@@ -91,8 +92,16 @@ class HiveStorage {
     final previousBuildId = readWebStorage(_buildIdKey);
     if (previousBuildId != null && previousBuildId != buildId) {
       await resetStorage(clearWebStorage: false);
+      _clearCachedJsonData();
     }
     writeWebStorage(_buildIdKey, buildId);
+  }
+
+  static void _clearCachedJsonData() {
+    if (!kIsWeb) {
+      return;
+    }
+    clearWebStorageWithPrefixes(_cachePrefixesToClear);
   }
 
   static bool _isRecoverableHiveError(Object error) {
