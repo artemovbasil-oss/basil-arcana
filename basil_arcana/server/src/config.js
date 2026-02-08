@@ -6,7 +6,11 @@ const OPENAI_API_KEY =
   process.env.OPENAI_API_TOKEN ||
   '';
 const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini';
-const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '';
+const TELEGRAM_BOT_TOKEN =
+  process.env.TELEGRAM_BOT_TOKEN ||
+  process.env.TELEGRAM_TOKEN ||
+  process.env.BOT_TOKEN ||
+  '';
 const RATE_LIMIT_WINDOW_MS = process.env.RATE_LIMIT_WINDOW_MS
   ? Number(process.env.RATE_LIMIT_WINDOW_MS)
   : null;

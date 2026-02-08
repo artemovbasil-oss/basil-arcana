@@ -77,9 +77,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   String? _currentBuildLabel() {
     final build = ConfigService.instance.build;
     if (build != null && build.trim().isNotEmpty) {
-      return build.trim();
+      return _shortenBuildLabel(build.trim());
     }
     return null;
+  }
+
+  String _shortenBuildLabel(String build) {
+    const maxLength = 8;
+    if (build.length <= maxLength) {
+      return build;
+    }
+    return build.substring(0, maxLength);
   }
 
   void _applyExample(String example) {
@@ -244,6 +252,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               l10n.appTitle,
                               style: AppTextStyles.title(context)
                                   .copyWith(color: colorScheme.onSurface),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ),
