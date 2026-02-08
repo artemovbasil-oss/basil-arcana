@@ -5,14 +5,22 @@ const fs = require('fs');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 
-const { buildPromptMessages, buildDetailsPrompt } = require('./src/prompt');
+const {
+  buildPromptMessages,
+  buildDetailsPrompt,
+  buildNatalChartPrompt
+} = require('./src/prompt');
 const {
   createResponse,
   createTextResponse,
   listModels,
   OpenAIRequestError
 } = require('./src/openai_client');
-const { validateReadingRequest, validateDetailsRequest } = require('./src/validate');
+const {
+  validateReadingRequest,
+  validateDetailsRequest,
+  validateNatalChartRequest
+} = require('./src/validate');
 const {
   ARCANA_API_KEY,
   PORT,
@@ -459,6 +467,171 @@ app.post('/api/reading/details', async (req, res) => {
         requestId: req.requestId,
         upstream
       });
+  }
+});
+
+app.post('/api/natal-chart/generate', async (req, res) => {
+  if (!OPENAI_API_KEY) {
+    return res.status(503).json({
+      error: 'server_misconfig',
+      requestId: req.requestId
+    });
+  }
+  if (!verifyArcanaApiKey(req, res)) {
+    return;
+  }
+  const error = validateNatalChartRequest(req.body);
+  if (error) {
+    return res.status(400).json({ error, requestId: req.requestId });
+  }
+
+  const startTime = Date.now();
+  try {
+    const messages = buildNatalChartPrompt(req.body);
+    const result = await createTextResponse(messages, {
+      requestId: req.requestId,
+      timeoutMs: 35000,
+    });
+    const interpretation = result.text.trim();
+    if (!interpretation) {
+      throw new OpenAIRequestError('Empty OpenAI response', {
+        status: result.meta?.status,
+      });
+    }
+    const durationMs = Date.now() - startTime;
+    console.log(
+      JSON.stringify({
+        event: 'natal_chart_request',
+        requestId: req.requestId,
+        status: 200,
+        duration_ms: durationMs,
+      })
+    );
+    return res.json({ interpretation, requestId: req.requestId });
+  } catch (err) {
+    const durationMs = Date.now() - startTime;
+    if (err?.name === 'AbortError') {
+      console.error(
+        JSON.stringify({
+          event: 'natal_chart_timeout',
+          requestId: req.requestId,
+          duration_ms: durationMs,
+        })
+      );
+      return res.status(504).json({
+        error: 'timeout',
+        requestId: req.requestId,
+      });
+    }
+    const upstream = {
+      status: err instanceof OpenAIRequestError ? err.status : null,
+      code: err instanceof OpenAIRequestError ? err.errorCode : null,
+      type: err instanceof OpenAIRequestError ? err.errorType : err.name,
+      message: err.message ? err.message.slice(0, 300) : null
+    };
+    console.error(
+      JSON.stringify({
+        event: 'natal_chart_error',
+        requestId: req.requestId,
+        duration_ms: durationMs,
+        status: upstream.status,
+        errorCode: upstream.code,
+        errorType: upstream.type
+      })
+    );
+    return res.status(502).json({
+      error: 'upstream_failed',
+      requestId: req.requestId,
+      upstream
+    });
+  }
+});
+
+app.post('/api/natal-chart/generate_web', async (req, res) => {
+  if (!OPENAI_API_KEY || !TELEGRAM_BOT_TOKEN) {
+    return res.status(503).json({
+      error: 'server_misconfig',
+      requestId: req.requestId
+    });
+  }
+  const { initData, payload } = req.body || {};
+  if (typeof initData !== 'string' || !initData.trim()) {
+    return res.status(400).json({
+      error: 'missing_init_data',
+      requestId: req.requestId
+    });
+  }
+  const validation = validateTelegramInitData(initData, TELEGRAM_BOT_TOKEN);
+  if (!validation.ok) {
+    return res.status(401).json({
+      error: validation.error || 'invalid_init_data',
+      requestId: req.requestId
+    });
+  }
+  const error = validateNatalChartRequest(payload);
+  if (error) {
+    return res.status(400).json({ error, requestId: req.requestId });
+  }
+
+  const startTime = Date.now();
+  try {
+    const messages = buildNatalChartPrompt(payload);
+    const result = await createTextResponse(messages, {
+      requestId: req.requestId,
+      timeoutMs: 35000,
+    });
+    const interpretation = result.text.trim();
+    if (!interpretation) {
+      throw new OpenAIRequestError('Empty OpenAI response', {
+        status: result.meta?.status,
+      });
+    }
+    const durationMs = Date.now() - startTime;
+    console.log(
+      JSON.stringify({
+        event: 'natal_chart_request',
+        requestId: req.requestId,
+        status: 200,
+        duration_ms: durationMs,
+      })
+    );
+    return res.json({ interpretation, requestId: req.requestId });
+  } catch (err) {
+    const durationMs = Date.now() - startTime;
+    if (err?.name === 'AbortError') {
+      console.error(
+        JSON.stringify({
+          event: 'natal_chart_timeout',
+          requestId: req.requestId,
+          duration_ms: durationMs,
+        })
+      );
+      return res.status(504).json({
+        error: 'timeout',
+        requestId: req.requestId,
+      });
+    }
+    const upstream = {
+      status: err instanceof OpenAIRequestError ? err.status : null,
+      code: err instanceof OpenAIRequestError ? err.errorCode : null,
+      type: err instanceof OpenAIRequestError ? err.errorType : err.name,
+      message: err.message ? err.message.slice(0, 300) : null
+    };
+    console.error(
+      JSON.stringify({
+        event: 'natal_chart_error',
+        requestId: req.requestId,
+        duration_ms: durationMs,
+        status: upstream.status,
+        errorCode: upstream.code,
+        errorType: upstream.type
+      })
+    );
+    return res.status(502).json({
+      error: 'upstream_failed',
+      requestId: req.requestId,
+      upstream
+    });
   }
 });
 

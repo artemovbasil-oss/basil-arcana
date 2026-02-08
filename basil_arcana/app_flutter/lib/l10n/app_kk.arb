@@ -178,5 +178,23 @@
     }
   },
   "offlineFallbackWhy": "Әр позиция сұрағыңыздың бір қырын көрсетеді, ал карталардың тақырыптары қазір назарды қайда бағыттау керегін айқындайды.",
-  "offlineFallbackAction": "Карталардың кеңесіне сай бір шағын, практикалық қадам таңдаңыз."
+  "offlineFallbackAction": "Карталардың кеңесіне сай бір шағын, практикалық қадам таңдаңыз.",
+  "moreFeaturesTitle": "Қосымша мүмкіндіктер",
+  "natalChartTitle": "Наталдық карта",
+  "natalChartDescription": "Туған күніңіз бойынша жеке астрологиялық талдау.",
+  "natalChartFreeLabel": "Тегін",
+  "natalChartButton": "Қалаймын",
+  "natalChartBirthDateLabel": "Туған күні",
+  "natalChartBirthDateHint": "ЖЖЖЖ-АА-КК",
+  "natalChartBirthDateError": "Туған күніңізді енгізіңіз.",
+  "natalChartBirthTimeLabel": "Туған уақыты",
+  "natalChartBirthTimeHint": "СС:ММ",
+  "natalChartBirthTimeHelper": "Шамамен уақыт жарайды (міндетті емес).",
+  "natalChartGenerateButton": "Жасау",
+  "natalChartLoading": "Наталдық карта жасалуда…",
+  "natalChartResultTitle": "Түсіндірме",
+  "natalChartError": "Наталдық картаны жасау мүмкін болмады. Қайта көріңіз.",
+  "professionalReadingTitle": "Кәсіби жорамал",
+  "professionalReadingDescription": "Таралымды терең кәсіби талдау.",
+  "professionalReadingButton": "Тариф таңдау"
 }

@@ -4,7 +4,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/app_buttons.dart';
@@ -21,6 +20,7 @@ import '../../state/reading_flow_controller.dart';
 import '../../state/providers.dart';
 import '../../core/widgets/app_top_bar.dart';
 import '../../core/navigation/app_route_config.dart';
+import '../more/more_features_screen.dart';
 import '../cards/card_detail_screen.dart';
 import 'widgets/chat_widgets.dart';
 import 'widgets/oracle_waiting_screen.dart';
@@ -371,10 +371,11 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                     Navigator.popUntil(context, (route) => route.isFirst);
                   },
                   onShare: () async {
-                    final url = Uri.parse('https://t.me/tarot_arkana_bot');
-                    await launchUrl(
-                      url,
-                      mode: LaunchMode.externalApplication,
+                    await Navigator.of(context).push(
+                      MaterialPageRoute(
+                        fullscreenDialog: true,
+                        builder: (_) => const MoreFeaturesScreen(),
+                      ),
                     );
                   },
                   newLabel: l10n.resultNewButton,
