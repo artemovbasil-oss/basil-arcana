@@ -144,27 +144,85 @@
       return /iphone|ipad|ipod/i.test(userAgent);
     }
 
-    (function clearTelegramIOSCache() {
-      if (!isTelegramIOS()) {
-        return;
+    (function purgeWebCachesAndStorage() {
+      var cacheKeyFragments = [
+        'cards_',
+        'cardsCache',
+        'cards-cache',
+        'deckCards',
+        'cardsRu',
+        'cardsKz',
+        'cardsEn',
+        'cdn_cards_',
+        'flutter.cdn_cards_',
+        'basil_cards',
+        'spreads_',
+        'spreadsCache',
+        'spreads-cache',
+        'deckSpreads',
+        'spreadsRu',
+        'spreadsKz',
+        'spreadsEn',
+        'cdn_spreads_',
+        'flutter.cdn_spreads_',
+        'basil_spreads'
+      ];
+
+      function shouldRemoveKey(key) {
+        return cacheKeyFragments.some(function (fragment) {
+          return key.indexOf(fragment) !== -1;
+        });
       }
-      if ('serviceWorker' in navigator) {
+
+      function purgeStorage(storage, label) {
+        if (!storage || typeof storage.length !== 'number') {
+          return [];
+        }
+        var removedKeys = [];
+        for (var i = storage.length - 1; i >= 0; i--) {
+          var key = storage.key(i);
+          if (!key) {
+            continue;
+          }
+          if (shouldRemoveKey(key)) {
+            removedKeys.push(key);
+            storage.removeItem(key);
+          }
+        }
+        console.info('[cache-cleanup]', label, 'removed keys:', removedKeys);
+        return removedKeys;
+      }
+
+      if ('serviceWorker' in navigator && navigator.serviceWorker) {
         navigator.serviceWorker.getRegistrations().then(function (registrations) {
           registrations.forEach(function (registration) {
             registration.unregister();
           });
         }).catch(function (error) {
-          console.warn('Telegram iOS service worker cleanup failed', error);
+          console.warn('Service worker cleanup failed', error);
         });
       }
+
       if (window.caches && caches.keys) {
         caches.keys().then(function (keys) {
           return Promise.all(keys.map(function (key) {
             return caches.delete(key);
           }));
         }).catch(function (error) {
-          console.warn('Telegram iOS cache cleanup failed', error);
+          console.warn('CacheStorage cleanup failed', error);
         });
+      }
+
+      try {
+        purgeStorage(window.localStorage, 'localStorage');
+      } catch (error) {
+        console.warn('localStorage cleanup failed', error);
+      }
+
+      try {
+        purgeStorage(window.sessionStorage, 'sessionStorage');
+      } catch (error) {
+        console.warn('sessionStorage cleanup failed', error);
       }
     })();
 

@@ -152,7 +152,13 @@ class WebAppHandler(SimpleHTTPRequestHandler):
             super().end_headers()
             return
         filename = os.path.basename(path)
-        if (
+        if path == "/":
+            self.send_header(
+                "Cache-Control", "no-store, no-cache, must-revalidate, max-age=0"
+            )
+            self.send_header("Pragma", "no-cache")
+            self.send_header("Expires", "0")
+        elif (
             filename in NO_STORE_FILES
             or filename.startswith(ASSET_PREFIXES)
             or filename == "flutter_service_worker.js"
