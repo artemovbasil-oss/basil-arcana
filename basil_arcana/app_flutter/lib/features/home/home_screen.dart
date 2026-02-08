@@ -276,18 +276,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             ),
                           ),
                         ),
-                        if (buildLabel != null) ...[
-                          const SizedBox(width: 8),
-                          Text(
-                            'v$buildLabel',
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelSmall
-                                ?.copyWith(
-                                  color: colorScheme.onSurface.withOpacity(0.6),
-                                ),
-                          ),
-                        ],
                         IconButton(
                           icon: const Icon(Icons.history),
                           tooltip: l10n.historyTooltip,

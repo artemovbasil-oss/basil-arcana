@@ -195,7 +195,9 @@ class AiRepository {
       );
     }
 
-    final useTelegramAuth = kIsWeb && TelegramEnv.instance.isTelegram;
+    final useTelegramAuth = kIsWeb &&
+        TelegramEnv.instance.isTelegram &&
+        apiKey.trim().isEmpty;
     if (kIsWeb && !useTelegramAuth && apiKey.trim().isEmpty) {
       _reportWebError(
         AiErrorType.unauthorized,

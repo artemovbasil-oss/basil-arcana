@@ -14,6 +14,37 @@
     return null;
   }
 
+  function readInitDataFromUrl() {
+    var search = window.location.search || '';
+    var hash = window.location.hash || '';
+    var candidates = [];
+    if (search) {
+      candidates.push(search.charAt(0) === '?' ? search.slice(1) : search);
+    }
+    if (hash) {
+      var trimmedHash = hash.charAt(0) === '#' ? hash.slice(1) : hash;
+      if (trimmedHash.indexOf('?') !== -1) {
+        trimmedHash = trimmedHash.split('?').pop();
+      }
+      candidates.push(trimmedHash);
+    }
+    for (var i = 0; i < candidates.length; i += 1) {
+      try {
+        var params = new URLSearchParams(candidates[i]);
+        var initData =
+          params.get('tgWebAppData') ||
+          params.get('tgInitData') ||
+          params.get('initData');
+        if (initData && typeof initData === 'string') {
+          return initData;
+        }
+      } catch (error) {
+        console.warn('Telegram initData URL parsing failed', error);
+      }
+    }
+    return '';
+  }
+
   function ensureReady() {
     var webApp = getWebApp();
     if (!webApp) {
@@ -48,17 +79,19 @@
     }, 50);
   }
 
-  window.__isTelegram = false;
+  var urlInitData = readInitDataFromUrl();
+
+  window.__isTelegram = Boolean(urlInitData);
   window.__tgInitData = function () {
     var webApp = getWebApp();
     if (!webApp) {
-      return '';
+      return urlInitData || '';
     }
     var initData = webApp.initData;
-    if (typeof initData === 'string') {
+    if (typeof initData === 'string' && initData) {
       return initData;
     }
-    return '';
+    return urlInitData || '';
   };
 
   scheduleReadyCheck(60);

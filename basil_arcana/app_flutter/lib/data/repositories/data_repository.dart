@@ -15,7 +15,7 @@ import '../models/card_video.dart';
 class DataRepository {
   DataRepository({http.Client? client}) : _client = client ?? http.Client();
 
-  static const int _cacheVersion = 2;
+  static const int _cacheVersion = 3;
   final http.Client _client;
   final Map<String, String> _memoryCache = {};
   final Map<String, DateTime> _lastFetchTimes = {};
