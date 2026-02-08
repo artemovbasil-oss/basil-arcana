@@ -113,6 +113,40 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
         );
       }
 
+      if (_shouldShowBackendErrorBubble(state)) {
+        final statusText = _statusMessage(state, l10n);
+        final canRetry = !state.isLoading && state.aiErrorType != null;
+        return Scaffold(
+          appBar: buildTopBar(
+            context,
+            title: Text(l10n.resultTitle),
+            showBack: true,
+          ),
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          body: SafeArea(
+            top: false,
+            child: Center(
+              child: GestureDetector(
+                onTap: canRetry
+                    ? () {
+                        ref
+                            .read(
+                              readingFlowControllerProvider.notifier,
+                            )
+                            .retryGenerate();
+                      }
+                    : null,
+                child: ChatBubble(
+                  isUser: false,
+                  avatarEmoji: '🪄',
+                  child: Text(statusText),
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
       final statusText = state.isLoading
           ? l10n.resultStatusAiReading
           : _statusMessage(state, l10n);
@@ -347,7 +381,18 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
   }
 
   bool _shouldShowRetryScreen(AiErrorType? type) {
-    return type == AiErrorType.timeout || type == AiErrorType.serverError;
+    return type == AiErrorType.timeout;
+  }
+
+  bool _shouldShowBackendErrorBubble(ReadingFlowState state) {
+    final status = state.aiErrorStatusCode;
+    if (status != null && (status < 200 || status >= 300)) {
+      return true;
+    }
+    return state.aiErrorType == AiErrorType.serverError ||
+        state.aiErrorType == AiErrorType.badResponse ||
+        state.aiErrorType == AiErrorType.unauthorized ||
+        state.aiErrorType == AiErrorType.rateLimited;
   }
 
   void _initializeSequence(ReadingFlowState state) {

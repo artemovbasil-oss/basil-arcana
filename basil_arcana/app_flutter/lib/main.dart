@@ -1,18 +1,34 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive/hive.dart';
 
 import 'app.dart';
 import 'core/config/app_config.dart';
+import 'core/config/diagnostics.dart';
+import 'core/config/web_build_version.dart';
 import 'core/theme/app_text_styles.dart';
 import 'core/widgets/app_buttons.dart';
+import 'core/storage/card_cache_cleanup.dart';
 import 'core/storage/hive_storage.dart';
+import 'data/models/card_model.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
     await AppConfig.init();
     await HiveStorage.init();
+    await CardCacheCleanup.clearPersistedCardCaches();
+    final settingsBox = Hive.box<String>('settings');
+    final languageCode = settingsBox.get('languageCode') ?? 'en';
+    final appVersion = (AppConfig.build ?? readWebBuildVersion()).trim();
+    logRuntimeDiagnostics(
+      appVersion: appVersion.isEmpty ? 'unknown' : appVersion,
+      locale: languageCode,
+      cardDataSource: 'embedded',
+      apiBaseUrl: AppConfig.apiBaseUrl,
+      schemaVersion: kCardSchemaVersion,
+    );
 
     runApp(const ProviderScope(child: BasilArcanaApp()));
   } catch (error, stackTrace) {

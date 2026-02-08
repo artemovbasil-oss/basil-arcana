@@ -5,3 +5,5 @@ void writeWebStorage(String key, String value) {}
 void removeWebStorage(String key) {}
 
 void clearWebStorageWithPrefixes(List<String> prefixes) {}
+
+void clearWebStorageWithSubstrings(List<String> fragments) {}
