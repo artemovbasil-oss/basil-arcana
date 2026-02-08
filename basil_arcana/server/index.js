@@ -65,7 +65,9 @@ app.get('/health', (req, res) => {
 });
 
 app.get('/api/reading/availability', (req, res) => {
-  const available = Boolean(OPENAI_API_KEY) && Boolean(ARCANA_API_KEY);
+  const available =
+    Boolean(OPENAI_API_KEY) &&
+    (Boolean(ARCANA_API_KEY) || Boolean(TELEGRAM_BOT_TOKEN));
   return res.json({
     ok: available,
     available,
@@ -389,11 +391,11 @@ app.post('/api/reading/details', async (req, res) => {
 });
 
 const missingRequired = [];
-if (!ARCANA_API_KEY) {
-  missingRequired.push('ARCANA_API_KEY');
-}
 if (!OPENAI_API_KEY) {
   missingRequired.push('OPENAI_API_KEY');
+}
+if (!ARCANA_API_KEY && !TELEGRAM_BOT_TOKEN) {
+  missingRequired.push('ARCANA_API_KEY or TELEGRAM_BOT_TOKEN');
 }
 
 if (missingRequired.length > 0) {

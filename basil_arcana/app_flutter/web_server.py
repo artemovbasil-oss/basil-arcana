@@ -16,6 +16,11 @@ NO_STORE_FILES = {
 }
 
 ASSET_PREFIXES = ("AssetManifest",)
+NO_STORE_PATH_PREFIXES = (
+    "/assets/data/",
+    "/assets/assets/data/",
+    "/flutter_assets/assets/data/",
+)
 
 
 CONFIG_PATH: str | None = None
@@ -147,7 +152,12 @@ class WebAppHandler(SimpleHTTPRequestHandler):
             super().end_headers()
             return
         filename = os.path.basename(path)
-        if filename in NO_STORE_FILES or filename.startswith(ASSET_PREFIXES) or filename == "flutter_service_worker.js":
+        if (
+            filename in NO_STORE_FILES
+            or filename.startswith(ASSET_PREFIXES)
+            or filename == "flutter_service_worker.js"
+            or path.startswith(NO_STORE_PATH_PREFIXES)
+        ):
             self.send_header("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
             self.send_header("Pragma", "no-cache")
             self.send_header("Expires", "0")
