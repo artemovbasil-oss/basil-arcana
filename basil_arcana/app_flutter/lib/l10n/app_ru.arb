@@ -196,5 +196,7 @@
   "natalChartError": "Не удалось создать натальную карту. Попробуйте еще раз.",
   "professionalReadingTitle": "Профессиональное толкование",
   "professionalReadingDescription": "Глубокий разбор расклада с помощью оракула.",
-  "professionalReadingButton": "Выбрать тариф"
+  "professionalReadingButton": "Выбрать тариф",
+  "professionalReadingOpenBotMessage": "Открой бота, чтобы увидеть тарифы подписки.",
+  "professionalReadingOpenBotAction": "Открыть бота"
 }

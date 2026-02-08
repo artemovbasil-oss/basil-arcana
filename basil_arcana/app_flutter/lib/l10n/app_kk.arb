@@ -196,5 +196,7 @@
   "natalChartError": "Наталдық картаны жасау мүмкін болмады. Қайта көріңіз.",
   "professionalReadingTitle": "Кәсіби жорамал",
   "professionalReadingDescription": "Таралымды терең кәсіби талдау.",
-  "professionalReadingButton": "Тариф таңдау"
+  "professionalReadingButton": "Тариф таңдау",
+  "professionalReadingOpenBotMessage": "Жазылым жоспарларын көру үшін ботты ашыңыз.",
+  "professionalReadingOpenBotAction": "Ботты ашу"
 }

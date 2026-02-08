@@ -39,8 +39,7 @@ const STRINGS: Record<
     },
     alreadyActive: "У тебя уже есть активная подписка",
     planAlreadySelected: "Тариф уже выбран.",
-    paymentStub:
-      "Оплата пока не настроена. Мы сохранили твой выбор и скоро продолжим.",
+    paymentStub: "Скоро будет доступно.",
   },
   en: {
     professionalTitle: "🔮 Professional reading",
@@ -53,8 +52,7 @@ const STRINGS: Record<
     },
     alreadyActive: "You already have an active subscription",
     planAlreadySelected: "Plan already selected.",
-    paymentStub:
-      "Payments are not set up yet. We saved your choice and will continue soon.",
+    paymentStub: "Coming soon.",
   },
   kk: {
     professionalTitle: "🔮 Кәсіби жорамал",
@@ -67,8 +65,7 @@ const STRINGS: Record<
     },
     alreadyActive: "Сенде белсенді жазылым бар",
     planAlreadySelected: "Тариф таңдалған.",
-    paymentStub:
-      "Төлем әзірге бапталмаған. Таңдауың сақталды, жақында жалғастырамыз.",
+    paymentStub: "Жақында қолжетімді болады.",
   },
 };
 
@@ -138,6 +135,19 @@ function parseWebAppAction(data: string): string | null {
   return null;
 }
 
+const webAppDebounceMs = 3000;
+const lastWebAppActionAt = new Map<number, number>();
+
+function shouldHandleWebAppAction(userId: number): boolean {
+  const now = Date.now();
+  const last = lastWebAppActionAt.get(userId) ?? 0;
+  if (now - last < webAppDebounceMs) {
+    return false;
+  }
+  lastWebAppActionAt.set(userId, now);
+  return true;
+}
+
 async function startPaymentFlow(
   ctx: Context,
   locale: SupportedLocale,
@@ -164,11 +174,14 @@ async function main(): Promise<void> {
   bot.on("message:web_app_data", async (ctx) => {
     const data = ctx.message.web_app_data?.data ?? "";
     const action = parseWebAppAction(data);
-    if (action !== "professional_reading") {
+    if (action !== "professional_reading" && action !== "show_plans") {
       return;
     }
     const userId = ctx.from?.id;
     if (!userId) {
+      return;
+    }
+    if (!shouldHandleWebAppAction(userId)) {
       return;
     }
     const locale = getLocale(ctx);
