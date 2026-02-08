@@ -65,7 +65,9 @@ app.get('/health', (req, res) => {
 });
 
 app.get('/api/reading/availability', (req, res) => {
-  const available = Boolean(OPENAI_API_KEY) && Boolean(ARCANA_API_KEY);
+  const available =
+    Boolean(OPENAI_API_KEY) &&
+    (Boolean(ARCANA_API_KEY) || Boolean(TELEGRAM_BOT_TOKEN));
   return res.json({
     ok: available,
     available,

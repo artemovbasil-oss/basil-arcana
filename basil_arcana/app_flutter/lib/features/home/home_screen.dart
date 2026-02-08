@@ -74,6 +74,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return DateTime.now().toIso8601String();
   }
 
+  String? _currentBuildLabel() {
+    final build = ConfigService.instance.build;
+    if (build != null && build.trim().isNotEmpty) {
+      return build.trim();
+    }
+    return null;
+  }
+
   void _applyExample(String example) {
     _controller.text = example;
     ref.read(readingFlowControllerProvider.notifier).setQuestion(example);
@@ -192,6 +200,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final colorScheme = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context)!;
     final locale = ref.watch(localeProvider);
+    final buildLabel = _currentBuildLabel();
     final examples = [
       l10n.homeExample1,
       l10n.homeExample2,
@@ -238,6 +247,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             ),
                           ),
                         ),
+                        if (buildLabel != null) ...[
+                          const SizedBox(width: 8),
+                          Text(
+                            'v$buildLabel',
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelSmall
+                                ?.copyWith(
+                                  color: colorScheme.onSurface.withOpacity(0.6),
+                                ),
+                          ),
+                        ],
                         IconButton(
                           icon: const Icon(Icons.history),
                           tooltip: l10n.historyTooltip,

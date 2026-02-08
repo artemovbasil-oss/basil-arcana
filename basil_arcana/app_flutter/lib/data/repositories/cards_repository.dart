@@ -12,6 +12,7 @@ import '../models/deck_model.dart';
 class CardsRepository {
   CardsRepository();
 
+  static const int _cacheVersion = 2;
   static const String _cardsPrefix = 'cdn_cards_';
   final Map<String, String> _memoryCache = {};
   final Map<String, DateTime> _lastFetchTimes = {};
@@ -53,7 +54,7 @@ class CardsRepository {
   String? get lastError => _lastError;
 
   String cardsCacheKey(Locale locale) =>
-      '$_cardsPrefix${locale.languageCode}';
+      '${_cardsPrefix}v${_cacheVersion}_${locale.languageCode}';
 
   String cardsFileNameForLocale(Locale locale) {
     return switch (locale.languageCode) {
@@ -160,9 +161,9 @@ class CardsRepository {
   }
 
   String _bundledAssetPath(String cacheKey) {
-    return cacheKey == '${_cardsPrefix}ru'
+    return cacheKey.endsWith('_ru')
         ? 'assets/data/cards_ru.json'
-        : cacheKey == '${_cardsPrefix}kk'
+        : cacheKey.endsWith('_kk')
             ? 'assets/data/cards_kz.json'
             : 'assets/data/cards_en.json';
   }
