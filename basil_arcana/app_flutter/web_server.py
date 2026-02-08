@@ -74,6 +74,24 @@ def log_config_presence() -> None:
 
 
 class WebAppHandler(SimpleHTTPRequestHandler):
+    base_path: str = ""
+
+    def _strip_base_path(self, path: str) -> tuple[str, bool]:
+        if not self.base_path:
+            return path, True
+        if path == self.base_path:
+            return "/", True
+        if path.startswith(f"{self.base_path}/"):
+            return path[len(self.base_path) :], True
+        return path, False
+
+    def _redirect_to_base(self) -> None:
+        target = f"{self.base_path}/"
+        self.send_response(302)
+        self.send_header("Location", target)
+        self.send_header("Cache-Control", "no-store, max-age=0")
+        self.end_headers()
+
     def _handle_video_range(self, file_path: str) -> bool:
         range_header = self.headers.get("Range")
         if not range_header:
@@ -120,6 +138,18 @@ class WebAppHandler(SimpleHTTPRequestHandler):
         parsed = urlparse(self.path)
         if parsed.path in ("/manifest.json", "/flutter.js"):
             print(f"Request for {parsed.path}")
+        if self.base_path:
+            stripped_path, allowed = self._strip_base_path(parsed.path)
+            if not allowed and parsed.path != "/healthz":
+                if parsed.path == "/":
+                    self._redirect_to_base()
+                else:
+                    self.send_error(404)
+                return
+            if allowed:
+                suffix = f"?{parsed.query}" if parsed.query else ""
+                self.path = f"{stripped_path}{suffix}"
+                parsed = urlparse(self.path)
         if parsed.path == "/healthz":
             body = b"ok"
             self.send_response(200)
@@ -191,8 +221,15 @@ def resolve_config_dir(preferred: str, fallback: str) -> str:
 
 def main() -> None:
     port = int(os.environ.get("PORT", "8080"))
-    directory = os.environ.get("WEB_ROOT", "/app/static")
-    preferred_dir = os.environ.get("CONFIG_DIR", "/app/static")
+    app_version = _read_env("APP_VERSION")
+    base_path = os.environ.get("WEB_BASE_PATH", "").strip()
+    if not base_path and app_version:
+        base_path = f"/v/{app_version}"
+    default_directory = (
+        f"/app/static/v/{app_version}" if app_version else "/app/static"
+    )
+    directory = os.environ.get("WEB_ROOT", default_directory)
+    preferred_dir = os.environ.get("CONFIG_DIR", directory)
     config_dir = resolve_config_dir(preferred_dir, "/tmp/static")
     required_files = ("index.html", "manifest.json", "flutter.js", "main.dart.js")
     missing_files = [
@@ -232,9 +269,13 @@ def main() -> None:
         CONFIG_PATH = None
     print(f"Resolved config dir: {config_dir} (cwd: {os.getcwd()})")
     log_config_presence()
+    WebAppHandler.base_path = base_path
     handler = functools.partial(WebAppHandler, directory=directory)
     server = ThreadingHTTPServer(("0.0.0.0", port), handler)
-    print(f"Listening on 0.0.0.0:{port}, serving {directory}")
+    print(
+        f"Listening on 0.0.0.0:{port}, serving {directory} "
+        f"(base_path={base_path or 'none'})"
+    )
     server.serve_forever()
 
 

@@ -1,14 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.loadConfig = loadConfig;
-function optionalEnv(name, fallback) {
-    const value = process.env[name];
-    if (!value) {
-        return fallback;
-    }
-    const trimmed = value.trim();
-    return trimmed.length === 0 ? fallback : trimmed;
-}
 function requireEnv(name) {
     const value = process.env[name];
     if (!value || value.trim().length === 0) {
@@ -16,23 +8,24 @@ function requireEnv(name) {
     }
     return value;
 }
-function appendVersion(url, version) {
+function buildVersionedUrl(url, version) {
     try {
         const parsed = new URL(url);
-        parsed.searchParams.set("v", version);
+        parsed.pathname = `/v/${version}/`;
+        parsed.search = "";
         return parsed.toString();
     }
     catch (error) {
-        const separator = url.includes("?") ? "&" : "?";
-        return `${url}${separator}v=${encodeURIComponent(version)}`;
+        const trimmed = url.replace(/\/+$/, "");
+        return `${trimmed}/v/${encodeURIComponent(version)}/`;
     }
 }
 function loadConfig() {
     const telegramToken = requireEnv("TELEGRAM_BOT_TOKEN");
     const webAppUrl = requireEnv("TELEGRAM_WEBAPP_URL");
-    const appVersion = optionalEnv("APP_VERSION", "dev");
+    const appVersion = requireEnv("APP_VERSION");
     return {
         telegramToken,
-        webAppUrl: appendVersion(webAppUrl, appVersion),
+        webAppUrl: buildVersionedUrl(webAppUrl, appVersion),
     };
 }
