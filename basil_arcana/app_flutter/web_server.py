@@ -53,17 +53,6 @@ class WebAppHandler(SimpleHTTPRequestHandler):
     app_version: str = ""
     _request_path: str = ""
 
-    def _redirect_to_version(self) -> None:
-        target = f"/v/{self.app_version}/" if self.app_version else "/"
-        self.send_response(302)
-        self.send_header("Location", target)
-        self.send_header(
-            "Cache-Control", "no-store, no-cache, must-revalidate, max-age=0"
-        )
-        self.send_header("Pragma", "no-cache")
-        self.send_header("Expires", "0")
-        self.end_headers()
-
     def _handle_video_range(self, file_path: str) -> bool:
         range_header = self.headers.get("Range")
         if not range_header:
@@ -139,19 +128,14 @@ class WebAppHandler(SimpleHTTPRequestHandler):
             except BrokenPipeError:
                 print("Broken pipe while writing /config.json response.")
             return
-        if parsed.path == "/":
-            self._redirect_to_version()
-            return
-        if parsed.path.startswith("/v/"):
-            suffix = parsed.path[len("/v/") :]
-            trimmed = suffix.lstrip("/")
-            suffix_query = f"?{parsed.query}" if parsed.query else ""
-            self.path = f"/{trimmed}{suffix_query}"
-            parsed = urlparse(self.path)
         if parsed.path.endswith(".mp4"):
             file_path = self.translate_path(parsed.path)
             if os.path.isfile(file_path) and self._handle_video_range(file_path):
                 return
+        if not os.path.splitext(parsed.path)[1]:
+            file_path = self.translate_path(parsed.path)
+            if not os.path.isfile(file_path):
+                self.path = "/index.html"
         try:
             super().do_GET()
         except BrokenPipeError:
@@ -166,9 +150,7 @@ class WebAppHandler(SimpleHTTPRequestHandler):
             )
             self.send_header("Pragma", "no-cache")
             self.send_header("Expires", "0")
-        elif path.startswith("/v/") and (
-            path.endswith("/main.dart.js") or "/assets/" in path
-        ):
+        elif path.startswith("/assets/"):
             self.send_header("Cache-Control", "public, max-age=31536000, immutable")
         else:
             self.send_header(
@@ -190,19 +172,18 @@ def main() -> None:
     missing_files = [
         name
         for name in required_files
-        if app_version
-        and not os.path.isfile(os.path.join(directory, app_version, name))
+        if not os.path.isfile(os.path.join(directory, name))
     ]
     if missing_files:
         print(
             "Warning: missing static files in "
-            f"{os.path.join(directory, app_version) if app_version else directory}: "
+            f"{directory}: "
             f"{', '.join(missing_files)}"
         )
     else:
         print(
             "Static files present in "
-            f"{os.path.join(directory, app_version) if app_version else directory}: "
+            f"{directory}: "
             f"{', '.join(required_files)}"
         )
     log_config_presence()

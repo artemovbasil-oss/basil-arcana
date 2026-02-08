@@ -22,7 +22,6 @@ RUN if [ ! -d "web" ]; then \
     fi
 
 RUN flutter gen-l10n && flutter build web --release --pwa-strategy=none \
-    --base-href="/v/${APP_VERSION}/" \
     --dart-define=API_BASE_URL="${API_BASE_URL}" \
     --dart-define=ASSETS_BASE_URL="${ASSETS_BASE_URL}" \
     --dart-define=APP_VERSION="${APP_VERSION}"
@@ -39,8 +38,8 @@ USER appuser
 ENV WEB_ROOT=/app/static
 ENV CONFIG_DIR=/app/static
 
-# Versioned web build output is served from /app/static/${APP_VERSION}.
-COPY --from=build --chown=appuser:appuser /app/build/web /app/static/${APP_VERSION}
+# Web build output is served from /app/static.
+COPY --from=build --chown=appuser:appuser /app/build/web /app/static
 COPY --from=build --chown=appuser:appuser /app/web_server.py /app/web_server.py
 
 EXPOSE 8080
