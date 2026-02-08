@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
@@ -8,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
 
 import '../../core/config/api_config.dart';
+import '../../core/network/network_exceptions.dart';
 import '../../core/telegram/telegram_env.dart';
 import '../../core/telemetry/web_error_reporter.dart';
 import '../models/ai_result_model.dart';
@@ -111,14 +111,17 @@ class AiRepository {
         );
       }
       throw const AiRepositoryException(AiErrorType.timeout);
-    } on SocketException catch (error) {
-      if (kDebugMode) {
-        debugPrint(
-          '[AiRepository] availabilityNoInternet requestId=$requestId '
-          'message="${error.toString()}"',
-        );
+    } on Exception catch (error) {
+      if (isSocketException(error) || error is http.ClientException) {
+        if (kDebugMode) {
+          debugPrint(
+            '[AiRepository] availabilityNoInternet requestId=$requestId '
+            'message="${error.toString()}"',
+          );
+        }
+        throw const AiRepositoryException(AiErrorType.noInternet);
       }
-      throw const AiRepositoryException(AiErrorType.noInternet);
+      rethrow;
     } finally {
       if (client == null) {
         httpClient.close();
@@ -298,16 +301,19 @@ class AiRepository {
       );
       _reportWebError(AiErrorType.timeout, message: error.toString());
       throw const AiRepositoryException(AiErrorType.timeout);
-    } on SocketException catch (error) {
-      _logFailure(
-        uri,
-        stopwatch,
-        requestId: requestId,
-        errorType: AiErrorType.noInternet,
-        exception: error,
-      );
-      _reportWebError(AiErrorType.noInternet, message: error.toString());
-      throw const AiRepositoryException(AiErrorType.noInternet);
+    } on Exception catch (error) {
+      if (isSocketException(error) || error is http.ClientException) {
+        _logFailure(
+          uri,
+          stopwatch,
+          requestId: requestId,
+          errorType: AiErrorType.noInternet,
+          exception: error,
+        );
+        _reportWebError(AiErrorType.noInternet, message: error.toString());
+        throw const AiRepositoryException(AiErrorType.noInternet);
+      }
+      rethrow;
     } finally {
       if (client == null) {
         httpClient.close();
@@ -532,16 +538,19 @@ class AiRepository {
       );
       _reportWebError(AiErrorType.timeout, message: error.toString());
       throw const AiRepositoryException(AiErrorType.timeout);
-    } on SocketException catch (error) {
-      _logFailure(
-        uri,
-        stopwatch,
-        requestId: requestId,
-        errorType: AiErrorType.noInternet,
-        exception: error,
-      );
-      _reportWebError(AiErrorType.noInternet, message: error.toString());
-      throw const AiRepositoryException(AiErrorType.noInternet);
+    } on Exception catch (error) {
+      if (isSocketException(error) || error is http.ClientException) {
+        _logFailure(
+          uri,
+          stopwatch,
+          requestId: requestId,
+          errorType: AiErrorType.noInternet,
+          exception: error,
+        );
+        _reportWebError(AiErrorType.noInternet, message: error.toString());
+        throw const AiRepositoryException(AiErrorType.noInternet);
+      }
+      rethrow;
     } finally {
       if (client == null) {
         httpClient.close();
@@ -746,16 +755,19 @@ class AiRepository {
       );
       _reportWebError(AiErrorType.timeout, message: error.toString());
       throw const AiRepositoryException(AiErrorType.timeout);
-    } on SocketException catch (error) {
-      _logFailure(
-        uri,
-        stopwatch,
-        requestId: requestId,
-        errorType: AiErrorType.noInternet,
-        exception: error,
-      );
-      _reportWebError(AiErrorType.noInternet, message: error.toString());
-      throw const AiRepositoryException(AiErrorType.noInternet);
+    } on Exception catch (error) {
+      if (isSocketException(error) || error is http.ClientException) {
+        _logFailure(
+          uri,
+          stopwatch,
+          requestId: requestId,
+          errorType: AiErrorType.noInternet,
+          exception: error,
+        );
+        _reportWebError(AiErrorType.noInternet, message: error.toString());
+        throw const AiRepositoryException(AiErrorType.noInternet);
+      }
+      rethrow;
     } finally {
       if (client == null) {
         httpClient.close();
