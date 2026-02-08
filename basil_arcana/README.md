@@ -117,7 +117,9 @@ Production default: `https://api.basilarcana.com`.
   - `cd app_flutter`
   - `flutter pub get`
   - `flutter gen-l10n`
-  - `flutter build web --release --pwa-strategy=none`
+  - `flutter build web --release --pwa-strategy=none --base-href /v/2026-02-08-1/`
+  - `mkdir -p ../server/public/v/2026-02-08-1`
+  - `cp -R build/web/* ../server/public/v/2026-02-08-1/`
 - **Local bot build**:
   - `cd bot`
   - `npm ci`
@@ -125,6 +127,7 @@ Production default: `https://api.basilarcana.com`.
   - `npm run start`
 - **Railway environment variables**:
   - Web service: `API_BASE_URL`
+  - Web service (optional): `APP_VERSION` (default `2026-02-08-1`), `PUBLIC_ROOT` (default `server/public`)
   - API service: `OPENAI_API_KEY`, `ARCANA_API_KEY` (+ optional `OPENAI_MODEL`, rate limit vars)
   - Bot service: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBAPP_URL`
 - **iOS Telegram verification**:

@@ -1,6 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
+const fs = require('fs');
+const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 
 const { buildPromptMessages, buildDetailsPrompt } = require('./src/prompt');
@@ -62,6 +64,29 @@ app.use((req, res, next) => {
 
   next();
 });
+
+const APP_VERSION = process.env.APP_VERSION || '2026-02-08-1';
+const VERSION_PREFIX = `/v/${APP_VERSION}`;
+const PUBLIC_ROOT = process.env.PUBLIC_ROOT || path.join(__dirname, 'public');
+const VERSIONED_ROOT = path.join(PUBLIC_ROOT, 'v', APP_VERSION);
+const VERSIONED_INDEX = path.join(VERSIONED_ROOT, 'index.html');
+
+if (fs.existsSync(VERSIONED_ROOT)) {
+  app.use(
+    VERSION_PREFIX,
+    express.static(VERSIONED_ROOT, {
+      index: false,
+      fallthrough: true
+    })
+  );
+
+  app.get(`${VERSION_PREFIX}/*`, (req, res) => {
+    if (fs.existsSync(VERSIONED_INDEX)) {
+      return res.sendFile(VERSIONED_INDEX);
+    }
+    return res.status(404).json({ error: 'not_found', requestId: req.requestId });
+  });
+}
 
 app.get('/', (req, res) => {
   res.json({
