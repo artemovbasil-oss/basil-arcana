@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
-import '../../core/assets/asset_paths.dart';
-import '../../core/config/config_service.dart';
-import '../../core/config/diagnostics.dart';
 import '../../core/navigation/app_route_config.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/app_buttons.dart';
@@ -27,7 +24,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   final FocusNode _focusNode = FocusNode();
   final ScrollController _scrollController = ScrollController();
   final GlobalKey _questionKey = GlobalKey();
-  String? _buildMarker;
 
   @override
   void initState() {
@@ -53,9 +49,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         setState(() {});
       },
     );
-    if (kShowDiagnostics) {
-      _buildMarker = _resolveBuildMarker();
-    }
   }
 
   @override
@@ -64,30 +57,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     _focusNode.dispose();
     _scrollController.dispose();
     super.dispose();
-  }
-
-  String _resolveBuildMarker() {
-    final build = ConfigService.instance.build;
-    if (build != null && build.trim().isNotEmpty) {
-      return build.trim();
-    }
-    return DateTime.now().toIso8601String();
-  }
-
-  String? _currentBuildLabel() {
-    final build = ConfigService.instance.build;
-    if (build != null && build.trim().isNotEmpty) {
-      return _shortenBuildLabel(build.trim());
-    }
-    return null;
-  }
-
-  String _shortenBuildLabel(String build) {
-    const maxLength = 8;
-    if (build.length <= maxLength) {
-      return build;
-    }
-    return build.substring(0, maxLength);
   }
 
   void _applyExample(String example) {
@@ -119,96 +88,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  void _showDebugOverlay(BuildContext context, Locale locale) {
-    if (!kShowDiagnostics) {
-      return;
-    }
-    final config = ConfigService.instance;
-    final cardsRepo = ref.read(cardsRepositoryProvider);
-    final spreadsRepo = ref.read(dataRepositoryProvider);
-    final cardsCacheKey = cardsRepo.cardsCacheKey(locale);
-    final spreadsCacheKey = spreadsRepo.spreadsCacheKey(locale);
-    final lastRequestedCardsUrl =
-        cardsRepo.lastAttemptedUrls[cardsCacheKey] ?? '—';
-    final lastRequestedSpreadsUrl =
-        spreadsRepo.lastAttemptedUrls[spreadsCacheKey] ?? '—';
-    final cardsStatusCode = cardsRepo.lastStatusCodes[cardsCacheKey];
-    final lastError = cardsRepo.lastError ??
-        spreadsRepo.lastError ??
-        config.lastError ??
-        'None';
-    showDialog<void>(
-      context: context,
-      builder: (dialogContext) {
-        final textTheme = Theme.of(dialogContext).textTheme;
-        return AlertDialog(
-          title: const Text('Debug info'),
-          content: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _DebugLine(
-                  label: 'API_BASE_URL',
-                  value: config.apiBaseUrl.trim().isEmpty
-                      ? '—'
-                      : config.apiBaseUrl,
-                  textTheme: textTheme,
-                ),
-                _DebugLine(
-                  label: 'ASSETS_BASE_URL',
-                  value: config.assetsBaseUrl,
-                  textTheme: textTheme,
-                ),
-                _DebugLine(
-                  label: 'Spreads URL',
-                  value: spreadsUrl(locale.languageCode),
-                  textTheme: textTheme,
-                ),
-                _DebugLine(
-                  label: 'Cards URL',
-                  value: cardsRepo.cardsUrlForLocale(locale),
-                  textTheme: textTheme,
-                ),
-                _DebugLine(
-                  label: 'Cards last requested URL',
-                  value: lastRequestedCardsUrl,
-                  textTheme: textTheme,
-                ),
-                _DebugLine(
-                  label: 'Cards last status',
-                  value: cardsStatusCode?.toString() ?? '—',
-                  textTheme: textTheme,
-                ),
-                _DebugLine(
-                  label: 'Spreads last requested URL',
-                  value: lastRequestedSpreadsUrl,
-                  textTheme: textTheme,
-                ),
-                _DebugLine(
-                  label: 'Last error',
-                  value: lastError,
-                  textTheme: textTheme,
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            AppSmallButton(
-              onPressed: () => Navigator.of(dialogContext).pop(),
-              label: 'Close',
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context)!;
     final locale = ref.watch(localeProvider);
-    final buildLabel = _currentBuildLabel();
     final examples = [
       l10n.homeExample1,
       l10n.homeExample2,
@@ -242,38 +126,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     Row(
                       children: [
                         Expanded(
-                          child: GestureDetector(
-                            onLongPress: kShowDiagnostics
-                                ? () {
-                                    _showDebugOverlay(context, locale);
-                                  }
-                                : null,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  l10n.appTitle,
-                                  style: AppTextStyles.title(context)
-                                      .copyWith(color: colorScheme.onSurface),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                if (buildLabel != null)
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 2),
-                                    child: Text(
-                                      'v$buildLabel',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .labelSmall
-                                          ?.copyWith(
-                                            color: colorScheme.onSurface
-                                                .withOpacity(0.6),
-                                          ),
-                                    ),
-                                  ),
-                              ],
-                            ),
+                          child: Text(
+                            l10n.appTitle,
+                            style: AppTextStyles.title(context)
+                                .copyWith(color: colorScheme.onSurface),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         IconButton(
@@ -428,16 +286,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ),
             ),
-            if (kShowDiagnostics && _buildMarker != null)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Text(
-                  'build: $_buildMarker',
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: colorScheme.onSurface.withOpacity(0.55),
-                      ),
-                ),
-              ),
           ],
         ),
       ),
@@ -471,36 +319,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       MaterialPageRoute(
         settings: appRouteSettings(showBackButton: false),
         builder: (_) => const SpreadScreen(),
-      ),
-    );
-  }
-}
-
-class _DebugLine extends StatelessWidget {
-  const _DebugLine({
-    required this.label,
-    required this.value,
-    required this.textTheme,
-  });
-
-  final String label;
-  final String value;
-  final TextTheme textTheme;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: textTheme.labelMedium),
-          const SizedBox(height: 4),
-          SelectableText(
-            value,
-            style: textTheme.bodySmall,
-          ),
-        ],
       ),
     );
   }

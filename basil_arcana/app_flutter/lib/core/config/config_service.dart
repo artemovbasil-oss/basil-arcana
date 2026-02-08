@@ -18,31 +18,29 @@ class ConfigService {
     defaultValue: '',
   );
 
-  static const String _apiKeyEnv = String.fromEnvironment(
-    'API_KEY',
-    defaultValue: '',
-  );
-
   static const String _assetsBaseUrlEnv = String.fromEnvironment(
     'ASSETS_BASE_URL',
     defaultValue: '',
   );
 
+  static const String _appVersionEnv = String.fromEnvironment(
+    'APP_VERSION',
+    defaultValue: '',
+  );
+
   String _apiBaseUrl = _apiBaseUrlEnv;
-  String _apiKey = _apiKeyEnv;
   String _assetsBaseUrl = _normalizeBaseUrl(
     _assetsBaseUrlEnv,
     fallback: '',
   );
-  String? _build;
+  String _appVersion = _appVersionEnv;
   String? _lastError;
 
   String get apiBaseUrl => _apiBaseUrl;
-  String? get build => _build;
+  String get appVersion => _appVersion;
   String? get lastError => _lastError;
   bool get isConfigured => _apiBaseUrl.trim().isNotEmpty;
 
-  String get apiKey => kIsWeb ? _apiKey : _apiKeyEnv;
   String get assetsBaseUrl =>
       _normalizeBaseUrl(_assetsBaseUrl, fallback: _defaultAssetsBaseUrl);
 
@@ -50,7 +48,9 @@ class ConfigService {
     if (!kIsWeb) {
       return;
     }
-    final cacheBust = readWebBuildVersion();
+    final cacheBust = _appVersion.isNotEmpty
+        ? _appVersion
+        : readWebBuildVersion();
     final uri = Uri.parse('config.json').replace(
       queryParameters: {'v': cacheBust.isEmpty ? 'dev' : cacheBust},
     );
@@ -71,14 +71,10 @@ class ConfigService {
         return;
       }
       final runtimeApiBaseUrl = payload['apiBaseUrl'];
-      final runtimeBuild = payload['build'];
-      final runtimeApiKey = payload['apiKey'];
       final runtimeAssetsBaseUrl = payload['assetsBaseUrl'];
+      final runtimeAppVersion = payload['appVersion'];
       if (runtimeApiBaseUrl is String && runtimeApiBaseUrl.trim().isNotEmpty) {
         _apiBaseUrl = runtimeApiBaseUrl.trim();
-      }
-      if (runtimeApiKey is String) {
-        _apiKey = runtimeApiKey.trim();
       }
       if (_assetsBaseUrlEnv.trim().isEmpty && runtimeAssetsBaseUrl is String) {
         _assetsBaseUrl = _normalizeBaseUrl(
@@ -86,8 +82,10 @@ class ConfigService {
           fallback: _defaultAssetsBaseUrl,
         );
       }
-      if (runtimeBuild is String && runtimeBuild.trim().isNotEmpty) {
-        _build = runtimeBuild.trim();
+      if (_appVersionEnv.trim().isEmpty &&
+          runtimeAppVersion is String &&
+          runtimeAppVersion.trim().isNotEmpty) {
+        _appVersion = runtimeAppVersion.trim();
       }
     } catch (error) {
       _lastError = 'Config load failed: ${error.toString()}';

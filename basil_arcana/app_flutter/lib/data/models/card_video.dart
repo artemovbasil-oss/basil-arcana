@@ -1,7 +1,6 @@
 import 'deck_model.dart';
 
 const List<String> _videoFileNames = [
-  'pentacles_queen.mp4',
   'chariot.mp4',
   'cups_king.mp4',
   'cups_knight.mp4',
@@ -24,6 +23,7 @@ const List<String> _videoFileNames = [
   'pentacles_king.mp4',
   'pentacles_knight.mp4',
   'pentacles_page.mp4',
+  'pentacles_queen.mp4',
   'star.mp4',
   'strength.mp4',
   'sun.mp4',
@@ -31,16 +31,6 @@ const List<String> _videoFileNames = [
   'swords_knight.mp4',
   'swords_page.mp4',
   'swords_queen.mp4',
-  'swords_ace.mp4',
-  'swords_two.mp4',
-  'swords_three.mp4',
-  'swords_four.mp4',
-  'swords_five.mp4',
-  'swords_six.mp4',
-  'swords_seven.mp4',
-  'swords_eight.mp4',
-  'swords_nine.mp4',
-  'swords_ten.mp4',
   'temperance.mp4',
   'tower.mp4',
   'wands_king.mp4',

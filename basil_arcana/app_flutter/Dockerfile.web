@@ -36,12 +36,11 @@ RUN useradd --create-home --uid 10001 appuser && \
     chown -R appuser:appuser /app /app/static
 USER appuser
 
-ENV WEB_ROOT=/app/static/v/${APP_VERSION}
-ENV WEB_BASE_PATH=/v/${APP_VERSION}
-ENV CONFIG_DIR=/app/static/v/${APP_VERSION}
+ENV WEB_ROOT=/app/static
+ENV CONFIG_DIR=/app/static
 
-# Versioned web build output is served from /app/static/v/${APP_VERSION}.
-COPY --from=build --chown=appuser:appuser /app/build/web /app/static/v/${APP_VERSION}
+# Versioned web build output is served from /app/static/${APP_VERSION}.
+COPY --from=build --chown=appuser:appuser /app/build/web /app/static/${APP_VERSION}
 COPY --from=build --chown=appuser:appuser /app/web_server.py /app/web_server.py
 
 EXPOSE 8080

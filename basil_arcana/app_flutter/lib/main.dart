@@ -22,19 +22,23 @@ Future<void> main() async {
     await CardCacheCleanup.clearPersistedCardCaches();
     final settingsBox = Hive.box<String>('settings');
     final languageCode = settingsBox.get('languageCode') ?? 'en';
-    final runtimeBuildVersion = (AppConfig.build ?? readWebBuildVersion()).trim();
-    final resolvedAppVersion =
-        runtimeBuildVersion.isNotEmpty ? runtimeBuildVersion : appVersion;
+    final runtimeBuildVersion = (AppConfig.appVersion.isNotEmpty
+            ? AppConfig.appVersion
+            : readWebBuildVersion())
+        .trim();
+    final resolvedAppVersion = runtimeBuildVersion.isNotEmpty
+        ? runtimeBuildVersion
+        : appVersion;
     debugPrint(
       '[Startup] APP_VERSION=$resolvedAppVersion '
       'locale=$languageCode '
-      'cardDataSource=embedded',
+      'cardDataSource=remote',
     );
     logRuntimeDiagnostics(
       appVersion:
           resolvedAppVersion.isEmpty ? 'unknown' : resolvedAppVersion,
       locale: languageCode,
-      cardDataSource: 'embedded',
+      cardDataSource: 'remote',
       apiBaseUrl: AppConfig.apiBaseUrl,
       schemaVersion: kCardSchemaVersion,
     );
