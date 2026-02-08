@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/config/assets_config.dart';
 import '../../core/network/json_loader.dart';
@@ -17,7 +16,6 @@ class DataRepository {
 
   static const int _cacheVersion = 3;
   final http.Client _client;
-  final Map<String, String> _memoryCache = {};
   final Map<String, DateTime> _lastFetchTimes = {};
   final Map<String, DateTime> _lastCacheTimes = {};
   final Map<String, String> _lastAttemptedUrls = {};
@@ -29,7 +27,6 @@ class DataRepository {
   final Map<String, int> _lastResponseStringLengths = {};
   final Map<String, int> _lastResponseByteLengths = {};
   final Map<String, String> _lastResponseRootTypes = {};
-  SharedPreferences? _preferences;
   String? _lastError;
 
   static const String _cardsPrefix = 'cdn_cards_';
@@ -112,16 +109,6 @@ class DataRepository {
       return null;
     }
     return _parseVideoIndex(raw);
-  }
-
-  Future<SharedPreferences> _prefs() async {
-    final existing = _preferences;
-    if (existing != null) {
-      return existing;
-    }
-    final prefs = await SharedPreferences.getInstance();
-    _preferences = prefs;
-    return prefs;
   }
 
   Future<String?> _loadBundledCards(String cacheKey) async {
@@ -219,8 +206,6 @@ class DataRepository {
       _lastResponseRootTypes[cacheKey] = rootType;
       if (expectedRootTypes.contains(rootType) &&
           validator(parsed.decoded)) {
-        await _storeCache(cacheKey, parsed.raw);
-        _lastCacheTimes[cacheKey] = DateTime.now();
         _lastError = null;
         return parsed.raw;
       }
@@ -249,15 +234,14 @@ class DataRepository {
       if (response.statusCode == 404 ||
           response.statusCode < 200 ||
           response.statusCode >= 300) {
-        return await _readCache(cacheKey);
+        return null;
       }
       final rootType = jsonRootType(parsed.decoded);
       _lastResponseRootTypes[cacheKey] = rootType;
       if (!expectedRootTypes.contains(rootType) ||
           !validator(parsed.decoded)) {
-        return await _readCache(cacheKey);
+        return null;
       }
-      await _storeCache(cacheKey, parsed.raw);
       _lastFetchTimes[cacheKey] = DateTime.now();
       _lastError = null;
       return parsed.raw;
@@ -266,71 +250,31 @@ class DataRepository {
       if (error is JsonFetchException && error.response != null) {
         _recordResponseInfo(cacheKey, error.response!);
       }
-      return await _readCache(cacheKey);
+      return null;
     }
   }
 
   Future<String?> _readCache(String cacheKey) async {
-    final cached = _memoryCache[cacheKey];
-    if (cached != null) {
-      return cached;
-    }
-    final prefs = await _prefs();
-    final raw = prefs.getString(cacheKey);
-    if (raw != null) {
-      _memoryCache[cacheKey] = raw;
-    }
-    return raw;
+    return null;
   }
 
   Future<void> _storeCache(String cacheKey, String raw) async {
-    _memoryCache[cacheKey] = raw;
-    final prefs = await _prefs();
-    await prefs.setString(cacheKey, raw);
+    return;
   }
 
   Future<bool> hasCachedData(String cacheKey) async {
-    final cached = _memoryCache[cacheKey];
-    if (cached != null) {
-      return true;
-    }
-    final prefs = await _prefs();
-    return prefs.containsKey(cacheKey);
+    return false;
   }
 
   Future<List<CardModel>> loadCachedCards({
     required Locale locale,
     required DeckType deckId,
   }) async {
-    final cacheKey = cardsCacheKey(locale);
-    final raw = await _readCache(cacheKey);
-    if (raw == null) {
-      throw DataLoadException('No cached cards available', cacheKey: cacheKey);
-    }
-    final parsed = parseJsonString(raw);
-    final rootType = jsonRootType(parsed.decoded);
-    _lastResponseRootTypes[cacheKey] = rootType;
-    if (rootType != 'Map' || !_isValidCardsJson(parsed.decoded)) {
-      throw DataLoadException('Cached cards are invalid', cacheKey: cacheKey);
-    }
-    _lastCacheTimes[cacheKey] = DateTime.now();
-    return _parseCards(raw: parsed.raw, deckId: deckId);
+    throw DataLoadException('Cached cards disabled');
   }
 
   Future<List<SpreadModel>> loadCachedSpreads({required Locale locale}) async {
-    final cacheKey = spreadsCacheKey(locale);
-    final raw = await _readCache(cacheKey);
-    if (raw == null) {
-      throw DataLoadException('No cached spreads available', cacheKey: cacheKey);
-    }
-    final parsed = parseJsonString(raw);
-    final rootType = jsonRootType(parsed.decoded);
-    _lastResponseRootTypes[cacheKey] = rootType;
-    if (rootType != 'List' || !_isValidSpreadsJson(parsed.decoded)) {
-      throw DataLoadException('Cached spreads are invalid', cacheKey: cacheKey);
-    }
-    _lastCacheTimes[cacheKey] = DateTime.now();
-    return _parseSpreads(raw: parsed.raw);
+    throw DataLoadException('Cached spreads disabled');
   }
 
   void _recordResponseInfo(String cacheKey, JsonResponseInfo response) {

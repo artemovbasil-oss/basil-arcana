@@ -51,7 +51,7 @@ class ConfigService {
       return;
     }
     final cacheBust = readWebBuildVersion();
-    final uri = Uri.parse('/config.json').replace(
+    final uri = Uri.parse('config.json').replace(
       queryParameters: {'v': cacheBust.isEmpty ? 'dev' : cacheBust},
     );
     try {
