@@ -248,12 +248,31 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     _showDebugOverlay(context, locale);
                                   }
                                 : null,
-                            child: Text(
-                              l10n.appTitle,
-                              style: AppTextStyles.title(context)
-                                  .copyWith(color: colorScheme.onSurface),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  l10n.appTitle,
+                                  style: AppTextStyles.title(context)
+                                      .copyWith(color: colorScheme.onSurface),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                if (buildLabel != null)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 2),
+                                    child: Text(
+                                      'v$buildLabel',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelSmall
+                                          ?.copyWith(
+                                            color: colorScheme.onSurface
+                                                .withOpacity(0.6),
+                                          ),
+                                    ),
+                                  ),
+                              ],
                             ),
                           ),
                         ),

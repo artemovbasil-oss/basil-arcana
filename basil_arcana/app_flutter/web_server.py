@@ -18,6 +18,7 @@ NO_STORE_FILES = {
 ASSET_PREFIXES = ("AssetManifest",)
 NO_STORE_PATH_PREFIXES = (
     "/assets/data/",
+    "/assets/assets/data/",
     "/flutter_assets/assets/data/",
 )
 

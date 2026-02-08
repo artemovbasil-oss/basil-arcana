@@ -391,11 +391,11 @@ app.post('/api/reading/details', async (req, res) => {
 });
 
 const missingRequired = [];
-if (!ARCANA_API_KEY) {
-  missingRequired.push('ARCANA_API_KEY');
-}
 if (!OPENAI_API_KEY) {
   missingRequired.push('OPENAI_API_KEY');
+}
+if (!ARCANA_API_KEY && !TELEGRAM_BOT_TOKEN) {
+  missingRequired.push('ARCANA_API_KEY or TELEGRAM_BOT_TOKEN');
 }
 
 if (missingRequired.length > 0) {
