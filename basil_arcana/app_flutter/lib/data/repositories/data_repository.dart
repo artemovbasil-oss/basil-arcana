@@ -15,6 +15,7 @@ import '../models/card_video.dart';
 class DataRepository {
   DataRepository({http.Client? client}) : _client = client ?? http.Client();
 
+  static const int _cacheVersion = 2;
   final http.Client _client;
   final Map<String, String> _memoryCache = {};
   final Map<String, DateTime> _lastFetchTimes = {};
@@ -62,12 +63,12 @@ class DataRepository {
   String get assetsBaseUrl => AssetsConfig.assetsBaseUrl;
 
   String cardsCacheKey(Locale locale) =>
-      '$_cardsPrefix${locale.languageCode}';
+      '${_cardsPrefix}v${_cacheVersion}_${locale.languageCode}';
 
   String spreadsCacheKey(Locale locale) =>
-      '$_spreadsPrefix${locale.languageCode}';
+      '${_spreadsPrefix}v${_cacheVersion}_${locale.languageCode}';
 
-  String get videoIndexCacheKey => _videoIndexKey;
+  String get videoIndexCacheKey => '${_videoIndexKey}_v${_cacheVersion}';
 
   String cardsFileNameForLocale(Locale locale) {
     return switch (locale.languageCode) {
@@ -180,17 +181,17 @@ class DataRepository {
   }
 
   String _bundledCardsAssetPath(String cacheKey) {
-    return cacheKey == '${_cardsPrefix}ru'
+    return cacheKey.endsWith('_ru')
         ? 'assets/data/cards_ru.json'
-        : cacheKey == '${_cardsPrefix}kk'
+        : cacheKey.endsWith('_kk')
             ? 'assets/data/cards_kz.json'
             : 'assets/data/cards_en.json';
   }
 
   String _bundledSpreadsAssetPath(String cacheKey) {
-    return cacheKey == '${_spreadsPrefix}ru'
+    return cacheKey.endsWith('_ru')
         ? 'assets/data/spreads_ru.json'
-        : cacheKey == '${_spreadsPrefix}kk'
+        : cacheKey.endsWith('_kk')
             ? 'assets/data/spreads_kz.json'
             : 'assets/data/spreads_en.json';
   }
