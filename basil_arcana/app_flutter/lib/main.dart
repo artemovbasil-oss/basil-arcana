@@ -5,6 +5,7 @@ import 'package:hive/hive.dart';
 
 import 'app.dart';
 import 'core/config/app_config.dart';
+import 'core/config/app_version.dart';
 import 'core/config/diagnostics.dart';
 import 'core/config/web_build_version.dart';
 import 'core/theme/app_text_styles.dart';
@@ -21,9 +22,17 @@ Future<void> main() async {
     await CardCacheCleanup.clearPersistedCardCaches();
     final settingsBox = Hive.box<String>('settings');
     final languageCode = settingsBox.get('languageCode') ?? 'en';
-    final appVersion = (AppConfig.build ?? readWebBuildVersion()).trim();
+    final runtimeBuildVersion = (AppConfig.build ?? readWebBuildVersion()).trim();
+    final resolvedAppVersion =
+        runtimeBuildVersion.isNotEmpty ? runtimeBuildVersion : appVersion;
+    debugPrint(
+      '[Startup] APP_VERSION=$resolvedAppVersion '
+      'locale=$languageCode '
+      'cardDataSource=embedded',
+    );
     logRuntimeDiagnostics(
-      appVersion: appVersion.isEmpty ? 'unknown' : appVersion,
+      appVersion:
+          resolvedAppVersion.isEmpty ? 'unknown' : resolvedAppVersion,
       locale: languageCode,
       cardDataSource: 'embedded',
       apiBaseUrl: AppConfig.apiBaseUrl,
