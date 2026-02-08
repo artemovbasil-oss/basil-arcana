@@ -85,7 +85,10 @@ class HiveStorage {
       return;
     }
     final buildId =
-        (AppConfig.build ?? readWebBuildVersion()).trim();
+        (AppConfig.appVersion.isNotEmpty
+                ? AppConfig.appVersion
+                : readWebBuildVersion())
+            .trim();
     if (buildId.isEmpty) {
       return;
     }

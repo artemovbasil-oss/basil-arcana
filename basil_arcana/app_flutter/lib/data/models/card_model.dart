@@ -116,7 +116,9 @@ class CardDto {
     final detailed = _stringFromJson(json['description']).isNotEmpty
         ? _stringFromJson(json['description'])
         : _stringFromJson(json['detailedDescription']);
-    final fact = _stringFromJson(json['fact']);
+    final fact = _stringFromJson(json['fact']).isNotEmpty
+        ? _stringFromJson(json['fact'])
+        : _stringFromJson(json['funFact']);
     final deckId = deckIdFromString(json['deck'] as String?) ??
         _deckIdFromCardId(id);
     return CardDto(
@@ -201,7 +203,7 @@ class CardModel {
       keywords: (json['keywords'] as List<dynamic>).cast<String>(),
       meaning: CardMeaning.fromJson(json['meaning'] as Map<String, dynamic>),
       detailedDescription: json['detailedDescription'] as String?,
-      funFact: json['fact'] as String?,
+      funFact: (json['fact'] as String?) ?? (json['funFact'] as String?),
       stats: CardStats.fromJson(json['stats'] as Map<String, dynamic>?),
       videoFileName: _videoFileNameFromJson(json),
       imageUrl: json['imageUrl'] as String? ?? '',

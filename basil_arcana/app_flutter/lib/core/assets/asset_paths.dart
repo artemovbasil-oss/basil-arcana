@@ -1,4 +1,6 @@
+import '../../data/models/card_video.dart';
 import '../../data/models/deck_model.dart';
+import '../config/app_config.dart';
 import '../config/assets_config.dart';
 
 String deckCoverImageUrl() {
@@ -50,7 +52,7 @@ String spreadsUrl(String languageCode) {
     'kz' => 'kz',
     _ => 'en',
   };
-  return '$base/data/spreads_${lang}.json';
+  return _appendCacheBust('$base/data/spreads_${lang}.json');
 }
 
 String cardsUrl(String languageCode) {
@@ -62,7 +64,7 @@ String cardsUrl(String languageCode) {
     'kz' => 'kz',
     _ => 'en',
   };
-  return '$base/data/cards_${lang}.json';
+  return _appendCacheBust('$base/data/cards_${lang}.json');
 }
 
 String deckPreviewImageUrl(DeckType deckId) {
@@ -91,28 +93,20 @@ String deckCoverAssetPath(DeckType deckId) {
 }
 
 String? videoUrlForCard(String cardId) {
-  final normalizedId = canonicalCardId(cardId);
   final base = AssetsConfig.assetsBaseUrl;
-  if (normalizedId.startsWith('major_')) {
-    final parts = normalizedId.split('_');
-    if (parts.length >= 3) {
-      var name = parts.sublist(2).join('_');
-      if (normalizedId == 'major_10_wheel') {
-        name = 'wheel_of_fortune';
-      }
-      return '$base/video/$name.mp4';
-    }
+  final fileName = resolveCardVideoFileName(cardId);
+  if (fileName == null || fileName.isEmpty) {
+    return null;
   }
-  final parts = normalizedId.split('_');
-  if (parts.length >= 3) {
-    final suit = parts.first;
-    final rank = parts.sublist(2).join('_');
-    if (rank == 'king' ||
-        rank == 'queen' ||
-        rank == 'knight' ||
-        rank == 'page') {
-      return '$base/video/${suit}_$rank.mp4';
-    }
-  }
-  return null;
+  return '$base/video/$fileName';
+}
+
+String _appendCacheBust(String url) {
+  final version = AppConfig.appVersion.trim().isNotEmpty
+      ? AppConfig.appVersion.trim()
+      : 'dev';
+  final uri = Uri.parse(url);
+  final params = Map<String, String>.from(uri.queryParameters);
+  params['v'] = version;
+  return uri.replace(queryParameters: params).toString();
 }

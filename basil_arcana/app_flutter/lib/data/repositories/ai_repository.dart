@@ -8,7 +8,6 @@ import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
 
 import '../../core/config/api_config.dart';
-import '../../core/config/app_config.dart';
 import '../../core/telegram/telegram_env.dart';
 import '../../core/telemetry/web_error_reporter.dart';
 import '../models/ai_result_model.dart';
@@ -17,8 +16,6 @@ import '../models/drawn_card_model.dart';
 import '../models/spread_model.dart';
 
 String get apiBaseUrl => ApiConfig.apiBaseUrl;
-
-String get apiKey => AppConfig.apiKey;
 
 const Duration _requestTimeout = Duration(seconds: 60);
 const Duration _availabilityTimeout = Duration(seconds: 8);
@@ -68,9 +65,6 @@ class AiRepository {
     if (!kIsWeb) {
       return false;
     }
-    if (apiKey.trim().isNotEmpty) {
-      return false;
-    }
     return !TelegramEnv.instance.isTelegram;
   }
 
@@ -104,7 +98,6 @@ class AiRepository {
             uri,
             headers: {
               'x-request-id': requestId,
-              if (apiKey.trim().isNotEmpty) 'x-api-key': apiKey,
               if (_telegramInitData.trim().isNotEmpty)
                 'X-Telegram-InitData': _telegramInitData,
             },
@@ -196,9 +189,8 @@ class AiRepository {
     }
 
     final useTelegramAuth = kIsWeb &&
-        TelegramEnv.instance.isTelegram &&
-        apiKey.trim().isEmpty;
-    if (kIsWeb && !useTelegramAuth && apiKey.trim().isEmpty) {
+        TelegramEnv.instance.isTelegram;
+    if (kIsWeb && !useTelegramAuth) {
       _reportWebError(
         AiErrorType.unauthorized,
         message: 'Open this experience inside Telegram to continue.',
@@ -260,7 +252,6 @@ class AiRepository {
     final headers = {
       'Content-Type': 'application/json',
       'x-request-id': requestId,
-      if (apiKey.trim().isNotEmpty) 'x-api-key': apiKey,
       if (_telegramInitData.trim().isNotEmpty)
         'X-Telegram-InitData': _telegramInitData,
     };
@@ -494,7 +485,6 @@ class AiRepository {
     final headers = {
       'Content-Type': 'application/json',
       'x-request-id': requestId,
-      if (apiKey.trim().isNotEmpty) 'x-api-key': apiKey,
       if (_telegramInitData.trim().isNotEmpty)
         'X-Telegram-InitData': _telegramInitData,
     };

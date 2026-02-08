@@ -1,6 +1,6 @@
 import 'dart:collection';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
 
 import '../../core/assets/asset_paths.dart';
 import '../../core/config/assets_config.dart';
@@ -10,10 +10,11 @@ import '../models/card_model.dart';
 import '../models/deck_model.dart';
 
 class CardsRepository {
-  CardsRepository();
+  CardsRepository({http.Client? client}) : _client = client ?? http.Client();
 
   static const int _cacheVersion = 4;
   static const String _cardsPrefix = 'cdn_cards_';
+  final http.Client _client;
   final Map<String, DateTime> _lastFetchTimes = {};
   final Map<String, DateTime> _lastCacheTimes = {};
   final Map<String, String> _lastAttemptedUrls = {};
@@ -71,55 +72,53 @@ class CardsRepository {
     required DeckType deckId,
   }) async {
     final cacheKey = cardsCacheKey(locale);
-    final raw = await _loadBundledOnly(cacheKey: cacheKey);
+    final raw = await _loadRemoteCards(cacheKey: cacheKey, locale: locale);
     return _parseCards(raw: raw, deckId: deckId);
   }
 
-  Future<String> _loadBundledOnly({required String cacheKey}) async {
-    _lastAttemptedUrls[cacheKey] = _bundledAssetPath(cacheKey);
-    final bundled = await _loadBundledCards(cacheKey, _isValidCardsJson);
-    if (bundled != null) {
-      _lastFetchTimes[cacheKey] = DateTime.now();
-      if (kEnableRuntimeLogs) {
-        debugPrint(
-          '[CardsRepository] dataSource=embedded cacheKey=$cacheKey',
-        );
-      }
-      return bundled;
-    }
-    _lastError = 'Bundled cards data is missing or invalid';
-    throw CardsLoadException(
-      'Bundled cards data is missing or invalid',
-      cacheKey: cacheKey,
-    );
-  }
-
-  Future<String?> _loadBundledCards(
-    String cacheKey,
-    bool Function(Object?) validator,
-  ) async {
-    final asset = _bundledAssetPath(cacheKey);
+  Future<String> _loadRemoteCards({
+    required String cacheKey,
+    required Locale locale,
+  }) async {
+    final uri = Uri.parse(cardsUrl(locale.languageCode));
+    _lastAttemptedUrls[cacheKey] = uri.toString();
     try {
-      final bundled = await rootBundle.loadString(asset);
-      final parsed = parseJsonString(bundled);
+      final response = await _client.get(
+        uri,
+        headers: const {
+          'Accept': 'application/json',
+        },
+      );
+      final parsed = decodeJsonResponse(response: response, uri: uri);
+      _recordResponseInfo(cacheKey, parsed.response);
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        _lastError = 'Cards load failed (${response.statusCode})';
+        throw CardsLoadException(_lastError!, cacheKey: cacheKey);
+      }
       final rootType = jsonRootType(parsed.decoded);
       _lastResponseRootTypes[cacheKey] = rootType;
-      if (rootType == 'Map' && validator(parsed.decoded)) {
-        _lastError = null;
-        return parsed.raw;
+      if (rootType != 'Map' || !_isValidCardsJson(parsed.decoded)) {
+        if (kEnableRuntimeLogs) {
+          debugPrint(
+            '[CardsRepository] schemaMismatch cacheKey=$cacheKey rootType=$rootType',
+          );
+        }
+        _lastError = 'Cards data failed schema validation';
+        throw CardsLoadException(_lastError!, cacheKey: cacheKey);
       }
-    } on FlutterError {
-      return null;
+      _lastFetchTimes[cacheKey] = DateTime.now();
+      _lastError = null;
+      return parsed.raw;
+    } catch (error, stackTrace) {
+      if (error is JsonFetchException && error.response != null) {
+        _recordResponseInfo(cacheKey, error.response!);
+      }
+      _lastError = '${error.toString()}\n$stackTrace';
+      throw CardsLoadException(
+        'Failed to load cards',
+        cacheKey: cacheKey,
+      );
     }
-    return null;
-  }
-
-  String _bundledAssetPath(String cacheKey) {
-    return cacheKey.endsWith('_ru')
-        ? 'assets/data/cards_ru.json'
-        : cacheKey.endsWith('_kk')
-            ? 'assets/data/cards_kz.json'
-            : 'assets/data/cards_en.json';
   }
 
   void _recordResponseInfo(String cacheKey, JsonResponseInfo response) {

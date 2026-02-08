@@ -4,6 +4,7 @@ import 'package:video_player/video_player.dart';
 
 import '../../core/assets/asset_paths.dart';
 import '../../core/config/assets_config.dart';
+import '../../data/models/card_video.dart';
 import '../../data/models/card_model.dart';
 import '../../data/models/deck_model.dart';
 import '../../state/providers.dart';
@@ -50,7 +51,7 @@ class CardMediaResolver {
         );
     String? resolvedVideo =
         videoUrlOverride ?? cardVideoUrl(fallbackCard, AssetsConfig.assetsBaseUrl);
-    resolvedVideo ??= videoUrlForCard(cardId);
+    resolvedVideo ??= _videoUrlFromCardId(cardId, availableVideoFiles);
     if (resolvedVideo != null &&
         availableVideoFiles != null &&
         availableVideoFiles!.isNotEmpty) {
@@ -63,6 +64,20 @@ class CardMediaResolver {
       imageUrl: imageUrl,
       videoUrl: resolvedVideo,
     );
+  }
+
+  String? _videoUrlFromCardId(
+    String cardId,
+    Set<String>? availableVideoFiles,
+  ) {
+    final fileName = resolveCardVideoFileName(
+      cardId,
+      availableFiles: availableVideoFiles,
+    );
+    if (fileName == null || fileName.isEmpty) {
+      return null;
+    }
+    return '${AssetsConfig.assetsBaseUrl}/video/$fileName';
   }
 }
 
@@ -294,7 +309,7 @@ class _CardMediaState extends State<CardMedia> {
     }
     _controllerCache[cacheKey]?.refCount++;
     controller
-      ..setLooping(true)
+      ..setLooping(false)
       ..setVolume(0.0);
     try {
       if (!controller.value.isInitialized) {

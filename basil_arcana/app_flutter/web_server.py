@@ -9,23 +9,9 @@ NO_STORE_FILES = {
     "index.html",
     "flutter.js",
     "flutter_bootstrap.js",
-    "main.dart.js",
-    "FontManifest.json",
-    "version.json",
     "manifest.json",
+    "config.json",
 }
-
-ASSET_PREFIXES = ("AssetManifest",)
-NO_STORE_PATH_PREFIXES = (
-    "/assets/data/",
-    "/assets/assets/data/",
-    "/flutter_assets/assets/data/",
-)
-
-
-CONFIG_PATH: str | None = None
-CONFIG_BUILD: str = ""
-
 
 def _read_env(*keys: str) -> str:
     for key in keys:
@@ -37,59 +23,45 @@ def _read_env(*keys: str) -> str:
 
 def build_config_payload() -> dict[str, str]:
     api_base_url = _read_env("API_BASE_URL", "BASE_URL")
-    api_key = _read_env("API_KEY", "ARCANA_API_KEY")
     assets_base_url = _read_env("ASSETS_BASE_URL")
+    app_version = _read_env("APP_VERSION")
     if not assets_base_url:
         assets_base_url = "https://cdn.basilarcana.com"
     payload: dict[str, str] = {
         "apiBaseUrl": api_base_url,
-        "apiKey": api_key,
         "assetsBaseUrl": assets_base_url,
-        "build": CONFIG_BUILD,
+        "appVersion": app_version,
     }
-    if not api_base_url or not api_key:
-        missing = []
-        if not api_base_url:
-            missing.append("API_BASE_URL/BASE_URL")
-        if not api_key:
-            missing.append("API_KEY/ARCANA_API_KEY")
-        payload["message"] = (
-            "Missing runtime configuration: " + ", ".join(missing)
-        )
     return payload
 
 
 def log_config_presence() -> None:
     api_base_url_present = bool(_read_env("API_BASE_URL", "BASE_URL"))
-    api_key_present = bool(_read_env("API_KEY", "ARCANA_API_KEY"))
     assets_base_url_present = bool(_read_env("ASSETS_BASE_URL"))
+    app_version_present = bool(_read_env("APP_VERSION"))
     print(
         "Config env presence - API_BASE_URL/BASE_URL: "
         f"{'present' if api_base_url_present else 'missing'}, "
-        "API_KEY/ARCANA_API_KEY: "
-        f"{'present' if api_key_present else 'missing'}, "
         "ASSETS_BASE_URL: "
-        f"{'present' if assets_base_url_present else 'missing'}"
+        f"{'present' if assets_base_url_present else 'missing'}, "
+        "APP_VERSION: "
+        f"{'present' if app_version_present else 'missing'}"
     )
 
 
 class WebAppHandler(SimpleHTTPRequestHandler):
-    base_path: str = ""
+    app_version: str = ""
+    _request_path: str = ""
 
-    def _strip_base_path(self, path: str) -> tuple[str, bool]:
-        if not self.base_path:
-            return path, True
-        if path == self.base_path:
-            return "/", True
-        if path.startswith(f"{self.base_path}/"):
-            return path[len(self.base_path) :], True
-        return path, False
-
-    def _redirect_to_base(self) -> None:
-        target = f"{self.base_path}/"
+    def _redirect_to_version(self) -> None:
+        target = f"/v/{self.app_version}/" if self.app_version else "/"
         self.send_response(302)
         self.send_header("Location", target)
-        self.send_header("Cache-Control", "no-store, max-age=0")
+        self.send_header(
+            "Cache-Control", "no-store, no-cache, must-revalidate, max-age=0"
+        )
+        self.send_header("Pragma", "no-cache")
+        self.send_header("Expires", "0")
         self.end_headers()
 
     def _handle_video_range(self, file_path: str) -> bool:
@@ -131,25 +103,13 @@ class WebAppHandler(SimpleHTTPRequestHandler):
                 handle.seek(start)
                 self.wfile.write(handle.read(length))
         except BrokenPipeError:
+            print("Broken pipe while streaming video range.")
             return True
         return True
 
     def do_GET(self):
         parsed = urlparse(self.path)
-        if parsed.path in ("/manifest.json", "/flutter.js"):
-            print(f"Request for {parsed.path}")
-        if self.base_path:
-            stripped_path, allowed = self._strip_base_path(parsed.path)
-            if not allowed and parsed.path != "/healthz":
-                if parsed.path == "/":
-                    self._redirect_to_base()
-                else:
-                    self.send_error(404)
-                return
-            if allowed:
-                suffix = f"?{parsed.query}" if parsed.query else ""
-                self.path = f"{stripped_path}{suffix}"
-                parsed = urlparse(self.path)
+        self._request_path = parsed.path
         if parsed.path == "/healthz":
             body = b"ok"
             self.send_response(200)
@@ -157,124 +117,101 @@ class WebAppHandler(SimpleHTTPRequestHandler):
             self.send_header("Cache-Control", "no-store, max-age=0")
             self.send_header("Content-Length", str(len(body)))
             self.end_headers()
-            self.wfile.write(body)
+            try:
+                self.wfile.write(body)
+            except BrokenPipeError:
+                print("Broken pipe while writing /healthz response.")
             return
         if parsed.path == "/config.json":
             payload = build_config_payload()
             body = json.dumps(payload).encode("utf-8")
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
-            self.send_header("Cache-Control", "no-store, max-age=0")
-            self.send_header("Content-Length", str(len(body)))
-            self.end_headers()
-            self.wfile.write(body)
-            return
-        if parsed.path.endswith(".mp4"):
-            file_path = self.translate_path(parsed.path)
-            if os.path.isfile(file_path) and self._handle_video_range(file_path):
-                return
-        super().do_GET()
-
-    def end_headers(self):
-        path = urlparse(self.path).path
-        if path == "/config.json":
-            self.send_header("Access-Control-Allow-Origin", "*")
-            super().end_headers()
-            return
-        filename = os.path.basename(path)
-        if path == "/":
             self.send_header(
                 "Cache-Control", "no-store, no-cache, must-revalidate, max-age=0"
             )
             self.send_header("Pragma", "no-cache")
             self.send_header("Expires", "0")
-        elif (
-            filename in NO_STORE_FILES
-            or filename.startswith(ASSET_PREFIXES)
-            or filename == "flutter_service_worker.js"
-            or path.startswith(NO_STORE_PATH_PREFIXES)
-        ):
-            self.send_header("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            try:
+                self.wfile.write(body)
+            except BrokenPipeError:
+                print("Broken pipe while writing /config.json response.")
+            return
+        if parsed.path == "/":
+            self._redirect_to_version()
+            return
+        if parsed.path.startswith("/v/"):
+            suffix = parsed.path[len("/v/") :]
+            trimmed = suffix.lstrip("/")
+            suffix_query = f"?{parsed.query}" if parsed.query else ""
+            self.path = f"/{trimmed}{suffix_query}"
+            parsed = urlparse(self.path)
+        if parsed.path.endswith(".mp4"):
+            file_path = self.translate_path(parsed.path)
+            if os.path.isfile(file_path) and self._handle_video_range(file_path):
+                return
+        try:
+            super().do_GET()
+        except BrokenPipeError:
+            print("Broken pipe while serving static content.")
+
+    def end_headers(self):
+        path = self._request_path or urlparse(self.path).path
+        filename = os.path.basename(path)
+        if path == "/" or path == "/config.json" or filename in NO_STORE_FILES:
+            self.send_header(
+                "Cache-Control", "no-store, no-cache, must-revalidate, max-age=0"
+            )
             self.send_header("Pragma", "no-cache")
             self.send_header("Expires", "0")
-        else:
+        elif path.startswith("/v/") and (
+            path.endswith("/main.dart.js") or "/assets/" in path
+        ):
             self.send_header("Cache-Control", "public, max-age=31536000, immutable")
+        else:
+            self.send_header(
+                "Cache-Control", "no-store, no-cache, must-revalidate, max-age=0"
+            )
+            self.send_header("Pragma", "no-cache")
+            self.send_header("Expires", "0")
         if path.endswith(".mp4"):
             self.send_header("Accept-Ranges", "bytes")
         self.send_header("Access-Control-Allow-Origin", "*")
         super().end_headers()
 
 
-def resolve_config_dir(preferred: str, fallback: str) -> str:
-    attempts = [preferred, fallback]
-    if os.path.isdir(preferred) and os.access(preferred, os.W_OK):
-        return preferred
-    if not os.path.isdir(fallback):
-        try:
-            os.makedirs(fallback, exist_ok=True)
-        except OSError:
-            pass
-    if os.path.isdir(fallback) and os.access(fallback, os.W_OK):
-        return fallback
-    raise RuntimeError(f"No writable config directory found (attempted: {attempts})")
-
-
 def main() -> None:
     port = int(os.environ.get("PORT", "8080"))
     app_version = _read_env("APP_VERSION")
-    base_path = os.environ.get("WEB_BASE_PATH", "").strip()
-    if not base_path and app_version:
-        base_path = f"/v/{app_version}"
-    default_directory = (
-        f"/app/static/v/{app_version}" if app_version else "/app/static"
-    )
-    directory = os.environ.get("WEB_ROOT", default_directory)
-    preferred_dir = os.environ.get("CONFIG_DIR", directory)
-    config_dir = resolve_config_dir(preferred_dir, "/tmp/static")
+    directory = os.environ.get("WEB_ROOT", "/app/static")
     required_files = ("index.html", "manifest.json", "flutter.js", "main.dart.js")
     missing_files = [
         name
         for name in required_files
-        if not os.path.isfile(os.path.join(directory, name))
+        if app_version
+        and not os.path.isfile(os.path.join(directory, app_version, name))
     ]
     if missing_files:
         print(
-            f"Warning: missing static files in {directory}: {', '.join(missing_files)}"
+            "Warning: missing static files in "
+            f"{os.path.join(directory, app_version) if app_version else directory}: "
+            f"{', '.join(missing_files)}"
         )
     else:
-        print(f"Static files present in {directory}: {', '.join(required_files)}")
-    build_id = (
-        os.environ.get("WEB_BUILD")
-        or os.environ.get("RAILWAY_GIT_COMMIT_SHA")
-        or os.environ.get("GIT_SHA")
-        or ""
-    )
-    config_path = os.path.join(config_dir, "config.json")
-    global CONFIG_PATH
-    global CONFIG_BUILD
-    CONFIG_BUILD = build_id
-    payload = build_config_payload()
-    try:
-        with open(config_path, "w", encoding="utf-8") as handle:
-            json.dump(payload, handle)
-        with open(config_path, "rb") as handle:
-            config_size = len(handle.read())
-        print(f"config.json size: {config_size} bytes")
-        CONFIG_PATH = config_path
-    except OSError as exc:
         print(
-            "Warning: failed to write config.json "
-            f"(attempted: {config_path}): {exc}"
+            "Static files present in "
+            f"{os.path.join(directory, app_version) if app_version else directory}: "
+            f"{', '.join(required_files)}"
         )
-        CONFIG_PATH = None
-    print(f"Resolved config dir: {config_dir} (cwd: {os.getcwd()})")
     log_config_presence()
-    WebAppHandler.base_path = base_path
+    WebAppHandler.app_version = app_version
     handler = functools.partial(WebAppHandler, directory=directory)
     server = ThreadingHTTPServer(("0.0.0.0", port), handler)
     print(
         f"Listening on 0.0.0.0:{port}, serving {directory} "
-        f"(base_path={base_path or 'none'})"
+        f"(app_version={app_version or 'none'})"
     )
     server.serve_forever()
 
