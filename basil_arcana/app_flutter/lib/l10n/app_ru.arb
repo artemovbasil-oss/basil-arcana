@@ -178,5 +178,23 @@
     }
   },
   "offlineFallbackWhy": "Каждая позиция отражает грань вашего вопроса, а темы карт указывают, куда стоит направить внимание сейчас.",
-  "offlineFallbackAction": "Выберите один небольшой практичный шаг, который следует советам карт."
+  "offlineFallbackAction": "Выберите один небольшой практичный шаг, который следует советам карт.",
+  "moreFeaturesTitle": "Больше возможностей",
+  "natalChartTitle": "Натальная карта",
+  "natalChartDescription": "Персональный астрологический разбор по дате рождения.",
+  "natalChartFreeLabel": "Бесплатно",
+  "natalChartButton": "Хочу",
+  "natalChartBirthDateLabel": "Дата рождения",
+  "natalChartBirthDateHint": "ГГГГ-ММ-ДД",
+  "natalChartBirthDateError": "Укажите дату рождения.",
+  "natalChartBirthTimeLabel": "Время рождения",
+  "natalChartBirthTimeHint": "ЧЧ:ММ",
+  "natalChartBirthTimeHelper": "Примерное время подойдет (необязательно).",
+  "natalChartGenerateButton": "Сгенерировать",
+  "natalChartLoading": "Создаем натальную карту…",
+  "natalChartResultTitle": "Ваш разбор",
+  "natalChartError": "Не удалось создать натальную карту. Попробуйте еще раз.",
+  "professionalReadingTitle": "Профессиональное толкование",
+  "professionalReadingDescription": "Глубокий разбор расклада с помощью оракула.",
+  "professionalReadingButton": "Выбрать тариф"
 }

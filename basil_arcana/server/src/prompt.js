@@ -96,4 +96,35 @@ function buildDetailsPrompt(payload) {
   ];
 }
 
-module.exports = { buildPromptMessages, buildDetailsPrompt };
+function buildNatalChartPrompt(payload) {
+  const { birthDate, birthTime, language } = payload;
+  const system = [
+    'You are a warm, grounded astrologer for Basil\'s Arcana.',
+    'Provide a concise natal chart interpretation based on the birth data.',
+    'If birth time is missing, mention that the interpretation is general and time is approximate.',
+    'Avoid absolute predictions and avoid the word "will". Use "may", "could", "suggests", "likely".',
+    'Do not give medical, legal, or financial directives.',
+    'Keep the response short (3-5 short paragraphs) and text-only.',
+    `Respond in the requested language (${language || 'infer from the input'}).`,
+  ].join(' ');
+
+  const user = {
+    birthDate,
+    birthTime: birthTime || null,
+    language,
+  };
+
+  return [
+    { role: 'system', content: system },
+    {
+      role: 'user',
+      content: `Use this birth data to generate a natal chart overview:\n${JSON.stringify(
+        user,
+        null,
+        2
+      )}`,
+    },
+  ];
+}
+
+module.exports = { buildPromptMessages, buildDetailsPrompt, buildNatalChartPrompt };

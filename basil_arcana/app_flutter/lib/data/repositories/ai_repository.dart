@@ -431,6 +431,237 @@ class AiRepository {
     }
   }
 
+  Future<String> generateNatalChart({
+    required String birthDate,
+    String? birthTime,
+    required String languageCode,
+    String? requestIdOverride,
+    http.Client? client,
+    Duration timeout = _requestTimeout,
+  }) async {
+    if (!isApiConfigured) {
+      if (kDebugMode) {
+        debugPrint(
+          '[AiRepository] requestId=unknown url=$apiBaseUrl/api/natal-chart/generate '
+          'status=n/a duration_ms=0 error=${AiErrorType.serverError.name}',
+        );
+      }
+      _reportWebError(
+        AiErrorType.misconfigured,
+        message: 'Missing API_BASE_URL',
+      );
+      throw const AiRepositoryException(
+        AiErrorType.misconfigured,
+        message: 'Missing API_BASE_URL',
+      );
+    }
+
+    final useTelegramAuth = kIsWeb && TelegramEnv.instance.isTelegram;
+    if (kIsWeb && !useTelegramAuth) {
+      _reportWebError(
+        AiErrorType.unauthorized,
+        message: 'Open this experience inside Telegram to continue.',
+      );
+      throw const AiRepositoryException(
+        AiErrorType.unauthorized,
+        message: 'Telegram WebApp required',
+      );
+    }
+
+    final endpoint = useTelegramAuth
+        ? '/api/natal-chart/generate_web'
+        : '/api/natal-chart/generate';
+    final uri = Uri.parse(apiBaseUrl).replace(path: endpoint);
+    final requestId = requestIdOverride ?? const Uuid().v4();
+    final startTimestamp = DateTime.now().toIso8601String();
+    final stopwatch = Stopwatch()..start();
+    final payload = {
+      'birthDate': birthDate,
+      'language': languageCode,
+      if (birthTime != null && birthTime.trim().isNotEmpty)
+        'birthTime': birthTime,
+    };
+
+    final headers = {
+      'Content-Type': 'application/json',
+      'x-request-id': requestId,
+      if (_telegramInitData.trim().isNotEmpty)
+        'X-Telegram-InitData': _telegramInitData,
+    };
+    if (useTelegramAuth && _telegramInitData.trim().isEmpty) {
+      _reportWebError(
+        AiErrorType.unauthorized,
+        message: 'Missing Telegram initData',
+      );
+      throw const AiRepositoryException(
+        AiErrorType.unauthorized,
+        message: 'Missing Telegram initData',
+      );
+    }
+
+    final requestPayload = useTelegramAuth
+        ? {
+            'initData': _telegramInitData,
+            'payload': payload,
+          }
+        : payload;
+
+    final httpClient = client ?? http.Client();
+    http.Response response;
+    try {
+      _logStart(
+        uri,
+        requestId: requestId,
+        startTimestamp: startTimestamp,
+        timeout: timeout,
+      );
+      response = await httpClient
+          .post(
+            uri,
+            headers: headers,
+            body: jsonEncode(requestPayload),
+          )
+          .timeout(timeout);
+    } on TimeoutException catch (error) {
+      _logFailure(
+        uri,
+        stopwatch,
+        requestId: requestId,
+        errorType: AiErrorType.timeout,
+        exception: error,
+      );
+      _reportWebError(AiErrorType.timeout, message: error.toString());
+      throw const AiRepositoryException(AiErrorType.timeout);
+    } on SocketException catch (error) {
+      _logFailure(
+        uri,
+        stopwatch,
+        requestId: requestId,
+        errorType: AiErrorType.noInternet,
+        exception: error,
+      );
+      _reportWebError(AiErrorType.noInternet, message: error.toString());
+      throw const AiRepositoryException(AiErrorType.noInternet);
+    } finally {
+      if (client == null) {
+        httpClient.close();
+      }
+    }
+
+    if (response.statusCode == 401 || response.statusCode == 403) {
+      _logFailure(
+        uri,
+        stopwatch,
+        requestId: requestId,
+        statusCode: response.statusCode,
+        errorType: AiErrorType.unauthorized,
+        responseBody: response.body,
+      );
+      _reportWebError(
+        AiErrorType.unauthorized,
+        statusCode: response.statusCode,
+        responseBody: response.body,
+      );
+      throw const AiRepositoryException(AiErrorType.unauthorized);
+    }
+
+    if (response.statusCode == 429) {
+      _logFailure(
+        uri,
+        stopwatch,
+        requestId: requestId,
+        statusCode: response.statusCode,
+        errorType: AiErrorType.rateLimited,
+        responseBody: response.body,
+      );
+      _reportWebError(
+        AiErrorType.rateLimited,
+        statusCode: response.statusCode,
+        responseBody: response.body,
+      );
+      throw const AiRepositoryException(AiErrorType.rateLimited);
+    }
+
+    if (response.statusCode >= 500) {
+      _logFailure(
+        uri,
+        stopwatch,
+        requestId: requestId,
+        statusCode: response.statusCode,
+        errorType: AiErrorType.serverError,
+        responseBody: response.body,
+      );
+      _reportWebError(
+        AiErrorType.serverError,
+        statusCode: response.statusCode,
+        responseBody: response.body,
+      );
+      throw AiRepositoryException(
+        AiErrorType.serverError,
+        statusCode: response.statusCode,
+      );
+    }
+
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      _logFailure(
+        uri,
+        stopwatch,
+        requestId: requestId,
+        statusCode: response.statusCode,
+        errorType: AiErrorType.badResponse,
+        responseBody: response.body,
+      );
+      _reportWebError(
+        AiErrorType.badResponse,
+        statusCode: response.statusCode,
+        responseBody: response.body,
+      );
+      throw AiRepositoryException(
+        AiErrorType.badResponse,
+        statusCode: response.statusCode,
+      );
+    }
+
+    try {
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      final interpretation = data['interpretation'];
+      if (interpretation is String && interpretation.trim().isNotEmpty) {
+        _logSuccess(
+          uri,
+          stopwatch,
+          requestId: data['requestId'] as String? ?? requestId,
+          statusCode: response.statusCode,
+        );
+        return interpretation.trim();
+      }
+      throw const FormatException('Missing interpretation');
+    } catch (error) {
+      if (kDebugMode) {
+        debugPrint(
+          '[AiRepository] natalParseError requestId=$requestId '
+          'type=${error.runtimeType} message="${error.toString()}"',
+        );
+      }
+      _logFailure(
+        uri,
+        stopwatch,
+        requestId: requestId,
+        statusCode: response.statusCode,
+        errorType: AiErrorType.badResponse,
+        responseBody: response.body,
+      );
+      _reportWebError(
+        AiErrorType.badResponse,
+        statusCode: response.statusCode,
+        responseBody: response.body,
+      );
+      throw AiRepositoryException(
+        AiErrorType.badResponse,
+        message: error.toString(),
+      );
+    }
+  }
+
   Future<String?> fetchReadingDetails({
     required String question,
     required SpreadModel spread,

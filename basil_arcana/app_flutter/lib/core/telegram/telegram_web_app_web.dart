@@ -159,4 +159,16 @@ class TelegramWebApp {
       } catch (_) {}
     }
   }
+
+  static void close() {
+    final webApp = _webApp;
+    if (webApp == null) {
+      return;
+    }
+    if (js_util.hasProperty(webApp, 'close')) {
+      try {
+        js_util.callMethod(webApp, 'close', []);
+      } catch (_) {}
+    }
+  }
 }

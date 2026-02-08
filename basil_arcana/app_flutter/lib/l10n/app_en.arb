@@ -178,5 +178,23 @@
     }
   },
   "offlineFallbackWhy": "Each position reflects a facet of your question, and the card themes align with where attention can be placed now.",
-  "offlineFallbackAction": "Choose one small, practical step that honors the advice in the cards."
+  "offlineFallbackAction": "Choose one small, practical step that honors the advice in the cards.",
+  "moreFeaturesTitle": "More features",
+  "natalChartTitle": "Natal chart",
+  "natalChartDescription": "Get a personal astrological overview based on your birth data.",
+  "natalChartFreeLabel": "Free",
+  "natalChartButton": "I want",
+  "natalChartBirthDateLabel": "Date of birth",
+  "natalChartBirthDateHint": "YYYY-MM-DD",
+  "natalChartBirthDateError": "Please enter your birth date.",
+  "natalChartBirthTimeLabel": "Time of birth",
+  "natalChartBirthTimeHint": "HH:MM",
+  "natalChartBirthTimeHelper": "Approximate time is fine (optional).",
+  "natalChartGenerateButton": "Generate",
+  "natalChartLoading": "Creating your natal chart…",
+  "natalChartResultTitle": "Your interpretation",
+  "natalChartError": "Couldn’t generate the natal chart. Please try again.",
+  "professionalReadingTitle": "Professional reading",
+  "professionalReadingDescription": "Deep interpretation of your spread by an oracle.",
+  "professionalReadingButton": "Choose plan"
 }

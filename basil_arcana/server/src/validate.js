@@ -135,4 +135,30 @@ function validateDetailsRequest(body) {
   return null;
 }
 
-module.exports = { validateReadingRequest, validateDetailsRequest };
+function validateNatalChartRequest(body) {
+  if (!body || typeof body !== 'object') {
+    return 'Request body must be an object';
+  }
+
+  const { birthDate, birthTime, language } = body;
+  if (!isNonEmptyString(birthDate)) {
+    return 'birthDate is required';
+  }
+  if (birthTime != null && typeof birthTime !== 'string') {
+    return 'birthTime must be a string';
+  }
+  if (!isNonEmptyString(language)) {
+    return 'language is required';
+  }
+  if (!['en', 'ru', 'kk'].includes(language)) {
+    return 'language must be one of en, ru, kk';
+  }
+
+  return null;
+}
+
+module.exports = {
+  validateReadingRequest,
+  validateDetailsRequest,
+  validateNatalChartRequest,
+};
