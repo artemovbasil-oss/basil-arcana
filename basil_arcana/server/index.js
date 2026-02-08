@@ -28,6 +28,18 @@ app.set('trust proxy', 1);
 app.use(cors());
 app.use(express.json({ limit: '1mb' }));
 
+function verifyArcanaApiKey(req, res) {
+  if (!ARCANA_API_KEY) {
+    return true;
+  }
+  const provided = req.get('x-api-key');
+  if (provided && provided === ARCANA_API_KEY) {
+    return true;
+  }
+  res.status(401).json({ error: 'unauthorized', requestId: req.requestId });
+  return false;
+}
+
 app.use((req, res, next) => {
   const incomingRequestId = req.get('x-request-id');
   const requestId = incomingRequestId || uuidv4();
@@ -65,9 +77,7 @@ app.get('/health', (req, res) => {
 });
 
 app.get('/api/reading/availability', (req, res) => {
-  const available =
-    Boolean(OPENAI_API_KEY) &&
-    (Boolean(ARCANA_API_KEY) || Boolean(TELEGRAM_BOT_TOKEN));
+  const available = Boolean(OPENAI_API_KEY);
   return res.json({
     ok: available,
     available,
@@ -177,11 +187,14 @@ if (RATE_LIMIT_MAX != null) {
 }
 
 app.post('/api/reading/generate', async (req, res) => {
-  if (!OPENAI_API_KEY || !ARCANA_API_KEY) {
+  if (!OPENAI_API_KEY) {
     return res.status(503).json({
       error: 'server_misconfig',
       requestId: req.requestId
     });
+  }
+  if (!verifyArcanaApiKey(req, res)) {
+    return;
   }
   const mode = req.query.mode || 'deep';
   if (
@@ -315,11 +328,14 @@ app.post('/api/reading/generate_web', async (req, res) => {
 });
 
 app.post('/api/reading/details', async (req, res) => {
-  if (!OPENAI_API_KEY || !ARCANA_API_KEY) {
+  if (!OPENAI_API_KEY) {
     return res.status(503).json({
       error: 'server_misconfig',
       requestId: req.requestId
     });
+  }
+  if (!verifyArcanaApiKey(req, res)) {
+    return;
   }
   const error = validateDetailsRequest(req.body);
   if (error) {
@@ -394,15 +410,18 @@ const missingRequired = [];
 if (!OPENAI_API_KEY) {
   missingRequired.push('OPENAI_API_KEY');
 }
-if (!ARCANA_API_KEY && !TELEGRAM_BOT_TOKEN) {
-  missingRequired.push('ARCANA_API_KEY or TELEGRAM_BOT_TOKEN');
-}
 
 if (missingRequired.length > 0) {
   console.error(
     `Missing required environment variables: ${missingRequired.join(', ')}`
   );
   process.exit(1);
+}
+
+if (!ARCANA_API_KEY && !TELEGRAM_BOT_TOKEN) {
+  console.warn(
+    'ARCANA_API_KEY or TELEGRAM_BOT_TOKEN is not set; running without auth.'
+  );
 }
 
 const port = Number(PORT) || 3000;
