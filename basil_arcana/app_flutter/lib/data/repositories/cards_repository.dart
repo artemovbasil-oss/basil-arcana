@@ -1,11 +1,11 @@
 import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/assets/asset_paths.dart';
 import '../../core/config/assets_config.dart';
 import '../../core/network/json_loader.dart';
+import '../../core/config/diagnostics.dart';
 import '../models/card_model.dart';
 import '../models/deck_model.dart';
 
@@ -14,7 +14,6 @@ class CardsRepository {
 
   static const int _cacheVersion = 4;
   static const String _cardsPrefix = 'cdn_cards_';
-  final Map<String, String> _memoryCache = {};
   final Map<String, DateTime> _lastFetchTimes = {};
   final Map<String, DateTime> _lastCacheTimes = {};
   final Map<String, String> _lastAttemptedUrls = {};
@@ -26,7 +25,6 @@ class CardsRepository {
   final Map<String, int> _lastResponseStringLengths = {};
   final Map<String, int> _lastResponseByteLengths = {};
   final Map<String, String> _lastResponseRootTypes = {};
-  SharedPreferences? _preferences;
   String? _lastError;
 
   UnmodifiableMapView<String, DateTime> get lastFetchTimes =>
@@ -77,59 +75,17 @@ class CardsRepository {
     return _parseCards(raw: raw, deckId: deckId);
   }
 
-  Future<List<CardModel>> loadCachedCards({
-    required Locale locale,
-    required DeckType deckId,
-  }) async {
-    final cacheKey = cardsCacheKey(locale);
-    final raw = await _readCache(cacheKey);
-    if (raw == null) {
-      throw CardsLoadException('No cached cards available', cacheKey: cacheKey);
-    }
-    final parsed = parseJsonString(raw);
-    final rootType = jsonRootType(parsed.decoded);
-    _lastResponseRootTypes[cacheKey] = rootType;
-    if (rootType != 'Map' || !_isValidCardsJson(parsed.decoded)) {
-      throw CardsLoadException('Cached cards are invalid', cacheKey: cacheKey);
-    }
-    _lastCacheTimes[cacheKey] = DateTime.now();
-    return _parseCards(raw: parsed.raw, deckId: deckId);
-  }
-
-  Future<bool> hasCachedData(String cacheKey) async {
-    final cached = _memoryCache[cacheKey];
-    if (cached != null) {
-      return true;
-    }
-    final prefs = await _prefs();
-    return prefs.containsKey(cacheKey);
-  }
-
-  Future<SharedPreferences> _prefs() async {
-    final existing = _preferences;
-    if (existing != null) {
-      return existing;
-    }
-    final prefs = await SharedPreferences.getInstance();
-    _preferences = prefs;
-    return prefs;
-  }
-
   Future<String> _loadBundledOnly({required String cacheKey}) async {
     _lastAttemptedUrls[cacheKey] = _bundledAssetPath(cacheKey);
     final bundled = await _loadBundledCards(cacheKey, _isValidCardsJson);
     if (bundled != null) {
-      return bundled;
-    }
-    final cached = await _readCache(cacheKey);
-    if (cached != null) {
-      final parsed = parseJsonString(cached);
-      final rootType = jsonRootType(parsed.decoded);
-      _lastResponseRootTypes[cacheKey] = rootType;
-      if (rootType == 'Map' && _isValidCardsJson(parsed.decoded)) {
-        _lastCacheTimes[cacheKey] = DateTime.now();
-        return parsed.raw;
+      _lastFetchTimes[cacheKey] = DateTime.now();
+      if (kEnableRuntimeLogs) {
+        debugPrint(
+          '[CardsRepository] dataSource=embedded cacheKey=$cacheKey',
+        );
       }
+      return bundled;
     }
     _lastError = 'Bundled cards data is missing or invalid';
     throw CardsLoadException(
@@ -149,8 +105,6 @@ class CardsRepository {
       final rootType = jsonRootType(parsed.decoded);
       _lastResponseRootTypes[cacheKey] = rootType;
       if (rootType == 'Map' && validator(parsed.decoded)) {
-        await _storeCache(cacheKey, parsed.raw);
-        _lastCacheTimes[cacheKey] = DateTime.now();
         _lastError = null;
         return parsed.raw;
       }
@@ -166,25 +120,6 @@ class CardsRepository {
         : cacheKey.endsWith('_kk')
             ? 'assets/data/cards_kz.json'
             : 'assets/data/cards_en.json';
-  }
-
-  Future<String?> _readCache(String cacheKey) async {
-    final cached = _memoryCache[cacheKey];
-    if (cached != null) {
-      return cached;
-    }
-    final prefs = await _prefs();
-    final raw = prefs.getString(cacheKey);
-    if (raw != null) {
-      _memoryCache[cacheKey] = raw;
-    }
-    return raw;
-  }
-
-  Future<void> _storeCache(String cacheKey, String raw) async {
-    _memoryCache[cacheKey] = raw;
-    final prefs = await _prefs();
-    await prefs.setString(cacheKey, raw);
   }
 
   void _recordResponseInfo(String cacheKey, JsonResponseInfo response) {
@@ -271,8 +206,24 @@ Map<String, Map<String, dynamic>> _canonicalizeCardData(
 ) {
   final canonical = <String, Map<String, dynamic>>{};
   for (final entry in data.entries) {
-    final key = canonicalCardId(entry.key);
-    canonical[key] = entry.value as Map<String, dynamic>;
+    if (entry.key is! String) {
+      if (kEnableRuntimeLogs) {
+        debugPrint(
+          '[CardsRepository] skipping non-string card key: ${entry.key}',
+        );
+      }
+      continue;
+    }
+    if (entry.value is! Map<String, dynamic>) {
+      if (kEnableRuntimeLogs) {
+        debugPrint(
+          '[CardsRepository] skipping invalid card payload for ${entry.key}',
+        );
+      }
+      continue;
+    }
+    final key = canonicalCardId(entry.key as String);
+    canonical[key] = Map<String, dynamic>.from(entry.value as Map);
   }
   return canonical;
 }

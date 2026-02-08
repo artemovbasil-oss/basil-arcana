@@ -23,3 +23,17 @@ void clearWebStorageWithPrefixes(List<String> prefixes) {
     storage.remove(key);
   }
 }
+
+void clearWebStorageWithSubstrings(List<String> fragments) {
+  final storage = html.window.localStorage;
+  final keysToRemove = <String>[];
+  for (var i = 0; i < storage.length; i++) {
+    final key = storage.keys.elementAt(i);
+    if (fragments.any((fragment) => key.contains(fragment))) {
+      keysToRemove.add(key);
+    }
+  }
+  for (final key in keysToRemove) {
+    storage.remove(key);
+  }
+}

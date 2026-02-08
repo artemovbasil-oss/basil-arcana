@@ -86,17 +86,12 @@ final deckProvider = StateNotifierProvider<DeckNotifier, DeckType>((ref) {
   return DeckNotifier(box);
 });
 
-final useCachedCardsProvider = StateProvider<bool>((ref) => false);
 final useCachedSpreadsProvider = StateProvider<bool>((ref) => false);
 
 final cardsProvider = FutureProvider((ref) async {
   final locale = ref.watch(localeProvider);
   final deckId = ref.watch(deckProvider);
   final repo = ref.watch(cardsRepositoryProvider);
-  final useCached = ref.watch(useCachedCardsProvider);
-  if (useCached) {
-    return repo.loadCachedCards(locale: locale, deckId: deckId);
-  }
   return repo.fetchCards(locale: locale, deckId: deckId);
 });
 

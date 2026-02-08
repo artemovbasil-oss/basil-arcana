@@ -106,29 +106,14 @@ class _CardsScreenState extends ConsumerState<CardsScreen> {
                   )
                 : null;
             return Center(
-              child: FutureBuilder<bool>(
-                future: repo.hasCachedData(cacheKey),
-                builder: (context, snapshot) {
-                  final hasCache = snapshot.data ?? false;
-                  return DataLoadError(
-                    title: l10n.dataLoadTitle,
-                    message: l10n.cardsLoadError,
-                    retryLabel: l10n.dataLoadRetry,
-                    onRetry: () {
-                      ref.read(useCachedCardsProvider.notifier).state = false;
-                      ref.invalidate(cardsProvider);
-                    },
-                    secondaryLabel: hasCache ? l10n.dataLoadUseCache : null,
-                    onSecondary: hasCache
-                        ? () {
-                            ref.read(useCachedCardsProvider.notifier).state =
-                                true;
-                            ref.invalidate(cardsProvider);
-                          }
-                        : null,
-                    debugInfo: debugInfo,
-                  );
+              child: DataLoadError(
+                title: l10n.dataLoadTitle,
+                message: l10n.cardsLoadError,
+                retryLabel: l10n.dataLoadRetry,
+                onRetry: () {
+                  ref.invalidate(cardsProvider);
                 },
+                debugInfo: debugInfo,
               ),
             );
           },

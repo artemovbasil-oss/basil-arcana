@@ -1,7 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 
+import '../../core/config/diagnostics.dart';
 import 'card_video.dart';
 import 'deck_model.dart';
+
+const int kCardSchemaVersion = 1;
 
 @HiveType(typeId: 0)
 class CardMeaning {
@@ -22,11 +26,24 @@ class CardMeaning {
   });
 
   factory CardMeaning.fromJson(Map<String, dynamic> json) {
+    return CardMeaning.fromJsonSafe(json);
+  }
+
+  factory CardMeaning.fromJsonSafe(
+    Map<String, dynamic>? json, {
+    String fallbackGeneral = '',
+  }) {
+    final fallback = fallbackGeneral.trim();
+    final general = _stringFromJson(json?['general']);
+    final light = _stringFromJson(json?['light']);
+    final shadow = _stringFromJson(json?['shadow']);
+    final advice = _stringFromJson(json?['advice']);
+    final resolvedGeneral = general.isNotEmpty ? general : fallback;
     return CardMeaning(
-      general: json['general'] as String,
-      light: json['light'] as String,
-      shadow: json['shadow'] as String,
-      advice: json['advice'] as String,
+      general: resolvedGeneral,
+      light: light.isNotEmpty ? light : resolvedGeneral,
+      shadow: shadow.isNotEmpty ? shadow : resolvedGeneral,
+      advice: advice.isNotEmpty ? advice : resolvedGeneral,
     );
   }
 
@@ -46,6 +63,80 @@ class CardMeaning {
         'shadow': shadow,
         'advice': advice,
       };
+}
+
+class CardDto {
+  const CardDto({
+    required this.id,
+    required this.deckId,
+    required this.name,
+    required this.keywords,
+    required this.meaning,
+    required this.detailedDescription,
+    required this.fact,
+    required this.stats,
+    required this.videoFileName,
+    required this.imageUrl,
+    required this.videoUrl,
+  });
+
+  final String id;
+  final DeckType deckId;
+  final String name;
+  final List<String> keywords;
+  final CardMeaning meaning;
+  final String detailedDescription;
+  final String fact;
+  final CardStats? stats;
+  final String? videoFileName;
+  final String imageUrl;
+  final String? videoUrl;
+
+  factory CardDto.fromJson({
+    required String id,
+    required Map<String, dynamic> json,
+  }) {
+    final name = _stringFromJson(json['title']).isNotEmpty
+        ? _stringFromJson(json['title'])
+        : _stringFromJson(json['name']);
+    if (name.isEmpty) {
+      _logCardParseWarning(id, 'Missing title/name');
+    }
+    final keywords = _normalizeKeywords(json['keywords'], id: id);
+    final summary = _stringFromJson(json['summary']).isNotEmpty
+        ? _stringFromJson(json['summary'])
+        : _stringFromJson(json['generalMeaning']);
+    final meaningPayload = json['meaning'];
+    final meaning = meaningPayload is Map<String, dynamic>
+        ? CardMeaning.fromJsonSafe(
+            meaningPayload,
+            fallbackGeneral: summary,
+          )
+        : CardMeaning.fromGeneralMeaning(summary);
+    final detailed = _stringFromJson(json['description']).isNotEmpty
+        ? _stringFromJson(json['description'])
+        : _stringFromJson(json['detailedDescription']);
+    final fact = _stringFromJson(json['fact']).isNotEmpty
+        ? _stringFromJson(json['fact'])
+        : _stringFromJson(json['funFact']);
+    final deckId = deckIdFromString(json['deck'] as String?) ??
+        _deckIdFromCardId(id);
+    return CardDto(
+      id: id,
+      deckId: deckId,
+      name: name,
+      keywords: keywords,
+      meaning: meaning,
+      detailedDescription: detailed,
+      fact: fact,
+      stats: CardStats.fromJson(json['stats'] as Map<String, dynamic>?),
+      videoFileName: _videoFileNameFromJson(json),
+      imageUrl: _stringFromJson(json['imageUrl']),
+      videoUrl: _stringFromJson(json['videoUrl']).isEmpty
+          ? null
+          : _stringFromJson(json['videoUrl']),
+    );
+  }
 }
 
 class CardModel {
@@ -121,25 +212,20 @@ class CardModel {
   }
 
   factory CardModel.fromLocalizedEntry(String id, Map<String, dynamic> json) {
-    final summary = json['summary'] as String?;
-    final meaningPayload = json['meaning'] as Map<String, dynamic>?;
-    final meaning = meaningPayload != null
-        ? CardMeaning.fromJson(meaningPayload)
-        : CardMeaning.fromGeneralMeaning(summary ?? '');
+    final dto = CardDto.fromJson(id: id, json: json);
     return CardModel(
-      id: id,
-      deckId: deckIdFromString(json['deck'] as String?) ??
-          _deckIdFromCardId(id),
-      name: json['title'] as String,
-      keywords: (json['keywords'] as List<dynamic>).cast<String>(),
-      meaning: meaning,
-      detailedDescription: json['description'] as String? ??
-          json['detailedDescription'] as String?,
-      funFact: json['fact'] as String? ?? json['funFact'] as String?,
-      stats: CardStats.fromJson(json['stats'] as Map<String, dynamic>?),
-      videoFileName: _videoFileNameFromJson(json),
-      imageUrl: json['imageUrl'] as String? ?? '',
-      videoUrl: json['videoUrl'] as String?,
+      id: dto.id,
+      deckId: dto.deckId,
+      name: dto.name,
+      keywords: dto.keywords,
+      meaning: dto.meaning,
+      detailedDescription:
+          dto.detailedDescription.isEmpty ? null : dto.detailedDescription,
+      funFact: dto.fact.isEmpty ? null : dto.fact,
+      stats: dto.stats,
+      videoFileName: dto.videoFileName,
+      imageUrl: dto.imageUrl,
+      videoUrl: dto.videoUrl,
     );
   }
 
@@ -172,6 +258,45 @@ String? _videoFileNameFromJson(Map<String, dynamic> json) {
     return null;
   }
   return normalizeVideoFileName(trimmed);
+}
+
+String _stringFromJson(Object? value) {
+  if (value is String) {
+    return value.trim();
+  }
+  return '';
+}
+
+List<String> _normalizeKeywords(Object? value, {required String id}) {
+  if (value is List) {
+    return value
+        .whereType<String>()
+        .map((keyword) => keyword.trim())
+        .where((keyword) => keyword.isNotEmpty)
+        .toList();
+  }
+  if (value is String) {
+    final trimmed = value.trim();
+    if (trimmed.isEmpty) {
+      return const [];
+    }
+    return trimmed
+        .split(RegExp(r'[;,]'))
+        .map((keyword) => keyword.trim())
+        .where((keyword) => keyword.isNotEmpty)
+        .toList();
+  }
+  if (value != null) {
+    _logCardParseWarning(id, 'Unexpected keywords type: ${value.runtimeType}');
+  }
+  return const [];
+}
+
+void _logCardParseWarning(String id, String message) {
+  if (!kEnableRuntimeLogs) {
+    return;
+  }
+  debugPrint('[CardDto] id=$id $message');
 }
 
 class CardStats {
