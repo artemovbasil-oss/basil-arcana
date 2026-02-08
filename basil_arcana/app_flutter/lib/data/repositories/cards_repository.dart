@@ -54,7 +54,7 @@ class CardsRepository {
   String? get lastError => _lastError;
 
   String cardsCacheKey(Locale locale) =>
-      '${_cardsPrefix}v$_cacheVersion_${locale.languageCode}';
+      '${_cardsPrefix}v${_cacheVersion}_${locale.languageCode}';
 
   String cardsFileNameForLocale(Locale locale) {
     return switch (locale.languageCode) {

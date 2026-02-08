@@ -63,12 +63,12 @@ class DataRepository {
   String get assetsBaseUrl => AssetsConfig.assetsBaseUrl;
 
   String cardsCacheKey(Locale locale) =>
-      '${_cardsPrefix}v$_cacheVersion_${locale.languageCode}';
+      '${_cardsPrefix}v${_cacheVersion}_${locale.languageCode}';
 
   String spreadsCacheKey(Locale locale) =>
-      '${_spreadsPrefix}v$_cacheVersion_${locale.languageCode}';
+      '${_spreadsPrefix}v${_cacheVersion}_${locale.languageCode}';
 
-  String get videoIndexCacheKey => '${_videoIndexKey}_v$_cacheVersion';
+  String get videoIndexCacheKey => '${_videoIndexKey}_v${_cacheVersion}';
 
   String cardsFileNameForLocale(Locale locale) {
     return switch (locale.languageCode) {
