@@ -34,6 +34,7 @@ class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
   bool _showCta = false;
   bool _hasTriggeredFall = false;
   bool _hasTriggeredBackground = false;
+  bool _hasNavigatedToResult = false;
 
   static const _cardWidth = 140.0;
   static const _cardHeight = 210.0;
@@ -82,6 +83,23 @@ class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
       if (!_hasTriggeredBackground && next.drawnCards.isNotEmpty) {
         _hasTriggeredBackground = true;
         _backgroundController.repeat(reverse: true);
+      }
+      if (!_hasNavigatedToResult &&
+          (prev?.drawnCards.isEmpty ?? true) &&
+          next.drawnCards.isNotEmpty) {
+        _hasNavigatedToResult = true;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) {
+            return;
+          }
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              settings: appRouteSettings(showBackButton: true),
+              builder: (_) => const ResultScreen(),
+            ),
+          );
+        });
       }
     });
   }
@@ -187,16 +205,6 @@ class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
                                       readingFlowControllerProvider.notifier,
                                     )
                                     .drawAndGenerate(cards);
-                                if (mounted) {
-                                  Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                      settings:
-                                          appRouteSettings(showBackButton: true),
-                                      builder: (_) => const ResultScreen(),
-                                    ),
-                                  );
-                                }
                               },
                         padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
