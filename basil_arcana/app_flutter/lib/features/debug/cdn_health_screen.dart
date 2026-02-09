@@ -27,12 +27,14 @@ class _CdnHealthScreenState extends ConsumerState<CdnHealthScreen> {
       _isLoading = true;
     });
     final repo = ref.read(cardsRepositoryProvider);
-    final spreadsRepo = ref.read(dataRepositoryProvider);
+    final spreadsRepo = ref.read(spreadsRepositoryProvider);
+    final dataRepo = ref.read(dataRepositoryProvider);
     final locale = ref.read(localeProvider);
     final deckId = ref.read(deckProvider);
     try {
       await repo.fetchCards(locale: locale, deckId: deckId);
       await spreadsRepo.fetchSpreads(locale: locale);
+      await dataRepo.fetchVideoIndex();
       setState(() {
         _status = 'success';
       });
@@ -60,20 +62,23 @@ class _CdnHealthScreenState extends ConsumerState<CdnHealthScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final repo = ref.watch(cardsRepositoryProvider);
-    final spreadsRepo = ref.watch(dataRepositoryProvider);
+    final spreadsRepo = ref.watch(spreadsRepositoryProvider);
+    final dataRepo = ref.watch(dataRepositoryProvider);
     final locale = ref.watch(localeProvider);
     final cardsFile = repo.cardsFileNameForLocale(locale);
     final spreadsFile = spreadsRepo.spreadsFileNameForLocale(locale);
     final cardsKey = repo.cardsCacheKey(locale);
     final spreadsKey = spreadsRepo.spreadsCacheKey(locale);
-    final videoKey = spreadsRepo.videoIndexCacheKey;
+    final videoKey = dataRepo.videoIndexCacheKey;
     final lastFetch = {
       ...repo.lastFetchTimes,
       ...spreadsRepo.lastFetchTimes,
+      ...dataRepo.lastFetchTimes,
     };
     final lastCache = {
       ...repo.lastCacheTimes,
       ...spreadsRepo.lastCacheTimes,
+      ...dataRepo.lastCacheTimes,
     };
 
     final statusText = switch (_status) {

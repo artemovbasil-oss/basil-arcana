@@ -78,7 +78,7 @@ class SpreadScreen extends ConsumerWidget {
           },
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, _) {
-            final repo = ref.read(dataRepositoryProvider);
+            final repo = ref.read(spreadsRepositoryProvider);
             final locale = ref.read(localeProvider);
             final cacheKey = repo.spreadsCacheKey(locale);
             final debugInfo = kShowDiagnostics
@@ -104,29 +104,14 @@ class SpreadScreen extends ConsumerWidget {
                   )
                 : null;
             return Center(
-              child: FutureBuilder<bool>(
-                future: repo.hasCachedData(cacheKey),
-                builder: (context, snapshot) {
-                  final hasCache = snapshot.data ?? false;
-                  return DataLoadError(
-                    title: l10n.dataLoadTitle,
-                    message: l10n.dataLoadSpreadsError,
-                    retryLabel: l10n.dataLoadRetry,
-                    onRetry: () {
-                      ref.read(useCachedSpreadsProvider.notifier).state = false;
-                      ref.invalidate(spreadsProvider);
-                    },
-                    secondaryLabel: hasCache ? l10n.dataLoadUseCache : null,
-                    onSecondary: hasCache
-                        ? () {
-                            ref.read(useCachedSpreadsProvider.notifier).state =
-                                true;
-                            ref.invalidate(spreadsProvider);
-                          }
-                        : null,
-                    debugInfo: debugInfo,
-                  );
+              child: DataLoadError(
+                title: l10n.dataLoadTitle,
+                message: l10n.dataLoadSpreadsError,
+                retryLabel: l10n.dataLoadRetry,
+                onRetry: () {
+                  ref.invalidate(spreadsProvider);
                 },
+                debugInfo: debugInfo,
               ),
             );
           },
