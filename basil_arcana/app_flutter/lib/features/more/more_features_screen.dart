@@ -1,12 +1,9 @@
-import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
-import '../../core/telegram/telegram_bridge.dart';
 import '../../core/widgets/app_buttons.dart';
 import '../../data/repositories/ai_repository.dart';
 import '../../state/providers.dart';
@@ -96,42 +93,9 @@ class _MoreFeaturesScreenState extends ConsumerState<MoreFeaturesScreen> {
     }
   }
 
-  void _scheduleClose() {
-    Future.microtask(() {
-      TelegramBridge.close();
-    });
-  }
-
   Future<void> _requestPlansAndReturnToBot() async {
-    // Previously used TelegramWebApp.sendData/close with a dialog fallback.
-    final payload = jsonEncode(
-      {
-        'action': 'show_plans',
-        'source': 'want_more',
-        'ts': DateTime.now().millisecondsSinceEpoch,
-      },
-    );
-    if (TelegramBridge.isAvailable) {
-      try {
-        final didSend = TelegramBridge.sendData(payload);
-        if (didSend) {
-          _scheduleClose();
-          return;
-        }
-      } catch (error) {
-        _logDebug('sendData failed', error);
-      }
-    }
-
     final url = Uri.parse('https://t.me/tarot_arkana_bot?start=plans');
     var didOpen = false;
-    if (TelegramBridge.isAvailable) {
-      try {
-        didOpen = TelegramBridge.openTelegramLink(url.toString());
-      } catch (error) {
-        _logDebug('openTelegramLink failed', error);
-      }
-    }
     if (!didOpen) {
       try {
         didOpen = await launchUrl(url, mode: LaunchMode.externalApplication);
@@ -140,7 +104,6 @@ class _MoreFeaturesScreenState extends ConsumerState<MoreFeaturesScreen> {
       }
     }
     if (didOpen) {
-      _scheduleClose();
       return;
     }
 
