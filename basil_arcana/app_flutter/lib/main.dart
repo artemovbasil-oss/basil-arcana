@@ -13,6 +13,9 @@ import 'core/widgets/app_buttons.dart';
 import 'core/storage/card_cache_cleanup.dart';
 import 'core/storage/hive_storage.dart';
 import 'data/models/card_model.dart';
+import 'data/models/deck_model.dart';
+import 'data/repositories/cards_repository.dart';
+import 'data/repositories/spreads_repository.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,16 +35,18 @@ Future<void> main() async {
     debugPrint(
       '[Startup] APP_VERSION=$resolvedAppVersion '
       'locale=$languageCode '
-      'cardDataSource=remote',
+      'cardDataSource=local',
     );
     logRuntimeDiagnostics(
       appVersion:
           resolvedAppVersion.isEmpty ? 'unknown' : resolvedAppVersion,
       locale: languageCode,
-      cardDataSource: 'remote',
+      cardDataSource: 'local',
       apiBaseUrl: AppConfig.apiBaseUrl,
       schemaVersion: kCardSchemaVersion,
     );
+
+    await _runLocalDataSelfCheck();
 
     runApp(const ProviderScope(child: BasilArcanaApp()));
   } catch (error, stackTrace) {
@@ -51,6 +56,35 @@ Future<void> main() async {
         stackTrace: stackTrace,
       ),
     );
+  }
+}
+
+Future<void> _runLocalDataSelfCheck() async {
+  if (!kDebugMode) {
+    return;
+  }
+  final cardsRepo = CardsRepository();
+  final spreadsRepo = SpreadsRepository();
+  const locales = <String, String>{
+    'en': 'EN',
+    'ru': 'RU',
+    'kk': 'KZ',
+  };
+  for (final entry in locales.entries) {
+    final locale = Locale(entry.key);
+    try {
+      final cards = await cardsRepo.fetchCards(
+        locale: locale,
+        deckId: DeckType.all,
+      );
+      final spreads = await spreadsRepo.fetchSpreads(locale: locale);
+      debugPrint(
+        '[SelfCheck] cards_${entry.value}=${cards.length} '
+        'spreads_${entry.value}=${spreads.length}',
+      );
+    } catch (error) {
+      debugPrint('[SelfCheck] ${entry.value} failed: $error');
+    }
   }
 }
 

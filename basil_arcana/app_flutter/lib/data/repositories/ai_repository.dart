@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
 
 import '../../core/config/api_config.dart';
+import '../../core/config/diagnostics.dart';
 import '../../core/network/network_exceptions.dart';
 import '../../core/network/telegram_api_client.dart';
 import '../../core/telegram/telegram_env.dart';
@@ -90,6 +91,20 @@ class AiRepository {
         AiErrorType.unauthorized,
         message: 'Telegram WebApp required',
       );
+    }
+    if (kIsWeb &&
+        TelegramEnv.instance.isTelegram &&
+        _telegramInitData.trim().isEmpty) {
+      const error = AiRepositoryException(
+        AiErrorType.unauthorized,
+        message: 'Missing Telegram initData',
+      );
+      if (kEnableDevDiagnostics) {
+        logDevFailure(
+          buildDevFailureInfo(FailedStage.telegramInitdata, error),
+        );
+      }
+      throw error;
     }
     final uri = Uri.parse(apiBaseUrl).replace(
       path: '/api/reading/availability',
@@ -265,14 +280,20 @@ class AiRepository {
         'X-Telegram-InitData': _telegramInitData,
     };
     if (useTelegramAuth && _telegramInitData.trim().isEmpty) {
+      const error = AiRepositoryException(
+        AiErrorType.unauthorized,
+        message: 'Missing Telegram initData',
+      );
+      if (kEnableDevDiagnostics) {
+        logDevFailure(
+          buildDevFailureInfo(FailedStage.telegramInitdata, error),
+        );
+      }
       _reportWebError(
         AiErrorType.unauthorized,
         message: 'Missing Telegram initData',
       );
-      throw const AiRepositoryException(
-        AiErrorType.unauthorized,
-        message: 'Missing Telegram initData',
-      );
+      throw error;
     }
     final requestPayload = useTelegramAuth
         ? {
@@ -502,14 +523,20 @@ class AiRepository {
         'X-Telegram-InitData': _telegramInitData,
     };
     if (useTelegramAuth && _telegramInitData.trim().isEmpty) {
+      const error = AiRepositoryException(
+        AiErrorType.unauthorized,
+        message: 'Missing Telegram initData',
+      );
+      if (kEnableDevDiagnostics) {
+        logDevFailure(
+          buildDevFailureInfo(FailedStage.telegramInitdata, error),
+        );
+      }
       _reportWebError(
         AiErrorType.unauthorized,
         message: 'Missing Telegram initData',
       );
-      throw const AiRepositoryException(
-        AiErrorType.unauthorized,
-        message: 'Missing Telegram initData',
-      );
+      throw error;
     }
 
     final requestPayload = useTelegramAuth
@@ -709,6 +736,20 @@ class AiRepository {
         AiErrorType.unauthorized,
         message: 'Telegram WebApp required',
       );
+    }
+    if (kIsWeb &&
+        TelegramEnv.instance.isTelegram &&
+        _telegramInitData.trim().isEmpty) {
+      const error = AiRepositoryException(
+        AiErrorType.unauthorized,
+        message: 'Missing Telegram initData',
+      );
+      if (kEnableDevDiagnostics) {
+        logDevFailure(
+          buildDevFailureInfo(FailedStage.telegramInitdata, error),
+        );
+      }
+      throw error;
     }
 
     final uri = Uri.parse(apiBaseUrl).replace(

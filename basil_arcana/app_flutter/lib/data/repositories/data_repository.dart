@@ -1,9 +1,9 @@
 import 'dart:collection';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 
-import '../../core/assets/asset_paths.dart';
 import '../../core/config/app_config.dart';
 import '../../core/config/assets_config.dart';
 import '../../core/config/diagnostics.dart';
@@ -90,8 +90,8 @@ class DataRepository {
     required DeckType deckId,
   }) async {
     final cacheKey = cardsCacheKey(locale);
-    final raw = await _loadRequiredJson(
-      uri: Uri.parse(cardsUrl(locale.languageCode)),
+    final raw = await _loadRequiredAssetJson(
+      assetPath: 'assets/data/${cardsFileNameForLocale(locale)}',
       cacheKey: cacheKey,
       validator: _isValidCardsJson,
       expectedRootTypes: {'Map'},
@@ -102,8 +102,8 @@ class DataRepository {
 
   Future<List<SpreadModel>> fetchSpreads({required Locale locale}) async {
     final cacheKey = spreadsCacheKey(locale);
-    final raw = await _loadRequiredJson(
-      uri: Uri.parse(spreadsUrl(locale.languageCode)),
+    final raw = await _loadRequiredAssetJson(
+      assetPath: 'assets/data/${spreadsFileNameForLocale(locale)}',
       cacheKey: cacheKey,
       validator: _isValidSpreadsJson,
       expectedRootTypes: {'List'},
@@ -207,6 +207,52 @@ class DataRepository {
       }
       return null;
     }
+  }
+
+  Future<String> _loadRequiredAssetJson({
+    required String assetPath,
+    required String cacheKey,
+    required bool Function(Object?) validator,
+    required Set<String> expectedRootTypes,
+    required String errorMessage,
+  }) async {
+    _lastAttemptedUrls[cacheKey] = assetPath;
+    try {
+      final raw = await rootBundle.loadString(assetPath);
+      final parsed = parseJsonString(raw);
+      final rootType = jsonRootType(parsed.decoded);
+      _lastResponseRootTypes[cacheKey] = rootType;
+      if (!expectedRootTypes.contains(rootType) ||
+          !validator(parsed.decoded)) {
+        if (kEnableRuntimeLogs) {
+          debugPrint(
+            '[DataRepository] local schemaMismatch cacheKey=$cacheKey rootType=$rootType',
+          );
+        }
+        _lastError = '$errorMessage (schema mismatch)';
+        throw DataLoadException(_lastError!, cacheKey: cacheKey);
+      }
+      _recordLocalResponseInfo(cacheKey, parsed.raw);
+      _lastCacheTimes[cacheKey] = DateTime.now();
+      _lastError = null;
+      return parsed.raw;
+    } catch (error, stackTrace) {
+      _lastError = '${error.toString()}\n$stackTrace';
+      if (kEnableRuntimeLogs) {
+        debugPrint('[DataRepository] local load failed: $error');
+      }
+      throw DataLoadException(errorMessage, cacheKey: cacheKey);
+    }
+  }
+
+  void _recordLocalResponseInfo(String cacheKey, String raw) {
+    _lastStatusCodes[cacheKey] = 200;
+    _lastContentTypes[cacheKey] = 'application/json';
+    _lastContentLengths[cacheKey] = raw.length.toString();
+    _lastResponseSnippetsStart[cacheKey] = _snippetStart(raw);
+    _lastResponseSnippetsEnd[cacheKey] = _snippetEnd(raw);
+    _lastResponseStringLengths[cacheKey] = raw.length;
+    _lastResponseByteLengths[cacheKey] = raw.length;
   }
 
   Future<String?> _readCache(String cacheKey) async {

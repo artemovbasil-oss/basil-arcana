@@ -63,7 +63,7 @@ class CardsRepository {
   }
 
   String cardsUrlForLocale(Locale locale) {
-    return cardsUrl(locale.languageCode);
+    return 'assets/data/${cardsFileNameForLocale(locale)}';
   }
 
   Future<List<CardModel>> fetchCards({
@@ -101,6 +101,9 @@ class CardsRepository {
       return parsed.raw;
     } catch (error, stackTrace) {
       _lastError = '${error.toString()}\n$stackTrace';
+      if (kEnableDevDiagnostics) {
+        logDevFailure(buildDevFailureInfo(FailedStage.cardsLocalLoad, error));
+      }
       if (kEnableRuntimeLogs) {
         debugPrint('[CardsRepository] local load failed: $error');
       }

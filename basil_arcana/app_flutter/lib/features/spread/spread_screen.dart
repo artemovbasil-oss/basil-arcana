@@ -81,7 +81,15 @@ class SpreadScreen extends ConsumerWidget {
             final repo = ref.read(spreadsRepositoryProvider);
             final locale = ref.read(localeProvider);
             final cacheKey = repo.spreadsCacheKey(locale);
-            final debugInfo = kShowDiagnostics
+            DevFailureInfo? failureInfo;
+            if (kEnableDevDiagnostics) {
+              failureInfo = buildDevFailureInfo(
+                FailedStage.spreadsLocalLoad,
+                error,
+              );
+              logDevFailure(failureInfo);
+            }
+            final debugInfo = kEnableDevDiagnostics
                 ? DataLoadDebugInfo(
                     assetsBaseUrl: AssetsConfig.assetsBaseUrl,
                     requests: {
@@ -100,7 +108,8 @@ class SpreadScreen extends ConsumerWidget {
                         rootType: repo.lastResponseRootTypes[cacheKey],
                       ),
                     },
-                    lastError: repo.lastError,
+                    failedStage: failureInfo?.failedStage,
+                    exceptionSummary: failureInfo?.summary,
                   )
                 : null;
             return Center(

@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
 
 import '../core/telegram/telegram_env.dart';
+import '../core/config/diagnostics.dart';
 import '../data/models/ai_result_model.dart';
 import '../data/models/card_model.dart';
 import '../data/models/drawn_card_model.dart';
@@ -491,6 +492,9 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       if (_activeRequestId != requestId) {
         return;
       }
+      if (kEnableDevDiagnostics) {
+        logDevFailure(buildDevFailureInfo(FailedStage.openaiCall, error));
+      }
       final shouldFallback = error.type != AiErrorType.unauthorized;
       if (shouldFallback) {
         final fallback = _offlineFallback(spread, drawnCards, l10n);
@@ -518,9 +522,12 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
         errorMessage: _messageForError(error, l10n),
       );
       await _autoSaveReading();
-    } catch (_) {
+    } catch (error) {
       if (_activeRequestId != requestId) {
         return;
+      }
+      if (kEnableDevDiagnostics) {
+        logDevFailure(buildDevFailureInfo(FailedStage.openaiCall, error));
       }
       final fallback = _offlineFallback(spread, drawnCards, l10n);
       await _incrementCardStats(drawnCards);
@@ -618,6 +625,9 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       if (_activeDeepRequestId != requestId) {
         return;
       }
+      if (kEnableDevDiagnostics) {
+        logDevFailure(buildDevFailureInfo(FailedStage.openaiCall, error));
+      }
       debugPrint(
         '[ReadingFlow] detailsResponse:error id=$requestId type=${error.type.name}',
       );
@@ -627,9 +637,12 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
         detailsText: null,
         detailsError: message,
       );
-    } catch (_) {
+    } catch (error) {
       if (_activeDeepRequestId != requestId) {
         return;
+      }
+      if (kEnableDevDiagnostics) {
+        logDevFailure(buildDevFailureInfo(FailedStage.openaiCall, error));
       }
       debugPrint('[ReadingFlow] detailsResponse:error id=$requestId');
       final message = _l10n().resultStatusServerUnavailable;

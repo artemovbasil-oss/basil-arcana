@@ -13,6 +13,7 @@ import '../../core/assets/asset_paths.dart';
 import '../../core/navigation/app_route_config.dart';
 import '../../data/models/app_enums.dart';
 import '../../data/models/deck_model.dart';
+import '../../data/repositories/cards_repository.dart';
 import '../../state/reading_flow_controller.dart';
 import '../../state/providers.dart';
 import '../result/result_screen.dart';
@@ -207,13 +208,23 @@ class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
                                         readingFlowControllerProvider.notifier,
                                       )
                                       .drawAndGenerate(cards);
-                                } catch (_) {
+                                } on CardsLoadException {
                                   if (!mounted) {
                                     return;
                                   }
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       content: Text(l10n.cardsLoadError),
+                                    ),
+                                  );
+                                } catch (_) {
+                                  if (!mounted) {
+                                    return;
+                                  }
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content:
+                                          Text(l10n.resultStatusServerUnavailable),
                                     ),
                                   );
                                 }

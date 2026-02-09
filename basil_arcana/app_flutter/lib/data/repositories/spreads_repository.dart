@@ -93,6 +93,11 @@ class SpreadsRepository {
       return parsed.raw;
     } catch (error, stackTrace) {
       _lastError = '${error.toString()}\n$stackTrace';
+      if (kEnableDevDiagnostics) {
+        logDevFailure(
+          buildDevFailureInfo(FailedStage.spreadsLocalLoad, error),
+        );
+      }
       if (kEnableRuntimeLogs) {
         debugPrint('[SpreadsRepository] local load failed: $error');
       }
