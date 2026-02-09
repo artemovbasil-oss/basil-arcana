@@ -10,7 +10,7 @@ import '../../core/config/api_config.dart';
 import '../../core/config/diagnostics.dart';
 import '../../core/network/network_exceptions.dart';
 import '../../core/network/telegram_api_client.dart';
-import '../../core/telegram/telegram_env.dart';
+import '../../core/telegram/telegram_auth.dart';
 import '../../core/telemetry/web_error_reporter.dart';
 import '../models/ai_result_model.dart';
 import '../models/card_model.dart';
@@ -60,14 +60,37 @@ class AiRepositoryException implements Exception {
   }
 }
 
+class _TelegramAuthState {
+  const _TelegramAuthState({
+    required this.isTelegram,
+    required this.initData,
+  });
+
+  final bool isTelegram;
+  final String initData;
+
+  bool get hasInitData => initData.trim().isNotEmpty;
+  int get initDataLength => initData.length;
+}
+
 class AiRepository {
   bool get isApiConfigured => apiBaseUrl.trim().isNotEmpty;
 
-  String get _telegramInitData => TelegramEnv.instance.initData;
-  bool get _hasTelegramInitData => _telegramInitData.trim().isNotEmpty;
-
   http.Client _wrapClient(http.Client client) {
     return TelegramApiClient(client);
+  }
+
+  Future<_TelegramAuthState> _getTelegramAuthState({
+    bool forceRefresh = false,
+  }) async {
+    final isTelegram = kIsWeb && TelegramAuth.instance.isTelegram;
+    final initData = await TelegramAuth.instance.getInitData(
+      forceRefresh: forceRefresh,
+    );
+    return _TelegramAuthState(
+      isTelegram: isTelegram,
+      initData: initData,
+    );
   }
 
   Future<bool> isBackendAvailable({
@@ -80,7 +103,8 @@ class AiRepository {
         message: 'Missing API_BASE_URL',
       );
     }
-    if (kIsWeb && TelegramEnv.instance.isTelegram && !_hasTelegramInitData) {
+    final telegramAuth = await _getTelegramAuthState();
+    if (kIsWeb && telegramAuth.isTelegram && !telegramAuth.hasInitData) {
       debugPrint(
         '[AiRepository] Telegram initData empty; check web bridge timing.',
       );
@@ -108,8 +132,8 @@ class AiRepository {
             uri,
         headers: {
           'x-request-id': requestId,
-          if (_hasTelegramInitData)
-            'X-Telegram-InitData': _telegramInitData,
+          if (telegramAuth.hasInitData)
+            'X-Telegram-InitData': telegramAuth.initData,
         },
       )
           .timeout(timeout);
@@ -140,10 +164,12 @@ class AiRepository {
 
     _logReadingApiResponse(
       uri: uri,
-      hasTelegramInitDataHeader: _hasTelegramInitData,
-      initDataLength: _telegramInitData.length,
+      isTelegram: telegramAuth.isTelegram,
+      hasTelegramInitDataHeader: telegramAuth.hasInitData,
+      initDataLength: telegramAuth.initDataLength,
       statusCode: response.statusCode,
       responseBody: response.body,
+      requestId: requestId,
     );
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
@@ -209,7 +235,8 @@ class AiRepository {
       );
     }
 
-    if (kIsWeb && TelegramEnv.instance.isTelegram && !_hasTelegramInitData) {
+    final telegramAuth = await _getTelegramAuthState();
+    if (kIsWeb && telegramAuth.isTelegram && !telegramAuth.hasInitData) {
       debugPrint(
         '[AiRepository] Telegram initData empty; check web bridge timing.',
       );
@@ -223,7 +250,7 @@ class AiRepository {
       );
     }
 
-    final useTelegramWeb = kIsWeb && TelegramEnv.instance.isTelegram;
+    final useTelegramWeb = kIsWeb && telegramAuth.isTelegram;
     final endpoint =
         useTelegramWeb ? '/api/reading/generate_web' : '/api/reading/generate';
     final uri = Uri.parse(apiBaseUrl).replace(
@@ -275,17 +302,17 @@ class AiRepository {
     final headers = {
       'Content-Type': 'application/json',
       'x-request-id': requestId,
-      if (_hasTelegramInitData)
-        'X-Telegram-InitData': _telegramInitData,
+      if (telegramAuth.hasInitData)
+        'X-Telegram-InitData': telegramAuth.initData,
     };
     final requestPayload = useTelegramWeb
         ? {
-            'initData': _telegramInitData,
+            if (telegramAuth.hasInitData) 'initData': telegramAuth.initData,
             'payload': payload,
           }
         : {
             ...payload,
-            'initData': _telegramInitData,
+            if (telegramAuth.hasInitData) 'initData': telegramAuth.initData,
           };
 
     final baseClient = client ?? http.Client();
@@ -336,10 +363,12 @@ class AiRepository {
 
     _logReadingApiResponse(
       uri: uri,
-      hasTelegramInitDataHeader: _hasTelegramInitData,
-      initDataLength: _telegramInitData.length,
+      isTelegram: telegramAuth.isTelegram,
+      hasTelegramInitDataHeader: telegramAuth.hasInitData,
+      initDataLength: telegramAuth.initDataLength,
       statusCode: response.statusCode,
       responseBody: response.body,
+      requestId: requestId,
     );
 
     if (response.statusCode == 401 || response.statusCode == 403) {
@@ -484,7 +513,8 @@ class AiRepository {
       );
     }
 
-    final useTelegramAuth = kIsWeb && _hasTelegramInitData;
+    final telegramAuth = await _getTelegramAuthState();
+    final useTelegramAuth = kIsWeb && telegramAuth.hasInitData;
     final endpoint = kIsWeb
         ? (useTelegramAuth
             ? '/api/natal-chart/generate'
@@ -504,12 +534,12 @@ class AiRepository {
     final headers = {
       'Content-Type': 'application/json',
       'x-request-id': requestId,
-      if (_hasTelegramInitData)
-        'X-Telegram-InitData': _telegramInitData,
+      if (telegramAuth.hasInitData)
+        'X-Telegram-InitData': telegramAuth.initData,
     };
     final requestPayload = useTelegramAuth
         ? {
-            'initData': _telegramInitData,
+            if (telegramAuth.hasInitData) 'initData': telegramAuth.initData,
             'payload': payload,
           }
         : payload;
@@ -699,7 +729,8 @@ class AiRepository {
         message: 'Missing API_BASE_URL',
       );
     }
-    if (kIsWeb && TelegramEnv.instance.isTelegram && !_hasTelegramInitData) {
+    final telegramAuth = await _getTelegramAuthState();
+    if (kIsWeb && telegramAuth.isTelegram && !telegramAuth.hasInitData) {
       debugPrint(
         '[AiRepository] Telegram initData empty; check web bridge timing.',
       );
@@ -724,7 +755,7 @@ class AiRepository {
     final stopwatch = Stopwatch()..start();
     final totalCards = spread.positions.length;
     final payload = {
-      'initData': _telegramInitData,
+      if (telegramAuth.hasInitData) 'initData': telegramAuth.initData,
       'question': question,
       'spread': spread.toJson(),
       'cards': drawnCards
@@ -736,8 +767,8 @@ class AiRepository {
     final headers = {
       'Content-Type': 'application/json',
       'x-request-id': requestId,
-      if (_hasTelegramInitData)
-        'X-Telegram-InitData': _telegramInitData,
+      if (telegramAuth.hasInitData)
+        'X-Telegram-InitData': telegramAuth.initData,
     };
 
     final baseClient = client ?? http.Client();
@@ -960,7 +991,8 @@ class AiRepository {
         meaning: meaning,
       ),
     ];
-    final initData = _telegramInitData;
+    final telegramAuth = await _getTelegramAuthState();
+    final initData = telegramAuth.initData;
     print('[AiRepository] smokeTest:start baseUrl=$apiBaseUrl');
     print(
       '[AiRepository] smokeTest:initData length=${initData.length} '
@@ -1049,22 +1081,37 @@ class AiRepository {
 
   void _logReadingApiResponse({
     required Uri uri,
+    required bool isTelegram,
     required bool hasTelegramInitDataHeader,
     required int initDataLength,
     required int statusCode,
     required String responseBody,
+    required String requestId,
   }) {
+    final responseRequestId = _extractRequestId(responseBody);
     final preview = responseBody.substring(
       0,
       responseBody.length > 500 ? 500 : responseBody.length,
     );
     print(
       '[AiRepository] readingApiResponse url=$uri '
+      'requestId=${responseRequestId ?? requestId} '
+      'isTelegram=$isTelegram '
       'telegram_header=$hasTelegramInitDataHeader '
       'initData_length=$initDataLength '
       'status=$statusCode '
       'body="${preview.replaceAll('\n', ' ')}"',
     );
+    if (kDebugMode) {
+      debugPrint(
+        '[AiRepository] telegramAuth endpoint=${uri.path} '
+        'requestId=${responseRequestId ?? requestId} '
+        'status=$statusCode '
+        'isTelegram=$isTelegram '
+        'initDataPresent=$hasTelegramInitDataHeader '
+        'initDataLength=$initDataLength',
+      );
+    }
   }
 
   String? _extractRequestId(String? responseBody) {
