@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 import '../../core/config/app_config.dart';
 import '../../core/config/assets_config.dart';
 import '../../core/config/diagnostics.dart';
+import '../../core/config/web_build_version.dart';
 import '../../core/network/json_loader.dart';
 import '../models/card_model.dart';
 import '../models/deck_model.dart';
@@ -63,12 +64,13 @@ class DataRepository {
   String get assetsBaseUrl => AssetsConfig.assetsBaseUrl;
 
   String cardsCacheKey(Locale locale) =>
-      '${_cardsPrefix}v${_cacheVersion}_${locale.languageCode}';
+      '${_cardsPrefix}v${_cacheVersion}_${_buildVersionTag()}_${locale.languageCode}';
 
   String spreadsCacheKey(Locale locale) =>
-      '${_spreadsPrefix}v${_cacheVersion}_${locale.languageCode}';
+      '${_spreadsPrefix}v${_cacheVersion}_${_buildVersionTag()}_${locale.languageCode}';
 
-  String get videoIndexCacheKey => '${_videoIndexKey}_v${_cacheVersion}';
+  String get videoIndexCacheKey =>
+      '${_videoIndexKey}_v${_cacheVersion}_${_buildVersionTag()}';
 
   String cardsFileNameForLocale(Locale locale) {
     return switch (locale.languageCode) {
@@ -84,6 +86,13 @@ class DataRepository {
       'kk' => 'spreads_kz.json',
       _ => 'spreads_en.json',
     };
+  }
+
+  String _buildVersionTag() {
+    final runtimeVersion =
+        (AppConfig.appVersion.isNotEmpty ? AppConfig.appVersion : readWebBuildVersion())
+            .trim();
+    return runtimeVersion.isNotEmpty ? runtimeVersion : 'dev';
   }
 
   Future<List<CardModel>> fetchCards({
@@ -288,33 +297,6 @@ class DataRepository {
     _lastResponseStringLengths[cacheKey] = response.stringLength;
     _lastResponseByteLengths[cacheKey] = response.bytesLength;
   }
-
-  String _snippetStart(String body) {
-    // Snippets are for debug diagnostics only; avoid collecting in release.
-    if (!kDebugMode || body.isEmpty) {
-      return '';
-    }
-    try {
-      return body.length <= 200 ? body : body.substring(0, 200);
-    } catch (_) {
-      return '';
-    }
-  }
-
-  String _snippetEnd(String body) {
-    // Snippets are for debug diagnostics only; avoid collecting in release.
-    if (!kDebugMode || body.isEmpty) {
-      return '';
-    }
-    try {
-      if (body.length <= 200) {
-        return body;
-      }
-      return body.substring(body.length - 200);
-    } catch (_) {
-      return '';
-    }
-  }
 }
 
 String _withCacheBust(String url) {
@@ -325,6 +307,33 @@ String _withCacheBust(String url) {
   final params = Map<String, String>.from(uri.queryParameters);
   params['v'] = version;
   return uri.replace(queryParameters: params).toString();
+}
+
+String _snippetStart(String body) {
+  // Snippets are for debug diagnostics only; avoid collecting in release.
+  if (!kDebugMode || body.isEmpty) {
+    return '';
+  }
+  try {
+    return body.length <= 200 ? body : body.substring(0, 200);
+  } catch (_) {
+    return '';
+  }
+}
+
+String _snippetEnd(String body) {
+  // Snippets are for debug diagnostics only; avoid collecting in release.
+  if (!kDebugMode || body.isEmpty) {
+    return '';
+  }
+  try {
+    if (body.length <= 200) {
+      return body;
+    }
+    return body.substring(body.length - 200);
+  } catch (_) {
+    return '';
+  }
 }
 
 class DataLoadException implements Exception {

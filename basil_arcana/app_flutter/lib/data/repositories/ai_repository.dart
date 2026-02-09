@@ -63,14 +63,8 @@ class AiRepositoryException implements Exception {
 class AiRepository {
   bool get isApiConfigured => apiBaseUrl.trim().isNotEmpty;
 
-  bool get _requiresTelegramAuth {
-    if (!kIsWeb) {
-      return false;
-    }
-    return !TelegramEnv.instance.isTelegram;
-  }
-
   String get _telegramInitData => TelegramEnv.instance.initData;
+  bool get _hasTelegramInitData => _telegramInitData.trim().isNotEmpty;
 
   http.Client _wrapClient(http.Client client) {
     return TelegramApiClient(client);
@@ -86,15 +80,7 @@ class AiRepository {
         message: 'Missing API_BASE_URL',
       );
     }
-    if (_requiresTelegramAuth) {
-      throw const AiRepositoryException(
-        AiErrorType.unauthorized,
-        message: 'Telegram WebApp required',
-      );
-    }
-    if (kIsWeb &&
-        TelegramEnv.instance.isTelegram &&
-        _telegramInitData.trim().isEmpty) {
+    if (kIsWeb && TelegramEnv.instance.isTelegram && !_hasTelegramInitData) {
       const error = AiRepositoryException(
         AiErrorType.unauthorized,
         message: 'Missing Telegram initData',
@@ -117,12 +103,12 @@ class AiRepository {
       response = await httpClient
           .get(
             uri,
-            headers: {
-              'x-request-id': requestId,
-              if (_telegramInitData.trim().isNotEmpty)
-                'X-Telegram-InitData': _telegramInitData,
-            },
-          )
+        headers: {
+          'x-request-id': requestId,
+          if (_hasTelegramInitData)
+            'X-Telegram-InitData': _telegramInitData,
+        },
+      )
           .timeout(timeout);
     } on TimeoutException catch (error) {
       if (kDebugMode) {
@@ -212,20 +198,11 @@ class AiRepository {
       );
     }
 
-    final useTelegramAuth = kIsWeb &&
-        TelegramEnv.instance.isTelegram;
-    if (kIsWeb && !useTelegramAuth) {
-      _reportWebError(
-        AiErrorType.unauthorized,
-        message: 'Open this experience inside Telegram to continue.',
-      );
-      throw const AiRepositoryException(
-        AiErrorType.unauthorized,
-        message: 'Telegram WebApp required',
-      );
-    }
-    final endpoint = useTelegramAuth
-        ? '/api/reading/generate_web'
+    final useTelegramAuth = kIsWeb && _hasTelegramInitData;
+    final endpoint = kIsWeb
+        ? (useTelegramAuth
+            ? '/api/reading/generate'
+            : '/api/reading/generate_web')
         : '/api/reading/generate';
     final uri = Uri.parse(apiBaseUrl).replace(
       path: endpoint,
@@ -276,25 +253,9 @@ class AiRepository {
     final headers = {
       'Content-Type': 'application/json',
       'x-request-id': requestId,
-      if (_telegramInitData.trim().isNotEmpty)
+      if (_hasTelegramInitData)
         'X-Telegram-InitData': _telegramInitData,
     };
-    if (useTelegramAuth && _telegramInitData.trim().isEmpty) {
-      const error = AiRepositoryException(
-        AiErrorType.unauthorized,
-        message: 'Missing Telegram initData',
-      );
-      if (kEnableDevDiagnostics) {
-        logDevFailure(
-          buildDevFailureInfo(FailedStage.telegramInitdata, error),
-        );
-      }
-      _reportWebError(
-        AiErrorType.unauthorized,
-        message: 'Missing Telegram initData',
-      );
-      throw error;
-    }
     final requestPayload = useTelegramAuth
         ? {
             'initData': _telegramInitData,
@@ -490,20 +451,11 @@ class AiRepository {
       );
     }
 
-    final useTelegramAuth = kIsWeb && TelegramEnv.instance.isTelegram;
-    if (kIsWeb && !useTelegramAuth) {
-      _reportWebError(
-        AiErrorType.unauthorized,
-        message: 'Open this experience inside Telegram to continue.',
-      );
-      throw const AiRepositoryException(
-        AiErrorType.unauthorized,
-        message: 'Telegram WebApp required',
-      );
-    }
-
-    final endpoint = useTelegramAuth
-        ? '/api/natal-chart/generate_web'
+    final useTelegramAuth = kIsWeb && _hasTelegramInitData;
+    final endpoint = kIsWeb
+        ? (useTelegramAuth
+            ? '/api/natal-chart/generate'
+            : '/api/natal-chart/generate_web')
         : '/api/natal-chart/generate';
     final uri = Uri.parse(apiBaseUrl).replace(path: endpoint);
     final requestId = requestIdOverride ?? const Uuid().v4();
@@ -519,26 +471,9 @@ class AiRepository {
     final headers = {
       'Content-Type': 'application/json',
       'x-request-id': requestId,
-      if (_telegramInitData.trim().isNotEmpty)
+      if (_hasTelegramInitData)
         'X-Telegram-InitData': _telegramInitData,
     };
-    if (useTelegramAuth && _telegramInitData.trim().isEmpty) {
-      const error = AiRepositoryException(
-        AiErrorType.unauthorized,
-        message: 'Missing Telegram initData',
-      );
-      if (kEnableDevDiagnostics) {
-        logDevFailure(
-          buildDevFailureInfo(FailedStage.telegramInitdata, error),
-        );
-      }
-      _reportWebError(
-        AiErrorType.unauthorized,
-        message: 'Missing Telegram initData',
-      );
-      throw error;
-    }
-
     final requestPayload = useTelegramAuth
         ? {
             'initData': _telegramInitData,
@@ -731,25 +666,15 @@ class AiRepository {
         message: 'Missing API_BASE_URL',
       );
     }
-    if (_requiresTelegramAuth) {
+    if (kIsWeb && !_hasTelegramInitData) {
+      _reportWebError(
+        AiErrorType.unauthorized,
+        message: 'Open this experience inside Telegram to continue.',
+      );
       throw const AiRepositoryException(
         AiErrorType.unauthorized,
         message: 'Telegram WebApp required',
       );
-    }
-    if (kIsWeb &&
-        TelegramEnv.instance.isTelegram &&
-        _telegramInitData.trim().isEmpty) {
-      const error = AiRepositoryException(
-        AiErrorType.unauthorized,
-        message: 'Missing Telegram initData',
-      );
-      if (kEnableDevDiagnostics) {
-        logDevFailure(
-          buildDevFailureInfo(FailedStage.telegramInitdata, error),
-        );
-      }
-      throw error;
     }
 
     final uri = Uri.parse(apiBaseUrl).replace(
@@ -774,7 +699,7 @@ class AiRepository {
     final headers = {
       'Content-Type': 'application/json',
       'x-request-id': requestId,
-      if (_telegramInitData.trim().isNotEmpty)
+      if (_hasTelegramInitData)
         'X-Telegram-InitData': _telegramInitData,
     };
 

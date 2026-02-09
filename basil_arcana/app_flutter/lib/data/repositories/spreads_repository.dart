@@ -4,6 +4,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../core/config/app_config.dart';
+import '../../core/config/web_build_version.dart';
 import '../../core/config/diagnostics.dart';
 import '../../core/network/json_loader.dart';
 import '../models/spread_model.dart';
@@ -51,7 +53,7 @@ class SpreadsRepository {
   String? get lastError => _lastError;
 
   String spreadsCacheKey(Locale locale) =>
-      '${_spreadsPrefix}v${_cacheVersion}_${locale.languageCode}';
+      '${_spreadsPrefix}v${_cacheVersion}_${_buildVersionTag()}_${locale.languageCode}';
 
   String spreadsFileNameForLocale(Locale locale) {
     return switch (locale.languageCode) {
@@ -59,6 +61,13 @@ class SpreadsRepository {
       'kk' => 'spreads_kz.json',
       _ => 'spreads_en.json',
     };
+  }
+
+  String _buildVersionTag() {
+    final runtimeVersion =
+        (AppConfig.appVersion.isNotEmpty ? AppConfig.appVersion : readWebBuildVersion())
+            .trim();
+    return runtimeVersion.isNotEmpty ? runtimeVersion : 'dev';
   }
 
   Future<List<SpreadModel>> fetchSpreads({required Locale locale}) async {
