@@ -96,29 +96,49 @@ app.get('/config.json', (req, res) => {
   res.json(buildConfigPayload(req));
 });
 
+const staticOptions = {
+  index: false,
+  fallthrough: true,
+  setHeaders: (res, filePath) => {
+    const filename = path.basename(filePath);
+    if (filename === 'index.html') {
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+      return;
+    }
+    if (filename === 'flutter.js' || filename === 'flutter_bootstrap.js') {
+      res.setHeader('Cache-Control', 'no-cache, max-age=0');
+      return;
+    }
+    if (filePath.includes(`${path.sep}assets${path.sep}`)) {
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    }
+  }
+};
+
 if (fs.existsSync(PUBLIC_ROOT)) {
-  app.use(
-    express.static(PUBLIC_ROOT, {
-      index: false,
-      fallthrough: true,
-      setHeaders: (res, filePath) => {
-        const filename = path.basename(filePath);
-        if (filename === 'index.html') {
-          res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
-          res.setHeader('Pragma', 'no-cache');
-          res.setHeader('Expires', '0');
-          return;
-        }
-        if (filename === 'flutter.js' || filename === 'flutter_bootstrap.js') {
-          res.setHeader('Cache-Control', 'no-cache, max-age=0');
-          return;
-        }
-        if (filePath.includes(`${path.sep}assets${path.sep}`)) {
-          res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
-        }
-      }
-    })
+  app.get('/v/:version', (req, res) =>
+    res.redirect(302, `/v/${encodeURIComponent(req.params.version)}/`)
   );
+
+  app.get('/v/:version/', (req, res) => {
+    if (fs.existsSync(PUBLIC_INDEX)) {
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+      return res.sendFile(PUBLIC_INDEX);
+    }
+    return res.json({
+      ok: true,
+      name: 'basils-arcana',
+      message: 'Basil’s Arcana API',
+      requestId: req.requestId
+    });
+  });
+
+  app.use('/v/:version', express.static(PUBLIC_ROOT, staticOptions));
+  app.use(express.static(PUBLIC_ROOT, staticOptions));
 }
 
 app.get('/', (req, res) => {
