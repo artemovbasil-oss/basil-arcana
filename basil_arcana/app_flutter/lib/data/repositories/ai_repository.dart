@@ -209,9 +209,9 @@ class AiRepository {
       );
     }
 
-    final endpoint = kIsWeb
-        ? '/api/reading/generate_web'
-        : '/api/reading/generate';
+    final useTelegramWeb = kIsWeb && TelegramEnv.instance.isTelegram;
+    final endpoint =
+        useTelegramWeb ? '/api/reading/generate_web' : '/api/reading/generate';
     final uri = Uri.parse(apiBaseUrl).replace(
       path: endpoint,
       queryParameters: {
@@ -264,12 +264,15 @@ class AiRepository {
       if (_hasTelegramInitData)
         'X-Telegram-InitData': _telegramInitData,
     };
-    final requestPayload = kIsWeb
+    final requestPayload = useTelegramWeb
         ? {
             'initData': _telegramInitData,
             'payload': payload,
           }
-        : payload;
+        : {
+            ...payload,
+            'initData': _telegramInitData,
+          };
 
     final baseClient = client ?? http.Client();
     final httpClient = _wrapClient(baseClient);
@@ -674,7 +677,7 @@ class AiRepository {
         message: 'Missing API_BASE_URL',
       );
     }
-    if (kIsWeb && !_hasTelegramInitData) {
+    if (kIsWeb && TelegramEnv.instance.isTelegram && !_hasTelegramInitData) {
       _reportWebError(
         AiErrorType.unauthorized,
         message: 'Open this experience inside Telegram to continue.',
