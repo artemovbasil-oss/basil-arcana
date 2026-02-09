@@ -287,6 +287,33 @@ class DataRepository {
     _lastResponseStringLengths[cacheKey] = response.stringLength;
     _lastResponseByteLengths[cacheKey] = response.bytesLength;
   }
+
+  String _snippetStart(String body) {
+    // Snippets are for debug diagnostics only; avoid collecting in release.
+    if (!kDebugMode || body.isEmpty) {
+      return '';
+    }
+    try {
+      return body.length <= 200 ? body : body.substring(0, 200);
+    } catch (_) {
+      return '';
+    }
+  }
+
+  String _snippetEnd(String body) {
+    // Snippets are for debug diagnostics only; avoid collecting in release.
+    if (!kDebugMode || body.isEmpty) {
+      return '';
+    }
+    try {
+      if (body.length <= 200) {
+        return body;
+      }
+      return body.substring(body.length - 200);
+    } catch (_) {
+      return '';
+    }
+  }
 }
 
 String _withCacheBust(String url) {
