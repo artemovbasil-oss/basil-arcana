@@ -8,44 +8,36 @@ class TelegramEnv {
   String? _cachedInitData;
 
   bool get isTelegram {
-    try {
-      final value = js_util.getProperty(js_util.globalThis, '__isTelegram');
-      if (value is bool) {
-        return value;
-      }
-    } catch (_) {
-      return false;
-    }
-    return false;
+    return _readWebAppInitData().trim().isNotEmpty;
   }
 
   String get initData {
     if (_cachedInitData != null && _cachedInitData!.trim().isNotEmpty) {
       return _cachedInitData!;
     }
-    final initData = _readInitData();
+    final initData = _readWebAppInitData();
     if (initData.trim().isNotEmpty) {
       _cachedInitData = initData;
     }
     return initData;
   }
 
-  String _readInitData() {
+  String _readWebAppInitData() {
     try {
-      if (!js_util.hasProperty(js_util.globalThis, '__tgInitData')) {
+      if (!js_util.hasProperty(js_util.globalThis, 'Telegram')) {
         return '';
       }
-      final initDataGetter =
-          js_util.getProperty(js_util.globalThis, '__tgInitData');
-      if (initDataGetter is Function) {
-        final value = js_util.callMethod(
-          js_util.globalThis,
-          '__tgInitData',
-          const [],
-        );
-        if (value is String) {
-          return value;
-        }
+      final telegram = js_util.getProperty(js_util.globalThis, 'Telegram');
+      if (telegram == null || !js_util.hasProperty(telegram, 'WebApp')) {
+        return '';
+      }
+      final webApp = js_util.getProperty(telegram, 'WebApp');
+      if (webApp == null || !js_util.hasProperty(webApp, 'initData')) {
+        return '';
+      }
+      final initData = js_util.getProperty(webApp, 'initData');
+      if (initData is String) {
+        return initData;
       }
     } catch (_) {
       return '';

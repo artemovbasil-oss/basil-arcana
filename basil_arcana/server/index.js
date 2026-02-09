@@ -50,6 +50,41 @@ function verifyArcanaApiKey(req, res) {
   return false;
 }
 
+function readTelegramInitData(req, fallback) {
+  const headerCandidates = [
+    'x-telegram-initdata',
+    'x-telegram-init-data',
+    'x-tg-init-data'
+  ];
+  for (const headerName of headerCandidates) {
+    const value = req.get(headerName);
+    if (typeof value === 'string' && value.trim()) {
+      return value.trim();
+    }
+  }
+  if (typeof fallback === 'string' && fallback.trim()) {
+    return fallback.trim();
+  }
+  return '';
+}
+
+function requireTelegramInitData(req, res) {
+  const initData = readTelegramInitData(req, req.body?.initData);
+  if (!initData) {
+    res.status(401).json({ error: 'missing_init_data', requestId: req.requestId });
+    return null;
+  }
+  const validation = validateTelegramInitData(initData, TELEGRAM_BOT_TOKEN);
+  if (!validation.ok) {
+    res.status(401).json({
+      error: validation.error || 'invalid_init_data',
+      requestId: req.requestId
+    });
+    return null;
+  }
+  return initData;
+}
+
 app.use((req, res, next) => {
   const incomingRequestId = req.get('x-request-id');
   const requestId = incomingRequestId || uuidv4();
@@ -152,6 +187,16 @@ app.get('/api/reading/availability', (req, res) => {
   return res.json({
     ok: available,
     available,
+    requestId: req.requestId
+  });
+});
+
+app.get('/api/openai/health', (req, res) => {
+  const hasKey = Boolean(OPENAI_API_KEY);
+  return res.json({
+    ok: hasKey,
+    hasKey,
+    hasModel: Boolean(process.env.OPENAI_MODEL),
     requestId: req.requestId
   });
 });
@@ -341,19 +386,10 @@ app.post('/api/reading/generate_web', async (req, res) => {
       requestId: req.requestId
     });
   }
-  const { initData, payload } = req.body || {};
-  if (typeof initData !== 'string' || !initData.trim()) {
-    return res.status(400).json({
-      error: 'missing_init_data',
-      requestId: req.requestId
-    });
-  }
-  const validation = validateTelegramInitData(initData, TELEGRAM_BOT_TOKEN);
-  if (!validation.ok) {
-    return res.status(401).json({
-      error: validation.error || 'invalid_init_data',
-      requestId: req.requestId
-    });
+  const { payload } = req.body || {};
+  const initData = requireTelegramInitData(req, res);
+  if (!initData) {
+    return;
   }
   const error = validateReadingRequest(payload);
   if (error) {
@@ -561,19 +597,10 @@ app.post('/api/natal-chart/generate_web', async (req, res) => {
       requestId: req.requestId
     });
   }
-  const { initData, payload } = req.body || {};
-  if (typeof initData !== 'string' || !initData.trim()) {
-    return res.status(400).json({
-      error: 'missing_init_data',
-      requestId: req.requestId
-    });
-  }
-  const validation = validateTelegramInitData(initData, TELEGRAM_BOT_TOKEN);
-  if (!validation.ok) {
-    return res.status(401).json({
-      error: validation.error || 'invalid_init_data',
-      requestId: req.requestId
-    });
+  const { payload } = req.body || {};
+  const initData = requireTelegramInitData(req, res);
+  if (!initData) {
+    return;
   }
   const error = validateNatalChartRequest(payload);
   if (error) {
