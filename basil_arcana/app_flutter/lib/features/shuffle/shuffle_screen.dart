@@ -196,15 +196,27 @@ class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
                         onPressed: !_showCta || state.isLoading
                             ? null
                             : () async {
-                                final cards = await cardsAsync.valueOrNull;
-                                if (cards == null) {
-                                  return;
+                                try {
+                                  final cards =
+                                      await ref.read(cardsProvider.future);
+                                  if (!mounted) {
+                                    return;
+                                  }
+                                  await ref
+                                      .read(
+                                        readingFlowControllerProvider.notifier,
+                                      )
+                                      .drawAndGenerate(cards);
+                                } catch (_) {
+                                  if (!mounted) {
+                                    return;
+                                  }
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(l10n.cardsLoadError),
+                                    ),
+                                  );
                                 }
-                                await ref
-                                    .read(
-                                      readingFlowControllerProvider.notifier,
-                                    )
-                                    .drawAndGenerate(cards);
                               },
                         padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
