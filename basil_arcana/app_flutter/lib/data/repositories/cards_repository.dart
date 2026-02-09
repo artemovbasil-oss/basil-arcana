@@ -1,5 +1,6 @@
 import 'dart:collection';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 
 import '../../core/assets/asset_paths.dart';
@@ -114,6 +115,14 @@ class CardsRepository {
         _recordResponseInfo(cacheKey, error.response!);
       }
       _lastError = '${error.toString()}\n$stackTrace';
+      final fallback = await _loadLocalCards(
+        cacheKey: cacheKey,
+        locale: locale,
+      );
+      if (fallback != null) {
+        _lastError = null;
+        return fallback;
+      }
       throw CardsLoadException(
         'Failed to load cards',
         cacheKey: cacheKey,
@@ -129,6 +138,34 @@ class CardsRepository {
     _lastResponseSnippetsEnd[cacheKey] = response.responseSnippetEnd;
     _lastResponseStringLengths[cacheKey] = response.stringLength;
     _lastResponseByteLengths[cacheKey] = response.bytesLength;
+  }
+
+  Future<String?> _loadLocalCards({
+    required String cacheKey,
+    required Locale locale,
+  }) async {
+    final assetPath = 'assets/data/${cardsFileNameForLocale(locale)}';
+    try {
+      final raw = await rootBundle.loadString(assetPath);
+      final parsed = parseJsonString(raw);
+      final rootType = jsonRootType(parsed.decoded);
+      _lastResponseRootTypes[cacheKey] = rootType;
+      if (rootType != 'Map' || !_isValidCardsJson(parsed.decoded)) {
+        if (kEnableRuntimeLogs) {
+          debugPrint(
+            '[CardsRepository] local schemaMismatch cacheKey=$cacheKey rootType=$rootType',
+          );
+        }
+        return null;
+      }
+      _lastCacheTimes[cacheKey] = DateTime.now();
+      return parsed.raw;
+    } catch (error) {
+      if (kEnableRuntimeLogs) {
+        debugPrint('[CardsRepository] local load failed: $error');
+      }
+      return null;
+    }
   }
 }
 
