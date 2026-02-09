@@ -39,6 +39,14 @@ app.set('trust proxy', 1);
 app.use(cors());
 app.use(express.json({ limit: '1mb' }));
 
+if (!TELEGRAM_BOT_TOKEN) {
+  console.warn(
+    JSON.stringify({
+      event: 'telegram_bot_token_missing'
+    })
+  );
+}
+
 function verifyArcanaApiKey(req, res) {
   if (!ARCANA_API_KEY) {
     return true;
@@ -52,12 +60,12 @@ function verifyArcanaApiKey(req, res) {
 }
 
 function readTelegramInitData(req) {
-  const headerCandidates = [
-    'x-telegram-initdata',
-    'x-telegram-init-data',
-    'x-tg-init-data'
-  ];
-  for (const headerName of headerCandidates) {
+  const preferredHeader = req.get('x-telegram-initdata');
+  if (typeof preferredHeader === 'string' && preferredHeader.trim()) {
+    return { initData: preferredHeader.trim(), source: 'x-telegram-initdata' };
+  }
+  const fallbackHeaders = ['x-telegram-init-data', 'x-tg-init-data'];
+  for (const headerName of fallbackHeaders) {
     const value = req.get(headerName);
     if (typeof value === 'string' && value.trim()) {
       return { initData: value.trim(), source: headerName };
@@ -87,7 +95,7 @@ function logTelegramAuthFailure({ req, reason, hasBodyInitData, hasHeaderInitDat
 function requireTelegramInitData(req, res) {
   const bodyInitData =
     typeof req.body?.initData === 'string' ? req.body.initData.trim() : '';
-  const { initData } = readTelegramInitData(req);
+  const { initData, source } = readTelegramInitData(req);
   const headerCandidates = [
     'x-telegram-initdata',
     'x-telegram-init-data',
@@ -98,7 +106,19 @@ function requireTelegramInitData(req, res) {
     return typeof value === 'string' && value.trim();
   });
   const hasBodyInitData = Boolean(bodyInitData);
+  const initDataLength = initData.length;
   if (!initData) {
+    console.warn(
+      JSON.stringify({
+        event: 'telegram_auth_check',
+        requestId: req.requestId,
+        path: req.originalUrl,
+        initData_present: false,
+        initData_length: initDataLength,
+        source,
+        validation_ok: false
+      })
+    );
     logTelegramAuthFailure({
       req,
       reason: 'missing_initData',
@@ -114,10 +134,18 @@ function requireTelegramInitData(req, res) {
   }
   const validation = validateTelegramInitData(initData, TELEGRAM_BOT_TOKEN);
   if (!validation.ok) {
-    const reason =
-      validation.error === 'expired_auth_date'
-        ? 'expired_auth_date'
-        : 'invalid_signature';
+    const reason = 'invalid_initData';
+    console.warn(
+      JSON.stringify({
+        event: 'telegram_auth_check',
+        requestId: req.requestId,
+        path: req.originalUrl,
+        initData_present: true,
+        initData_length: initDataLength,
+        source,
+        validation_ok: false
+      })
+    );
     logTelegramAuthFailure({
       req,
       reason,
@@ -131,6 +159,17 @@ function requireTelegramInitData(req, res) {
     });
     return null;
   }
+  console.log(
+    JSON.stringify({
+      event: 'telegram_auth_check',
+      requestId: req.requestId,
+      path: req.originalUrl,
+      initData_present: true,
+      initData_length: initDataLength,
+      source,
+      validation_ok: true
+    })
+  );
   return initData;
 }
 

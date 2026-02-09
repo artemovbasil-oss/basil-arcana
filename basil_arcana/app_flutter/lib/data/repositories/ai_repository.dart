@@ -138,6 +138,14 @@ class AiRepository {
       }
     }
 
+    _logReadingApiResponse(
+      uri: uri,
+      hasTelegramInitDataHeader: _hasTelegramInitData,
+      initDataLength: _telegramInitData.length,
+      statusCode: response.statusCode,
+      responseBody: response.body,
+    );
+
     if (response.statusCode < 200 || response.statusCode >= 300) {
       if (kDebugMode) {
         debugPrint(
@@ -325,6 +333,14 @@ class AiRepository {
         httpClient.close();
       }
     }
+
+    _logReadingApiResponse(
+      uri: uri,
+      hasTelegramInitDataHeader: _hasTelegramInitData,
+      initDataLength: _telegramInitData.length,
+      statusCode: response.statusCode,
+      responseBody: response.body,
+    );
 
     if (response.statusCode == 401 || response.statusCode == 403) {
       _logFailure(
@@ -1029,6 +1045,26 @@ class AiRepository {
       buffer.write(' body_preview="${preview.replaceAll('\n', ' ')}"');
     }
     print(buffer.toString());
+  }
+
+  void _logReadingApiResponse({
+    required Uri uri,
+    required bool hasTelegramInitDataHeader,
+    required int initDataLength,
+    required int statusCode,
+    required String responseBody,
+  }) {
+    final preview = responseBody.substring(
+      0,
+      responseBody.length > 500 ? 500 : responseBody.length,
+    );
+    print(
+      '[AiRepository] readingApiResponse url=$uri '
+      'telegram_header=$hasTelegramInitDataHeader '
+      'initData_length=$initDataLength '
+      'status=$statusCode '
+      'body="${preview.replaceAll('\n', ' ')}"',
+    );
   }
 
   String? _extractRequestId(String? responseBody) {
