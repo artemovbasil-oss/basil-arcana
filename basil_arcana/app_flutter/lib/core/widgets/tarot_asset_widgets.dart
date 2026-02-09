@@ -4,6 +4,7 @@ import 'package:video_player/video_player.dart';
 
 import '../../core/assets/asset_paths.dart';
 import '../../core/config/assets_config.dart';
+import '../../core/config/diagnostics.dart';
 import '../../data/models/card_video.dart';
 import '../../data/models/card_model.dart';
 import '../../data/models/deck_model.dart';
@@ -132,6 +133,11 @@ class CardAssetImage extends ConsumerWidget {
       fit: fit,
       filterQuality: FilterQuality.high,
       errorBuilder: (context, error, stackTrace) {
+        if (kEnableDevDiagnostics) {
+          logDevFailure(
+            buildDevFailureInfo(FailedStage.mediaLoad, error),
+          );
+        }
         assert(() {
           debugPrint('Missing card image for $cardId');
           return true;
@@ -319,7 +325,12 @@ class _CardMediaState extends State<CardMedia> {
         return;
       }
       controller.addListener(_handlePlayback);
-    } catch (_) {
+    } catch (error) {
+      if (kEnableDevDiagnostics) {
+        logDevFailure(
+          buildDevFailureInfo(FailedStage.mediaLoad, error),
+        );
+      }
       if (mounted) {
         setState(() {
           _videoFailed = true;
@@ -561,6 +572,11 @@ class DeckCoverBack extends ConsumerWidget {
           return buildPlaceholder();
         },
         errorBuilder: (context, error, stackTrace) {
+          if (kEnableDevDiagnostics) {
+            logDevFailure(
+              buildDevFailureInfo(FailedStage.mediaLoad, error),
+            );
+          }
           if (allowFallback && deckId != DeckType.major) {
             return buildImage(
               deckCoverAssetPath(DeckType.major),

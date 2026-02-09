@@ -40,7 +40,15 @@ class CardDetailScreen extends ConsumerWidget {
       final repo = ref.read(cardsRepositoryProvider);
       final locale = ref.read(localeProvider);
       final cacheKey = repo.cardsCacheKey(locale);
-      final debugInfo = kShowDiagnostics
+      DevFailureInfo? failureInfo;
+      if (kEnableDevDiagnostics && cardsAsync.hasError) {
+        failureInfo = buildDevFailureInfo(
+          FailedStage.cardsLocalLoad,
+          cardsAsync.error ?? StateError('Cards not loaded'),
+        );
+        logDevFailure(failureInfo);
+      }
+      final debugInfo = kEnableDevDiagnostics
           ? DataLoadDebugInfo(
               assetsBaseUrl: AssetsConfig.assetsBaseUrl,
               requests: {
@@ -57,7 +65,8 @@ class CardDetailScreen extends ConsumerWidget {
                   rootType: repo.lastResponseRootTypes[cacheKey],
                 ),
               },
-              lastError: repo.lastError,
+              failedStage: failureInfo?.failedStage,
+              exceptionSummary: failureInfo?.summary,
             )
           : null;
       return Scaffold(

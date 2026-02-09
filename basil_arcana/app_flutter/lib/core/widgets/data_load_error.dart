@@ -32,12 +32,14 @@ class DataLoadDebugInfo {
   const DataLoadDebugInfo({
     required this.assetsBaseUrl,
     required this.requests,
-    required this.lastError,
+    this.failedStage,
+    this.exceptionSummary,
   });
 
   final String assetsBaseUrl;
   final Map<String, DataLoadRequestDebugInfo> requests;
-  final String? lastError;
+  final String? failedStage;
+  final String? exceptionSummary;
 }
 
 class DataLoadError extends StatelessWidget {
@@ -97,7 +99,7 @@ class DataLoadError extends StatelessWidget {
               label: secondaryLabel!,
             ),
           ],
-          if (kShowDiagnostics && debugInfo != null) ...[
+          if (kEnableDevDiagnostics && debugInfo != null) ...[
             const SizedBox(height: 16),
             _DebugInfoPanel(info: debugInfo!),
           ],
@@ -140,8 +142,11 @@ class _DebugInfoPanel extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          Text('Exception', style: textTheme.labelMedium),
-          SelectableText(info.lastError ?? '—'),
+          Text('FAILED_STAGE', style: textTheme.labelMedium),
+          SelectableText(info.failedStage ?? '—'),
+          const SizedBox(height: 12),
+          Text('Exception (sanitized)', style: textTheme.labelMedium),
+          SelectableText(info.exceptionSummary ?? '—'),
         ],
       ),
     );

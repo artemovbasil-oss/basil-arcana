@@ -60,6 +60,17 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
           prev?.showDetailsCta != next.showDetailsCta) {
         _maybeScrollToBottom();
       }
+      final errorMessage = next.errorMessage;
+      if (errorMessage != null && errorMessage != prev?.errorMessage) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) {
+            return;
+          }
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(errorMessage)),
+          );
+        });
+      }
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _jumpToTop();
