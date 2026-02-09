@@ -120,6 +120,34 @@ class CardsRepository {
     _lastResponseStringLengths[cacheKey] = raw.length;
     _lastResponseByteLengths[cacheKey] = raw.length;
   }
+
+  Future<String?> _loadLocalCards({
+    required String cacheKey,
+    required Locale locale,
+  }) async {
+    final assetPath = 'assets/data/${cardsFileNameForLocale(locale)}';
+    try {
+      final raw = await rootBundle.loadString(assetPath);
+      final parsed = parseJsonString(raw);
+      final rootType = jsonRootType(parsed.decoded);
+      _lastResponseRootTypes[cacheKey] = rootType;
+      if (rootType != 'Map' || !_isValidCardsJson(parsed.decoded)) {
+        if (kEnableRuntimeLogs) {
+          debugPrint(
+            '[CardsRepository] local schemaMismatch cacheKey=$cacheKey rootType=$rootType',
+          );
+        }
+        return null;
+      }
+      _lastCacheTimes[cacheKey] = DateTime.now();
+      return parsed.raw;
+    } catch (error) {
+      if (kEnableRuntimeLogs) {
+        debugPrint('[CardsRepository] local load failed: $error');
+      }
+      return null;
+    }
+  }
 }
 
 class CardsLoadException implements Exception {
