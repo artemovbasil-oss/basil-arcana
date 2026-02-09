@@ -9,6 +9,7 @@ import '../../core/widgets/app_top_bar.dart';
 import '../../core/widgets/data_load_error.dart';
 import '../../core/widgets/tarot_asset_widgets.dart';
 import '../../data/models/card_model.dart';
+import '../../data/models/deck_model.dart';
 import '../../state/providers.dart';
 import 'card_detail_screen.dart';
 
@@ -21,6 +22,20 @@ class CardsScreen extends ConsumerStatefulWidget {
 
 class _CardsScreenState extends ConsumerState<CardsScreen> {
   bool _precacheDone = false;
+  final ScrollController _scrollController = ScrollController();
+  late final Map<DeckType, GlobalKey> _sectionKeys = {
+    DeckType.major: GlobalKey(),
+    DeckType.wands: GlobalKey(),
+    DeckType.swords: GlobalKey(),
+    DeckType.pentacles: GlobalKey(),
+    DeckType.cups: GlobalKey(),
+  };
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,33 +62,76 @@ class _CardsScreenState extends ConsumerState<CardsScreen> {
             return ValueListenableBuilder(
               valueListenable: statsRepository.listenable(),
               builder: (context, box, _) {
-                return GridView.builder(
-                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 16,
-                    crossAxisSpacing: 16,
-                    childAspectRatio: 0.62,
-                  ),
-                  itemCount: cards.length,
-                  itemBuilder: (context, index) {
-                    final card = cards[index];
-                    final count = statsRepository.getCount(card.id);
-                    return _CardTile(
-                      card: card,
-                      drawnCount: count,
-                      drawnLabel: l10n.cardsDrawnCount(count),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            settings: appRouteSettings(showBackButton: true),
-                            builder: (_) => CardDetailScreen(card: card),
+                final sections = _buildDeckSections(cards, l10n);
+                return CustomScrollView(
+                  controller: _scrollController,
+                  slivers: [
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
+                        child: _DeckChips(
+                          sections: sections,
+                          onSelect: (deck) => _scrollToSection(deck),
+                        ),
+                      ),
+                    ),
+                    for (final section in sections) ...[
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          key: _sectionKeys[section.deck],
+                          padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
+                          child: Text(
+                            section.label,
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelLarge
+                                ?.copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurface
+                                      .withOpacity(0.65),
+                                ),
                           ),
-                        );
-                      },
-                    );
-                  },
+                        ),
+                      ),
+                      SliverPadding(
+                        padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+                        sliver: SliverGrid(
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            mainAxisSpacing: 16,
+                            crossAxisSpacing: 16,
+                            childAspectRatio: 0.62,
+                          ),
+                          delegate: SliverChildBuilderDelegate(
+                            (context, index) {
+                              final card = section.cards[index];
+                              final count = statsRepository.getCount(card.id);
+                              return _CardTile(
+                                card: card,
+                                drawnCount: count,
+                                drawnLabel: l10n.cardsDrawnCount(count),
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      settings: appRouteSettings(
+                                        showBackButton: true,
+                                      ),
+                                      builder: (_) =>
+                                          CardDetailScreen(card: card),
+                                    ),
+                                  );
+                                },
+                              );
+                            },
+                            childCount: section.cards.length,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
                 );
               },
             );
@@ -136,6 +194,94 @@ class _CardsScreenState extends ConsumerState<CardsScreen> {
         );
       }
     });
+  }
+
+  void _scrollToSection(DeckType deck) {
+    final target = _sectionKeys[deck]?.currentContext;
+    if (target == null) {
+      return;
+    }
+    Scrollable.ensureVisible(
+      target,
+      duration: const Duration(milliseconds: 350),
+      curve: Curves.easeOut,
+      alignment: 0.1,
+    );
+  }
+
+  List<_DeckSection> _buildDeckSections(
+    List<CardModel> cards,
+    AppLocalizations l10n,
+  ) {
+    final labels = <DeckType, String>{
+      DeckType.major: l10n.deckMajorName,
+      DeckType.wands: l10n.deckWandsName,
+      DeckType.swords: l10n.deckSwordsName,
+      DeckType.pentacles: l10n.deckPentaclesName,
+      DeckType.cups: l10n.deckCupsName,
+    };
+    final order = [
+      DeckType.major,
+      DeckType.wands,
+      DeckType.swords,
+      DeckType.pentacles,
+      DeckType.cups,
+    ];
+    return [
+      for (final deck in order)
+        _DeckSection(
+          deck: deck,
+          label: labels[deck] ?? '',
+          cards: cards.where((card) => card.deckId == deck).toList(),
+        ),
+    ].where((section) => section.cards.isNotEmpty).toList();
+  }
+}
+
+class _DeckSection {
+  const _DeckSection({
+    required this.deck,
+    required this.label,
+    required this.cards,
+  });
+
+  final DeckType deck;
+  final String label;
+  final List<CardModel> cards;
+}
+
+class _DeckChips extends StatelessWidget {
+  const _DeckChips({
+    required this.sections,
+    required this.onSelect,
+  });
+
+  final List<_DeckSection> sections;
+  final ValueChanged<DeckType> onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Wrap(
+      spacing: 10,
+      runSpacing: 8,
+      children: [
+        for (final section in sections)
+          ActionChip(
+            label: Text(section.label),
+            onPressed: () => onSelect(section.deck),
+            backgroundColor: colorScheme.surfaceVariant.withOpacity(0.6),
+            shape: StadiumBorder(
+              side: BorderSide(
+                color: colorScheme.outlineVariant.withOpacity(0.5),
+              ),
+            ),
+            labelStyle: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: colorScheme.onSurface,
+                ),
+          ),
+      ],
+    );
   }
 }
 

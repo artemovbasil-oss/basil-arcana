@@ -426,21 +426,25 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
     _activeClient = client;
     try {
       final aiRepository = ref.read(aiRepositoryProvider);
-      final backendAvailable =
-          await aiRepository.isBackendAvailable(client: client);
+      var backendAvailable = true;
+      try {
+        backendAvailable =
+            await aiRepository.isBackendAvailable(client: client);
+      } on AiRepositoryException catch (error) {
+        if (_activeRequestId != requestId) {
+          return;
+        }
+        if (kDebugMode) {
+          debugPrint(
+            '[ReadingFlow] availabilityCheckSkipped type=${error.type.name}',
+          );
+        }
+      }
       if (_activeRequestId != requestId) {
         return;
       }
-      if (!backendAvailable) {
-        state = state.copyWith(
-          aiResult: null,
-          isLoading: false,
-          aiUsed: false,
-          showDetailsCta: false,
-          aiErrorType: AiErrorType.serverError,
-          errorMessage: l10n.resultStatusServerUnavailable,
-        );
-        return;
+      if (!backendAvailable && kDebugMode) {
+        debugPrint('[ReadingFlow] availabilityCheckFalse');
       }
       final locale = ref.read(localeProvider);
       final result = await aiRepository.generateReading(
@@ -460,6 +464,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
         isLoading: false,
         aiUsed: true,
         showDetailsCta: true,
+        clearError: true,
       );
       await _autoSaveReading();
     } on AiRepositoryException catch (error) {

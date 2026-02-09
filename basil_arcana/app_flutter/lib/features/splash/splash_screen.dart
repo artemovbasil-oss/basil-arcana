@@ -178,10 +178,24 @@ class _DeckSplashMediaState extends State<DeckSplashMedia> {
     return Stack(
       fit: StackFit.expand,
       children: [
+        const DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Color(0xFF141218),
+                Color(0xFF0F0F12),
+              ],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+        ),
         Image.network(
           widget.posterUrl,
           fit: BoxFit.cover,
           filterQuality: FilterQuality.high,
+          gaplessPlayback: true,
+          errorBuilder: (_, __, ___) => const SizedBox.expand(),
         ),
         AnimatedOpacity(
           opacity: _isVideoReady ? 1 : 0,
