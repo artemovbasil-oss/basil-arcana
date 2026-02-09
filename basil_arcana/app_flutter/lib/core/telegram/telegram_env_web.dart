@@ -82,6 +82,16 @@ class TelegramEnv {
 
   String _readWebAppInitData() {
     try {
+      if (js_util.hasProperty(js_util.globalThis, 'getTelegramInitData')) {
+        final value = js_util.callMethod(
+          js_util.globalThis,
+          'getTelegramInitData',
+          const [],
+        );
+        if (value is String) {
+          return value;
+        }
+      }
       if (js_util.hasProperty(js_util.globalThis, 'tgGetInitData')) {
         final value =
             js_util.callMethod(js_util.globalThis, 'tgGetInitData', const []);

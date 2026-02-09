@@ -4,6 +4,7 @@
   var hasInitialized = false;
   var cachedInitData = '';
   var hasLoggedInitData = false;
+  var retryHandle = null;
 
   function getWebApp() {
     try {
@@ -52,6 +53,7 @@
     if (!webApp) {
       return false;
     }
+    window.isTelegramWebApp = true;
     window.__isTelegram = true;
     if (!hasInitialized) {
       hasInitialized = true;
@@ -102,6 +104,7 @@
       cachedInitData = value;
       window.__tg_initData = value;
       window.__isTelegram = true;
+      window.isTelegramWebApp = true;
       logInitData(value, source);
       return value;
     }
@@ -109,12 +112,12 @@
   }
 
   function readInitData() {
+    if (cachedInitData) {
+      return cachedInitData;
+    }
     var webApp = getWebApp();
     if (webApp && typeof webApp.initData === 'string' && webApp.initData.trim()) {
       return cacheInitData(webApp.initData, 'webapp');
-    }
-    if (cachedInitData) {
-      return cachedInitData;
     }
     var urlInitData = readInitDataFromUrl();
     if (urlInitData) {
@@ -123,12 +126,34 @@
     return '';
   }
 
+  function pollForInitData(attemptsLeft) {
+    if (cachedInitData) {
+      return;
+    }
+    ensureReady();
+    var value = readInitData();
+    if (value && value.trim()) {
+      return;
+    }
+    if (attemptsLeft <= 0) {
+      return;
+    }
+    retryHandle = setTimeout(function () {
+      pollForInitData(attemptsLeft - 1);
+    }, 50);
+  }
+
   var urlInitData = readInitDataFromUrl();
   if (urlInitData) {
     cacheInitData(urlInitData, 'url');
   }
 
-  window.__isTelegram = Boolean(urlInitData);
+  window.isTelegramWebApp = Boolean(getWebApp());
+  window.__isTelegram = window.isTelegramWebApp || Boolean(urlInitData);
+  window.getTelegramInitData = function () {
+    ensureReady();
+    return readInitData();
+  };
   window.tgGetInitData = function () {
     ensureReady();
     return readInitData();
@@ -138,6 +163,7 @@
   };
 
   scheduleReadyCheck(60);
+  pollForInitData(20);
 
   function tgIsAvailable() {
     return Boolean(getWebApp());
