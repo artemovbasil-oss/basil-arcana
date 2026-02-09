@@ -1094,7 +1094,7 @@ class _ActionBar extends StatelessWidget {
               children: [
                 SizedBox(
                   width: double.infinity,
-                  child: AppPrimaryButton(
+                  child: AppGhostButton(
                     label: newLabel,
                     icon: Icons.auto_awesome,
                     onPressed: onNew,
@@ -1119,7 +1119,7 @@ class _ActionBar extends StatelessWidget {
                           padding: const EdgeInsets.only(top: 12),
                           child: SizedBox(
                             width: double.infinity,
-                            child: AppGhostButton(
+                            child: AppPrimaryButton(
                               label: moreLabel,
                               icon: Icons.auto_awesome_outlined,
                               onPressed: onShare,

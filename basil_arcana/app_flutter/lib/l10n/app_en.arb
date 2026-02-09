@@ -189,7 +189,7 @@
   "natalChartBirthDateError": "Please enter your birth date.",
   "natalChartBirthTimeLabel": "Time of birth",
   "natalChartBirthTimeHint": "HH:MM",
-  "natalChartBirthTimeHelper": "Approximate time is fine (optional).",
+  "natalChartBirthTimeHelper": "If unsure, use 12:00 (noon).",
   "natalChartGenerateButton": "Generate",
   "natalChartLoading": "Creating your natal chart…",
   "natalChartResultTitle": "Your interpretation",

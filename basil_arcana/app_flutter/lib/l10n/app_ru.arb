@@ -189,7 +189,7 @@
   "natalChartBirthDateError": "Укажите дату рождения.",
   "natalChartBirthTimeLabel": "Время рождения",
   "natalChartBirthTimeHint": "ЧЧ:ММ",
-  "natalChartBirthTimeHelper": "Примерное время подойдет (необязательно).",
+  "natalChartBirthTimeHelper": "Если точное время неизвестно, укажите 12:00 (полдень).",
   "natalChartGenerateButton": "Сгенерировать",
   "natalChartLoading": "Создаем натальную карту…",
   "natalChartResultTitle": "Ваш разбор",
