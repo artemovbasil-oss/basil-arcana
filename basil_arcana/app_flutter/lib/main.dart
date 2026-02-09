@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 
@@ -62,6 +63,22 @@ Future<void> main() async {
 Future<void> _runLocalDataSelfCheck() async {
   if (!kDebugMode) {
     return;
+  }
+  const assetFiles = <String>[
+    'assets/data/cards_en.json',
+    'assets/data/cards_ru.json',
+    'assets/data/cards_kz.json',
+    'assets/data/spreads_en.json',
+    'assets/data/spreads_ru.json',
+    'assets/data/spreads_kz.json',
+  ];
+  for (final asset in assetFiles) {
+    try {
+      await rootBundle.loadString(asset);
+      debugPrint('[SelfCheck] asset load OK: $asset');
+    } catch (error) {
+      debugPrint('[SelfCheck] asset load FAILED: $asset error=$error');
+    }
   }
   final cardsRepo = CardsRepository();
   final spreadsRepo = SpreadsRepository();

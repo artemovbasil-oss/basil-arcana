@@ -6,7 +6,6 @@ import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
 
-import '../core/telegram/telegram_env.dart';
 import '../core/config/diagnostics.dart';
 import '../data/models/ai_result_model.dart';
 import '../data/models/card_model.dart';
@@ -161,10 +160,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
   int _activeDeepRequestId = 0;
 
   bool _requiresTelegramAccess() {
-    if (!kIsWeb) {
-      return false;
-    }
-    return !TelegramEnv.instance.isTelegram;
+    return false;
   }
 
   void setQuestion(String question) {

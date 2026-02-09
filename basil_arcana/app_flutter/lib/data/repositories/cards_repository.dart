@@ -4,6 +4,8 @@ import 'package:flutter/services.dart';
 
 import '../../core/assets/asset_paths.dart';
 import '../../core/config/assets_config.dart';
+import '../../core/config/app_config.dart';
+import '../../core/config/web_build_version.dart';
 import '../../core/network/json_loader.dart';
 import '../../core/config/diagnostics.dart';
 import '../models/card_model.dart';
@@ -52,7 +54,7 @@ class CardsRepository {
   String? get lastError => _lastError;
 
   String cardsCacheKey(Locale locale) =>
-      '${_cardsPrefix}v${_cacheVersion}_${locale.languageCode}';
+      '${_cardsPrefix}v${_cacheVersion}_${_buildVersionTag()}_${locale.languageCode}';
 
   String cardsFileNameForLocale(Locale locale) {
     return switch (locale.languageCode) {
@@ -60,6 +62,13 @@ class CardsRepository {
       'kk' => 'cards_kz.json',
       _ => 'cards_en.json',
     };
+  }
+
+  String _buildVersionTag() {
+    final runtimeVersion =
+        (AppConfig.appVersion.isNotEmpty ? AppConfig.appVersion : readWebBuildVersion())
+            .trim();
+    return runtimeVersion.isNotEmpty ? runtimeVersion : 'dev';
   }
 
   String cardsUrlForLocale(Locale locale) {
