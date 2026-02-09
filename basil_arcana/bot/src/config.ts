@@ -19,25 +19,24 @@ function optionalEnv(name: string): string | undefined {
   return value;
 }
 
-function buildVersionedUrl(url: string, version: string): string {
+function buildRootUrl(url: string): string {
   try {
     const parsed = new URL(url);
-    parsed.pathname = `/v/${version}/`;
-    parsed.search = "";
+    const normalizedPath = parsed.pathname.replace(/\/+$/, "") || "/";
+    parsed.pathname = normalizedPath.endsWith("/") ? normalizedPath : `${normalizedPath}/`;
     return parsed.toString();
   } catch (error) {
     const trimmed = url.replace(/\/+$/, "");
-    return `${trimmed}/v/${encodeURIComponent(version)}/`;
+    return trimmed.length > 0 ? `${trimmed}/` : "/";
   }
 }
 
 export function loadConfig(): BotConfig {
   const telegramToken = requireEnv("TELEGRAM_BOT_TOKEN");
   const webAppUrl = optionalEnv("TELEGRAM_WEBAPP_URL");
-  const appVersion = optionalEnv("APP_VERSION") ?? "dev";
 
   return {
     telegramToken,
-    webAppUrl: webAppUrl ? buildVersionedUrl(webAppUrl, appVersion) : undefined,
+    webAppUrl: webAppUrl ? buildRootUrl(webAppUrl) : undefined,
   };
 }

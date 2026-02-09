@@ -118,26 +118,13 @@ const staticOptions = {
 };
 
 if (fs.existsSync(PUBLIC_ROOT)) {
-  app.get('/v/:version', (req, res) =>
-    res.redirect(302, `/v/${encodeURIComponent(req.params.version)}/`)
-  );
-
-  app.get('/v/:version/', (req, res) => {
-    if (fs.existsSync(PUBLIC_INDEX)) {
-      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
-      res.setHeader('Pragma', 'no-cache');
-      res.setHeader('Expires', '0');
-      return res.sendFile(PUBLIC_INDEX);
-    }
-    return res.json({
-      ok: true,
-      name: 'basils-arcana',
-      message: 'Basil’s Arcana API',
-      requestId: req.requestId
-    });
+  app.get('/v/:version', (req, res) => res.redirect(302, '/'));
+  app.get('/v/:version/', (req, res) => res.redirect(302, '/'));
+  app.get('/v/:version/*', (req, res) => {
+    const restPath = req.params[0] ? `/${req.params[0]}` : '/';
+    return res.redirect(302, restPath);
   });
 
-  app.use('/v/:version', express.static(PUBLIC_ROOT, staticOptions));
   app.use(express.static(PUBLIC_ROOT, staticOptions));
 }
 
