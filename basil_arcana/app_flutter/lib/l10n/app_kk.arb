@@ -37,7 +37,7 @@
   "cardsTitle": "Барлық карталар",
   "cardsEmptyTitle": "Карталар әзірге жоқ",
   "cardsEmptySubtitle": "Сәл кейінірек қайталап көріңіз.",
-  "cardsLoadError": "Карталарды жүктеу мүмкін болмады.",
+  "cardsLoadError": "Карталардың деректері жоқ немесе бүлінген.",
   "dataLoadTitle": "Карталар кітапханасына қосыла алмадық.",
   "dataLoadRetry": "Қайталау",
   "dataLoadUseCache": "Кэшті пайдалану",
@@ -139,7 +139,7 @@
   "resultStatusNoInternet": "Интернет жоқ — офлайн оқылым көрсетіледі",
   "resultStatusTimeout": "Оракул кідірді — қайта көру үшін түртіңіз.",
   "resultStatusTooManyAttempts": "Тым көп әрекет — біраз күтіп, қайта көріңіз.",
-  "resultStatusServerUnavailableWithStatus": "Қызмет қолжетімсіз ({status}) — сәл кейінірек қайталап көріңіз.",
+  "resultStatusServerUnavailableWithStatus": "Оракул қолжетімсіз ({status}) — сәл кейінірек қайталап көріңіз.",
   "@resultStatusServerUnavailableWithStatus": {
     "placeholders": {
       "status": {
@@ -147,7 +147,7 @@
       }
     }
   },
-  "resultStatusServerUnavailable": "Қызмет қолжетімсіз — сәл кейінірек қайталап көріңіз.",
+  "resultStatusServerUnavailable": "Оракул қолжетімсіз — сәл кейінірек қайталап көріңіз.",
   "resultStatusMissingApiBaseUrl": "Баптау қатесі — API базалық URL жоқ.",
   "resultStatusUnexpectedResponse": "Күтілмеген жауап — қайта көру үшін түртіңіз.",
   "resultStatusInterpretationUnavailable": "AI түсіндірмесі қолжетімсіз — қайта көру үшін түртіңіз.",

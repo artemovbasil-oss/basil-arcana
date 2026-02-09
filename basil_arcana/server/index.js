@@ -52,11 +52,6 @@ function verifyArcanaApiKey(req, res) {
 }
 
 function readTelegramInitData(req) {
-  const bodyInitData =
-    typeof req.body?.initData === 'string' ? req.body.initData.trim() : '';
-  if (bodyInitData) {
-    return { initData: bodyInitData, source: 'body' };
-  }
   const headerCandidates = [
     'x-telegram-initdata',
     'x-telegram-init-data',
@@ -67,6 +62,11 @@ function readTelegramInitData(req) {
     if (typeof value === 'string' && value.trim()) {
       return { initData: value.trim(), source: headerName };
     }
+  }
+  const bodyInitData =
+    typeof req.body?.initData === 'string' ? req.body.initData.trim() : '';
+  if (bodyInitData) {
+    return { initData: bodyInitData, source: 'body' };
   }
   return { initData: '', source: null };
 }
@@ -114,15 +114,19 @@ function requireTelegramInitData(req, res) {
   }
   const validation = validateTelegramInitData(initData, TELEGRAM_BOT_TOKEN);
   if (!validation.ok) {
+    const reason =
+      validation.error === 'expired_auth_date'
+        ? 'expired_auth_date'
+        : 'invalid_signature';
     logTelegramAuthFailure({
       req,
-      reason: 'invalid_initData',
+      reason,
       hasBodyInitData,
       hasHeaderInitData
     });
     res.status(401).json({
       error: 'unauthorized',
-      reason: 'invalid_initData',
+      reason,
       requestId: req.requestId
     });
     return null;

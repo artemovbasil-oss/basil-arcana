@@ -37,7 +37,7 @@
   "cardsTitle": "Все карты",
   "cardsEmptyTitle": "Карты пока недоступны",
   "cardsEmptySubtitle": "Попробуйте снова чуть позже.",
-  "cardsLoadError": "Не удалось загрузить карты.",
+  "cardsLoadError": "Данные карт отсутствуют или повреждены.",
   "dataLoadTitle": "Не удаётся подключиться к библиотеке карт.",
   "dataLoadRetry": "Повторить",
   "dataLoadUseCache": "Использовать кэш",
@@ -139,7 +139,7 @@
   "resultStatusNoInternet": "Нет интернета — показываем офлайн-расклад",
   "resultStatusTimeout": "Оракул на паузе — нажмите, чтобы повторить.",
   "resultStatusTooManyAttempts": "Слишком много попыток — подождите и попробуйте снова.",
-  "resultStatusServerUnavailableWithStatus": "Сервис недоступен ({status}) — попробуйте снова чуть позже.",
+  "resultStatusServerUnavailableWithStatus": "Оракул недоступен ({status}) — попробуйте снова чуть позже.",
   "@resultStatusServerUnavailableWithStatus": {
     "placeholders": {
       "status": {
@@ -147,7 +147,7 @@
       }
     }
   },
-  "resultStatusServerUnavailable": "Сервис недоступен — попробуйте снова чуть позже.",
+  "resultStatusServerUnavailable": "Оракул недоступен — попробуйте снова чуть позже.",
   "resultStatusMissingApiBaseUrl": "Ошибка конфигурации — отсутствует базовый URL API.",
   "resultStatusUnexpectedResponse": "Неожиданный ответ — нажмите, чтобы повторить.",
   "resultStatusInterpretationUnavailable": "Интерпретация ИИ недоступна — нажмите, чтобы повторить.",

@@ -37,7 +37,7 @@
   "cardsTitle": "All cards",
   "cardsEmptyTitle": "No cards to show yet",
   "cardsEmptySubtitle": "Please try again in a moment.",
-  "cardsLoadError": "Unable to load cards right now.",
+  "cardsLoadError": "Cards data missing or invalid.",
   "dataLoadTitle": "Unable to reach the card library.",
   "dataLoadRetry": "Retry",
   "dataLoadUseCache": "Use cached data",
@@ -139,7 +139,7 @@
   "resultStatusNoInternet": "No internet — showing offline reading",
   "resultStatusTimeout": "The oracle paused — tap to retry.",
   "resultStatusTooManyAttempts": "Too many attempts — please wait and try again.",
-  "resultStatusServerUnavailableWithStatus": "Service unavailable ({status}) — try again in a moment.",
+  "resultStatusServerUnavailableWithStatus": "Oracle unavailable ({status}) — try again in a moment.",
   "@resultStatusServerUnavailableWithStatus": {
     "placeholders": {
       "status": {
@@ -147,7 +147,7 @@
       }
     }
   },
-  "resultStatusServerUnavailable": "Service unavailable — try again in a moment.",
+  "resultStatusServerUnavailable": "Oracle unavailable — try again in a moment.",
   "resultStatusMissingApiBaseUrl": "Configuration error — missing API base URL.",
   "resultStatusUnexpectedResponse": "Unexpected response — tap to retry.",
   "resultStatusInterpretationUnavailable": "AI interpretation unavailable — tap to retry.",

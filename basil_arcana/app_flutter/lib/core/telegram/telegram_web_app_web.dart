@@ -79,6 +79,26 @@ class TelegramWebApp {
 
   static String? get initData {
     try {
+      if (js_util.hasProperty(js_util.globalThis, 'tgGetInitData')) {
+        final value =
+            js_util.callMethod(js_util.globalThis, 'tgGetInitData', const []);
+        if (value is String && value.trim().isNotEmpty) {
+          return value;
+        }
+      }
+      if (js_util.hasProperty(js_util.globalThis, '__tg_initData')) {
+        final cached = js_util.getProperty(js_util.globalThis, '__tg_initData');
+        if (cached is String && cached.trim().isNotEmpty) {
+          return cached;
+        }
+      }
+      if (js_util.hasProperty(js_util.globalThis, '__tgInitData')) {
+        final value =
+            js_util.callMethod(js_util.globalThis, '__tgInitData', const []);
+        if (value is String && value.trim().isNotEmpty) {
+          return value;
+        }
+      }
       final webApp = _webApp;
       if (webApp == null) {
         return null;
