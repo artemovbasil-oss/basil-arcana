@@ -76,21 +76,35 @@ function buildChatMessages(messages) {
   }));
 }
 
-function extractResponseText(data) {
-  if (typeof data?.output_text === 'string' && data.output_text.trim()) {
-    return data.output_text;
-  }
-
+function extractResponsePayload(data) {
   const outputs = Array.isArray(data?.output) ? data.output : [];
   for (const output of outputs) {
     const contents = Array.isArray(output?.content) ? output.content : [];
     for (const content of contents) {
+      if (content?.json && typeof content.json === 'object') {
+        return { json: content.json };
+      }
       if (typeof content?.text === 'string' && content.text.trim()) {
-        return content.text;
+        return { text: content.text };
       }
     }
   }
 
+  if (typeof data?.output_text === 'string' && data.output_text.trim()) {
+    return { text: data.output_text };
+  }
+
+  return null;
+}
+
+function extractResponseText(data) {
+  const payload = extractResponsePayload(data);
+  if (payload?.text) {
+    return payload.text;
+  }
+  if (payload?.json) {
+    return JSON.stringify(payload.json);
+  }
   return null;
 }
 
@@ -200,8 +214,8 @@ async function createResponse(
       }
 
       const data = await response.json();
-      const content = extractResponseText(data);
-      if (!content) {
+      const payload = extractResponsePayload(data);
+      if (!payload) {
         return await createChatResponse(messages, {
           requestId,
           timeoutMs,
@@ -212,7 +226,10 @@ async function createResponse(
 
       let parsed;
       try {
-        parsed = JSON.parse(content);
+        parsed =
+          payload.json && typeof payload.json === 'object'
+            ? payload.json
+            : JSON.parse(payload.text);
       } catch (error) {
         return await createChatResponse(messages, {
           requestId,
