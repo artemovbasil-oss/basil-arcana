@@ -202,23 +202,11 @@ async function createResponse(
       const data = await response.json();
       const content = extractResponseText(data);
       if (!content) {
-        const errorMessage = 'Empty OpenAI response';
-        logOpenAIEvent({
+        return await createChatResponse(messages, {
           requestId,
-          model: OPENAI_MODEL,
-          timeout_ms: timeoutMs,
+          timeoutMs,
           retries,
-          duration_ms: durationMs,
-          ok: false,
-          status: response.status,
-          errorName: 'OpenAIRequestError',
-          errorMessage,
-          attempt,
-        });
-        logged = true;
-        throw new OpenAIRequestError(errorMessage, {
-          status: response.status,
-          durationMs,
+          fallbackDurationMs: durationMs,
         });
       }
 
@@ -226,26 +214,11 @@ async function createResponse(
       try {
         parsed = JSON.parse(content);
       } catch (error) {
-        const bodyPreview = buildBodyPreview(content);
-        const errorMessage = 'Invalid JSON response from OpenAI';
-        logOpenAIEvent({
+        return await createChatResponse(messages, {
           requestId,
-          model: OPENAI_MODEL,
-          timeout_ms: timeoutMs,
+          timeoutMs,
           retries,
-          duration_ms: durationMs,
-          ok: false,
-          status: response.status,
-          errorName: 'OpenAIRequestError',
-          errorMessage,
-          bodyPreview,
-          attempt,
-        });
-        logged = true;
-        throw new OpenAIRequestError(errorMessage, {
-          status: response.status,
-          bodyPreview,
-          durationMs,
+          fallbackDurationMs: durationMs,
         });
       }
 
