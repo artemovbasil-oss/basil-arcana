@@ -119,6 +119,19 @@
     if (webApp && typeof webApp.initData === 'string' && webApp.initData.trim()) {
       return cacheInitData(webApp.initData, 'webapp');
     }
+    if (webApp && webApp.initDataUnsafe) {
+      try {
+        var unsafe = webApp.initDataUnsafe;
+        if (
+          unsafe &&
+          (unsafe.user || unsafe.hash || unsafe.auth_date)
+        ) {
+          window.__tg_hasInitDataUnsafe = true;
+        }
+      } catch (error) {
+        console.warn('Telegram initDataUnsafe read failed', error);
+      }
+    }
     var urlInitData = readInitDataFromUrl();
     if (urlInitData) {
       return cacheInitData(urlInitData, 'url');
@@ -162,6 +175,7 @@
     return readInitData();
   };
 
+  ensureReady();
   scheduleReadyCheck(60);
   pollForInitData(20);
 

@@ -128,6 +128,17 @@ class TelegramEnv {
       if (initData is String) {
         return initData;
       }
+      if (js_util.hasProperty(webApp, 'initDataUnsafe')) {
+        final unsafe = js_util.getProperty(webApp, 'initDataUnsafe');
+        if (unsafe != null) {
+          final hasUser = js_util.hasProperty(unsafe, 'user');
+          final hasHash = js_util.hasProperty(unsafe, 'hash');
+          final hasAuthDate = js_util.hasProperty(unsafe, 'auth_date');
+          if ((hasUser || hasHash || hasAuthDate) && kDebugMode) {
+            debugPrint('[TelegramEnv] initDataUnsafe present');
+          }
+        }
+      }
     } catch (_) {
       return '';
     }
