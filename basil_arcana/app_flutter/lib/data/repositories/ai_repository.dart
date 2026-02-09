@@ -198,11 +198,19 @@ class AiRepository {
       );
     }
 
-    final useTelegramAuth = kIsWeb && _hasTelegramInitData;
+    if (kIsWeb && TelegramEnv.instance.isTelegram && !_hasTelegramInitData) {
+      _reportWebError(
+        AiErrorType.unauthorized,
+        message: 'Open this experience inside Telegram to continue.',
+      );
+      throw const AiRepositoryException(
+        AiErrorType.unauthorized,
+        message: 'Telegram WebApp required',
+      );
+    }
+
     final endpoint = kIsWeb
-        ? (useTelegramAuth
-            ? '/api/reading/generate'
-            : '/api/reading/generate_web')
+        ? '/api/reading/generate_web'
         : '/api/reading/generate';
     final uri = Uri.parse(apiBaseUrl).replace(
       path: endpoint,
@@ -256,7 +264,7 @@ class AiRepository {
       if (_hasTelegramInitData)
         'X-Telegram-InitData': _telegramInitData,
     };
-    final requestPayload = useTelegramAuth
+    final requestPayload = kIsWeb
         ? {
             'initData': _telegramInitData,
             'payload': payload,
@@ -688,6 +696,7 @@ class AiRepository {
     final stopwatch = Stopwatch()..start();
     final totalCards = spread.positions.length;
     final payload = {
+      'initData': _telegramInitData,
       'question': question,
       'spread': spread.toJson(),
       'cards': drawnCards

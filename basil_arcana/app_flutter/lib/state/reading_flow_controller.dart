@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
 
 import '../core/config/diagnostics.dart';
+import '../core/telegram/telegram_env.dart';
 import '../data/models/ai_result_model.dart';
 import '../data/models/card_model.dart';
 import '../data/models/drawn_card_model.dart';
@@ -160,7 +161,12 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
   int _activeDeepRequestId = 0;
 
   bool _requiresTelegramAccess() {
-    return false;
+    if (!kIsWeb) {
+      return false;
+    }
+    final telegramEnv = TelegramEnv.instance;
+    return telegramEnv.isTelegram &&
+        telegramEnv.initData.trim().isEmpty;
   }
 
   void setQuestion(String question) {
@@ -556,6 +562,16 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
     if (spread == null ||
         state.drawnCards.isEmpty ||
         state.detailsStatus == DetailsStatus.loading) {
+      return;
+    }
+
+    if (_requiresTelegramAccess()) {
+      state = state.copyWith(
+        detailsStatus: DetailsStatus.error,
+        detailsText: null,
+        detailsError: null,
+        requiresTelegram: true,
+      );
       return;
     }
 
