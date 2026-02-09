@@ -1,7 +1,6 @@
 import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
 
 import '../../core/assets/asset_paths.dart';
 import '../../core/config/assets_config.dart';
@@ -11,11 +10,10 @@ import '../models/card_model.dart';
 import '../models/deck_model.dart';
 
 class CardsRepository {
-  CardsRepository({http.Client? client}) : _client = client ?? http.Client();
+  CardsRepository();
 
   static const int _cacheVersion = 4;
   static const String _cardsPrefix = 'cdn_cards_';
-  final http.Client _client;
   final Map<String, DateTime> _lastFetchTimes = {};
   final Map<String, DateTime> _lastCacheTimes = {};
   final Map<String, String> _lastAttemptedUrls = {};
@@ -73,55 +71,38 @@ class CardsRepository {
     required DeckType deckId,
   }) async {
     final cacheKey = cardsCacheKey(locale);
-    final raw = await _loadRemoteCards(cacheKey: cacheKey, locale: locale);
+    final raw = await _loadLocalCards(cacheKey: cacheKey, locale: locale);
     return _parseCards(raw: raw, deckId: deckId);
   }
 
-  Future<String> _loadRemoteCards({
+  Future<String> _loadLocalCards({
     required String cacheKey,
     required Locale locale,
   }) async {
-    final uri = Uri.parse(cardsUrl(locale.languageCode));
-    _lastAttemptedUrls[cacheKey] = uri.toString();
+    final assetPath = 'assets/data/${cardsFileNameForLocale(locale)}';
+    _lastAttemptedUrls[cacheKey] = assetPath;
     try {
-      final response = await _client.get(
-        uri,
-        headers: const {
-          'Accept': 'application/json',
-        },
-      );
-      final parsed = decodeJsonResponse(response: response, uri: uri);
-      _recordResponseInfo(cacheKey, parsed.response);
-      if (response.statusCode < 200 || response.statusCode >= 300) {
-        _lastError = 'Cards load failed (${response.statusCode})';
-        throw CardsLoadException(_lastError!, cacheKey: cacheKey);
-      }
+      final raw = await rootBundle.loadString(assetPath);
+      final parsed = parseJsonString(raw);
       final rootType = jsonRootType(parsed.decoded);
       _lastResponseRootTypes[cacheKey] = rootType;
       if (rootType != 'Map' || !_isValidCardsJson(parsed.decoded)) {
         if (kEnableRuntimeLogs) {
           debugPrint(
-            '[CardsRepository] schemaMismatch cacheKey=$cacheKey rootType=$rootType',
+            '[CardsRepository] local schemaMismatch cacheKey=$cacheKey rootType=$rootType',
           );
         }
         _lastError = 'Cards data failed schema validation';
         throw CardsLoadException(_lastError!, cacheKey: cacheKey);
       }
-      _lastFetchTimes[cacheKey] = DateTime.now();
+      _recordLocalResponseInfo(cacheKey, parsed.raw);
+      _lastCacheTimes[cacheKey] = DateTime.now();
       _lastError = null;
       return parsed.raw;
     } catch (error, stackTrace) {
-      if (error is JsonFetchException && error.response != null) {
-        _recordResponseInfo(cacheKey, error.response!);
-      }
       _lastError = '${error.toString()}\n$stackTrace';
-      final fallback = await _loadLocalCards(
-        cacheKey: cacheKey,
-        locale: locale,
-      );
-      if (fallback != null) {
-        _lastError = null;
-        return fallback;
+      if (kEnableRuntimeLogs) {
+        debugPrint('[CardsRepository] local load failed: $error');
       }
       throw CardsLoadException(
         'Failed to load cards',
@@ -130,14 +111,14 @@ class CardsRepository {
     }
   }
 
-  void _recordResponseInfo(String cacheKey, JsonResponseInfo response) {
-    _lastStatusCodes[cacheKey] = response.statusCode;
-    _lastContentTypes[cacheKey] = response.contentType;
-    _lastContentLengths[cacheKey] = response.contentLengthHeader;
-    _lastResponseSnippetsStart[cacheKey] = response.responseSnippetStart;
-    _lastResponseSnippetsEnd[cacheKey] = response.responseSnippetEnd;
-    _lastResponseStringLengths[cacheKey] = response.stringLength;
-    _lastResponseByteLengths[cacheKey] = response.bytesLength;
+  void _recordLocalResponseInfo(String cacheKey, String raw) {
+    _lastStatusCodes[cacheKey] = 200;
+    _lastContentTypes[cacheKey] = 'application/json';
+    _lastContentLengths[cacheKey] = raw.length.toString();
+    _lastResponseSnippetsStart[cacheKey] = _snippetStart(raw);
+    _lastResponseSnippetsEnd[cacheKey] = _snippetEnd(raw);
+    _lastResponseStringLengths[cacheKey] = raw.length;
+    _lastResponseByteLengths[cacheKey] = raw.length;
   }
 
   Future<String?> _loadLocalCards({
@@ -200,6 +181,23 @@ bool _isValidCardEntry(Map<String, dynamic> card) {
       card.containsKey('summary') ||
       card.containsKey('generalMeaning');
   return card.containsKey('id') && hasTitle && hasMeaning;
+}
+
+String _snippetStart(String body) {
+  if (body.isEmpty) {
+    return '';
+  }
+  return body.length <= 200 ? body : body.substring(0, 200);
+}
+
+String _snippetEnd(String body) {
+  if (body.isEmpty) {
+    return '';
+  }
+  if (body.length <= 200) {
+    return body;
+  }
+  return body.substring(body.length - 200);
 }
 
 List<CardModel> _parseCards({required String raw, required DeckType deckId}) {
