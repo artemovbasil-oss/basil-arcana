@@ -81,6 +81,9 @@ class AiRepository {
       );
     }
     if (kIsWeb && TelegramEnv.instance.isTelegram && !_hasTelegramInitData) {
+      debugPrint(
+        '[AiRepository] Telegram initData empty; check web bridge timing.',
+      );
       const error = AiRepositoryException(
         AiErrorType.unauthorized,
         message: 'Missing Telegram initData',
@@ -199,6 +202,9 @@ class AiRepository {
     }
 
     if (kIsWeb && TelegramEnv.instance.isTelegram && !_hasTelegramInitData) {
+      debugPrint(
+        '[AiRepository] Telegram initData empty; check web bridge timing.',
+      );
       _reportWebError(
         AiErrorType.unauthorized,
         message: 'Open this experience inside Telegram to continue.',
@@ -678,6 +684,9 @@ class AiRepository {
       );
     }
     if (kIsWeb && TelegramEnv.instance.isTelegram && !_hasTelegramInitData) {
+      debugPrint(
+        '[AiRepository] Telegram initData empty; check web bridge timing.',
+      );
       _reportWebError(
         AiErrorType.unauthorized,
         message: 'Open this experience inside Telegram to continue.',
@@ -935,7 +944,14 @@ class AiRepository {
         meaning: meaning,
       ),
     ];
+    final initData = _telegramInitData;
     print('[AiRepository] smokeTest:start baseUrl=$apiBaseUrl');
+    print(
+      '[AiRepository] smokeTest:initData length=${initData.length} '
+      'startsWithQueryId=${initData.startsWith('query_id=')}',
+    );
+    final available = await isBackendAvailable();
+    print('[AiRepository] smokeTest:availability ok=$available');
     final result = await generateReading(
       question: 'Smoke test',
       spread: spread,
