@@ -427,6 +427,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
     try {
       final aiRepository = ref.read(aiRepositoryProvider);
       var backendAvailable = true;
+      AiRepositoryException? availabilityError;
       try {
         backendAvailable =
             await aiRepository.isBackendAvailable(client: client);
@@ -439,12 +440,31 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
             '[ReadingFlow] availabilityCheckSkipped type=${error.type.name}',
           );
         }
+        availabilityError = error;
       }
       if (_activeRequestId != requestId) {
         return;
       }
-      if (!backendAvailable && kDebugMode) {
-        debugPrint('[ReadingFlow] availabilityCheckFalse');
+      if (!backendAvailable || availabilityError != null) {
+        if (kDebugMode) {
+          debugPrint('[ReadingFlow] availabilityFallback');
+        }
+        final fallback = _offlineFallback(spread, drawnCards, l10n);
+        await _incrementCardStats(drawnCards);
+        state = state.copyWith(
+          aiResult: fallback,
+          isLoading: false,
+          aiUsed: false,
+          showDetailsCta: true,
+          aiErrorType:
+              availabilityError?.type ?? AiErrorType.serverError,
+          aiErrorStatusCode: availabilityError?.statusCode,
+          errorMessage: availabilityError != null
+              ? _messageForError(availabilityError!, l10n)
+              : l10n.resultStatusServerUnavailable,
+        );
+        await _autoSaveReading();
+        return;
       }
       final locale = ref.read(localeProvider);
       final result = await aiRepository.generateReading(
@@ -502,11 +522,13 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       if (_activeRequestId != requestId) {
         return;
       }
+      final fallback = _offlineFallback(spread, drawnCards, l10n);
+      await _incrementCardStats(drawnCards);
       state = state.copyWith(
-        aiResult: null,
+        aiResult: fallback,
         isLoading: false,
         aiUsed: false,
-        showDetailsCta: false,
+        showDetailsCta: true,
         aiErrorType: AiErrorType.serverError,
         errorMessage: l10n.resultStatusServerUnavailable,
       );
