@@ -19,9 +19,12 @@ class AiSectionModel {
 
   factory AiSectionModel.fromJson(Map<String, dynamic> json) {
     return AiSectionModel(
-      positionId: json['positionId'] as String,
-      title: json['title'] as String,
-      text: json['text'] as String,
+      // Be tolerant of slightly different keys/types so valid JSON doesn't
+      // surface as a server error for the user.
+      positionId:
+          (json['positionId'] ?? json['position_id'] ?? '').toString(),
+      title: (json['title'] ?? '').toString(),
+      text: (json['text'] ?? '').toString(),
     );
   }
 
@@ -52,15 +55,22 @@ class AiResultModel {
   });
 
   factory AiResultModel.fromJson(Map<String, dynamic> json) {
+    // Some responses can return sections as a map keyed by positionId.
+    final rawSections = json['sections'];
+    final sectionList = rawSections is Map
+        ? rawSections.values.toList()
+        : (rawSections as List<dynamic>? ?? []);
     return AiResultModel(
-      tldr: (json['tldr'] as String?) ?? '',
-      sections: (json['sections'] as List<dynamic>? ?? [])
+      tldr: (json['tldr'] ?? json['tldr_text'] ?? '').toString(),
+      sections: sectionList
+          .whereType<Map<String, dynamic>>()
           .map((section) => AiSectionModel.fromJson(section))
           .toList(),
-      why: (json['why'] as String?) ?? '',
-      action: (json['action'] as String?) ?? '',
-      fullText: (json['fullText'] as String?) ?? '',
-      detailsText: (json['detailsText'] as String?) ?? '',
+      why: (json['why'] ?? '').toString(),
+      action: (json['action'] ?? '').toString(),
+      fullText: (json['fullText'] ?? json['full_text'] ?? '').toString(),
+      detailsText:
+          (json['detailsText'] ?? json['details_text'] ?? '').toString(),
       requestId: json['requestId'] as String?,
     );
   }
