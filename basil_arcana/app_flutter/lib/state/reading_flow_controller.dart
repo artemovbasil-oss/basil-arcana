@@ -448,7 +448,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       if (_activeRequestId != requestId) {
         return;
       }
-      if (!backendAvailable || availabilityError != null) {
+      if (!backendAvailable) {
         if (kDebugMode) {
           debugPrint('[ReadingFlow] availabilityFallback');
         }
@@ -465,6 +465,25 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
           errorMessage: availabilityError != null
               ? _messageForError(availabilityError!, l10n)
               : l10n.resultStatusServerUnavailable,
+        );
+        await _autoSaveReading();
+        return;
+      }
+      if (availabilityError != null &&
+          availabilityError.type == AiErrorType.misconfigured) {
+        if (kDebugMode) {
+          debugPrint('[ReadingFlow] availabilityMisconfigured');
+        }
+        final fallback = _offlineFallback(spread, drawnCards, l10n);
+        await _incrementCardStats(drawnCards);
+        state = state.copyWith(
+          aiResult: fallback,
+          isLoading: false,
+          aiUsed: false,
+          showDetailsCta: true,
+          aiErrorType: availabilityError.type,
+          aiErrorStatusCode: availabilityError.statusCode,
+          errorMessage: _messageForError(availabilityError, l10n),
         );
         await _autoSaveReading();
         return;
