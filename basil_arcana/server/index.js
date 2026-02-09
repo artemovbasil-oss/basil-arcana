@@ -31,6 +31,7 @@ const {
   TELEGRAM_BOT_TOKEN
 } = require('./src/config');
 const { validateTelegramInitData } = require('./src/telegram');
+const { telegramAuthMiddleware } = require('./src/telegram_auth_middleware');
 
 const app = express();
 
@@ -171,42 +172,6 @@ function requireTelegramInitData(req, res) {
     })
   );
   return initData;
-}
-
-function requireReadingAuth(req, res) {
-  const providedApiKey = req.get('x-api-key');
-  if (ARCANA_API_KEY && providedApiKey) {
-    if (providedApiKey === ARCANA_API_KEY) {
-      return { ok: true, method: 'api_key' };
-    }
-    console.warn(
-      JSON.stringify({
-        event: 'reading_auth_failed',
-        requestId: req.requestId,
-        path: req.originalUrl,
-        reason: 'invalid_api_key'
-      })
-    );
-  }
-
-  if (TELEGRAM_BOT_TOKEN) {
-    const initData = requireTelegramInitData(req, res);
-    if (!initData) {
-      return null;
-    }
-    return { ok: true, method: 'telegram', initData };
-  }
-
-  if (ARCANA_API_KEY) {
-    res.status(401).json({
-      error: 'unauthorized',
-      reason: 'invalid_api_key',
-      requestId: req.requestId
-    });
-    return null;
-  }
-
-  return { ok: true, method: 'none' };
 }
 
 app.use((req, res, next) => {
@@ -443,16 +408,12 @@ if (RATE_LIMIT_MAX != null) {
   app.use('/api', apiLimiter);
 }
 
-app.post('/api/reading/generate', async (req, res) => {
+app.post('/api/reading/generate', telegramAuthMiddleware, async (req, res) => {
   if (!OPENAI_API_KEY) {
     return res.status(503).json({
       error: 'server_misconfig',
       requestId: req.requestId
     });
-  }
-  const auth = requireReadingAuth(req, res);
-  if (!auth) {
-    return;
   }
   const mode = req.query.mode || 'deep';
   if (
@@ -509,16 +470,12 @@ app.post('/api/reading/generate', async (req, res) => {
   }
 });
 
-app.post('/api/reading/generate_web', async (req, res) => {
-  if (!OPENAI_API_KEY || !TELEGRAM_BOT_TOKEN) {
+app.post('/api/reading/generate_web', telegramAuthMiddleware, async (req, res) => {
+  if (!OPENAI_API_KEY) {
     return res.status(503).json({
       error: 'server_misconfig',
       requestId: req.requestId
     });
-  }
-  const auth = requireReadingAuth(req, res);
-  if (!auth) {
-    return;
   }
   const mode = req.query.mode || 'deep';
   if (
@@ -576,15 +533,12 @@ app.post('/api/reading/generate_web', async (req, res) => {
   }
 });
 
-app.post('/api/reading/details', async (req, res) => {
+app.post('/api/reading/details', telegramAuthMiddleware, async (req, res) => {
   if (!OPENAI_API_KEY) {
     return res.status(503).json({
       error: 'server_misconfig',
       requestId: req.requestId
     });
-  }
-  if (!verifyArcanaApiKey(req, res)) {
-    return;
   }
   const error = validateDetailsRequest(req.body);
   if (error) {

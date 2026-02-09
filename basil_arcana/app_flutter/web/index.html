@@ -359,6 +359,7 @@
   <div id="tg-scroll-root">
     <div id="flutter_mount"></div>
   </div>
+  <script src="telegram_bridge.js?v={{flutter_service_worker_version}}"></script>
   <script>
     window.addEventListener('load', function (ev) {
       var disableServiceWorker = true || isTelegramWebView();
@@ -366,12 +367,7 @@
         var resolvedVersion = version || window.__buildVersion || 'dev';
         window.__buildVersion = resolvedVersion;
         window.__flutterBootstrapUrl = 'flutter_bootstrap.js?v=' + resolvedVersion;
-        var bridgeVersion = buildVersion || resolvedVersion;
-        return loadScript('telegram_bridge.js?v=' + bridgeVersion)
-          .catch(function () {})
-          .then(function () {
-            return loadScript('flutter.js?v=' + resolvedVersion, { defer: '' });
-          });
+        return loadScript('flutter.js?v=' + resolvedVersion, { defer: '' });
       }).then(function () {
         _flutter.loader.loadEntrypoint({
           entrypointUrl: 'main.dart.js?v=' + window.__buildVersion,

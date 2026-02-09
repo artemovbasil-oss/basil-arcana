@@ -1,10 +1,7 @@
 (function () {
   'use strict';
 
-  var hasInitialized = false;
-  var cachedInitData = '';
-  var hasLoggedInitData = false;
-  var retryHandle = null;
+  var readyCalled = false;
 
   function getWebApp() {
     try {
@@ -12,178 +9,69 @@
         return window.Telegram.WebApp;
       }
     } catch (error) {
-      console.warn('Telegram WebApp access failed', error);
+      return null;
     }
     return null;
   }
 
-  function readInitDataFromUrl() {
-    var search = window.location.search || '';
-    var hash = window.location.hash || '';
-    var candidates = [];
-    if (search) {
-      candidates.push(search.charAt(0) === '?' ? search.slice(1) : search);
-    }
-    if (hash) {
-      var trimmedHash = hash.charAt(0) === '#' ? hash.slice(1) : hash;
-      if (trimmedHash.indexOf('?') !== -1) {
-        trimmedHash = trimmedHash.split('?').pop();
-      }
-      candidates.push(trimmedHash);
-    }
-    for (var i = 0; i < candidates.length; i += 1) {
-      try {
-        var params = new URLSearchParams(candidates[i]);
-        var initData =
-          params.get('tgWebAppData') ||
-          params.get('tgInitData') ||
-          params.get('initData');
-        if (initData && typeof initData === 'string') {
-          return initData;
-        }
-      } catch (error) {
-        console.warn('Telegram initData URL parsing failed', error);
-      }
-    }
-    return '';
-  }
-
-  function ensureReady() {
+  function callReadyOnce() {
     var webApp = getWebApp();
     if (!webApp) {
       return false;
     }
-    window.isTelegramWebApp = true;
-    window.__isTelegram = true;
-    if (!hasInitialized) {
-      hasInitialized = true;
-      try {
-        if (typeof webApp.ready === 'function') {
-          webApp.ready();
-        }
-        if (typeof webApp.expand === 'function') {
-          webApp.expand();
-        }
-      } catch (error) {
-        console.warn('Telegram WebApp ready/expand failed', error);
-      }
+    if (readyCalled) {
+      return true;
     }
+    readyCalled = true;
+    try {
+      if (typeof webApp.ready === 'function') {
+        webApp.ready();
+      }
+    } catch (error) {}
     return true;
   }
 
-  function scheduleReadyCheck(attemptsLeft) {
-    if (ensureReady()) {
-      return;
+  function readInitData() {
+    var webApp = getWebApp();
+    if (webApp && typeof webApp.initData === 'string' && webApp.initData.trim()) {
+      return webApp.initData;
     }
-    if (attemptsLeft <= 0) {
-      return;
+    if (typeof window.__tgInitData === 'string' && window.__tgInitData.trim()) {
+      return window.__tgInitData;
     }
-    setTimeout(function () {
-      scheduleReadyCheck(attemptsLeft - 1);
-    }, 50);
+    return '';
   }
 
-  function logInitData(initData, source) {
-    if (hasLoggedInitData) {
-      return;
-    }
-    hasLoggedInitData = true;
-    var value = initData || '';
-    var hasUser = value.indexOf('user=') !== -1;
-    var hasHash = value.indexOf('hash=') !== -1;
-    console.info('[Telegram] initData', {
-      length: value.length,
-      has_user: hasUser,
-      has_hash: hasHash,
-      source: source || 'unknown'
-    });
-  }
-
-  function cacheInitData(value, source) {
-    if (typeof value === 'string' && value.trim()) {
-      cachedInitData = value;
-      window.__tg_initData = value;
+  function refreshInitData() {
+    callReadyOnce();
+    var value = readInitData();
+    if (value && typeof value === 'string' && value.trim()) {
+      window.__tgInitData = value;
       window.__isTelegram = true;
       window.isTelegramWebApp = true;
-      logInitData(value, source);
       return value;
     }
     return '';
   }
 
-  function readInitData() {
-    if (cachedInitData) {
-      return cachedInitData;
-    }
-    var webApp = getWebApp();
-    if (webApp && typeof webApp.initData === 'string' && webApp.initData.trim()) {
-      return cacheInitData(webApp.initData, 'webapp');
-    }
-    if (webApp && webApp.initDataUnsafe) {
-      try {
-        var unsafe = webApp.initDataUnsafe;
-        if (
-          unsafe &&
-          (unsafe.user || unsafe.hash || unsafe.auth_date)
-        ) {
-          window.__tg_hasInitDataUnsafe = true;
-        }
-      } catch (error) {
-        console.warn('Telegram initDataUnsafe read failed', error);
-      }
-    }
-    var urlInitData = readInitDataFromUrl();
-    if (urlInitData) {
-      return cacheInitData(urlInitData, 'url');
-    }
-    return '';
-  }
-
-  function pollForInitData(attemptsLeft) {
-    if (cachedInitData) {
-      return;
-    }
-    ensureReady();
-    var value = readInitData();
-    if (value && value.trim()) {
-      return;
-    }
-    if (attemptsLeft <= 0) {
-      return;
-    }
-    retryHandle = setTimeout(function () {
-      pollForInitData(attemptsLeft - 1);
-    }, 50);
-  }
-
-  var urlInitData = readInitDataFromUrl();
-  if (urlInitData) {
-    cacheInitData(urlInitData, 'url');
-  }
-
-  window.isTelegramWebApp = Boolean(getWebApp());
-  window.__isTelegram = window.isTelegramWebApp || Boolean(urlInitData);
-  window.getTelegramInitData = function () {
-    ensureReady();
-    return readInitData();
-  };
-  window.tgGetInitData = function () {
-    ensureReady();
-    return readInitData();
-  };
-  window.__tgInitData = function () {
-    return readInitData();
+  window.__tgInitDataGetter = function () {
+    return refreshInitData();
   };
 
-  ensureReady();
-  scheduleReadyCheck(60);
-  pollForInitData(20);
+  var initial = refreshInitData();
+  if (!initial) {
+    var available = Boolean(getWebApp());
+    window.isTelegramWebApp = available;
+    if (available) {
+      window.__isTelegram = true;
+    }
+  }
 
-  function tgIsAvailable() {
+  window.tgIsAvailable = function () {
     return Boolean(getWebApp());
-  }
+  };
 
-  function tgSendData(payload) {
+  window.tgSendData = function (payload) {
     var webApp = getWebApp();
     if (!webApp || typeof webApp.sendData !== 'function') {
       return false;
@@ -192,12 +80,11 @@
       webApp.sendData(String(payload || ''));
       return true;
     } catch (error) {
-      console.warn('Telegram sendData failed', error);
       return false;
     }
-  }
+  };
 
-  function tgClose() {
+  window.tgClose = function () {
     var webApp = getWebApp();
     if (!webApp || typeof webApp.close !== 'function') {
       return false;
@@ -206,12 +93,11 @@
       webApp.close();
       return true;
     } catch (error) {
-      console.warn('Telegram close failed', error);
       return false;
     }
-  }
+  };
 
-  function tgOpenTelegramLink(url) {
+  window.tgOpenTelegramLink = function (url) {
     var link = String(url || '');
     if (!link) {
       return false;
@@ -222,20 +108,12 @@
         webApp.openTelegramLink(link);
         return true;
       }
-    } catch (error) {
-      console.warn('Telegram openTelegramLink failed', error);
-    }
+    } catch (error) {}
     try {
       window.open(link, '_blank');
       return true;
     } catch (error) {
-      console.warn('window.open failed', error);
       return false;
     }
-  }
-
-  window.tgIsAvailable = tgIsAvailable;
-  window.tgSendData = tgSendData;
-  window.tgClose = tgClose;
-  window.tgOpenTelegramLink = tgOpenTelegramLink;
+  };
 })();

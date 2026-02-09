@@ -99,17 +99,19 @@ class TelegramEnv {
           return value;
         }
       }
-      if (js_util.hasProperty(js_util.globalThis, '__tg_initData')) {
-        final cached =
-            js_util.getProperty(js_util.globalThis, '__tg_initData');
+      if (js_util.hasProperty(js_util.globalThis, '__tgInitData')) {
+        final cached = js_util.getProperty(js_util.globalThis, '__tgInitData');
         if (cached is String && cached.trim().isNotEmpty) {
           return cached;
         }
       }
-      if (js_util.hasProperty(js_util.globalThis, '__tgInitData')) {
-        final value =
-            js_util.callMethod(js_util.globalThis, '__tgInitData', const []);
-        if (value is String) {
+      if (js_util.hasProperty(js_util.globalThis, '__tgInitDataGetter')) {
+        final value = js_util.callMethod(
+          js_util.globalThis,
+          '__tgInitDataGetter',
+          const [],
+        );
+        if (value is String && value.trim().isNotEmpty) {
           return value;
         }
       }
