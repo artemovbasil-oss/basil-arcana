@@ -496,6 +496,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
         aiErrorStatusCode: error.statusCode,
         errorMessage: _messageForError(error, l10n),
       );
+      await _autoSaveReading();
     } catch (_) {
       if (_activeRequestId != requestId) {
         return;
@@ -508,6 +509,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
         aiErrorType: AiErrorType.serverError,
         errorMessage: l10n.resultStatusServerUnavailable,
       );
+      await _autoSaveReading();
     } finally {
       if (_activeClient == client) {
         _activeClient = null;

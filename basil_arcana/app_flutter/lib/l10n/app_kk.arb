@@ -189,7 +189,7 @@
   "natalChartBirthDateError": "Туған күніңізді енгізіңіз.",
   "natalChartBirthTimeLabel": "Туған уақыты",
   "natalChartBirthTimeHint": "СС:ММ",
-  "natalChartBirthTimeHelper": "Шамамен уақыт жарайды (міндетті емес).",
+  "natalChartBirthTimeHelper": "Дәл уақыт белгісіз болса, 12:00 (түскі) деп көрсетіңіз.",
   "natalChartGenerateButton": "Жасау",
   "natalChartLoading": "Наталдық карта жасалуда…",
   "natalChartResultTitle": "Түсіндірме",

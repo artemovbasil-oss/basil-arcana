@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
@@ -24,12 +25,77 @@ class _MoreFeaturesScreenState extends ConsumerState<MoreFeaturesScreen> {
   String? _errorText;
 
   static const bool _enableDebugLogs = !kReleaseMode;
+  static final DateFormat _birthDateFormat = DateFormat('yyyy-MM-dd');
 
   @override
   void dispose() {
     _birthDateController.dispose();
     _birthTimeController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickBirthDate() async {
+    final now = DateTime.now();
+    final initialDate = _parseBirthDate() ?? DateTime(now.year - 25, 1, 1);
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: DateTime(1900),
+      lastDate: now,
+    );
+    if (picked == null) {
+      return;
+    }
+    setState(() {
+      _birthDateController.text = _birthDateFormat.format(picked);
+    });
+  }
+
+  Future<void> _pickBirthTime() async {
+    final initialTime = _parseBirthTime() ?? const TimeOfDay(hour: 12, minute: 0);
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: initialTime,
+    );
+    if (picked == null) {
+      return;
+    }
+    final formatted = MaterialLocalizations.of(context).formatTimeOfDay(
+      picked,
+      alwaysUse24HourFormat: true,
+    );
+    setState(() {
+      _birthTimeController.text = formatted;
+    });
+  }
+
+  DateTime? _parseBirthDate() {
+    final text = _birthDateController.text.trim();
+    if (text.isEmpty) {
+      return null;
+    }
+    try {
+      return _birthDateFormat.parseStrict(text);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  TimeOfDay? _parseBirthTime() {
+    final text = _birthTimeController.text.trim();
+    final match = RegExp(r'^(\d{1,2}):(\d{2})$').firstMatch(text);
+    if (match == null) {
+      return null;
+    }
+    final hour = int.tryParse(match.group(1) ?? '');
+    final minute = int.tryParse(match.group(2) ?? '');
+    if (hour == null || minute == null) {
+      return null;
+    }
+    if (hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+      return null;
+    }
+    return TimeOfDay(hour: hour, minute: minute);
   }
 
   Future<void> _handleNatalChart() async {
@@ -133,13 +199,11 @@ class _MoreFeaturesScreenState extends ConsumerState<MoreFeaturesScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.moreFeaturesTitle),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.close),
-            tooltip: l10n.actionCancel,
-            onPressed: () => Navigator.of(context).maybePop(),
-          ),
-        ],
+        leading: IconButton(
+          icon: const Icon(Icons.close),
+          tooltip: l10n.actionCancel,
+          onPressed: () => Navigator.of(context).maybePop(),
+        ),
       ),
       body: SafeArea(
         top: false,
@@ -168,21 +232,25 @@ class _MoreFeaturesScreenState extends ConsumerState<MoreFeaturesScreen> {
                   const SizedBox(height: 16),
                   TextField(
                     controller: _birthDateController,
-                    keyboardType: TextInputType.datetime,
+                    readOnly: true,
                     decoration: InputDecoration(
                       labelText: l10n.natalChartBirthDateLabel,
                       hintText: l10n.natalChartBirthDateHint,
+                      suffixIcon: const Icon(Icons.calendar_today),
                     ),
+                    onTap: _pickBirthDate,
                   ),
                   const SizedBox(height: 12),
                   TextField(
                     controller: _birthTimeController,
-                    keyboardType: TextInputType.datetime,
+                    readOnly: true,
                     decoration: InputDecoration(
                       labelText: l10n.natalChartBirthTimeLabel,
                       hintText: l10n.natalChartBirthTimeHint,
                       helperText: l10n.natalChartBirthTimeHelper,
+                      suffixIcon: const Icon(Icons.schedule),
                     ),
+                    onTap: _pickBirthTime,
                   ),
                   const SizedBox(height: 16),
                   SizedBox(
