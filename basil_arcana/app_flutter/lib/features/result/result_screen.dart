@@ -839,7 +839,7 @@ class _OpenInTelegramScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'Open in Telegram to draw cards',
+                'Open this mini app from Telegram bot',
                 style: AppTextStyles.title(context),
                 textAlign: TextAlign.center,
               ),
@@ -851,7 +851,7 @@ class _OpenInTelegramScreen extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               AppPrimaryButton(
-                label: 'Open in Telegram',
+                label: 'Open Telegram bot',
                 onPressed: onOpen,
               ),
               const SizedBox(height: 12),

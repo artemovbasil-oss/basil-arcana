@@ -8,6 +8,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../core/config/api_config.dart';
 import '../../core/network/network_exceptions.dart';
+import '../../core/network/telegram_api_client.dart';
 import '../../core/telegram/telegram_env.dart';
 import '../../core/telemetry/web_error_reporter.dart';
 import '../models/ai_result_model.dart';
@@ -70,6 +71,10 @@ class AiRepository {
 
   String get _telegramInitData => TelegramEnv.instance.initData;
 
+  http.Client _wrapClient(http.Client client) {
+    return TelegramApiClient(client);
+  }
+
   Future<bool> isBackendAvailable({
     http.Client? client,
     Duration timeout = _availabilityTimeout,
@@ -90,7 +95,8 @@ class AiRepository {
       path: '/api/reading/availability',
     );
     final requestId = const Uuid().v4();
-    final httpClient = client ?? http.Client();
+    final baseClient = client ?? http.Client();
+    final httpClient = _wrapClient(baseClient);
     http.Response response;
     try {
       response = await httpClient
@@ -275,7 +281,8 @@ class AiRepository {
           }
         : payload;
 
-    final httpClient = client ?? http.Client();
+    final baseClient = client ?? http.Client();
+    final httpClient = _wrapClient(baseClient);
     http.Response response;
     try {
       _logStart(
@@ -512,7 +519,8 @@ class AiRepository {
           }
         : payload;
 
-    final httpClient = client ?? http.Client();
+    final baseClient = client ?? http.Client();
+    final httpClient = _wrapClient(baseClient);
     http.Response response;
     try {
       _logStart(
@@ -729,7 +737,8 @@ class AiRepository {
         'X-Telegram-InitData': _telegramInitData,
     };
 
-    final httpClient = client ?? http.Client();
+    final baseClient = client ?? http.Client();
+    final httpClient = _wrapClient(baseClient);
     http.Response response;
     try {
       _logStart(
