@@ -471,7 +471,8 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       if (_activeRequestId != requestId) {
         return;
       }
-      if (error.type == AiErrorType.noInternet) {
+      final shouldFallback = error.type != AiErrorType.unauthorized;
+      if (shouldFallback) {
         final fallback = _offlineFallback(spread, drawnCards, l10n);
         await _incrementCardStats(drawnCards);
         state = state.copyWith(

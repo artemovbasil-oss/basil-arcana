@@ -6,6 +6,7 @@ import '../data/repositories/ai_repository.dart';
 import '../data/repositories/card_stats_repository.dart';
 import '../data/repositories/cards_repository.dart';
 import '../data/repositories/data_repository.dart';
+import '../data/repositories/spreads_repository.dart';
 import '../data/repositories/readings_repository.dart';
 import '../data/models/deck_model.dart';
 import 'reading_flow_controller.dart';
@@ -16,6 +17,10 @@ final dataRepositoryProvider = Provider<DataRepository>((ref) {
 
 final cardsRepositoryProvider = Provider<CardsRepository>((ref) {
   return CardsRepository();
+});
+
+final spreadsRepositoryProvider = Provider<SpreadsRepository>((ref) {
+  return SpreadsRepository();
 });
 
 final aiRepositoryProvider = Provider<AiRepository>((ref) {
@@ -86,8 +91,6 @@ final deckProvider = StateNotifierProvider<DeckNotifier, DeckType>((ref) {
   return DeckNotifier(box);
 });
 
-final useCachedSpreadsProvider = StateProvider<bool>((ref) => false);
-
 final cardsProvider = FutureProvider((ref) async {
   final locale = ref.watch(localeProvider);
   final deckId = ref.watch(deckProvider);
@@ -97,11 +100,7 @@ final cardsProvider = FutureProvider((ref) async {
 
 final spreadsProvider = FutureProvider((ref) async {
   final locale = ref.watch(localeProvider);
-  final repo = ref.watch(dataRepositoryProvider);
-  final useCached = ref.watch(useCachedSpreadsProvider);
-  if (useCached) {
-    return repo.loadCachedSpreads(locale: locale);
-  }
+  final repo = ref.watch(spreadsRepositoryProvider);
   return repo.fetchSpreads(locale: locale);
 });
 
