@@ -3,12 +3,6 @@ import { loadConfig } from "./config";
 
 const config = loadConfig();
 
-const WELCOME_TEXT =
-  "Welcome to Basil’s Arcana. Tap below to open the mini app.";
-const HELP_TEXT =
-  "Use the button below to open the Basil’s Arcana mini app inside Telegram.";
-const NUDGE_TEXT = "Open Basil’s Arcana from the button below.";
-
 type SupportedLocale = "ru" | "en" | "kk";
 type PlanId = "week" | "month" | "year";
 
@@ -20,6 +14,16 @@ interface UserState {
 const STRINGS: Record<
   SupportedLocale,
   {
+    menuTitle: string;
+    menuDescription: string;
+    menuButtons: {
+      launchApp: string;
+      buy: string;
+      about: string;
+      back: string;
+    };
+    launchUnavailable: string;
+    aboutText: string;
     professionalTitle: string;
     professionalDescription: string;
     planLabels: Record<PlanId, string>;
@@ -29,6 +33,17 @@ const STRINGS: Record<
   }
 > = {
   ru: {
+    menuTitle: "Добро пожаловать в Basil’s Arcana ✨",
+    menuDescription: "Выбери действие из меню ниже.",
+    menuButtons: {
+      launchApp: "🚀 Запустить мини‑приложение",
+      buy: "💳 Купить подписку",
+      about: "✨ Что умеет бот",
+      back: "⬅️ В меню",
+    },
+    launchUnavailable: "🚀 Временно недоступно",
+    aboutText:
+      "Basil’s Arcana — магия как сервис. Здесь ты можешь получить быстрые и глубокие расклады, персональные подсказки и историю своих обращений. Открывай мини‑приложение, чтобы начать чтение.",
     professionalTitle: "🔮 Профессиональное толкование",
     professionalDescription:
       "Хочешь более глубокий и персональный разбор?\nВыбери подходящий тариф — и оракул раскроется полностью.",
@@ -39,9 +54,20 @@ const STRINGS: Record<
     },
     alreadyActive: "У тебя уже есть активная подписка",
     planAlreadySelected: "Тариф уже выбран.",
-    paymentStub: "Скоро будет доступно.",
+    paymentStub: "Оплата скоро будет доступна.",
   },
   en: {
+    menuTitle: "Welcome to Basil’s Arcana ✨",
+    menuDescription: "Choose an action from the menu below.",
+    menuButtons: {
+      launchApp: "🚀 Launch app",
+      buy: "💳 Buy subscription",
+      about: "✨ What this bot can do",
+      back: "⬅️ Back to menu",
+    },
+    launchUnavailable: "🚀 Temporarily unavailable",
+    aboutText:
+      "Basil’s Arcana is magic as a service. Get quick and deep readings, personalized insights, and a history of your requests. Open the mini app to begin.",
     professionalTitle: "🔮 Professional reading",
     professionalDescription:
       "Want a deeper, more personal interpretation?\nPick the plan that fits you — and the oracle will open up fully.",
@@ -55,6 +81,17 @@ const STRINGS: Record<
     paymentStub: "Coming soon.",
   },
   kk: {
+    menuTitle: "Basil’s Arcana-ға қош келдің ✨",
+    menuDescription: "Төмендегі мәзірден әрекет таңда.",
+    menuButtons: {
+      launchApp: "🚀 Мини‑қосымшаны ашу",
+      buy: "💳 Жазылымды сатып алу",
+      about: "✨ Бот не істей алады",
+      back: "⬅️ Мәзірге",
+    },
+    launchUnavailable: "🚀 Уақытша қолжетімсіз",
+    aboutText:
+      "Basil’s Arcana — магия қызмет ретінде. Мұнда жылдам әрі терең жорамал, жеке кеңестер және сұраулар тарихын аласың. Бастау үшін мини‑қосымшаны аш.",
     professionalTitle: "🔮 Кәсіби жорамал",
     professionalDescription:
       "Терең әрі жеке талдау қалайсың ба?\nӨзіңе ыңғайлы тарифті таңда — сонда оракул толық ашылады.",
@@ -71,8 +108,14 @@ const STRINGS: Record<
 
 const userState = new Map<number, UserState>();
 
-function buildKeyboard(): InlineKeyboard {
-  return new InlineKeyboard().webApp("Open Basil’s Arcana", config.webAppUrl);
+function buildMainMenuKeyboard(locale: SupportedLocale): InlineKeyboard {
+  const labels = STRINGS[locale].menuButtons;
+  const keyboard = new InlineKeyboard();
+  if (config.webAppUrl) {
+    keyboard.webApp(labels.launchApp, config.webAppUrl).row();
+  }
+  keyboard.text(labels.buy, "menu:buy").row().text(labels.about, "menu:about");
+  return keyboard;
 }
 
 function getLocale(ctx: Context): SupportedLocale {
@@ -101,12 +144,13 @@ function getUserState(userId: number): UserState {
 
 function buildSubscriptionKeyboard(locale: SupportedLocale): InlineKeyboard {
   const labels = STRINGS[locale].planLabels;
+  const backLabel = STRINGS[locale].menuButtons.back;
   return new InlineKeyboard()
     .text(labels.week, "plan:week")
-    .row()
     .text(labels.month, "plan:month")
+    .text(labels.year, "plan:year")
     .row()
-    .text(labels.year, "plan:year");
+    .text(backLabel, "menu:home");
 }
 
 async function sendProfessionalReadingOffer(ctx: Context): Promise<void> {
@@ -114,6 +158,32 @@ async function sendProfessionalReadingOffer(ctx: Context): Promise<void> {
   const strings = STRINGS[locale];
   const text = `${strings.professionalTitle}\n\n${strings.professionalDescription}`;
   await ctx.reply(text, { reply_markup: buildSubscriptionKeyboard(locale) });
+}
+
+async function sendMainMenu(ctx: Context): Promise<void> {
+  const locale = getLocale(ctx);
+  const strings = STRINGS[locale];
+  const lines = [strings.menuTitle, strings.menuDescription];
+  if (!config.webAppUrl) {
+    console.error(
+      "TELEGRAM_WEBAPP_URL is missing; Launch app button disabled.",
+    );
+    lines.push("", strings.launchUnavailable);
+  }
+  await ctx.reply(lines.join("\n"), {
+    reply_markup: buildMainMenuKeyboard(locale),
+  });
+}
+
+async function sendAbout(ctx: Context): Promise<void> {
+  const locale = getLocale(ctx);
+  const strings = STRINGS[locale];
+  await ctx.reply(strings.aboutText, {
+    reply_markup: new InlineKeyboard().text(
+      strings.menuButtons.back,
+      "menu:home",
+    ),
+  });
 }
 
 function parseWebAppAction(data: string): string | null {
@@ -156,12 +226,15 @@ async function startPaymentFlow(
   await ctx.reply(STRINGS[locale].paymentStub);
 }
 
-async function sendPlans(ctx: Context): Promise<void> {
+async function sendPlans(
+  ctx: Context,
+  { ignoreDebounce = false }: { ignoreDebounce?: boolean } = {},
+): Promise<void> {
   const userId = ctx.from?.id;
   if (!userId) {
     return;
   }
-  if (!shouldHandleWebAppAction(userId)) {
+  if (!ignoreDebounce && !shouldHandleWebAppAction(userId)) {
     return;
   }
   const locale = getLocale(ctx);
@@ -190,7 +263,7 @@ function parseStartPayload(ctx: Context): string | null {
 }
 
 async function sendLauncherMessage(ctx: Context): Promise<void> {
-  await ctx.reply(WELCOME_TEXT, { reply_markup: buildKeyboard() });
+  await sendMainMenu(ctx);
 }
 
 async function main(): Promise<void> {
@@ -199,14 +272,14 @@ async function main(): Promise<void> {
   bot.command("start", async (ctx) => {
     const payload = parseStartPayload(ctx);
     if (payload === "plans") {
-      await sendPlans(ctx);
+      await sendPlans(ctx, { ignoreDebounce: true });
       return;
     }
     await sendLauncherMessage(ctx);
   });
 
   bot.command("help", async (ctx) => {
-    await ctx.reply(HELP_TEXT, { reply_markup: buildKeyboard() });
+    await sendMainMenu(ctx);
   });
 
   bot.on("message:web_app_data", async (ctx) => {
@@ -216,6 +289,21 @@ async function main(): Promise<void> {
       return;
     }
     await sendPlans(ctx);
+  });
+
+  bot.callbackQuery("menu:buy", async (ctx) => {
+    await ctx.answerCallbackQuery();
+    await sendPlans(ctx, { ignoreDebounce: true });
+  });
+
+  bot.callbackQuery("menu:about", async (ctx) => {
+    await ctx.answerCallbackQuery();
+    await sendAbout(ctx);
+  });
+
+  bot.callbackQuery("menu:home", async (ctx) => {
+    await ctx.answerCallbackQuery();
+    await sendMainMenu(ctx);
   });
 
   bot.callbackQuery(/^plan:(week|month|year)$/, async (ctx) => {
@@ -240,7 +328,7 @@ async function main(): Promise<void> {
   });
 
   bot.on("message:text", async (ctx) => {
-    await ctx.reply(NUDGE_TEXT, { reply_markup: buildKeyboard() });
+    await sendMainMenu(ctx);
   });
 
   bot.catch((err) => {

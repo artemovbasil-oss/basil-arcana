@@ -78,7 +78,7 @@ curl -X POST http://localhost:3000/api/reading/generate \
 
 1. Set bot variables in Railway:
    - `TELEGRAM_BOT_TOKEN`
-   - `TELEGRAM_WEBAPP_URL`
+   - `TELEGRAM_WEBAPP_URL` (optional, required only for the Launch app button)
 2. WebApp must be opened via web_app button.
 3. Build command: `cd bot && npm ci && npm run build`
 4. Start command: `cd bot && npm run start`
@@ -129,7 +129,7 @@ Production default: `https://api.basilarcana.com`.
   - Web service: `API_BASE_URL`
   - Web service (optional): `APP_VERSION` (default `2026-02-08-1`), `PUBLIC_ROOT` (default `server/public`)
   - API service: `OPENAI_API_KEY`, `ARCANA_API_KEY` (+ optional `OPENAI_MODEL`, rate limit vars)
-  - Bot service: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBAPP_URL`
+  - Bot service: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBAPP_URL` (optional), `APP_VERSION` (optional)
 - **iOS Telegram verification**:
   - Open the mini app via the bot button on iOS.
   - Confirm full-height layout (no black screen, no half-height), header not overlapping, and swipe-down doesn’t collapse the webview.

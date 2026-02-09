@@ -1,15 +1,17 @@
 # Basil Arcana Telegram Bot
 
-Launcher-only Telegram bot built with Node.js + TypeScript and grammY. It only opens the Basil’s Arcana Telegram Mini App.
+Telegram bot built with Node.js + TypeScript and grammY. It provides a localized menu, opens the Basil’s Arcana Telegram Mini App, and shows subscription plans.
 
 ## Features
-- `/start` and `/help` return a button that opens the mini app
-- Any other message nudges the user to open the mini app
+- `/start` and `/help` return a localized main menu (launch app, plans, about)
+- Plan options are available directly in the bot, even before opening the mini app
+- Graceful fallback if the web app URL is missing
 
 ## Environment variables (Railway)
 Set these in Railway **Secrets**:
 - `TELEGRAM_BOT_TOKEN` (required)
-- `TELEGRAM_WEBAPP_URL` (required)
+- `TELEGRAM_WEBAPP_URL` (optional, required only for the Launch app button)
+- `APP_VERSION` (optional, defaults to `dev`)
 - `NODE_ENV` (optional)
 
 > Never commit real secrets. Keep `.env` files out of the repo.
@@ -27,6 +29,7 @@ You can provide env vars via your shell:
 ```bash
 export TELEGRAM_BOT_TOKEN=...
 export TELEGRAM_WEBAPP_URL=https://your-webapp.example
+export APP_VERSION=2026-02-08-1
 npm run dev
 ```
 
