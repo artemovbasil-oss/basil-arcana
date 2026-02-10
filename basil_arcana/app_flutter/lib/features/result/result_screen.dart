@@ -1197,6 +1197,9 @@ class _DetailsCardThumbnails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cards = _thumbnailCards();
+    if (cards.isEmpty) {
+      return const SizedBox.shrink();
+    }
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -1219,6 +1222,23 @@ class _DetailsCardThumbnails extends StatelessWidget {
             : spread.positions.length >= 3
                 ? SpreadType.three
                 : SpreadType.one);
+    if (resolvedType.cardCount <= 1) {
+      return const [];
+    }
+    final isFiveCard = resolvedType.cardCount >= 5 && drawnCards.length >= 5;
+    if (isFiveCard) {
+      final cards = drawnCards.take(5).toList();
+      return [
+        _ThumbnailCardData(cardId: cards[0].cardId),
+        _ThumbnailCardData(cardId: cards[1].cardId),
+        _ThumbnailCardData(
+          cardId: cards[2].cardId,
+          highlight: true,
+        ),
+        _ThumbnailCardData(cardId: cards[3].cardId),
+        _ThumbnailCardData(cardId: cards[4].cardId),
+      ];
+    }
     final isThreeCard = resolvedType.cardCount >= 3 && drawnCards.length >= 3;
     if (isThreeCard) {
       final cards = drawnCards.take(3).toList();
@@ -1232,17 +1252,20 @@ class _DetailsCardThumbnails extends StatelessWidget {
       ];
     }
     if (drawnCards.isEmpty) {
-      return const [
-        _ThumbnailCardData(isBack: true),
-        _ThumbnailCardData(isBack: true),
-        _ThumbnailCardData(isBack: true),
-      ];
+      final count = resolvedType.cardCount.clamp(2, 5);
+      return List<_ThumbnailCardData>.generate(
+        count,
+        (_) => const _ThumbnailCardData(isBack: true),
+      );
     }
-    return [
-      const _ThumbnailCardData(isBack: true),
-      _ThumbnailCardData(cardId: drawnCards.first.cardId),
-      const _ThumbnailCardData(isBack: true),
-    ];
+    if (drawnCards.length == 1) {
+      return const [];
+    }
+    final count = min(drawnCards.length, resolvedType.cardCount);
+    return drawnCards
+        .take(count)
+        .map((card) => _ThumbnailCardData(cardId: card.cardId))
+        .toList();
   }
 }
 

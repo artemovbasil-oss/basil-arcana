@@ -49,8 +49,7 @@ class AiRepositoryException implements Exception {
 
   @override
   String toString() {
-    final buffer = StringBuffer('AiRepositoryException(')
-      ..write(type.name);
+    final buffer = StringBuffer('AiRepositoryException(')..write(type.name);
     if (statusCode != null) {
       buffer.write(':$statusCode');
     }
@@ -129,16 +128,14 @@ class AiRepository {
     final httpClient = _wrapClient(baseClient);
     http.Response response;
     try {
-      response = await httpClient
-          .get(
-            uri,
+      response = await httpClient.get(
+        uri,
         headers: {
           'x-request-id': requestId,
           if (telegramAuth.hasInitData)
             'X-Telegram-InitData': telegramAuth.initData,
         },
-      )
-          .timeout(timeout);
+      ).timeout(timeout);
     } on TimeoutException catch (error) {
       if (kDebugMode) {
         debugPrint(
@@ -350,7 +347,8 @@ class AiRepository {
         errorType: AiErrorType.timeout,
         exception: error,
       );
-      _reportWebError(AiErrorType.timeout, message: error.toString(), requestId: requestId);
+      _reportWebError(AiErrorType.timeout,
+          message: error.toString(), requestId: requestId);
       throw const AiRepositoryException(AiErrorType.timeout);
     } on Exception catch (error) {
       if (isSocketException(error) || error is http.ClientException) {
@@ -361,7 +359,8 @@ class AiRepository {
           errorType: AiErrorType.noInternet,
           exception: error,
         );
-        _reportWebError(AiErrorType.noInternet, message: error.toString(), requestId: requestId);
+        _reportWebError(AiErrorType.noInternet,
+            message: error.toString(), requestId: requestId);
         throw const AiRepositoryException(AiErrorType.noInternet);
       }
       rethrow;
@@ -503,7 +502,6 @@ class AiRepository {
     }
   }
 
-
   AiResultModel _parseAiResultResponse({
     required String body,
     required String requestId,
@@ -534,7 +532,8 @@ class AiRepository {
         result.action.trim().isNotEmpty ||
         result.fullText.trim().isNotEmpty;
     if (!hasAnyContent) {
-      throw const FormatException('Reading payload has no displayable content.');
+      throw const FormatException(
+          'Reading payload has no displayable content.');
     }
 
     final fallbackFullText = [
@@ -549,7 +548,9 @@ class AiRepository {
       sections: result.sections,
       why: result.why,
       action: result.action,
-      fullText: result.fullText.trim().isNotEmpty ? result.fullText : fallbackFullText,
+      fullText: result.fullText.trim().isNotEmpty
+          ? result.fullText
+          : fallbackFullText,
       detailsText: result.detailsText,
       requestId: result.requestId ?? requestId,
     );
@@ -595,8 +596,8 @@ class AiRepository {
     final useTelegramAuth = kIsWeb && telegramAuth.hasInitData;
     final endpoint = kIsWeb
         ? (useTelegramAuth
-            ? '/api/natal-chart/generate'
-            : '/api/natal-chart/generate_web')
+            ? '/api/natal-chart/generate_web'
+            : '/api/natal-chart/generate')
         : '/api/natal-chart/generate';
     final uri = Uri.parse(apiBaseUrl).replace(path: endpoint);
     final requestId = requestIdOverride ?? const Uuid().v4();
@@ -647,7 +648,8 @@ class AiRepository {
         errorType: AiErrorType.timeout,
         exception: error,
       );
-      _reportWebError(AiErrorType.timeout, message: error.toString(), requestId: requestId);
+      _reportWebError(AiErrorType.timeout,
+          message: error.toString(), requestId: requestId);
       throw const AiRepositoryException(AiErrorType.timeout);
     } on Exception catch (error) {
       if (isSocketException(error) || error is http.ClientException) {
@@ -658,7 +660,8 @@ class AiRepository {
           errorType: AiErrorType.noInternet,
           exception: error,
         );
-        _reportWebError(AiErrorType.noInternet, message: error.toString(), requestId: requestId);
+        _reportWebError(AiErrorType.noInternet,
+            message: error.toString(), requestId: requestId);
         throw const AiRepositoryException(AiErrorType.noInternet);
       }
       rethrow;
@@ -827,8 +830,7 @@ class AiRepository {
     );
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     final randomSuffix = Random().nextInt(900000) + 100000;
-    final requestId = requestIdOverride ??
-        'details-$timestamp-$randomSuffix';
+    final requestId = requestIdOverride ?? 'details-$timestamp-$randomSuffix';
     final startTimestamp = DateTime.now().toIso8601String();
     final stopwatch = Stopwatch()..start();
     final totalCards = spread.positions.length;
@@ -874,7 +876,8 @@ class AiRepository {
         errorType: AiErrorType.timeout,
         exception: error,
       );
-      _reportWebError(AiErrorType.timeout, message: error.toString(), requestId: requestId);
+      _reportWebError(AiErrorType.timeout,
+          message: error.toString(), requestId: requestId);
       throw const AiRepositoryException(AiErrorType.timeout);
     } on Exception catch (error) {
       if (isSocketException(error) || error is http.ClientException) {
@@ -885,7 +888,8 @@ class AiRepository {
           errorType: AiErrorType.noInternet,
           exception: error,
         );
-        _reportWebError(AiErrorType.noInternet, message: error.toString(), requestId: requestId);
+        _reportWebError(AiErrorType.noInternet,
+            message: error.toString(), requestId: requestId);
         throw const AiRepositoryException(AiErrorType.noInternet);
       }
       rethrow;
