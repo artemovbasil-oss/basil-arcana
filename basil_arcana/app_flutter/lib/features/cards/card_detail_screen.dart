@@ -9,6 +9,7 @@ import '../../core/widgets/app_top_bar.dart';
 import '../../core/widgets/data_load_error.dart';
 import '../../core/widgets/tarot_asset_widgets.dart';
 import '../../data/models/card_model.dart';
+import '../../data/models/deck_model.dart';
 import '../../state/providers.dart';
 
 class CardDetailScreen extends ConsumerWidget {
@@ -30,7 +31,7 @@ class CardDetailScreen extends ConsumerWidget {
     final availableVideos =
         videoIndex == null || videoIndex.isEmpty ? null : videoIndex;
     final resolvedCardId = card?.id ?? cardId;
-    final cardsAsync = ref.watch(cardsProvider);
+    final cardsAsync = ref.watch(cardsAllProvider);
     final resolvedCard = _resolveCard(
       cardsAsync.asData?.value,
       resolvedCardId,
@@ -58,7 +59,8 @@ class CardDetailScreen extends ConsumerWidget {
                   statusCode: repo.lastStatusCodes[cacheKey],
                   contentType: repo.lastContentTypes[cacheKey],
                   contentLength: repo.lastContentLengths[cacheKey],
-                  responseSnippetStart: repo.lastResponseSnippetsStart[cacheKey],
+                  responseSnippetStart:
+                      repo.lastResponseSnippetsStart[cacheKey],
                   responseSnippetEnd: repo.lastResponseSnippetsEnd[cacheKey],
                   responseLength: repo.lastResponseStringLengths[cacheKey],
                   bytesLength: repo.lastResponseByteLengths[cacheKey],
@@ -84,7 +86,7 @@ class CardDetailScreen extends ConsumerWidget {
                     title: l10n.dataLoadTitle,
                     message: l10n.cardsLoadError,
                     retryLabel: l10n.dataLoadRetry,
-                    onRetry: () => ref.invalidate(cardsProvider),
+                    onRetry: () => ref.invalidate(cardsAllProvider),
                     debugInfo: debugInfo,
                   ),
           ),
@@ -122,7 +124,8 @@ class CardDetailScreen extends ConsumerWidget {
                           aspectRatio: 2 / 3,
                           child: DecoratedBox(
                             decoration: BoxDecoration(
-                              color: colorScheme.surfaceVariant.withOpacity(0.35),
+                              color:
+                                  colorScheme.surfaceVariant.withOpacity(0.35),
                               borderRadius: BorderRadius.circular(26),
                               boxShadow: [
                                 BoxShadow(
@@ -239,7 +242,8 @@ class CardDetailScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        resolvedCard.detailedDescription?.trim().isNotEmpty ?? false
+                        resolvedCard.detailedDescription?.trim().isNotEmpty ??
+                                false
                             ? resolvedCard.detailedDescription!
                             : l10n.cardDetailsFallback,
                         style: Theme.of(context).textTheme.bodyMedium,
@@ -356,13 +360,16 @@ CardModel? _resolveCard(
   if (cardId == null || cardId.isEmpty) {
     return fallback;
   }
+  final canonicalId = canonicalCardId(cardId);
   if (cards == null || cards.isEmpty) {
     return fallback;
   }
-  return cards.firstWhere(
-    (card) => card.id == cardId,
-    orElse: () => fallback ?? cards.first,
-  );
+  for (final card in cards) {
+    if (card.id == canonicalId) {
+      return card;
+    }
+  }
+  return fallback;
 }
 
 class _StatTile extends StatelessWidget {

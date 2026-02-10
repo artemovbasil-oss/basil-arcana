@@ -271,10 +271,19 @@ SpreadModel? _resolveSpreadByType(
   }
   while (fallbackPositions.length < desiredCount) {
     final idx = fallbackPositions.length + 1;
+    final defaultTitle = spreadType == SpreadType.five
+        ? switch (idx) {
+            1 => l10n.spreadFivePosition1,
+            2 => l10n.spreadFivePosition2,
+            3 => l10n.spreadFivePosition3,
+            4 => l10n.spreadFivePosition4,
+            _ => l10n.spreadFivePosition5,
+          }
+        : 'Card $idx';
     fallbackPositions.add(
       SpreadPosition(
         id: 'slot_$idx',
-        title: 'Card $idx',
+        title: defaultTitle,
       ),
     );
   }

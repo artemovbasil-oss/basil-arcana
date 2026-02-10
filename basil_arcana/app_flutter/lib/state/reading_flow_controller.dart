@@ -266,7 +266,11 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       1,
       state.spreadType?.cardCount ?? spread.positions.length,
     );
-    final positions = _resolvePositionsForDraw(spread, desiredCount);
+    final positions = _resolvePositionsForDraw(
+      spread,
+      desiredCount,
+      spreadType: state.spreadType,
+    );
     final drawn = drawCards(desiredCount, cards);
     final drawnCards = <DrawnCardModel>[];
     for (var i = 0; i < positions.length; i++) {
@@ -886,7 +890,11 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
     if (spread.positions.length == count) {
       return spread;
     }
-    final positions = _resolvePositionsForDraw(spread, count);
+    final positions = _resolvePositionsForDraw(
+      spread,
+      count,
+      spreadType: spreadType,
+    );
     return SpreadModel(
       id: spread.id,
       name: spread.name,
@@ -895,16 +903,31 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
     );
   }
 
-  List<SpreadPosition> _resolvePositionsForDraw(SpreadModel spread, int count) {
+  List<SpreadPosition> _resolvePositionsForDraw(
+    SpreadModel spread,
+    int count, {
+    SpreadType? spreadType,
+  }) {
     if (spread.positions.length >= count) {
       return spread.positions.take(count).toList();
     }
     final positions = <SpreadPosition>[...spread.positions];
+    final l10n = _l10n();
     for (var i = positions.length; i < count; i++) {
+      final idx = i + 1;
+      final title = spreadType == SpreadType.five
+          ? switch (idx) {
+              1 => l10n.spreadFivePosition1,
+              2 => l10n.spreadFivePosition2,
+              3 => l10n.spreadFivePosition3,
+              4 => l10n.spreadFivePosition4,
+              _ => l10n.spreadFivePosition5,
+            }
+          : 'Card $idx';
       positions.add(
         SpreadPosition(
-          id: 'slot_${i + 1}',
-          title: 'Card ${i + 1}',
+          id: 'slot_$idx',
+          title: title,
         ),
       );
     }

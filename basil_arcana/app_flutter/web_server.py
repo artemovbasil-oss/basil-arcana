@@ -2,7 +2,6 @@ import functools
 import json
 import os
 import re
-import time
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse
 
@@ -73,10 +72,7 @@ class WebAppHandler(SimpleHTTPRequestHandler):
 
     @classmethod
     def _effective_app_version(cls) -> str:
-        version = (cls.app_version or "").strip()
-        if version:
-            return version
-        return str(int(time.time()))
+        return (cls.app_version or "dev").strip() or "dev"
 
     def _serve_index_html(self) -> None:
         file_path = self.translate_path("/index.html")
@@ -236,7 +232,7 @@ class WebAppHandler(SimpleHTTPRequestHandler):
 
 def main() -> None:
     port = int(os.environ.get("PORT", "8080"))
-    app_version = _read_env("APP_VERSION")
+    app_version = _read_env("APP_VERSION") or "dev"
     directory = os.environ.get("WEB_ROOT", "/app/static")
     required_files = ("index.html", "manifest.json", "flutter.js", "main.dart.js")
     missing_files = [

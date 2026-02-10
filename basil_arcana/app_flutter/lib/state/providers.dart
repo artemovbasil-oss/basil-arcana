@@ -69,8 +69,7 @@ class LocaleNotifier extends StateNotifier<Locale> {
   }
 }
 
-final localeProvider =
-    StateNotifierProvider<LocaleNotifier, Locale>((ref) {
+final localeProvider = StateNotifierProvider<LocaleNotifier, Locale>((ref) {
   final box = Hive.box<String>(_settingsBoxName);
   return LocaleNotifier(box);
 });
@@ -96,6 +95,12 @@ final cardsProvider = FutureProvider((ref) async {
   final deckId = ref.watch(deckProvider);
   final repo = ref.watch(cardsRepositoryProvider);
   return repo.fetchCards(locale: locale, deckId: deckId);
+});
+
+final cardsAllProvider = FutureProvider((ref) async {
+  final locale = ref.watch(localeProvider);
+  final repo = ref.watch(cardsRepositoryProvider);
+  return repo.fetchCards(locale: locale, deckId: DeckType.all);
 });
 
 final spreadsProvider = FutureProvider((ref) async {

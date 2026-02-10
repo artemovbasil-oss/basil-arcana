@@ -6,6 +6,7 @@ import 'tarot_asset_widgets.dart';
 import '../theme/app_text_styles.dart';
 import 'app_buttons.dart';
 import '../../data/models/card_model.dart';
+import '../../data/models/deck_model.dart';
 import '../../state/providers.dart';
 
 class CardFaceWidget extends ConsumerWidget {
@@ -27,12 +28,13 @@ class CardFaceWidget extends ConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context)!;
     final deckId = ref.watch(deckProvider);
-    final cardsAsync = ref.watch(cardsProvider);
+    final cardsAsync = ref.watch(cardsAllProvider);
     CardModel? resolvedCard;
     final cards = cardsAsync.asData?.value;
     if (cardId != null && cards != null) {
+      final canonicalId = canonicalCardId(cardId!);
       for (final card in cards) {
-        if (card.id == cardId) {
+        if (card.id == canonicalId) {
           resolvedCard = card;
           break;
         }
@@ -60,13 +62,13 @@ class CardFaceWidget extends ConsumerWidget {
                   deckId: deckId,
                   availableVideoFiles: availableVideos,
                 ).resolve(
-                  cardId!,
+                  resolvedCard?.id ?? canonicalCardId(cardId!),
                   card: resolvedCard,
                   imageUrlOverride: resolvedCard?.imageUrl,
                   videoUrlOverride: resolvedCard?.videoUrl,
                 );
                 final image = CardMedia(
-                  cardId: cardId!,
+                  cardId: resolvedCard?.id ?? canonicalCardId(cardId!),
                   imageUrl: resolvedCard?.imageUrl,
                   videoUrl: mediaAssets.videoUrl,
                   enableVideo: true,

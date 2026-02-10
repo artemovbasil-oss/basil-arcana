@@ -39,7 +39,7 @@ class _CardsScreenState extends ConsumerState<CardsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final cardsAsync = ref.watch(cardsProvider);
+    final cardsAsync = ref.watch(cardsAllProvider);
     final l10n = AppLocalizations.of(context)!;
     final statsRepository = ref.watch(cardStatsRepositoryProvider);
     return Scaffold(
@@ -163,7 +163,8 @@ class _CardsScreenState extends ConsumerState<CardsScreen> {
                             repo.lastResponseSnippetsStart[cacheKey],
                         responseSnippetEnd:
                             repo.lastResponseSnippetsEnd[cacheKey],
-                        responseLength: repo.lastResponseStringLengths[cacheKey],
+                        responseLength:
+                            repo.lastResponseStringLengths[cacheKey],
                         bytesLength: repo.lastResponseByteLengths[cacheKey],
                         rootType: repo.lastResponseRootTypes[cacheKey],
                       ),
@@ -178,7 +179,7 @@ class _CardsScreenState extends ConsumerState<CardsScreen> {
                 message: l10n.cardsLoadError,
                 retryLabel: l10n.dataLoadRetry,
                 onRetry: () {
-                  ref.invalidate(cardsProvider);
+                  ref.invalidate(cardsAllProvider);
                 },
                 debugInfo: debugInfo,
               ),
@@ -271,25 +272,28 @@ class _DeckChips extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    return Wrap(
-      spacing: 10,
-      runSpacing: 8,
-      children: [
-        for (final section in sections)
-          ActionChip(
-            label: Text(section.label),
-            onPressed: () => onSelect(section.deck),
-            backgroundColor: colorScheme.surfaceVariant.withOpacity(0.6),
-            shape: StadiumBorder(
-              side: BorderSide(
-                color: colorScheme.outlineVariant.withOpacity(0.5),
-              ),
-            ),
-            labelStyle: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: colorScheme.onSurface,
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          for (var i = 0; i < sections.length; i++) ...[
+            ActionChip(
+              label: Text(sections[i].label),
+              onPressed: () => onSelect(sections[i].deck),
+              backgroundColor: colorScheme.surfaceVariant.withOpacity(0.6),
+              shape: StadiumBorder(
+                side: BorderSide(
+                  color: colorScheme.outlineVariant.withOpacity(0.5),
                 ),
-          ),
-      ],
+              ),
+              labelStyle: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: colorScheme.onSurface,
+                  ),
+            ),
+            if (i != sections.length - 1) const SizedBox(width: 10),
+          ],
+        ],
+      ),
     );
   }
 }

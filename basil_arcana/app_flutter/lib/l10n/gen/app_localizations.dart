@@ -592,6 +592,36 @@ abstract class AppLocalizations {
   /// **'A deeper look at your path. Five cards — layered context and guidance.'**
   String get spreadFiveCardSubtitle;
 
+  /// No description provided for @spreadFivePosition1.
+  ///
+  /// In en, this message translates to:
+  /// **'Core energy'**
+  String get spreadFivePosition1;
+
+  /// No description provided for @spreadFivePosition2.
+  ///
+  /// In en, this message translates to:
+  /// **'What helps'**
+  String get spreadFivePosition2;
+
+  /// No description provided for @spreadFivePosition3.
+  ///
+  /// In en, this message translates to:
+  /// **'What blocks'**
+  String get spreadFivePosition3;
+
+  /// No description provided for @spreadFivePosition4.
+  ///
+  /// In en, this message translates to:
+  /// **'Hidden factor'**
+  String get spreadFivePosition4;
+
+  /// No description provided for @spreadFivePosition5.
+  ///
+  /// In en, this message translates to:
+  /// **'Outcome and advice'**
+  String get spreadFivePosition5;
+
   /// No description provided for @spreadLabelPast.
   ///
   /// In en, this message translates to:

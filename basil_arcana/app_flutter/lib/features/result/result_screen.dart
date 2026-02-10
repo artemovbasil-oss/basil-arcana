@@ -746,7 +746,8 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
 
   void _precacheDrawnCards(ReadingFlowState state) {
     _precacheDone = true;
-    final cards = ref.read(cardsProvider).asData?.value ?? const <CardModel>[];
+    final cards =
+        ref.read(cardsAllProvider).asData?.value ?? const <CardModel>[];
     WidgetsBinding.instance.addPostFrameCallback((_) {
       for (final drawn in state.drawnCards) {
         final imageUrl = _resolveImageUrl(cards, drawn.cardId);
@@ -1285,12 +1286,13 @@ class _DetailThumbnailCard extends ConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final radius = BorderRadius.circular(12);
     final deckId = ref.watch(deckProvider);
-    final cards = ref.watch(cardsProvider).asData?.value;
+    final cards = ref.watch(cardsAllProvider).asData?.value;
+    final canonicalId = cardId == null ? null : canonicalCardId(cardId!);
     final resolvedImageUrl = cardId == null
         ? null
         : cards
             ?.firstWhere(
-              (card) => card.id == cardId,
+              (card) => card.id == canonicalId,
               orElse: () => const CardModel(
                 id: '',
                 deckId: DeckType.major,
@@ -1378,8 +1380,9 @@ String? _resolveImageUrl(List<CardModel> cards, String cardId) {
   if (cards.isEmpty) {
     return null;
   }
+  final canonicalId = canonicalCardId(cardId);
   for (final card in cards) {
-    if (card.id == cardId) {
+    if (card.id == canonicalId) {
       return card.imageUrl;
     }
   }

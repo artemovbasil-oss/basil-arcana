@@ -259,6 +259,21 @@ class AppLocalizationsRu extends AppLocalizations {
       'Более глубокий взгляд на ситуацию. Пять карт — слои контекста и рекомендации.';
 
   @override
+  String get spreadFivePosition1 => 'Суть ситуации';
+
+  @override
+  String get spreadFivePosition2 => 'Что помогает';
+
+  @override
+  String get spreadFivePosition3 => 'Что мешает';
+
+  @override
+  String get spreadFivePosition4 => 'Скрытый фактор';
+
+  @override
+  String get spreadFivePosition5 => 'Итог и совет';
+
+  @override
   String get spreadLabelPast => 'Прошлое';
 
   @override

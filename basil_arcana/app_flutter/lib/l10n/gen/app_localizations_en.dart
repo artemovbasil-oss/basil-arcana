@@ -259,6 +259,21 @@ class AppLocalizationsEn extends AppLocalizations {
       'A deeper look at your path. Five cards — layered context and guidance.';
 
   @override
+  String get spreadFivePosition1 => 'Core energy';
+
+  @override
+  String get spreadFivePosition2 => 'What helps';
+
+  @override
+  String get spreadFivePosition3 => 'What blocks';
+
+  @override
+  String get spreadFivePosition4 => 'Hidden factor';
+
+  @override
+  String get spreadFivePosition5 => 'Outcome and advice';
+
+  @override
   String get spreadLabelPast => 'Past';
 
   @override

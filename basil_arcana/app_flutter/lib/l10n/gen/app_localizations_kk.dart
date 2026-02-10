@@ -259,6 +259,21 @@ class AppLocalizationsKk extends AppLocalizations {
       'Жағдайға тереңірек көзқарас. Бес карта — көпқабатты мәнмәтін мен бағыт.';
 
   @override
+  String get spreadFivePosition1 => 'Жағдайдың мәні';
+
+  @override
+  String get spreadFivePosition2 => 'Не көмектеседі';
+
+  @override
+  String get spreadFivePosition3 => 'Не кедергі';
+
+  @override
+  String get spreadFivePosition4 => 'Жасырын фактор';
+
+  @override
+  String get spreadFivePosition5 => 'Нәтиже және кеңес';
+
+  @override
   String get spreadLabelPast => 'Өткен';
 
   @override
