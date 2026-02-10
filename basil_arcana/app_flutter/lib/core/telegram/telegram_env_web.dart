@@ -44,28 +44,28 @@ class TelegramEnv {
     Duration delay = _retryDelay,
   }) async {
     if (!_isTelegramEnvironment()) {
-      return initData;
+      return this.initData;
     }
     _callReadyAndExpand();
     var attempts = 0;
-    var initData = _readWebAppInitData();
-    while (initData.trim().isEmpty && attempts < maxAttempts) {
+    var currentInitData = _readWebAppInitData();
+    while (currentInitData.trim().isEmpty && attempts < maxAttempts) {
       attempts += 1;
       await Future.delayed(delay);
       _callReadyAndExpand();
-      initData = _readWebAppInitData();
+      currentInitData = _readWebAppInitData();
     }
-    if (initData.trim().isNotEmpty) {
-      _cachedInitData = initData;
-      _logInitData(initData);
-      return initData;
+    if (currentInitData.trim().isNotEmpty) {
+      _cachedInitData = currentInitData;
+      _logInitData(currentInitData);
+      return currentInitData;
     }
     if (kDebugMode) {
       debugPrint(
         '[TelegramEnv] initData empty after $attempts attempts',
       );
     }
-    return initData;
+    return currentInitData;
   }
 
   bool _isTelegramEnvironment() {
