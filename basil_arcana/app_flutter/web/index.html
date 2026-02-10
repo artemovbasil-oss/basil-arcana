@@ -48,10 +48,18 @@
       return String(buildId).trim() || 'dev';
     }
 
-    var buildVersion = resolveBuildId();
-    window.__buildVersion = buildVersion;
-    window.__flutterBootstrapUrl = 'flutter_bootstrap.js?v=' + buildVersion;
-    window.__configUrl = 'config.json?v=' + buildVersion;
+    var v = resolveBuildId();
+    window.__buildVersion = v;
+    window.__flutterBootstrapUrl = 'flutter_bootstrap.js?v=' + v;
+    window.__configUrl = 'config.json?v=' + v;
+
+    (function appendVersionedBootstrapHints() {
+      var bootstrapPreload = document.createElement('link');
+      bootstrapPreload.rel = 'preload';
+      bootstrapPreload.as = 'script';
+      bootstrapPreload.href = window.__flutterBootstrapUrl;
+      document.head.appendChild(bootstrapPreload);
+    })();
   </script>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script>
@@ -351,13 +359,13 @@
   </div>
   <script>
     window.addEventListener('load', function (ev) {
-      var resolvedVersion = window.__buildVersion || 'dev';
-      window.__flutterBootstrapUrl = 'flutter_bootstrap.js?v=' + resolvedVersion;
-      loadScript('telegram_bridge.js?v=' + resolvedVersion).then(function () {
-        return loadScript('flutter.js?v=' + resolvedVersion, { defer: '' });
+      var v = window.__buildVersion || 'dev';
+      window.__flutterBootstrapUrl = 'flutter_bootstrap.js?v=' + v;
+      loadScript('telegram_bridge.js?v=' + v).then(function () {
+        return loadScript('flutter.js?v=' + v, { defer: '' });
       }).then(function () {
         _flutter.loader.loadEntrypoint({
-          entrypointUrl: 'main.dart.js?v=' + resolvedVersion,
+          entrypointUrl: 'main.dart.js?v=' + v,
           serviceWorker: null,
           onEntrypointLoaded: function (engineInitializer) {
             engineInitializer.initializeEngine({
