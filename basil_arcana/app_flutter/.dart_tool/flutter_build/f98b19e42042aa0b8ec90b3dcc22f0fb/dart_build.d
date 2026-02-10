@@ -1,0 +1,1 @@
+ /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/flutter_build/f98b19e42042aa0b8ec90b3dcc22f0fb/dart_build_result.json:  /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/package_config.json /Users/basilart/basil_arcana/basil_arcana/app_flutter/pubspec.yaml /opt/homebrew/share/flutter/bin/cache/dart-sdk/version

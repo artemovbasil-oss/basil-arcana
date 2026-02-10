@@ -1,0 +1,1830 @@
+{
+  "major_00_fool": {
+    "title": "The Fool",
+    "keywords": [
+      "beginnings",
+      "freedom",
+      "trust"
+    ],
+    "meaning": {
+      "general": "A fresh start and a leap of faith.",
+      "light": "Playful optimism and a willingness to explore.",
+      "shadow": "Naivety, rash risks, or ignoring the obvious.",
+      "advice": "Begin, but carry a small plan with your hope."
+    },
+    "fact": "Numbered 0, The Fool is the journey before it starts.",
+    "stats": {
+      "luck": 50,
+      "power": 55,
+      "love": 50,
+      "clarity": 55
+    },
+    "detailedDescription": "A fresh start and a leap of faith. Playful optimism and a willingness to explore. Naivety, rash risks, or ignoring the obvious. Begin, but carry a small plan with your hope."
+  },
+  "major_01_magician": {
+    "title": "The Magician",
+    "keywords": [
+      "will",
+      "skill",
+      "manifestation"
+    ],
+    "meaning": {
+      "general": "Focused will and the tools to make ideas real.",
+      "light": "Confidence, skill, and aligned action.",
+      "shadow": "Manipulation or scattered energy.",
+      "advice": "Pick one aim and commit your resources."
+    },
+    "fact": "The Magician holds all four suit symbols on the table.",
+    "stats": {
+      "luck": 50,
+      "power": 55,
+      "love": 50,
+      "clarity": 55
+    },
+    "detailedDescription": "Focused will and the tools to make ideas real. Confidence, skill, and aligned action. Manipulation or scattered energy. Pick one aim and commit your resources."
+  },
+  "major_02_high_priestess": {
+    "title": "The High Priestess",
+    "keywords": [
+      "intuition",
+      "mystery",
+      "inner voice"
+    ],
+    "meaning": {
+      "general": "Quiet knowledge and the pull of intuition.",
+      "light": "Trusting subtle signals and inner truth.",
+      "shadow": "Withholding, secrecy, or ignoring feelings.",
+      "advice": "Listen before you speak or act."
+    },
+    "fact": "She sits between pillars marked for the seen and unseen.",
+    "stats": {
+      "luck": 50,
+      "power": 55,
+      "love": 50,
+      "clarity": 55
+    },
+    "detailedDescription": "Quiet knowledge and the pull of intuition. Trusting subtle signals and inner truth. Withholding, secrecy, or ignoring feelings. Listen before you speak or act."
+  },
+  "major_03_empress": {
+    "title": "The Empress",
+    "keywords": [
+      "nurture",
+      "abundance",
+      "creation"
+    ],
+    "meaning": {
+      "general": "Abundance, care, and embodied creativity.",
+      "light": "Warmth, growth, and fertile ideas.",
+      "shadow": "Overgiving or being smothered by comfort.",
+      "advice": "Feed what you want to grow."
+    },
+    "fact": "The Empress is linked to Venus and the earth.",
+    "stats": {
+      "luck": 50,
+      "power": 55,
+      "love": 50,
+      "clarity": 55
+    },
+    "detailedDescription": "Abundance, care, and embodied creativity. Warmth, growth, and fertile ideas. Overgiving or being smothered by comfort. Feed what you want to grow."
+  },
+  "major_04_emperor": {
+    "title": "The Emperor",
+    "keywords": [
+      "structure",
+      "authority",
+      "stability"
+    ],
+    "meaning": {
+      "general": "Order, structure, and responsible leadership.",
+      "light": "Clear boundaries and steady authority.",
+      "shadow": "Rigidity, control, or fear of change.",
+      "advice": "Lead with firmness and fairness."
+    },
+    "fact": "The Emperor embodies the stabilizing force of Aries.",
+    "stats": {
+      "luck": 50,
+      "power": 55,
+      "love": 50,
+      "clarity": 55
+    },
+    "detailedDescription": "Order, structure, and responsible leadership. Clear boundaries and steady authority. Rigidity, control, or fear of change. Lead with firmness and fairness."
+  },
+  "major_05_hierophant": {
+    "title": "The Hierophant",
+    "keywords": [
+      "tradition",
+      "beliefs",
+      "guidance"
+    ],
+    "meaning": {
+      "general": "Shared values, tradition, and learning from elders.",
+      "light": "Mentorship, ritual, and steady teachings.",
+      "shadow": "Dogma, conformity, or resisting growth.",
+      "advice": "Honor the lesson, then make it your own."
+    },
+    "fact": "The Hierophant bridges the sacred and the social.",
+    "stats": {
+      "luck": 50,
+      "power": 55,
+      "love": 50,
+      "clarity": 55
+    },
+    "detailedDescription": "Shared values, tradition, and learning from elders. Mentorship, ritual, and steady teachings. Dogma, conformity, or resisting growth. Honor the lesson, then make it your own."
+  },
+  "major_06_lovers": {
+    "title": "The Lovers",
+    "keywords": [
+      "alignment",
+      "choice",
+      "union"
+    ],
+    "meaning": {
+      "general": "Alignment of values before commitment.",
+      "light": "Mutual choice, harmony, and honest connection.",
+      "shadow": "Indecision, temptation, or values out of sync.",
+      "advice": "Choose what truly matches your heart."
+    },
+    "fact": "The Lovers are about alignment more than romance.",
+    "stats": {
+      "luck": 50,
+      "power": 55,
+      "love": 50,
+      "clarity": 55
+    },
+    "detailedDescription": "Alignment of values before commitment. Mutual choice, harmony, and honest connection. Indecision, temptation, or values out of sync. Choose what truly matches your heart."
+  },
+  "major_07_chariot": {
+    "title": "The Chariot",
+    "keywords": [
+      "willpower",
+      "direction",
+      "victory"
+    ],
+    "meaning": {
+      "general": "Discipline and will guiding opposing forces.",
+      "light": "Momentum, confidence, and steady drive.",
+      "shadow": "Aggression, scattered focus, or forcing outcomes.",
+      "advice": "Hold the reins and steer with purpose."
+    },
+    "fact": "The Chariot is linked to the sign of Cancer.",
+    "stats": {
+      "luck": 50,
+      "power": 55,
+      "love": 50,
+      "clarity": 55
+    },
+    "detailedDescription": "Discipline and will guiding opposing forces. Momentum, confidence, and steady drive. Aggression, scattered focus, or forcing outcomes. Hold the reins and steer with purpose."
+  },
+  "major_08_strength": {
+    "title": "Strength",
+    "keywords": [
+      "courage",
+      "patience",
+      "compassion"
+    ],
+    "meaning": {
+      "general": "Gentle power and steady inner courage.",
+      "light": "Calm resilience and compassionate control.",
+      "shadow": "Self-doubt, suppressed anger, or forcing calm.",
+      "advice": "Lead with patience, not pressure."
+    },
+    "fact": "Strength is associated with the sign of Leo.",
+    "stats": {
+      "luck": 50,
+      "power": 55,
+      "love": 50,
+      "clarity": 55
+    },
+    "detailedDescription": "Gentle power and steady inner courage. Calm resilience and compassionate control. Self-doubt, suppressed anger, or forcing calm. Lead with patience, not pressure."
+  },
+  "major_09_hermit": {
+    "title": "The Hermit",
+    "keywords": [
+      "solitude",
+      "wisdom",
+      "guidance"
+    ],
+    "meaning": {
+      "general": "Withdrawal to find inner guidance.",
+      "light": "Reflection, clarity, and honest self-study.",
+      "shadow": "Isolation, avoidance, or withdrawing too long.",
+      "advice": "Step back to see the path clearly."
+    },
+    "fact": "The Hermit carries a lantern to light the way.",
+    "stats": {
+      "luck": 50,
+      "power": 55,
+      "love": 50,
+      "clarity": 55
+    },
+    "detailedDescription": "Withdrawal to find inner guidance. Reflection, clarity, and honest self-study. Isolation, avoidance, or withdrawing too long. Step back to see the path clearly."
+  },
+  "major_10_wheel": {
+    "title": "Wheel of Fortune",
+    "keywords": [
+      "cycles",
+      "change",
+      "fate"
+    ],
+    "meaning": {
+      "general": "A turning cycle and shifting circumstances.",
+      "light": "Positive momentum and welcome change.",
+      "shadow": "Feeling stuck in a loop or resisting the turn.",
+      "advice": "Move with the change instead of fighting it."
+    },
+    "fact": "The wheel reminds us that everything turns.",
+    "stats": {
+      "luck": 50,
+      "power": 55,
+      "love": 50,
+      "clarity": 55
+    },
+    "detailedDescription": "A turning cycle and shifting circumstances. Positive momentum and welcome change. Feeling stuck in a loop or resisting the turn. Move with the change instead of fighting it."
+  },
+  "major_11_justice": {
+    "title": "Justice",
+    "keywords": [
+      "truth",
+      "balance",
+      "accountability"
+    ],
+    "meaning": {
+      "general": "Clarity, fairness, and consequences.",
+      "light": "Honesty, integrity, and balanced judgment.",
+      "shadow": "Bias, denial, or fear of truth.",
+      "advice": "Tell the truth and accept what it brings."
+    },
+    "fact": "Justice is linked to the sign of Libra.",
+    "stats": {
+      "luck": 50,
+      "power": 55,
+      "love": 50,
+      "clarity": 55
+    },
+    "detailedDescription": "Clarity, fairness, and consequences. Honesty, integrity, and balanced judgment. Bias, denial, or fear of truth. Tell the truth and accept what it brings."
+  },
+  "major_12_hanged_man": {
+    "title": "The Hanged Man",
+    "keywords": [
+      "pause",
+      "surrender",
+      "perspective"
+    ],
+    "meaning": {
+      "general": "A pause that reveals a new view.",
+      "light": "Letting go to gain insight.",
+      "shadow": "Stalling, martyrdom, or fear of change.",
+      "advice": "Release control and see what shifts."
+    },
+    "fact": "The Hanged Man is about perspective, not punishment.",
+    "stats": {
+      "luck": 50,
+      "power": 55,
+      "love": 50,
+      "clarity": 55
+    },
+    "detailedDescription": "A pause that reveals a new view. Letting go to gain insight. Stalling, martyrdom, or fear of change. Release control and see what shifts."
+  },
+  "major_13_death": {
+    "title": "Death",
+    "keywords": [
+      "ending",
+      "transformation",
+      "renewal"
+    ],
+    "meaning": {
+      "general": "An ending that clears the way forward.",
+      "light": "Release, renewal, and true transformation.",
+      "shadow": "Clinging to the past or fearing change.",
+      "advice": "Let the old fall away so the new can rise."
+    },
+    "fact": "Death is tied to Scorpio and deep change.",
+    "stats": {
+      "luck": 50,
+      "power": 55,
+      "love": 50,
+      "clarity": 55
+    },
+    "detailedDescription": "An ending that clears the way forward. Release, renewal, and true transformation. Clinging to the past or fearing change. Let the old fall away so the new can rise."
+  },
+  "major_14_temperance": {
+    "title": "Temperance",
+    "keywords": [
+      "balance",
+      "healing",
+      "integration"
+    ],
+    "meaning": {
+      "general": "Blending extremes into harmony.",
+      "light": "Patience, healing, and steady integration.",
+      "shadow": "Imbalance, excess, or forcing a mix.",
+      "advice": "Go slowly and let the blend settle."
+    },
+    "fact": "Temperance is linked to the sign of Sagittarius.",
+    "stats": {
+      "luck": 50,
+      "power": 55,
+      "love": 50,
+      "clarity": 55
+    },
+    "detailedDescription": "Blending extremes into harmony. Patience, healing, and steady integration. Imbalance, excess, or forcing a mix. Go slowly and let the blend settle."
+  },
+  "major_15_devil": {
+    "title": "The Devil",
+    "keywords": [
+      "attachment",
+      "temptation",
+      "control"
+    ],
+    "meaning": {
+      "general": "Attachments that feel like control.",
+      "light": "Awareness of what binds you.",
+      "shadow": "Addiction, fear, or giving away power.",
+      "advice": "Name the chain, then loosen it."
+    },
+    "fact": "The Devil mirrors the Lovers, but without choice.",
+    "stats": {
+      "luck": 50,
+      "power": 55,
+      "love": 50,
+      "clarity": 55
+    },
+    "detailedDescription": "Attachments that feel like control. Awareness of what binds you. Addiction, fear, or giving away power. Name the chain, then loosen it."
+  },
+  "major_16_tower": {
+    "title": "The Tower",
+    "keywords": [
+      "upheaval",
+      "truth",
+      "release"
+    ],
+    "meaning": {
+      "general": "A sudden shake that reveals truth.",
+      "light": "Breakthrough, liberation, and clarity.",
+      "shadow": "Chaos, resistance, or fear of collapse.",
+      "advice": "Let the false fall so the real can stand."
+    },
+    "fact": "The Tower is linked to Mars and abrupt change.",
+    "stats": {
+      "luck": 50,
+      "power": 55,
+      "love": 50,
+      "clarity": 55
+    },
+    "detailedDescription": "A sudden shake that reveals truth. Breakthrough, liberation, and clarity. Chaos, resistance, or fear of collapse. Let the false fall so the real can stand."
+  },
+  "major_17_star": {
+    "title": "The Star",
+    "keywords": [
+      "hope",
+      "healing",
+      "renewal"
+    ],
+    "meaning": {
+      "general": "A quiet promise of renewal.",
+      "light": "Hope, calm faith, and healing.",
+      "shadow": "Doubt, discouragement, or losing faith.",
+      "advice": "Keep the signal alive, even if it is small."
+    },
+    "fact": "The Star follows the Tower as a sign of recovery.",
+    "stats": {
+      "luck": 50,
+      "power": 55,
+      "love": 50,
+      "clarity": 55
+    },
+    "detailedDescription": "A quiet promise of renewal. Hope, calm faith, and healing. Doubt, discouragement, or losing faith. Keep the signal alive, even if it is small."
+  },
+  "major_18_moon": {
+    "title": "The Moon",
+    "keywords": [
+      "mystery",
+      "dreams",
+      "uncertainty"
+    ],
+    "meaning": {
+      "general": "The fog of intuition and the unseen.",
+      "light": "Imagination, empathy, and subtle guidance.",
+      "shadow": "Confusion, fear, or illusion.",
+      "advice": "Move slowly and verify what you feel."
+    },
+    "fact": "The Moon rules the tides of the unconscious.",
+    "stats": {
+      "luck": 50,
+      "power": 55,
+      "love": 50,
+      "clarity": 55
+    },
+    "detailedDescription": "The fog of intuition and the unseen. Imagination, empathy, and subtle guidance. Confusion, fear, or illusion. Move slowly and verify what you feel."
+  },
+  "major_19_sun": {
+    "title": "The Sun",
+    "keywords": [
+      "joy",
+      "clarity",
+      "success"
+    ],
+    "meaning": {
+      "general": "Warmth, visibility, and clear success.",
+      "light": "Joy, vitality, and honest celebration.",
+      "shadow": "Overexposure, ego, or burnout.",
+      "advice": "Let your light be seen and shared."
+    },
+    "fact": "The Sun is the clearest card of the deck.",
+    "stats": {
+      "luck": 50,
+      "power": 55,
+      "love": 50,
+      "clarity": 55
+    },
+    "detailedDescription": "Warmth, visibility, and clear success. Joy, vitality, and honest celebration. Overexposure, ego, or burnout. Let your light be seen and shared."
+  },
+  "major_20_judgement": {
+    "title": "Judgement",
+    "keywords": [
+      "awakening",
+      "reckoning",
+      "purpose"
+    ],
+    "meaning": {
+      "general": "A call to rise and be accountable.",
+      "light": "Renewal, forgiveness, and clear purpose.",
+      "shadow": "Harsh self-judgment or refusing the call.",
+      "advice": "Answer honestly and step into the next chapter."
+    },
+    "fact": "Judgement is about awakening, not punishment.",
+    "stats": {
+      "luck": 50,
+      "power": 55,
+      "love": 50,
+      "clarity": 55
+    },
+    "detailedDescription": "A call to rise and be accountable. Renewal, forgiveness, and clear purpose. Harsh self-judgment or refusing the call. Answer honestly and step into the next chapter."
+  },
+  "major_21_world": {
+    "title": "The World",
+    "keywords": [
+      "completion",
+      "wholeness",
+      "integration"
+    ],
+    "meaning": {
+      "general": "Completion and a sense of wholeness.",
+      "light": "Integration, reward, and earned closure.",
+      "shadow": "Delays in finishing or fearing the next cycle.",
+      "advice": "Honor what is complete and open the next door."
+    },
+    "fact": "The World closes the Major Arcana journey.",
+    "stats": {
+      "luck": 50,
+      "power": 55,
+      "love": 50,
+      "clarity": 55
+    },
+    "detailedDescription": "Completion and a sense of wholeness. Integration, reward, and earned closure. Delays in finishing or fearing the next cycle. Honor what is complete and open the next door."
+  },
+  "wands_00_knight": {
+    "title": "Knight of Wands",
+    "keywords": [
+      "drive",
+      "action",
+      "quest",
+      "drive",
+      "creativity"
+    ],
+    "meaning": {
+      "general": "The Knight of Wands points to decisive action and pursuit in the realm of passion, action, and courage.",
+      "light": "At its best, it shows bold movement and initiative.",
+      "shadow": "In shadow, it can show impulsiveness or recklessness.",
+      "advice": "Advice: act with courage and direction."
+    },
+    "fact": "Knights bring motion to the suit in Wands.",
+    "stats": {
+      "luck": 54,
+      "power": 66,
+      "love": 50,
+      "clarity": 54
+    },
+    "detailedDescription": "The Knight of Wands points to decisive action and pursuit in the realm of passion, action, and courage. At its best, it shows bold movement and initiative. In shadow, it can show impulsiveness or recklessness. Advice: act with courage and direction."
+  },
+  "wands_01_king": {
+    "title": "King of Wands",
+    "keywords": [
+      "leadership",
+      "authority",
+      "direction",
+      "drive",
+      "creativity"
+    ],
+    "meaning": {
+      "general": "The King of Wands points to outward mastery and leadership in the realm of passion, action, and courage.",
+      "light": "At its best, it shows clear authority and wise direction.",
+      "shadow": "In shadow, it can show rigidity or misuse of power.",
+      "advice": "Advice: use your authority with integrity."
+    },
+    "fact": "Kings express the suit's power outwardly in Wands.",
+    "stats": {
+      "luck": 54,
+      "power": 66,
+      "love": 52,
+      "clarity": 58
+    },
+    "detailedDescription": "The King of Wands points to outward mastery and leadership in the realm of passion, action, and courage. At its best, it shows clear authority and wise direction. In shadow, it can show rigidity or misuse of power. Advice: use your authority with integrity."
+  },
+  "wands_02_queen": {
+    "title": "Queen of Wands",
+    "keywords": [
+      "mastery",
+      "care",
+      "inner strength",
+      "drive",
+      "creativity"
+    ],
+    "meaning": {
+      "general": "The Queen of Wands points to inner mastery and steady care in the realm of passion, action, and courage.",
+      "light": "At its best, it shows warm leadership and emotional intelligence.",
+      "shadow": "In shadow, it can show overcontrol or hidden resentment.",
+      "advice": "Advice: lead quietly and consistently."
+    },
+    "fact": "Queens hold the suit's wisdom within in Wands.",
+    "stats": {
+      "luck": 54,
+      "power": 60,
+      "love": 58,
+      "clarity": 54
+    },
+    "detailedDescription": "The Queen of Wands points to inner mastery and steady care in the realm of passion, action, and courage. At its best, it shows warm leadership and emotional intelligence. In shadow, it can show overcontrol or hidden resentment. Advice: lead quietly and consistently."
+  },
+  "wands_03_page": {
+    "title": "Page of Wands",
+    "keywords": [
+      "curiosity",
+      "messages",
+      "learning",
+      "drive",
+      "creativity"
+    ],
+    "meaning": {
+      "general": "The Page of Wands points to curiosity and new information in the realm of passion, action, and courage.",
+      "light": "At its best, it shows fresh study and openness.",
+      "shadow": "In shadow, it can show naivety or scattered attention.",
+      "advice": "Advice: stay curious and grounded."
+    },
+    "fact": "Pages signal messages and beginnings in Wands.",
+    "stats": {
+      "luck": 56,
+      "power": 60,
+      "love": 52,
+      "clarity": 54
+    },
+    "detailedDescription": "The Page of Wands points to curiosity and new information in the realm of passion, action, and courage. At its best, it shows fresh study and openness. In shadow, it can show naivety or scattered attention. Advice: stay curious and grounded."
+  },
+  "wands_04_two": {
+    "title": "Two of Wands",
+    "keywords": [
+      "choice",
+      "balance",
+      "planning",
+      "drive",
+      "creativity"
+    ],
+    "meaning": {
+      "general": "The Two of Wands points to a choice and a wider horizon in the realm of passion, action, and courage.",
+      "light": "At its best, it shows steady planning and clear options.",
+      "shadow": "In shadow, it can show indecision or waiting too long.",
+      "advice": "Advice: choose a direction and commit."
+    },
+    "fact": "Twos weigh options before the journey in Wands.",
+    "stats": {
+      "luck": 54,
+      "power": 58,
+      "love": 54,
+      "clarity": 58
+    },
+    "detailedDescription": "The Two of Wands points to a choice and a wider horizon in the realm of passion, action, and courage. At its best, it shows steady planning and clear options. In shadow, it can show indecision or waiting too long. Advice: choose a direction and commit."
+  },
+  "wands_05_three": {
+    "title": "Three of Wands",
+    "keywords": [
+      "growth",
+      "teamwork",
+      "progress",
+      "drive",
+      "creativity"
+    ],
+    "meaning": {
+      "general": "The Three of Wands points to early results and expansion in the realm of passion, action, and courage.",
+      "light": "At its best, it shows collaboration and momentum.",
+      "shadow": "In shadow, it can show misalignment or slow feedback.",
+      "advice": "Advice: share the load and keep moving."
+    },
+    "fact": "Threes mark growth after the first step in Wands.",
+    "stats": {
+      "luck": 56,
+      "power": 60,
+      "love": 56,
+      "clarity": 54
+    },
+    "detailedDescription": "The Three of Wands points to early results and expansion in the realm of passion, action, and courage. At its best, it shows collaboration and momentum. In shadow, it can show misalignment or slow feedback. Advice: share the load and keep moving."
+  },
+  "wands_06_four": {
+    "title": "Four of Wands",
+    "keywords": [
+      "stability",
+      "rest",
+      "foundation",
+      "drive",
+      "creativity"
+    ],
+    "meaning": {
+      "general": "The Four of Wands points to stability and consolidation in the realm of passion, action, and courage.",
+      "light": "At its best, it shows healthy rest and grounded structure.",
+      "shadow": "In shadow, it can show stagnation or holding too tight.",
+      "advice": "Advice: stabilize without freezing."
+    },
+    "fact": "Fours create a base before the next push in Wands.",
+    "stats": {
+      "luck": 52,
+      "power": 60,
+      "love": 52,
+      "clarity": 58
+    },
+    "detailedDescription": "The Four of Wands points to stability and consolidation in the realm of passion, action, and courage. At its best, it shows healthy rest and grounded structure. In shadow, it can show stagnation or holding too tight. Advice: stabilize without freezing."
+  },
+  "wands_07_five": {
+    "title": "Five of Wands",
+    "keywords": [
+      "challenge",
+      "conflict",
+      "test",
+      "drive",
+      "creativity"
+    ],
+    "meaning": {
+      "general": "The Five of Wands points to friction and a test of will in the realm of passion, action, and courage.",
+      "light": "At its best, it shows learning through challenge.",
+      "shadow": "In shadow, it can show chaos, ego clashes, or loss.",
+      "advice": "Advice: address the tension directly."
+    },
+    "fact": "Fives introduce change through tension in Wands.",
+    "stats": {
+      "luck": 46,
+      "power": 60,
+      "love": 48,
+      "clarity": 52
+    },
+    "detailedDescription": "The Five of Wands points to friction and a test of will in the realm of passion, action, and courage. At its best, it shows learning through challenge. In shadow, it can show chaos, ego clashes, or loss. Advice: address the tension directly."
+  },
+  "wands_08_six": {
+    "title": "Six of Wands",
+    "keywords": [
+      "harmony",
+      "support",
+      "success",
+      "drive",
+      "creativity"
+    ],
+    "meaning": {
+      "general": "The Six of Wands points to progress and shared support in the realm of passion, action, and courage.",
+      "light": "At its best, it shows recognition and smooth cooperation.",
+      "shadow": "In shadow, it can show complacency or shallow wins.",
+      "advice": "Advice: accept help and keep pace."
+    },
+    "fact": "Sixes bring cooperation and relief in Wands.",
+    "stats": {
+      "luck": 58,
+      "power": 60,
+      "love": 54,
+      "clarity": 54
+    },
+    "detailedDescription": "The Six of Wands points to progress and shared support in the realm of passion, action, and courage. At its best, it shows recognition and smooth cooperation. In shadow, it can show complacency or shallow wins. Advice: accept help and keep pace."
+  },
+  "wands_09_seven": {
+    "title": "Seven of Wands",
+    "keywords": [
+      "strategy",
+      "defense",
+      "evaluation",
+      "drive",
+      "creativity"
+    ],
+    "meaning": {
+      "general": "The Seven of Wands points to strategy and measured resistance in the realm of passion, action, and courage.",
+      "light": "At its best, it shows focus, persistence, and smart boundaries.",
+      "shadow": "In shadow, it can show overdefending or second-guessing.",
+      "advice": "Advice: protect your ground without closing off."
+    },
+    "fact": "Sevens test focus and resolve in Wands.",
+    "stats": {
+      "luck": 50,
+      "power": 62,
+      "love": 50,
+      "clarity": 56
+    },
+    "detailedDescription": "The Seven of Wands points to strategy and measured resistance in the realm of passion, action, and courage. At its best, it shows focus, persistence, and smart boundaries. In shadow, it can show overdefending or second-guessing. Advice: protect your ground without closing off."
+  },
+  "wands_10_eight": {
+    "title": "Eight of Wands",
+    "keywords": [
+      "movement",
+      "practice",
+      "momentum",
+      "drive",
+      "creativity"
+    ],
+    "meaning": {
+      "general": "The Eight of Wands points to speed and skill-building in the realm of passion, action, and courage.",
+      "light": "At its best, it shows productive flow and steady motion.",
+      "shadow": "In shadow, it can show rushed choices or burnout.",
+      "advice": "Advice: move quickly, but keep form."
+    },
+    "fact": "Eights accelerate the suit's energy in Wands.",
+    "stats": {
+      "luck": 54,
+      "power": 62,
+      "love": 50,
+      "clarity": 58
+    },
+    "detailedDescription": "The Eight of Wands points to speed and skill-building in the realm of passion, action, and courage. At its best, it shows productive flow and steady motion. In shadow, it can show rushed choices or burnout. Advice: move quickly, but keep form."
+  },
+  "wands_11_nine": {
+    "title": "Nine of Wands",
+    "keywords": [
+      "resilience",
+      "boundaries",
+      "near-complete",
+      "drive",
+      "creativity"
+    ],
+    "meaning": {
+      "general": "The Nine of Wands points to endurance and nearing completion in the realm of passion, action, and courage.",
+      "light": "At its best, it shows strong boundaries and grit.",
+      "shadow": "In shadow, it can show fatigue or isolation.",
+      "advice": "Advice: protect your energy and finish well."
+    },
+    "fact": "Nines hold steady near the finish in Wands.",
+    "stats": {
+      "luck": 52,
+      "power": 60,
+      "love": 56,
+      "clarity": 54
+    },
+    "detailedDescription": "The Nine of Wands points to endurance and nearing completion in the realm of passion, action, and courage. At its best, it shows strong boundaries and grit. In shadow, it can show fatigue or isolation. Advice: protect your energy and finish well."
+  },
+  "wands_12_ten": {
+    "title": "Ten of Wands",
+    "keywords": [
+      "culmination",
+      "burden",
+      "closure",
+      "drive",
+      "creativity"
+    ],
+    "meaning": {
+      "general": "The Ten of Wands points to a cycle reaching full weight in the realm of passion, action, and courage.",
+      "light": "At its best, it shows completion and a clear finish line.",
+      "shadow": "In shadow, it can show overload or carrying too much.",
+      "advice": "Advice: share the burden and wrap it up."
+    },
+    "fact": "Tens close the suit's cycle in Wands.",
+    "stats": {
+      "luck": 50,
+      "power": 56,
+      "love": 52,
+      "clarity": 56
+    },
+    "detailedDescription": "The Ten of Wands points to a cycle reaching full weight in the realm of passion, action, and courage. At its best, it shows completion and a clear finish line. In shadow, it can show overload or carrying too much. Advice: share the burden and wrap it up."
+  },
+  "wands_13_ace": {
+    "title": "Ace of Wands",
+    "keywords": [
+      "spark",
+      "potential",
+      "beginning",
+      "drive",
+      "creativity"
+    ],
+    "meaning": {
+      "general": "The Ace of Wands points to a new seed and raw potential in the realm of passion, action, and courage.",
+      "light": "At its best, it shows fresh energy and a clean opening.",
+      "shadow": "In shadow, it can show potential without follow-through.",
+      "advice": "Advice: plant the seed and nurture it."
+    },
+    "fact": "Aces are the first pulse of the suit in Wands.",
+    "stats": {
+      "luck": 56,
+      "power": 68,
+      "love": 52,
+      "clarity": 58
+    },
+    "detailedDescription": "The Ace of Wands points to a new seed and raw potential in the realm of passion, action, and courage. At its best, it shows fresh energy and a clean opening. In shadow, it can show potential without follow-through. Advice: plant the seed and nurture it."
+  },
+  "swords_00_knight": {
+    "title": "Knight of Swords",
+    "keywords": [
+      "drive",
+      "action",
+      "quest",
+      "clarity",
+      "truth"
+    ],
+    "meaning": {
+      "general": "The Knight of Swords points to decisive action and pursuit in the realm of mind, truth, and decisions.",
+      "light": "At its best, it shows bold movement and initiative.",
+      "shadow": "In shadow, it can show impulsiveness or recklessness.",
+      "advice": "Advice: act with courage and direction."
+    },
+    "fact": "Knights bring motion to the suit in Swords.",
+    "stats": {
+      "luck": 52,
+      "power": 62,
+      "love": 50,
+      "clarity": 60
+    },
+    "detailedDescription": "The Knight of Swords points to decisive action and pursuit in the realm of mind, truth, and decisions. At its best, it shows bold movement and initiative. In shadow, it can show impulsiveness or recklessness. Advice: act with courage and direction."
+  },
+  "swords_01_king": {
+    "title": "King of Swords",
+    "keywords": [
+      "leadership",
+      "authority",
+      "direction",
+      "clarity",
+      "truth"
+    ],
+    "meaning": {
+      "general": "The King of Swords points to outward mastery and leadership in the realm of mind, truth, and decisions.",
+      "light": "At its best, it shows clear authority and wise direction.",
+      "shadow": "In shadow, it can show rigidity or misuse of power.",
+      "advice": "Advice: use your authority with integrity."
+    },
+    "fact": "Kings express the suit's power outwardly in Swords.",
+    "stats": {
+      "luck": 52,
+      "power": 62,
+      "love": 52,
+      "clarity": 64
+    },
+    "detailedDescription": "The King of Swords points to outward mastery and leadership in the realm of mind, truth, and decisions. At its best, it shows clear authority and wise direction. In shadow, it can show rigidity or misuse of power. Advice: use your authority with integrity."
+  },
+  "swords_02_queen": {
+    "title": "Queen of Swords",
+    "keywords": [
+      "mastery",
+      "care",
+      "inner strength",
+      "clarity",
+      "truth"
+    ],
+    "meaning": {
+      "general": "The Queen of Swords points to inner mastery and steady care in the realm of mind, truth, and decisions.",
+      "light": "At its best, it shows warm leadership and emotional intelligence.",
+      "shadow": "In shadow, it can show overcontrol or hidden resentment.",
+      "advice": "Advice: lead quietly and consistently."
+    },
+    "fact": "Queens hold the suit's wisdom within in Swords.",
+    "stats": {
+      "luck": 52,
+      "power": 56,
+      "love": 58,
+      "clarity": 60
+    },
+    "detailedDescription": "The Queen of Swords points to inner mastery and steady care in the realm of mind, truth, and decisions. At its best, it shows warm leadership and emotional intelligence. In shadow, it can show overcontrol or hidden resentment. Advice: lead quietly and consistently."
+  },
+  "swords_03_page": {
+    "title": "Page of Swords",
+    "keywords": [
+      "curiosity",
+      "messages",
+      "learning",
+      "clarity",
+      "truth"
+    ],
+    "meaning": {
+      "general": "The Page of Swords points to curiosity and new information in the realm of mind, truth, and decisions.",
+      "light": "At its best, it shows fresh study and openness.",
+      "shadow": "In shadow, it can show naivety or scattered attention.",
+      "advice": "Advice: stay curious and grounded."
+    },
+    "fact": "Pages signal messages and beginnings in Swords.",
+    "stats": {
+      "luck": 54,
+      "power": 56,
+      "love": 52,
+      "clarity": 60
+    },
+    "detailedDescription": "The Page of Swords points to curiosity and new information in the realm of mind, truth, and decisions. At its best, it shows fresh study and openness. In shadow, it can show naivety or scattered attention. Advice: stay curious and grounded."
+  },
+  "swords_04_two": {
+    "title": "Two of Swords",
+    "keywords": [
+      "choice",
+      "balance",
+      "planning",
+      "clarity",
+      "truth"
+    ],
+    "meaning": {
+      "general": "The Two of Swords points to a choice and a wider horizon in the realm of mind, truth, and decisions.",
+      "light": "At its best, it shows steady planning and clear options.",
+      "shadow": "In shadow, it can show indecision or waiting too long.",
+      "advice": "Advice: choose a direction and commit."
+    },
+    "fact": "Twos weigh options before the journey in Swords.",
+    "stats": {
+      "luck": 52,
+      "power": 54,
+      "love": 54,
+      "clarity": 64
+    },
+    "detailedDescription": "The Two of Swords points to a choice and a wider horizon in the realm of mind, truth, and decisions. At its best, it shows steady planning and clear options. In shadow, it can show indecision or waiting too long. Advice: choose a direction and commit."
+  },
+  "swords_05_three": {
+    "title": "Three of Swords",
+    "keywords": [
+      "growth",
+      "teamwork",
+      "progress",
+      "clarity",
+      "truth"
+    ],
+    "meaning": {
+      "general": "The Three of Swords points to early results and expansion in the realm of mind, truth, and decisions.",
+      "light": "At its best, it shows collaboration and momentum.",
+      "shadow": "In shadow, it can show misalignment or slow feedback.",
+      "advice": "Advice: share the load and keep moving."
+    },
+    "fact": "Threes mark growth after the first step in Swords.",
+    "stats": {
+      "luck": 54,
+      "power": 56,
+      "love": 56,
+      "clarity": 60
+    },
+    "detailedDescription": "The Three of Swords points to early results and expansion in the realm of mind, truth, and decisions. At its best, it shows collaboration and momentum. In shadow, it can show misalignment or slow feedback. Advice: share the load and keep moving."
+  },
+  "swords_06_four": {
+    "title": "Four of Swords",
+    "keywords": [
+      "stability",
+      "rest",
+      "foundation",
+      "clarity",
+      "truth"
+    ],
+    "meaning": {
+      "general": "The Four of Swords points to stability and consolidation in the realm of mind, truth, and decisions.",
+      "light": "At its best, it shows healthy rest and grounded structure.",
+      "shadow": "In shadow, it can show stagnation or holding too tight.",
+      "advice": "Advice: stabilize without freezing."
+    },
+    "fact": "Fours create a base before the next push in Swords.",
+    "stats": {
+      "luck": 50,
+      "power": 56,
+      "love": 52,
+      "clarity": 64
+    },
+    "detailedDescription": "The Four of Swords points to stability and consolidation in the realm of mind, truth, and decisions. At its best, it shows healthy rest and grounded structure. In shadow, it can show stagnation or holding too tight. Advice: stabilize without freezing."
+  },
+  "swords_07_five": {
+    "title": "Five of Swords",
+    "keywords": [
+      "challenge",
+      "conflict",
+      "test",
+      "clarity",
+      "truth"
+    ],
+    "meaning": {
+      "general": "The Five of Swords points to friction and a test of will in the realm of mind, truth, and decisions.",
+      "light": "At its best, it shows learning through challenge.",
+      "shadow": "In shadow, it can show chaos, ego clashes, or loss.",
+      "advice": "Advice: address the tension directly."
+    },
+    "fact": "Fives introduce change through tension in Swords.",
+    "stats": {
+      "luck": 44,
+      "power": 56,
+      "love": 48,
+      "clarity": 58
+    },
+    "detailedDescription": "The Five of Swords points to friction and a test of will in the realm of mind, truth, and decisions. At its best, it shows learning through challenge. In shadow, it can show chaos, ego clashes, or loss. Advice: address the tension directly."
+  },
+  "swords_08_six": {
+    "title": "Six of Swords",
+    "keywords": [
+      "harmony",
+      "support",
+      "success",
+      "clarity",
+      "truth"
+    ],
+    "meaning": {
+      "general": "The Six of Swords points to progress and shared support in the realm of mind, truth, and decisions.",
+      "light": "At its best, it shows recognition and smooth cooperation.",
+      "shadow": "In shadow, it can show complacency or shallow wins.",
+      "advice": "Advice: accept help and keep pace."
+    },
+    "fact": "Sixes bring cooperation and relief in Swords.",
+    "stats": {
+      "luck": 56,
+      "power": 56,
+      "love": 54,
+      "clarity": 60
+    },
+    "detailedDescription": "The Six of Swords points to progress and shared support in the realm of mind, truth, and decisions. At its best, it shows recognition and smooth cooperation. In shadow, it can show complacency or shallow wins. Advice: accept help and keep pace."
+  },
+  "swords_09_seven": {
+    "title": "Seven of Swords",
+    "keywords": [
+      "strategy",
+      "defense",
+      "evaluation",
+      "clarity",
+      "truth"
+    ],
+    "meaning": {
+      "general": "The Seven of Swords points to strategy and measured resistance in the realm of mind, truth, and decisions.",
+      "light": "At its best, it shows focus, persistence, and smart boundaries.",
+      "shadow": "In shadow, it can show overdefending or second-guessing.",
+      "advice": "Advice: protect your ground without closing off."
+    },
+    "fact": "Sevens test focus and resolve in Swords.",
+    "stats": {
+      "luck": 48,
+      "power": 58,
+      "love": 50,
+      "clarity": 62
+    },
+    "detailedDescription": "The Seven of Swords points to strategy and measured resistance in the realm of mind, truth, and decisions. At its best, it shows focus, persistence, and smart boundaries. In shadow, it can show overdefending or second-guessing. Advice: protect your ground without closing off."
+  },
+  "swords_10_eight": {
+    "title": "Eight of Swords",
+    "keywords": [
+      "movement",
+      "practice",
+      "momentum",
+      "clarity",
+      "truth"
+    ],
+    "meaning": {
+      "general": "The Eight of Swords points to speed and skill-building in the realm of mind, truth, and decisions.",
+      "light": "At its best, it shows productive flow and steady motion.",
+      "shadow": "In shadow, it can show rushed choices or burnout.",
+      "advice": "Advice: move quickly, but keep form."
+    },
+    "fact": "Eights accelerate the suit's energy in Swords.",
+    "stats": {
+      "luck": 52,
+      "power": 58,
+      "love": 50,
+      "clarity": 64
+    },
+    "detailedDescription": "The Eight of Swords points to speed and skill-building in the realm of mind, truth, and decisions. At its best, it shows productive flow and steady motion. In shadow, it can show rushed choices or burnout. Advice: move quickly, but keep form."
+  },
+  "swords_11_nine": {
+    "title": "Nine of Swords",
+    "keywords": [
+      "resilience",
+      "boundaries",
+      "near-complete",
+      "clarity",
+      "truth"
+    ],
+    "meaning": {
+      "general": "The Nine of Swords points to endurance and nearing completion in the realm of mind, truth, and decisions.",
+      "light": "At its best, it shows strong boundaries and grit.",
+      "shadow": "In shadow, it can show fatigue or isolation.",
+      "advice": "Advice: protect your energy and finish well."
+    },
+    "fact": "Nines hold steady near the finish in Swords.",
+    "stats": {
+      "luck": 50,
+      "power": 56,
+      "love": 56,
+      "clarity": 60
+    },
+    "detailedDescription": "The Nine of Swords points to endurance and nearing completion in the realm of mind, truth, and decisions. At its best, it shows strong boundaries and grit. In shadow, it can show fatigue or isolation. Advice: protect your energy and finish well."
+  },
+  "swords_12_ten": {
+    "title": "Ten of Swords",
+    "keywords": [
+      "culmination",
+      "burden",
+      "closure",
+      "clarity",
+      "truth"
+    ],
+    "meaning": {
+      "general": "The Ten of Swords points to a cycle reaching full weight in the realm of mind, truth, and decisions.",
+      "light": "At its best, it shows completion and a clear finish line.",
+      "shadow": "In shadow, it can show overload or carrying too much.",
+      "advice": "Advice: share the burden and wrap it up."
+    },
+    "fact": "Tens close the suit's cycle in Swords.",
+    "stats": {
+      "luck": 48,
+      "power": 52,
+      "love": 52,
+      "clarity": 62
+    },
+    "detailedDescription": "The Ten of Swords points to a cycle reaching full weight in the realm of mind, truth, and decisions. At its best, it shows completion and a clear finish line. In shadow, it can show overload or carrying too much. Advice: share the burden and wrap it up."
+  },
+  "swords_13_ace": {
+    "title": "Ace of Swords",
+    "keywords": [
+      "spark",
+      "potential",
+      "beginning",
+      "clarity",
+      "truth"
+    ],
+    "meaning": {
+      "general": "The Ace of Swords points to a new seed and raw potential in the realm of mind, truth, and decisions.",
+      "light": "At its best, it shows fresh energy and a clean opening.",
+      "shadow": "In shadow, it can show potential without follow-through.",
+      "advice": "Advice: plant the seed and nurture it."
+    },
+    "fact": "Aces are the first pulse of the suit in Swords.",
+    "stats": {
+      "luck": 54,
+      "power": 64,
+      "love": 52,
+      "clarity": 64
+    },
+    "detailedDescription": "The Ace of Swords points to a new seed and raw potential in the realm of mind, truth, and decisions. At its best, it shows fresh energy and a clean opening. In shadow, it can show potential without follow-through. Advice: plant the seed and nurture it."
+  },
+  "pentacles_00_knight": {
+    "title": "Knight of Pentacles",
+    "keywords": [
+      "drive",
+      "action",
+      "quest",
+      "stability",
+      "resources"
+    ],
+    "meaning": {
+      "general": "The Knight of Pentacles points to decisive action and pursuit in the realm of material life, resources, and stability.",
+      "light": "At its best, it shows bold movement and initiative.",
+      "shadow": "In shadow, it can show impulsiveness or recklessness.",
+      "advice": "Advice: act with courage and direction."
+    },
+    "fact": "Knights bring motion to the suit in Pentacles.",
+    "stats": {
+      "luck": 60,
+      "power": 60,
+      "love": 50,
+      "clarity": 56
+    },
+    "detailedDescription": "The Knight of Pentacles points to decisive action and pursuit in the realm of material life, resources, and stability. At its best, it shows bold movement and initiative. In shadow, it can show impulsiveness or recklessness. Advice: act with courage and direction."
+  },
+  "pentacles_01_king": {
+    "title": "King of Pentacles",
+    "keywords": [
+      "leadership",
+      "authority",
+      "direction",
+      "stability",
+      "resources"
+    ],
+    "meaning": {
+      "general": "The King of Pentacles points to outward mastery and leadership in the realm of material life, resources, and stability.",
+      "light": "At its best, it shows clear authority and wise direction.",
+      "shadow": "In shadow, it can show rigidity or misuse of power.",
+      "advice": "Advice: use your authority with integrity."
+    },
+    "fact": "Kings express the suit's power outwardly in Pentacles.",
+    "stats": {
+      "luck": 60,
+      "power": 60,
+      "love": 52,
+      "clarity": 60
+    },
+    "detailedDescription": "The King of Pentacles points to outward mastery and leadership in the realm of material life, resources, and stability. At its best, it shows clear authority and wise direction. In shadow, it can show rigidity or misuse of power. Advice: use your authority with integrity."
+  },
+  "pentacles_02_queen": {
+    "title": "Queen of Pentacles",
+    "keywords": [
+      "mastery",
+      "care",
+      "inner strength",
+      "stability",
+      "resources"
+    ],
+    "meaning": {
+      "general": "The Queen of Pentacles points to inner mastery and steady care in the realm of material life, resources, and stability.",
+      "light": "At its best, it shows warm leadership and emotional intelligence.",
+      "shadow": "In shadow, it can show overcontrol or hidden resentment.",
+      "advice": "Advice: lead quietly and consistently."
+    },
+    "fact": "Queens hold the suit's wisdom within in Pentacles.",
+    "stats": {
+      "luck": 60,
+      "power": 54,
+      "love": 58,
+      "clarity": 56
+    },
+    "detailedDescription": "The Queen of Pentacles points to inner mastery and steady care in the realm of material life, resources, and stability. At its best, it shows warm leadership and emotional intelligence. In shadow, it can show overcontrol or hidden resentment. Advice: lead quietly and consistently."
+  },
+  "pentacles_03_page": {
+    "title": "Page of Pentacles",
+    "keywords": [
+      "curiosity",
+      "messages",
+      "learning",
+      "stability",
+      "resources"
+    ],
+    "meaning": {
+      "general": "The Page of Pentacles points to curiosity and new information in the realm of material life, resources, and stability.",
+      "light": "At its best, it shows fresh study and openness.",
+      "shadow": "In shadow, it can show naivety or scattered attention.",
+      "advice": "Advice: stay curious and grounded."
+    },
+    "fact": "Pages signal messages and beginnings in Pentacles.",
+    "stats": {
+      "luck": 62,
+      "power": 54,
+      "love": 52,
+      "clarity": 56
+    },
+    "detailedDescription": "The Page of Pentacles points to curiosity and new information in the realm of material life, resources, and stability. At its best, it shows fresh study and openness. In shadow, it can show naivety or scattered attention. Advice: stay curious and grounded."
+  },
+  "pentacles_04_two": {
+    "title": "Two of Pentacles",
+    "keywords": [
+      "choice",
+      "balance",
+      "planning",
+      "stability",
+      "resources"
+    ],
+    "meaning": {
+      "general": "The Two of Pentacles points to a choice and a wider horizon in the realm of material life, resources, and stability.",
+      "light": "At its best, it shows steady planning and clear options.",
+      "shadow": "In shadow, it can show indecision or waiting too long.",
+      "advice": "Advice: choose a direction and commit."
+    },
+    "fact": "Twos weigh options before the journey in Pentacles.",
+    "stats": {
+      "luck": 60,
+      "power": 52,
+      "love": 54,
+      "clarity": 60
+    },
+    "detailedDescription": "The Two of Pentacles points to a choice and a wider horizon in the realm of material life, resources, and stability. At its best, it shows steady planning and clear options. In shadow, it can show indecision or waiting too long. Advice: choose a direction and commit."
+  },
+  "pentacles_05_three": {
+    "title": "Three of Pentacles",
+    "keywords": [
+      "growth",
+      "teamwork",
+      "progress",
+      "stability",
+      "resources"
+    ],
+    "meaning": {
+      "general": "The Three of Pentacles points to early results and expansion in the realm of material life, resources, and stability.",
+      "light": "At its best, it shows collaboration and momentum.",
+      "shadow": "In shadow, it can show misalignment or slow feedback.",
+      "advice": "Advice: share the load and keep moving."
+    },
+    "fact": "Threes mark growth after the first step in Pentacles.",
+    "stats": {
+      "luck": 62,
+      "power": 54,
+      "love": 56,
+      "clarity": 56
+    },
+    "detailedDescription": "The Three of Pentacles points to early results and expansion in the realm of material life, resources, and stability. At its best, it shows collaboration and momentum. In shadow, it can show misalignment or slow feedback. Advice: share the load and keep moving."
+  },
+  "pentacles_06_four": {
+    "title": "Four of Pentacles",
+    "keywords": [
+      "stability",
+      "rest",
+      "foundation",
+      "stability",
+      "resources"
+    ],
+    "meaning": {
+      "general": "The Four of Pentacles points to stability and consolidation in the realm of material life, resources, and stability.",
+      "light": "At its best, it shows healthy rest and grounded structure.",
+      "shadow": "In shadow, it can show stagnation or holding too tight.",
+      "advice": "Advice: stabilize without freezing."
+    },
+    "fact": "Fours create a base before the next push in Pentacles.",
+    "stats": {
+      "luck": 58,
+      "power": 54,
+      "love": 52,
+      "clarity": 60
+    },
+    "detailedDescription": "The Four of Pentacles points to stability and consolidation in the realm of material life, resources, and stability. At its best, it shows healthy rest and grounded structure. In shadow, it can show stagnation or holding too tight. Advice: stabilize without freezing."
+  },
+  "pentacles_07_five": {
+    "title": "Five of Pentacles",
+    "keywords": [
+      "challenge",
+      "conflict",
+      "test",
+      "stability",
+      "resources"
+    ],
+    "meaning": {
+      "general": "The Five of Pentacles points to friction and a test of will in the realm of material life, resources, and stability.",
+      "light": "At its best, it shows learning through challenge.",
+      "shadow": "In shadow, it can show chaos, ego clashes, or loss.",
+      "advice": "Advice: address the tension directly."
+    },
+    "fact": "Fives introduce change through tension in Pentacles.",
+    "stats": {
+      "luck": 52,
+      "power": 54,
+      "love": 48,
+      "clarity": 54
+    },
+    "detailedDescription": "The Five of Pentacles points to friction and a test of will in the realm of material life, resources, and stability. At its best, it shows learning through challenge. In shadow, it can show chaos, ego clashes, or loss. Advice: address the tension directly."
+  },
+  "pentacles_08_six": {
+    "title": "Six of Pentacles",
+    "keywords": [
+      "harmony",
+      "support",
+      "success",
+      "stability",
+      "resources"
+    ],
+    "meaning": {
+      "general": "The Six of Pentacles points to progress and shared support in the realm of material life, resources, and stability.",
+      "light": "At its best, it shows recognition and smooth cooperation.",
+      "shadow": "In shadow, it can show complacency or shallow wins.",
+      "advice": "Advice: accept help and keep pace."
+    },
+    "fact": "Sixes bring cooperation and relief in Pentacles.",
+    "stats": {
+      "luck": 64,
+      "power": 54,
+      "love": 54,
+      "clarity": 56
+    },
+    "detailedDescription": "The Six of Pentacles points to progress and shared support in the realm of material life, resources, and stability. At its best, it shows recognition and smooth cooperation. In shadow, it can show complacency or shallow wins. Advice: accept help and keep pace."
+  },
+  "pentacles_09_seven": {
+    "title": "Seven of Pentacles",
+    "keywords": [
+      "strategy",
+      "defense",
+      "evaluation",
+      "stability",
+      "resources"
+    ],
+    "meaning": {
+      "general": "The Seven of Pentacles points to strategy and measured resistance in the realm of material life, resources, and stability.",
+      "light": "At its best, it shows focus, persistence, and smart boundaries.",
+      "shadow": "In shadow, it can show overdefending or second-guessing.",
+      "advice": "Advice: protect your ground without closing off."
+    },
+    "fact": "Sevens test focus and resolve in Pentacles.",
+    "stats": {
+      "luck": 56,
+      "power": 56,
+      "love": 50,
+      "clarity": 58
+    },
+    "detailedDescription": "The Seven of Pentacles points to strategy and measured resistance in the realm of material life, resources, and stability. At its best, it shows focus, persistence, and smart boundaries. In shadow, it can show overdefending or second-guessing. Advice: protect your ground without closing off."
+  },
+  "pentacles_10_eight": {
+    "title": "Eight of Pentacles",
+    "keywords": [
+      "movement",
+      "practice",
+      "momentum",
+      "stability",
+      "resources"
+    ],
+    "meaning": {
+      "general": "The Eight of Pentacles points to speed and skill-building in the realm of material life, resources, and stability.",
+      "light": "At its best, it shows productive flow and steady motion.",
+      "shadow": "In shadow, it can show rushed choices or burnout.",
+      "advice": "Advice: move quickly, but keep form."
+    },
+    "fact": "Eights accelerate the suit's energy in Pentacles.",
+    "stats": {
+      "luck": 60,
+      "power": 56,
+      "love": 50,
+      "clarity": 60
+    },
+    "detailedDescription": "The Eight of Pentacles points to speed and skill-building in the realm of material life, resources, and stability. At its best, it shows productive flow and steady motion. In shadow, it can show rushed choices or burnout. Advice: move quickly, but keep form."
+  },
+  "pentacles_11_nine": {
+    "title": "Nine of Pentacles",
+    "keywords": [
+      "resilience",
+      "boundaries",
+      "near-complete",
+      "stability",
+      "resources"
+    ],
+    "meaning": {
+      "general": "The Nine of Pentacles points to endurance and nearing completion in the realm of material life, resources, and stability.",
+      "light": "At its best, it shows strong boundaries and grit.",
+      "shadow": "In shadow, it can show fatigue or isolation.",
+      "advice": "Advice: protect your energy and finish well."
+    },
+    "fact": "Nines hold steady near the finish in Pentacles.",
+    "stats": {
+      "luck": 58,
+      "power": 54,
+      "love": 56,
+      "clarity": 56
+    },
+    "detailedDescription": "The Nine of Pentacles points to endurance and nearing completion in the realm of material life, resources, and stability. At its best, it shows strong boundaries and grit. In shadow, it can show fatigue or isolation. Advice: protect your energy and finish well."
+  },
+  "pentacles_12_ten": {
+    "title": "Ten of Pentacles",
+    "keywords": [
+      "culmination",
+      "burden",
+      "closure",
+      "stability",
+      "resources"
+    ],
+    "meaning": {
+      "general": "The Ten of Pentacles points to a cycle reaching full weight in the realm of material life, resources, and stability.",
+      "light": "At its best, it shows completion and a clear finish line.",
+      "shadow": "In shadow, it can show overload or carrying too much.",
+      "advice": "Advice: share the burden and wrap it up."
+    },
+    "fact": "Tens close the suit's cycle in Pentacles.",
+    "stats": {
+      "luck": 56,
+      "power": 50,
+      "love": 52,
+      "clarity": 58
+    },
+    "detailedDescription": "The Ten of Pentacles points to a cycle reaching full weight in the realm of material life, resources, and stability. At its best, it shows completion and a clear finish line. In shadow, it can show overload or carrying too much. Advice: share the burden and wrap it up."
+  },
+  "pentacles_13_ace": {
+    "title": "Ace of Pentacles",
+    "keywords": [
+      "spark",
+      "potential",
+      "beginning",
+      "stability",
+      "resources"
+    ],
+    "meaning": {
+      "general": "The Ace of Pentacles points to a new seed and raw potential in the realm of material life, resources, and stability.",
+      "light": "At its best, it shows fresh energy and a clean opening.",
+      "shadow": "In shadow, it can show potential without follow-through.",
+      "advice": "Advice: plant the seed and nurture it."
+    },
+    "fact": "Aces are the first pulse of the suit in Pentacles.",
+    "stats": {
+      "luck": 62,
+      "power": 62,
+      "love": 52,
+      "clarity": 60
+    },
+    "detailedDescription": "The Ace of Pentacles points to a new seed and raw potential in the realm of material life, resources, and stability. At its best, it shows fresh energy and a clean opening. In shadow, it can show potential without follow-through. Advice: plant the seed and nurture it."
+  },
+  "cups_00_knight": {
+    "title": "Knight of Cups",
+    "keywords": [
+      "drive",
+      "action",
+      "quest",
+      "emotion",
+      "connection"
+    ],
+    "meaning": {
+      "general": "The Knight of Cups points to decisive action and pursuit in the realm of emotion, connection, and intuition.",
+      "light": "At its best, it shows bold movement and initiative.",
+      "shadow": "In shadow, it can show impulsiveness or recklessness.",
+      "advice": "Advice: act with courage and direction."
+    },
+    "fact": "Knights bring motion to the suit in Cups.",
+    "stats": {
+      "luck": 56,
+      "power": 58,
+      "love": 58,
+      "clarity": 54
+    },
+    "detailedDescription": "The Knight of Cups points to decisive action and pursuit in the realm of emotion, connection, and intuition. At its best, it shows bold movement and initiative. In shadow, it can show impulsiveness or recklessness. Advice: act with courage and direction."
+  },
+  "cups_01_king": {
+    "title": "King of Cups",
+    "keywords": [
+      "leadership",
+      "authority",
+      "direction",
+      "emotion",
+      "connection"
+    ],
+    "meaning": {
+      "general": "The King of Cups points to outward mastery and leadership in the realm of emotion, connection, and intuition.",
+      "light": "At its best, it shows clear authority and wise direction.",
+      "shadow": "In shadow, it can show rigidity or misuse of power.",
+      "advice": "Advice: use your authority with integrity."
+    },
+    "fact": "Kings express the suit's power outwardly in Cups.",
+    "stats": {
+      "luck": 56,
+      "power": 58,
+      "love": 60,
+      "clarity": 58
+    },
+    "detailedDescription": "The King of Cups points to outward mastery and leadership in the realm of emotion, connection, and intuition. At its best, it shows clear authority and wise direction. In shadow, it can show rigidity or misuse of power. Advice: use your authority with integrity."
+  },
+  "cups_02_queen": {
+    "title": "Queen of Cups",
+    "keywords": [
+      "mastery",
+      "care",
+      "inner strength",
+      "emotion",
+      "connection"
+    ],
+    "meaning": {
+      "general": "The Queen of Cups points to inner mastery and steady care in the realm of emotion, connection, and intuition.",
+      "light": "At its best, it shows warm leadership and emotional intelligence.",
+      "shadow": "In shadow, it can show overcontrol or hidden resentment.",
+      "advice": "Advice: lead quietly and consistently."
+    },
+    "fact": "Queens hold the suit's wisdom within in Cups.",
+    "stats": {
+      "luck": 56,
+      "power": 52,
+      "love": 66,
+      "clarity": 54
+    },
+    "detailedDescription": "The Queen of Cups points to inner mastery and steady care in the realm of emotion, connection, and intuition. At its best, it shows warm leadership and emotional intelligence. In shadow, it can show overcontrol or hidden resentment. Advice: lead quietly and consistently."
+  },
+  "cups_03_page": {
+    "title": "Page of Cups",
+    "keywords": [
+      "curiosity",
+      "messages",
+      "learning",
+      "emotion",
+      "connection"
+    ],
+    "meaning": {
+      "general": "The Page of Cups points to curiosity and new information in the realm of emotion, connection, and intuition.",
+      "light": "At its best, it shows fresh study and openness.",
+      "shadow": "In shadow, it can show naivety or scattered attention.",
+      "advice": "Advice: stay curious and grounded."
+    },
+    "fact": "Pages signal messages and beginnings in Cups.",
+    "stats": {
+      "luck": 58,
+      "power": 52,
+      "love": 60,
+      "clarity": 54
+    },
+    "detailedDescription": "The Page of Cups points to curiosity and new information in the realm of emotion, connection, and intuition. At its best, it shows fresh study and openness. In shadow, it can show naivety or scattered attention. Advice: stay curious and grounded."
+  },
+  "cups_04_two": {
+    "title": "Two of Cups",
+    "keywords": [
+      "choice",
+      "balance",
+      "planning",
+      "emotion",
+      "connection"
+    ],
+    "meaning": {
+      "general": "The Two of Cups points to a choice and a wider horizon in the realm of emotion, connection, and intuition.",
+      "light": "At its best, it shows steady planning and clear options.",
+      "shadow": "In shadow, it can show indecision or waiting too long.",
+      "advice": "Advice: choose a direction and commit."
+    },
+    "fact": "Twos weigh options before the journey in Cups.",
+    "stats": {
+      "luck": 56,
+      "power": 50,
+      "love": 62,
+      "clarity": 58
+    },
+    "detailedDescription": "The Two of Cups points to a choice and a wider horizon in the realm of emotion, connection, and intuition. At its best, it shows steady planning and clear options. In shadow, it can show indecision or waiting too long. Advice: choose a direction and commit."
+  },
+  "cups_05_three": {
+    "title": "Three of Cups",
+    "keywords": [
+      "growth",
+      "teamwork",
+      "progress",
+      "emotion",
+      "connection"
+    ],
+    "meaning": {
+      "general": "The Three of Cups points to early results and expansion in the realm of emotion, connection, and intuition.",
+      "light": "At its best, it shows collaboration and momentum.",
+      "shadow": "In shadow, it can show misalignment or slow feedback.",
+      "advice": "Advice: share the load and keep moving."
+    },
+    "fact": "Threes mark growth after the first step in Cups.",
+    "stats": {
+      "luck": 58,
+      "power": 52,
+      "love": 64,
+      "clarity": 54
+    },
+    "detailedDescription": "The Three of Cups points to early results and expansion in the realm of emotion, connection, and intuition. At its best, it shows collaboration and momentum. In shadow, it can show misalignment or slow feedback. Advice: share the load and keep moving."
+  },
+  "cups_06_four": {
+    "title": "Four of Cups",
+    "keywords": [
+      "stability",
+      "rest",
+      "foundation",
+      "emotion",
+      "connection"
+    ],
+    "meaning": {
+      "general": "The Four of Cups points to stability and consolidation in the realm of emotion, connection, and intuition.",
+      "light": "At its best, it shows healthy rest and grounded structure.",
+      "shadow": "In shadow, it can show stagnation or holding too tight.",
+      "advice": "Advice: stabilize without freezing."
+    },
+    "fact": "Fours create a base before the next push in Cups.",
+    "stats": {
+      "luck": 54,
+      "power": 52,
+      "love": 60,
+      "clarity": 58
+    },
+    "detailedDescription": "The Four of Cups points to stability and consolidation in the realm of emotion, connection, and intuition. At its best, it shows healthy rest and grounded structure. In shadow, it can show stagnation or holding too tight. Advice: stabilize without freezing."
+  },
+  "cups_07_five": {
+    "title": "Five of Cups",
+    "keywords": [
+      "challenge",
+      "conflict",
+      "test",
+      "emotion",
+      "connection"
+    ],
+    "meaning": {
+      "general": "The Five of Cups points to friction and a test of will in the realm of emotion, connection, and intuition.",
+      "light": "At its best, it shows learning through challenge.",
+      "shadow": "In shadow, it can show chaos, ego clashes, or loss.",
+      "advice": "Advice: address the tension directly."
+    },
+    "fact": "Fives introduce change through tension in Cups.",
+    "stats": {
+      "luck": 48,
+      "power": 52,
+      "love": 56,
+      "clarity": 52
+    },
+    "detailedDescription": "The Five of Cups points to friction and a test of will in the realm of emotion, connection, and intuition. At its best, it shows learning through challenge. In shadow, it can show chaos, ego clashes, or loss. Advice: address the tension directly."
+  },
+  "cups_08_six": {
+    "title": "Six of Cups",
+    "keywords": [
+      "harmony",
+      "support",
+      "success",
+      "emotion",
+      "connection"
+    ],
+    "meaning": {
+      "general": "The Six of Cups points to progress and shared support in the realm of emotion, connection, and intuition.",
+      "light": "At its best, it shows recognition and smooth cooperation.",
+      "shadow": "In shadow, it can show complacency or shallow wins.",
+      "advice": "Advice: accept help and keep pace."
+    },
+    "fact": "Sixes bring cooperation and relief in Cups.",
+    "stats": {
+      "luck": 60,
+      "power": 52,
+      "love": 62,
+      "clarity": 54
+    },
+    "detailedDescription": "The Six of Cups points to progress and shared support in the realm of emotion, connection, and intuition. At its best, it shows recognition and smooth cooperation. In shadow, it can show complacency or shallow wins. Advice: accept help and keep pace."
+  },
+  "cups_09_seven": {
+    "title": "Seven of Cups",
+    "keywords": [
+      "strategy",
+      "defense",
+      "evaluation",
+      "emotion",
+      "connection"
+    ],
+    "meaning": {
+      "general": "The Seven of Cups points to strategy and measured resistance in the realm of emotion, connection, and intuition.",
+      "light": "At its best, it shows focus, persistence, and smart boundaries.",
+      "shadow": "In shadow, it can show overdefending or second-guessing.",
+      "advice": "Advice: protect your ground without closing off."
+    },
+    "fact": "Sevens test focus and resolve in Cups.",
+    "stats": {
+      "luck": 52,
+      "power": 54,
+      "love": 58,
+      "clarity": 56
+    },
+    "detailedDescription": "The Seven of Cups points to strategy and measured resistance in the realm of emotion, connection, and intuition. At its best, it shows focus, persistence, and smart boundaries. In shadow, it can show overdefending or second-guessing. Advice: protect your ground without closing off."
+  },
+  "cups_10_eight": {
+    "title": "Eight of Cups",
+    "keywords": [
+      "movement",
+      "practice",
+      "momentum",
+      "emotion",
+      "connection"
+    ],
+    "meaning": {
+      "general": "The Eight of Cups points to speed and skill-building in the realm of emotion, connection, and intuition.",
+      "light": "At its best, it shows productive flow and steady motion.",
+      "shadow": "In shadow, it can show rushed choices or burnout.",
+      "advice": "Advice: move quickly, but keep form."
+    },
+    "fact": "Eights accelerate the suit's energy in Cups.",
+    "stats": {
+      "luck": 56,
+      "power": 54,
+      "love": 58,
+      "clarity": 58
+    },
+    "detailedDescription": "The Eight of Cups points to speed and skill-building in the realm of emotion, connection, and intuition. At its best, it shows productive flow and steady motion. In shadow, it can show rushed choices or burnout. Advice: move quickly, but keep form."
+  },
+  "cups_11_nine": {
+    "title": "Nine of Cups",
+    "keywords": [
+      "resilience",
+      "boundaries",
+      "near-complete",
+      "emotion",
+      "connection"
+    ],
+    "meaning": {
+      "general": "The Nine of Cups points to endurance and nearing completion in the realm of emotion, connection, and intuition.",
+      "light": "At its best, it shows strong boundaries and grit.",
+      "shadow": "In shadow, it can show fatigue or isolation.",
+      "advice": "Advice: protect your energy and finish well."
+    },
+    "fact": "Nines hold steady near the finish in Cups.",
+    "stats": {
+      "luck": 54,
+      "power": 52,
+      "love": 64,
+      "clarity": 54
+    },
+    "detailedDescription": "The Nine of Cups points to endurance and nearing completion in the realm of emotion, connection, and intuition. At its best, it shows strong boundaries and grit. In shadow, it can show fatigue or isolation. Advice: protect your energy and finish well."
+  },
+  "cups_12_ten": {
+    "title": "Ten of Cups",
+    "keywords": [
+      "culmination",
+      "burden",
+      "closure",
+      "emotion",
+      "connection"
+    ],
+    "meaning": {
+      "general": "The Ten of Cups points to a cycle reaching full weight in the realm of emotion, connection, and intuition.",
+      "light": "At its best, it shows completion and a clear finish line.",
+      "shadow": "In shadow, it can show overload or carrying too much.",
+      "advice": "Advice: share the burden and wrap it up."
+    },
+    "fact": "Tens close the suit's cycle in Cups.",
+    "stats": {
+      "luck": 52,
+      "power": 48,
+      "love": 60,
+      "clarity": 56
+    },
+    "detailedDescription": "The Ten of Cups points to a cycle reaching full weight in the realm of emotion, connection, and intuition. At its best, it shows completion and a clear finish line. In shadow, it can show overload or carrying too much. Advice: share the burden and wrap it up."
+  },
+  "cups_13_ace": {
+    "title": "Ace of Cups",
+    "keywords": [
+      "spark",
+      "potential",
+      "beginning",
+      "emotion",
+      "connection"
+    ],
+    "meaning": {
+      "general": "The Ace of Cups points to a new seed and raw potential in the realm of emotion, connection, and intuition.",
+      "light": "At its best, it shows fresh energy and a clean opening.",
+      "shadow": "In shadow, it can show potential without follow-through.",
+      "advice": "Advice: plant the seed and nurture it."
+    },
+    "fact": "Aces are the first pulse of the suit in Cups.",
+    "stats": {
+      "luck": 58,
+      "power": 60,
+      "love": 60,
+      "clarity": 58
+    },
+    "detailedDescription": "The Ace of Cups points to a new seed and raw potential in the realm of emotion, connection, and intuition. At its best, it shows fresh energy and a clean opening. In shadow, it can show potential without follow-through. Advice: plant the seed and nurture it."
+  }
+}
