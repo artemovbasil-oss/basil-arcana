@@ -6,7 +6,9 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
 import '../../core/widgets/app_buttons.dart';
+import '../../core/widgets/energy_widgets.dart';
 import '../../data/repositories/ai_repository.dart';
+import '../../state/energy_controller.dart';
 import '../../state/providers.dart';
 
 class MoreFeaturesScreen extends ConsumerStatefulWidget {
@@ -52,7 +54,8 @@ class _MoreFeaturesScreenState extends ConsumerState<MoreFeaturesScreen> {
   }
 
   Future<void> _pickBirthTime() async {
-    final initialTime = _parseBirthTime() ?? const TimeOfDay(hour: 12, minute: 0);
+    final initialTime =
+        _parseBirthTime() ?? const TimeOfDay(hour: 12, minute: 0);
     final picked = await showTimePicker(
       context: context,
       initialTime: initialTime,
@@ -105,6 +108,15 @@ class _MoreFeaturesScreenState extends ConsumerState<MoreFeaturesScreen> {
       setState(() {
         _errorText = l10n.natalChartBirthDateError;
       });
+      return;
+    }
+
+    final canProceed = await trySpendEnergyForAction(
+      context,
+      ref,
+      EnergyAction.natalChart,
+    );
+    if (!canProceed || !mounted) {
       return;
     }
 
@@ -260,6 +272,13 @@ class _MoreFeaturesScreenState extends ConsumerState<MoreFeaturesScreen> {
                       icon: Icons.auto_awesome_outlined,
                       onPressed: _isLoading ? null : _handleNatalChart,
                     ),
+                  ),
+                  const SizedBox(height: 10),
+                  EnergyStatusCard(
+                    actionCost: EnergyAction.natalChart.cost,
+                    onTopUpPressed: () async {
+                      await showEnergyTopUpSheet(context, ref);
+                    },
                   ),
                 ],
                 if (_isLoading) ...[

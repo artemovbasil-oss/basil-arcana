@@ -5,6 +5,8 @@ import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 import '../../core/navigation/app_route_config.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/app_buttons.dart';
+import '../../core/widgets/energy_widgets.dart';
+import '../../state/energy_controller.dart';
 import '../../state/providers.dart';
 import '../../state/reading_flow_controller.dart';
 import '../history/history_screen.dart';
@@ -29,8 +31,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void initState() {
     super.initState();
     _focusNode.addListener(_handleFocusChange);
-    final initialQuestion =
-        ref.read(readingFlowControllerProvider).question;
+    final initialQuestion = ref.read(readingFlowControllerProvider).question;
     if (initialQuestion.isNotEmpty) {
       _controller.text = initialQuestion;
     }
@@ -42,8 +43,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         }
         _controller.value = _controller.value.copyWith(
           text: next.question,
-          selection:
-              TextSelection.collapsed(offset: next.question.length),
+          selection: TextSelection.collapsed(offset: next.question.length),
           composing: TextRange.empty,
         );
         setState(() {});
@@ -92,7 +92,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context)!;
-    final locale = ref.watch(localeProvider);
     final examples = [
       l10n.homeExample1,
       l10n.homeExample2,
@@ -103,8 +102,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     const buttonHeight = 56.0;
     final primaryColor = colorScheme.primary;
-    final disabledColor =
-        Color.lerp(primaryColor, colorScheme.surface, 0.45)!;
+    final disabledColor = Color.lerp(primaryColor, colorScheme.surface, 0.45)!;
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -228,7 +226,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   _InlineIconButton(
                                     icon: Icons.arrow_forward,
                                     tooltip: l10n.homeContinueButton,
-                                    onTap: () => _handlePrimaryAction(hasQuestion),
+                                    onTap: () =>
+                                        _handlePrimaryAction(hasQuestion),
                                     backgroundColor:
                                         colorScheme.primary.withOpacity(0.2),
                                     iconColor: colorScheme.primary,
@@ -275,8 +274,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            settings:
-                                appRouteSettings(showBackButton: true),
+                            settings: appRouteSettings(showBackButton: true),
                             builder: (_) => const CardsScreen(),
                           ),
                         );
@@ -295,12 +293,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           duration: const Duration(milliseconds: 220),
           curve: Curves.easeOut,
           padding: EdgeInsets.fromLTRB(20, 12, 20, 20 + bottomInset),
-          child: _PrimaryActionButton(
-            isActive: hasQuestion,
-            primaryColor: primaryColor,
-            disabledColor: disabledColor,
-            label: l10n.homeContinueButton,
-            onPressed: () => _handlePrimaryAction(hasQuestion),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _PrimaryActionButton(
+                isActive: hasQuestion,
+                primaryColor: primaryColor,
+                disabledColor: disabledColor,
+                label: l10n.homeContinueButton,
+                onPressed: () => _handlePrimaryAction(hasQuestion),
+              ),
+              const SizedBox(height: 10),
+              EnergyStatusCard(
+                actionCost: EnergyAction.reading.cost,
+                onTopUpPressed: () async {
+                  await showEnergyTopUpSheet(context, ref);
+                },
+              ),
+            ],
           ),
         ),
       ),

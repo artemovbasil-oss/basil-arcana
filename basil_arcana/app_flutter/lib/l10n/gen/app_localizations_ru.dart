@@ -527,6 +527,57 @@ class AppLocalizationsRu extends AppLocalizations {
       'Не удалось создать натальную карту. Попробуйте еще раз.';
 
   @override
+  String energyLabelWithPercent(int value) {
+    return 'Энергия оракула: $value%';
+  }
+
+  @override
+  String get energyRecoveryReady => 'Энергия полностью восстановлена.';
+
+  @override
+  String get energyRecoveryLessThanMinute =>
+      'До полного восстановления меньше минуты.';
+
+  @override
+  String energyRecoveryInMinutes(int minutes) {
+    return 'До 100%: $minutes мин.';
+  }
+
+  @override
+  String energyActionCost(int value) {
+    return 'Стоимость действия: $value%';
+  }
+
+  @override
+  String get energyTopUpButton => 'Пополнить';
+
+  @override
+  String get energyTopUpTitle => 'Энергия заканчивается';
+
+  @override
+  String get energyTopUpDescription =>
+      'Выберите пакет, чтобы продолжить без ожидания восстановления.';
+
+  @override
+  String get energyPackSmall => 'Купить +25% энергии';
+
+  @override
+  String get energyPackMedium => 'Купить +50% энергии';
+
+  @override
+  String get energyPackFull => 'Купить полный заряд';
+
+  @override
+  String energyTopUpSuccess(int value) {
+    return 'Энергия пополнена на $value%.';
+  }
+
+  @override
+  String energyInsufficientForAction(int value) {
+    return 'Недостаточно энергии для действия ($value%).';
+  }
+
+  @override
   String get professionalReadingTitle => 'Профессиональное толкование';
 
   @override

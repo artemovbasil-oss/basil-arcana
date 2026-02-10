@@ -1054,6 +1054,84 @@ abstract class AppLocalizations {
   /// **'Couldn’t generate the natal chart. Please try again.'**
   String get natalChartError;
 
+  /// No description provided for @energyLabelWithPercent.
+  ///
+  /// In en, this message translates to:
+  /// **'Oracle energy: {value}%'**
+  String energyLabelWithPercent(int value);
+
+  /// No description provided for @energyRecoveryReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Fully recharged.'**
+  String get energyRecoveryReady;
+
+  /// No description provided for @energyRecoveryLessThanMinute.
+  ///
+  /// In en, this message translates to:
+  /// **'Full in less than a minute.'**
+  String get energyRecoveryLessThanMinute;
+
+  /// No description provided for @energyRecoveryInMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Full in {minutes} min.'**
+  String energyRecoveryInMinutes(int minutes);
+
+  /// No description provided for @energyActionCost.
+  ///
+  /// In en, this message translates to:
+  /// **'Action cost: {value}%'**
+  String energyActionCost(int value);
+
+  /// No description provided for @energyTopUpButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Top up'**
+  String get energyTopUpButton;
+
+  /// No description provided for @energyTopUpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Energy is running low'**
+  String get energyTopUpTitle;
+
+  /// No description provided for @energyTopUpDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a pack to continue readings without waiting for recharge.'**
+  String get energyTopUpDescription;
+
+  /// No description provided for @energyPackSmall.
+  ///
+  /// In en, this message translates to:
+  /// **'Buy +25% energy'**
+  String get energyPackSmall;
+
+  /// No description provided for @energyPackMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Buy +50% energy'**
+  String get energyPackMedium;
+
+  /// No description provided for @energyPackFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Buy full energy'**
+  String get energyPackFull;
+
+  /// No description provided for @energyTopUpSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Energy restored by {value}%.'**
+  String energyTopUpSuccess(int value);
+
+  /// No description provided for @energyInsufficientForAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough energy for this action ({value}%).'**
+  String energyInsufficientForAction(int value);
+
   /// No description provided for @professionalReadingTitle.
   ///
   /// In en, this message translates to:

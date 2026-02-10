@@ -201,6 +201,54 @@
   "natalChartLoading": "Наталдық карта жасалуда…",
   "natalChartResultTitle": "Түсіндірме",
   "natalChartError": "Наталдық картаны жасау мүмкін болмады. Қайта көріңіз.",
+  "energyLabelWithPercent": "Оракул энергиясы: {value}%",
+  "@energyLabelWithPercent": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "energyRecoveryReady": "Энергия толық қалпына келді.",
+  "energyRecoveryLessThanMinute": "Толық қалпына келуге бір минуттан аз қалды.",
+  "energyRecoveryInMinutes": "100%-ға дейін: {minutes} мин.",
+  "@energyRecoveryInMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "energyActionCost": "Әрекет құны: {value}%",
+  "@energyActionCost": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "energyTopUpButton": "Толықтыру",
+  "energyTopUpTitle": "Энергия азайып қалды",
+  "energyTopUpDescription": "Қалпына келуді күтпей жалғастыру үшін пакет таңдаңыз.",
+  "energyPackSmall": "+25% энергия сатып алу",
+  "energyPackMedium": "+50% энергия сатып алу",
+  "energyPackFull": "Толық энергияны сатып алу",
+  "energyTopUpSuccess": "Энергия {value}%-ға толықты.",
+  "@energyTopUpSuccess": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "energyInsufficientForAction": "Бұл әрекетке энергия жеткіліксіз ({value}%).",
+  "@energyInsufficientForAction": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
   "professionalReadingTitle": "Кәсіби жорамал",
   "professionalReadingDescription": "Таралымды терең кәсіби талдау.",
   "professionalReadingButton": "Тариф таңдау",

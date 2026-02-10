@@ -9,6 +9,7 @@ import '../data/repositories/data_repository.dart';
 import '../data/repositories/spreads_repository.dart';
 import '../data/repositories/readings_repository.dart';
 import '../data/models/deck_model.dart';
+import 'energy_controller.dart';
 import 'reading_flow_controller.dart';
 
 final dataRepositoryProvider = Provider<DataRepository>((ref) {
@@ -38,6 +39,13 @@ final cardStatsRepositoryProvider = Provider<CardStatsRepository>((ref) {
 final readingFlowControllerProvider =
     StateNotifierProvider<ReadingFlowController, ReadingFlowState>((ref) {
   return ReadingFlowController(ref);
+});
+
+final energyProvider = StateNotifierProvider<EnergyController, EnergyState>((
+  ref,
+) {
+  final box = Hive.box<String>(_settingsBoxName);
+  return EnergyController(box);
 });
 
 const _settingsBoxName = 'settings';

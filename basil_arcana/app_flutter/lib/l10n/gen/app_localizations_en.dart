@@ -522,6 +522,56 @@ class AppLocalizationsEn extends AppLocalizations {
       'Couldn’t generate the natal chart. Please try again.';
 
   @override
+  String energyLabelWithPercent(int value) {
+    return 'Oracle energy: $value%';
+  }
+
+  @override
+  String get energyRecoveryReady => 'Fully recharged.';
+
+  @override
+  String get energyRecoveryLessThanMinute => 'Full in less than a minute.';
+
+  @override
+  String energyRecoveryInMinutes(int minutes) {
+    return 'Full in $minutes min.';
+  }
+
+  @override
+  String energyActionCost(int value) {
+    return 'Action cost: $value%';
+  }
+
+  @override
+  String get energyTopUpButton => 'Top up';
+
+  @override
+  String get energyTopUpTitle => 'Energy is running low';
+
+  @override
+  String get energyTopUpDescription =>
+      'Choose a pack to continue readings without waiting for recharge.';
+
+  @override
+  String get energyPackSmall => 'Buy +25% energy';
+
+  @override
+  String get energyPackMedium => 'Buy +50% energy';
+
+  @override
+  String get energyPackFull => 'Buy full energy';
+
+  @override
+  String energyTopUpSuccess(int value) {
+    return 'Energy restored by $value%.';
+  }
+
+  @override
+  String energyInsufficientForAction(int value) {
+    return 'Not enough energy for this action ($value%).';
+  }
+
+  @override
   String get professionalReadingTitle => 'Professional reading';
 
   @override

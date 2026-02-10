@@ -525,6 +525,57 @@ class AppLocalizationsKk extends AppLocalizations {
       'Наталдық картаны жасау мүмкін болмады. Қайта көріңіз.';
 
   @override
+  String energyLabelWithPercent(int value) {
+    return 'Оракул энергиясы: $value%';
+  }
+
+  @override
+  String get energyRecoveryReady => 'Энергия толық қалпына келді.';
+
+  @override
+  String get energyRecoveryLessThanMinute =>
+      'Толық қалпына келуге бір минуттан аз қалды.';
+
+  @override
+  String energyRecoveryInMinutes(int minutes) {
+    return '100%-ға дейін: $minutes мин.';
+  }
+
+  @override
+  String energyActionCost(int value) {
+    return 'Әрекет құны: $value%';
+  }
+
+  @override
+  String get energyTopUpButton => 'Толықтыру';
+
+  @override
+  String get energyTopUpTitle => 'Энергия азайып қалды';
+
+  @override
+  String get energyTopUpDescription =>
+      'Қалпына келуді күтпей жалғастыру үшін пакет таңдаңыз.';
+
+  @override
+  String get energyPackSmall => '+25% энергия сатып алу';
+
+  @override
+  String get energyPackMedium => '+50% энергия сатып алу';
+
+  @override
+  String get energyPackFull => 'Толық энергияны сатып алу';
+
+  @override
+  String energyTopUpSuccess(int value) {
+    return 'Энергия $value%-ға толықты.';
+  }
+
+  @override
+  String energyInsufficientForAction(int value) {
+    return 'Бұл әрекетке энергия жеткіліксіз ($value%).';
+  }
+
+  @override
   String get professionalReadingTitle => 'Кәсіби жорамал';
 
   @override

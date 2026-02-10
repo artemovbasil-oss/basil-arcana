@@ -201,6 +201,54 @@
   "natalChartLoading": "Creating your natal chart…",
   "natalChartResultTitle": "Your interpretation",
   "natalChartError": "Couldn’t generate the natal chart. Please try again.",
+  "energyLabelWithPercent": "Oracle energy: {value}%",
+  "@energyLabelWithPercent": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "energyRecoveryReady": "Fully recharged.",
+  "energyRecoveryLessThanMinute": "Full in less than a minute.",
+  "energyRecoveryInMinutes": "Full in {minutes} min.",
+  "@energyRecoveryInMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "energyActionCost": "Action cost: {value}%",
+  "@energyActionCost": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "energyTopUpButton": "Top up",
+  "energyTopUpTitle": "Energy is running low",
+  "energyTopUpDescription": "Choose a pack to continue readings without waiting for recharge.",
+  "energyPackSmall": "Buy +25% energy",
+  "energyPackMedium": "Buy +50% energy",
+  "energyPackFull": "Buy full energy",
+  "energyTopUpSuccess": "Energy restored by {value}%.",
+  "@energyTopUpSuccess": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "energyInsufficientForAction": "Not enough energy for this action ({value}%).",
+  "@energyInsufficientForAction": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
   "professionalReadingTitle": "Professional reading",
   "professionalReadingDescription": "Deep interpretation of your spread by an oracle.",
   "professionalReadingButton": "Choose plan",

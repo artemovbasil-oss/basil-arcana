@@ -7,12 +7,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
 import '../../core/widgets/app_buttons.dart';
+import '../../core/widgets/energy_widgets.dart';
 import '../../core/widgets/app_top_bar.dart';
 import '../../core/widgets/tarot_asset_widgets.dart';
 import '../../core/assets/asset_paths.dart';
 import '../../core/navigation/app_route_config.dart';
 import '../../data/models/app_enums.dart';
 import '../../data/repositories/cards_repository.dart';
+import '../../state/energy_controller.dart';
 import '../../state/reading_flow_controller.dart';
 import '../../state/providers.dart';
 import '../result/result_screen.dart';
@@ -203,6 +205,15 @@ class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
                         onPressed: !_showCta || state.isLoading
                             ? null
                             : () async {
+                                final canStartReading =
+                                    await trySpendEnergyForAction(
+                                  context,
+                                  ref,
+                                  EnergyAction.reading,
+                                );
+                                if (!canStartReading) {
+                                  return;
+                                }
                                 try {
                                   final cards =
                                       await ref.read(cardsProvider.future);
@@ -244,6 +255,13 @@ class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
                         padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
                     ),
+                  ),
+                  const SizedBox(height: 10),
+                  EnergyStatusCard(
+                    actionCost: EnergyAction.reading.cost,
+                    onTopUpPressed: () async {
+                      await showEnergyTopUpSheet(context, ref);
+                    },
                   ),
                 ],
               ),

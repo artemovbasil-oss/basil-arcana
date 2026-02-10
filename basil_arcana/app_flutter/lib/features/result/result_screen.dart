@@ -9,6 +9,7 @@ import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/card_face_widget.dart';
+import '../../core/widgets/energy_widgets.dart';
 import '../../core/assets/asset_paths.dart';
 import '../../core/widgets/tarot_asset_widgets.dart';
 import '../../data/models/card_model.dart';
@@ -17,6 +18,7 @@ import '../../data/models/app_enums.dart';
 import '../../data/models/drawn_card_model.dart';
 import '../../data/models/spread_model.dart';
 import '../../data/repositories/ai_repository.dart';
+import '../../state/energy_controller.dart';
 import '../../state/reading_flow_controller.dart';
 import '../../state/providers.dart';
 import '../../core/widgets/app_top_bar.dart';
@@ -273,6 +275,15 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                             if (state.detailsStatus == DetailsStatus.loading) {
                               return;
                             }
+                            final canShowDetails =
+                                await trySpendEnergyForAction(
+                              context,
+                              ref,
+                              EnergyAction.deepDetails,
+                            );
+                            if (!canShowDetails) {
+                              return;
+                            }
                             await ref
                                 .read(
                                   readingFlowControllerProvider.notifier,
@@ -358,11 +369,20 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                                 .dismissDetails();
                           },
                           onRetry: () {
-                            ref
-                                .read(
-                                  readingFlowControllerProvider.notifier,
-                                )
-                                .tryAgainDetails();
+                            trySpendEnergyForAction(
+                              context,
+                              ref,
+                              EnergyAction.deepDetails,
+                            ).then((canRetry) {
+                              if (!canRetry) {
+                                return;
+                              }
+                              ref
+                                  .read(
+                                    readingFlowControllerProvider.notifier,
+                                  )
+                                  .tryAgainDetails();
+                            });
                           },
                         ),
                       ),
@@ -392,6 +412,9 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                         builder: (_) => const MoreFeaturesScreen(),
                       ),
                     );
+                  },
+                  onTopUp: () async {
+                    await showEnergyTopUpSheet(context, ref);
                   },
                   newLabel: l10n.resultNewButton,
                   moreLabel: l10n.resultWantMoreButton,
@@ -1099,16 +1122,18 @@ class _ActionBar extends StatelessWidget {
     required this.showExtra,
     required this.onNew,
     required this.onShare,
+    required this.onTopUp,
     required this.newLabel,
     required this.moreLabel,
   });
 
-  static const double baseHeight = 86;
+  static const double baseHeight = 178;
   static const double extraHeight = 70;
 
   final bool showExtra;
   final VoidCallback onNew;
   final VoidCallback onShare;
+  final VoidCallback onTopUp;
   final String newLabel;
   final String moreLabel;
 
@@ -1174,6 +1199,11 @@ class _ActionBar extends StatelessWidget {
                           ),
                         )
                       : const SizedBox.shrink(),
+                ),
+                const SizedBox(height: 10),
+                EnergyStatusCard(
+                  actionCost: EnergyAction.deepDetails.cost,
+                  onTopUpPressed: onTopUp,
                 ),
               ],
             ),

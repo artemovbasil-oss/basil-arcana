@@ -201,6 +201,54 @@
   "natalChartLoading": "Создаем натальную карту…",
   "natalChartResultTitle": "Ваш разбор",
   "natalChartError": "Не удалось создать натальную карту. Попробуйте еще раз.",
+  "energyLabelWithPercent": "Энергия оракула: {value}%",
+  "@energyLabelWithPercent": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "energyRecoveryReady": "Энергия полностью восстановлена.",
+  "energyRecoveryLessThanMinute": "До полного восстановления меньше минуты.",
+  "energyRecoveryInMinutes": "До 100%: {minutes} мин.",
+  "@energyRecoveryInMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "energyActionCost": "Стоимость действия: {value}%",
+  "@energyActionCost": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "energyTopUpButton": "Пополнить",
+  "energyTopUpTitle": "Энергия заканчивается",
+  "energyTopUpDescription": "Выберите пакет, чтобы продолжить без ожидания восстановления.",
+  "energyPackSmall": "Купить +25% энергии",
+  "energyPackMedium": "Купить +50% энергии",
+  "energyPackFull": "Купить полный заряд",
+  "energyTopUpSuccess": "Энергия пополнена на {value}%.",
+  "@energyTopUpSuccess": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "energyInsufficientForAction": "Недостаточно энергии для действия ({value}%).",
+  "@energyInsufficientForAction": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
   "professionalReadingTitle": "Профессиональное толкование",
   "professionalReadingDescription": "Глубокий разбор расклада с помощью оракула.",
   "professionalReadingButton": "Выбрать тариф",
