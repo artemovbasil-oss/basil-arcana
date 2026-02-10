@@ -2,6 +2,7 @@ import functools
 import json
 import os
 import re
+import time
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse
 
@@ -70,6 +71,45 @@ class WebAppHandler(SimpleHTTPRequestHandler):
     app_version: str = ""
     _request_path: str = ""
 
+    @classmethod
+    def _effective_app_version(cls) -> str:
+        version = (cls.app_version or "").strip()
+        if version:
+            return version
+        return str(int(time.time()))
+
+    def _serve_index_html(self) -> None:
+        file_path = self.translate_path("/index.html")
+        if not os.path.isfile(file_path):
+            self.send_error(404, "index.html not found")
+            return
+        try:
+            with open(file_path, "r", encoding="utf-8") as handle:
+                text = handle.read()
+        except OSError:
+            self.send_error(500, "Failed to read index.html")
+            return
+
+        version = self._effective_app_version()
+        text = text.replace("{{BUILD_ID}}", version)
+        text = text.replace("{{flutter_service_worker_version}}", version)
+        body = text.encode("utf-8")
+
+        self.send_response(200)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header(
+            "Cache-Control", "no-store, no-cache, must-revalidate, max-age=0"
+        )
+        self.send_header("Pragma", "no-cache")
+        self.send_header("Expires", "0")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        try:
+            self.wfile.write(body)
+        except BrokenPipeError:
+            print("Broken pipe while writing index.html response.")
+            return
+
     def _handle_video_range(self, file_path: str) -> bool:
         range_header = self.headers.get("Range")
         if not range_header:
@@ -116,6 +156,9 @@ class WebAppHandler(SimpleHTTPRequestHandler):
     def do_GET(self):
         parsed = urlparse(self.path)
         self._request_path = parsed.path
+        if parsed.path == "/" or parsed.path == "/index.html":
+            self._serve_index_html()
+            return
         if parsed.path == "/healthz":
             body = b"ok"
             self.send_response(200)
@@ -164,7 +207,8 @@ class WebAppHandler(SimpleHTTPRequestHandler):
         if not os.path.splitext(parsed.path)[1]:
             file_path = self.translate_path(parsed.path)
             if not os.path.isfile(file_path):
-                self.path = "/index.html"
+                self._serve_index_html()
+                return
         try:
             super().do_GET()
         except BrokenPipeError:
