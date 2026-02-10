@@ -1102,6 +1102,12 @@ abstract class AppLocalizations {
   /// **'Oracle energy'**
   String get energyLabel;
 
+  /// No description provided for @energyInfoTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Energy is spent on actions and restores over time'**
+  String get energyInfoTooltip;
+
   /// No description provided for @energyRecoveryReady.
   ///
   /// In en, this message translates to:

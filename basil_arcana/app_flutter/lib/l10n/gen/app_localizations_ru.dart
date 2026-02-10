@@ -94,7 +94,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get homeClearQuestionTooltip => 'Очистить вопрос';
 
   @override
-  String get homeTryPrompt => 'Попробуйте один из этих запросов:';
+  String get homeTryPrompt => 'Попробуй один из этих запросов:';
 
   @override
   String get homeExample1 => 'Куда направить свою энергию?';
@@ -551,6 +551,10 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get energyLabel => 'Энергия оракула';
+
+  @override
+  String get energyInfoTooltip =>
+      'Энергия тратится на действия и восстанавливается со временем';
 
   @override
   String get energyRecoveryReady => 'Энергия полностью восстановлена.';

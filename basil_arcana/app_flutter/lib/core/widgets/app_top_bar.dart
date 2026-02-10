@@ -188,6 +188,34 @@ class _EnergyHeaderPillState extends ConsumerState<_EnergyHeaderPill>
                     fontWeight: FontWeight.w800,
                   ),
                 ),
+                const SizedBox(width: 4),
+                Tooltip(
+                  triggerMode: TooltipTriggerMode.tap,
+                  waitDuration: Duration.zero,
+                  showDuration: const Duration(seconds: 3),
+                  message: l10n.energyInfoTooltip,
+                  child: Container(
+                    width: 16,
+                    height: 16,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.9),
+                      ),
+                    ),
+                    child: const Center(
+                      child: Text(
+                        'i',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          height: 1,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
                 if (energy.isNearEmpty) ...[
                   const SizedBox(width: 4),
                   IconButton(

@@ -327,7 +327,7 @@ class _MoreFeaturesScreenState extends ConsumerState<MoreFeaturesScreen> {
                   width: double.infinity,
                   child: AppPrimaryButton(
                     label: l10n.professionalReadingButton,
-                    icon: Icons.star,
+                    icon: Icons.workspace_premium,
                     onPressed: _requestPlansAndReturnToBot,
                   ),
                 ),
@@ -355,7 +355,20 @@ class _FeatureCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: LinearGradient(
+          colors: [
+            colorScheme.surface.withOpacity(0.96),
+            colorScheme.primary.withOpacity(0.18),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        border: Border.all(color: colorScheme.primary.withOpacity(0.35)),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(18),
         child: Column(
@@ -393,20 +406,26 @@ class _StatusPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: colorScheme.primary.withOpacity(0.12),
+        gradient: const LinearGradient(
+          colors: [
+            Color(0xFF0A3C20),
+            Color(0xFF14592F),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: colorScheme.primary.withOpacity(0.6)),
+        border: Border.all(color: const Color(0xFF2FA25A)),
       ),
       child: Text(
         text,
-        style: Theme.of(context)
-            .textTheme
-            .labelLarge
-            ?.copyWith(color: colorScheme.onSurface),
+        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+            ),
       ),
     );
   }

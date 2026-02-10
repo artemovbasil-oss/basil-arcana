@@ -209,6 +209,7 @@
   "natalChartError": "Наталдық картаны жасау мүмкін болмады. Қайта көріңіз.",
   "energyLabelWithPercent": "Оракул энергиясы: {value}%",
   "energyLabel": "Оракул энергиясы",
+  "energyInfoTooltip": "Энергия әрекеттерге жұмсалады және уақыт өте қалпына келеді",
   "@energyLabelWithPercent": {
     "placeholders": {
       "value": {

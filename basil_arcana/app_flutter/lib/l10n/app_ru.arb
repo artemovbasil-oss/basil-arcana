@@ -28,7 +28,7 @@
   "homeQuestionLabel": "Какой у вас вопрос?",
   "homeQuestionHint": "Напишите, в чем нужна ясность",
   "homeClearQuestionTooltip": "Очистить вопрос",
-  "homeTryPrompt": "Попробуйте один из этих запросов:",
+  "homeTryPrompt": "Попробуй один из этих запросов:",
   "homeExample1": "Куда направить свою энергию?",
   "homeExample2": "Какой урок здесь скрыт?",
   "homeExample3": "Где мне стоит проявить терпение?",
@@ -209,6 +209,7 @@
   "natalChartError": "Не удалось создать натальную карту. Попробуйте еще раз.",
   "energyLabelWithPercent": "Энергия оракула: {value}%",
   "energyLabel": "Энергия оракула",
+  "energyInfoTooltip": "Энергия тратится на действия и восстанавливается со временем",
   "@energyLabelWithPercent": {
     "placeholders": {
       "value": {

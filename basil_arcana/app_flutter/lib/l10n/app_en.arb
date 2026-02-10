@@ -209,6 +209,7 @@
   "natalChartError": "Couldn’t generate the natal chart. Please try again.",
   "energyLabelWithPercent": "Oracle energy: {value}%",
   "energyLabel": "Oracle energy",
+  "energyInfoTooltip": "Energy is spent on actions and restores over time",
   "@energyLabelWithPercent": {
     "placeholders": {
       "value": {

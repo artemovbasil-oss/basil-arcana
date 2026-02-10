@@ -551,6 +551,10 @@ class AppLocalizationsKk extends AppLocalizations {
   String get energyLabel => 'Оракул энергиясы';
 
   @override
+  String get energyInfoTooltip =>
+      'Энергия әрекеттерге жұмсалады және уақыт өте қалпына келеді';
+
+  @override
   String get energyRecoveryReady => 'Энергия толық қалпына келді.';
 
   @override
