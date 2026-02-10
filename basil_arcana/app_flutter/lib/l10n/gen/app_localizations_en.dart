@@ -9,7 +9,7 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appTitle => 'Basil\'s Arcana';
+  String get appTitle => 'The real magic';
 
   @override
   String get historyTooltip => 'History';
@@ -79,7 +79,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Ask a question and explore the threads that shape your next step';
 
   @override
-  String get homeDescription => 'A quiet space for a single clear question';
+  String get homeDescription => 'Drop your question and catch the magic vibe';
 
   @override
   String get homeQuestionPlaceholder => 'Type your question here…';

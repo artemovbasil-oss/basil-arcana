@@ -222,8 +222,6 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
       });
     }
 
-    final statusText =
-        state.aiUsed ? l10n.resultStatusAiReading : _statusMessage(state, l10n);
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     final listBottomPadding = 24 +
         _ActionBar.baseHeight +
@@ -245,11 +243,6 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                 controller: _scrollController,
                 padding: EdgeInsets.fromLTRB(20, 16, 20, listBottomPadding),
                 children: [
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: _StatusPill(text: statusText),
-                  ),
-                  const SizedBox(height: 18),
                   for (final item in _items) ...[
                     _buildChatItem(item, state),
                     const SizedBox(height: 14),

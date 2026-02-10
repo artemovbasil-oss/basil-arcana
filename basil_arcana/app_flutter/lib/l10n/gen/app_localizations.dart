@@ -103,7 +103,7 @@ abstract class AppLocalizations {
   /// No description provided for @appTitle.
   ///
   /// In en, this message translates to:
-  /// **'Basil\'s Arcana'**
+  /// **'The real magic'**
   String get appTitle;
 
   /// No description provided for @historyTooltip.
@@ -241,7 +241,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeDescription.
   ///
   /// In en, this message translates to:
-  /// **'A quiet space for a single clear question'**
+  /// **'Drop your question and catch the magic vibe'**
   String get homeDescription;
 
   /// No description provided for @homeQuestionPlaceholder.

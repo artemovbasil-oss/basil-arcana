@@ -10,6 +10,7 @@ import '../../core/navigation/app_route_config.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/app_top_bar.dart';
 import '../../core/widgets/data_load_error.dart';
+import '../settings/settings_screen.dart';
 import '../../data/models/app_enums.dart';
 import '../../data/models/spread_model.dart';
 import '../../state/providers.dart';
@@ -24,9 +25,16 @@ class SpreadScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: buildTopBar(
+      appBar: buildEnergyTopBar(
         context,
-        title: Text(l10n.spreadTitle),
+        showBack: true,
+        onSettings: () {
+          Navigator.pushNamed(
+            context,
+            SettingsScreen.routeName,
+            arguments: const AppRouteConfig(showBackButton: true),
+          );
+        },
       ),
       body: SafeArea(
         top: false,

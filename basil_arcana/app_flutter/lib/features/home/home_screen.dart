@@ -5,11 +5,11 @@ import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 import '../../core/navigation/app_route_config.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/app_buttons.dart';
+import '../../core/widgets/app_top_bar.dart';
 import '../../core/widgets/energy_widgets.dart';
 import '../../state/energy_controller.dart';
 import '../../state/providers.dart';
 import '../../state/reading_flow_controller.dart';
-import '../history/history_screen.dart';
 import '../cards/cards_screen.dart';
 import '../settings/settings_screen.dart';
 import '../spread/spread_screen.dart';
@@ -105,8 +105,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final disabledColor = Color.lerp(primaryColor, colorScheme.surface, 0.45)!;
 
     return Scaffold(
+      appBar: buildEnergyTopBar(
+        context,
+        showBack: false,
+        onSettings: () {
+          Navigator.pushNamed(
+            context,
+            SettingsScreen.routeName,
+            arguments: const AppRouteConfig(showBackButton: true),
+          );
+        },
+      ),
       resizeToAvoidBottomInset: false,
       body: SafeArea(
+        top: false,
         child: Column(
           children: [
             Expanded(
@@ -114,53 +126,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 controller: _scrollController,
                 padding: EdgeInsets.fromLTRB(
                   20,
-                  12,
+                  10,
                   20,
                   24 + buttonHeight,
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            l10n.appTitle,
-                            style: AppTextStyles.title(context)
-                                .copyWith(color: colorScheme.onSurface),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.history),
-                          tooltip: l10n.historyTooltip,
-                          onPressed: () {
-                            Navigator.pushNamed(
-                              context,
-                              HistoryScreen.routeName,
-                              arguments:
-                                  const AppRouteConfig(showBackButton: true),
-                            );
-                          },
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.settings),
-                          tooltip: l10n.settingsTitle,
-                          onPressed: () {
-                            Navigator.pushNamed(
-                              context,
-                              SettingsScreen.routeName,
-                              arguments:
-                                  const AppRouteConfig(showBackButton: true),
-                            );
-                          },
-                        ),
-                      ],
+                    Text(
+                      l10n.homeDescription,
+                      style: AppTextStyles.title(context).copyWith(
+                        color: colorScheme.onSurface,
+                      ),
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      l10n.homeDescription,
+                      l10n.homeSubtitle,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: colorScheme.onSurface.withOpacity(0.7),
                           ),

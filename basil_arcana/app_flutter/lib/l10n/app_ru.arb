@@ -1,6 +1,6 @@
 {
   "@@locale": "ru",
-  "appTitle": "Basil's Arcana",
+  "appTitle": "The real magic",
   "historyTooltip": "История",
   "settingsTitle": "Настройки",
   "languageLabel": "Язык",
@@ -23,7 +23,7 @@
   "deckDebugLogLabel": "Debug: вывести путь для Жезлов",
   "homeTagline": "Ясность в картах.",
   "homeSubtitle": "Задайте вопрос и исследуйте нити, которые определяют ваш следующий шаг",
-  "homeDescription": "Тихое пространство для одного ясного вопроса",
+  "homeDescription": "Задай вопрос и поймай магический вайб",
   "homeQuestionPlaceholder": "Напишите свой вопрос…",
   "homeQuestionLabel": "Какой у вас вопрос?",
   "homeQuestionHint": "Напишите, в чем нужна ясность",

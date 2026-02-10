@@ -9,7 +9,7 @@ class AppLocalizationsRu extends AppLocalizations {
   AppLocalizationsRu([String locale = 'ru']) : super(locale);
 
   @override
-  String get appTitle => 'Basil\'s Arcana';
+  String get appTitle => 'The real magic';
 
   @override
   String get historyTooltip => 'История';
@@ -79,7 +79,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'Задайте вопрос и исследуйте нити, которые определяют ваш следующий шаг';
 
   @override
-  String get homeDescription => 'Тихое пространство для одного ясного вопроса';
+  String get homeDescription => 'Задай вопрос и поймай магический вайб';
 
   @override
   String get homeQuestionPlaceholder => 'Напишите свой вопрос…';

@@ -9,7 +9,7 @@ class AppLocalizationsKk extends AppLocalizations {
   AppLocalizationsKk([String locale = 'kk']) : super(locale);
 
   @override
-  String get appTitle => 'Basil\'s Arcana';
+  String get appTitle => 'The real magic';
 
   @override
   String get historyTooltip => 'Тарих';
@@ -79,7 +79,7 @@ class AppLocalizationsKk extends AppLocalizations {
       'Сұрақ қойып, келесі қадамыңызды айқындайтын желілерді зерттеңіз';
 
   @override
-  String get homeDescription => 'Бір анық сұраққа арналған тыныш кеңістік';
+  String get homeDescription => 'Сұрағыңды қой да, сиқыр вайбын ұста';
 
   @override
   String get homeQuestionPlaceholder => 'Сұрағыңызды жазыңыз…';
