@@ -668,6 +668,74 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
     }
   }
 
+  AiResultModel _offlineFallback(
+    SpreadModel spread,
+    List<DrawnCardModel> drawnCards,
+    AppLocalizations l10n,
+  ) {
+    final focus = state.question.trim().isEmpty
+        ? l10n.offlineFallbackReflection
+        : state.question.trim();
+
+    final keywordPool = drawnCards
+        .expand((card) => card.keywords)
+        .map((keyword) => keyword.trim())
+        .where((keyword) => keyword.isNotEmpty)
+        .toSet()
+        .take(4)
+        .toList();
+    final keywordSummary = keywordPool.isNotEmpty
+        ? keywordPool.join(', ')
+        : drawnCards.map((card) => card.cardName).join(', ');
+
+    final tldr = l10n.offlineFallbackSummary(focus, keywordSummary);
+
+    final sections = <AiSectionModel>[];
+    for (final drawn in drawnCards) {
+      final baseMeaning = drawn.meaning.general.trim().isNotEmpty
+          ? drawn.meaning.general.trim()
+          : drawn.meaning.light.trim().isNotEmpty
+              ? drawn.meaning.light.trim()
+              : drawn.keywords.take(3).join(', ');
+      final advice = drawn.meaning.advice.trim();
+      final sectionText = advice.isNotEmpty
+          ? '$baseMeaning ${l10n.offlineFallbackAdviceLabel(advice)}'
+          : baseMeaning;
+      sections.add(
+        AiSectionModel(
+          positionId: drawn.positionId,
+          title: drawn.positionTitle,
+          text: sectionText,
+        ),
+      );
+    }
+
+    final positionTitles = spread.positions
+        .map((position) => position.title.trim())
+        .where((title) => title.isNotEmpty)
+        .join(', ');
+    final why = positionTitles.isNotEmpty
+        ? '${l10n.offlineFallbackWhy} ($positionTitles)'
+        : l10n.offlineFallbackWhy;
+    final action = l10n.offlineFallbackAction;
+    final fullText = [
+      tldr,
+      ...sections.map((section) => '${section.title}: ${section.text}'),
+      why,
+      action,
+    ].where((line) => line.trim().isNotEmpty).join('\n\n');
+
+    return AiResultModel(
+      tldr: tldr,
+      sections: sections,
+      why: why,
+      action: action,
+      fullText: fullText,
+      detailsText: '',
+      requestId: null,
+    );
+  }
+
   SpreadModel _normalizeSpread(SpreadModel spread, SpreadType spreadType) {
     final count = spreadType.cardCount;
     if (spread.positions.length == count) {
