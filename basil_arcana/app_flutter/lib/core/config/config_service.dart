@@ -41,6 +41,9 @@ class ConfigService {
   String _appVersion = _appVersionEnv;
   String? _lastError;
 
+  String? _resolvedBuildToken;
+  Future<void>? _loadFuture;
+
   String get apiBaseUrl => _apiBaseUrl;
   String get appVersion => _appVersion;
   String? get lastError => _lastError;
@@ -49,35 +52,71 @@ class ConfigService {
   String get assetsBaseUrl =>
       _normalizeBaseUrl(_assetsBaseUrl, fallback: _defaultAssetsBaseUrl);
 
-  Future<void> load() async {
+  Future<void> load({bool forceRefresh = false}) {
     if (!kIsWeb) {
-      return;
+      return Future.value();
     }
-    final cacheBust = _buildIdEnv.isNotEmpty
-        ? _buildIdEnv
-        : (_appVersion.isNotEmpty ? _appVersion : readWebBuildVersion());
-    final uri = Uri.parse('config.json').replace(
-      queryParameters: {'v': cacheBust.isEmpty ? 'prod' : cacheBust},
+
+    if (!forceRefresh && _loadFuture != null) {
+      return _loadFuture!;
+    }
+
+    final token = _resolveBuildToken();
+    final uri = Uri.parse('/config.json').replace(
+      queryParameters: {'v': token},
     );
+
+    if (kDebugMode) {
+      debugPrint('[ConfigService] buildToken=$token');
+      debugPrint('[ConfigService] configUrl=${uri.toString()}');
+    }
+
+    final future = _fetchConfig(uri);
+    _loadFuture = future;
+    return future;
+  }
+
+  String _resolveBuildToken() {
+    if (_resolvedBuildToken != null) {
+      return _resolvedBuildToken!;
+    }
+
+    final fromWebBootstrap = readWebBuildVersion().trim();
+    final fromEnv = _buildIdEnv.trim();
+    final resolved = fromWebBootstrap.isNotEmpty
+        ? fromWebBootstrap
+        : (fromEnv.isNotEmpty ? fromEnv : 'prod');
+
+    _resolvedBuildToken = resolved;
+    return resolved;
+  }
+
+  Future<void> _fetchConfig(Uri uri) async {
     try {
       final response = await http.get(
         uri,
-        headers: {'Cache-Control': 'no-cache'},
+        headers: const {
+          'Cache-Control': 'no-store',
+          'Pragma': 'no-cache',
+        },
       );
       if (response.statusCode < 200 || response.statusCode >= 300) {
         _lastError = 'Config load failed (${response.statusCode})';
         WebErrorReporter.instance.report(_lastError!);
         return;
       }
+
       final payload = jsonDecode(response.body);
       if (payload is! Map<String, dynamic>) {
         _lastError = 'Config load failed (invalid JSON payload)';
         WebErrorReporter.instance.report(_lastError!);
         return;
       }
+
       final runtimeApiBaseUrl = payload['apiBaseUrl'];
       final runtimeAssetsBaseUrl = payload['assetsBaseUrl'];
       final runtimeAppVersion = payload['appVersion'];
+
       if (runtimeApiBaseUrl is String && runtimeApiBaseUrl.trim().isNotEmpty) {
         _apiBaseUrl = runtimeApiBaseUrl.trim();
       }
