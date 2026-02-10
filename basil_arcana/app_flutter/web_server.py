@@ -7,10 +7,27 @@ from urllib.parse import urlparse
 
 NO_STORE_FILES = {
     "index.html",
-    "flutter.js",
-    "flutter_bootstrap.js",
-    "manifest.json",
     "config.json",
+    "flutter_service_worker.js",
+}
+
+LONG_CACHE_EXTENSIONS = {
+    ".js",
+    ".css",
+    ".wasm",
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".gif",
+    ".svg",
+    ".ico",
+    ".webp",
+    ".json",
+    ".ttf",
+    ".otf",
+    ".woff",
+    ".woff2",
+    ".map",
 }
 
 def _read_env(*keys: str) -> str:
@@ -111,6 +128,18 @@ class WebAppHandler(SimpleHTTPRequestHandler):
             except BrokenPipeError:
                 print("Broken pipe while writing /healthz response.")
             return
+        if parsed.path == "/flutter_service_worker.js":
+            body = b"service worker disabled"
+            self.send_response(404)
+            self.send_header("Content-Type", "text/plain; charset=utf-8")
+            self.send_header("Cache-Control", "no-store, max-age=0")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            try:
+                self.wfile.write(body)
+            except BrokenPipeError:
+                print("Broken pipe while writing /flutter_service_worker.js response.")
+            return
         if parsed.path == "/config.json":
             payload = build_config_payload()
             body = json.dumps(payload).encode("utf-8")
@@ -144,20 +173,17 @@ class WebAppHandler(SimpleHTTPRequestHandler):
     def end_headers(self):
         path = self._request_path or urlparse(self.path).path
         filename = os.path.basename(path)
+        _, extension = os.path.splitext(filename)
         if path == "/" or path == "/config.json" or filename in NO_STORE_FILES:
             self.send_header(
                 "Cache-Control", "no-store, no-cache, must-revalidate, max-age=0"
             )
             self.send_header("Pragma", "no-cache")
             self.send_header("Expires", "0")
-        elif path.startswith("/assets/"):
+        elif path.startswith("/assets/") or extension in LONG_CACHE_EXTENSIONS:
             self.send_header("Cache-Control", "public, max-age=31536000, immutable")
         else:
-            self.send_header(
-                "Cache-Control", "no-store, no-cache, must-revalidate, max-age=0"
-            )
-            self.send_header("Pragma", "no-cache")
-            self.send_header("Expires", "0")
+            self.send_header("Cache-Control", "public, max-age=3600")
         if path.endswith(".mp4"):
             self.send_header("Accept-Ranges", "bytes")
         self.send_header("Access-Control-Allow-Origin", "*")

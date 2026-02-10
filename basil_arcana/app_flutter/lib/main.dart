@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -14,6 +16,7 @@ import 'core/theme/app_text_styles.dart';
 import 'core/widgets/app_buttons.dart';
 import 'core/storage/card_cache_cleanup.dart';
 import 'core/storage/hive_storage.dart';
+import 'core/telemetry/runtime_error_buffer.dart';
 import 'data/models/card_model.dart';
 import 'data/models/deck_model.dart';
 import 'data/repositories/cards_repository.dart';
@@ -21,6 +24,7 @@ import 'data/repositories/spreads_repository.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  _installGlobalErrorHandlers();
   try {
     await AppConfig.init();
     await HiveStorage.init();
@@ -60,6 +64,28 @@ Future<void> main() async {
       ),
     );
   }
+}
+
+void _installGlobalErrorHandlers() {
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+    debugPrint('[RuntimeError][FlutterError] ${details.exceptionAsString()}');
+    RuntimeErrorBuffer.instance.add(
+      source: 'FlutterError.onError',
+      error: details.exception,
+      stackTrace: details.stack,
+    );
+  };
+
+  PlatformDispatcher.instance.onError = (Object error, StackTrace stackTrace) {
+    debugPrint('[RuntimeError][PlatformDispatcher] $error');
+    RuntimeErrorBuffer.instance.add(
+      source: 'PlatformDispatcher.onError',
+      error: error,
+      stackTrace: stackTrace,
+    );
+    return true;
+  };
 }
 
 Future<void> _runApiAvailabilitySelfCheck() async {

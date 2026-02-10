@@ -475,8 +475,16 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
   }
 
   List<_ChatItem> _buildBasilMessages(ReadingFlowState state) {
-    final aiResult = state.aiResult!;
+    final aiResult = state.aiResult;
     final l10n = AppLocalizations.of(context)!;
+    if (aiResult == null) {
+      return <_ChatItem>[
+        _ChatItem.basil(
+          id: _nextId(),
+          child: Text(l10n.resultStatusUnexpectedResponse),
+        ),
+      ];
+    }
     final sectionMap = {
       for (final section in aiResult.sections) section.positionId: section
     };
@@ -496,7 +504,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                   ?.copyWith(color: Theme.of(context).colorScheme.primary),
             ),
             const SizedBox(height: 8),
-            Text(aiResult.tldr),
+            Text(aiResult.tldr.trim().isEmpty ? l10n.resultStatusUnexpectedResponse : aiResult.tldr),
           ],
         ),
       ),
@@ -532,7 +540,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
-              Text(section?.text ?? ''),
+              Text((section?.text ?? '').trim().isEmpty ? l10n.resultStatusUnexpectedResponse : section?.text ?? ''),
             ],
           ),
         ),

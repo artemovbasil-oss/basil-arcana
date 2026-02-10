@@ -160,6 +160,19 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
   int _deepRequestCounter = 0;
   int _activeDeepRequestId = 0;
 
+  void _logStateTransition(String label, ReadingFlowState nextState) {
+    if (!kDebugMode) {
+      return;
+    }
+    debugPrint(
+      '[ReadingFlow] state:$label '
+      'loading=${nextState.isLoading} '
+      'hasResult=${nextState.aiResult != null} '
+      "errorType=${nextState.aiErrorType?.name ?? 'none'} "
+      'requiresTelegram=${nextState.requiresTelegram}',
+    );
+  }
+
   Future<bool> _ensureTelegramInitData() async {
     if (!kIsWeb) {
       return true;
@@ -286,6 +299,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       clearDeepError: true,
       clearError: true,
     );
+    _logStateTransition('idle->generating', state);
 
     if (requiresTelegram) {
       await _autoSaveReading();
@@ -525,6 +539,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
         showDetailsCta: true,
         clearError: true,
       );
+      _logStateTransition('generating->done', state);
       await _autoSaveReading();
     } on AiRepositoryException catch (error) {
       if (_activeRequestId != requestId) {
@@ -546,6 +561,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
           aiErrorStatusCode: error.statusCode,
           errorMessage: _messageForError(error, l10n),
         );
+        _logStateTransition('generating->done(fallback:error)', state);
         await _autoSaveReading();
         return;
       }
@@ -559,6 +575,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
         aiErrorStatusCode: error.statusCode,
         errorMessage: _messageForError(error, l10n),
       );
+      _logStateTransition('generating->error', state);
       await _autoSaveReading();
     } catch (error) {
       if (_activeRequestId != requestId) {
@@ -577,6 +594,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
         aiErrorType: AiErrorType.serverError,
         errorMessage: l10n.resultStatusServerUnavailable,
       );
+      _logStateTransition('generating->done(fallback:unknown)', state);
       await _autoSaveReading();
     } finally {
       if (_activeClient == client) {

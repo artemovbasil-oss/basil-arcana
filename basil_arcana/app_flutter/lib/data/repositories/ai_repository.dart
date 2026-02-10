@@ -452,14 +452,10 @@ class AiRepository {
     }
 
     try {
-      final data = jsonDecode(response.body) as Map<String, dynamic>;
-      if (kDebugMode) {
-        debugPrint(
-          '[AiRepository] responseKeys requestId=$requestId '
-          'keys=${data.keys.toList()}',
-        );
-      }
-      final result = AiResultModel.fromJson(data);
+      final result = _parseAiResultResponse(
+        body: response.body,
+        requestId: requestId,
+      );
       _logSuccess(
         uri,
         stopwatch,
@@ -492,6 +488,69 @@ class AiRepository {
         message: error.toString(),
       );
     }
+  }
+
+
+  AiResultModel _parseAiResultResponse({
+    required String body,
+    required String requestId,
+  }) {
+    dynamic decoded;
+    try {
+      decoded = jsonDecode(body);
+    } catch (error) {
+      throw FormatException('Invalid JSON: $error');
+    }
+
+    if (decoded is! Map<String, dynamic>) {
+      throw const FormatException('Response root must be an object.');
+    }
+
+    final payload = _extractResultPayload(decoded);
+    if (kDebugMode) {
+      debugPrint(
+        '[AiRepository] responseKeys requestId=$requestId '
+        'keys=${payload.keys.toList()}',
+      );
+    }
+
+    final result = AiResultModel.fromJson(payload);
+    final hasAnyContent = result.tldr.trim().isNotEmpty ||
+        result.sections.isNotEmpty ||
+        result.why.trim().isNotEmpty ||
+        result.action.trim().isNotEmpty ||
+        result.fullText.trim().isNotEmpty;
+    if (!hasAnyContent) {
+      throw const FormatException('Reading payload has no displayable content.');
+    }
+
+    final fallbackFullText = [
+      result.tldr,
+      ...result.sections.map((section) => section.text),
+      result.why,
+      result.action,
+    ].where((line) => line.trim().isNotEmpty).join('\n\n');
+
+    return AiResultModel(
+      tldr: result.tldr.trim().isEmpty ? 'Your reading is ready.' : result.tldr,
+      sections: result.sections,
+      why: result.why,
+      action: result.action,
+      fullText: result.fullText.trim().isNotEmpty ? result.fullText : fallbackFullText,
+      detailsText: result.detailsText,
+      requestId: result.requestId ?? requestId,
+    );
+  }
+
+  Map<String, dynamic> _extractResultPayload(Map<String, dynamic> root) {
+    const nestedKeys = ['data', 'result', 'payload', 'reading'];
+    for (final key in nestedKeys) {
+      final candidate = root[key];
+      if (candidate is Map<String, dynamic>) {
+        return candidate;
+      }
+    }
+    return root;
   }
 
   Future<String> generateNatalChart({

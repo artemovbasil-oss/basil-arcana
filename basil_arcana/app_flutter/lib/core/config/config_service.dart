@@ -28,6 +28,11 @@ class ConfigService {
     defaultValue: '',
   );
 
+  static const String _buildIdEnv = String.fromEnvironment(
+    'BUILD_ID',
+    defaultValue: '',
+  );
+
   String _apiBaseUrl = _apiBaseUrlEnv;
   String _assetsBaseUrl = _normalizeBaseUrl(
     _assetsBaseUrlEnv,
@@ -48,11 +53,11 @@ class ConfigService {
     if (!kIsWeb) {
       return;
     }
-    final cacheBust = _appVersion.isNotEmpty
-        ? _appVersion
-        : readWebBuildVersion();
+    final cacheBust = _buildIdEnv.isNotEmpty
+        ? _buildIdEnv
+        : (_appVersion.isNotEmpty ? _appVersion : readWebBuildVersion());
     final uri = Uri.parse('config.json').replace(
-      queryParameters: {'v': cacheBust.isEmpty ? 'dev' : cacheBust},
+      queryParameters: {'v': cacheBust.isEmpty ? 'prod' : cacheBust},
     );
     try {
       final response = await http.get(

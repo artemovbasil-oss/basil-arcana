@@ -12,6 +12,7 @@ import '../../data/models/card_model.dart';
 import '../../data/models/deck_model.dart';
 import '../../state/providers.dart';
 import '../../state/settings_controller.dart';
+import '../debug/runtime_error_log_screen.dart';
 import '../home/home_screen.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -30,7 +31,17 @@ class SettingsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: buildTopBar(
         context,
-        title: Text(l10n.settingsTitle),
+        title: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onLongPress: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => const RuntimeErrorLogScreen(),
+              ),
+            );
+          },
+          child: Text(l10n.settingsTitle),
+        ),
         showBack: true,
       ),
       bottomNavigationBar: AnimatedSwitcher(
