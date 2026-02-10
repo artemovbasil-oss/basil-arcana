@@ -56,6 +56,7 @@
     }
 
     var buildVersion = resolveBuildId();
+    window.__BUILD_ID__ = buildVersion;
     window.__buildVersion = buildVersion;
     window.__flutterBootstrapUrl = 'flutter_bootstrap.js?v=' + buildVersion;
     window.__configUrl = 'config.json?v=' + buildVersion;
@@ -79,26 +80,6 @@
       });
     }
 
-    function preloadRuntimeConfig() {
-      var version = window.__buildVersion || 'prod';
-      var configUrl = 'config.json?v=' + encodeURIComponent(version);
-      window.__configUrl = configUrl;
-      return fetch(configUrl, { cache: 'no-store' })
-        .then(function (response) {
-          if (!response.ok) {
-            throw new Error('Config request failed: ' + response.status);
-          }
-          return response.json();
-        })
-        .then(function (payload) {
-          window.__runtimeConfig = payload;
-          return payload;
-        })
-        .catch(function (error) {
-          console.warn('[boot] config preload failed', error);
-          return null;
-        });
-    }
 
   </script>
   <link rel="manifest" href="manifest.json">
@@ -381,9 +362,7 @@
       var disableServiceWorker = true || isTelegramWebView();
       var resolvedVersion = window.__buildVersion || 'prod';
       window.__flutterBootstrapUrl = 'flutter_bootstrap.js?v=' + resolvedVersion;
-      preloadRuntimeConfig().then(function () {
-        return loadScript('telegram_bridge.js?v=' + resolvedVersion);
-      }).then(function () {
+      loadScript('telegram_bridge.js?v=' + resolvedVersion).then(function () {
         return loadScript('flutter.js?v=' + resolvedVersion, { defer: '' });
       }).then(function () {
         _flutter.loader.loadEntrypoint({
