@@ -8,6 +8,7 @@ import 'package:uuid/uuid.dart';
 
 import '../core/config/diagnostics.dart';
 import '../core/telegram/telegram_env.dart';
+import '../core/utils/local_reading_builder.dart';
 import '../data/models/ai_result_model.dart';
 import '../data/models/card_model.dart';
 import '../data/models/drawn_card_model.dart';
@@ -153,6 +154,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
   ReadingFlowController(this.ref) : super(ReadingFlowState.initial());
 
   final Ref ref;
+  final LocalReadingBuilder _localReadingBuilder = const LocalReadingBuilder();
   http.Client? _activeClient;
   int _requestCounter = 0;
   int _activeRequestId = 0;
@@ -262,7 +264,6 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       return;
     }
     state = state.copyWith(isSaved: false);
-    final l10n = _l10n();
     final hasTelegramInitData = await _ensureTelegramInitData();
 
     final drawn = drawCards(spread.positions.length, cards);
@@ -305,7 +306,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       await _autoSaveReading();
       return;
     }
-    await _generateReading(spread: spread, drawnCards: drawnCards, l10n: l10n);
+    await _generateReading(spread: spread, drawnCards: drawnCards);
   }
 
   AppLocalizations _l10n() {
@@ -337,63 +338,6 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
     }
   }
 
-  AiResultModel _offlineFallback(
-    SpreadModel spread,
-    List<DrawnCardModel> drawnCards,
-    AppLocalizations l10n,
-  ) {
-    final tldrKeywords = drawnCards.isNotEmpty
-        ? drawnCards.first.keywords.join(', ')
-        : l10n.offlineFallbackReflection;
-    final tldr = l10n.offlineFallbackSummary(
-      state.question,
-      tldrKeywords,
-    );
-
-    final sections = drawnCards.map((drawn) {
-      final general = drawn.meaning.general;
-      final advice = drawn.meaning.advice;
-      final adviceText = advice.isNotEmpty
-          ? l10n.offlineFallbackAdviceLabel(advice)
-          : '';
-      final text =
-          '${drawn.positionTitle}: $general ${adviceText.isNotEmpty ? adviceText : ''}';
-      return AiSectionModel(
-        positionId: drawn.positionId,
-        title: drawn.positionTitle,
-        text: text.trim(),
-      );
-    }).toList();
-
-    final why = l10n.offlineFallbackWhy;
-    final action = drawnCards
-        .map((drawn) {
-          return drawn.meaning.advice;
-        })
-        .where((advice) => advice.isNotEmpty)
-        .take(2)
-        .join(' ');
-
-    final fullText = [
-      tldr,
-      ...sections.map((section) => section.text),
-      why,
-      action,
-    ].join('\n\n');
-
-    return AiResultModel(
-      tldr: tldr,
-      sections: sections,
-      why: why,
-      action: action.isEmpty
-          ? l10n.offlineFallbackAction
-          : action,
-      fullText: fullText,
-      detailsText: '',
-      requestId: null,
-    );
-  }
-
   Future<void> retryGenerate() async {
     final spread = state.spread;
     if (spread == null || state.drawnCards.isEmpty) {
@@ -419,7 +363,6 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
 
     state = state.copyWith(
       isLoading: true,
-      aiResult: null,
       detailsStatus: DetailsStatus.idle,
       detailsText: null,
       detailsError: null,
@@ -430,29 +373,45 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
     await _generateReading(
       spread: spread,
       drawnCards: state.drawnCards,
-      l10n: _l10n(),
     );
   }
 
   Future<void> _generateReading({
     required SpreadModel spread,
     required List<DrawnCardModel> drawnCards,
-    required AppLocalizations l10n,
   }) async {
+    final localResult = _localReadingBuilder.build(
+      question: state.question,
+      spread: spread,
+      spreadType: state.spreadType ?? SpreadType.one,
+      drawnCards: drawnCards,
+    );
+
     final hasTelegramInitData = await _ensureTelegramInitData();
     if (kIsWeb &&
         TelegramEnv.instance.isTelegram &&
         !hasTelegramInitData) {
       state = state.copyWith(
-        aiResult: null,
+        aiResult: localResult,
         isLoading: false,
         aiUsed: false,
-        showDetailsCta: false,
+        showDetailsCta: true,
         requiresTelegram: true,
         clearError: true,
       );
+      await _incrementCardStats(drawnCards);
+      await _autoSaveReading();
       return;
     }
+
+    state = state.copyWith(
+      aiResult: localResult,
+      isLoading: true,
+      aiUsed: false,
+      showDetailsCta: true,
+      clearError: true,
+    );
+
     final requestId = ++_requestCounter;
     _activeRequestId = requestId;
     final client = http.Client();
@@ -460,65 +419,6 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
     _activeClient = client;
     try {
       final aiRepository = ref.read(aiRepositoryProvider);
-      var backendAvailable = true;
-      AiRepositoryException? availabilityError;
-      try {
-        backendAvailable =
-            await aiRepository.isBackendAvailable(client: client);
-      } on AiRepositoryException catch (error) {
-        if (_activeRequestId != requestId) {
-          return;
-        }
-        if (kDebugMode) {
-          debugPrint(
-            '[ReadingFlow] availabilityCheckSkipped type=${error.type.name}',
-          );
-        }
-        availabilityError = error;
-      }
-      if (_activeRequestId != requestId) {
-        return;
-      }
-      if (!backendAvailable) {
-        if (kDebugMode) {
-          debugPrint('[ReadingFlow] availabilityFallback');
-        }
-        final fallback = _offlineFallback(spread, drawnCards, l10n);
-        await _incrementCardStats(drawnCards);
-        state = state.copyWith(
-          aiResult: fallback,
-          isLoading: false,
-          aiUsed: false,
-          showDetailsCta: true,
-          aiErrorType:
-              availabilityError?.type ?? AiErrorType.serverError,
-          aiErrorStatusCode: availabilityError?.statusCode,
-          errorMessage: availabilityError != null
-              ? _messageForError(availabilityError!, l10n)
-              : l10n.resultStatusServerUnavailable,
-        );
-        await _autoSaveReading();
-        return;
-      }
-      if (availabilityError != null &&
-          availabilityError.type == AiErrorType.misconfigured) {
-        if (kDebugMode) {
-          debugPrint('[ReadingFlow] availabilityMisconfigured');
-        }
-        final fallback = _offlineFallback(spread, drawnCards, l10n);
-        await _incrementCardStats(drawnCards);
-        state = state.copyWith(
-          aiResult: fallback,
-          isLoading: false,
-          aiUsed: false,
-          showDetailsCta: true,
-          aiErrorType: availabilityError.type,
-          aiErrorStatusCode: availabilityError.statusCode,
-          errorMessage: _messageForError(availabilityError, l10n),
-        );
-        await _autoSaveReading();
-        return;
-      }
       final locale = ref.read(localeProvider);
       final result = await aiRepository.generateReading(
         question: state.question,
@@ -548,34 +448,16 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       if (kEnableDevDiagnostics) {
         logDevFailure(buildDevFailureInfo(FailedStage.openaiCall, error));
       }
-      final shouldFallback = error.type != AiErrorType.unauthorized;
-      if (shouldFallback) {
-        final fallback = _offlineFallback(spread, drawnCards, l10n);
-        await _incrementCardStats(drawnCards);
-        state = state.copyWith(
-          aiResult: fallback,
-          isLoading: false,
-          aiUsed: false,
-          showDetailsCta: true,
-          aiErrorType: error.type,
-          aiErrorStatusCode: error.statusCode,
-          errorMessage: _messageForError(error, l10n),
-        );
-        _logStateTransition('generating->done(fallback:error)', state);
-        await _autoSaveReading();
-        return;
-      }
-
       state = state.copyWith(
-        aiResult: null,
         isLoading: false,
         aiUsed: false,
-        showDetailsCta: false,
+        showDetailsCta: true,
         aiErrorType: error.type,
         aiErrorStatusCode: error.statusCode,
-        errorMessage: _messageForError(error, l10n),
+        errorMessage: 'AI temporarily unavailable — showing base interpretation',
       );
-      _logStateTransition('generating->error', state);
+      _logStateTransition('generating->done(local-retained:error)', state);
+      await _incrementCardStats(drawnCards);
       await _autoSaveReading();
     } catch (error) {
       if (_activeRequestId != requestId) {
@@ -584,17 +466,15 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       if (kEnableDevDiagnostics) {
         logDevFailure(buildDevFailureInfo(FailedStage.openaiCall, error));
       }
-      final fallback = _offlineFallback(spread, drawnCards, l10n);
-      await _incrementCardStats(drawnCards);
       state = state.copyWith(
-        aiResult: fallback,
         isLoading: false,
         aiUsed: false,
         showDetailsCta: true,
         aiErrorType: AiErrorType.serverError,
-        errorMessage: l10n.resultStatusServerUnavailable,
+        errorMessage: 'AI temporarily unavailable — showing base interpretation',
       );
-      _logStateTransition('generating->done(fallback:unknown)', state);
+      _logStateTransition('generating->done(local-retained:unknown)', state);
+      await _incrementCardStats(drawnCards);
       await _autoSaveReading();
     } finally {
       if (_activeClient == client) {

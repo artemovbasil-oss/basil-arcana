@@ -71,6 +71,11 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
           );
         });
       }
+      if (prev?.aiResult != null &&
+          next.aiResult != null &&
+          prev?.aiResult?.fullText != next.aiResult?.fullText) {
+        _replaceReadingMessages(next);
+      }
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _jumpToTop();
@@ -472,6 +477,26 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
         }
       });
     });
+  }
+
+  void _replaceReadingMessages(ReadingFlowState state) {
+    if (!mounted) {
+      return;
+    }
+    _typingTimer?.cancel();
+    setState(() {
+      _sequenceComplete = true;
+      _warmTip = _maybeWarmTip(state);
+      final userMessages = _items
+          .where((item) => item.kind == _ChatItemKind.user)
+          .toList(growable: true);
+      _items
+        ..clear()
+        ..addAll(userMessages)
+        ..addAll(_buildBasilMessages(state));
+      _basilQueue.clear();
+    });
+    _maybeScrollToBottom();
   }
 
   List<_ChatItem> _buildBasilMessages(ReadingFlowState state) {

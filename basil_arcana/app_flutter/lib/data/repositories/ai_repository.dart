@@ -228,6 +228,7 @@ class AiRepository {
       _reportWebError(
         AiErrorType.misconfigured,
         message: 'Missing API_BASE_URL',
+        requestId: 'unknown',
       );
       throw const AiRepositoryException(
         AiErrorType.misconfigured,
@@ -243,6 +244,7 @@ class AiRepository {
       _reportWebError(
         AiErrorType.unauthorized,
         message: 'Open this experience inside Telegram to continue.',
+        requestId: 'unknown',
       );
       throw const AiRepositoryException(
         AiErrorType.unauthorized,
@@ -346,7 +348,7 @@ class AiRepository {
         errorType: AiErrorType.timeout,
         exception: error,
       );
-      _reportWebError(AiErrorType.timeout, message: error.toString());
+      _reportWebError(AiErrorType.timeout, message: error.toString(), requestId: requestId);
       throw const AiRepositoryException(AiErrorType.timeout);
     } on Exception catch (error) {
       if (isSocketException(error) || error is http.ClientException) {
@@ -357,7 +359,7 @@ class AiRepository {
           errorType: AiErrorType.noInternet,
           exception: error,
         );
-        _reportWebError(AiErrorType.noInternet, message: error.toString());
+        _reportWebError(AiErrorType.noInternet, message: error.toString(), requestId: requestId);
         throw const AiRepositoryException(AiErrorType.noInternet);
       }
       rethrow;
@@ -388,6 +390,7 @@ class AiRepository {
       );
       _reportWebError(
         AiErrorType.unauthorized,
+        requestId: requestId,
         statusCode: response.statusCode,
         responseBody: response.body,
       );
@@ -405,6 +408,7 @@ class AiRepository {
       );
       _reportWebError(
         AiErrorType.rateLimited,
+        requestId: requestId,
         statusCode: response.statusCode,
         responseBody: response.body,
       );
@@ -422,6 +426,7 @@ class AiRepository {
       );
       _reportWebError(
         AiErrorType.serverError,
+        requestId: requestId,
         statusCode: response.statusCode,
         responseBody: response.body,
       );
@@ -442,6 +447,7 @@ class AiRepository {
       );
       _reportWebError(
         AiErrorType.badResponse,
+        requestId: requestId,
         statusCode: response.statusCode,
         responseBody: response.body,
       );
@@ -480,6 +486,7 @@ class AiRepository {
       );
       _reportWebError(
         AiErrorType.badResponse,
+        requestId: requestId,
         statusCode: response.statusCode,
         responseBody: response.body,
       );
@@ -634,7 +641,7 @@ class AiRepository {
         errorType: AiErrorType.timeout,
         exception: error,
       );
-      _reportWebError(AiErrorType.timeout, message: error.toString());
+      _reportWebError(AiErrorType.timeout, message: error.toString(), requestId: requestId);
       throw const AiRepositoryException(AiErrorType.timeout);
     } on Exception catch (error) {
       if (isSocketException(error) || error is http.ClientException) {
@@ -645,7 +652,7 @@ class AiRepository {
           errorType: AiErrorType.noInternet,
           exception: error,
         );
-        _reportWebError(AiErrorType.noInternet, message: error.toString());
+        _reportWebError(AiErrorType.noInternet, message: error.toString(), requestId: requestId);
         throw const AiRepositoryException(AiErrorType.noInternet);
       }
       rethrow;
@@ -861,7 +868,7 @@ class AiRepository {
         errorType: AiErrorType.timeout,
         exception: error,
       );
-      _reportWebError(AiErrorType.timeout, message: error.toString());
+      _reportWebError(AiErrorType.timeout, message: error.toString(), requestId: requestId);
       throw const AiRepositoryException(AiErrorType.timeout);
     } on Exception catch (error) {
       if (isSocketException(error) || error is http.ClientException) {
@@ -872,7 +879,7 @@ class AiRepository {
           errorType: AiErrorType.noInternet,
           exception: error,
         );
-        _reportWebError(AiErrorType.noInternet, message: error.toString());
+        _reportWebError(AiErrorType.noInternet, message: error.toString(), requestId: requestId);
         throw const AiRepositoryException(AiErrorType.noInternet);
       }
       rethrow;
@@ -1219,23 +1226,37 @@ class AiRepository {
     int? statusCode,
     String? message,
     String? responseBody,
+    String? requestId,
   }) {
     if (!kIsWeb) {
       return;
     }
-    final preview = responseBody == null
-        ? ''
-        : responseBody.substring(
-            0,
-            responseBody.length > 240 ? 240 : responseBody.length,
-          );
+    final preview = _trimBody(responseBody, maxLength: 400);
+    final buildMode = kReleaseMode ? 'release' : 'debug';
     final parts = [
       'API error: ${type.name}',
+      'build=$buildMode',
+      'apiBaseUrl=$apiBaseUrl',
+      'requestId=${requestId ?? _extractRequestId(responseBody) ?? 'unknown'}',
       if (statusCode != null) 'status=$statusCode',
       if (message != null && message.trim().isNotEmpty)
         'message=${message.trim()}',
-      if (preview.trim().isNotEmpty) 'body=${preview.trim()}',
+      if (preview.isNotEmpty) 'body=$preview',
     ];
     WebErrorReporter.instance.report(parts.join(' | '));
+  }
+
+  String _trimBody(String? responseBody, {int maxLength = 300}) {
+    if (responseBody == null) {
+      return '';
+    }
+    final sanitized = responseBody.replaceAll('\n', ' ').trim();
+    if (sanitized.isEmpty) {
+      return '';
+    }
+    if (sanitized.length <= maxLength) {
+      return sanitized;
+    }
+    return '${sanitized.substring(0, maxLength)}…';
   }
 }
