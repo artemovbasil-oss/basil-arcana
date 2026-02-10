@@ -160,13 +160,21 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
   int _deepRequestCounter = 0;
   int _activeDeepRequestId = 0;
 
-  bool _requiresTelegramAccess() {
+  Future<bool> _ensureTelegramInitData() async {
     if (!kIsWeb) {
-      return false;
+      return true;
     }
     final telegramEnv = TelegramEnv.instance;
-    return telegramEnv.isTelegram &&
-        telegramEnv.initData.trim().isEmpty;
+    if (!telegramEnv.isTelegram) {
+      return true;
+    }
+    final initData = await telegramEnv.ensureInitData();
+    if (initData.trim().isEmpty && kDebugMode) {
+      debugPrint(
+        '[ReadingFlow] Telegram initData still empty after retry.',
+      );
+    }
+    return initData.trim().isNotEmpty;
   }
 
   void setQuestion(String question) {
@@ -242,6 +250,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
     }
     state = state.copyWith(isSaved: false);
     final l10n = _l10n();
+    final hasTelegramInitData = await _ensureTelegramInitData();
 
     final drawn = drawCards(spread.positions.length, cards);
     final drawnCards = <DrawnCardModel>[];
@@ -260,7 +269,9 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       );
     }
 
-    final requiresTelegram = _requiresTelegramAccess();
+    final requiresTelegram = kIsWeb &&
+        TelegramEnv.instance.isTelegram &&
+        !hasTelegramInitData;
     state = state.copyWith(
       drawnCards: drawnCards,
       isLoading: !requiresTelegram,
@@ -375,7 +386,10 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       return;
     }
 
-    if (_requiresTelegramAccess()) {
+    final hasTelegramInitData = await _ensureTelegramInitData();
+    if (kIsWeb &&
+        TelegramEnv.instance.isTelegram &&
+        !hasTelegramInitData) {
       state = state.copyWith(
         isLoading: false,
         aiResult: null,
@@ -411,7 +425,10 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
     required List<DrawnCardModel> drawnCards,
     required AppLocalizations l10n,
   }) async {
-    if (_requiresTelegramAccess()) {
+    final hasTelegramInitData = await _ensureTelegramInitData();
+    if (kIsWeb &&
+        TelegramEnv.instance.isTelegram &&
+        !hasTelegramInitData) {
       state = state.copyWith(
         aiResult: null,
         isLoading: false,
@@ -584,7 +601,10 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       return;
     }
 
-    if (_requiresTelegramAccess()) {
+    final hasTelegramInitData = await _ensureTelegramInitData();
+    if (kIsWeb &&
+        TelegramEnv.instance.isTelegram &&
+        !hasTelegramInitData) {
       state = state.copyWith(
         detailsStatus: DetailsStatus.error,
         detailsText: null,

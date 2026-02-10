@@ -1,4 +1,7 @@
+import 'dart:async';
 import 'dart:js_util' as js_util;
+
+import 'package:flutter/foundation.dart';
 
 class TelegramAuth {
   TelegramAuth._();
@@ -7,6 +10,7 @@ class TelegramAuth {
 
   String? _cachedInitData;
   bool _readyCalled = false;
+  bool _expandCalled = false;
 
   bool get isTelegram {
     return _hasWebApp() || _hasBridgeInitData();
@@ -21,9 +25,27 @@ class TelegramAuth {
     if (_hasWebApp()) {
       _callReadyOnce();
     }
-    final value = _readInitData();
+    var value = _readInitData();
     if (value.trim().isNotEmpty) {
       _cachedInitData = value;
+      return value;
+    }
+    if (!_hasWebApp() && !_hasBridgeInitData()) {
+      return value;
+    }
+    const maxAttempts = 10;
+    const delay = Duration(milliseconds: 120);
+    var attempts = 0;
+    while (value.trim().isEmpty && attempts < maxAttempts) {
+      attempts += 1;
+      await Future.delayed(delay);
+      _callReadyOnce();
+      value = _readInitData();
+    }
+    if (value.trim().isNotEmpty) {
+      _cachedInitData = value;
+    } else if (kDebugMode) {
+      debugPrint('[TelegramAuth] initData empty after $attempts attempts');
     }
     return value;
   }
@@ -80,6 +102,10 @@ class TelegramAuth {
       final webApp = js_util.getProperty(telegram, 'WebApp');
       if (webApp != null && js_util.hasProperty(webApp, 'ready')) {
         js_util.callMethod(webApp, 'ready', const []);
+      }
+      if (!_expandCalled && webApp != null && js_util.hasProperty(webApp, 'expand')) {
+        js_util.callMethod(webApp, 'expand', const []);
+        _expandCalled = true;
       }
     } catch (_) {}
   }

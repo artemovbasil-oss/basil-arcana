@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
+import 'package:http/http.dart' as http;
 
 import 'app.dart';
 import 'core/config/app_config.dart';
@@ -48,6 +49,7 @@ Future<void> main() async {
     );
 
     await _runLocalDataSelfCheck();
+    await _runApiAvailabilitySelfCheck();
 
     runApp(const ProviderScope(child: BasilArcanaApp()));
   } catch (error, stackTrace) {
@@ -57,6 +59,31 @@ Future<void> main() async {
         stackTrace: stackTrace,
       ),
     );
+  }
+}
+
+Future<void> _runApiAvailabilitySelfCheck() async {
+  if (!kDebugMode) {
+    return;
+  }
+  final baseUrl = AppConfig.apiBaseUrl.trim();
+  if (baseUrl.isEmpty) {
+    debugPrint('[SelfCheck] API base URL missing.');
+    return;
+  }
+  final uri = Uri.parse(baseUrl).replace(path: '/api/reading/availability');
+  try {
+    final response =
+        await http.get(uri).timeout(const Duration(seconds: 6));
+    final preview = response.body.length > 200
+        ? response.body.substring(0, 200)
+        : response.body;
+    debugPrint(
+      '[SelfCheck] availability status=${response.statusCode} '
+      'body="${preview.replaceAll('\n', ' ')}"',
+    );
+  } catch (error) {
+    debugPrint('[SelfCheck] availability failed: $error');
   }
 }
 

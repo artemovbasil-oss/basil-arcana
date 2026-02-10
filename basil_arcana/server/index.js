@@ -37,7 +37,19 @@ const app = express();
 
 app.set('trust proxy', 1);
 
-app.use(cors());
+app.use(
+  cors({
+    allowedHeaders: [
+      'Content-Type',
+      'X-Request-Id',
+      'X-Telegram-InitData',
+      'X-Telegram-Init-Data',
+      'X-TG-Init-Data',
+      'X-Api-Key'
+    ],
+    exposedHeaders: ['x-request-id']
+  })
+);
 app.use(express.json({ limit: '1mb' }));
 
 if (!TELEGRAM_BOT_TOKEN) {
@@ -396,6 +408,27 @@ app.get('/api/telegram/debug', (req, res) => {
   });
 });
 
+app.post('/api/debug/telegram', (req, res) => {
+  if (process.env.NODE_ENV === 'production') {
+    return res.status(404).json({ error: 'not_found', requestId: req.requestId });
+  }
+  const headerValue =
+    req.get('x-telegram-initdata') ||
+    req.get('x-telegram-init-data') ||
+    req.get('x-tg-init-data') ||
+    '';
+  const bodyValue =
+    typeof req.body?.initData === 'string' ? req.body.initData : '';
+  const headerTrimmed = headerValue.trim();
+  const bodyTrimmed = bodyValue.trim();
+  return res.json({
+    hasHeader: Boolean(headerTrimmed),
+    hasBody: Boolean(bodyTrimmed),
+    headerLen: headerTrimmed.length,
+    bodyLen: bodyTrimmed.length
+  });
+});
+
 if (RATE_LIMIT_MAX != null) {
   const apiLimiter = rateLimit({
     windowMs: RATE_LIMIT_WINDOW_MS ?? 60000,
@@ -412,6 +445,7 @@ app.post('/api/reading/generate', telegramAuthMiddleware, async (req, res) => {
   if (!OPENAI_API_KEY) {
     return res.status(503).json({
       error: 'server_misconfig',
+      reason: 'missing_openai_api_key',
       requestId: req.requestId
     });
   }
@@ -474,6 +508,7 @@ app.post('/api/reading/generate_web', telegramAuthMiddleware, async (req, res) =
   if (!OPENAI_API_KEY) {
     return res.status(503).json({
       error: 'server_misconfig',
+      reason: 'missing_openai_api_key',
       requestId: req.requestId
     });
   }
@@ -537,6 +572,7 @@ app.post('/api/reading/details', telegramAuthMiddleware, async (req, res) => {
   if (!OPENAI_API_KEY) {
     return res.status(503).json({
       error: 'server_misconfig',
+      reason: 'missing_openai_api_key',
       requestId: req.requestId
     });
   }
@@ -613,6 +649,7 @@ app.post('/api/natal-chart/generate', async (req, res) => {
   if (!OPENAI_API_KEY) {
     return res.status(503).json({
       error: 'server_misconfig',
+      reason: 'missing_openai_api_key',
       requestId: req.requestId
     });
   }
@@ -690,6 +727,7 @@ app.post('/api/natal-chart/generate_web', async (req, res) => {
   if (!OPENAI_API_KEY || !TELEGRAM_BOT_TOKEN) {
     return res.status(503).json({
       error: 'server_misconfig',
+      reason: !OPENAI_API_KEY ? 'missing_openai_api_key' : 'missing_telegram_bot_token',
       requestId: req.requestId
     });
   }
