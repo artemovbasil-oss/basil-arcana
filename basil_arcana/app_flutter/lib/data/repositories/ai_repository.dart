@@ -39,11 +39,13 @@ class AiRepositoryException implements Exception {
     this.type, {
     this.statusCode,
     this.message,
+    this.responseBody,
   });
 
   final AiErrorType type;
   final int? statusCode;
   final String? message;
+  final String? responseBody;
 
   @override
   String toString() {
@@ -433,6 +435,7 @@ class AiRepository {
       throw AiRepositoryException(
         AiErrorType.serverError,
         statusCode: response.statusCode,
+        responseBody: response.body,
       );
     }
 
@@ -454,6 +457,7 @@ class AiRepository {
       throw AiRepositoryException(
         AiErrorType.badResponse,
         statusCode: response.statusCode,
+        responseBody: response.body,
       );
     }
 
@@ -493,6 +497,8 @@ class AiRepository {
       throw AiRepositoryException(
         AiErrorType.badResponse,
         message: error.toString(),
+        statusCode: response.statusCode,
+        responseBody: response.body,
       );
     }
   }
