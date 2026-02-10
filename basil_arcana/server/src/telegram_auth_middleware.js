@@ -4,9 +4,16 @@ const { TELEGRAM_BOT_TOKEN } = require('./config');
 const { validateTelegramInitData } = require('./telegram');
 
 function extractInitData(req) {
-  const headerValue = req.get('x-telegram-initdata');
-  if (typeof headerValue === 'string' && headerValue.trim()) {
-    return headerValue.trim();
+  const headerCandidates = [
+    'x-telegram-initdata',
+    'x-telegram-init-data',
+    'x-tg-init-data'
+  ];
+  for (const headerName of headerCandidates) {
+    const headerValue = req.get(headerName);
+    if (typeof headerValue === 'string' && headerValue.trim()) {
+      return headerValue.trim();
+    }
   }
   const bodyInitData =
     typeof req.body?.initData === 'string' ? req.body.initData.trim() : '';
@@ -30,6 +37,15 @@ function telegramAuthMiddleware(req, res, next) {
     res.setHeader('x-request-id', requestId);
   }
 
+  const headerValue =
+    req.get('x-telegram-initdata') ||
+    req.get('x-telegram-init-data') ||
+    req.get('x-tg-init-data') ||
+    '';
+  const bodyValue =
+    typeof req.body?.initData === 'string' ? req.body.initData.trim() : '';
+  const headerLen = headerValue.trim().length;
+  const bodyLen = bodyValue.trim().length;
   const initData = extractInitData(req);
   if (!initData) {
     console.warn(
@@ -37,7 +53,9 @@ function telegramAuthMiddleware(req, res, next) {
         event: 'telegram_auth_failed',
         requestId,
         reason: 'missing_initData',
-        initData_length: 0
+        initData_length: 0,
+        header_len: headerLen,
+        body_len: bodyLen
       })
     );
     return res.status(401).json({
@@ -58,7 +76,9 @@ function telegramAuthMiddleware(req, res, next) {
         event: 'telegram_auth_failed',
         requestId,
         reason: 'invalid_initData',
-        initData_length: initData.length
+        initData_length: initData.length,
+        header_len: headerLen,
+        body_len: bodyLen
       })
     );
     return res.status(401).json({
@@ -89,6 +109,8 @@ function telegramAuthMiddleware(req, res, next) {
       event: 'telegram_auth_ok',
       requestId,
       initData_length: initData.length,
+      header_len: headerLen,
+      body_len: bodyLen,
       userId
     })
   );

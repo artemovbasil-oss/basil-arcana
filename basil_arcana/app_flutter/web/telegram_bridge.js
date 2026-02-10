@@ -2,6 +2,7 @@
   'use strict';
 
   var readyCalled = false;
+  var expandCalled = false;
 
   function getWebApp() {
     try {
@@ -31,6 +32,23 @@
     return true;
   }
 
+  function callExpandOnce() {
+    var webApp = getWebApp();
+    if (!webApp) {
+      return false;
+    }
+    if (expandCalled) {
+      return true;
+    }
+    expandCalled = true;
+    try {
+      if (typeof webApp.expand === 'function') {
+        webApp.expand();
+      }
+    } catch (error) {}
+    return true;
+  }
+
   function readInitData() {
     var webApp = getWebApp();
     if (webApp && typeof webApp.initData === 'string' && webApp.initData.trim()) {
@@ -44,6 +62,7 @@
 
   function refreshInitData() {
     callReadyOnce();
+    callExpandOnce();
     var value = readInitData();
     if (value && typeof value === 'string' && value.trim()) {
       window.__tgInitData = value;

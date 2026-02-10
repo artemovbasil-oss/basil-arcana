@@ -13,8 +13,10 @@ class TelegramEnv {
   String? _cachedInitData;
   bool _retryInProgress = false;
   bool _loggedInitData = false;
-  static const int _maxInitDataRetries = 4;
-  static const Duration _retryDelay = Duration(milliseconds: 150);
+  bool _readyCalled = false;
+  bool _expandCalled = false;
+  static const int _maxInitDataRetries = 10;
+  static const Duration _retryDelay = Duration(milliseconds: 120);
 
   bool get isTelegram {
     return _isTelegramEnvironment();
@@ -24,12 +26,44 @@ class TelegramEnv {
     if (_cachedInitData != null && _cachedInitData!.trim().isNotEmpty) {
       return _cachedInitData!;
     }
+    if (_isTelegramEnvironment()) {
+      _callReadyAndExpand();
+    }
     final initData = _readWebAppInitData();
     if (initData.trim().isNotEmpty) {
       _cachedInitData = initData;
       _logInitData(initData);
     } else {
       _scheduleInitDataRetry();
+    }
+    return initData;
+  }
+
+  Future<String> ensureInitData({
+    int maxAttempts = _maxInitDataRetries,
+    Duration delay = _retryDelay,
+  }) async {
+    if (!_isTelegramEnvironment()) {
+      return initData;
+    }
+    _callReadyAndExpand();
+    var attempts = 0;
+    var initData = _readWebAppInitData();
+    while (initData.trim().isEmpty && attempts < maxAttempts) {
+      attempts += 1;
+      await Future.delayed(delay);
+      _callReadyAndExpand();
+      initData = _readWebAppInitData();
+    }
+    if (initData.trim().isNotEmpty) {
+      _cachedInitData = initData;
+      _logInitData(initData);
+      return initData;
+    }
+    if (kDebugMode) {
+      debugPrint(
+        '[TelegramEnv] initData empty after $attempts attempts',
+      );
     }
     return initData;
   }
@@ -55,6 +89,17 @@ class TelegramEnv {
     return false;
   }
 
+  void _callReadyAndExpand() {
+    if (!_readyCalled) {
+      TelegramWebApp.ready();
+      _readyCalled = true;
+    }
+    if (!_expandCalled) {
+      TelegramWebApp.expand();
+      _expandCalled = true;
+    }
+  }
+
   void _scheduleInitDataRetry() {
     if (_retryInProgress || !_isTelegramEnvironment()) {
       return;
@@ -62,6 +107,7 @@ class TelegramEnv {
     _retryInProgress = true;
     var attempts = 0;
     void attempt() {
+      _callReadyAndExpand();
       attempts += 1;
       final initData = _readWebAppInitData();
       if (initData.trim().isNotEmpty) {
@@ -72,6 +118,11 @@ class TelegramEnv {
       }
       if (attempts >= _maxInitDataRetries) {
         _retryInProgress = false;
+        if (kDebugMode) {
+          debugPrint(
+            '[TelegramEnv] initData still empty after $attempts attempts',
+          );
+        }
         return;
       }
       Future.delayed(_retryDelay, attempt);

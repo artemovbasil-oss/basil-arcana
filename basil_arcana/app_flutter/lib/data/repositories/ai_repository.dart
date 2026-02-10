@@ -305,6 +305,12 @@ class AiRepository {
       if (telegramAuth.hasInitData)
         'X-Telegram-InitData': telegramAuth.initData,
     };
+    if (useTelegramWeb && kDebugMode) {
+      _logTelegramInitDataDebug(
+        endpoint: endpoint,
+        initData: telegramAuth.initData,
+      );
+    }
     final requestPayload = useTelegramWeb
         ? {
             if (telegramAuth.hasInitData) 'initData': telegramAuth.initData,
@@ -1018,6 +1024,26 @@ class AiRepository {
       return 'details_relationships_career';
     }
     return mode.name;
+  }
+
+  void _logTelegramInitDataDebug({
+    required String endpoint,
+    required String initData,
+  }) {
+    if (!kDebugMode) {
+      return;
+    }
+    final trimmed = initData.trim();
+    if (trimmed.isEmpty) {
+      debugPrint('[AiRepository] telegramInitData endpoint=$endpoint empty');
+      return;
+    }
+    final prefixLength = min(10, trimmed.length);
+    final prefix = trimmed.substring(0, prefixLength);
+    debugPrint(
+      '[AiRepository] telegramInitData endpoint=$endpoint '
+      'length=${trimmed.length} prefix=${prefix}***',
+    );
   }
 
   void _logSuccess(
