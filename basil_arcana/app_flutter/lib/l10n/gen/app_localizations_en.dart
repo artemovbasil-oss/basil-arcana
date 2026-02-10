@@ -79,7 +79,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Ask a question and explore the threads that shape your next step';
 
   @override
-  String get homeDescription => 'Drop your question and catch the magic vibe';
+  String get homeDescription => 'catch the magic vibe';
 
   @override
   String get homeQuestionPlaceholder => 'Type your question here…';

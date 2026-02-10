@@ -79,7 +79,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'Задайте вопрос и исследуйте нити, которые определяют ваш следующий шаг';
 
   @override
-  String get homeDescription => 'Задай вопрос и поймай магический вайб';
+  String get homeDescription => 'поймай магический вайб';
 
   @override
   String get homeQuestionPlaceholder => 'Напишите свой вопрос…';

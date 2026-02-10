@@ -79,7 +79,7 @@ class AppLocalizationsKk extends AppLocalizations {
       'Сұрақ қойып, келесі қадамыңызды айқындайтын желілерді зерттеңіз';
 
   @override
-  String get homeDescription => 'Сұрағыңды қой да, сиқыр вайбын ұста';
+  String get homeDescription => 'сиқыр вайбын ұста';
 
   @override
   String get homeQuestionPlaceholder => 'Сұрағыңызды жазыңыз…';

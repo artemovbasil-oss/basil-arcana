@@ -24,6 +24,7 @@ import '../../state/providers.dart';
 import '../../core/widgets/app_top_bar.dart';
 import '../../core/navigation/app_route_config.dart';
 import '../more/more_features_screen.dart';
+import '../settings/settings_screen.dart';
 import '../cards/card_detail_screen.dart';
 import 'widgets/chat_widgets.dart';
 import 'widgets/oracle_waiting_screen.dart';
@@ -140,11 +141,17 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
         final statusText = _statusMessage(state, l10n);
         final canRetry = !state.isLoading && state.aiErrorType != null;
         return Scaffold(
-          appBar: buildTopBar(
+          appBar: buildEnergyTopBar(
             context,
-            title: Text(l10n.resultTitle),
             showBack: true,
             onBack: handleBack,
+            onSettings: () {
+              Navigator.pushNamed(
+                context,
+                SettingsScreen.routeName,
+                arguments: const AppRouteConfig(showBackButton: true),
+              );
+            },
           ),
           backgroundColor: Theme.of(context).colorScheme.surface,
           body: SafeArea(
@@ -176,11 +183,17 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
           : _statusMessage(state, l10n);
       final canRetry = !state.isLoading && state.aiErrorType != null;
       return Scaffold(
-        appBar: buildTopBar(
+        appBar: buildEnergyTopBar(
           context,
-          title: Text(l10n.resultTitle),
           showBack: true,
           onBack: handleBack,
+          onSettings: () {
+            Navigator.pushNamed(
+              context,
+              SettingsScreen.routeName,
+              arguments: const AppRouteConfig(showBackButton: true),
+            );
+          },
         ),
         backgroundColor: Theme.of(context).colorScheme.surface,
         body: SafeArea(
@@ -227,11 +240,17 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
         _ActionBar.baseHeight +
         (_sequenceComplete ? _ActionBar.extraHeight : 0);
     return Scaffold(
-      appBar: buildTopBar(
+      appBar: buildEnergyTopBar(
         context,
-        title: Text(l10n.resultTitle),
         showBack: true,
         onBack: handleBack,
+        onSettings: () {
+          Navigator.pushNamed(
+            context,
+            SettingsScreen.routeName,
+            arguments: const AppRouteConfig(showBackButton: true),
+          );
+        },
       ),
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
@@ -405,9 +424,6 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                         builder: (_) => const MoreFeaturesScreen(),
                       ),
                     );
-                  },
-                  onTopUp: () async {
-                    await showEnergyTopUpSheet(context, ref);
                   },
                   newLabel: l10n.resultNewButton,
                   moreLabel: l10n.resultWantMoreButton,
@@ -885,13 +901,18 @@ class _OpenInTelegramScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: buildTopBar(
+      appBar: buildEnergyTopBar(
         context,
-        title: Text(l10n.resultTitle),
         showBack: true,
         onBack: onBack,
+        onSettings: () {
+          Navigator.pushNamed(
+            context,
+            SettingsScreen.routeName,
+            arguments: const AppRouteConfig(showBackButton: true),
+          );
+        },
       ),
       backgroundColor: colorScheme.surface,
       body: SafeArea(
@@ -1115,18 +1136,16 @@ class _ActionBar extends StatelessWidget {
     required this.showExtra,
     required this.onNew,
     required this.onShare,
-    required this.onTopUp,
     required this.newLabel,
     required this.moreLabel,
   });
 
-  static const double baseHeight = 178;
+  static const double baseHeight = 86;
   static const double extraHeight = 70;
 
   final bool showExtra;
   final VoidCallback onNew;
   final VoidCallback onShare;
-  final VoidCallback onTopUp;
   final String newLabel;
   final String moreLabel;
 
@@ -1192,11 +1211,6 @@ class _ActionBar extends StatelessWidget {
                           ),
                         )
                       : const SizedBox.shrink(),
-                ),
-                const SizedBox(height: 10),
-                EnergyStatusCard(
-                  actionCost: EnergyAction.deepDetails.cost,
-                  onTopUpPressed: onTopUp,
                 ),
               ],
             ),

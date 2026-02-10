@@ -18,6 +18,7 @@ import '../../state/energy_controller.dart';
 import '../../state/reading_flow_controller.dart';
 import '../../state/providers.dart';
 import '../result/result_screen.dart';
+import '../settings/settings_screen.dart';
 
 class ShuffleScreen extends ConsumerStatefulWidget {
   const ShuffleScreen({super.key});
@@ -135,10 +136,16 @@ class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
         state.spreadType?.cardCount ?? state.spread?.positions.length ?? 0;
     final showGlow = state.isLoading && hasDrawnCards;
     return Scaffold(
-      appBar: buildTopBar(
+      appBar: buildEnergyTopBar(
         context,
-        title: Text(l10n.shuffleTitle),
         showBack: true,
+        onSettings: () {
+          Navigator.pushNamed(
+            context,
+            SettingsScreen.routeName,
+            arguments: const AppRouteConfig(showBackButton: true),
+          );
+        },
       ),
       backgroundColor: colorScheme.background,
       body: SafeArea(
@@ -255,13 +262,6 @@ class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
                         padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 10),
-                  EnergyStatusCard(
-                    actionCost: EnergyAction.reading.cost,
-                    onTopUpPressed: () async {
-                      await showEnergyTopUpSheet(context, ref);
-                    },
                   ),
                 ],
               ),

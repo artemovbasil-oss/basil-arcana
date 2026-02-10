@@ -241,7 +241,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeDescription.
   ///
   /// In en, this message translates to:
-  /// **'Drop your question and catch the magic vibe'**
+  /// **'catch the magic vibe'**
   String get homeDescription;
 
   /// No description provided for @homeQuestionPlaceholder.

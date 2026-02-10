@@ -6,8 +6,6 @@ import '../../core/navigation/app_route_config.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/app_top_bar.dart';
-import '../../core/widgets/energy_widgets.dart';
-import '../../state/energy_controller.dart';
 import '../../state/providers.dart';
 import '../../state/reading_flow_controller.dart';
 import '../cards/cards_screen.dart';
@@ -115,6 +113,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             arguments: const AppRouteConfig(showBackButton: true),
           );
         },
+        leadingFallback: const Center(
+          child: Text(
+            '🔮',
+            style: TextStyle(fontSize: 21),
+          ),
+        ),
       ),
       resizeToAvoidBottomInset: false,
       body: SafeArea(
@@ -139,14 +143,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         color: colorScheme.onSurface,
                       ),
                     ),
-                    const SizedBox(height: 6),
-                    Text(
-                      l10n.homeSubtitle,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: colorScheme.onSurface.withOpacity(0.7),
-                          ),
-                    ),
-                    const SizedBox(height: 22),
+                    const SizedBox(height: 20),
                     Container(
                       key: _questionKey,
                       decoration: BoxDecoration(
@@ -283,13 +280,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 disabledColor: disabledColor,
                 label: l10n.homeContinueButton,
                 onPressed: () => _handlePrimaryAction(hasQuestion),
-              ),
-              const SizedBox(height: 10),
-              EnergyStatusCard(
-                actionCost: EnergyAction.reading.cost,
-                onTopUpPressed: () async {
-                  await showEnergyTopUpSheet(context, ref);
-                },
               ),
             ],
           ),

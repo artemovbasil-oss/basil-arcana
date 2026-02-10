@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
+import 'energy_widgets.dart';
 import '../../state/providers.dart';
 
 PreferredSizeWidget buildTopBar(
@@ -36,6 +37,7 @@ PreferredSizeWidget buildEnergyTopBar(
   VoidCallback? onBack,
   bool showSettings = true,
   VoidCallback? onSettings,
+  Widget? leadingFallback,
 }) {
   final canPop = Navigator.canPop(context);
   final shouldShowBack = showBack && (canPop || onBack != null);
@@ -56,7 +58,7 @@ PreferredSizeWidget buildEnergyTopBar(
                     }
                   },
                 )
-              : null,
+              : leadingFallback,
         ),
         const SizedBox(width: 8),
         const Expanded(
@@ -108,7 +110,7 @@ class _EnergyHeaderPillState extends ConsumerState<_EnergyHeaderPill>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1800),
+      duration: const Duration(milliseconds: 3600),
     )..repeat(reverse: true);
   }
 
@@ -128,10 +130,11 @@ class _EnergyHeaderPillState extends ConsumerState<_EnergyHeaderPill>
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
-        final t = _controller.value;
+        final curveT = Curves.easeInOutSine.transform(_controller.value);
+        final t = curveT;
         return Container(
           height: 42,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 10),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(999),
             gradient: LinearGradient(
@@ -151,19 +154,38 @@ class _EnergyHeaderPillState extends ConsumerState<_EnergyHeaderPill>
             ],
           ),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Icon(Icons.bolt, size: 15, color: Colors.white),
               const SizedBox(width: 6),
-              Text(
-                l10n.energyLabelWithPercent(energy.percent),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
+              Expanded(
+                child: Text(
+                  l10n.energyLabelWithPercent(energy.percent),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
+              if (energy.isNearEmpty)
+                IconButton(
+                  iconSize: 16,
+                  visualDensity: VisualDensity.compact,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints.tightFor(
+                    width: 26,
+                    height: 26,
+                  ),
+                  tooltip: l10n.energyTopUpButton,
+                  onPressed: () async {
+                    await showEnergyTopUpSheet(context, ref);
+                  },
+                  icon: const Icon(
+                    Icons.add_circle_outline,
+                    color: Colors.white,
+                  ),
+                ),
             ],
           ),
         );

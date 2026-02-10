@@ -273,13 +273,6 @@ class _MoreFeaturesScreenState extends ConsumerState<MoreFeaturesScreen> {
                       onPressed: _isLoading ? null : _handleNatalChart,
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  EnergyStatusCard(
-                    actionCost: EnergyAction.natalChart.cost,
-                    onTopUpPressed: () async {
-                      await showEnergyTopUpSheet(context, ref);
-                    },
-                  ),
                 ],
                 if (_isLoading) ...[
                   const SizedBox(height: 16),
