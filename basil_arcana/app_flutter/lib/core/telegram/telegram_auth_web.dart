@@ -112,6 +112,26 @@ class TelegramAuth {
 
   String _readInitData() {
     try {
+      if (js_util.hasProperty(js_util.globalThis, 'getTelegramInitData')) {
+        final value = js_util.callMethod(
+          js_util.globalThis,
+          'getTelegramInitData',
+          const [],
+        );
+        if (value is String && value.trim().isNotEmpty) {
+          return value;
+        }
+      }
+      if (js_util.hasProperty(js_util.globalThis, 'tgGetInitData')) {
+        final value = js_util.callMethod(
+          js_util.globalThis,
+          'tgGetInitData',
+          const [],
+        );
+        if (value is String && value.trim().isNotEmpty) {
+          return value;
+        }
+      }
       if (js_util.hasProperty(js_util.globalThis, 'Telegram')) {
         final telegram = js_util.getProperty(js_util.globalThis, 'Telegram');
         if (telegram != null && js_util.hasProperty(telegram, 'WebApp')) {

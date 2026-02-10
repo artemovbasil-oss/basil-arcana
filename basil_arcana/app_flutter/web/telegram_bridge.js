@@ -49,6 +49,25 @@
     return true;
   }
 
+  function readInitDataFromLocation() {
+    try {
+      var hashParams = new URLSearchParams((window.location.hash || '').replace(/^#/, ''));
+      var hashValue = hashParams.get('tgWebAppData');
+      if (typeof hashValue === 'string' && hashValue.trim()) {
+        return hashValue;
+      }
+    } catch (error) {}
+
+    try {
+      var queryValue = new URLSearchParams(window.location.search || '').get('tgWebAppData');
+      if (typeof queryValue === 'string' && queryValue.trim()) {
+        return queryValue;
+      }
+    } catch (error) {}
+
+    return '';
+  }
+
   function readInitData() {
     var webApp = getWebApp();
     if (webApp && typeof webApp.initData === 'string' && webApp.initData.trim()) {
@@ -56,6 +75,10 @@
     }
     if (typeof window.__tgInitData === 'string' && window.__tgInitData.trim()) {
       return window.__tgInitData;
+    }
+    var locationData = readInitDataFromLocation();
+    if (locationData) {
+      return locationData;
     }
     return '';
   }
@@ -74,6 +97,15 @@
   }
 
   window.__tgInitDataGetter = function () {
+    return refreshInitData();
+  };
+
+
+  window.getTelegramInitData = function () {
+    return refreshInitData();
+  };
+
+  window.tgGetInitData = function () {
     return refreshInitData();
   };
 
