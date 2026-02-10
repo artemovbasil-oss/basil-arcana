@@ -21,11 +21,12 @@ RUN if [ ! -d "web" ]; then \
       flutter create . --platforms web; \
     fi
 
-RUN flutter gen-l10n && flutter build web --release --pwa-strategy=none \
+RUN WEB_APP_VERSION="${APP_VERSION:-$(date -u +%Y%m%d%H%M%S)}" && \
+    flutter gen-l10n && flutter build web --release --pwa-strategy=none \
     --dart-define=API_BASE_URL="${API_BASE_URL}" \
     --dart-define=ASSETS_BASE_URL="${ASSETS_BASE_URL}" \
-    --dart-define=APP_VERSION="${APP_VERSION}" && \
-    ./scripts/patch_web_version.sh build/web "${APP_VERSION}"
+    --dart-define=APP_VERSION="${WEB_APP_VERSION}" && \
+    ./scripts/patch_web_version.sh build/web "${WEB_APP_VERSION}"
 
 FROM python:3.12-slim AS runtime
 

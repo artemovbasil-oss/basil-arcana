@@ -264,7 +264,6 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       return;
     }
     state = state.copyWith(isSaved: false);
-    final hasTelegramInitData = await _ensureTelegramInitData();
 
     final drawn = drawCards(spread.positions.length, cards);
     final drawnCards = <DrawnCardModel>[];
@@ -283,12 +282,9 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       );
     }
 
-    final requiresTelegram = kIsWeb &&
-        TelegramEnv.instance.isTelegram &&
-        !hasTelegramInitData;
     state = state.copyWith(
       drawnCards: drawnCards,
-      isLoading: !requiresTelegram,
+      isLoading: true,
       aiResult: null,
       deepResult: null,
       detailsStatus: DetailsStatus.idle,
@@ -296,17 +292,30 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       detailsError: null,
       showDetailsCta: false,
       isDeepLoading: false,
-      requiresTelegram: requiresTelegram,
+      requiresTelegram: false,
       clearDeepError: true,
       clearError: true,
     );
     _logStateTransition('idle->generating', state);
 
-    if (requiresTelegram) {
-      await _autoSaveReading();
-      return;
+    try {
+      await _generateReading(spread: spread, drawnCards: drawnCards);
+    } catch (error) {
+      if (kDebugMode) {
+        final message = error.toString();
+        debugPrint(
+          '[ReadingFlow] drawAndGenerate unexpected error '
+          'bodyPreview="${message.substring(0, min(200, message.length))}"',
+        );
+      }
+      await _useOfflineFallback(
+        spread: spread,
+        drawnCards: drawnCards,
+        errorType: AiErrorType.serverError,
+        errorMessage: 'AI temporarily unavailable — showing base interpretation',
+        logLabel: 'generating->done(local-fallback:top-level)',
+      );
     }
-    await _generateReading(spread: spread, drawnCards: drawnCards);
   }
 
   AppLocalizations _l10n() {
@@ -344,23 +353,6 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       return;
     }
 
-    final hasTelegramInitData = await _ensureTelegramInitData();
-    if (kIsWeb &&
-        TelegramEnv.instance.isTelegram &&
-        !hasTelegramInitData) {
-      state = state.copyWith(
-        isLoading: false,
-        aiResult: null,
-        detailsStatus: DetailsStatus.idle,
-        detailsText: null,
-        detailsError: null,
-        showDetailsCta: false,
-        requiresTelegram: true,
-        clearError: true,
-      );
-      return;
-    }
-
     state = state.copyWith(
       isLoading: true,
       detailsStatus: DetailsStatus.idle,
@@ -387,28 +379,12 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       drawnCards: drawnCards,
     );
 
-    final hasTelegramInitData = await _ensureTelegramInitData();
-    if (kIsWeb &&
-        TelegramEnv.instance.isTelegram &&
-        !hasTelegramInitData) {
-      state = state.copyWith(
-        aiResult: localResult,
-        isLoading: false,
-        aiUsed: false,
-        showDetailsCta: true,
-        requiresTelegram: true,
-        clearError: true,
-      );
-      await _incrementCardStats(drawnCards);
-      await _autoSaveReading();
-      return;
-    }
-
     state = state.copyWith(
       aiResult: localResult,
       isLoading: true,
       aiUsed: false,
       showDetailsCta: true,
+      requiresTelegram: false,
       clearError: true,
     );
 
@@ -449,16 +425,16 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
         );
         return;
       }
-      await _incrementCardStats(drawnCards);
       state = state.copyWith(
         aiResult: result,
         isLoading: false,
         aiUsed: true,
         showDetailsCta: true,
+        requiresTelegram: false,
         clearError: true,
       );
       _logStateTransition('generating->done', state);
-      await _autoSaveReading();
+      await _runPostGenerationSideEffects(drawnCards);
     } on AiRepositoryException catch (error) {
       if (_activeRequestId != requestId) {
         return;
@@ -498,6 +474,16 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
         logLabel: 'generating->done(local-fallback:unknown)',
       );
     } finally {
+      if (_activeRequestId == requestId && state.isLoading) {
+        await _useOfflineFallback(
+          spread: spread,
+          drawnCards: drawnCards,
+          errorType: AiErrorType.serverError,
+          errorMessage:
+              'AI temporarily unavailable — showing base interpretation',
+          logLabel: 'generating->done(local-fallback:safety-net)',
+        );
+      }
       if (_activeClient == client) {
         _activeClient = null;
       }
@@ -542,13 +528,32 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       isLoading: false,
       aiUsed: false,
       showDetailsCta: true,
+      requiresTelegram: false,
       aiErrorType: errorType,
       aiErrorStatusCode: errorStatusCode,
       errorMessage: errorMessage,
     );
     _logStateTransition(logLabel, state);
-    await _incrementCardStats(drawnCards);
-    await _autoSaveReading();
+    await _runPostGenerationSideEffects(drawnCards);
+  }
+
+  Future<void> _runPostGenerationSideEffects(
+    List<DrawnCardModel> drawnCards,
+  ) async {
+    try {
+      await _incrementCardStats(drawnCards);
+    } catch (error) {
+      if (kDebugMode) {
+        debugPrint('[ReadingFlow] incrementCardStats failed: $error');
+      }
+    }
+    try {
+      await _autoSaveReading();
+    } catch (error) {
+      if (kDebugMode) {
+        debugPrint('[ReadingFlow] autoSaveReading failed: $error');
+      }
+    }
   }
 
   Future<void> _autoSaveReading() async {

@@ -19,6 +19,7 @@ fi
 
 python3 - <<'PY' "${INDEX_HTML}" "${APP_VERSION}"
 from pathlib import Path
+import re
 import sys
 
 index_path = Path(sys.argv[1])
@@ -27,6 +28,19 @@ text = index_path.read_text(encoding='utf-8')
 
 text = text.replace("{{BUILD_ID}}", app_version)
 text = text.replace("{{flutter_service_worker_version}}", app_version)
+
+def ensure_versioned(content: str, asset: str, version: str) -> str:
+    pattern = rf"{re.escape(asset)}(?!\?v=)"
+    return re.sub(pattern, f"{asset}?v={version}", content)
+
+for asset_name in (
+    "main.dart.js",
+    "flutter.js",
+    "flutter_bootstrap.js",
+    "telegram_bridge.js",
+    "config.json",
+):
+    text = ensure_versioned(text, asset_name, app_version)
 
 index_path.write_text(text, encoding='utf-8')
 PY
@@ -43,6 +57,7 @@ text = bootstrap_path.read_text(encoding='utf-8')
 
 text = text.replace("{{flutter_service_worker_version}}", app_version)
 text = re.sub(r"(const|var) serviceWorkerVersion = null", r"\1 serviceWorkerVersion = \"%s\"" % app_version, text)
+text = re.sub(r"main\.dart\.js(?!\?v=)", f"main.dart.js?v={app_version}", text)
 
 bootstrap_path.write_text(text, encoding='utf-8')
 PY
