@@ -252,6 +252,13 @@ class AppLocalizationsKk extends AppLocalizations {
       'Оқиғаңның қарапайым доғасы. Үш карта — мәнмәтін мен бағыт.';
 
   @override
+  String get spreadFiveCardTitle => 'Бес карта';
+
+  @override
+  String get spreadFiveCardSubtitle =>
+      'Жағдайға тереңірек көзқарас. Бес карта — көпқабатты мәнмәтін мен бағыт.';
+
+  @override
   String get spreadLabelPast => 'Өткен';
 
   @override

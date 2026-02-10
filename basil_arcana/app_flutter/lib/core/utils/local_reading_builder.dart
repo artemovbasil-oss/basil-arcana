@@ -25,7 +25,7 @@ class LocalReadingBuilder {
 
     final tldr = spreadType == SpreadType.one
         ? _singleCardSummary(question: question, cards: drawnCards)
-        : _threeCardSummary(question: question, cards: drawnCards);
+        : _multiCardSummary(question: question, cards: drawnCards);
 
     final why = _buildWhy(spread, drawnCards);
     final action = _buildAction(drawnCards);
@@ -60,7 +60,7 @@ class LocalReadingBuilder {
     return '${card.cardName} highlights $focus. $meaning';
   }
 
-  String _threeCardSummary({
+  String _multiCardSummary({
     required String question,
     required List<DrawnCardModel> cards,
   }) {
@@ -68,6 +68,10 @@ class LocalReadingBuilder {
     if (cards.length < 3) {
       final names = cards.map((card) => card.cardName).join(', ');
       return 'This spread about $focus emphasizes $names.';
+    }
+    if (cards.length >= 5) {
+      final names = cards.take(5).map((card) => card.cardName).join(', ');
+      return 'Your five-card reading around $focus highlights $names, revealing layered influences and a practical direction.';
     }
     return 'Your three-card spread around $focus shows a movement from '
         '${cards[0].cardName} to ${cards[1].cardName}, leading into ${cards[2].cardName}.';
@@ -132,7 +136,8 @@ class LocalReadingBuilder {
 
   String _fallbackByCardName(String cardName) {
     const fallbackMap = <String, String>{
-      'The Fool': 'a fresh start, trust in your next step, and openness to change',
+      'The Fool':
+          'a fresh start, trust in your next step, and openness to change',
       'The Magician': 'using your skills intentionally and acting with clarity',
       'The High Priestess': 'listening to intuition before making a final move',
       'The Empress': 'growth through care, creativity, and patience',

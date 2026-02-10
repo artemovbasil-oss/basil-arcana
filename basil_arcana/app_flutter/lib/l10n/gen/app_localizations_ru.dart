@@ -252,6 +252,13 @@ class AppLocalizationsRu extends AppLocalizations {
       'Простая дуга истории. Три карты — контекст и направление.';
 
   @override
+  String get spreadFiveCardTitle => 'Пять карт';
+
+  @override
+  String get spreadFiveCardSubtitle =>
+      'Более глубокий взгляд на ситуацию. Пять карт — слои контекста и рекомендации.';
+
+  @override
   String get spreadLabelPast => 'Прошлое';
 
   @override

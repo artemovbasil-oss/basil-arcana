@@ -43,7 +43,9 @@
     function resolveBuildId() {
       var buildId = '{{BUILD_ID}}';
       if (!buildId || buildId === '{{BUILD_ID}}' || buildId === 'null') {
-        buildId = 'dev';
+        // Never fall back to static "dev" in production-like environments.
+        // A per-load runtime tag prevents stale JS/CSS reuse in Telegram WebViews.
+        buildId = String(Date.now());
       }
       return String(buildId).trim() || 'dev';
     }

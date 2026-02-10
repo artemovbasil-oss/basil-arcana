@@ -12,7 +12,6 @@ import '../../core/widgets/tarot_asset_widgets.dart';
 import '../../core/assets/asset_paths.dart';
 import '../../core/navigation/app_route_config.dart';
 import '../../data/models/app_enums.dart';
-import '../../data/models/deck_model.dart';
 import '../../data/repositories/cards_repository.dart';
 import '../../state/reading_flow_controller.dart';
 import '../../state/providers.dart';
@@ -40,6 +39,25 @@ class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
   static const _cardWidth = 140.0;
   static const _cardHeight = 210.0;
   static String get _deckCoverUrl => deckCoverImageUrl();
+
+  void _navigateToResultIfNeeded() {
+    if (_hasNavigatedToResult) {
+      return;
+    }
+    _hasNavigatedToResult = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          settings: appRouteSettings(showBackButton: true),
+          builder: (_) => const ResultScreen(),
+        ),
+      );
+    });
+  }
 
   @override
   void initState() {
@@ -85,22 +103,11 @@ class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
         _hasTriggeredBackground = true;
         _backgroundController.repeat(reverse: true);
       }
-      if (!_hasNavigatedToResult &&
-          (prev?.drawnCards.isEmpty ?? true) &&
-          next.drawnCards.isNotEmpty) {
-        _hasNavigatedToResult = true;
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (!mounted) {
-            return;
-          }
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              settings: appRouteSettings(showBackButton: true),
-              builder: (_) => const ResultScreen(),
-            ),
-          );
-        });
+      if ((prev?.drawnCards.isEmpty ?? true) && next.drawnCards.isNotEmpty) {
+        _navigateToResultIfNeeded();
+      }
+      if (next.aiResult != null && prev?.aiResult == null) {
+        _navigateToResultIfNeeded();
       }
     });
   }
@@ -118,7 +125,6 @@ class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(readingFlowControllerProvider);
-    final cardsAsync = ref.watch(cardsProvider);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context)!;
@@ -208,6 +214,12 @@ class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
                                         readingFlowControllerProvider.notifier,
                                       )
                                       .drawAndGenerate(cards);
+                                  final latest =
+                                      ref.read(readingFlowControllerProvider);
+                                  if (latest.aiResult != null ||
+                                      latest.drawnCards.isNotEmpty) {
+                                    _navigateToResultIfNeeded();
+                                  }
                                 } on CardsLoadException {
                                   if (!mounted) {
                                     return;
@@ -223,8 +235,8 @@ class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
                                   }
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
-                                      content:
-                                          Text(l10n.resultStatusServerUnavailable),
+                                      content: Text(
+                                          l10n.resultStatusServerUnavailable),
                                     ),
                                   );
                                 }
@@ -265,9 +277,8 @@ class _DrawnStack extends StatelessWidget {
     return AnimatedBuilder(
       animation: Listenable.merge([fallAnimation, glowAnimation]),
       builder: (context, child) {
-        final glowStrength = showGlow
-            ? (0.45 + sin(glowAnimation.value * pi) * 0.35)
-            : 0.0;
+        final glowStrength =
+            showGlow ? (0.45 + sin(glowAnimation.value * pi) * 0.35) : 0.0;
         return Stack(
           alignment: Alignment.center,
           children: [

@@ -42,6 +42,11 @@ class SpreadScreen extends ConsumerWidget {
               SpreadType.three,
               l10n: l10n,
             );
+            final fiveCardSpread = _resolveSpreadByType(
+              spreads,
+              SpreadType.five,
+              l10n: l10n,
+            );
 
             return Padding(
               padding: const EdgeInsets.all(20),
@@ -69,6 +74,20 @@ class SpreadScreen extends ConsumerWidget {
                         subtitle: l10n.spreadThreeCardSubtitle,
                         animation: const SpreadIconDeck(
                           mode: SpreadIconMode.threeCards,
+                        ),
+                      ),
+                    ),
+                  if (threeCardSpread != null && fiveCardSpread != null)
+                    const SizedBox(height: 18),
+                  if (fiveCardSpread != null)
+                    Expanded(
+                      child: _SpreadOptionCard(
+                        spread: fiveCardSpread,
+                        spreadType: SpreadType.five,
+                        title: l10n.spreadFiveCardTitle,
+                        subtitle: l10n.spreadFiveCardSubtitle,
+                        animation: const SpreadIconDeck(
+                          mode: SpreadIconMode.fiveCards,
                         ),
                       ),
                     ),
@@ -103,7 +122,8 @@ class SpreadScreen extends ConsumerWidget {
                             repo.lastResponseSnippetsStart[cacheKey],
                         responseSnippetEnd:
                             repo.lastResponseSnippetsEnd[cacheKey],
-                        responseLength: repo.lastResponseStringLengths[cacheKey],
+                        responseLength:
+                            repo.lastResponseStringLengths[cacheKey],
                         bytesLength: repo.lastResponseByteLengths[cacheKey],
                         rootType: repo.lastResponseRootTypes[cacheKey],
                       ),
@@ -245,27 +265,37 @@ SpreadModel? _resolveSpreadByType(
     return null;
   }
   final fallback = spreads.first;
-  final fallbackPositions = fallback.positions.isNotEmpty
-      ? fallback.positions.take(desiredCount).toList()
-      : [
-          SpreadPosition(
-            id: spreadType == SpreadType.one ? 'focus' : 'past',
-            title: spreadType == SpreadType.one
-                ? l10n.spreadOneCardTitle
-                : l10n.spreadThreeCardTitle,
-          ),
-        ];
+  final fallbackPositions = <SpreadPosition>[];
+  if (fallback.positions.isNotEmpty) {
+    fallbackPositions.addAll(fallback.positions.take(desiredCount));
+  }
+  while (fallbackPositions.length < desiredCount) {
+    final idx = fallbackPositions.length + 1;
+    fallbackPositions.add(
+      SpreadPosition(
+        id: 'slot_$idx',
+        title: 'Card $idx',
+      ),
+    );
+  }
+  final fallbackName = switch (spreadType) {
+    SpreadType.one => l10n.spreadOneCardTitle,
+    SpreadType.three => l10n.spreadThreeCardTitle,
+    SpreadType.five => l10n.spreadFiveCardTitle,
+  };
   return SpreadModel(
-    id: spreadType == SpreadType.one ? 'one_card' : fallback.id,
-    name: spreadType == SpreadType.one
-        ? l10n.spreadOneCardTitle
-        : fallback.name,
+    id: switch (spreadType) {
+      SpreadType.one => 'one_card',
+      SpreadType.three => 'three_card',
+      SpreadType.five => 'five_card',
+    },
+    name: fallback.name.trim().isEmpty ? fallbackName : fallback.name,
     positions: fallbackPositions,
     cardsCount: desiredCount,
   );
 }
 
-enum SpreadIconMode { oneCard, threeCards }
+enum SpreadIconMode { oneCard, threeCards, fiveCards }
 
 class SpreadIconDeck extends StatefulWidget {
   const SpreadIconDeck({
@@ -357,7 +387,7 @@ class _SpreadIconDeckState extends State<SpreadIconDeck>
                   offset: center + const Offset(-8, 4),
                   rotation: 0.02,
                 ),
-                if (widget.mode == SpreadIconMode.threeCards)
+                if (widget.mode != SpreadIconMode.oneCard)
                   _CardShape(
                     width: cardWidth,
                     height: cardHeight,
@@ -372,7 +402,7 @@ class _SpreadIconDeckState extends State<SpreadIconDeck>
                         center + Offset(-14 * fanProgress, -14 * fanProgress),
                     rotation: -0.14 * fanProgress,
                   ),
-                if (widget.mode == SpreadIconMode.threeCards)
+                if (widget.mode != SpreadIconMode.oneCard)
                   _CardShape(
                     width: cardWidth,
                     height: cardHeight,
@@ -403,6 +433,35 @@ class _SpreadIconDeckState extends State<SpreadIconDeck>
                       ? 0.05
                       : 0.14 * fanProgress,
                 ),
+                if (widget.mode == SpreadIconMode.fiveCards)
+                  _CardShape(
+                    width: cardWidth,
+                    height: cardHeight,
+                    gradient: LinearGradient(
+                      colors: [cardColor, cardHighlight],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderColor: cardBorder,
+                    shadowColor: shadow,
+                    offset:
+                        center + Offset(-26 * fanProgress, -6 * fanProgress),
+                    rotation: -0.22 * fanProgress,
+                  ),
+                if (widget.mode == SpreadIconMode.fiveCards)
+                  _CardShape(
+                    width: cardWidth,
+                    height: cardHeight,
+                    gradient: LinearGradient(
+                      colors: [cardColor, cardHighlight],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderColor: cardBorder,
+                    shadowColor: shadow,
+                    offset: center + Offset(28 * fanProgress, -4 * fanProgress),
+                    rotation: 0.22 * fanProgress,
+                  ),
               ],
             );
           },

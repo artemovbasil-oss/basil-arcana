@@ -80,6 +80,8 @@
   "spreadOneCardSubtitle": "Сәтті тез аңғаруға арналған айна. Бір карта — бір айқын фокус.",
   "spreadThreeCardTitle": "Үш карта",
   "spreadThreeCardSubtitle": "Оқиғаңның қарапайым доғасы. Үш карта — мәнмәтін мен бағыт.",
+  "spreadFiveCardTitle": "Бес карта",
+  "spreadFiveCardSubtitle": "Жағдайға тереңірек көзқарас. Бес карта — көпқабатты мәнмәтін мен бағыт.",
   "spreadLabelPast": "Өткен",
   "spreadLabelPresent": "Қазіргі",
   "spreadLabelFuture": "Болашақ",

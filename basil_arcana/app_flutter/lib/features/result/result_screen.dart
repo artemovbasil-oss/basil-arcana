@@ -220,9 +220,8 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
       });
     }
 
-    final statusText = state.aiUsed
-        ? l10n.resultStatusAiReading
-        : _statusMessage(state, l10n);
+    final statusText =
+        state.aiUsed ? l10n.resultStatusAiReading : _statusMessage(state, l10n);
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     final listBottomPadding = 24 +
         _ActionBar.baseHeight +
@@ -288,8 +287,8 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                   if (state.detailsStatus == DetailsStatus.loading) ...[
                     ChatBubbleReveal(
                       child: OracleTypingBubble(
-                        label: AppLocalizations.of(context)!
-                            .resultDeepTypingLabel,
+                        label:
+                            AppLocalizations.of(context)!.resultDeepTypingLabel,
                       ),
                     ),
                     const SizedBox(height: 14),
@@ -309,11 +308,10 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                       ),
                     ),
                     const SizedBox(height: 14),
-                    for (final section
-                        in _buildDetailsSections(
-                          state.detailsText!,
-                          l10n,
-                        )) ...[
+                    for (final section in _buildDetailsSections(
+                      state.detailsText!,
+                      l10n,
+                    )) ...[
                       ChatBubbleReveal(
                         child: ChatBubble(
                           isUser: false,
@@ -529,7 +527,9 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                   ?.copyWith(color: Theme.of(context).colorScheme.primary),
             ),
             const SizedBox(height: 8),
-            Text(aiResult.tldr.trim().isEmpty ? l10n.resultStatusUnexpectedResponse : aiResult.tldr),
+            Text(aiResult.tldr.trim().isEmpty
+                ? l10n.resultStatusUnexpectedResponse
+                : aiResult.tldr),
           ],
         ),
       ),
@@ -565,7 +565,9 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
-              Text((section?.text ?? '').trim().isEmpty ? l10n.resultStatusUnexpectedResponse : section?.text ?? ''),
+              Text((section?.text ?? '').trim().isEmpty
+                  ? l10n.resultStatusUnexpectedResponse
+                  : section?.text ?? ''),
             ],
           ),
         ),
@@ -764,7 +766,8 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
     AppLocalizations l10n,
   ) {
     final sanitized = _sanitizeDetailsText(rawText);
-    final cleaned = sanitized.trim().isEmpty ? rawText.trim() : sanitized.trim();
+    final cleaned =
+        sanitized.trim().isEmpty ? rawText.trim() : sanitized.trim();
     if (cleaned.isEmpty) {
       return const [];
     }
@@ -800,8 +803,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
     final secondLabel = relationshipsFirst
         ? l10n.resultDeepCareerHeading
         : l10n.resultDeepRelationshipsHeading;
-    final firstBody =
-        cleaned.substring(firstIndex, secondIndex).trim();
+    final firstBody = cleaned.substring(firstIndex, secondIndex).trim();
     final secondBody = cleaned.substring(secondIndex).trim();
 
     final firstText = _stripSectionHeading(
@@ -1212,9 +1214,12 @@ class _DetailsCardThumbnails extends StatelessWidget {
 
   List<_ThumbnailCardData> _thumbnailCards() {
     final resolvedType = spreadType ??
-        (spread.positions.length >= 3 ? SpreadType.three : SpreadType.one);
-    final isThreeCard =
-        resolvedType.cardCount >= 3 && drawnCards.length >= 3;
+        (spread.positions.length >= 5
+            ? SpreadType.five
+            : spread.positions.length >= 3
+                ? SpreadType.three
+                : SpreadType.one);
+    final isThreeCard = resolvedType.cardCount >= 3 && drawnCards.length >= 3;
     if (isThreeCard) {
       final cards = drawnCards.take(3).toList();
       return [

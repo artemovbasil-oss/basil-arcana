@@ -262,10 +262,15 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
     }
     state = state.copyWith(isSaved: false);
 
-    final drawn = drawCards(spread.positions.length, cards);
+    final desiredCount = max(
+      1,
+      state.spreadType?.cardCount ?? spread.positions.length,
+    );
+    final positions = _resolvePositionsForDraw(spread, desiredCount);
+    final drawn = drawCards(desiredCount, cards);
     final drawnCards = <DrawnCardModel>[];
-    for (var i = 0; i < spread.positions.length; i++) {
-      final position = spread.positions[i];
+    for (var i = 0; i < positions.length; i++) {
+      final position = positions[i];
       final card = drawn[i];
       drawnCards.add(
         DrawnCardModel(
@@ -881,14 +886,28 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
     if (spread.positions.length == count) {
       return spread;
     }
-    final positions = spread.positions.isNotEmpty
-        ? spread.positions.take(count).toList()
-        : [const SpreadPosition(id: 'focus', title: 'Focus')];
+    final positions = _resolvePositionsForDraw(spread, count);
     return SpreadModel(
       id: spread.id,
       name: spread.name,
       positions: positions,
       cardsCount: count,
     );
+  }
+
+  List<SpreadPosition> _resolvePositionsForDraw(SpreadModel spread, int count) {
+    if (spread.positions.length >= count) {
+      return spread.positions.take(count).toList();
+    }
+    final positions = <SpreadPosition>[...spread.positions];
+    for (var i = positions.length; i < count; i++) {
+      positions.add(
+        SpreadPosition(
+          id: 'slot_${i + 1}',
+          title: 'Card ${i + 1}',
+        ),
+      );
+    }
+    return positions;
   }
 }

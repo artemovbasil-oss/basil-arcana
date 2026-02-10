@@ -31,14 +31,29 @@ extension AppLanguageX on AppLanguage {
   static AppLanguage fromLocale(Locale locale) => fromCode(locale.languageCode);
 }
 
-enum SpreadType { one, three }
+enum SpreadType { one, three, five }
 
 extension SpreadTypeX on SpreadType {
-  String get storageValue => this == SpreadType.one ? 'one' : 'three';
+  String get storageValue {
+    return switch (this) {
+      SpreadType.one => 'one',
+      SpreadType.three => 'three',
+      SpreadType.five => 'five',
+    };
+  }
 
-  int get cardCount => this == SpreadType.one ? 1 : 3;
+  int get cardCount {
+    return switch (this) {
+      SpreadType.one => 1,
+      SpreadType.three => 3,
+      SpreadType.five => 5,
+    };
+  }
 
   static SpreadType fromStorage(String? value) {
+    if (value == 'five') {
+      return SpreadType.five;
+    }
     if (value == 'three') {
       return SpreadType.three;
     }

@@ -580,6 +580,18 @@ abstract class AppLocalizations {
   /// **'A simple arc of your story. Three cards — context and direction.'**
   String get spreadThreeCardSubtitle;
 
+  /// No description provided for @spreadFiveCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Five cards'**
+  String get spreadFiveCardTitle;
+
+  /// No description provided for @spreadFiveCardSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A deeper look at your path. Five cards — layered context and guidance.'**
+  String get spreadFiveCardSubtitle;
+
   /// No description provided for @spreadLabelPast.
   ///
   /// In en, this message translates to:

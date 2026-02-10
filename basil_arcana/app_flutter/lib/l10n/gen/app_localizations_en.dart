@@ -252,6 +252,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'A simple arc of your story. Three cards — context and direction.';
 
   @override
+  String get spreadFiveCardTitle => 'Five cards';
+
+  @override
+  String get spreadFiveCardSubtitle =>
+      'A deeper look at your path. Five cards — layered context and guidance.';
+
+  @override
   String get spreadLabelPast => 'Past';
 
   @override
