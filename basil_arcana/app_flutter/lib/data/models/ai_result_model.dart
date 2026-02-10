@@ -63,6 +63,7 @@ class AiResultModel {
     return AiResultModel(
       tldr: (json['tldr'] ?? json['tldr_text'] ?? '').toString(),
       sections: sectionList
+          .map(_asStringKeyedMap)
           .whereType<Map<String, dynamic>>()
           .map((section) => AiSectionModel.fromJson(section))
           .toList(),
@@ -96,4 +97,14 @@ class AiSectionModelAdapter extends TypeAdapter<AiSectionModel> {
       ..writeString(obj.title)
       ..writeString(obj.text);
   }
+}
+
+Map<String, dynamic>? _asStringKeyedMap(dynamic value) {
+  if (value is Map<String, dynamic>) {
+    return value;
+  }
+  if (value is Map) {
+    return value.map((key, val) => MapEntry(key.toString(), val));
+  }
+  return null;
 }
