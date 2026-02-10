@@ -427,8 +427,26 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
         languageCode: locale.languageCode,
         mode: ReadingMode.fast,
         client: client,
+        timeout: const Duration(seconds: 12),
       );
       if (_activeRequestId != requestId) {
+        return;
+      }
+      if (!_hasDisplayableResult(result)) {
+        if (kDebugMode) {
+          debugPrint(
+            '[ReadingFlow] generateReading invalid payload '
+            'status=200 bodyPreview="<parsed-empty-payload>"',
+          );
+        }
+        await _useOfflineFallback(
+          spread: spread,
+          drawnCards: drawnCards,
+          errorType: AiErrorType.badResponse,
+          errorMessage:
+              'AI temporarily unavailable — showing base interpretation',
+          logLabel: 'generating->done(local-fallback:invalid-response)',
+        );
         return;
       }
       await _incrementCardStats(drawnCards);
@@ -445,43 +463,92 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       if (_activeRequestId != requestId) {
         return;
       }
+      _logAiFailure(error);
       if (kEnableDevDiagnostics) {
         logDevFailure(buildDevFailureInfo(FailedStage.openaiCall, error));
       }
-      state = state.copyWith(
-        isLoading: false,
-        aiUsed: false,
-        showDetailsCta: true,
-        aiErrorType: error.type,
-        aiErrorStatusCode: error.statusCode,
-        errorMessage: 'AI temporarily unavailable — showing base interpretation',
+      await _useOfflineFallback(
+        spread: spread,
+        drawnCards: drawnCards,
+        errorType: error.type,
+        errorStatusCode: error.statusCode,
+        errorMessage:
+            'AI temporarily unavailable — showing base interpretation',
+        logLabel: 'generating->done(local-fallback:error)',
       );
-      _logStateTransition('generating->done(local-retained:error)', state);
-      await _incrementCardStats(drawnCards);
-      await _autoSaveReading();
     } catch (error) {
       if (_activeRequestId != requestId) {
         return;
       }
+      if (kDebugMode) {
+        debugPrint(
+          '[ReadingFlow] generateReading unexpected error '
+          'status=n/a bodyPreview="${error.toString().substring(0, min(200, error.toString().length))}"',
+        );
+      }
       if (kEnableDevDiagnostics) {
         logDevFailure(buildDevFailureInfo(FailedStage.openaiCall, error));
       }
-      state = state.copyWith(
-        isLoading: false,
-        aiUsed: false,
-        showDetailsCta: true,
-        aiErrorType: AiErrorType.serverError,
-        errorMessage: 'AI temporarily unavailable — showing base interpretation',
+      await _useOfflineFallback(
+        spread: spread,
+        drawnCards: drawnCards,
+        errorType: AiErrorType.serverError,
+        errorMessage:
+            'AI temporarily unavailable — showing base interpretation',
+        logLabel: 'generating->done(local-fallback:unknown)',
       );
-      _logStateTransition('generating->done(local-retained:unknown)', state);
-      await _incrementCardStats(drawnCards);
-      await _autoSaveReading();
     } finally {
       if (_activeClient == client) {
         _activeClient = null;
       }
       client.close();
     }
+  }
+
+  bool _hasDisplayableResult(AiResultModel result) {
+    return result.tldr.trim().isNotEmpty ||
+        result.sections.isNotEmpty ||
+        result.why.trim().isNotEmpty ||
+        result.action.trim().isNotEmpty ||
+        result.fullText.trim().isNotEmpty;
+  }
+
+  void _logAiFailure(AiRepositoryException error) {
+    if (!kDebugMode) {
+      return;
+    }
+    final responsePreview = (error.responseBody ?? '').trim();
+    final bodySnippet = responsePreview.isEmpty
+        ? '<empty>'
+        : responsePreview.substring(0, min(200, responsePreview.length));
+    debugPrint(
+      '[ReadingFlow] generateReading failed '
+      'status=${error.statusCode ?? 'n/a'} '
+      'bodyPreview="$bodySnippet"',
+    );
+  }
+
+  Future<void> _useOfflineFallback({
+    required SpreadModel spread,
+    required List<DrawnCardModel> drawnCards,
+    required AiErrorType errorType,
+    int? errorStatusCode,
+    required String errorMessage,
+    required String logLabel,
+  }) async {
+    final fallbackResult = _offlineFallback(spread, drawnCards, _l10n());
+    state = state.copyWith(
+      aiResult: fallbackResult,
+      isLoading: false,
+      aiUsed: false,
+      showDetailsCta: true,
+      aiErrorType: errorType,
+      aiErrorStatusCode: errorStatusCode,
+      errorMessage: errorMessage,
+    );
+    _logStateTransition(logLabel, state);
+    await _incrementCardStats(drawnCards);
+    await _autoSaveReading();
   }
 
   Future<void> _autoSaveReading() async {
