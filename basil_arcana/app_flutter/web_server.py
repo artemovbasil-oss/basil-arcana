@@ -1,4 +1,5 @@
 import functools
+import hashlib
 import json
 import os
 import re
@@ -232,8 +233,33 @@ class WebAppHandler(SimpleHTTPRequestHandler):
 
 def main() -> None:
     port = int(os.environ.get("PORT", "8080"))
-    app_version = _read_env("APP_VERSION") or "dev"
     directory = os.environ.get("WEB_ROOT", "/app/static")
+    app_version = _read_env("APP_VERSION")
+    if not app_version:
+        # Derive a stable version from built assets so cache-busting works even
+        # when APP_VERSION is not configured. This value is identical across
+        # replicas for the same image and changes when assets change.
+        hasher = hashlib.sha1()
+        has_data = False
+        for filename in ("main.dart.js", "flutter_bootstrap.js", "index.html"):
+            file_path = os.path.join(directory, filename)
+            if not os.path.isfile(file_path):
+                continue
+            try:
+                with open(file_path, "rb") as handle:
+                    while True:
+                        chunk = handle.read(1024 * 1024)
+                        if not chunk:
+                            break
+                        hasher.update(chunk)
+                        has_data = True
+            except OSError:
+                continue
+        if has_data:
+            app_version = f"build-{hasher.hexdigest()[:12]}"
+        else:
+            app_version = "dev"
+
     required_files = ("index.html", "manifest.json", "flutter.js", "main.dart.js")
     missing_files = [
         name
