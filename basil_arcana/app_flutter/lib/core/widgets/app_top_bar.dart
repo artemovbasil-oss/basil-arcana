@@ -112,7 +112,7 @@ class _EnergyHeaderPillState extends ConsumerState<_EnergyHeaderPill>
       vsync: this,
       duration: const Duration(milliseconds: 3600),
       value: 0.5,
-    );
+    )..repeat(reverse: true);
   }
 
   @override
@@ -126,21 +126,24 @@ class _EnergyHeaderPillState extends ConsumerState<_EnergyHeaderPill>
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final energy = ref.watch(energyProvider);
-    final primary = theme.colorScheme.primary;
     final isLow = energy.clampedValue < 15;
-    if (isLow && !_controller.isAnimating) {
-      _controller.repeat(reverse: true);
-    } else if (!isLow && _controller.isAnimating) {
-      _controller.stop();
-      _controller.value = 0.5;
-    }
+    const vividPurple = Color(0xFFA05CFF);
+    const darkBurgundy = Color(0xFF4A102A);
+    const nearBlack = Color(0xFF08060C);
+    final progress = energy.progress.clamp(0, 1);
+    final base = progress >= 0.5
+        ? Color.lerp(darkBurgundy, vividPurple, (progress - 0.5) * 2)!
+        : Color.lerp(nearBlack, darkBurgundy, progress * 2)!;
+    final end = Color.lerp(base, nearBlack, 0.48)!;
+    final edge = Color.lerp(base, Colors.white, 0.08)!;
 
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
         final curveT = Curves.easeInOutSine.transform(_controller.value);
-        final pulse = isLow ? (0.97 + 0.05 * curveT) : 1.0;
-        final glow = isLow ? (0.28 + 0.24 * curveT) : 0.18;
+        final pulse =
+            isLow ? (0.988 + 0.03 * curveT) : (0.996 + 0.012 * curveT);
+        final glow = isLow ? (0.25 + 0.22 * curveT) : (0.1 + 0.1 * curveT);
         return Transform.scale(
           scale: pulse,
           child: Container(
@@ -150,77 +153,61 @@ class _EnergyHeaderPillState extends ConsumerState<_EnergyHeaderPill>
               borderRadius: BorderRadius.circular(999),
               gradient: LinearGradient(
                 colors: [
-                  primary.withOpacity(0.95),
-                  primary.withOpacity(0.68),
+                  base,
+                  end,
                 ],
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
               ),
+              border: Border.all(color: edge),
               boxShadow: [
                 BoxShadow(
-                  color: primary.withOpacity(glow),
+                  color: base.withOpacity(glow),
                   blurRadius: isLow ? 16 : 10,
                   offset: const Offset(0, 4),
                 ),
               ],
             ),
-            child: Stack(
-              clipBehavior: Clip.none,
+            child: Row(
               children: [
-                Positioned(
-                  left: 8,
-                  right: 8,
-                  bottom: 5,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(99),
-                    child: LinearProgressIndicator(
-                      value: energy.progress,
-                      minHeight: 3,
-                      backgroundColor: Colors.white.withOpacity(0.18),
-                      valueColor: const AlwaysStoppedAnimation<Color>(
-                        Colors.white,
-                      ),
+                Expanded(
+                  child: Text(
+                    l10n.energyLabel,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),
-                Row(
-                  children: [
-                    const Icon(Icons.bolt, size: 15, color: Colors.white),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.only(bottom: 3),
-                        child: Text(
-                          l10n.energyLabelWithPercent(energy.percent),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.labelMedium?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ),
-                    if (energy.isNearEmpty)
-                      IconButton(
-                        iconSize: 16,
-                        visualDensity: VisualDensity.compact,
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints.tightFor(
-                          width: 24,
-                          height: 24,
-                        ),
-                        tooltip: l10n.energyTopUpButton,
-                        onPressed: () async {
-                          await showEnergyTopUpSheet(context, ref);
-                        },
-                        icon: const Icon(
-                          Icons.add_circle_outline,
-                          color: Colors.white,
-                        ),
-                      ),
-                  ],
+                Text(
+                  '${energy.percent}%',
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
+                if (energy.isNearEmpty) ...[
+                  const SizedBox(width: 4),
+                  IconButton(
+                    iconSize: 16,
+                    visualDensity: VisualDensity.compact,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints.tightFor(
+                      width: 22,
+                      height: 22,
+                    ),
+                    tooltip: l10n.energyTopUpButton,
+                    onPressed: () async {
+                      await showEnergyTopUpSheet(context, ref);
+                    },
+                    icon: const Icon(
+                      Icons.add_circle_outline,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

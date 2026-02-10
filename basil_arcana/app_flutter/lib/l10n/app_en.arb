@@ -208,6 +208,7 @@
   "natalChartResultTitle": "Your interpretation",
   "natalChartError": "Couldn’t generate the natal chart. Please try again.",
   "energyLabelWithPercent": "Oracle energy: {value}%",
+  "energyLabel": "Oracle energy",
   "@energyLabelWithPercent": {
     "placeholders": {
       "value": {

@@ -1096,6 +1096,12 @@ abstract class AppLocalizations {
   /// **'Oracle energy: {value}%'**
   String energyLabelWithPercent(int value);
 
+  /// No description provided for @energyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Oracle energy'**
+  String get energyLabel;
+
   /// No description provided for @energyRecoveryReady.
   ///
   /// In en, this message translates to:

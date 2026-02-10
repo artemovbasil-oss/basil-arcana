@@ -208,6 +208,7 @@
   "natalChartResultTitle": "Ваш разбор",
   "natalChartError": "Не удалось создать натальную карту. Попробуйте еще раз.",
   "energyLabelWithPercent": "Энергия оракула: {value}%",
+  "energyLabel": "Энергия оракула",
   "@energyLabelWithPercent": {
     "placeholders": {
       "value": {

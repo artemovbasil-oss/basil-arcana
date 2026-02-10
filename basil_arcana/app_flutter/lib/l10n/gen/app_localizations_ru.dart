@@ -550,6 +550,9 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
+  String get energyLabel => 'Энергия оракула';
+
+  @override
   String get energyRecoveryReady => 'Энергия полностью восстановлена.';
 
   @override

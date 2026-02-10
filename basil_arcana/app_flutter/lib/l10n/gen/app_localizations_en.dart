@@ -545,6 +545,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get energyLabel => 'Oracle energy';
+
+  @override
   String get energyRecoveryReady => 'Fully recharged.';
 
   @override
