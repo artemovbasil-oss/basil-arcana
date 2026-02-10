@@ -241,7 +241,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeDescription.
   ///
   /// In en, this message translates to:
-  /// **'catch the magic vibe'**
+  /// **'Catch the magic vibe'**
   String get homeDescription;
 
   /// No description provided for @homeQuestionPlaceholder.
@@ -292,6 +292,36 @@ abstract class AppLocalizations {
   /// **'What needs patience from me?'**
   String get homeExample3;
 
+  /// No description provided for @homeQuickTopicRelationships.
+  ///
+  /// In en, this message translates to:
+  /// **'Relationships'**
+  String get homeQuickTopicRelationships;
+
+  /// No description provided for @homeQuickTopicMoney.
+  ///
+  /// In en, this message translates to:
+  /// **'Money'**
+  String get homeQuickTopicMoney;
+
+  /// No description provided for @homeQuickTopicFuture.
+  ///
+  /// In en, this message translates to:
+  /// **'Future'**
+  String get homeQuickTopicFuture;
+
+  /// No description provided for @homeQuickTopicGrowth.
+  ///
+  /// In en, this message translates to:
+  /// **'Growth point'**
+  String get homeQuickTopicGrowth;
+
+  /// No description provided for @homeQuickTopicWeatherTomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Tomorrow\'s weather'**
+  String get homeQuickTopicWeatherTomorrow;
+
   /// No description provided for @homeContinueButton.
   ///
   /// In en, this message translates to:
@@ -303,6 +333,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'All cards'**
   String get homeAllCardsButton;
+
+  /// No description provided for @homeAllCardsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Touch the magic of the cards'**
+  String get homeAllCardsDescription;
 
   /// No description provided for @cardsTitle.
   ///

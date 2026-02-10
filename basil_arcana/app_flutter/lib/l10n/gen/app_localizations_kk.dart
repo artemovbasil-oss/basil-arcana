@@ -79,7 +79,7 @@ class AppLocalizationsKk extends AppLocalizations {
       'Сұрақ қойып, келесі қадамыңызды айқындайтын желілерді зерттеңіз';
 
   @override
-  String get homeDescription => 'сиқыр вайбын ұста';
+  String get homeDescription => 'Сиқыр вайбын ұста';
 
   @override
   String get homeQuestionPlaceholder => 'Сұрағыңызды жазыңыз…';
@@ -106,10 +106,28 @@ class AppLocalizationsKk extends AppLocalizations {
   String get homeExample3 => 'Қай жерде сабыр керек?';
 
   @override
+  String get homeQuickTopicRelationships => 'Қарым-қатынас';
+
+  @override
+  String get homeQuickTopicMoney => 'Ақша';
+
+  @override
+  String get homeQuickTopicFuture => 'Болашақ';
+
+  @override
+  String get homeQuickTopicGrowth => 'Өсу нүктесі';
+
+  @override
+  String get homeQuickTopicWeatherTomorrow => 'Ертеңгі ауа райы';
+
+  @override
   String get homeContinueButton => 'Жаймаға өту';
 
   @override
   String get homeAllCardsButton => 'Барлық карталар';
+
+  @override
+  String get homeAllCardsDescription => 'Карталар сиқырына қол тигіз';
 
   @override
   String get cardsTitle => 'Барлық карталар';

@@ -90,10 +90,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context)!;
-    final examples = [
-      l10n.homeExample1,
-      l10n.homeExample2,
-      l10n.homeExample3,
+    final quickTopics = [
+      l10n.homeQuickTopicRelationships,
+      l10n.homeQuickTopicMoney,
+      l10n.homeQuickTopicFuture,
+      l10n.homeQuickTopicGrowth,
+      l10n.homeQuickTopicWeatherTomorrow,
     ];
     final hasQuestion = _controller.text.trim().isNotEmpty;
 
@@ -224,29 +226,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           ),
                     ),
                     const SizedBox(height: 12),
-                    Wrap(
-                      spacing: 10,
-                      runSpacing: 10,
-                      children: examples
-                          .map(
-                            (example) => _ExampleChip(
-                              text: example,
-                              onTap: () => _applyExample(example),
-                            ),
-                          )
-                          .toList(),
+                    SizedBox(
+                      height: 40,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: quickTopics.length,
+                        separatorBuilder: (_, __) => const SizedBox(width: 10),
+                        itemBuilder: (context, index) {
+                          final topic = quickTopics[index];
+                          return _ExampleChip(
+                            text: topic,
+                            onTap: () => _applyExample(topic),
+                          );
+                        },
+                      ),
                     ),
                     const SizedBox(height: 28),
-                    Text(
-                      l10n.homeSubtitle,
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            color: colorScheme.onSurface.withOpacity(0.7),
-                          ),
-                    ),
-                    const SizedBox(height: 12),
                     _HomeNavCard(
                       title: l10n.homeAllCardsButton,
-                      description: l10n.cardsTitle,
+                      description: l10n.homeAllCardsDescription,
                       icon: Icons.auto_awesome,
                       onTap: () {
                         Navigator.push(

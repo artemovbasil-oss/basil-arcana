@@ -79,7 +79,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Ask a question and explore the threads that shape your next step';
 
   @override
-  String get homeDescription => 'catch the magic vibe';
+  String get homeDescription => 'Catch the magic vibe';
 
   @override
   String get homeQuestionPlaceholder => 'Type your question here…';
@@ -106,10 +106,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeExample3 => 'What needs patience from me?';
 
   @override
+  String get homeQuickTopicRelationships => 'Relationships';
+
+  @override
+  String get homeQuickTopicMoney => 'Money';
+
+  @override
+  String get homeQuickTopicFuture => 'Future';
+
+  @override
+  String get homeQuickTopicGrowth => 'Growth point';
+
+  @override
+  String get homeQuickTopicWeatherTomorrow => 'Tomorrow\'s weather';
+
+  @override
   String get homeContinueButton => 'Continue to your spread';
 
   @override
   String get homeAllCardsButton => 'All cards';
+
+  @override
+  String get homeAllCardsDescription => 'Touch the magic of the cards';
 
   @override
   String get cardsTitle => 'All cards';

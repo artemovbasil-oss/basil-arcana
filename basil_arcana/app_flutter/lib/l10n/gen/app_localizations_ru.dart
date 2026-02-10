@@ -79,7 +79,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'Задайте вопрос и исследуйте нити, которые определяют ваш следующий шаг';
 
   @override
-  String get homeDescription => 'поймай магический вайб';
+  String get homeDescription => 'Поймай магический вайб';
 
   @override
   String get homeQuestionPlaceholder => 'Напишите свой вопрос…';
@@ -106,10 +106,28 @@ class AppLocalizationsRu extends AppLocalizations {
   String get homeExample3 => 'Где мне стоит проявить терпение?';
 
   @override
+  String get homeQuickTopicRelationships => 'Отношения';
+
+  @override
+  String get homeQuickTopicMoney => 'Деньги';
+
+  @override
+  String get homeQuickTopicFuture => 'Будущее';
+
+  @override
+  String get homeQuickTopicGrowth => 'Точка роста';
+
+  @override
+  String get homeQuickTopicWeatherTomorrow => 'Погода на завтра';
+
+  @override
   String get homeContinueButton => 'Перейти к раскладу';
 
   @override
   String get homeAllCardsButton => 'Все карты';
+
+  @override
+  String get homeAllCardsDescription => 'Прикоснись к магии карт';
 
   @override
   String get cardsTitle => 'Все карты';
