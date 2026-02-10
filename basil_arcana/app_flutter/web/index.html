@@ -40,23 +40,15 @@
     });
   </script>
   <script>
-    // This is used by Flutter build to replace with a concrete version.
-    var serviceWorkerVersion = null;
     function resolveBuildId() {
       var buildId = '{{BUILD_ID}}';
-      if (!buildId || buildId === '{{BUILD_ID}}') {
-        buildId = '{{flutter_service_worker_version}}';
+      if (!buildId || buildId === '{{BUILD_ID}}' || buildId === 'null') {
+        buildId = 'dev';
       }
-      if (!buildId ||
-          buildId === 'null' ||
-          buildId === '{{flutter_service_worker_version}}') {
-        buildId = 'prod';
-      }
-      return String(buildId).trim() || 'prod';
+      return String(buildId).trim() || 'dev';
     }
 
     var buildVersion = resolveBuildId();
-    window.__BUILD_ID__ = buildVersion;
     window.__buildVersion = buildVersion;
     window.__flutterBootstrapUrl = 'flutter_bootstrap.js?v=' + buildVersion;
     window.__configUrl = 'config.json?v=' + buildVersion;
@@ -359,17 +351,14 @@
   </div>
   <script>
     window.addEventListener('load', function (ev) {
-      var disableServiceWorker = true || isTelegramWebView();
-      var resolvedVersion = window.__buildVersion || 'prod';
+      var resolvedVersion = window.__buildVersion || 'dev';
       window.__flutterBootstrapUrl = 'flutter_bootstrap.js?v=' + resolvedVersion;
       loadScript('telegram_bridge.js?v=' + resolvedVersion).then(function () {
         return loadScript('flutter.js?v=' + resolvedVersion, { defer: '' });
       }).then(function () {
         _flutter.loader.loadEntrypoint({
           entrypointUrl: 'main.dart.js?v=' + resolvedVersion,
-          serviceWorker: disableServiceWorker
-            ? null
-            : { serviceWorkerVersion: serviceWorkerVersion },
+          serviceWorker: null,
           onEntrypointLoaded: function (engineInitializer) {
             engineInitializer.initializeEngine({
               hostElement: document.getElementById('flutter_mount')

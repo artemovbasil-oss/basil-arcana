@@ -28,11 +28,6 @@ class ConfigService {
     defaultValue: '',
   );
 
-  static const String _buildIdEnv = String.fromEnvironment(
-    'BUILD_ID',
-    defaultValue: '',
-  );
-
   String _apiBaseUrl = _apiBaseUrlEnv;
   String _assetsBaseUrl = _normalizeBaseUrl(
     _assetsBaseUrlEnv,
@@ -81,14 +76,9 @@ class ConfigService {
       return _resolvedBuildToken!;
     }
 
-    final fromWebBootstrap = readWebBuildVersion().trim();
-    final fromEnv = _buildIdEnv.trim();
-    final resolved = fromWebBootstrap.isNotEmpty
-        ? fromWebBootstrap
-        : (fromEnv.isNotEmpty ? fromEnv : 'prod');
-
-    _resolvedBuildToken = resolved;
-    return resolved;
+    final resolved = readWebBuildVersion().trim();
+    _resolvedBuildToken = resolved.isNotEmpty ? resolved : 'dev';
+    return _resolvedBuildToken!;
   }
 
   Future<void> _fetchConfig(Uri uri) async {

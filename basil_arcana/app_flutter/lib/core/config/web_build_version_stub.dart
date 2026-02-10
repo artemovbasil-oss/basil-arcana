@@ -1,1 +1,1 @@
-String readWebBuildVersion() => '';
+String readWebBuildVersion() => 'dev';
