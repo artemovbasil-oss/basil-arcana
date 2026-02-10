@@ -43,7 +43,7 @@
     function resolveBuildId() {
       var buildId = '{{BUILD_ID}}';
       if (!buildId || buildId === '{{BUILD_ID}}' || buildId === 'null') {
-        buildId = 'dev';
+        buildId = String(Date.now());
       }
       return String(buildId).trim() || 'dev';
     }
