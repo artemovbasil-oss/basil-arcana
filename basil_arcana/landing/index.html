@@ -106,15 +106,18 @@
         align-items: center;
         justify-content: space-between;
         gap: 1rem;
-        padding: 0.9rem 0 0.5rem;
+        padding: 1.05rem 0 0.75rem;
       }
 
       .logo {
         font-family: "Space Grotesk", sans-serif;
         font-weight: 600;
         letter-spacing: 0.02em;
-        font-size: clamp(1.15rem, 1.8vw, 1.45rem);
+        font-size: clamp(0.95rem, 1.35vw, 1.2rem);
         transition: color 0.2s ease, text-shadow 0.2s ease, transform 0.2s ease;
+        color: var(--accent-soft);
+        opacity: 0.95;
+        max-width: 36ch;
       }
 
       .logo:hover {
@@ -158,10 +161,10 @@
 
       .hero {
         display: grid;
-        grid-template-columns: 1fr 320px;
-        gap: 1rem;
+        grid-template-columns: 1fr 340px;
+        gap: 1.35rem;
         align-items: center;
-        padding: 0.2rem 0 0.6rem;
+        padding: 0.45rem 0 0.95rem;
       }
 
       .badge {
@@ -182,20 +185,23 @@
         font-family: "Space Grotesk", sans-serif;
         line-height: 1;
         font-weight: 700;
-        font-size: clamp(1.55rem, 3.2vw, 3rem);
+        font-size: clamp(1.9rem, 4vw, 3.55rem);
         text-wrap: balance;
         max-width: 16ch;
+        min-height: 2.05em;
       }
 
       .lead {
-        margin: 0.8rem 0 0;
+        margin: 1rem 0 0;
         color: var(--text-soft);
-        font-size: clamp(0.9rem, 1.3vw, 1.03rem);
+        font-size: clamp(1rem, 1.55vw, 1.18rem);
         max-width: 62ch;
+        min-height: 3.25em;
+        line-height: 1.5;
       }
 
       .hero-actions {
-        margin-top: 0.9rem;
+        margin-top: 1.2rem;
         display: flex;
         flex-wrap: wrap;
         gap: 0.55rem;
@@ -340,6 +346,7 @@
         color: var(--text-soft);
         line-height: 1.32;
         font-size: 0.82rem;
+        min-height: 4.1em;
       }
 
       .card-mark {
@@ -368,6 +375,20 @@
         justify-content: space-between;
         font-weight: 700;
         font-size: 0.88rem;
+      }
+
+      .bottom-cta span {
+        min-height: 1.5em;
+      }
+
+      [data-i18n] {
+        transition: opacity 0.32s ease, transform 0.32s ease, filter 0.32s ease;
+      }
+
+      body.lang-switching [data-i18n] {
+        opacity: 0.15;
+        transform: translateY(5px);
+        filter: blur(1.5px);
       }
 
       .bottom-cta a {
@@ -417,6 +438,27 @@
 
         .hero {
           grid-template-columns: 1fr;
+          gap: 1.05rem;
+          padding: 0.6rem 0 1rem;
+        }
+
+        h1 {
+          font-size: clamp(1.95rem, 8.1vw, 2.5rem);
+          min-height: auto;
+          margin-top: 0.1rem;
+        }
+
+        .lead {
+          font-size: 1rem;
+          min-height: auto;
+          margin-top: 0.95rem;
+          line-height: 1.56;
+          padding-right: 0.2rem;
+        }
+
+        .hero-actions {
+          margin-top: 1.05rem;
+          gap: 0.62rem;
         }
 
         .portrait {
@@ -433,11 +475,30 @@
 
         .cards {
           grid-template-columns: 1fr;
+          gap: 0.78rem;
+          padding-bottom: 0.9rem;
+        }
+
+        .card {
+          padding: 0.95rem;
+        }
+
+        .card h2 {
+          font-size: 1.02rem;
+          margin-bottom: 0.5rem;
+        }
+
+        .card p {
+          font-size: 0.92rem;
+          line-height: 1.45;
+          min-height: auto;
         }
 
         .bottom-cta {
           flex-direction: column;
           align-items: flex-start;
+          padding: 0.88rem 0.9rem;
+          margin-bottom: 0.95rem;
         }
       }
     </style>
@@ -446,7 +507,7 @@
     <div class="stars"></div>
     <main class="wrap">
       <header class="topbar">
-        <div class="logo">BasilArcana — The Real Magic</div>
+        <div class="logo" data-i18n="topLine"></div>
         <div class="langs" role="group" aria-label="Language switcher">
           <button class="lang-btn" data-lang="ru" aria-pressed="true">RU</button>
           <button class="lang-btn" data-lang="kz" aria-pressed="false">KZ</button>
@@ -518,6 +579,7 @@
     <script>
       const copy = {
         ru: {
+          topLine: "Твой личный магический навигатор в Telegram",
           badge: "премиум‑таро в Telegram",
           title: "BasilArcana — The Real Magic",
           lead: "Молодой премиум‑формат для тех, кто хочет красиво, глубоко и по делу. Выбирай расклад, лови инсайт и переходи в действие.",
@@ -536,6 +598,7 @@
           devCta: "Разработка ботов и приложений на заказ под ключ — напишите нам"
         },
         kz: {
+          topLine: "Telegram ішіндегі жеке магиялық бағыттаушың",
           badge: "Telegram ішіндегі премиум таро",
           title: "BasilArcana — The Real Magic",
           lead: "Әдемі, терең әрі нақты формат. Сұрағыңды таңда, инсайт ал да, нақты әрекетке өт.",
@@ -554,6 +617,7 @@
           devCta: "Тапсырыс бойынша bot және app толық әзірлеу — бізге жазыңыз"
         },
         en: {
+          topLine: "Your personal magic navigator on Telegram",
           badge: "premium tarot on Telegram",
           title: "BasilArcana — The Real Magic",
           lead: "A premium but youthful format for clarity with style. Pick your spread, catch the insight, and move with confidence.",
@@ -584,8 +648,27 @@
         });
       }
 
+      let activeLang = "ru";
+      let langSwitchInProgress = false;
+
+      function switchLanguage(nextLang) {
+        if (!nextLang || nextLang === activeLang || langSwitchInProgress) {
+          return;
+        }
+        langSwitchInProgress = true;
+        document.body.classList.add("lang-switching");
+        window.setTimeout(() => {
+          applyLang(nextLang);
+          activeLang = nextLang;
+          requestAnimationFrame(() => {
+            document.body.classList.remove("lang-switching");
+            langSwitchInProgress = false;
+          });
+        }, 180);
+      }
+
       document.querySelectorAll(".lang-btn").forEach((btn) => {
-        btn.addEventListener("click", () => applyLang(btn.dataset.lang));
+        btn.addEventListener("click", () => switchLanguage(btn.dataset.lang));
       });
 
       const portraitVideo = document.querySelector(".portrait video");
