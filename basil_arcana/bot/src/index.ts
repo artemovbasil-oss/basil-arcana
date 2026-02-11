@@ -282,6 +282,15 @@ async function main(): Promise<void> {
     await sendMainMenu(ctx);
   });
 
+  bot.command("chatid", async (ctx) => {
+    const chatId = ctx.chat?.id;
+    const userId = ctx.from?.id;
+    const username = ctx.from?.username ? `@${ctx.from.username}` : "-";
+    await ctx.reply(
+      `chat_id: ${chatId ?? "-"}\nuser_id: ${userId ?? "-"}\nusername: ${username}`,
+    );
+  });
+
   bot.on("message:web_app_data", async (ctx) => {
     const data = ctx.message.web_app_data?.data ?? "";
     const action = parseWebAppAction(data);
