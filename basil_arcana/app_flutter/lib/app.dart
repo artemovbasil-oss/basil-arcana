@@ -6,6 +6,7 @@ import 'core/theme/app_theme.dart';
 import 'core/telemetry/web_error_overlay.dart';
 import 'core/telegram/telegram_back_button_observer.dart';
 import 'features/history/history_screen.dart';
+import 'features/history/query_history_screen.dart';
 import 'features/settings/settings_screen.dart';
 import 'features/splash/splash_screen.dart';
 import 'state/providers.dart';
@@ -39,6 +40,7 @@ class BasilArcanaApp extends ConsumerWidget {
       home: const SplashScreen(),
       routes: {
         HistoryScreen.routeName: (_) => const HistoryScreen(),
+        QueryHistoryScreen.routeName: (_) => const QueryHistoryScreen(),
         SettingsScreen.routeName: (_) => const SettingsScreen(),
       },
     );

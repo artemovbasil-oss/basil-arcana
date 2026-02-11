@@ -37,6 +37,7 @@
   "homeQuestionHint": "Напишите, в чем нужна ясность",
   "homeClearQuestionTooltip": "Очистить вопрос",
   "homeTryPrompt": "Попробуй один из этих запросов:",
+  "homeRecentQueriesButton": "🕘 Прошлые запросы",
   "homeExample1": "Куда направить свою энергию?",
   "homeExample2": "Какой урок здесь скрыт?",
   "homeExample3": "Где мне стоит проявить терпение?",
@@ -184,6 +185,10 @@
   "historyClearButton": "Очистить историю",
   "historyDetailTitle": "Детали расклада",
   "historyTldrTitle": "TL;DR",
+  "queryHistoryTitle": "Прошлые запросы",
+  "queryHistoryEmpty": "Пока нет прошлых запросов.",
+  "queryHistoryLoadError": "Не удалось загрузить историю запросов.",
+  "queryHistoryRetry": "Повторить",
   "offlineFallbackReflection": "размышление",
   "offlineFallbackSummary": "Для «{question}» чтение сосредоточено на {keywords}.",
   "@offlineFallbackSummary": {

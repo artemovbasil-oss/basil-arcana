@@ -124,6 +124,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get homeTryPrompt => 'Попробуй один из этих запросов:';
 
   @override
+  String get homeRecentQueriesButton => '🕘 Прошлые запросы';
+
+  @override
   String get homeExample1 => 'Куда направить свою энергию?';
 
   @override
@@ -501,6 +504,18 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get historyTldrTitle => 'TL;DR';
+
+  @override
+  String get queryHistoryTitle => 'Прошлые запросы';
+
+  @override
+  String get queryHistoryEmpty => 'Пока нет прошлых запросов.';
+
+  @override
+  String get queryHistoryLoadError => 'Не удалось загрузить историю запросов.';
+
+  @override
+  String get queryHistoryRetry => 'Повторить';
 
   @override
   String get offlineFallbackReflection => 'размышление';

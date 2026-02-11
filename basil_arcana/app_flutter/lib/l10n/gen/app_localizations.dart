@@ -322,6 +322,12 @@ abstract class AppLocalizations {
   /// **'Try one of these prompts:'**
   String get homeTryPrompt;
 
+  /// No description provided for @homeRecentQueriesButton.
+  ///
+  /// In en, this message translates to:
+  /// **'🕘 Recent prompts'**
+  String get homeRecentQueriesButton;
+
   /// No description provided for @homeExample1.
   ///
   /// In en, this message translates to:
@@ -1017,6 +1023,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'TL;DR'**
   String get historyTldrTitle;
+
+  /// No description provided for @queryHistoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent prompts'**
+  String get queryHistoryTitle;
+
+  /// No description provided for @queryHistoryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No previous prompts yet.'**
+  String get queryHistoryEmpty;
+
+  /// No description provided for @queryHistoryLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load prompt history.'**
+  String get queryHistoryLoadError;
+
+  /// No description provided for @queryHistoryRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get queryHistoryRetry;
 
   /// No description provided for @offlineFallbackReflection.
   ///

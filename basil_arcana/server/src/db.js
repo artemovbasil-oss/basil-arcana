@@ -108,6 +108,20 @@ async function ensureSchema() {
   await pool.query(
     "CREATE INDEX IF NOT EXISTS idx_energy_ledger_user_created ON energy_ledger (telegram_user_id, created_at DESC);"
   );
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS user_query_history (
+      id BIGSERIAL PRIMARY KEY,
+      telegram_user_id BIGINT NOT NULL REFERENCES users(telegram_user_id) ON DELETE CASCADE,
+      query_type TEXT NOT NULL,
+      question TEXT NOT NULL,
+      locale TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+  await pool.query(
+    "CREATE INDEX IF NOT EXISTS idx_query_history_user_created ON user_query_history (telegram_user_id, created_at DESC);"
+  );
 }
 
 function normalizeText(value) {
@@ -373,6 +387,49 @@ async function confirmInvoiceStatus({ telegramUserId, payload, status }) {
   }
 }
 
+async function logUserQuery({
+  telegramUserId,
+  queryType,
+  question,
+  locale = null
+}) {
+  if (!telegramUserId || !queryType) {
+    return;
+  }
+  const normalizedQuestion =
+    typeof question === 'string' && question.trim() ? question.trim() : '';
+  if (!normalizedQuestion) {
+    return;
+  }
+  await getDb().query(
+    `
+    INSERT INTO user_query_history (telegram_user_id, query_type, question, locale)
+    VALUES ($1, $2, $3, $4);
+    `,
+    [telegramUserId, queryType, normalizedQuestion.slice(0, 1000), normalizeText(locale)]
+  );
+}
+
+async function listRecentUserQueries({ telegramUserId, limit = 20 }) {
+  const safeLimit = Math.max(1, Math.min(100, Number(limit) || 20));
+  const { rows } = await getDb().query(
+    `
+    SELECT query_type, question, locale, created_at
+    FROM user_query_history
+    WHERE telegram_user_id = $1
+    ORDER BY created_at DESC
+    LIMIT $2;
+    `,
+    [telegramUserId, safeLimit]
+  );
+  return rows.map((row) => ({
+    queryType: String(row.query_type || ''),
+    question: String(row.question || ''),
+    locale: row.locale ? String(row.locale) : null,
+    createdAt: row.created_at ? new Date(row.created_at).toISOString() : null
+  }));
+}
+
 module.exports = {
   initDb,
   hasDb,
@@ -380,5 +437,7 @@ module.exports = {
   upsertUserProfile,
   recordSofiaConsent,
   saveCreatedInvoice,
-  confirmInvoiceStatus
+  confirmInvoiceStatus,
+  logUserQuery,
+  listRecentUserQueries
 };

@@ -12,6 +12,7 @@ import '../../data/repositories/sofia_consent_repository.dart';
 import '../../state/providers.dart';
 import '../../state/reading_flow_controller.dart';
 import '../cards/cards_screen.dart';
+import '../history/query_history_screen.dart';
 import '../settings/settings_screen.dart';
 import '../spread/spread_screen.dart';
 
@@ -34,6 +35,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   final GlobalKey _questionKey = GlobalKey();
   _SofiaConsentState _sofiaConsentState = _SofiaConsentState.undecided;
   bool _sendingConsent = false;
+  bool _hasQueryHistory = false;
 
   @override
   void initState() {
@@ -44,6 +46,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     if (initialQuestion.isNotEmpty) {
       _controller.text = initialQuestion;
     }
+    _loadQueryHistoryAvailability();
     ref.listen<ReadingFlowState>(
       readingFlowControllerProvider,
       (prev, next) {
@@ -58,6 +61,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         setState(() {});
       },
     );
+  }
+
+  Future<void> _loadQueryHistoryAvailability() async {
+    try {
+      final history =
+          await ref.read(queryHistoryRepositoryProvider).fetchRecent(limit: 1);
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _hasQueryHistory = history.isNotEmpty;
+      });
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _hasQueryHistory = false;
+      });
+    }
   }
 
   _SofiaConsentState _readSofiaConsentState() {
@@ -394,6 +417,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
+                    if (_hasQueryHistory) ...[
+                      _RecentQueriesButton(
+                        label: l10n.homeRecentQueriesButton,
+                        onTap: () {
+                          Navigator.pushNamed(
+                            context,
+                            QueryHistoryScreen.routeName,
+                          ).then((_) => _loadQueryHistoryAvailability());
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                    ],
                     Text(
                       l10n.homeTryPrompt,
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
@@ -769,6 +804,55 @@ class _ExampleChip extends StatelessWidget {
         child: Text(
           text,
           style: Theme.of(context).textTheme.bodySmall,
+        ),
+      ),
+    );
+  }
+}
+
+class _RecentQueriesButton extends StatelessWidget {
+  const _RecentQueriesButton({
+    required this.label,
+    required this.onTap,
+  });
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: onTap,
+      child: Ink(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          color: colorScheme.primary.withOpacity(0.18),
+          border: Border.all(
+            color: colorScheme.primary.withOpacity(0.58),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.access_time_rounded,
+              size: 18,
+              color: colorScheme.primary,
+            ),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                label,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.onSurface,
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+            ),
+          ],
         ),
       ),
     );

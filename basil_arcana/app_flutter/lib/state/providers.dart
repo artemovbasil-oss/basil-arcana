@@ -9,6 +9,7 @@ import '../data/repositories/card_stats_repository.dart';
 import '../data/repositories/cards_repository.dart';
 import '../data/repositories/data_repository.dart';
 import '../data/repositories/energy_topup_repository.dart';
+import '../data/repositories/query_history_repository.dart';
 import '../data/repositories/spreads_repository.dart';
 import '../data/repositories/readings_repository.dart';
 import '../data/repositories/sofia_consent_repository.dart';
@@ -46,6 +47,10 @@ final energyTopUpRepositoryProvider = Provider<EnergyTopUpRepository>((ref) {
 
 final sofiaConsentRepositoryProvider = Provider<SofiaConsentRepository>((ref) {
   return SofiaConsentRepository();
+});
+
+final queryHistoryRepositoryProvider = Provider<QueryHistoryRepository>((ref) {
+  return QueryHistoryRepository();
 });
 
 final readingFlowControllerProvider =

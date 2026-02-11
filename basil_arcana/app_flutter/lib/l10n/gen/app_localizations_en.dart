@@ -123,6 +123,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeTryPrompt => 'Try one of these prompts:';
 
   @override
+  String get homeRecentQueriesButton => '🕘 Recent prompts';
+
+  @override
   String get homeExample1 => 'Where should I place my energy?';
 
   @override
@@ -496,6 +499,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get historyTldrTitle => 'TL;DR';
+
+  @override
+  String get queryHistoryTitle => 'Recent prompts';
+
+  @override
+  String get queryHistoryEmpty => 'No previous prompts yet.';
+
+  @override
+  String get queryHistoryLoadError => 'Could not load prompt history.';
+
+  @override
+  String get queryHistoryRetry => 'Retry';
 
   @override
   String get offlineFallbackReflection => 'reflection';

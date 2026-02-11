@@ -41,7 +41,9 @@ const {
   upsertUserProfile,
   recordSofiaConsent,
   saveCreatedInvoice,
-  confirmInvoiceStatus
+  confirmInvoiceStatus,
+  logUserQuery,
+  listRecentUserQueries
 } = require('./src/db');
 
 const app = express();
@@ -323,6 +325,30 @@ async function upsertTelegramUserFromRequest(req, locale = null) {
   });
 }
 
+async function logHistoryFromRequest({
+  req,
+  queryType,
+  question,
+  locale = null
+}) {
+  if (!hasDb()) {
+    return;
+  }
+  const telegramUserId =
+    Number.isFinite(Number(req.telegram?.userId)) && Number(req.telegram?.userId) > 0
+      ? Number(req.telegram.userId)
+      : null;
+  if (!telegramUserId) {
+    return;
+  }
+  await logUserQuery({
+    telegramUserId,
+    queryType,
+    question,
+    locale
+  });
+}
+
 function parseUserIdFromInitData(initData) {
   if (!initData || typeof initData !== 'string') {
     return null;
@@ -504,6 +530,39 @@ app.get('/api/reading/availability', (req, res) => {
   return res.json({
     ok: available,
     available,
+    requestId: req.requestId
+  });
+});
+
+app.get('/api/history/queries', telegramAuthMiddleware, async (req, res) => {
+  if (!hasDb()) {
+    return res.status(503).json({
+      error: 'storage_unavailable',
+      reason: 'database_not_configured',
+      requestId: req.requestId
+    });
+  }
+  const telegramUserId =
+    Number.isFinite(Number(req.telegram?.userId)) && Number(req.telegram?.userId) > 0
+      ? Number(req.telegram.userId)
+      : parseUserIdFromInitData(readTelegramInitData(req).initData);
+  if (!telegramUserId) {
+    return res.status(401).json({
+      error: 'unauthorized',
+      reason: 'telegram_user_missing',
+      requestId: req.requestId
+    });
+  }
+  const limitRaw = Number(req.query?.limit);
+  const limit = Number.isFinite(limitRaw) ? limitRaw : 20;
+  await upsertTelegramUserFromRequest(req);
+  const items = await listRecentUserQueries({
+    telegramUserId,
+    limit
+  });
+  return res.json({
+    ok: true,
+    items,
     requestId: req.requestId
   });
 });
@@ -957,6 +1016,12 @@ app.post('/api/reading/generate', telegramAuthMiddleware, async (req, res) => {
     });
     const locale = normalizeLocale(req.body?.language);
     const enriched = appendPromoToReadingResult(result.parsed, locale);
+    await logHistoryFromRequest({
+      req,
+      queryType: `reading_${String(mode)}`,
+      question: req.body?.question,
+      locale
+    });
     return res.json({ ...enriched, requestId: req.requestId });
   } catch (err) {
     const durationMs = Date.now() - startTime;
@@ -1023,6 +1088,12 @@ app.post('/api/reading/generate_web', telegramAuthMiddleware, async (req, res) =
     });
     const locale = normalizeLocale(payload?.language);
     const enriched = appendPromoToReadingResult(result.parsed, locale);
+    await logHistoryFromRequest({
+      req,
+      queryType: `reading_${String(mode)}`,
+      question: payload?.question,
+      locale
+    });
     return res.json({ ...enriched, requestId: req.requestId });
   } catch (err) {
     const durationMs = Date.now() - startTime;
@@ -1091,6 +1162,12 @@ app.post('/api/reading/details', telegramAuthMiddleware, async (req, res) => {
       })
     );
     const locale = normalizeLocale(req.body?.locale);
+    await logHistoryFromRequest({
+      req,
+      queryType: 'reading_details',
+      question: req.body?.question,
+      locale
+    });
     return res.json({
       detailsText: appendSofiaPromo(detailsText, locale),
       requestId: req.requestId
@@ -1175,6 +1252,12 @@ app.post('/api/natal-chart/generate', async (req, res) => {
       })
     );
     const locale = normalizeLocale(req.body?.language);
+    await logHistoryFromRequest({
+      req,
+      queryType: 'natal_chart',
+      question: `Natal chart ${req.body?.birthDate || ''}${req.body?.birthTime ? ` ${req.body.birthTime}` : ''}`.trim(),
+      locale
+    });
     return res.json({
       interpretation: appendSofiaPromo(interpretation, locale),
       requestId: req.requestId
@@ -1259,6 +1342,12 @@ app.post('/api/natal-chart/generate_web', async (req, res) => {
       })
     );
     const locale = normalizeLocale(payload?.language);
+    await logHistoryFromRequest({
+      req,
+      queryType: 'natal_chart',
+      question: `Natal chart ${payload?.birthDate || ''}${payload?.birthTime ? ` ${payload.birthTime}` : ''}`.trim(),
+      locale
+    });
     return res.json({
       interpretation: appendSofiaPromo(interpretation, locale),
       requestId: req.requestId

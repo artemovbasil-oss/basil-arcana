@@ -124,6 +124,9 @@ class AppLocalizationsKk extends AppLocalizations {
   String get homeTryPrompt => 'Осы сұрақтардың бірін көріңіз:';
 
   @override
+  String get homeRecentQueriesButton => '🕘 Алдыңғы сұрақтар';
+
+  @override
   String get homeExample1 => 'Энергиямды қайда бағыттаған дұрыс?';
 
   @override
@@ -499,6 +502,18 @@ class AppLocalizationsKk extends AppLocalizations {
 
   @override
   String get historyTldrTitle => 'TL;DR';
+
+  @override
+  String get queryHistoryTitle => 'Алдыңғы сұрақтар';
+
+  @override
+  String get queryHistoryEmpty => 'Әзірге алдыңғы сұрақтар жоқ.';
+
+  @override
+  String get queryHistoryLoadError => 'Сұрақтар тарихын жүктеу мүмкін болмады.';
+
+  @override
+  String get queryHistoryRetry => 'Қайталау';
 
   @override
   String get offlineFallbackReflection => 'ойлану';

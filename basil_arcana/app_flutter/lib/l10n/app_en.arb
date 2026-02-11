@@ -37,6 +37,7 @@
   "homeQuestionHint": "Type what you want clarity on",
   "homeClearQuestionTooltip": "Clear question",
   "homeTryPrompt": "Try one of these prompts:",
+  "homeRecentQueriesButton": "🕘 Recent prompts",
   "homeExample1": "Where should I place my energy?",
   "homeExample2": "What is the hidden lesson here?",
   "homeExample3": "What needs patience from me?",
@@ -184,6 +185,10 @@
   "historyClearButton": "Clear history",
   "historyDetailTitle": "Reading detail",
   "historyTldrTitle": "TL;DR",
+  "queryHistoryTitle": "Recent prompts",
+  "queryHistoryEmpty": "No previous prompts yet.",
+  "queryHistoryLoadError": "Could not load prompt history.",
+  "queryHistoryRetry": "Retry",
   "offlineFallbackReflection": "reflection",
   "offlineFallbackSummary": "For “{question}”, the reading centers on {keywords}.",
   "@offlineFallbackSummary": {

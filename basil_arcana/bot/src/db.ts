@@ -27,6 +27,13 @@ export interface ActiveSubscriptionRow {
   purchasedYear: number;
 }
 
+export interface RecentUserQueryRow {
+  queryType: string;
+  question: string;
+  locale: string | null;
+  createdAt: number | null;
+}
+
 let pool: Pool | null = null;
 
 function requirePool(): Pool {
@@ -110,6 +117,21 @@ export async function ensureSchema(): Promise<void> {
 
   await db.query(
     "CREATE INDEX IF NOT EXISTS subscriptions_active_idx ON subscriptions (subscription_ends_at, unspent_single_readings);",
+  );
+
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS user_query_history (
+      id BIGSERIAL PRIMARY KEY,
+      telegram_user_id BIGINT NOT NULL REFERENCES users(telegram_user_id) ON DELETE CASCADE,
+      query_type TEXT NOT NULL,
+      question TEXT NOT NULL,
+      locale TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+
+  await db.query(
+    "CREATE INDEX IF NOT EXISTS idx_query_history_user_created ON user_query_history (telegram_user_id, created_at DESC);",
   );
 }
 
@@ -355,6 +377,30 @@ export async function completeConsultation(
   } finally {
     client.release();
   }
+}
+
+export async function listRecentUserQueriesForUser(
+  telegramUserId: number,
+  limit = 10,
+): Promise<RecentUserQueryRow[]> {
+  const db = requirePool();
+  const safeLimit = Math.max(1, Math.min(50, Number(limit) || 10));
+  const { rows } = await db.query(
+    `
+    SELECT query_type, question, locale, created_at
+    FROM user_query_history
+    WHERE telegram_user_id = $1
+    ORDER BY created_at DESC
+    LIMIT $2;
+    `,
+    [telegramUserId, safeLimit],
+  );
+  return rows.map((row) => ({
+    queryType: String(row.query_type ?? ""),
+    question: String(row.question ?? ""),
+    locale: (row.locale as string | null) ?? null,
+    createdAt: toMillis((row.created_at as Date | null) ?? null),
+  }));
 }
 
 async function getSubscriptionForUpdate(

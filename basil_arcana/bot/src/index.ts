@@ -8,6 +8,7 @@ import {
   initDb,
   insertPayment,
   listActiveSubscriptions,
+  listRecentUserQueriesForUser,
   paymentExists,
   saveUserSubscription,
   upsertUserProfile,
@@ -786,6 +787,14 @@ function parseCommandArg(ctx: Context): string | null {
   return parts[0] ?? null;
 }
 
+function parseCommandArgs(ctx: Context): string[] {
+  const match = (ctx.match as string | undefined)?.trim();
+  if (!match) {
+    return [];
+  }
+  return match.split(/\s+/).filter(Boolean);
+}
+
 function formatStateForSofia(row: {
   telegramUserId: number;
   username: string | null;
@@ -811,6 +820,19 @@ function formatStateForSofia(row: {
     `Разовые разборы: ${row.unspentSingleReadings}`,
     `Пакеты: 1d x${row.purchasedSingle}, 7d x${row.purchasedWeek}, 30d x${row.purchasedMonth}, 365d x${row.purchasedYear}`,
   ].join("\n");
+}
+
+function formatQueryTypeForSofia(queryType: string): string {
+  if (queryType.startsWith("reading_")) {
+    return `Расклад (${queryType.replace("reading_", "")})`;
+  }
+  if (queryType === "natal_chart") {
+    return "Натальная карта";
+  }
+  if (queryType === "reading_details") {
+    return "Детальный разбор";
+  }
+  return queryType;
 }
 
 async function sendLauncherMessage(ctx: Context): Promise<void> {
@@ -884,7 +906,7 @@ async function main(): Promise<void> {
     }
 
     await ctx.reply(
-      `Активные подписки (${active.length}):\n\n${chunks.join("\n\n----------------\n\n")}\n\nКоманда закрытия: /sub_done <user_id>`,
+      `Активные подписки (${active.length}):\n\n${chunks.join("\n\n----------------\n\n")}\n\nКоманда закрытия: /sub_done <user_id>\nИстория запросов: /queries <user_id> [limit]`,
     );
   });
 
@@ -928,6 +950,39 @@ async function main(): Promise<void> {
     }
 
     await ctx.reply("У пользователя нет активной подписки для завершения или он не найден.");
+  });
+
+  bot.command("queries", async (ctx) => {
+    if (!isSofiaOperator(ctx)) {
+      return;
+    }
+
+    const args = parseCommandArgs(ctx);
+    const userId = args[0] ? Number(args[0]) : NaN;
+    const limit = args[1] ? Number(args[1]) : 10;
+    if (!Number.isFinite(userId) || userId <= 0) {
+      await ctx.reply("Использование: /queries <user_id> [limit]");
+      return;
+    }
+
+    const rows = await listRecentUserQueriesForUser(userId, limit);
+    if (rows.length === 0) {
+      await ctx.reply(`По user_id=${userId} запросов пока нет.`);
+      return;
+    }
+
+    const lines = rows.map((row, index) => {
+      const date = row.createdAt
+        ? formatDateForLocale(new Date(row.createdAt), "ru")
+        : "-";
+      const type = formatQueryTypeForSofia(row.queryType);
+      const question = row.question || "-";
+      return `${index + 1}. ${date} • ${type}\n${question}`;
+    });
+
+    await ctx.reply(
+      `Недавние запросы user_id=${userId} (${rows.length}):\n\n${lines.join("\n\n")}`,
+    );
   });
 
   bot.callbackQuery(/^lang:(ru|en|kk)$/, async (ctx) => {
