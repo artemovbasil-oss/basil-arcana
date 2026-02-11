@@ -26,7 +26,7 @@ class CardFaceWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
     final deckId = ref.watch(deckProvider);
     final cardsAsync = ref.watch(cardsAllProvider);
     CardModel? resolvedCard;
@@ -69,7 +69,7 @@ class CardFaceWidget extends ConsumerWidget {
                 );
                 final image = CardMedia(
                   cardId: resolvedCard?.id ?? canonicalCardId(cardId!),
-                  imageUrl: resolvedCard?.imageUrl,
+                  imageUrl: mediaAssets.imageUrl,
                   videoUrl: mediaAssets.videoUrl,
                   enableVideo: true,
                   autoPlayOnce: true,

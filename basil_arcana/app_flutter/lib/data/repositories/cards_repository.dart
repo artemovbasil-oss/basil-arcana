@@ -1,6 +1,7 @@
 import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
 
 import '../../core/assets/asset_paths.dart';
 import '../../core/config/assets_config.dart';
@@ -65,9 +66,10 @@ class CardsRepository {
   }
 
   String _buildVersionTag() {
-    final runtimeVersion =
-        (AppConfig.appVersion.isNotEmpty ? AppConfig.appVersion : readWebBuildVersion())
-            .trim();
+    final runtimeVersion = (AppConfig.appVersion.isNotEmpty
+            ? AppConfig.appVersion
+            : readWebBuildVersion())
+        .trim();
     return runtimeVersion.isNotEmpty ? runtimeVersion : 'dev';
   }
 
@@ -80,7 +82,16 @@ class CardsRepository {
     required DeckType deckId,
   }) async {
     final cacheKey = cardsCacheKey(locale);
-    final raw = await _loadLocalCards(cacheKey: cacheKey, locale: locale);
+    var raw = await _loadLocalCards(cacheKey: cacheKey, locale: locale);
+    if (_isLegacyCardsPayload(raw)) {
+      final remoteRaw = await _tryLoadRemoteCards(
+        cacheKey: cacheKey,
+        locale: locale,
+      );
+      if (remoteRaw != null) {
+        raw = remoteRaw;
+      }
+    }
     return _parseCards(raw: raw, deckId: deckId);
   }
 
@@ -133,6 +144,53 @@ class CardsRepository {
     _lastResponseByteLengths[cacheKey] = raw.length;
   }
 
+  Future<String?> _tryLoadRemoteCards({
+    required String cacheKey,
+    required Locale locale,
+  }) async {
+    final uri = Uri.parse(cardsUrl(locale.languageCode));
+    _lastAttemptedUrls[cacheKey] = uri.toString();
+    final client = http.Client();
+    try {
+      final response = await client.get(
+        uri,
+        headers: const {
+          'Accept': 'application/json',
+        },
+      ).timeout(const Duration(seconds: 8));
+      final parsed = decodeJsonResponse(response: response, uri: uri);
+      _recordRemoteResponseInfo(cacheKey, parsed.response);
+      _lastResponseRootTypes[cacheKey] = jsonRootType(parsed.decoded);
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        return null;
+      }
+      if (!_isValidCardsJson(parsed.decoded) ||
+          _isLegacyCardsPayload(parsed.raw)) {
+        return null;
+      }
+      _lastFetchTimes[cacheKey] = DateTime.now();
+      _lastError = null;
+      return parsed.raw;
+    } catch (error, stackTrace) {
+      _lastError = '${error.toString()}\n$stackTrace';
+      if (kEnableRuntimeLogs) {
+        debugPrint('[CardsRepository] remote load skipped: $error');
+      }
+      return null;
+    } finally {
+      client.close();
+    }
+  }
+
+  void _recordRemoteResponseInfo(String cacheKey, JsonResponseInfo response) {
+    _lastStatusCodes[cacheKey] = response.statusCode;
+    _lastContentTypes[cacheKey] = response.contentType;
+    _lastContentLengths[cacheKey] = response.contentLengthHeader;
+    _lastResponseSnippetsStart[cacheKey] = response.responseSnippetStart;
+    _lastResponseSnippetsEnd[cacheKey] = response.responseSnippetEnd;
+    _lastResponseStringLengths[cacheKey] = response.stringLength;
+    _lastResponseByteLengths[cacheKey] = response.bytesLength;
+  }
 }
 
 class CardsLoadException implements Exception {
@@ -158,6 +216,38 @@ bool _isValidCardsJson(Object? payload) {
     card['id'] ??= entry.key;
     return _isValidCardEntry(card);
   });
+}
+
+bool _isLegacyCardsPayload(String raw) {
+  try {
+    final decoded = parseJsonString(raw).decoded;
+    if (decoded is! Map<String, dynamic> || decoded.isEmpty) {
+      return true;
+    }
+    var richCards = 0;
+    for (final value in decoded.values) {
+      if (value is! Map<String, dynamic>) {
+        continue;
+      }
+      final detailed =
+          _stringOrEmpty(value['detailedDescription']).isNotEmpty ||
+              _stringOrEmpty(value['description']).isNotEmpty;
+      final fact = _stringOrEmpty(value['fact']).isNotEmpty ||
+          _stringOrEmpty(value['funFact']).isNotEmpty;
+      final stats = value['stats'] is Map<String, dynamic> &&
+          (value['stats'] as Map<String, dynamic>).isNotEmpty;
+      if (detailed && fact && stats) {
+        richCards++;
+      }
+    }
+    final total = decoded.length;
+    if (total < 70) {
+      return true;
+    }
+    return (richCards / total) < 0.35;
+  } catch (_) {
+    return true;
+  }
 }
 
 bool _isValidCardEntry(Map<String, dynamic> card) {
@@ -225,14 +315,6 @@ Map<String, Map<String, dynamic>> _canonicalizeCardData(
 ) {
   final canonical = <String, Map<String, dynamic>>{};
   for (final entry in data.entries) {
-    if (entry.key is! String) {
-      if (kEnableRuntimeLogs) {
-        debugPrint(
-          '[CardsRepository] skipping non-string card key: ${entry.key}',
-        );
-      }
-      continue;
-    }
     if (entry.value is! Map<String, dynamic>) {
       if (kEnableRuntimeLogs) {
         debugPrint(
@@ -241,7 +323,7 @@ Map<String, Map<String, dynamic>> _canonicalizeCardData(
       }
       continue;
     }
-    final key = canonicalCardId(entry.key as String);
+    final key = canonicalCardId(entry.key);
     canonical[key] = Map<String, dynamic>.from(entry.value as Map);
   }
   return canonical;
@@ -256,10 +338,11 @@ String _resolveImageUrl(String rawUrl, String cardId, DeckType deckId) {
     return trimmed;
   }
   final normalized = trimmed.replaceFirst(RegExp(r'^/+'), '');
-  if (normalized.startsWith('cards/')) {
+  if (normalized.startsWith('cards/') ||
+      (normalized.contains('/') && normalized.endsWith('.webp'))) {
     return '${AssetsConfig.assetsBaseUrl}/$normalized';
   }
-  return '${AssetsConfig.assetsBaseUrl}/$normalized';
+  return cardImageUrl(cardId, deckId: deckId);
 }
 
 List<CardModel> _getActiveDeckCards(
@@ -270,4 +353,11 @@ List<CardModel> _getActiveDeckCards(
     return deckRegistry.values.expand((cards) => cards).toList();
   }
   return deckRegistry[selectedDeckType] ?? const [];
+}
+
+String _stringOrEmpty(Object? value) {
+  if (value is String) {
+    return value.trim();
+  }
+  return '';
 }

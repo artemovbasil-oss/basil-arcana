@@ -46,7 +46,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final settingsState = ref.watch(settingsControllerProvider);
     final energyState = ref.watch(energyProvider);
     final settingsController = ref.read(settingsControllerProvider.notifier);
-    final cards = ref.watch(cardsProvider).asData?.value ?? const <CardModel>[];
+    final cards =
+        ref.watch(cardsAllProvider).asData?.value ?? const <CardModel>[];
     final isDirty = settingsState.isDirty;
     final bottomPadding = isDirty ? 120.0 : 32.0;
     return Scaffold(
