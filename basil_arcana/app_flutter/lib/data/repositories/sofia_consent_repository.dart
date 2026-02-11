@@ -6,13 +6,14 @@ import 'package:http/http.dart' as http;
 import '../../core/config/api_config.dart';
 import '../../core/network/telegram_api_client.dart';
 
-enum SofiaConsentDecision { accepted, rejected }
+enum SofiaConsentDecision { accepted, rejected, revoked }
 
 extension SofiaConsentDecisionValue on SofiaConsentDecision {
   String get value {
     return switch (this) {
       SofiaConsentDecision.accepted => 'accepted',
       SofiaConsentDecision.rejected => 'rejected',
+      SofiaConsentDecision.revoked => 'revoked',
     };
   }
 }

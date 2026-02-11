@@ -11,6 +11,7 @@ import '../../core/navigation/app_route_config.dart';
 import '../../data/models/app_enums.dart';
 import '../../data/models/card_model.dart';
 import '../../data/models/deck_model.dart';
+import '../../data/repositories/sofia_consent_repository.dart';
 import '../../state/providers.dart';
 import '../../state/settings_controller.dart';
 import '../debug/runtime_error_log_screen.dart';
@@ -47,6 +48,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final settingsBox = Hive.box<String>(_settingsBoxName);
+    final hasSofiaConsent =
+        (settingsBox.get(_sofiaConsentKey) ?? '').isNotEmpty;
     final settingsState = ref.watch(settingsControllerProvider);
     final energyState = ref.watch(energyProvider);
     final settingsController = ref.read(settingsControllerProvider.notifier);
@@ -275,16 +279,32 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             const SizedBox(height: 10),
             AppGhostButton(
               label: _revokeConsentLabel(context),
-              onPressed: () async {
-                final box = Hive.box<String>(_settingsBoxName);
-                await box.delete(_sofiaConsentKey);
-                if (!mounted) {
-                  return;
-                }
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(_revokeConsentDone(context))),
-                );
-              },
+              onPressed: hasSofiaConsent
+                  ? () async {
+                      try {
+                        await ref
+                            .read(sofiaConsentRepositoryProvider)
+                            .submitDecision(SofiaConsentDecision.revoked);
+                      } catch (_) {
+                        if (!mounted) {
+                          return;
+                        }
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(_revokeConsentError(context))),
+                        );
+                        return;
+                      }
+                      final box = Hive.box<String>(_settingsBoxName);
+                      await box.delete(_sofiaConsentKey);
+                      if (!mounted) {
+                        return;
+                      }
+                      setState(() {});
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(_revokeConsentDone(context))),
+                      );
+                    }
+                  : null,
             ),
             if (kDebugMode) ...[
               const SizedBox(height: 12),
@@ -346,6 +366,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       return 'Егер ойың өзгерсе, осында ат пен username жіберуге берілген келісімді өшіре аласың.';
     }
     return 'If you change your mind, reset consent for sharing name and username here.';
+  }
+
+  String _revokeConsentError(BuildContext context) {
+    final code = Localizations.localeOf(context).languageCode;
+    if (code == 'ru') {
+      return 'Не получилось отправить отзыв согласия. Попробуй еще раз.';
+    }
+    if (code == 'kk') {
+      return 'Келісімді қайтарып алу жіберілмеді. Қайтадан көр.';
+    }
+    return 'Could not submit consent withdrawal. Please try again.';
   }
 }
 

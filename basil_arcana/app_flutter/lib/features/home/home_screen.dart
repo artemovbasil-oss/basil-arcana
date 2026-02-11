@@ -281,7 +281,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             context,
             SettingsScreen.routeName,
             arguments: const AppRouteConfig(showBackButton: true),
-          );
+          ).then((_) {
+            if (!mounted) {
+              return;
+            }
+            setState(() {
+              _sofiaConsentState = _readSofiaConsentState();
+            });
+          });
         },
         leadingFallback: const Center(
           child: Text(

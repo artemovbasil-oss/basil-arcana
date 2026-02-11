@@ -283,7 +283,7 @@ function persistSofiaConsentState(state) {
 
 function normalizeConsentDecision(value) {
   const raw = typeof value === 'string' ? value.trim().toLowerCase() : '';
-  if (raw === 'accepted' || raw === 'rejected') {
+  if (raw === 'accepted' || raw === 'rejected' || raw === 'revoked') {
     return raw;
   }
   return '';
@@ -675,13 +675,16 @@ app.post('/api/sofia/consent', telegramAuthMiddleware, async (req, res) => {
     });
   }
 
+  const userName = resolveUserName(req.telegram?.user, telegramUserId);
+  const username = resolveUserUsername(req.telegram?.user);
   const message =
     decision === 'accepted'
-      ? `✅ Пользователь согласился на передачу контакта\nИмя: ${resolveUserName(
-          req.telegram?.user,
-          telegramUserId
-        )}\nUsername: ${resolveUserUsername(req.telegram?.user)}\nВсего пользователей: ${state.totalUsers}`
-      : `ℹ️ Добавился еще 1 пользователь без передачи имени и username\nВсего пользователей: ${state.totalUsers}`;
+      ? state.previousDecision === 'revoked'
+        ? `🔁 Пользователь снова дал согласие на передачу контакта\nИмя: ${userName}\nUsername: ${username}\nВсего пользователей: ${state.totalUsers}`
+        : `✅ Пользователь согласился на передачу контакта\nИмя: ${userName}\nUsername: ${username}\nВсего пользователей: ${state.totalUsers}`
+      : decision === 'revoked'
+        ? `⛔️ Пользователь отозвал согласие на передачу контакта\nИмя: ${userName}\nUsername: ${username}\nВсего пользователей: ${state.totalUsers}`
+        : `ℹ️ Добавился еще 1 пользователь без передачи имени и username\nВсего пользователей: ${state.totalUsers}`;
 
   try {
     const result = await sendTelegramBotMessage({
