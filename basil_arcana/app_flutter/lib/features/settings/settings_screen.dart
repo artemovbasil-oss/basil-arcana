@@ -15,15 +15,36 @@ import '../../state/settings_controller.dart';
 import '../debug/runtime_error_log_screen.dart';
 import '../home/home_screen.dart';
 
-class SettingsScreen extends ConsumerWidget {
+class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
 
   static const routeName = '/settings';
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends ConsumerState<SettingsScreen> {
+  late final TextEditingController _promoController;
+  String? _promoFeedback;
+
+  @override
+  void initState() {
+    super.initState();
+    _promoController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _promoController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final settingsState = ref.watch(settingsControllerProvider);
+    final energyState = ref.watch(energyProvider);
     final settingsController = ref.read(settingsControllerProvider.notifier);
     final cards = ref.watch(cardsProvider).asData?.value ?? const <CardModel>[];
     final isDirty = settingsState.isDirty;
@@ -165,6 +186,77 @@ class SettingsScreen extends ConsumerWidget {
                 settingsController.updateDeck(value);
               },
             ),
+            const SizedBox(height: 20),
+            Text(
+              l10n.settingsPromoTitle,
+              style: AppTextStyles.subtitle(context),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              l10n.settingsPromoDescription,
+              style: AppTextStyles.caption(context),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: _promoController,
+              textCapitalization: TextCapitalization.characters,
+              decoration: InputDecoration(
+                hintText: l10n.settingsPromoHint,
+                suffixIcon: energyState.promoCodeActive
+                    ? const Icon(Icons.verified_rounded)
+                    : const Icon(Icons.sell_outlined),
+              ),
+            ),
+            const SizedBox(height: 10),
+            AppPrimaryButton(
+              label: l10n.settingsPromoApplyButton,
+              onPressed: () async {
+                final ok = await ref
+                    .read(energyProvider.notifier)
+                    .applyPromoCode(_promoController.text);
+                if (!mounted) {
+                  return;
+                }
+                setState(() {
+                  _promoFeedback = ok
+                      ? l10n.settingsPromoApplied
+                      : l10n.settingsPromoInvalid;
+                });
+                if (ok) {
+                  _promoController.clear();
+                }
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(_promoFeedback!)),
+                );
+              },
+            ),
+            if (energyState.promoCodeActive) ...[
+              const SizedBox(height: 10),
+              AppGhostButton(
+                label: l10n.settingsPromoResetButton,
+                onPressed: () async {
+                  await ref
+                      .read(energyProvider.notifier)
+                      .clearPromoCodeAccess();
+                  if (!mounted) {
+                    return;
+                  }
+                  setState(() {
+                    _promoFeedback = l10n.settingsPromoResetDone;
+                  });
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(_promoFeedback!)),
+                  );
+                },
+              ),
+            ],
+            if (_promoFeedback != null) ...[
+              const SizedBox(height: 8),
+              Text(
+                _promoFeedback!,
+                style: AppTextStyles.caption(context),
+              ),
+            ],
             if (kDebugMode) ...[
               const SizedBox(height: 12),
               ListTile(

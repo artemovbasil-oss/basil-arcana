@@ -3,6 +3,14 @@
   "appTitle": "The real magic",
   "historyTooltip": "История",
   "settingsTitle": "Настройки",
+  "settingsPromoTitle": "Промокод (тест)",
+  "settingsPromoDescription": "Введи код, чтобы временно включить безлимит на 1 год для тестов.",
+  "settingsPromoHint": "Например: LUCY100",
+  "settingsPromoApplyButton": "Активировать промокод",
+  "settingsPromoInvalid": "Промокод не найден.",
+  "settingsPromoApplied": "Промокод активирован: безлимит на 1 год включен.",
+  "settingsPromoResetButton": "Отказаться от промокода",
+  "settingsPromoResetDone": "Промокод отключен. Возвращаемся к бесплатной версии.",
   "languageLabel": "Язык",
   "languageEnglish": "English (EN)",
   "languageRussian": "Русский (RU)",
@@ -236,8 +244,22 @@
     }
   },
   "energyTopUpButton": "Пополнить",
-  "energyTopUpTitle": "Энергия заканчивается",
-  "energyTopUpDescription": "Выберите пакет, чтобы продолжить без ожидания восстановления.",
+  "energyTopUpTitle": "Подпитай магию",
+  "energyTopUpDescription": "Твоя энергия ведет расклад глубже. Выбери ритм и продолжай без пауз.",
+  "energyTopUpDescriptionCompact": "Энергия тратится на действия и мягко восстанавливается сама. Можно подождать или усилить поток звездами.",
+  "energyCostsTitle": "Сколько стоит каждое действие",
+  "energyCostReading": "Расклад",
+  "energyCostDeepDetails": "Углубление по раскладу",
+  "energyCostNatalChart": "Натальная карта",
+  "energyNextFreeReady": "Следующая бесплатная попытка уже готова.",
+  "energyNextFreeIn": "До следующей бесплатной попытки: {value}",
+  "@energyNextFreeIn": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
   "energyPackSmall": "Купить +25% энергии",
   "energyPackMedium": "Купить +50% энергии",
   "energyPackFull": "Купить полный заряд",

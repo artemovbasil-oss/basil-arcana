@@ -118,6 +118,54 @@ abstract class AppLocalizations {
   /// **'Settings'**
   String get settingsTitle;
 
+  /// No description provided for @settingsPromoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Promo code (test)'**
+  String get settingsPromoTitle;
+
+  /// No description provided for @settingsPromoDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a code to temporarily enable 1-year unlimited access for testing.'**
+  String get settingsPromoDescription;
+
+  /// No description provided for @settingsPromoHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Example: LUCY100'**
+  String get settingsPromoHint;
+
+  /// No description provided for @settingsPromoApplyButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Activate promo code'**
+  String get settingsPromoApplyButton;
+
+  /// No description provided for @settingsPromoInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Promo code is invalid.'**
+  String get settingsPromoInvalid;
+
+  /// No description provided for @settingsPromoApplied.
+  ///
+  /// In en, this message translates to:
+  /// **'Promo activated: 1-year unlimited access enabled.'**
+  String get settingsPromoApplied;
+
+  /// No description provided for @settingsPromoResetButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Disable promo code'**
+  String get settingsPromoResetButton;
+
+  /// No description provided for @settingsPromoResetDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Promo disabled. Back to free version.'**
+  String get settingsPromoResetDone;
+
   /// No description provided for @languageLabel.
   ///
   /// In en, this message translates to:
@@ -1141,14 +1189,56 @@ abstract class AppLocalizations {
   /// No description provided for @energyTopUpTitle.
   ///
   /// In en, this message translates to:
-  /// **'Energy is running low'**
+  /// **'Feed your arcane flow'**
   String get energyTopUpTitle;
 
   /// No description provided for @energyTopUpDescription.
   ///
   /// In en, this message translates to:
-  /// **'Choose a pack to continue readings without waiting for recharge.'**
+  /// **'Your energy keeps the reading clear and deep. Choose your rhythm and stay in the magic.'**
   String get energyTopUpDescription;
+
+  /// No description provided for @energyTopUpDescriptionCompact.
+  ///
+  /// In en, this message translates to:
+  /// **'Energy is spent on actions and recovers over time. You can wait for free recharge or boost it instantly with Stars.'**
+  String get energyTopUpDescriptionCompact;
+
+  /// No description provided for @energyCostsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Energy cost per action'**
+  String get energyCostsTitle;
+
+  /// No description provided for @energyCostReading.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading'**
+  String get energyCostReading;
+
+  /// No description provided for @energyCostDeepDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Deep details'**
+  String get energyCostDeepDetails;
+
+  /// No description provided for @energyCostNatalChart.
+  ///
+  /// In en, this message translates to:
+  /// **'Natal chart'**
+  String get energyCostNatalChart;
+
+  /// No description provided for @energyNextFreeReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Your next free attempt is ready.'**
+  String get energyNextFreeReady;
+
+  /// No description provided for @energyNextFreeIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Next free attempt in: {value}'**
+  String energyNextFreeIn(String value);
 
   /// No description provided for @energyPackSmall.
   ///

@@ -43,115 +43,131 @@ Future<void> showEnergyTopUpSheet(BuildContext context, WidgetRef ref) async {
       return StatefulBuilder(
         builder: (statefulContext, setState) {
           return SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    l10n.energyTopUpTitle,
-                    style: Theme.of(sheetContext).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    l10n.energyTopUpDescription,
-                    style: Theme.of(sheetContext).textTheme.bodyMedium,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    l10n.energyInfoTooltip,
-                    style: Theme.of(sheetContext).textTheme.bodySmall,
-                  ),
-                  const SizedBox(height: 16),
-                  if (processingPack != null)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: Text(
-                        l10n.energyTopUpProcessing,
-                        style: Theme.of(sheetContext).textTheme.bodySmall,
-                      ),
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.energyTopUpTitle,
+                      style: Theme.of(sheetContext).textTheme.titleLarge,
                     ),
-                  AppPrimaryButton(
-                    label: l10n.energyPackSmall,
-                    onPressed: processingPack != null
-                        ? null
-                        : () async {
-                            setState(() => processingPack = EnergyPackId.small);
-                            await _purchaseEnergyPack(
-                              context: context,
-                              sheetContext: statefulContext,
-                              ref: ref,
-                              l10n: l10n,
-                              packId: EnergyPackId.small,
-                            );
-                            if (statefulContext.mounted) {
-                              setState(() => processingPack = null);
-                            }
-                          },
-                  ),
-                  const SizedBox(height: 10),
-                  AppPrimaryButton(
-                    label: l10n.energyPackMedium,
-                    onPressed: processingPack != null
-                        ? null
-                        : () async {
-                            setState(
-                                () => processingPack = EnergyPackId.medium);
-                            await _purchaseEnergyPack(
-                              context: context,
-                              sheetContext: statefulContext,
-                              ref: ref,
-                              l10n: l10n,
-                              packId: EnergyPackId.medium,
-                            );
-                            if (statefulContext.mounted) {
-                              setState(() => processingPack = null);
-                            }
-                          },
-                  ),
-                  const SizedBox(height: 10),
-                  AppGhostButton(
-                    label: l10n.energyPackFull,
-                    icon: Icons.flash_on,
-                    onPressed: processingPack != null
-                        ? null
-                        : () async {
-                            setState(() => processingPack = EnergyPackId.full);
-                            await _purchaseEnergyPack(
-                              context: context,
-                              sheetContext: statefulContext,
-                              ref: ref,
-                              l10n: l10n,
-                              packId: EnergyPackId.full,
-                            );
-                            if (statefulContext.mounted) {
-                              setState(() => processingPack = null);
-                            }
-                          },
-                  ),
-                  const SizedBox(height: 10),
-                  AppGhostButton(
-                    label: l10n.energyPackYearUnlimited,
-                    icon: Icons.all_inclusive,
-                    onPressed: processingPack != null
-                        ? null
-                        : () async {
-                            setState(() =>
-                                processingPack = EnergyPackId.yearUnlimited);
-                            await _purchaseEnergyPack(
-                              context: context,
-                              sheetContext: statefulContext,
-                              ref: ref,
-                              l10n: l10n,
-                              packId: EnergyPackId.yearUnlimited,
-                            );
-                            if (statefulContext.mounted) {
-                              setState(() => processingPack = null);
-                            }
-                          },
-                  ),
-                ],
+                    const SizedBox(height: 8),
+                    Text(
+                      l10n.energyTopUpDescription,
+                      style: Theme.of(sheetContext).textTheme.bodyMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      l10n.energyTopUpDescriptionCompact,
+                      style: Theme.of(sheetContext).textTheme.bodySmall,
+                    ),
+                    const SizedBox(height: 12),
+                    const _NextFreeAttemptCard(),
+                    const SizedBox(height: 12),
+                    const _EnergyCostsTable(),
+                    const SizedBox(height: 14),
+                    Divider(
+                      height: 1,
+                      color: Theme.of(sheetContext)
+                          .colorScheme
+                          .outlineVariant
+                          .withOpacity(0.5),
+                    ),
+                    const SizedBox(height: 14),
+                    if (processingPack != null)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Text(
+                          l10n.energyTopUpProcessing,
+                          style: Theme.of(sheetContext).textTheme.bodySmall,
+                        ),
+                      ),
+                    AppPrimaryButton(
+                      label: l10n.energyPackYearUnlimited,
+                      icon: Icons.all_inclusive,
+                      onPressed: processingPack != null
+                          ? null
+                          : () async {
+                              setState(() =>
+                                  processingPack = EnergyPackId.yearUnlimited);
+                              await _purchaseEnergyPack(
+                                context: context,
+                                sheetContext: statefulContext,
+                                ref: ref,
+                                l10n: l10n,
+                                packId: EnergyPackId.yearUnlimited,
+                              );
+                              if (statefulContext.mounted) {
+                                setState(() => processingPack = null);
+                              }
+                            },
+                    ),
+                    const SizedBox(height: 10),
+                    AppGhostButton(
+                      label: l10n.energyPackSmall,
+                      onPressed: processingPack != null
+                          ? null
+                          : () async {
+                              setState(
+                                  () => processingPack = EnergyPackId.small);
+                              await _purchaseEnergyPack(
+                                context: context,
+                                sheetContext: statefulContext,
+                                ref: ref,
+                                l10n: l10n,
+                                packId: EnergyPackId.small,
+                              );
+                              if (statefulContext.mounted) {
+                                setState(() => processingPack = null);
+                              }
+                            },
+                    ),
+                    const SizedBox(height: 10),
+                    AppGhostButton(
+                      label: l10n.energyPackMedium,
+                      onPressed: processingPack != null
+                          ? null
+                          : () async {
+                              setState(
+                                  () => processingPack = EnergyPackId.medium);
+                              await _purchaseEnergyPack(
+                                context: context,
+                                sheetContext: statefulContext,
+                                ref: ref,
+                                l10n: l10n,
+                                packId: EnergyPackId.medium,
+                              );
+                              if (statefulContext.mounted) {
+                                setState(() => processingPack = null);
+                              }
+                            },
+                    ),
+                    const SizedBox(height: 10),
+                    AppGhostButton(
+                      label: l10n.energyPackFull,
+                      icon: Icons.flash_on,
+                      onPressed: processingPack != null
+                          ? null
+                          : () async {
+                              setState(
+                                  () => processingPack = EnergyPackId.full);
+                              await _purchaseEnergyPack(
+                                context: context,
+                                sheetContext: statefulContext,
+                                ref: ref,
+                                l10n: l10n,
+                                packId: EnergyPackId.full,
+                              );
+                              if (statefulContext.mounted) {
+                                setState(() => processingPack = null);
+                              }
+                            },
+                    ),
+                  ],
+                ),
               ),
             ),
           );
@@ -159,6 +175,111 @@ Future<void> showEnergyTopUpSheet(BuildContext context, WidgetRef ref) async {
       );
     },
   );
+}
+
+class _EnergyCostsTable extends StatelessWidget {
+  const _EnergyCostsTable();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    Widget row(String action, String value) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(action, style: textTheme.bodySmall),
+            ),
+            Text(value, style: textTheme.bodySmall),
+          ],
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: colorScheme.surface.withOpacity(0.55),
+        border: Border.all(color: colorScheme.primary.withOpacity(0.25)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.energyCostsTitle,
+            style: textTheme.labelLarge,
+          ),
+          const SizedBox(height: 6),
+          row(l10n.energyCostReading, '${EnergyAction.reading.cost.round()}%'),
+          row(l10n.energyCostDeepDetails,
+              '${EnergyAction.deepDetails.cost.round()}%'),
+          row(l10n.energyCostNatalChart,
+              '${EnergyAction.natalChart.cost.round()}%'),
+        ],
+      ),
+    );
+  }
+}
+
+class _NextFreeAttemptCard extends ConsumerWidget {
+  const _NextFreeAttemptCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final energy = ref.watch(energyProvider);
+    final missing =
+        (EnergyAction.reading.cost - energy.clampedValue).clamp(0, 100);
+    final seconds = energy.isUnlimited
+        ? 0
+        : (missing / EnergyController.recoveryPerSecond).ceil();
+    final waitText = seconds <= 0
+        ? l10n.energyNextFreeReady
+        : l10n
+            .energyNextFreeIn(_formatShortDuration(Duration(seconds: seconds)));
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: colorScheme.surface.withOpacity(0.55),
+        border: Border.all(color: colorScheme.primary.withOpacity(0.25)),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.timer_outlined, size: 16, color: colorScheme.primary),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              waitText,
+              style: textTheme.bodySmall,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+String _formatShortDuration(Duration duration) {
+  final totalSeconds = duration.inSeconds;
+  final hours = totalSeconds ~/ 3600;
+  final minutes = (totalSeconds % 3600) ~/ 60;
+  final seconds = totalSeconds % 60;
+  if (hours > 0) {
+    return '${hours}ч ${minutes}м';
+  }
+  if (minutes > 0) {
+    return '${minutes}м ${seconds}с';
+  }
+  return '${seconds}с';
 }
 
 Future<void> _purchaseEnergyPack({

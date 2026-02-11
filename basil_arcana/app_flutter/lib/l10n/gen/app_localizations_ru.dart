@@ -18,6 +18,33 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsTitle => 'Настройки';
 
   @override
+  String get settingsPromoTitle => 'Промокод (тест)';
+
+  @override
+  String get settingsPromoDescription =>
+      'Введи код, чтобы временно включить безлимит на 1 год для тестов.';
+
+  @override
+  String get settingsPromoHint => 'Например: LUCY100';
+
+  @override
+  String get settingsPromoApplyButton => 'Активировать промокод';
+
+  @override
+  String get settingsPromoInvalid => 'Промокод не найден.';
+
+  @override
+  String get settingsPromoApplied =>
+      'Промокод активирован: безлимит на 1 год включен.';
+
+  @override
+  String get settingsPromoResetButton => 'Отказаться от промокода';
+
+  @override
+  String get settingsPromoResetDone =>
+      'Промокод отключен. Возвращаемся к бесплатной версии.';
+
+  @override
   String get languageLabel => 'Язык';
 
   @override
@@ -577,11 +604,35 @@ class AppLocalizationsRu extends AppLocalizations {
   String get energyTopUpButton => 'Пополнить';
 
   @override
-  String get energyTopUpTitle => 'Энергия заканчивается';
+  String get energyTopUpTitle => 'Подпитай магию';
 
   @override
   String get energyTopUpDescription =>
-      'Выберите пакет, чтобы продолжить без ожидания восстановления.';
+      'Твоя энергия ведет расклад глубже. Выбери ритм и продолжай без пауз.';
+
+  @override
+  String get energyTopUpDescriptionCompact =>
+      'Энергия тратится на действия и мягко восстанавливается сама. Можно подождать или усилить поток звездами.';
+
+  @override
+  String get energyCostsTitle => 'Сколько стоит каждое действие';
+
+  @override
+  String get energyCostReading => 'Расклад';
+
+  @override
+  String get energyCostDeepDetails => 'Углубление по раскладу';
+
+  @override
+  String get energyCostNatalChart => 'Натальная карта';
+
+  @override
+  String get energyNextFreeReady => 'Следующая бесплатная попытка уже готова.';
+
+  @override
+  String energyNextFreeIn(String value) {
+    return 'До следующей бесплатной попытки: $value';
+  }
 
   @override
   String get energyPackSmall => 'Купить +25% энергии';

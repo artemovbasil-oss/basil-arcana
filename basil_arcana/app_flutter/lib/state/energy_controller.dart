@@ -24,11 +24,13 @@ class EnergyState {
     required this.value,
     required this.lastUpdatedAt,
     this.unlimitedUntil,
+    this.promoCodeActive = false,
   });
 
   final double value;
   final DateTime lastUpdatedAt;
   final DateTime? unlimitedUntil;
+  final bool promoCodeActive;
 
   bool get isUnlimited {
     final until = unlimitedUntil;
@@ -58,6 +60,7 @@ class EnergyState {
     double? value,
     DateTime? lastUpdatedAt,
     DateTime? unlimitedUntil,
+    bool? promoCodeActive,
     bool clearUnlimitedUntil = false,
   }) {
     return EnergyState(
@@ -65,6 +68,7 @@ class EnergyState {
       lastUpdatedAt: lastUpdatedAt ?? this.lastUpdatedAt,
       unlimitedUntil:
           clearUnlimitedUntil ? null : (unlimitedUntil ?? this.unlimitedUntil),
+      promoCodeActive: promoCodeActive ?? this.promoCodeActive,
     );
   }
 }
@@ -87,6 +91,8 @@ class EnergyController extends StateNotifier<EnergyState> {
   static const String timestampStorageKey = 'oracle_energy_updated_at';
   static const String unlimitedUntilStorageKey =
       'oracle_energy_unlimited_until';
+  static const String promoCodeActiveStorageKey = 'oracle_promo_active';
+  static const String testPromoCode = 'LUCY100';
 
   final Box<String> _box;
   Timer? _ticker;
@@ -99,10 +105,12 @@ class EnergyController extends StateNotifier<EnergyState> {
     final storedUnlimitedUntil = DateTime.tryParse(
       box.get(unlimitedUntilStorageKey) ?? '',
     );
+    final promoActive = (box.get(promoCodeActiveStorageKey) ?? '') == '1';
     final base = EnergyState(
       value: storedValue ?? maxEnergy,
       lastUpdatedAt: storedTimestamp ?? DateTime.now(),
       unlimitedUntil: storedUnlimitedUntil,
+      promoCodeActive: promoActive,
     );
     return _applyRecovery(base, DateTime.now());
   }
@@ -192,6 +200,36 @@ class EnergyController extends StateNotifier<EnergyState> {
       value: maxEnergy,
       lastUpdatedAt: now,
       unlimitedUntil: now.add(const Duration(days: 365)),
+      promoCodeActive: false,
+    );
+    state = next;
+    await _persist(next);
+  }
+
+  Future<bool> applyPromoCode(String rawCode) async {
+    final normalized = rawCode.trim().toUpperCase();
+    if (normalized != testPromoCode) {
+      return false;
+    }
+    final now = DateTime.now();
+    final next = state.copyWith(
+      value: maxEnergy,
+      lastUpdatedAt: now,
+      unlimitedUntil: now.add(const Duration(days: 365)),
+      promoCodeActive: true,
+    );
+    state = next;
+    await _persist(next);
+    return true;
+  }
+
+  Future<void> clearPromoCodeAccess() async {
+    final now = DateTime.now();
+    final next = state.copyWith(
+      value: maxEnergy,
+      lastUpdatedAt: now,
+      clearUnlimitedUntil: true,
+      promoCodeActive: false,
     );
     state = next;
     await _persist(next);
@@ -206,6 +244,10 @@ class EnergyController extends StateNotifier<EnergyState> {
     } else {
       await _box.delete(unlimitedUntilStorageKey);
     }
+    await _box.put(
+      promoCodeActiveStorageKey,
+      source.promoCodeActive ? '1' : '0',
+    );
   }
 
   @override

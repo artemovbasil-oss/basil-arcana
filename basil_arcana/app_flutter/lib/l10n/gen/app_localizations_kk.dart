@@ -18,6 +18,33 @@ class AppLocalizationsKk extends AppLocalizations {
   String get settingsTitle => 'Баптаулар';
 
   @override
+  String get settingsPromoTitle => 'Промокод (тест)';
+
+  @override
+  String get settingsPromoDescription =>
+      'Тестілеу үшін код енгіз де 1 жылдық шексіз қолжетімділікті уақытша қос.';
+
+  @override
+  String get settingsPromoHint => 'Мысалы: LUCY100';
+
+  @override
+  String get settingsPromoApplyButton => 'Промокодты қосу';
+
+  @override
+  String get settingsPromoInvalid => 'Промокод жарамсыз.';
+
+  @override
+  String get settingsPromoApplied =>
+      'Промокод іске қосылды: 1 жылдық шексіз қолжетімділік берілді.';
+
+  @override
+  String get settingsPromoResetButton => 'Промокодтан бас тарту';
+
+  @override
+  String get settingsPromoResetDone =>
+      'Промокод өшірілді. Тегін нұсқаға қайттық.';
+
+  @override
   String get languageLabel => 'Тіл';
 
   @override
@@ -575,11 +602,35 @@ class AppLocalizationsKk extends AppLocalizations {
   String get energyTopUpButton => 'Толықтыру';
 
   @override
-  String get energyTopUpTitle => 'Энергия азайып қалды';
+  String get energyTopUpTitle => 'Сиқыр қуатын күшейт';
 
   @override
   String get energyTopUpDescription =>
-      'Қалпына келуді күтпей жалғастыру үшін пакет таңдаңыз.';
+      'Энергияң жорамалды терең әрі анық етеді. Ырғағыңды таңда да ағымды жалғастыр.';
+
+  @override
+  String get energyTopUpDescriptionCompact =>
+      'Энергия әр әрекетке жұмсалады және уақыт өте қалпына келеді. Күте тұр немесе жұлдызбен бірден толықтыр.';
+
+  @override
+  String get energyCostsTitle => 'Әрекетке кететін энергия';
+
+  @override
+  String get energyCostReading => 'Жорамал';
+
+  @override
+  String get energyCostDeepDetails => 'Терең талдау';
+
+  @override
+  String get energyCostNatalChart => 'Наталдық карта';
+
+  @override
+  String get energyNextFreeReady => 'Келесі тегін әрекет дайын.';
+
+  @override
+  String energyNextFreeIn(String value) {
+    return 'Келесі тегін әрекетке дейін: $value';
+  }
 
   @override
   String get energyPackSmall => '+25% энергия сатып алу';

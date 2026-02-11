@@ -3,6 +3,14 @@
   "appTitle": "The real magic",
   "historyTooltip": "Тарих",
   "settingsTitle": "Баптаулар",
+  "settingsPromoTitle": "Промокод (тест)",
+  "settingsPromoDescription": "Тестілеу үшін код енгіз де 1 жылдық шексіз қолжетімділікті уақытша қос.",
+  "settingsPromoHint": "Мысалы: LUCY100",
+  "settingsPromoApplyButton": "Промокодты қосу",
+  "settingsPromoInvalid": "Промокод жарамсыз.",
+  "settingsPromoApplied": "Промокод іске қосылды: 1 жылдық шексіз қолжетімділік берілді.",
+  "settingsPromoResetButton": "Промокодтан бас тарту",
+  "settingsPromoResetDone": "Промокод өшірілді. Тегін нұсқаға қайттық.",
   "languageLabel": "Тіл",
   "languageEnglish": "English (EN)",
   "languageRussian": "Русский (RU)",
@@ -236,8 +244,22 @@
     }
   },
   "energyTopUpButton": "Толықтыру",
-  "energyTopUpTitle": "Энергия азайып қалды",
-  "energyTopUpDescription": "Қалпына келуді күтпей жалғастыру үшін пакет таңдаңыз.",
+  "energyTopUpTitle": "Сиқыр қуатын күшейт",
+  "energyTopUpDescription": "Энергияң жорамалды терең әрі анық етеді. Ырғағыңды таңда да ағымды жалғастыр.",
+  "energyTopUpDescriptionCompact": "Энергия әр әрекетке жұмсалады және уақыт өте қалпына келеді. Күте тұр немесе жұлдызбен бірден толықтыр.",
+  "energyCostsTitle": "Әрекетке кететін энергия",
+  "energyCostReading": "Жорамал",
+  "energyCostDeepDetails": "Терең талдау",
+  "energyCostNatalChart": "Наталдық карта",
+  "energyNextFreeReady": "Келесі тегін әрекет дайын.",
+  "energyNextFreeIn": "Келесі тегін әрекетке дейін: {value}",
+  "@energyNextFreeIn": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
   "energyPackSmall": "+25% энергия сатып алу",
   "energyPackMedium": "+50% энергия сатып алу",
   "energyPackFull": "Толық энергияны сатып алу",

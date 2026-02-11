@@ -18,6 +18,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsTitle => 'Settings';
 
   @override
+  String get settingsPromoTitle => 'Promo code (test)';
+
+  @override
+  String get settingsPromoDescription =>
+      'Enter a code to temporarily enable 1-year unlimited access for testing.';
+
+  @override
+  String get settingsPromoHint => 'Example: LUCY100';
+
+  @override
+  String get settingsPromoApplyButton => 'Activate promo code';
+
+  @override
+  String get settingsPromoInvalid => 'Promo code is invalid.';
+
+  @override
+  String get settingsPromoApplied =>
+      'Promo activated: 1-year unlimited access enabled.';
+
+  @override
+  String get settingsPromoResetButton => 'Disable promo code';
+
+  @override
+  String get settingsPromoResetDone => 'Promo disabled. Back to free version.';
+
+  @override
   String get languageLabel => 'Language';
 
   @override
@@ -571,11 +597,35 @@ class AppLocalizationsEn extends AppLocalizations {
   String get energyTopUpButton => 'Top up';
 
   @override
-  String get energyTopUpTitle => 'Energy is running low';
+  String get energyTopUpTitle => 'Feed your arcane flow';
 
   @override
   String get energyTopUpDescription =>
-      'Choose a pack to continue readings without waiting for recharge.';
+      'Your energy keeps the reading clear and deep. Choose your rhythm and stay in the magic.';
+
+  @override
+  String get energyTopUpDescriptionCompact =>
+      'Energy is spent on actions and recovers over time. You can wait for free recharge or boost it instantly with Stars.';
+
+  @override
+  String get energyCostsTitle => 'Energy cost per action';
+
+  @override
+  String get energyCostReading => 'Reading';
+
+  @override
+  String get energyCostDeepDetails => 'Deep details';
+
+  @override
+  String get energyCostNatalChart => 'Natal chart';
+
+  @override
+  String get energyNextFreeReady => 'Your next free attempt is ready.';
+
+  @override
+  String energyNextFreeIn(String value) {
+    return 'Next free attempt in: $value';
+  }
 
   @override
   String get energyPackSmall => 'Buy +25% energy';

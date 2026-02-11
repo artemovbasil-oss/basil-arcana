@@ -3,6 +3,14 @@
   "appTitle": "The real magic",
   "historyTooltip": "History",
   "settingsTitle": "Settings",
+  "settingsPromoTitle": "Promo code (test)",
+  "settingsPromoDescription": "Enter a code to temporarily enable 1-year unlimited access for testing.",
+  "settingsPromoHint": "Example: LUCY100",
+  "settingsPromoApplyButton": "Activate promo code",
+  "settingsPromoInvalid": "Promo code is invalid.",
+  "settingsPromoApplied": "Promo activated: 1-year unlimited access enabled.",
+  "settingsPromoResetButton": "Disable promo code",
+  "settingsPromoResetDone": "Promo disabled. Back to free version.",
   "languageLabel": "Language",
   "languageEnglish": "English (EN)",
   "languageRussian": "Russian (RU)",
@@ -236,8 +244,22 @@
     }
   },
   "energyTopUpButton": "Top up",
-  "energyTopUpTitle": "Energy is running low",
-  "energyTopUpDescription": "Choose a pack to continue readings without waiting for recharge.",
+  "energyTopUpTitle": "Feed your arcane flow",
+  "energyTopUpDescription": "Your energy keeps the reading clear and deep. Choose your rhythm and stay in the magic.",
+  "energyTopUpDescriptionCompact": "Energy is spent on actions and recovers over time. You can wait for free recharge or boost it instantly with Stars.",
+  "energyCostsTitle": "Energy cost per action",
+  "energyCostReading": "Reading",
+  "energyCostDeepDetails": "Deep details",
+  "energyCostNatalChart": "Natal chart",
+  "energyNextFreeReady": "Your next free attempt is ready.",
+  "energyNextFreeIn": "Next free attempt in: {value}",
+  "@energyNextFreeIn": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
   "energyPackSmall": "Buy +25% energy",
   "energyPackMedium": "Buy +50% energy",
   "energyPackFull": "Buy full energy",
