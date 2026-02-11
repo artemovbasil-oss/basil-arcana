@@ -11,6 +11,11 @@ Telegram bot built with Node.js + TypeScript and grammY. It provides a localized
   - Weekly, monthly, yearly subscription
 - After successful payment user gets a unique 6-digit code and instructions to send it to Sofia
 - Bot sends Sofia purchase notification with user details, plan and validity date
+- Active subscription durations are summed on repeated purchases
+- If user has active subscriptions, main menu shows a dedicated "My active subscriptions" button
+- Sofia can manage subscriptions using bot commands:
+  - `/subs` — list users with active subscriptions
+  - `/sub_done <user_id>` — complete one single reading (or close active timed subscription)
 - Graceful fallback if the web app URL is missing
 
 ## Environment variables (Railway)

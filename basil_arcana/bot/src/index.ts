@@ -13,30 +13,34 @@ interface Plan {
   isSingleUse: boolean;
 }
 
-interface UserState {
-  activeSubscription: boolean;
-  selectedPlan: PlanId | null;
-  locale: SupportedLocale | null;
-  pendingStartPayload: string | null;
-  subscriptionEndsAt: number | null;
-}
-
 interface LocalizedPlan {
   label: string;
   notifyLabel: string;
   fiatPriceDisplay: string;
 }
 
+interface UserState {
+  locale: SupportedLocale | null;
+  pendingStartPayload: string | null;
+  selectedPlan: PlanId | null;
+  subscriptionEndsAt: number | null;
+  unspentSingleReadings: number;
+  purchasedByPlan: Record<PlanId, number>;
+  username: string | null;
+  firstName: string | null;
+  lastName: string | null;
+}
+
 const SOFIA_PROFILE_URL = "https://t.me/SofiaKnoxx";
 const TELEGRAM_STARS_CURRENCY = "XTR";
 const PURCHASE_CODE_LENGTH = 6;
-const PURCHASE_CODE_TTL_DAYS = 30;
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 const PLANS: Record<PlanId, Plan> = {
   single: {
     id: "single",
     stars: 140,
-    durationDays: PURCHASE_CODE_TTL_DAYS,
+    durationDays: 1,
     isSingleUse: true,
   },
   week: {
@@ -69,6 +73,7 @@ const STRINGS: Record<
       buy: string;
       about: string;
       back: string;
+      subscriptions: string;
     };
     languagePrompt: string;
     languageButtons: Record<SupportedLocale, string>;
@@ -77,7 +82,6 @@ const STRINGS: Record<
     professionalTitle: string;
     professionalDescription: string;
     planLabels: Record<PlanId, LocalizedPlan>;
-    planAlreadySelected: string;
     invoiceTitle: string;
     invoiceDescription: string;
     paymentPrompt: string;
@@ -89,6 +93,11 @@ const STRINGS: Record<
     sofiaContactCard: string;
     missingSofiaChatWarn: string;
     unknownPaymentPlan: string;
+    subscriptionsTitle: string;
+    subscriptionsNone: string;
+    subscriptionsUntil: string;
+    subscriptionsSingleLeft: string;
+    subscriptionsPlansCount: string;
   }
 > = {
   ru: {
@@ -99,6 +108,7 @@ const STRINGS: Record<
       buy: "💳 Купить разбор/подписку",
       about: "✨ Чем мы можем быть полезны",
       back: "⬅️ В меню",
+      subscriptions: "📦 Мои активные подписки",
     },
     languagePrompt:
       "На каком языке тебе удобнее общаться?\nТілді таңдаңыз.\nWhich language do you prefer?",
@@ -135,7 +145,6 @@ const STRINGS: Record<
         fiatPriceDisplay: "6 990 ₽",
       },
     },
-    planAlreadySelected: "Тариф уже выбран.",
     invoiceTitle: "Basil’s Arcana • Оплата",
     invoiceDescription:
       "Детальный разбор раскладов и натальных карт от Софии.",
@@ -151,6 +160,11 @@ const STRINGS: Record<
     missingSofiaChatWarn:
       "Оплата прошла, но уведомление Софии не отправлено автоматически. Напиши ей и отправь код вручную: https://t.me/SofiaKnoxx",
     unknownPaymentPlan: "Не удалось определить тариф оплаты.",
+    subscriptionsTitle: "📦 Твои активные подписки",
+    subscriptionsNone: "У тебя сейчас нет активных подписок.",
+    subscriptionsUntil: "Активно до",
+    subscriptionsSingleLeft: "Осталось разовых разборов",
+    subscriptionsPlansCount: "Куплено пакетов",
   },
   en: {
     menuTitle: "Welcome to Basil’s Arcana ✨",
@@ -160,6 +174,7 @@ const STRINGS: Record<
       buy: "💳 Buy reading/subscription",
       about: "✨ How we can help",
       back: "⬅️ Back to menu",
+      subscriptions: "📦 My active subscriptions",
     },
     languagePrompt:
       "На каком языке тебе удобнее общаться?\nТілді таңдаңыз.\nWhich language do you prefer?",
@@ -196,11 +211,11 @@ const STRINGS: Record<
         fiatPriceDisplay: "$84.99",
       },
     },
-    planAlreadySelected: "Plan already selected.",
     invoiceTitle: "Basil’s Arcana • Payment",
     invoiceDescription:
       "Detailed spread and natal-chart interpretation by Sofia.",
-    paymentPrompt: "Choose an option below and the bot will send a Telegram Stars invoice.",
+    paymentPrompt:
+      "Choose an option below and the bot will send a Telegram Stars invoice.",
     paymentCancelled: "Payment failed. Please try again.",
     paymentSuccess: "Payment received ✅",
     activationUntil: "Active until",
@@ -212,6 +227,11 @@ const STRINGS: Record<
     missingSofiaChatWarn:
       "Payment is complete, but Sofia was not notified automatically. Please message Sofia and send the code manually: https://t.me/SofiaKnoxx",
     unknownPaymentPlan: "Could not determine payment plan.",
+    subscriptionsTitle: "📦 Your active subscriptions",
+    subscriptionsNone: "You currently have no active subscriptions.",
+    subscriptionsUntil: "Active until",
+    subscriptionsSingleLeft: "Single readings left",
+    subscriptionsPlansCount: "Purchased packs",
   },
   kk: {
     menuTitle: "Basil’s Arcana-ға қош келдің ✨",
@@ -221,6 +241,7 @@ const STRINGS: Record<
       buy: "💳 Талдау/жазылым сатып алу",
       about: "✨ Қалай көмектесе аламыз",
       back: "⬅️ Мәзірге",
+      subscriptions: "📦 Белсенді жазылымдарым",
     },
     languagePrompt:
       "На каком языке тебе удобнее общаться?\nТілді таңдаңыз.\nWhich language do you prefer?",
@@ -257,9 +278,9 @@ const STRINGS: Record<
         fiatPriceDisplay: "36 400 ₸",
       },
     },
-    planAlreadySelected: "Тариф таңдалды.",
     invoiceTitle: "Basil’s Arcana • Төлем",
-    invoiceDescription: "Софиядан расклад және натал карта бойынша терең талдау.",
+    invoiceDescription:
+      "Софиядан расклад және натал карта бойынша терең талдау.",
     paymentPrompt: "Төменнен таңдаңыз, бот Telegram Stars шотын жібереді.",
     paymentCancelled: "Төлем өтпеді. Қайталап көріңіз.",
     paymentSuccess: "Төлем қабылданды ✅",
@@ -272,6 +293,11 @@ const STRINGS: Record<
     missingSofiaChatWarn:
       "Төлем өтті, бірақ Софияға автоматты хабарлама жіберілмеді. Кодты Софияға қолмен жіберіңіз: https://t.me/SofiaKnoxx",
     unknownPaymentPlan: "Төлем тарифін анықтау мүмкін болмады.",
+    subscriptionsTitle: "📦 Белсенді жазылымдарыңыз",
+    subscriptionsNone: "Қазір белсенді жазылымдарыңыз жоқ.",
+    subscriptionsUntil: "Белсенді мерзімі",
+    subscriptionsSingleLeft: "Бір реттік талдау қалды",
+    subscriptionsPlansCount: "Сатып алынған пакеттер",
   },
 };
 
@@ -279,24 +305,39 @@ const userState = new Map<number, UserState>();
 const issuedCodes = new Set<string>();
 const processedPayments = new Set<string>();
 
-function buildMainMenuKeyboard(locale: SupportedLocale): InlineKeyboard {
-  const labels = STRINGS[locale].menuButtons;
-  const keyboard = new InlineKeyboard();
-  if (config.webAppUrl) {
-    keyboard.webApp(labels.launchApp, config.webAppUrl).row();
-  }
-  keyboard.text(labels.buy, "menu:buy").row().text(labels.about, "menu:about");
-  return keyboard;
+function blankPurchasedByPlan(): Record<PlanId, number> {
+  return { single: 0, week: 0, month: 0, year: 0 };
 }
 
-function buildLanguageKeyboard(): InlineKeyboard {
-  const labels = STRINGS.ru.languageButtons;
-  return new InlineKeyboard()
-    .text(labels.ru, "lang:ru")
-    .row()
-    .text(labels.kk, "lang:kk")
-    .row()
-    .text(labels.en, "lang:en");
+function getUserState(userId: number): UserState {
+  const existing = userState.get(userId);
+  if (existing) {
+    return existing;
+  }
+  const initial: UserState = {
+    locale: null,
+    pendingStartPayload: null,
+    selectedPlan: null,
+    subscriptionEndsAt: null,
+    unspentSingleReadings: 0,
+    purchasedByPlan: blankPurchasedByPlan(),
+    username: null,
+    firstName: null,
+    lastName: null,
+  };
+  userState.set(userId, initial);
+  return initial;
+}
+
+function rememberUserProfile(ctx: Context): void {
+  const userId = ctx.from?.id;
+  if (!userId) {
+    return;
+  }
+  const state = getUserState(userId);
+  state.username = ctx.from?.username ?? state.username;
+  state.firstName = ctx.from?.first_name ?? state.firstName;
+  state.lastName = ctx.from?.last_name ?? state.lastName;
 }
 
 function detectLocaleFromTelegram(ctx: Context): SupportedLocale {
@@ -321,20 +362,17 @@ function getLocale(ctx: Context): SupportedLocale {
   return detectLocaleFromTelegram(ctx);
 }
 
-function getUserState(userId: number): UserState {
-  const existing = userState.get(userId);
-  if (existing) {
-    return existing;
-  }
-  const initial: UserState = {
-    activeSubscription: false,
-    selectedPlan: null,
-    locale: null,
-    pendingStartPayload: null,
-    subscriptionEndsAt: null,
+function formatDateForLocale(date: Date, locale: SupportedLocale): string {
+  const localeMap: Record<SupportedLocale, string> = {
+    ru: "ru-RU",
+    kk: "kk-KZ",
+    en: "en-US",
   };
-  userState.set(userId, initial);
-  return initial;
+  return new Intl.DateTimeFormat(localeMap[locale], {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(date);
 }
 
 function parsePlanId(value: string): PlanId | null {
@@ -352,27 +390,18 @@ function parsePlanFromPayload(payload: string): PlanId | null {
   if (!payload.startsWith("purchase:")) {
     return null;
   }
-  const rawPlan = payload.replace("purchase:", "").trim();
-  return parsePlanId(rawPlan);
+  return parsePlanId(payload.replace("purchase:", "").trim());
 }
 
-function formatDateForLocale(date: Date, locale: SupportedLocale): string {
-  const localeMap: Record<SupportedLocale, string> = {
-    ru: "ru-RU",
-    kk: "kk-KZ",
-    en: "en-US",
-  };
-  return new Intl.DateTimeFormat(localeMap[locale], {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  }).format(date);
+function extendSubscription(currentEndsAt: number | null, addDays: number): number {
+  const now = Date.now();
+  const base = currentEndsAt && currentEndsAt > now ? currentEndsAt : now;
+  return base + addDays * DAY_MS;
 }
 
-function addDays(now: Date, days: number): Date {
-  const next = new Date(now);
-  next.setDate(next.getDate() + days);
-  return next;
+function isSubscriptionActive(state: UserState): boolean {
+  const now = Date.now();
+  return (state.subscriptionEndsAt ?? 0) > now || state.unspentSingleReadings > 0;
 }
 
 function generatePurchaseCode(): string {
@@ -386,6 +415,29 @@ function generatePurchaseCode(): string {
   const fallback = `${Date.now()}`.slice(-PURCHASE_CODE_LENGTH);
   issuedCodes.add(fallback);
   return fallback;
+}
+
+function buildLanguageKeyboard(): InlineKeyboard {
+  const labels = STRINGS.ru.languageButtons;
+  return new InlineKeyboard()
+    .text(labels.ru, "lang:ru")
+    .row()
+    .text(labels.kk, "lang:kk")
+    .row()
+    .text(labels.en, "lang:en");
+}
+
+function buildMainMenuKeyboard(locale: SupportedLocale, hasActiveSubs: boolean): InlineKeyboard {
+  const labels = STRINGS[locale].menuButtons;
+  const keyboard = new InlineKeyboard();
+  if (config.webAppUrl) {
+    keyboard.webApp(labels.launchApp, config.webAppUrl).row();
+  }
+  keyboard.text(labels.buy, "menu:buy").row().text(labels.about, "menu:about");
+  if (hasActiveSubs) {
+    keyboard.row().text(labels.subscriptions, "menu:subscriptions");
+  }
+  return keyboard;
 }
 
 function buildSubscriptionKeyboard(locale: SupportedLocale): InlineKeyboard {
@@ -403,9 +455,41 @@ function buildSubscriptionKeyboard(locale: SupportedLocale): InlineKeyboard {
     .text(backLabel, "menu:home");
 }
 
+function buildBackKeyboard(locale: SupportedLocale): InlineKeyboard {
+  return new InlineKeyboard().text(STRINGS[locale].menuButtons.back, "menu:home");
+}
+
 async function sendLanguagePicker(ctx: Context): Promise<void> {
   await ctx.reply(STRINGS.ru.languagePrompt, {
     reply_markup: buildLanguageKeyboard(),
+  });
+}
+
+async function sendMainMenu(ctx: Context): Promise<void> {
+  rememberUserProfile(ctx);
+  const locale = getLocale(ctx);
+  const strings = STRINGS[locale];
+  const userId = ctx.from?.id;
+  const state = userId ? getUserState(userId) : null;
+  const hasActiveSubs = state ? isSubscriptionActive(state) : false;
+
+  const lines = [strings.menuTitle, strings.menuDescription];
+  if (!config.webAppUrl) {
+    console.error(
+      "TELEGRAM_WEBAPP_URL is missing; Launch app button disabled.",
+    );
+    lines.push("", strings.launchUnavailable);
+  }
+  await ctx.reply(lines.join("\n"), {
+    reply_markup: buildMainMenuKeyboard(locale, hasActiveSubs),
+  });
+}
+
+async function sendAbout(ctx: Context): Promise<void> {
+  const locale = getLocale(ctx);
+  const strings = STRINGS[locale];
+  await ctx.reply(`${strings.aboutText}\n\n${strings.sofiaContactCard}`, {
+    reply_markup: buildBackKeyboard(locale),
   });
 }
 
@@ -416,30 +500,33 @@ async function sendProfessionalReadingOffer(ctx: Context): Promise<void> {
   await ctx.reply(text, { reply_markup: buildSubscriptionKeyboard(locale) });
 }
 
-async function sendMainMenu(ctx: Context): Promise<void> {
-  const locale = getLocale(ctx);
-  const strings = STRINGS[locale];
-  const lines = [strings.menuTitle, strings.menuDescription];
-  if (!config.webAppUrl) {
-    console.error(
-      "TELEGRAM_WEBAPP_URL is missing; Launch app button disabled.",
-    );
-    lines.push("", strings.launchUnavailable);
+async function sendMySubscriptions(ctx: Context): Promise<void> {
+  const userId = ctx.from?.id;
+  if (!userId) {
+    return;
   }
-  await ctx.reply(lines.join("\n"), {
-    reply_markup: buildMainMenuKeyboard(locale),
-  });
-}
-
-async function sendAbout(ctx: Context): Promise<void> {
   const locale = getLocale(ctx);
   const strings = STRINGS[locale];
-  await ctx.reply(`${strings.aboutText}\n\n${strings.sofiaContactCard}`, {
-    reply_markup: new InlineKeyboard().text(
-      strings.menuButtons.back,
-      "menu:home",
-    ),
-  });
+  const state = getUserState(userId);
+
+  if (!isSubscriptionActive(state)) {
+    await ctx.reply(strings.subscriptionsNone, { reply_markup: buildBackKeyboard(locale) });
+    return;
+  }
+
+  const endsAt = state.subscriptionEndsAt
+    ? formatDateForLocale(new Date(state.subscriptionEndsAt), locale)
+    : "-";
+
+  const lines = [
+    strings.subscriptionsTitle,
+    "",
+    `${strings.subscriptionsUntil}: ${endsAt}`,
+    `${strings.subscriptionsSingleLeft}: ${state.unspentSingleReadings}`,
+    `${strings.subscriptionsPlansCount}: 1d x${state.purchasedByPlan.single}, 7d x${state.purchasedByPlan.week}, 30d x${state.purchasedByPlan.month}, 365d x${state.purchasedByPlan.year}`,
+  ];
+
+  await ctx.reply(lines.join("\n"), { reply_markup: buildBackKeyboard(locale) });
 }
 
 function parseWebAppAction(data: string): string | null {
@@ -503,15 +590,17 @@ async function notifySofia(
 
   const locale = getLocale(ctx);
   const strings = STRINGS[locale];
-  const user = ctx.from;
-  const username = user?.username ? `@${user.username}` : "-";
-  const firstName = user?.first_name?.trim() || "-";
-  const lastName = user?.last_name?.trim() || "-";
-  const userId = user?.id ?? "-";
+  const state = ctx.from?.id ? getUserState(ctx.from.id) : null;
 
-  const plan = PLANS[planId];
+  const username = state?.username ? `@${state.username}` : "-";
+  const firstName = state?.firstName ?? "-";
+  const lastName = state?.lastName ?? "-";
+  const userId = ctx.from?.id ?? "-";
+
   const label = strings.planLabels[planId].notifyLabel;
   const fiatPrice = strings.planLabels[planId].fiatPriceDisplay;
+  const stars = PLANS[planId].stars;
+
   const expires = formatDateForLocale(expiresAt, "ru");
 
   const text = [
@@ -524,7 +613,7 @@ async function notifySofia(
     `Язык: ${locale}`,
     "",
     `Покупка: ${label}`,
-    `Стоимость: ${fiatPrice} / ${plan.stars} ⭐`,
+    `Стоимость: ${fiatPrice} / ${stars} ⭐`,
     `Активно до: ${expires}`,
     `Код: ${purchaseCode}`,
   ].join("\n");
@@ -533,16 +622,33 @@ async function notifySofia(
   return true;
 }
 
-function applyPurchasedPlan(userId: number, planId: PlanId, expiresAt: Date): void {
+function applyPurchasedPlan(userId: number, planId: PlanId): Date {
   const state = getUserState(userId);
   state.selectedPlan = planId;
-  if (!PLANS[planId].isSingleUse) {
-    state.activeSubscription = true;
-    state.subscriptionEndsAt = expiresAt.getTime();
+  state.purchasedByPlan[planId] += 1;
+  if (PLANS[planId].isSingleUse) {
+    state.unspentSingleReadings += 1;
   }
+  state.subscriptionEndsAt = extendSubscription(
+    state.subscriptionEndsAt,
+    PLANS[planId].durationDays,
+  );
+  return new Date(state.subscriptionEndsAt);
+}
+
+function consumeOneSingleReading(state: UserState): boolean {
+  if (state.unspentSingleReadings <= 0) {
+    return false;
+  }
+  state.unspentSingleReadings -= 1;
+  if (state.subscriptionEndsAt) {
+    state.subscriptionEndsAt = Math.max(0, state.subscriptionEndsAt - DAY_MS);
+  }
+  return true;
 }
 
 async function handleSuccessfulPayment(ctx: Context): Promise<void> {
+  rememberUserProfile(ctx);
   const userId = ctx.from?.id;
   const locale = getLocale(ctx);
   const strings = STRINGS[locale];
@@ -573,9 +679,7 @@ async function handleSuccessfulPayment(ctx: Context): Promise<void> {
 
   processedPayments.add(payment.telegram_payment_charge_id);
 
-  const now = new Date();
-  const expiresAt = addDays(now, plan.durationDays);
-  applyPurchasedPlan(userId, planId, expiresAt);
+  const expiresAt = applyPurchasedPlan(userId, planId);
 
   const code = generatePurchaseCode();
   const expiresText = formatDateForLocale(expiresAt, locale);
@@ -623,6 +727,39 @@ function parseStartPayload(ctx: Context): string | null {
   return parts[1] ?? null;
 }
 
+function isSofiaOperator(ctx: Context): boolean {
+  const target = config.sofiaChatId;
+  if (!target) {
+    return false;
+  }
+  return `${ctx.from?.id ?? ""}` === target || `${ctx.chat?.id ?? ""}` === target;
+}
+
+function parseCommandArg(ctx: Context): string | null {
+  const match = (ctx.match as string | undefined)?.trim();
+  if (!match) {
+    return null;
+  }
+  const parts = match.split(/\s+/);
+  return parts[0] ?? null;
+}
+
+function formatStateForSofia(userId: number, state: UserState): string {
+  const ends = state.subscriptionEndsAt
+    ? formatDateForLocale(new Date(state.subscriptionEndsAt), "ru")
+    : "-";
+  const username = state.username ? `@${state.username}` : "-";
+  const fullName = `${state.firstName ?? ""} ${state.lastName ?? ""}`.trim() || "-";
+  return [
+    `ID: ${userId}`,
+    `Username: ${username}`,
+    `Имя: ${fullName}`,
+    `Активно до: ${ends}`,
+    `Разовые разборы: ${state.unspentSingleReadings}`,
+    `Пакеты: 1d x${state.purchasedByPlan.single}, 7d x${state.purchasedByPlan.week}, 30d x${state.purchasedByPlan.month}, 365d x${state.purchasedByPlan.year}`,
+  ].join("\n");
+}
+
 async function sendLauncherMessage(ctx: Context): Promise<void> {
   await sendMainMenu(ctx);
 }
@@ -631,6 +768,7 @@ async function main(): Promise<void> {
   const bot = new Bot(config.telegramToken);
 
   bot.command("start", async (ctx) => {
+    rememberUserProfile(ctx);
     const userId = ctx.from?.id;
     if (!userId) {
       await sendLauncherMessage(ctx);
@@ -651,6 +789,7 @@ async function main(): Promise<void> {
   });
 
   bot.command("help", async (ctx) => {
+    rememberUserProfile(ctx);
     const userId = ctx.from?.id;
     if (userId) {
       const state = getUserState(userId);
@@ -671,7 +810,81 @@ async function main(): Promise<void> {
     );
   });
 
+  bot.command("subs", async (ctx) => {
+    if (!isSofiaOperator(ctx)) {
+      return;
+    }
+
+    const active = Array.from(userState.entries()).filter(([, state]) =>
+      isSubscriptionActive(state),
+    );
+
+    if (active.length === 0) {
+      await ctx.reply("Активных подписок сейчас нет.");
+      return;
+    }
+
+    const chunks: string[] = [];
+    for (const [userId, state] of active) {
+      chunks.push(formatStateForSofia(userId, state));
+    }
+
+    await ctx.reply(
+      `Активные подписки (${active.length}):\n\n${chunks.join("\n\n----------------\n\n")}\n\nКоманда закрытия: /sub_done <user_id>`,
+    );
+  });
+
+  bot.command("sub_done", async (ctx) => {
+    if (!isSofiaOperator(ctx)) {
+      return;
+    }
+
+    const arg = parseCommandArg(ctx);
+    const userId = arg ? Number(arg) : NaN;
+    if (!Number.isFinite(userId)) {
+      await ctx.reply("Использование: /sub_done <user_id>");
+      return;
+    }
+
+    const state = userState.get(userId);
+    if (!state) {
+      await ctx.reply("Пользователь не найден в активной базе бота.");
+      return;
+    }
+
+    const hadSingle = consumeOneSingleReading(state);
+    if (hadSingle) {
+      await ctx.reply(`Завершен один разовый разбор для user_id=${userId}.`);
+      try {
+        await ctx.api.sendMessage(
+          userId,
+          "✅ София отметила, что консультация оказана. Один разовый разбор списан.",
+        );
+      } catch (error) {
+        console.error("Cannot notify user about consumed single reading", error);
+      }
+      return;
+    }
+
+    if ((state.subscriptionEndsAt ?? 0) > Date.now()) {
+      state.subscriptionEndsAt = Date.now();
+      await ctx.reply(`Подписка пользователя user_id=${userId} завершена.`);
+      try {
+        await ctx.api.sendMessage(
+          userId,
+          "✅ София отметила консультацию как завершенную. Текущая подписка закрыта.",
+        );
+      } catch (error) {
+        console.error("Cannot notify user about subscription close", error);
+      }
+      return;
+    }
+
+    await ctx.reply("У пользователя нет активной подписки для завершения.");
+  });
+
   bot.callbackQuery(/^lang:(ru|en|kk)$/, async (ctx) => {
+    rememberUserProfile(ctx);
     await ctx.answerCallbackQuery();
     const userId = ctx.from?.id;
     if (!userId) {
@@ -690,6 +903,7 @@ async function main(): Promise<void> {
   });
 
   bot.on("message:web_app_data", async (ctx) => {
+    rememberUserProfile(ctx);
     const data = ctx.message.web_app_data?.data ?? "";
     const action = parseWebAppAction(data);
     if (action !== "professional_reading" && action !== "show_plans") {
@@ -699,21 +913,31 @@ async function main(): Promise<void> {
   });
 
   bot.callbackQuery("menu:buy", async (ctx) => {
+    rememberUserProfile(ctx);
     await ctx.answerCallbackQuery();
     await sendPlans(ctx, { ignoreDebounce: true });
   });
 
   bot.callbackQuery("menu:about", async (ctx) => {
+    rememberUserProfile(ctx);
     await ctx.answerCallbackQuery();
     await sendAbout(ctx);
   });
 
+  bot.callbackQuery("menu:subscriptions", async (ctx) => {
+    rememberUserProfile(ctx);
+    await ctx.answerCallbackQuery();
+    await sendMySubscriptions(ctx);
+  });
+
   bot.callbackQuery("menu:home", async (ctx) => {
+    rememberUserProfile(ctx);
     await ctx.answerCallbackQuery();
     await sendMainMenu(ctx);
   });
 
   bot.callbackQuery(/^plan:(single|week|month|year)$/, async (ctx) => {
+    rememberUserProfile(ctx);
     await ctx.answerCallbackQuery();
     const userId = ctx.from?.id;
     if (!userId) {
@@ -731,6 +955,7 @@ async function main(): Promise<void> {
   });
 
   bot.on("pre_checkout_query", async (ctx) => {
+    rememberUserProfile(ctx);
     const query = ctx.preCheckoutQuery;
     if (!query) {
       return;
@@ -760,6 +985,7 @@ async function main(): Promise<void> {
   });
 
   bot.on("message:text", async (ctx) => {
+    rememberUserProfile(ctx);
     const userId = ctx.from?.id;
     if (userId) {
       const state = getUserState(userId);
