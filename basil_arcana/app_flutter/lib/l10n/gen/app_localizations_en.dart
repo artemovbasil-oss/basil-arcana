@@ -592,6 +592,26 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get energyTopUpProcessing => 'Opening payment...';
+
+  @override
+  String get energyTopUpOnlyInTelegram =>
+      'Top up with Telegram Stars is available only inside Telegram.';
+
+  @override
+  String get energyTopUpPaymentCancelled => 'Payment was cancelled.';
+
+  @override
+  String get energyTopUpPaymentPending => 'Payment is pending confirmation.';
+
+  @override
+  String get energyTopUpPaymentFailed => 'Payment failed. Try again.';
+
+  @override
+  String get energyTopUpServiceUnavailable =>
+      'Payment is temporarily unavailable.';
+
+  @override
   String energyInsufficientForAction(int value) {
     return 'Not enough energy for this action ($value%).';
   }

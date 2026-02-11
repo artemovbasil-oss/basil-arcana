@@ -242,6 +242,12 @@
   "energyPackMedium": "Buy +50% energy",
   "energyPackFull": "Buy full energy",
   "energyTopUpSuccess": "Energy restored by {value}%.",
+  "energyTopUpProcessing": "Opening payment...",
+  "energyTopUpOnlyInTelegram": "Top up with Telegram Stars is available only inside Telegram.",
+  "energyTopUpPaymentCancelled": "Payment was cancelled.",
+  "energyTopUpPaymentPending": "Payment is pending confirmation.",
+  "energyTopUpPaymentFailed": "Payment failed. Try again.",
+  "energyTopUpServiceUnavailable": "Payment is temporarily unavailable.",
   "@energyTopUpSuccess": {
     "placeholders": {
       "value": {

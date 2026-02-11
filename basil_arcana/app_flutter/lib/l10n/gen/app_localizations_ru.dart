@@ -598,6 +598,25 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
+  String get energyTopUpProcessing => 'Открываем оплату...';
+
+  @override
+  String get energyTopUpOnlyInTelegram =>
+      'Пополнение звездами доступно только внутри Telegram.';
+
+  @override
+  String get energyTopUpPaymentCancelled => 'Оплата отменена.';
+
+  @override
+  String get energyTopUpPaymentPending => 'Платеж ожидает подтверждения.';
+
+  @override
+  String get energyTopUpPaymentFailed => 'Оплата не прошла. Попробуйте снова.';
+
+  @override
+  String get energyTopUpServiceUnavailable => 'Оплата временно недоступна.';
+
+  @override
   String energyInsufficientForAction(int value) {
     return 'Недостаточно энергии для действия ($value%).';
   }

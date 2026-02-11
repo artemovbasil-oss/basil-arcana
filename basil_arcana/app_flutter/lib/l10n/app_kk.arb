@@ -242,6 +242,12 @@
   "energyPackMedium": "+50% энергия сатып алу",
   "energyPackFull": "Толық энергияны сатып алу",
   "energyTopUpSuccess": "Энергия {value}%-ға толықты.",
+  "energyTopUpProcessing": "Төлем ашылып жатыр...",
+  "energyTopUpOnlyInTelegram": "Жұлдызбен толықтыру тек Telegram ішінде қолжетімді.",
+  "energyTopUpPaymentCancelled": "Төлем тоқтатылды.",
+  "energyTopUpPaymentPending": "Төлем расталуын күтіп тұр.",
+  "energyTopUpPaymentFailed": "Төлем сәтсіз аяқталды. Қайталап көріңіз.",
+  "energyTopUpServiceUnavailable": "Төлем уақытша қолжетімсіз.",
   "@energyTopUpSuccess": {
     "placeholders": {
       "value": {

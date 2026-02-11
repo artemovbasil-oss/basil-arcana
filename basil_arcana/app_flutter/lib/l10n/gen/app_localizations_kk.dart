@@ -596,6 +596,26 @@ class AppLocalizationsKk extends AppLocalizations {
   }
 
   @override
+  String get energyTopUpProcessing => 'Төлем ашылып жатыр...';
+
+  @override
+  String get energyTopUpOnlyInTelegram =>
+      'Жұлдызбен толықтыру тек Telegram ішінде қолжетімді.';
+
+  @override
+  String get energyTopUpPaymentCancelled => 'Төлем тоқтатылды.';
+
+  @override
+  String get energyTopUpPaymentPending => 'Төлем расталуын күтіп тұр.';
+
+  @override
+  String get energyTopUpPaymentFailed =>
+      'Төлем сәтсіз аяқталды. Қайталап көріңіз.';
+
+  @override
+  String get energyTopUpServiceUnavailable => 'Төлем уақытша қолжетімсіз.';
+
+  @override
   String energyInsufficientForAction(int value) {
     return 'Бұл әрекетке энергия жеткіліксіз ($value%).';
   }

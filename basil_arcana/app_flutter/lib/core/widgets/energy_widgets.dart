@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
+import '../../core/telegram/telegram_bridge.dart';
+import '../../data/repositories/energy_topup_repository.dart';
 import '../../state/energy_controller.dart';
 import '../../state/providers.dart';
 import 'app_buttons.dart';
@@ -37,75 +39,177 @@ Future<void> showEnergyTopUpSheet(BuildContext context, WidgetRef ref) async {
       borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
     ),
     builder: (sheetContext) {
-      return SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                l10n.energyTopUpTitle,
-                style: Theme.of(sheetContext).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                l10n.energyTopUpDescription,
-                style: Theme.of(sheetContext).textTheme.bodyMedium,
-              ),
-              const SizedBox(height: 16),
-              AppPrimaryButton(
-                label: l10n.energyPackSmall,
-                onPressed: () async {
-                  await ref.read(energyProvider.notifier).addEnergy(25);
-                  if (!sheetContext.mounted) {
-                    return;
-                  }
-                  Navigator.of(sheetContext).pop();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(l10n.energyTopUpSuccess(25)),
+      EnergyPackId? processingPack;
+      return StatefulBuilder(
+        builder: (statefulContext, setState) {
+          return SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.energyTopUpTitle,
+                    style: Theme.of(sheetContext).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    l10n.energyTopUpDescription,
+                    style: Theme.of(sheetContext).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 16),
+                  if (processingPack != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Text(
+                        l10n.energyTopUpProcessing,
+                        style: Theme.of(sheetContext).textTheme.bodySmall,
+                      ),
                     ),
-                  );
-                },
+                  AppPrimaryButton(
+                    label: l10n.energyPackSmall,
+                    onPressed: processingPack != null
+                        ? null
+                        : () async {
+                            setState(() => processingPack = EnergyPackId.small);
+                            await _purchaseEnergyPack(
+                              context: context,
+                              sheetContext: statefulContext,
+                              ref: ref,
+                              l10n: l10n,
+                              packId: EnergyPackId.small,
+                            );
+                            if (statefulContext.mounted) {
+                              setState(() => processingPack = null);
+                            }
+                          },
+                  ),
+                  const SizedBox(height: 10),
+                  AppPrimaryButton(
+                    label: l10n.energyPackMedium,
+                    onPressed: processingPack != null
+                        ? null
+                        : () async {
+                            setState(
+                                () => processingPack = EnergyPackId.medium);
+                            await _purchaseEnergyPack(
+                              context: context,
+                              sheetContext: statefulContext,
+                              ref: ref,
+                              l10n: l10n,
+                              packId: EnergyPackId.medium,
+                            );
+                            if (statefulContext.mounted) {
+                              setState(() => processingPack = null);
+                            }
+                          },
+                  ),
+                  const SizedBox(height: 10),
+                  AppGhostButton(
+                    label: l10n.energyPackFull,
+                    icon: Icons.flash_on,
+                    onPressed: processingPack != null
+                        ? null
+                        : () async {
+                            setState(() => processingPack = EnergyPackId.full);
+                            await _purchaseEnergyPack(
+                              context: context,
+                              sheetContext: statefulContext,
+                              ref: ref,
+                              l10n: l10n,
+                              packId: EnergyPackId.full,
+                            );
+                            if (statefulContext.mounted) {
+                              setState(() => processingPack = null);
+                            }
+                          },
+                  ),
+                ],
               ),
-              const SizedBox(height: 10),
-              AppPrimaryButton(
-                label: l10n.energyPackMedium,
-                onPressed: () async {
-                  await ref.read(energyProvider.notifier).addEnergy(50);
-                  if (!sheetContext.mounted) {
-                    return;
-                  }
-                  Navigator.of(sheetContext).pop();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(l10n.energyTopUpSuccess(50)),
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 10),
-              AppGhostButton(
-                label: l10n.energyPackFull,
-                icon: Icons.flash_on,
-                onPressed: () async {
-                  await ref.read(energyProvider.notifier).fillToMax();
-                  if (!sheetContext.mounted) {
-                    return;
-                  }
-                  Navigator.of(sheetContext).pop();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(l10n.energyTopUpSuccess(100))),
-                  );
-                },
-              ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       );
     },
   );
+}
+
+Future<void> _purchaseEnergyPack({
+  required BuildContext context,
+  required BuildContext sheetContext,
+  required WidgetRef ref,
+  required AppLocalizations l10n,
+  required EnergyPackId packId,
+}) async {
+  if (!TelegramBridge.isAvailable) {
+    if (!context.mounted) {
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.energyTopUpOnlyInTelegram)),
+    );
+    return;
+  }
+
+  try {
+    final topUpRepo = ref.read(energyTopUpRepositoryProvider);
+    final invoice = await topUpRepo.createInvoice(packId);
+    final status = await TelegramBridge.openInvoice(invoice.invoiceLink);
+
+    if (!context.mounted) {
+      return;
+    }
+
+    switch (status) {
+      case 'paid':
+        await ref
+            .read(energyProvider.notifier)
+            .addEnergy(invoice.energyAmount.toDouble());
+        if (sheetContext.mounted) {
+          Navigator.of(sheetContext).pop();
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text(l10n.energyTopUpSuccess(invoice.energyAmount))),
+        );
+        return;
+      case 'cancelled':
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.energyTopUpPaymentCancelled)),
+        );
+        return;
+      case 'pending':
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.energyTopUpPaymentPending)),
+        );
+        return;
+      case 'failed':
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.energyTopUpPaymentFailed)),
+        );
+        return;
+      default:
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.energyTopUpServiceUnavailable)),
+        );
+        return;
+    }
+  } on EnergyTopUpRepositoryException {
+    if (!context.mounted) {
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.energyTopUpServiceUnavailable)),
+    );
+  } catch (_) {
+    if (!context.mounted) {
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.energyTopUpServiceUnavailable)),
+    );
+  }
 }
 
 class EnergyStatusCard extends ConsumerWidget {

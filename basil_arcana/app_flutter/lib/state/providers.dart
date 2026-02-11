@@ -6,6 +6,7 @@ import '../data/repositories/ai_repository.dart';
 import '../data/repositories/card_stats_repository.dart';
 import '../data/repositories/cards_repository.dart';
 import '../data/repositories/data_repository.dart';
+import '../data/repositories/energy_topup_repository.dart';
 import '../data/repositories/spreads_repository.dart';
 import '../data/repositories/readings_repository.dart';
 import '../data/models/deck_model.dart';
@@ -34,6 +35,10 @@ final readingsRepositoryProvider = Provider<ReadingsRepository>((ref) {
 
 final cardStatsRepositoryProvider = Provider<CardStatsRepository>((ref) {
   return CardStatsRepository();
+});
+
+final energyTopUpRepositoryProvider = Provider<EnergyTopUpRepository>((ref) {
+  return EnergyTopUpRepository();
 });
 
 final readingFlowControllerProvider =

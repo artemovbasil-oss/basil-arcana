@@ -242,6 +242,12 @@
   "energyPackMedium": "Купить +50% энергии",
   "energyPackFull": "Купить полный заряд",
   "energyTopUpSuccess": "Энергия пополнена на {value}%.",
+  "energyTopUpProcessing": "Открываем оплату...",
+  "energyTopUpOnlyInTelegram": "Пополнение звездами доступно только внутри Telegram.",
+  "energyTopUpPaymentCancelled": "Оплата отменена.",
+  "energyTopUpPaymentPending": "Платеж ожидает подтверждения.",
+  "energyTopUpPaymentFailed": "Оплата не прошла. Попробуйте снова.",
+  "energyTopUpServiceUnavailable": "Оплата временно недоступна.",
   "@energyTopUpSuccess": {
     "placeholders": {
       "value": {

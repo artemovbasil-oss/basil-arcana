@@ -214,6 +214,79 @@ const PUBLIC_ROOT = process.env.PUBLIC_ROOT || path.join(__dirname, 'public');
 const PUBLIC_INDEX = path.join(PUBLIC_ROOT, 'index.html');
 const API_BASE_URL_ENV = process.env.API_BASE_URL || process.env.BASE_URL || '';
 const ASSETS_BASE_URL_ENV = process.env.ASSETS_BASE_URL || 'https://cdn.basilarcana.com';
+const STARS_PACK_SMALL_XTR = Number(process.env.STARS_PACK_SMALL_XTR || 25);
+const STARS_PACK_MEDIUM_XTR = Number(process.env.STARS_PACK_MEDIUM_XTR || 45);
+const STARS_PACK_FULL_XTR = Number(process.env.STARS_PACK_FULL_XTR || 75);
+
+const ENERGY_STARS_PACKS = {
+  small: { energyAmount: 25, starsAmount: STARS_PACK_SMALL_XTR },
+  medium: { energyAmount: 50, starsAmount: STARS_PACK_MEDIUM_XTR },
+  full: { energyAmount: 100, starsAmount: STARS_PACK_FULL_XTR }
+};
+
+function parseUserIdFromInitData(initData) {
+  if (!initData || typeof initData !== 'string') {
+    return null;
+  }
+  try {
+    const params = new URLSearchParams(initData);
+    const userRaw = params.get('user');
+    if (!userRaw) {
+      return null;
+    }
+    const user = JSON.parse(userRaw);
+    const userId = Number(user?.id);
+    if (!Number.isFinite(userId)) {
+      return null;
+    }
+    return userId;
+  } catch (_) {
+    return null;
+  }
+}
+
+async function createTelegramInvoiceLink({
+  title,
+  description,
+  payload,
+  starsAmount
+}) {
+  const response = await fetch(
+    `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/createInvoiceLink`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        title,
+        description,
+        payload,
+        currency: 'XTR',
+        prices: [
+          {
+            label: title,
+            amount: Math.max(1, Math.round(starsAmount))
+          }
+        ]
+      })
+    }
+  );
+  const responseText = await response.text();
+  let parsed = null;
+  try {
+    parsed = JSON.parse(responseText);
+  } catch (_) {
+    parsed = null;
+  }
+  return {
+    ok: response.ok && Boolean(parsed?.ok) && typeof parsed?.result === 'string',
+    status: response.status,
+    invoiceLink: typeof parsed?.result === 'string' ? parsed.result : '',
+    errorDescription:
+      typeof parsed?.description === 'string' ? parsed.description : responseText.slice(0, 300)
+  };
+}
 
 function buildConfigPayload(req) {
   const apiBaseUrl =
@@ -290,6 +363,80 @@ app.get('/api/reading/availability', (req, res) => {
     available,
     requestId: req.requestId
   });
+});
+
+app.post('/api/payments/stars/invoice', telegramAuthMiddleware, async (req, res) => {
+  if (!TELEGRAM_BOT_TOKEN) {
+    return res.status(503).json({
+      error: 'server_misconfig',
+      reason: 'missing_telegram_bot_token',
+      requestId: req.requestId
+    });
+  }
+
+  const packId = typeof req.body?.packId === 'string' ? req.body.packId.trim() : '';
+  const pack = ENERGY_STARS_PACKS[packId];
+  if (!pack) {
+    return res.status(400).json({
+      error: 'invalid_pack',
+      requestId: req.requestId
+    });
+  }
+  if (!Number.isFinite(pack.starsAmount) || pack.starsAmount <= 0) {
+    return res.status(503).json({
+      error: 'server_misconfig',
+      reason: 'invalid_stars_pack_config',
+      requestId: req.requestId
+    });
+  }
+
+  const userId =
+    Number.isFinite(Number(req.telegram?.userId)) && Number(req.telegram?.userId) > 0
+      ? Number(req.telegram.userId)
+      : parseUserIdFromInitData(readTelegramInitData(req).initData);
+  if (!userId) {
+    return res.status(401).json({
+      error: 'unauthorized',
+      reason: 'telegram_user_missing',
+      requestId: req.requestId
+    });
+  }
+
+  const payload = `energy:${packId}:user:${userId}:ts:${Date.now()}`;
+  const title = `Energy +${pack.energyAmount}%`;
+  const description = `Top up oracle energy by ${pack.energyAmount}%`;
+
+  try {
+    const result = await createTelegramInvoiceLink({
+      title,
+      description,
+      payload,
+      starsAmount: pack.starsAmount
+    });
+    if (!result.ok) {
+      return res.status(502).json({
+        error: 'telegram_invoice_create_failed',
+        status: result.status,
+        details: result.errorDescription,
+        requestId: req.requestId
+      });
+    }
+    return res.json({
+      ok: true,
+      packId,
+      energyAmount: pack.energyAmount,
+      starsAmount: Math.round(pack.starsAmount),
+      invoiceLink: result.invoiceLink,
+      payload,
+      requestId: req.requestId
+    });
+  } catch (error) {
+    return res.status(502).json({
+      error: 'telegram_invoice_create_failed',
+      details: error?.message ? String(error.message).slice(0, 300) : 'unknown',
+      requestId: req.requestId
+    });
+  }
 });
 
 app.get('/api/openai/health', (req, res) => {

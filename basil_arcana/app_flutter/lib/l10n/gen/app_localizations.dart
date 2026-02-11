@@ -1174,6 +1174,42 @@ abstract class AppLocalizations {
   /// **'Energy restored by {value}%.'**
   String energyTopUpSuccess(int value);
 
+  /// No description provided for @energyTopUpProcessing.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening payment...'**
+  String get energyTopUpProcessing;
+
+  /// No description provided for @energyTopUpOnlyInTelegram.
+  ///
+  /// In en, this message translates to:
+  /// **'Top up with Telegram Stars is available only inside Telegram.'**
+  String get energyTopUpOnlyInTelegram;
+
+  /// No description provided for @energyTopUpPaymentCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment was cancelled.'**
+  String get energyTopUpPaymentCancelled;
+
+  /// No description provided for @energyTopUpPaymentPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment is pending confirmation.'**
+  String get energyTopUpPaymentPending;
+
+  /// No description provided for @energyTopUpPaymentFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment failed. Try again.'**
+  String get energyTopUpPaymentFailed;
+
+  /// No description provided for @energyTopUpServiceUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment is temporarily unavailable.'**
+  String get energyTopUpServiceUnavailable;
+
   /// No description provided for @energyInsufficientForAction.
   ///
   /// In en, this message translates to:

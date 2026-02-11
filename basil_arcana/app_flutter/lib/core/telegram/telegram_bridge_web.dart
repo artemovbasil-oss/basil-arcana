@@ -52,4 +52,26 @@ class TelegramBridge {
       return false;
     }
   }
+
+  static Future<String> openInvoice(String url) async {
+    try {
+      final global = js_util.globalThis;
+      if (!js_util.hasProperty(global, 'tgOpenInvoice')) {
+        return 'unsupported';
+      }
+      final result = js_util.callMethod(global, 'tgOpenInvoice', [url]);
+      if (result is String) {
+        return result;
+      }
+      if (result != null && js_util.hasProperty(result, 'then')) {
+        final awaited = await js_util.promiseToFuture<Object?>(result);
+        if (awaited is String && awaited.trim().isNotEmpty) {
+          return awaited;
+        }
+      }
+      return 'unknown';
+    } catch (_) {
+      return 'failed';
+    }
+  }
 }
