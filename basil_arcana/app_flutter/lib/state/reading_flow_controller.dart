@@ -407,7 +407,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
         languageCode: locale.languageCode,
         mode: ReadingMode.fast,
         client: client,
-        timeout: const Duration(seconds: 12),
+        timeout: const Duration(seconds: 20),
       );
       if (_activeRequestId != requestId) {
         return;

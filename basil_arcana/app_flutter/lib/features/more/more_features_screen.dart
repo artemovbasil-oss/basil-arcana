@@ -7,6 +7,8 @@ import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
 import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/energy_widgets.dart';
+import '../../core/widgets/linkified_text.dart';
+import '../../core/widgets/sofia_promo_card.dart';
 import '../../data/repositories/ai_repository.dart';
 import '../../state/energy_controller.dart';
 import '../../state/providers.dart';
@@ -208,6 +210,11 @@ class _MoreFeaturesScreenState extends ConsumerState<MoreFeaturesScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final colorScheme = Theme.of(context).colorScheme;
+    final resultText = _resultText;
+    final cleanedResult =
+        resultText == null ? null : stripSofiaPromo(resultText);
+    final hasSofiaPromo =
+        resultText == null ? false : containsSofiaPromo(resultText);
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.moreFeaturesTitle),
@@ -303,17 +310,22 @@ class _MoreFeaturesScreenState extends ConsumerState<MoreFeaturesScreen> {
                         ?.copyWith(color: colorScheme.error),
                   ),
                 ],
-                if (_resultText != null) ...[
+                if (resultText != null) ...[
                   const SizedBox(height: 16),
                   Text(
                     l10n.natalChartResultTitle,
                     style: Theme.of(context).textTheme.titleSmall,
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    _resultText!,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
+                  if ((cleanedResult ?? '').trim().isNotEmpty)
+                    LinkifiedText(
+                      cleanedResult!,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  if (hasSofiaPromo) ...[
+                    const SizedBox(height: 12),
+                    const SofiaPromoCard(compact: true),
+                  ],
                 ],
               ],
             ),

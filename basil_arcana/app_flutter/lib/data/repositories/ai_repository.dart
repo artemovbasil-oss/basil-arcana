@@ -1238,7 +1238,7 @@ class AiRepository {
     String? responseBody,
     String? requestId,
   }) {
-    if (!kIsWeb) {
+    if (!kIsWeb || !kEnableDevDiagnostics) {
       return;
     }
     final preview = _trimBody(responseBody, maxLength: 400);

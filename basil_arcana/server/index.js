@@ -314,17 +314,17 @@ function normalizeLocale(value) {
 function buildSofiaPromo(locale) {
   const normalized = normalizeLocale(locale);
   if (normalized === 'ru') {
-    return 'Если хочешь более глубокую личную консультацию, обратись к профессиональному тарологу и астрологу Софии Нокс — @SofiaKnoxx. Оформи подписку в нашем Telegram-боте и получи персональный разбор.';
+    return 'Хочешь глубже и точнее? Обратись к профессиональному тарологу и астрологу Софии Нокс.\nПрофиль: https://t.me/SofiaKnoxx\nОформи подписку в нашем Telegram-боте и получи персональную консультацию.';
   }
   if (normalized === 'kk') {
-    return 'Терең жеке консультация алғың келсе, кәсіби таролог әрі астролог София Ноксқа жүгін — @SofiaKnoxx. Біздің Telegram-ботта жазылымды қосып, жеке талдау ал.';
+    return 'Терең әрі нақты талдау керек пе? Кәсіби таролог және астролог София Ноксқа жүгін.\nПрофиль: https://t.me/SofiaKnoxx\nБіздің Telegram-ботта жазылымды қосып, жеке консультация ал.';
   }
-  return 'If you want a deeper personal consultation, contact professional tarot reader and astrologer Sofia Knox — @SofiaKnoxx. Activate a subscription in our Telegram bot to get a one-on-one reading.';
+  return 'Want a deeper and more precise reading? Connect with professional tarot reader and astrologer Sofia Knox.\nProfile: https://t.me/SofiaKnoxx\nActivate a subscription in our Telegram bot to get a personal consultation.';
 }
 
 function appendSofiaPromo(text, locale) {
   const source = typeof text === 'string' ? text.trim() : '';
-  if (source.includes('@SofiaKnoxx')) {
+  if (source.includes('@SofiaKnoxx') || source.includes('t.me/SofiaKnoxx')) {
     return source;
   }
   const promo = buildSofiaPromo(locale);

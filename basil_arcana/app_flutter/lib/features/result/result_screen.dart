@@ -12,6 +12,8 @@ import '../../core/widgets/card_face_widget.dart';
 import '../../core/widgets/energy_widgets.dart';
 import '../../core/assets/asset_paths.dart';
 import '../../core/widgets/tarot_asset_widgets.dart';
+import '../../core/widgets/linkified_text.dart';
+import '../../core/widgets/sofia_promo_card.dart';
 import '../../data/models/card_model.dart';
 import '../../data/models/deck_model.dart';
 import '../../data/models/app_enums.dart';
@@ -356,7 +358,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                                 ),
                                 const SizedBox(height: 8),
                               ],
-                              Text(section.text),
+                              LinkifiedText(section.text),
                             ],
                           ),
                         ),
@@ -543,6 +545,12 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
     final sectionMap = {
       for (final section in aiResult.sections) section.positionId: section
     };
+    final hasSofiaPromo = <String>[
+      aiResult.tldr,
+      aiResult.why,
+      aiResult.action,
+      ...aiResult.sections.map((section) => section.text),
+    ].any(containsSofiaPromo);
 
     final items = <_ChatItem>[];
     items.add(
@@ -559,9 +567,11 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                   ?.copyWith(color: Theme.of(context).colorScheme.primary),
             ),
             const SizedBox(height: 8),
-            Text(aiResult.tldr.trim().isEmpty
-                ? l10n.resultStatusUnexpectedResponse
-                : aiResult.tldr),
+            LinkifiedText(
+              stripSofiaPromo(aiResult.tldr).trim().isEmpty
+                  ? l10n.resultStatusUnexpectedResponse
+                  : stripSofiaPromo(aiResult.tldr),
+            ),
           ],
         ),
       ),
@@ -597,16 +607,19 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
-              Text((section?.text ?? '').trim().isEmpty
-                  ? l10n.resultStatusUnexpectedResponse
-                  : section?.text ?? ''),
+              LinkifiedText(
+                stripSofiaPromo(section?.text ?? '').trim().isEmpty
+                    ? l10n.resultStatusUnexpectedResponse
+                    : stripSofiaPromo(section?.text ?? ''),
+              ),
             ],
           ),
         ),
       );
     }
 
-    if (aiResult.why.trim().isNotEmpty) {
+    final whyText = stripSofiaPromo(aiResult.why);
+    if (whyText.trim().isNotEmpty) {
       items.add(
         _ChatItem.basil(
           id: _nextId(),
@@ -618,14 +631,15 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
-              Text(aiResult.why),
+              LinkifiedText(whyText),
             ],
           ),
         ),
       );
     }
 
-    if (aiResult.action.trim().isNotEmpty) {
+    final actionText = stripSofiaPromo(aiResult.action);
+    if (actionText.trim().isNotEmpty) {
       items.add(
         _ChatItem.basil(
           id: _nextId(),
@@ -637,9 +651,18 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
-              Text(aiResult.action),
+              LinkifiedText(actionText),
             ],
           ),
+        ),
+      );
+    }
+
+    if (hasSofiaPromo) {
+      items.add(
+        _ChatItem.basil(
+          id: _nextId(),
+          child: const SofiaPromoCard(),
         ),
       );
     }
@@ -648,7 +671,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
       items.add(
         _ChatItem.basil(
           id: _nextId(),
-          child: Text(_warmTip!),
+          child: LinkifiedText(_warmTip!),
         ),
       );
     }
