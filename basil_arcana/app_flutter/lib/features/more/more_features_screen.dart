@@ -9,6 +9,7 @@ import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/energy_widgets.dart';
 import '../../core/widgets/linkified_text.dart';
 import '../../core/widgets/sofia_promo_card.dart';
+import '../../core/telegram/telegram_bridge.dart';
 import '../../data/repositories/ai_repository.dart';
 import '../../state/energy_controller.dart';
 import '../../state/providers.dart';
@@ -176,6 +177,13 @@ class _MoreFeaturesScreenState extends ConsumerState<MoreFeaturesScreen> {
   Future<void> _requestPlansAndReturnToBot() async {
     final url = Uri.parse('https://t.me/tarot_arkana_bot?start=plans');
     var didOpen = false;
+    if (!didOpen && TelegramBridge.isAvailable) {
+      try {
+        didOpen = TelegramBridge.openTelegramLink(url.toString());
+      } catch (error) {
+        _logDebug('TelegramBridge.openTelegramLink failed', error);
+      }
+    }
     if (!didOpen) {
       try {
         didOpen = await launchUrl(url, mode: LaunchMode.externalApplication);
@@ -184,6 +192,9 @@ class _MoreFeaturesScreenState extends ConsumerState<MoreFeaturesScreen> {
       }
     }
     if (didOpen) {
+      if (TelegramBridge.isAvailable) {
+        TelegramBridge.close();
+      }
       return;
     }
 
