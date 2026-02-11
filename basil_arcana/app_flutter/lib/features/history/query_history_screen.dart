@@ -3,11 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
-import '../../core/navigation/app_route_config.dart';
 import '../../core/widgets/app_top_bar.dart';
 import '../../data/repositories/query_history_repository.dart';
 import '../../state/providers.dart';
-import '../spread/spread_screen.dart';
 
 class QueryHistoryScreen extends ConsumerStatefulWidget {
   const QueryHistoryScreen({super.key});
@@ -44,7 +42,6 @@ class _QueryHistoryScreenState extends ConsumerState<QueryHistoryScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: buildTopBar(
         context,
@@ -96,67 +93,37 @@ class _QueryHistoryScreenState extends ConsumerState<QueryHistoryScreen> {
             return ListView.separated(
               padding: const EdgeInsets.all(20),
               itemCount: items.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 10),
+              separatorBuilder: (_, __) => const Divider(height: 1),
               itemBuilder: (context, index) {
                 final item = items[index];
                 return InkWell(
-                  borderRadius: BorderRadius.circular(16),
                   onTap: () {
                     ref
                         .read(readingFlowControllerProvider.notifier)
                         .setQuestion(item.question);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        settings: appRouteSettings(showBackButton: false),
-                        builder: (_) => const SpreadScreen(),
-                      ),
-                    );
+                    Navigator.pop(context);
                   },
-                  child: Ink(
+                  child: Padding(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 12),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      color: colorScheme.surfaceVariant.withOpacity(0.24),
-                      border: Border.all(color: colorScheme.outlineVariant),
+                      horizontal: 2,
+                      vertical: 12,
                     ),
                     child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(
-                          Icons.history_toggle_off,
-                          color: colorScheme.primary,
-                        ),
-                        const SizedBox(width: 10),
                         Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                item.question,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context).textTheme.titleSmall,
-                              ),
-                              const SizedBox(height: 6),
-                              Text(
-                                _formatDate(context, item.createdAt),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
-                                    ?.copyWith(
-                                      color: colorScheme.onSurface
-                                          .withOpacity(0.7),
-                                    ),
-                              ),
-                            ],
+                          child: Text(
+                            item.question,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.bodyLarge,
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        Icon(
-                          Icons.chevron_right,
-                          color: colorScheme.onSurface.withOpacity(0.45),
+                        const SizedBox(width: 12),
+                        Text(
+                          _formatDate(context, item.createdAt),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.bodySmall,
                         ),
                       ],
                     ),

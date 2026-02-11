@@ -417,18 +417,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    if (_hasQueryHistory) ...[
-                      _RecentQueriesButton(
-                        label: l10n.homeRecentQueriesButton,
-                        onTap: () {
-                          Navigator.pushNamed(
-                            context,
-                            QueryHistoryScreen.routeName,
-                          ).then((_) => _loadQueryHistoryAvailability());
-                        },
-                      ),
-                      const SizedBox(height: 12),
-                    ],
                     Text(
                       l10n.homeTryPrompt,
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
@@ -438,17 +426,38 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     const SizedBox(height: 12),
                     SizedBox(
                       height: 40,
-                      child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: quickTopics.length,
-                        separatorBuilder: (_, __) => const SizedBox(width: 10),
-                        itemBuilder: (context, index) {
-                          final topic = quickTopics[index];
-                          return _ExampleChip(
-                            text: topic,
-                            onTap: () => _applyExample(topic),
-                          );
-                        },
+                      child: Stack(
+                        children: [
+                          ListView.separated(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: quickTopics.length,
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(width: 10),
+                            itemBuilder: (context, index) {
+                              final topic = quickTopics[index];
+                              return _ExampleChip(
+                                text: topic,
+                                onTap: () => _applyExample(topic),
+                              );
+                            },
+                          ),
+                          if (_hasQueryHistory)
+                            Positioned(
+                              left: 0,
+                              top: 0,
+                              bottom: 0,
+                              child: _RecentQueriesChip(
+                                label: l10n.homeRecentQueriesButton,
+                                onTap: () {
+                                  Navigator.pushNamed(
+                                    context,
+                                    QueryHistoryScreen.routeName,
+                                  ).then(
+                                      (_) => _loadQueryHistoryAvailability());
+                                },
+                              ),
+                            ),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 28),
@@ -784,10 +793,12 @@ class _ExampleChip extends StatelessWidget {
   const _ExampleChip({
     required this.text,
     required this.onTap,
+    this.leading,
   });
 
   final String text;
   final VoidCallback onTap;
+  final Widget? leading;
 
   @override
   Widget build(BuildContext context) {
@@ -801,17 +812,26 @@ class _ExampleChip extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: colorScheme.outlineVariant),
         ),
-        child: Text(
-          text,
-          style: Theme.of(context).textTheme.bodySmall,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (leading != null) ...[
+              leading!,
+              const SizedBox(width: 6),
+            ],
+            Text(
+              text,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-class _RecentQueriesButton extends StatelessWidget {
-  const _RecentQueriesButton({
+class _RecentQueriesChip extends StatelessWidget {
+  const _RecentQueriesChip({
     required this.label,
     required this.onTap,
   });
@@ -822,38 +842,13 @@ class _RecentQueriesButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    return InkWell(
-      borderRadius: BorderRadius.circular(16),
+    return _ExampleChip(
+      text: label,
       onTap: onTap,
-      child: Ink(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          color: colorScheme.primary.withOpacity(0.18),
-          border: Border.all(
-            color: colorScheme.primary.withOpacity(0.58),
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.access_time_rounded,
-              size: 18,
-              color: colorScheme.primary,
-            ),
-            const SizedBox(width: 8),
-            Flexible(
-              child: Text(
-                label,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurface,
-                      fontWeight: FontWeight.w600,
-                    ),
-              ),
-            ),
-          ],
-        ),
+      leading: Icon(
+        Icons.history,
+        size: 16,
+        color: colorScheme.onSurface.withOpacity(0.88),
       ),
     );
   }
