@@ -854,16 +854,8 @@ async function main(): Promise<void> {
     }
     const state = getUserState(userId);
     const payload = parseStartPayload(ctx);
-    if (!state.locale) {
-      state.pendingStartPayload = payload;
-      await sendLanguagePicker(ctx);
-      return;
-    }
-    if (payload === "plans") {
-      await sendPlans(ctx, { ignoreDebounce: true });
-      return;
-    }
-    await sendLauncherMessage(ctx);
+    state.pendingStartPayload = payload;
+    await sendLanguagePicker(ctx);
   });
 
   bot.command("help", async (ctx) => {
