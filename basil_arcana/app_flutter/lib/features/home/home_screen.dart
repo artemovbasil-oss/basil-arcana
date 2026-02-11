@@ -124,6 +124,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       builder: (context) {
         final colorScheme = Theme.of(context).colorScheme;
         final showActions = _sofiaConsentState == _SofiaConsentState.undecided;
+        final isConsentFlow = showActions;
         return SafeArea(
           top: false,
           child: Padding(
@@ -162,14 +163,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    copy.modalBody,
+                    isConsentFlow
+                        ? copy.consentModalBody
+                        : copy.profileModalBody,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: colorScheme.onSurface.withOpacity(0.85),
                         ),
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    copy.modalDataScope,
+                    isConsentFlow
+                        ? copy.consentModalScope
+                        : copy.profileModalScope,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: colorScheme.onSurface.withOpacity(0.72),
                         ),
@@ -641,8 +646,10 @@ class _SofiaCopy {
     required this.rejectButton,
     required this.infoCardTitle,
     required this.modalTitle,
-    required this.modalBody,
-    required this.modalDataScope,
+    required this.consentModalBody,
+    required this.consentModalScope,
+    required this.profileModalBody,
+    required this.profileModalScope,
     required this.submitError,
     required this.closeLabel,
   });
@@ -655,8 +662,10 @@ class _SofiaCopy {
   final String rejectButton;
   final String infoCardTitle;
   final String modalTitle;
-  final String modalBody;
-  final String modalDataScope;
+  final String consentModalBody;
+  final String consentModalScope;
+  final String profileModalBody;
+  final String profileModalScope;
   final String submitError;
   final String closeLabel;
 
@@ -666,16 +675,20 @@ class _SofiaCopy {
       return const _SofiaCopy(
         sofiaName: '@SofiaKnoxx',
         consentTitle: 'Согласие на обработку данных',
-        consentBodyPrefix: 'Передавать имя нашему астрологу',
+        consentBodyPrefix: 'Передавать имя и username нашему астрологу',
         consentBodySuffix: 'для уведомлений',
         acceptButton: 'Согласен',
         rejectButton: 'Не согласен',
         infoCardTitle: 'Наш таролог-астролог София',
         modalTitle: 'Наш таролог-астролог София',
-        modalBody:
-            'Если хочешь, можешь разрешить передавать только твое имя Софии для уведомлений. Получатель: @SofiaKnoxx.',
-        modalDataScope:
-            'Передаем только имя. Если откажешься, уходит только анонимная статистика без имени.',
+        consentModalBody:
+            'Если хочешь, можешь разрешить передавать Софии твое имя и username для уведомлений. Получатель: @SofiaKnoxx.',
+        consentModalScope:
+            'Передаем только имя и username. Если откажешься, уходит только анонимная статистика без имени и username.',
+        profileModalBody:
+            'София мягко и точно разбирает даже запутанные истории: отношения, деньги, работу и внутренние качели.',
+        profileModalScope:
+            'Если нужен ясный вектор и честный разбор без воды, она поможет собрать картину по шагам.',
         submitError: 'Не получилось сохранить выбор. Давай еще раз.',
         closeLabel: 'Закрыть',
       );
@@ -690,10 +703,14 @@ class _SofiaCopy {
         rejectButton: 'Келіспеймін',
         infoCardTitle: 'Біздің таролог-астролог София',
         modalTitle: 'Біздің таролог-астролог София',
-        modalBody:
+        consentModalBody:
             'Хабарламалар үшін тек атыңызды София маманына жіберуге рұқсат бере аласыз. Нақты алушы: @SofiaKnoxx.',
-        modalDataScope:
+        consentModalScope:
             'Тек ат беріледі. Бас тартсаңыз, атсыз тек жинақталған статистика жіберіледі.',
+        profileModalBody:
+            'София күрделі жағдайларды да жұмсақ әрі нақты талдап береді.',
+        profileModalScope:
+            'Қатынас, ақша, мансап не ішкі күй болсын, саған айқын бағыт табуға көмектеседі.',
         submitError: 'Таңдауды сақтау мүмкін болмады. Қайтадан көріңіз.',
         closeLabel: 'Жабу',
       );
@@ -707,10 +724,14 @@ class _SofiaCopy {
       rejectButton: 'Decline',
       infoCardTitle: 'Our Tarot Astrologer Sofia',
       modalTitle: 'Our Tarot Astrologer Sofia',
-      modalBody:
-          'You can allow sending only your name to Sofia for notifications. Recipient details: @SofiaKnoxx.',
-      modalDataScope:
-          'Only your name is shared. If you decline, only anonymous aggregate stats are sent.',
+      consentModalBody:
+          'You can allow sending your name and Telegram username to Sofia for notifications. Recipient: @SofiaKnoxx.',
+      consentModalScope:
+          'Only your name and username are shared. If you decline, only anonymous aggregate stats are sent.',
+      profileModalBody:
+          'Sofia can help you untangle even the most complex situation with calm and precision.',
+      profileModalScope:
+          'Relationships, money, career, or inner chaos: she helps you see the full picture and your next step.',
       submitError: 'Could not save your choice. Please try again.',
       closeLabel: 'Close',
     );

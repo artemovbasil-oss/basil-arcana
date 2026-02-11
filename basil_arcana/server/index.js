@@ -303,6 +303,14 @@ function resolveUserName(telegramUser, userId) {
   return `Пользователь #${userId}`;
 }
 
+function resolveUserUsername(telegramUser) {
+  const username = typeof telegramUser?.username === 'string' ? telegramUser.username.trim() : '';
+  if (username) {
+    return `@${username}`;
+  }
+  return '—';
+}
+
 async function sendTelegramBotMessage({ chatId, text }) {
   const response = await fetch(
     `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
@@ -669,11 +677,11 @@ app.post('/api/sofia/consent', telegramAuthMiddleware, async (req, res) => {
 
   const message =
     decision === 'accepted'
-      ? `✅ Пользователь согласился на передачу имени\nИмя: ${resolveUserName(
+      ? `✅ Пользователь согласился на передачу контакта\nИмя: ${resolveUserName(
           req.telegram?.user,
           telegramUserId
-        )}\nВсего пользователей: ${state.totalUsers}`
-      : `ℹ️ Добавился еще 1 пользователь без передачи имени\nВсего пользователей: ${state.totalUsers}`;
+        )}\nUsername: ${resolveUserUsername(req.telegram?.user)}\nВсего пользователей: ${state.totalUsers}`
+      : `ℹ️ Добавился еще 1 пользователь без передачи имени и username\nВсего пользователей: ${state.totalUsers}`;
 
   try {
     const result = await sendTelegramBotMessage({

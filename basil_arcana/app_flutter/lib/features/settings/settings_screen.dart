@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive/hive.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
 import '../../core/theme/app_text_styles.dart';
@@ -14,6 +15,9 @@ import '../../state/providers.dart';
 import '../../state/settings_controller.dart';
 import '../debug/runtime_error_log_screen.dart';
 import '../home/home_screen.dart';
+
+const String _settingsBoxName = 'settings';
+const String _sofiaConsentKey = 'sofiaConsentDecision';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -258,6 +262,30 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 style: AppTextStyles.caption(context),
               ),
             ],
+            const SizedBox(height: 20),
+            Text(
+              _privacySectionTitle(context),
+              style: AppTextStyles.subtitle(context),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              _privacySectionHint(context),
+              style: AppTextStyles.caption(context),
+            ),
+            const SizedBox(height: 10),
+            AppGhostButton(
+              label: _revokeConsentLabel(context),
+              onPressed: () async {
+                final box = Hive.box<String>(_settingsBoxName);
+                await box.delete(_sofiaConsentKey);
+                if (!mounted) {
+                  return;
+                }
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(_revokeConsentDone(context))),
+                );
+              },
+            ),
             if (kDebugMode) ...[
               const SizedBox(height: 12),
               ListTile(
@@ -274,6 +302,50 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ),
       ),
     );
+  }
+
+  String _revokeConsentLabel(BuildContext context) {
+    final code = Localizations.localeOf(context).languageCode;
+    if (code == 'ru') {
+      return 'Отозвать согласие для Софии';
+    }
+    if (code == 'kk') {
+      return 'София үшін келісімді қайтарып алу';
+    }
+    return 'Withdraw Sofia consent';
+  }
+
+  String _revokeConsentDone(BuildContext context) {
+    final code = Localizations.localeOf(context).languageCode;
+    if (code == 'ru') {
+      return 'Согласие отозвано. На главном экране снова появится запрос.';
+    }
+    if (code == 'kk') {
+      return 'Келісім қайтарылды. Басты экранда сұрау қайта көрсетіледі.';
+    }
+    return 'Consent withdrawn. The request will appear again on Home.';
+  }
+
+  String _privacySectionTitle(BuildContext context) {
+    final code = Localizations.localeOf(context).languageCode;
+    if (code == 'ru') {
+      return 'Приватность';
+    }
+    if (code == 'kk') {
+      return 'Құпиялық';
+    }
+    return 'Privacy';
+  }
+
+  String _privacySectionHint(BuildContext context) {
+    final code = Localizations.localeOf(context).languageCode;
+    if (code == 'ru') {
+      return 'Если передумаешь, здесь можно сбросить согласие на передачу имени и username.';
+    }
+    if (code == 'kk') {
+      return 'Егер ойың өзгерсе, осында ат пен username жіберуге берілген келісімді өшіре аласың.';
+    }
+    return 'If you change your mind, reset consent for sharing name and username here.';
   }
 }
 
