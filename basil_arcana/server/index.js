@@ -1048,7 +1048,7 @@ app.post('/api/reading/generate', telegramAuthMiddleware, async (req, res) => {
     await logHistoryFromRequest({
       req,
       queryType: `reading_${String(mode)}`,
-      question: req.body?.question,
+      question: req.body?.userQuestion || req.body?.question,
       locale
     });
     return res.json({ ...enriched, requestId: req.requestId });
@@ -1120,7 +1120,7 @@ app.post('/api/reading/generate_web', telegramAuthMiddleware, async (req, res) =
     await logHistoryFromRequest({
       req,
       queryType: `reading_${String(mode)}`,
-      question: payload?.question,
+      question: payload?.userQuestion || payload?.question,
       locale
     });
     return res.json({ ...enriched, requestId: req.requestId });

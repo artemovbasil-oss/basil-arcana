@@ -23,6 +23,27 @@ class QueryHistoryItem {
 class QueryHistoryRepository {
   static const Duration _timeout = Duration(seconds: 12);
 
+  String _normalizeDisplayQuestion(String raw) {
+    final question = raw.trim();
+    if (question.isEmpty) {
+      return '';
+    }
+    final promptPatterns = <RegExp>[
+      RegExp(r'Фокус запроса пользователя:\s*"([^"]+)"', caseSensitive: false),
+      RegExp(r'Пайдаланушы сұрағының фокусы:\s*"([^"]+)"',
+          caseSensitive: false),
+      RegExp(r'User focus:\s*"([^"]+)"', caseSensitive: false),
+    ];
+    for (final pattern in promptPatterns) {
+      final match = pattern.firstMatch(question);
+      final extracted = match?.group(1)?.trim() ?? '';
+      if (extracted.isNotEmpty) {
+        return extracted;
+      }
+    }
+    return question;
+  }
+
   Future<List<QueryHistoryItem>> fetchRecent({int limit = 30}) async {
     final uri = Uri.parse(ApiConfig.apiBaseUrl).replace(
       path: '/api/history/queries',
@@ -68,10 +89,14 @@ class QueryHistoryRepository {
           continue;
         }
         final locale = item['locale'];
+        final normalizedQuestion = _normalizeDisplayQuestion(question);
+        if (normalizedQuestion.isEmpty) {
+          continue;
+        }
         items.add(
           QueryHistoryItem(
             queryType: normalizedQueryType,
-            question: question.trim(),
+            question: normalizedQuestion,
             createdAt: createdAt,
             locale:
                 locale is String && locale.trim().isNotEmpty ? locale : null,

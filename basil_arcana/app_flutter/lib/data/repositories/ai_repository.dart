@@ -298,6 +298,7 @@ class AiRepository {
         : 'neutral';
     final payload = {
       'question': promptQuestion,
+      'userQuestion': question.trim(),
       'spread': spread.toJson(),
       'cards': cardsPayload,
       'tone': tone,
