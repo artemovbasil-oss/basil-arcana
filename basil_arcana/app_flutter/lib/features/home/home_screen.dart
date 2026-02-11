@@ -144,11 +144,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                   ),
                   const SizedBox(height: 14),
-                  Text(
-                    copy.modalTitle,
-                    style: Theme.of(context).textTheme.titleLarge,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          copy.modalTitle,
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: const Icon(Icons.close),
+                        tooltip: copy.closeLabel,
+                        visualDensity: VisualDensity.compact,
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 4),
                   Text(
                     copy.modalBody,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -597,7 +609,10 @@ class _SofiaInfoCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(Icons.auto_awesome, color: colorScheme.primary, size: 18),
+            Text(
+              '🦹‍♀️',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
@@ -629,6 +644,7 @@ class _SofiaCopy {
     required this.modalBody,
     required this.modalDataScope,
     required this.submitError,
+    required this.closeLabel,
   });
 
   final String sofiaName;
@@ -642,6 +658,7 @@ class _SofiaCopy {
   final String modalBody;
   final String modalDataScope;
   final String submitError;
+  final String closeLabel;
 
   static _SofiaCopy resolve(BuildContext context) {
     final code = Localizations.localeOf(context).languageCode;
@@ -656,10 +673,11 @@ class _SofiaCopy {
         infoCardTitle: 'Наш таролог-астролог София',
         modalTitle: 'Наш таролог-астролог София',
         modalBody:
-            'Вы можете разрешить передачу только вашего имени специалисту Софии для уведомлений. Детали получателя: @SofiaKnoxx.',
+            'Если хочешь, можешь разрешить передавать только твое имя Софии для уведомлений. Получатель: @SofiaKnoxx.',
         modalDataScope:
-            'Передается только имя. При отказе отправляется только агрегированная статистика без имени.',
-        submitError: 'Не удалось сохранить выбор. Попробуйте еще раз.',
+            'Передаем только имя. Если откажешься, уходит только анонимная статистика без имени.',
+        submitError: 'Не получилось сохранить выбор. Давай еще раз.',
+        closeLabel: 'Закрыть',
       );
     }
     if (code == 'kk') {
@@ -677,6 +695,7 @@ class _SofiaCopy {
         modalDataScope:
             'Тек ат беріледі. Бас тартсаңыз, атсыз тек жинақталған статистика жіберіледі.',
         submitError: 'Таңдауды сақтау мүмкін болмады. Қайтадан көріңіз.',
+        closeLabel: 'Жабу',
       );
     }
     return const _SofiaCopy(
@@ -693,6 +712,7 @@ class _SofiaCopy {
       modalDataScope:
           'Only your name is shared. If you decline, only anonymous aggregate stats are sent.',
       submitError: 'Could not save your choice. Please try again.',
+      closeLabel: 'Close',
     );
   }
 }
