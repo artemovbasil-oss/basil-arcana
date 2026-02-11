@@ -324,7 +324,10 @@ class _MoreFeaturesScreenState extends ConsumerState<MoreFeaturesScreen> {
                     ),
                   if (hasSofiaPromo) ...[
                     const SizedBox(height: 12),
-                    const SofiaPromoCard(compact: true),
+                    SofiaPromoCard(
+                      compact: true,
+                      prefilledMessage: (cleanedResult ?? '').trim(),
+                    ),
                   ],
                 ],
               ],

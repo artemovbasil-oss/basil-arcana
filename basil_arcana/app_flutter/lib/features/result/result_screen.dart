@@ -19,6 +19,7 @@ import '../../data/models/deck_model.dart';
 import '../../data/models/app_enums.dart';
 import '../../data/models/drawn_card_model.dart';
 import '../../data/models/spread_model.dart';
+import '../../data/models/ai_result_model.dart';
 import '../../data/repositories/ai_repository.dart';
 import '../../state/energy_controller.dart';
 import '../../state/reading_flow_controller.dart';
@@ -551,6 +552,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
       aiResult.action,
       ...aiResult.sections.map((section) => section.text),
     ].any(containsSofiaPromo);
+    final sofiaPrefill = _buildSofiaPrefill(aiResult, l10n);
 
     final items = <_ChatItem>[];
     items.add(
@@ -662,7 +664,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
       items.add(
         _ChatItem.basil(
           id: _nextId(),
-          child: const SofiaPromoCard(),
+          child: SofiaPromoCard(prefilledMessage: sofiaPrefill),
         ),
       );
     }
@@ -770,6 +772,22 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
   }
 
   String _nextId() => 'chat_${_itemCounter++}';
+
+  String _buildSofiaPrefill(AiResultModel aiResult, AppLocalizations l10n) {
+    final lines = <String>[];
+    final tldr = stripSofiaPromo(aiResult.tldr).trim();
+    if (tldr.isNotEmpty) {
+      lines.add(tldr);
+    }
+    final action = stripSofiaPromo(aiResult.action).trim();
+    if (action.isNotEmpty) {
+      lines.add('${l10n.resultSectionAction}: $action');
+    }
+    if (lines.isEmpty) {
+      return '';
+    }
+    return lines.join('\n\n');
+  }
 
   void _jumpToTop() {
     WidgetsBinding.instance.addPostFrameCallback((_) {

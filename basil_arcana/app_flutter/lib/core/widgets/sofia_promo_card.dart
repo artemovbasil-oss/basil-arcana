@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
@@ -56,9 +57,11 @@ class SofiaPromoCard extends StatelessWidget {
   const SofiaPromoCard({
     super.key,
     this.compact = false,
+    this.prefilledMessage,
   });
 
   final bool compact;
+  final String? prefilledMessage;
 
   @override
   Widget build(BuildContext context) {
@@ -127,6 +130,18 @@ class SofiaPromoCard extends StatelessWidget {
             AppGhostButton(
               label: buttonLabel,
               onPressed: () async {
+                final message = _buildMessage(prefilledMessage, localeCode);
+                if (message.isNotEmpty) {
+                  await Clipboard.setData(ClipboardData(text: message));
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(_copiedHint(localeCode)),
+                        duration: const Duration(seconds: 2),
+                      ),
+                    );
+                  }
+                }
                 await launchUrl(
                   Uri.parse(kSofiaProfileUrl),
                   mode: LaunchMode.externalApplication,
@@ -184,5 +199,36 @@ class SofiaPromoCard extends StatelessWidget {
       return 'Жеке консультация алу үшін Telegram-боттағы жазылымды қос.';
     }
     return 'Activate a subscription in our Telegram bot to book a personal consultation.';
+  }
+
+  String _buildMessage(String? raw, String localeCode) {
+    final summary = _trimForMessage((raw ?? '').trim(), maxChars: 1200);
+    if (summary.isEmpty) {
+      return '';
+    }
+    if (localeCode == 'ru') {
+      return 'Привет, София! Хочу личную консультацию.\n\nКратко о моем раскладе:\n$summary';
+    }
+    if (localeCode == 'kk') {
+      return 'Сәлем, София! Жеке консультация алғым келеді.\n\nМенің қысқаша нәтижем:\n$summary';
+    }
+    return 'Hi Sofia! I would like a personal consultation.\n\nShort summary of my reading:\n$summary';
+  }
+
+  String _trimForMessage(String source, {required int maxChars}) {
+    if (source.length <= maxChars) {
+      return source;
+    }
+    return '${source.substring(0, maxChars).trimRight()}...';
+  }
+
+  String _copiedHint(String localeCode) {
+    if (localeCode == 'ru') {
+      return 'Краткое саммари скопировано. Вставь его в сообщение Софии.';
+    }
+    if (localeCode == 'kk') {
+      return 'Қысқаша нәтиже көшірілді. Оны Софияға хабарламаға қой.';
+    }
+    return 'Summary copied. Paste it into your message to Sofia.';
   }
 }
