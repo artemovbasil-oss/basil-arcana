@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
+import '../config/assets_config.dart';
 import 'app_buttons.dart';
+import 'tarot_asset_widgets.dart';
 
 const String kSofiaProfileUrl = 'https://t.me/SofiaKnoxx';
 
@@ -60,6 +63,7 @@ class SofiaPromoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
     final titleStyle = Theme.of(context).textTheme.titleMedium?.copyWith(
           color: colorScheme.primary,
           fontWeight: FontWeight.w700,
@@ -70,6 +74,8 @@ class SofiaPromoCard extends StatelessWidget {
     final subtitle = _subtitle(localeCode);
     final buttonLabel = _buttonLabel(localeCode);
     final tip = _tip(localeCode);
+    final assetsBaseUrl = AssetsConfig.assetsBaseUrl;
+    final mediaHeight = compact ? 146.0 : 190.0;
 
     return Container(
       decoration: BoxDecoration(
@@ -89,6 +95,22 @@ class SofiaPromoCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: CardMedia(
+                cardId: 'sofia_promo',
+                imageUrl: '$assetsBaseUrl/sofia/sofia.webp',
+                videoUrl: '$assetsBaseUrl/sofia/sofia.webm',
+                width: double.infinity,
+                height: mediaHeight,
+                fit: BoxFit.cover,
+                showGlow: false,
+                enableVideo: true,
+                autoPlayOnce: true,
+                playLabel: l10n.videoTapToPlay,
+              ),
+            ),
+            const SizedBox(height: 12),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
