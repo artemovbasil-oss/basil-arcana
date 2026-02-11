@@ -58,6 +58,11 @@ class QueryHistoryRepository {
             createdAtRaw is! String) {
           continue;
         }
+        final normalizedQueryType = queryType.trim().toLowerCase();
+        if (!normalizedQueryType.startsWith('reading_') ||
+            normalizedQueryType == 'reading_details') {
+          continue;
+        }
         final createdAt = DateTime.tryParse(createdAtRaw)?.toLocal();
         if (createdAt == null) {
           continue;
@@ -65,7 +70,7 @@ class QueryHistoryRepository {
         final locale = item['locale'];
         items.add(
           QueryHistoryItem(
-            queryType: queryType,
+            queryType: normalizedQueryType,
             question: question.trim(),
             createdAt: createdAt,
             locale:

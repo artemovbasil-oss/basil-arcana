@@ -1162,12 +1162,6 @@ app.post('/api/reading/details', telegramAuthMiddleware, async (req, res) => {
       })
     );
     const locale = normalizeLocale(req.body?.locale);
-    await logHistoryFromRequest({
-      req,
-      queryType: 'reading_details',
-      question: req.body?.question,
-      locale
-    });
     return res.json({
       detailsText: appendSofiaPromo(detailsText, locale),
       requestId: req.requestId
@@ -1252,12 +1246,6 @@ app.post('/api/natal-chart/generate', async (req, res) => {
       })
     );
     const locale = normalizeLocale(req.body?.language);
-    await logHistoryFromRequest({
-      req,
-      queryType: 'natal_chart',
-      question: `Natal chart ${req.body?.birthDate || ''}${req.body?.birthTime ? ` ${req.body.birthTime}` : ''}`.trim(),
-      locale
-    });
     return res.json({
       interpretation: appendSofiaPromo(interpretation, locale),
       requestId: req.requestId
@@ -1342,12 +1330,6 @@ app.post('/api/natal-chart/generate_web', async (req, res) => {
       })
     );
     const locale = normalizeLocale(payload?.language);
-    await logHistoryFromRequest({
-      req,
-      queryType: 'natal_chart',
-      question: `Natal chart ${payload?.birthDate || ''}${payload?.birthTime ? ` ${payload.birthTime}` : ''}`.trim(),
-      locale
-    });
     return res.json({
       interpretation: appendSofiaPromo(interpretation, locale),
       requestId: req.requestId
