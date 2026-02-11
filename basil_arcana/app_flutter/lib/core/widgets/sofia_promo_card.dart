@@ -75,7 +75,7 @@ class SofiaPromoCard extends StatelessWidget {
     final buttonLabel = _buttonLabel(localeCode);
     final tip = _tip(localeCode);
     final assetsBaseUrl = AssetsConfig.assetsBaseUrl;
-    final mediaHeight = compact ? 146.0 : 190.0;
+    final mediaAspectRatio = compact ? 3 / 4 : 3 / 4;
 
     return Container(
       decoration: BoxDecoration(
@@ -97,55 +97,35 @@ class SofiaPromoCard extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(16),
-              child: CardMedia(
-                cardId: 'sofia_promo',
-                imageUrl: '$assetsBaseUrl/sofia/sofia.webp',
-                videoUrl: '$assetsBaseUrl/sofia/sofia.webm',
-                width: double.infinity,
-                height: mediaHeight,
-                fit: BoxFit.cover,
-                showGlow: false,
-                enableVideo: true,
-                autoPlayOnce: true,
-                playLabel: l10n.videoTapToPlay,
+              child: ColoredBox(
+                color: colorScheme.surface.withValues(alpha: 0.45),
+                child: AspectRatio(
+                  aspectRatio: mediaAspectRatio,
+                  child: CardMedia(
+                    cardId: 'sofia_promo',
+                    imageUrl: '$assetsBaseUrl/sofia/sofia.webp',
+                    videoUrl: '$assetsBaseUrl/sofia/sofia.webm',
+                    fit: BoxFit.contain,
+                    showGlow: false,
+                    enableVideo: true,
+                    autoPlayOnce: true,
+                    playLabel: l10n.videoTapToPlay,
+                  ),
+                ),
               ),
             ),
             const SizedBox(height: 12),
-            Row(
+            Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: 34,
-                  height: 34,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: colorScheme.primary.withValues(alpha: 0.16),
-                    border: Border.all(
-                        color: colorScheme.primary.withValues(alpha: 0.6)),
-                  ),
-                  child: Icon(
-                    Icons.auto_awesome,
-                    color: colorScheme.primary,
-                    size: 18,
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(title, style: titleStyle),
-                      const SizedBox(height: 4),
-                      Text(subtitle, style: bodyStyle),
-                    ],
-                  ),
-                ),
+                Text(title, style: titleStyle),
+                const SizedBox(height: 4),
+                Text(subtitle, style: bodyStyle),
               ],
             ),
             const SizedBox(height: 12),
             AppGhostButton(
               label: buttonLabel,
-              icon: Icons.open_in_new,
               onPressed: () async {
                 await launchUrl(
                   Uri.parse(kSofiaProfileUrl),
