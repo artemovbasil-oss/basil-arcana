@@ -264,17 +264,24 @@ class AiRepository {
     final startTimestamp = DateTime.now().toIso8601String();
     final stopwatch = Stopwatch()..start();
     final totalCards = drawnCards.length;
+    final promptQuestion = _composeReadingPromptQuestion(
+      question: question,
+      languageCode: languageCode,
+      mode: mode,
+      spread: spread,
+      drawnCards: drawnCards,
+    );
     final responseConstraints = mode == ReadingMode.fast
         ? {
             'tldrMaxChars': 180,
-            'sectionMaxChars': 280,
-            'actionMaxChars': 160,
+            'sectionMaxChars': 340,
+            'actionMaxChars': 220,
           }
         : {
-            'tldrMaxChars': 180,
+            'tldrMaxChars': 220,
             'sectionMaxChars': 700,
-            'whyMaxChars': 400,
-            'actionMaxChars': 240,
+            'whyMaxChars': 480,
+            'actionMaxChars': 320,
           };
     final cardsPayload = mode == ReadingMode.deep ||
             mode == ReadingMode.lifeAreas ||
@@ -290,7 +297,7 @@ class AiRepository {
         ? 'gentle'
         : 'neutral';
     final payload = {
-      'question': question,
+      'question': promptQuestion,
       'spread': spread.toJson(),
       'cards': cardsPayload,
       'tone': tone,
@@ -834,9 +841,16 @@ class AiRepository {
     final startTimestamp = DateTime.now().toIso8601String();
     final stopwatch = Stopwatch()..start();
     final totalCards = spread.positions.length;
+    final promptQuestion = _composeReadingPromptQuestion(
+      question: question,
+      languageCode: locale,
+      mode: ReadingMode.deep,
+      spread: spread,
+      drawnCards: drawnCards,
+    );
     final payload = {
       if (telegramAuth.hasInitData) 'initData': telegramAuth.initData,
-      'question': question,
+      'question': promptQuestion,
       'spread': spread.toJson(),
       'cards': drawnCards
           .map((drawn) => drawn.toAiDeepJson(totalCards: totalCards))
@@ -1100,6 +1114,67 @@ class AiRepository {
       return 'details_relationships_career';
     }
     return mode.name;
+  }
+
+  String _composeReadingPromptQuestion({
+    required String question,
+    required String languageCode,
+    required ReadingMode mode,
+    required SpreadModel spread,
+    required List<DrawnCardModel> drawnCards,
+  }) {
+    final normalizedLanguage = languageCode.trim().toLowerCase();
+    final focus = question.trim().isEmpty
+        ? (normalizedLanguage == 'ru'
+            ? 'общая жизненная ситуация'
+            : normalizedLanguage == 'kk'
+                ? 'жалпы өмірлік жағдай'
+                : 'current life situation')
+        : question.trim();
+    final cardNames = drawnCards
+        .map((drawn) => drawn.cardName.trim())
+        .where((name) => name.isNotEmpty)
+        .take(5)
+        .join(', ');
+    final positions = spread.positions
+        .map((position) => position.title.trim())
+        .where((title) => title.isNotEmpty)
+        .take(5)
+        .join(', ');
+
+    if (normalizedLanguage == 'ru') {
+      final depthLine = mode == ReadingMode.deep ||
+              mode == ReadingMode.detailsRelationshipsCareer
+          ? 'Объясни причинно-следственные связи и внутренние мотивы, а не только итог.'
+          : 'Дай прямой и практичный ответ уже в первых строках.';
+      return '''
+Фокус запроса пользователя: "$focus".
+Ответ должен быть адресным и персональным: напрямую свяжи выводы с вопросом пользователя, позициями расклада ($positions) и картами ($cardNames).
+$depthLine
+Избегай общих фраз и повторов. В конце дай 1-2 конкретных шага, что делать дальше именно по этому запросу.''';
+    }
+
+    if (normalizedLanguage == 'kk' || normalizedLanguage == 'kz') {
+      final depthLine = mode == ReadingMode.deep ||
+              mode == ReadingMode.detailsRelationshipsCareer
+          ? 'Себеп-салдарды және ішкі уәждерді ашып түсіндір.'
+          : 'Жауаптың басында-ақ нақты практикалық бағыт бер.';
+      return '''
+Пайдаланушы сұрағының фокусы: "$focus".
+Жауап жеке әрі нысаналы болсын: қорытындыны сұрақпен, жайылма позицияларымен ($positions) және карталармен ($cardNames) тікелей байланыстыр.
+$depthLine
+Жалпылама, шаблон тіркестерден қаш. Соңында осы сұраққа сай 1-2 нақты қадам ұсын.''';
+    }
+
+    final depthLine = mode == ReadingMode.deep ||
+            mode == ReadingMode.detailsRelationshipsCareer
+        ? 'Explain cause-and-effect and inner drivers, not only conclusions.'
+        : 'Give a direct, practical answer in the opening lines.';
+    return '''
+User focus: "$focus".
+Make the reading specific and personal: tie conclusions directly to the question, spread positions ($positions), and drawn cards ($cardNames).
+$depthLine
+Avoid generic filler and repetition. Finish with 1-2 concrete next steps tailored to this question.''';
   }
 
   void _logTelegramInitDataDebug({
