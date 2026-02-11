@@ -121,19 +121,19 @@ abstract class AppLocalizations {
   /// No description provided for @settingsPromoTitle.
   ///
   /// In en, this message translates to:
-  /// **'Promo code (test)'**
+  /// **'Promo code'**
   String get settingsPromoTitle;
 
   /// No description provided for @settingsPromoDescription.
   ///
   /// In en, this message translates to:
-  /// **'Enter a code to temporarily enable 1-year unlimited access for testing.'**
+  /// **'Enter a promo code to unlock unlimited energy for 1 year.'**
   String get settingsPromoDescription;
 
   /// No description provided for @settingsPromoHint.
   ///
   /// In en, this message translates to:
-  /// **'Example: LUCY100'**
+  /// **'Enter promo code'**
   String get settingsPromoHint;
 
   /// No description provided for @settingsPromoApplyButton.

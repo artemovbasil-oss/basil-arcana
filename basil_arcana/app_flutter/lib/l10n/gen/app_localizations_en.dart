@@ -18,14 +18,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsTitle => 'Settings';
 
   @override
-  String get settingsPromoTitle => 'Promo code (test)';
+  String get settingsPromoTitle => 'Promo code';
 
   @override
   String get settingsPromoDescription =>
-      'Enter a code to temporarily enable 1-year unlimited access for testing.';
+      'Enter a promo code to unlock unlimited energy for 1 year.';
 
   @override
-  String get settingsPromoHint => 'Example: LUCY100';
+  String get settingsPromoHint => 'Enter promo code';
 
   @override
   String get settingsPromoApplyButton => 'Activate promo code';

@@ -18,14 +18,14 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsTitle => 'Настройки';
 
   @override
-  String get settingsPromoTitle => 'Промокод (тест)';
+  String get settingsPromoTitle => 'Промокод';
 
   @override
   String get settingsPromoDescription =>
-      'Введи код, чтобы временно включить безлимит на 1 год для тестов.';
+      'Введи промокод, чтобы открыть безлимитную энергию на 1 год.';
 
   @override
-  String get settingsPromoHint => 'Например: LUCY100';
+  String get settingsPromoHint => 'Введи промокод';
 
   @override
   String get settingsPromoApplyButton => 'Активировать промокод';

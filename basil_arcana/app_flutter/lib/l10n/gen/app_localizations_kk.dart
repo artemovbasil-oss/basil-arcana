@@ -18,14 +18,14 @@ class AppLocalizationsKk extends AppLocalizations {
   String get settingsTitle => 'Баптаулар';
 
   @override
-  String get settingsPromoTitle => 'Промокод (тест)';
+  String get settingsPromoTitle => 'Промокод';
 
   @override
   String get settingsPromoDescription =>
-      'Тестілеу үшін код енгіз де 1 жылдық шексіз қолжетімділікті уақытша қос.';
+      'Промокод енгізіп, 1 жылға шексіз энергияны аш.';
 
   @override
-  String get settingsPromoHint => 'Мысалы: LUCY100';
+  String get settingsPromoHint => 'Промокод енгіз';
 
   @override
   String get settingsPromoApplyButton => 'Промокодты қосу';
