@@ -9,7 +9,6 @@ type PlanId = "single" | "week" | "month" | "year";
 interface Plan {
   id: PlanId;
   stars: number;
-  rubles: number;
   durationDays: number;
   isSingleUse: boolean;
 }
@@ -25,6 +24,7 @@ interface UserState {
 interface LocalizedPlan {
   label: string;
   notifyLabel: string;
+  fiatPriceDisplay: string;
 }
 
 const SOFIA_PROFILE_URL = "https://t.me/SofiaKnoxx";
@@ -36,28 +36,24 @@ const PLANS: Record<PlanId, Plan> = {
   single: {
     id: "single",
     stars: 140,
-    rubles: 250,
     durationDays: PURCHASE_CODE_TTL_DAYS,
     isSingleUse: true,
   },
   week: {
     id: "week",
     stars: 275,
-    rubles: 490,
     durationDays: 7,
     isSingleUse: false,
   },
   month: {
     id: "month",
     stars: 550,
-    rubles: 990,
     durationDays: 30,
     isSingleUse: false,
   },
   year: {
     id: "year",
     stars: 3900,
-    rubles: 6990,
     durationDays: 365,
     isSingleUse: false,
   },
@@ -121,18 +117,22 @@ const STRINGS: Record<
       single: {
         label: "1 разбор — 250 ₽ / 140 ⭐",
         notifyLabel: "Разовый детальный разбор",
+        fiatPriceDisplay: "250 ₽",
       },
       week: {
         label: "Неделя — 490 ₽ / 275 ⭐",
         notifyLabel: "Подписка на неделю",
+        fiatPriceDisplay: "490 ₽",
       },
       month: {
         label: "Месяц — 990 ₽ / 550 ⭐",
         notifyLabel: "Подписка на месяц",
+        fiatPriceDisplay: "990 ₽",
       },
       year: {
         label: "Год — 6 990 ₽ / 3900 ⭐",
         notifyLabel: "Подписка на год",
+        fiatPriceDisplay: "6 990 ₽",
       },
     },
     planAlreadySelected: "Тариф уже выбран.",
@@ -176,20 +176,24 @@ const STRINGS: Record<
       "Get detailed spread and natal-chart interpretation from our tarot reader/astrologer Sofia.",
     planLabels: {
       single: {
-        label: "1 reading — 250 ₽ / 140 ⭐",
+        label: "1 reading — $2.99 / 140 ⭐",
         notifyLabel: "Single detailed reading",
+        fiatPriceDisplay: "$2.99",
       },
       week: {
-        label: "Week — 490 ₽ / 275 ⭐",
+        label: "Week — $5.99 / 275 ⭐",
         notifyLabel: "Weekly subscription",
+        fiatPriceDisplay: "$5.99",
       },
       month: {
-        label: "Month — 990 ₽ / 550 ⭐",
+        label: "Month — $11.99 / 550 ⭐",
         notifyLabel: "Monthly subscription",
+        fiatPriceDisplay: "$11.99",
       },
       year: {
-        label: "Year — 6 990 ₽ / 3900 ⭐",
+        label: "Year — $84.99 / 3900 ⭐",
         notifyLabel: "Yearly subscription",
+        fiatPriceDisplay: "$84.99",
       },
     },
     planAlreadySelected: "Plan already selected.",
@@ -233,20 +237,24 @@ const STRINGS: Record<
       "Раскладтар мен натал карталар бойынша кәсіби талдауды таролог/астролог Софиядан алыңыз.",
     planLabels: {
       single: {
-        label: "1 талдау — 250 ₽ / 140 ⭐",
+        label: "1 талдау — 1 300 ₸ / 140 ⭐",
         notifyLabel: "Бір реттік терең талдау",
+        fiatPriceDisplay: "1 300 ₸",
       },
       week: {
-        label: "Апта — 490 ₽ / 275 ⭐",
+        label: "Апта — 2 550 ₸ / 275 ⭐",
         notifyLabel: "Апталық жазылым",
+        fiatPriceDisplay: "2 550 ₸",
       },
       month: {
-        label: "Ай — 990 ₽ / 550 ⭐",
+        label: "Ай — 5 150 ₸ / 550 ⭐",
         notifyLabel: "Айлық жазылым",
+        fiatPriceDisplay: "5 150 ₸",
       },
       year: {
-        label: "Жыл — 6 990 ₽ / 3900 ⭐",
+        label: "Жыл — 36 400 ₸ / 3900 ⭐",
         notifyLabel: "Жылдық жазылым",
+        fiatPriceDisplay: "36 400 ₸",
       },
     },
     planAlreadySelected: "Тариф таңдалды.",
@@ -503,6 +511,7 @@ async function notifySofia(
 
   const plan = PLANS[planId];
   const label = strings.planLabels[planId].notifyLabel;
+  const fiatPrice = strings.planLabels[planId].fiatPriceDisplay;
   const expires = formatDateForLocale(expiresAt, "ru");
 
   const text = [
@@ -515,7 +524,7 @@ async function notifySofia(
     `Язык: ${locale}`,
     "",
     `Покупка: ${label}`,
-    `Стоимость: ${plan.rubles} ₽ / ${plan.stars} ⭐`,
+    `Стоимость: ${fiatPrice} / ${plan.stars} ⭐`,
     `Активно до: ${expires}`,
     `Код: ${purchaseCode}`,
   ].join("\n");
