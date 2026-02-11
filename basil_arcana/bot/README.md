@@ -6,12 +6,19 @@ Telegram bot built with Node.js + TypeScript and grammY. It provides a localized
 - On first `/start`, bot asks preferred language (`ru`/`kz`/`en`) with flag buttons
 - `/start` and `/help` then use the selected language for menu and content
 - Plan options are available directly in the bot, even before opening the mini app
+- Telegram Stars payments for:
+  - One detailed reading
+  - Weekly, monthly, yearly subscription
+- After successful payment user gets a unique 6-digit code and instructions to send it to Sofia
+- Bot sends Sofia purchase notification with user details, plan and validity date
 - Graceful fallback if the web app URL is missing
 
 ## Environment variables (Railway)
 Set these in Railway **Secrets**:
 - `TELEGRAM_BOT_TOKEN` (required)
 - `TELEGRAM_WEBAPP_URL` (optional, required only for the Launch app button)
+- `SOFIA_CHAT_ID` (optional, enables auto-notifications to Sofia on purchase)
+- `SOFIA_NOTIFY_CHAT_ID` (optional alias for `SOFIA_CHAT_ID`)
 - `APP_VERSION` (optional, defaults to `dev`)
 - `NODE_ENV` (optional)
 

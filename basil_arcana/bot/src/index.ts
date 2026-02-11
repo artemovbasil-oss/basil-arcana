@@ -4,14 +4,64 @@ import { loadConfig } from "./config";
 const config = loadConfig();
 
 type SupportedLocale = "ru" | "en" | "kk";
-type PlanId = "week" | "month" | "year";
+type PlanId = "single" | "week" | "month" | "year";
+
+interface Plan {
+  id: PlanId;
+  stars: number;
+  rubles: number;
+  durationDays: number;
+  isSingleUse: boolean;
+}
 
 interface UserState {
   activeSubscription: boolean;
   selectedPlan: PlanId | null;
   locale: SupportedLocale | null;
   pendingStartPayload: string | null;
+  subscriptionEndsAt: number | null;
 }
+
+interface LocalizedPlan {
+  label: string;
+  notifyLabel: string;
+}
+
+const SOFIA_PROFILE_URL = "https://t.me/SofiaKnoxx";
+const TELEGRAM_STARS_CURRENCY = "XTR";
+const PURCHASE_CODE_LENGTH = 6;
+const PURCHASE_CODE_TTL_DAYS = 30;
+
+const PLANS: Record<PlanId, Plan> = {
+  single: {
+    id: "single",
+    stars: 140,
+    rubles: 250,
+    durationDays: PURCHASE_CODE_TTL_DAYS,
+    isSingleUse: true,
+  },
+  week: {
+    id: "week",
+    stars: 275,
+    rubles: 490,
+    durationDays: 7,
+    isSingleUse: false,
+  },
+  month: {
+    id: "month",
+    stars: 550,
+    rubles: 990,
+    durationDays: 30,
+    isSingleUse: false,
+  },
+  year: {
+    id: "year",
+    stars: 3900,
+    rubles: 6990,
+    durationDays: 365,
+    isSingleUse: false,
+  },
+};
 
 const STRINGS: Record<
   SupportedLocale,
@@ -30,10 +80,19 @@ const STRINGS: Record<
     aboutText: string;
     professionalTitle: string;
     professionalDescription: string;
-    planLabels: Record<PlanId, string>;
-    alreadyActive: string;
+    planLabels: Record<PlanId, LocalizedPlan>;
     planAlreadySelected: string;
-    paymentStub: string;
+    invoiceTitle: string;
+    invoiceDescription: string;
+    paymentPrompt: string;
+    paymentCancelled: string;
+    paymentSuccess: string;
+    activationUntil: string;
+    codeInstruction: string;
+    sofiaNotifyTitle: string;
+    sofiaContactCard: string;
+    missingSofiaChatWarn: string;
+    unknownPaymentPlan: string;
   }
 > = {
   ru: {
@@ -41,7 +100,7 @@ const STRINGS: Record<
     menuDescription: "Выбери действие из меню ниже.",
     menuButtons: {
       launchApp: "🚀 Запустить мини‑приложение",
-      buy: "💳 Купить подписку",
+      buy: "💳 Купить разбор/подписку",
       about: "✨ Чем мы можем быть полезны",
       back: "⬅️ В меню",
     },
@@ -54,25 +113,51 @@ const STRINGS: Record<
     },
     launchUnavailable: "🚀 Временно недоступно",
     aboutText:
-      "✨ Чем мы можем быть полезны\n\nВ приложении Basil’s Arcana:\n• Быстрые и глубокие расклады на отношения, деньги, карьеру и состояние.\n• Персональные подсказки и понятные шаги по ситуации.\n• История твоих раскладов в одном месте.\n• Мини‑приложение с атмосферой и интерактивными картами.\n\n🔮 Наш таролог и астролог София\n• Мягкий, точный и глубокий разбор запроса.\n• Личная консультация по твоей ситуации.\n• Видео Софии: https://cdn.basilarcana.com/sofia/sofia.webm\n• Профиль Софии: https://t.me/SofiaKnoxx",
-    professionalTitle: "🔮 Профессиональное толкование",
+      "✨ Чем мы можем быть полезны\n\nВ приложении Basil’s Arcana:\n• Расклады на 1, 3 и 5 карт под твой запрос.\n• Глубокий анализ в разрезе карьеры и отношений.\n• Персональные подсказки и понятные шаги по ситуации.\n• Мини‑приложение с атмосферой и интерактивными картами.\n\n🔮 Наш таролог и астролог София\n• Детально разбирает расклады и натальные карты.\n• Помогает дойти до практичного решения без воды.",
+    professionalTitle: "🔮 Детальный разбор с Софией",
     professionalDescription:
-      "Хочешь более глубокий и персональный разбор?\nВыбери подходящий тариф — и оракул раскроется полностью.",
+      "Оформи доступ к детальному разбору раскладов и натальных карт нашим тарологом/астрологом Софией.",
     planLabels: {
-      week: "Неделя — 299 ₽",
-      month: "Месяц — 899 ₽ ⭐️",
-      year: "Год — 6 990 ₽",
+      single: {
+        label: "1 разбор — 250 ₽ / 140 ⭐",
+        notifyLabel: "Разовый детальный разбор",
+      },
+      week: {
+        label: "Неделя — 490 ₽ / 275 ⭐",
+        notifyLabel: "Подписка на неделю",
+      },
+      month: {
+        label: "Месяц — 990 ₽ / 550 ⭐",
+        notifyLabel: "Подписка на месяц",
+      },
+      year: {
+        label: "Год — 6 990 ₽ / 3900 ⭐",
+        notifyLabel: "Подписка на год",
+      },
     },
-    alreadyActive: "У тебя уже есть активная подписка",
     planAlreadySelected: "Тариф уже выбран.",
-    paymentStub: "Оплата скоро будет доступна.",
+    invoiceTitle: "Basil’s Arcana • Оплата",
+    invoiceDescription:
+      "Детальный разбор раскладов и натальных карт от Софии.",
+    paymentPrompt: "Выбери вариант ниже, бот пришлет счет в Telegram Stars.",
+    paymentCancelled: "Оплата не прошла. Попробуй еще раз.",
+    paymentSuccess: "Оплата принята ✅",
+    activationUntil: "Активно до",
+    codeInstruction:
+      "Твой код доступа: {code}\n\nНапиши Софии и передай этот код для подтверждения:\n{sofia}\n\nПодсказка: код одноразовый для проверки покупки.",
+    sofiaNotifyTitle: "🧾 Новая покупка в Basil’s Arcana",
+    sofiaContactCard:
+      "👩‍💼 Контакт Софии\n• София Нокс — таролог/астролог\n• Telegram: @SofiaKnoxx\n• Написать: https://t.me/SofiaKnoxx",
+    missingSofiaChatWarn:
+      "Оплата прошла, но уведомление Софии не отправлено автоматически. Напиши ей и отправь код вручную: https://t.me/SofiaKnoxx",
+    unknownPaymentPlan: "Не удалось определить тариф оплаты.",
   },
   en: {
     menuTitle: "Welcome to Basil’s Arcana ✨",
     menuDescription: "Choose an action from the menu below.",
     menuButtons: {
       launchApp: "🚀 Launch app",
-      buy: "💳 Buy subscription",
+      buy: "💳 Buy reading/subscription",
       about: "✨ How we can help",
       back: "⬅️ Back to menu",
     },
@@ -85,25 +170,51 @@ const STRINGS: Record<
     },
     launchUnavailable: "🚀 Temporarily unavailable",
     aboutText:
-      "✨ How we can help\n\nInside Basil’s Arcana:\n• Quick and deep readings for love, money, career, and inner state.\n• Personalized insights with clear next steps.\n• Reading history in one place.\n• Atmospheric mini app with interactive cards.\n\n🔮 Our tarot reader and astrologer Sofia\n• Calm, precise, and deep interpretation.\n• Personal consultation for your situation.\n• Sofia video: https://cdn.basilarcana.com/sofia/sofia.webm\n• Sofia profile: https://t.me/SofiaKnoxx",
-    professionalTitle: "🔮 Professional reading",
+      "✨ How we can help\n\nInside Basil’s Arcana:\n• Spreads with 1, 3, and 5 cards for your exact question.\n• Deep analysis focused on career and relationships.\n• Personalized guidance with clear next steps.\n• Atmospheric mini app with interactive cards.\n\n🔮 Our tarot reader and astrologer Sofia\n• Provides detailed interpretation of spreads and natal charts.\n• Helps turn insight into practical decisions.",
+    professionalTitle: "🔮 Detailed reading with Sofia",
     professionalDescription:
-      "Want a deeper, more personal interpretation?\nPick the plan that fits you — and the oracle will open up fully.",
+      "Get detailed spread and natal-chart interpretation from our tarot reader/astrologer Sofia.",
     planLabels: {
-      week: "Week — 299 ₽",
-      month: "Month — 899 ₽ ⭐️",
-      year: "Year — 6 990 ₽",
+      single: {
+        label: "1 reading — 250 ₽ / 140 ⭐",
+        notifyLabel: "Single detailed reading",
+      },
+      week: {
+        label: "Week — 490 ₽ / 275 ⭐",
+        notifyLabel: "Weekly subscription",
+      },
+      month: {
+        label: "Month — 990 ₽ / 550 ⭐",
+        notifyLabel: "Monthly subscription",
+      },
+      year: {
+        label: "Year — 6 990 ₽ / 3900 ⭐",
+        notifyLabel: "Yearly subscription",
+      },
     },
-    alreadyActive: "You already have an active subscription",
     planAlreadySelected: "Plan already selected.",
-    paymentStub: "Coming soon.",
+    invoiceTitle: "Basil’s Arcana • Payment",
+    invoiceDescription:
+      "Detailed spread and natal-chart interpretation by Sofia.",
+    paymentPrompt: "Choose an option below and the bot will send a Telegram Stars invoice.",
+    paymentCancelled: "Payment failed. Please try again.",
+    paymentSuccess: "Payment received ✅",
+    activationUntil: "Active until",
+    codeInstruction:
+      "Your access code: {code}\n\nSend this code to Sofia for verification:\n{sofia}\n\nTip: this is a one-time verification code.",
+    sofiaNotifyTitle: "🧾 New purchase in Basil’s Arcana",
+    sofiaContactCard:
+      "👩‍💼 Sofia contact\n• Sofia Knox — tarot reader/astrologer\n• Telegram: @SofiaKnoxx\n• Message: https://t.me/SofiaKnoxx",
+    missingSofiaChatWarn:
+      "Payment is complete, but Sofia was not notified automatically. Please message Sofia and send the code manually: https://t.me/SofiaKnoxx",
+    unknownPaymentPlan: "Could not determine payment plan.",
   },
   kk: {
     menuTitle: "Basil’s Arcana-ға қош келдің ✨",
     menuDescription: "Төмендегі мәзірден әрекет таңда.",
     menuButtons: {
       launchApp: "🚀 Мини‑қосымшаны ашу",
-      buy: "💳 Жазылымды сатып алу",
+      buy: "💳 Талдау/жазылым сатып алу",
       about: "✨ Қалай көмектесе аламыз",
       back: "⬅️ Мәзірге",
     },
@@ -116,22 +227,49 @@ const STRINGS: Record<
     },
     launchUnavailable: "🚀 Уақытша қолжетімсіз",
     aboutText:
-      "✨ Қалай көмектесе аламыз\n\nBasil’s Arcana ішінде:\n• Қарым-қатынас, қаржы, мансап және ішкі күйге арналған жедел әрі терең жорамалдар.\n• Жеке кеңес және нақты келесі қадамдар.\n• Барлық жорамалдар тарихы бір жерде.\n• Атмосферасы бар интерактивті мини-қосымша.\n\n🔮 Біздің таролог және астролог София\n• Сұрағыңды жұмсақ әрі дәл талдайды.\n• Жағдайыңа сай жеке консультация береді.\n• София видеосы: https://cdn.basilarcana.com/sofia/sofia.webm\n• София профилі: https://t.me/SofiaKnoxx",
-    professionalTitle: "🔮 Кәсіби жорамал",
+      "✨ Қалай көмектесе аламыз\n\nBasil’s Arcana ішінде:\n• Сұрағыңа сай 1, 3 және 5 карталық раскладтар.\n• Мансап пен қарым‑қатынас бағыты бойынша терең талдау.\n• Нақты келесі қадамдары бар жеке кеңес.\n• Атмосферасы бар интерактивті мини‑қосымша.\n\n🔮 Біздің таролог және астролог София\n• Расклад пен натал картаны егжей‑тегжейлі талдайды.\n• Инсайтты нақты шешімге айналдыруға көмектеседі.",
+    professionalTitle: "🔮 Софиямен терең талдау",
     professionalDescription:
-      "Терең әрі жеке талдау қалайсың ба?\nӨзіңе ыңғайлы тарифті таңда — сонда оракул толық ашылады.",
+      "Раскладтар мен натал карталар бойынша кәсіби талдауды таролог/астролог Софиядан алыңыз.",
     planLabels: {
-      week: "Апта — 299 ₽",
-      month: "Ай — 899 ₽ ⭐️",
-      year: "Жыл — 6 990 ₽",
+      single: {
+        label: "1 талдау — 250 ₽ / 140 ⭐",
+        notifyLabel: "Бір реттік терең талдау",
+      },
+      week: {
+        label: "Апта — 490 ₽ / 275 ⭐",
+        notifyLabel: "Апталық жазылым",
+      },
+      month: {
+        label: "Ай — 990 ₽ / 550 ⭐",
+        notifyLabel: "Айлық жазылым",
+      },
+      year: {
+        label: "Жыл — 6 990 ₽ / 3900 ⭐",
+        notifyLabel: "Жылдық жазылым",
+      },
     },
-    alreadyActive: "Сенде белсенді жазылым бар",
-    planAlreadySelected: "Тариф таңдалған.",
-    paymentStub: "Жақында қолжетімді болады.",
+    planAlreadySelected: "Тариф таңдалды.",
+    invoiceTitle: "Basil’s Arcana • Төлем",
+    invoiceDescription: "Софиядан расклад және натал карта бойынша терең талдау.",
+    paymentPrompt: "Төменнен таңдаңыз, бот Telegram Stars шотын жібереді.",
+    paymentCancelled: "Төлем өтпеді. Қайталап көріңіз.",
+    paymentSuccess: "Төлем қабылданды ✅",
+    activationUntil: "Белсенді мерзімі",
+    codeInstruction:
+      "Қолжетімділік коды: {code}\n\nРастау үшін осы кодты Софияға жіберіңіз:\n{sofia}\n\nКеңес: бұл сатып алуды тексеруге арналған бір реттік код.",
+    sofiaNotifyTitle: "🧾 Basil’s Arcana ішіндегі жаңа сатып алу",
+    sofiaContactCard:
+      "👩‍💼 София байланысы\n• София Нокс — таролог/астролог\n• Telegram: @SofiaKnoxx\n• Жазу: https://t.me/SofiaKnoxx",
+    missingSofiaChatWarn:
+      "Төлем өтті, бірақ Софияға автоматты хабарлама жіберілмеді. Кодты Софияға қолмен жіберіңіз: https://t.me/SofiaKnoxx",
+    unknownPaymentPlan: "Төлем тарифін анықтау мүмкін болмады.",
   },
 };
 
 const userState = new Map<number, UserState>();
+const issuedCodes = new Set<string>();
+const processedPayments = new Set<string>();
 
 function buildMainMenuKeyboard(locale: SupportedLocale): InlineKeyboard {
   const labels = STRINGS[locale].menuButtons;
@@ -185,9 +323,76 @@ function getUserState(userId: number): UserState {
     selectedPlan: null,
     locale: null,
     pendingStartPayload: null,
+    subscriptionEndsAt: null,
   };
   userState.set(userId, initial);
   return initial;
+}
+
+function parsePlanId(value: string): PlanId | null {
+  if (value === "single" || value === "week" || value === "month" || value === "year") {
+    return value;
+  }
+  return null;
+}
+
+function paymentPayload(plan: PlanId): string {
+  return `purchase:${plan}`;
+}
+
+function parsePlanFromPayload(payload: string): PlanId | null {
+  if (!payload.startsWith("purchase:")) {
+    return null;
+  }
+  const rawPlan = payload.replace("purchase:", "").trim();
+  return parsePlanId(rawPlan);
+}
+
+function formatDateForLocale(date: Date, locale: SupportedLocale): string {
+  const localeMap: Record<SupportedLocale, string> = {
+    ru: "ru-RU",
+    kk: "kk-KZ",
+    en: "en-US",
+  };
+  return new Intl.DateTimeFormat(localeMap[locale], {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(date);
+}
+
+function addDays(now: Date, days: number): Date {
+  const next = new Date(now);
+  next.setDate(next.getDate() + days);
+  return next;
+}
+
+function generatePurchaseCode(): string {
+  for (let i = 0; i < 24; i += 1) {
+    const value = Math.floor(100000 + Math.random() * 900000).toString();
+    if (!issuedCodes.has(value)) {
+      issuedCodes.add(value);
+      return value;
+    }
+  }
+  const fallback = `${Date.now()}`.slice(-PURCHASE_CODE_LENGTH);
+  issuedCodes.add(fallback);
+  return fallback;
+}
+
+function buildSubscriptionKeyboard(locale: SupportedLocale): InlineKeyboard {
+  const labels = STRINGS[locale].planLabels;
+  const backLabel = STRINGS[locale].menuButtons.back;
+  return new InlineKeyboard()
+    .text(labels.single.label, "plan:single")
+    .row()
+    .text(labels.week.label, "plan:week")
+    .row()
+    .text(labels.month.label, "plan:month")
+    .row()
+    .text(labels.year.label, "plan:year")
+    .row()
+    .text(backLabel, "menu:home");
 }
 
 async function sendLanguagePicker(ctx: Context): Promise<void> {
@@ -196,21 +401,10 @@ async function sendLanguagePicker(ctx: Context): Promise<void> {
   });
 }
 
-function buildSubscriptionKeyboard(locale: SupportedLocale): InlineKeyboard {
-  const labels = STRINGS[locale].planLabels;
-  const backLabel = STRINGS[locale].menuButtons.back;
-  return new InlineKeyboard()
-    .text(labels.week, "plan:week")
-    .text(labels.month, "plan:month")
-    .text(labels.year, "plan:year")
-    .row()
-    .text(backLabel, "menu:home");
-}
-
 async function sendProfessionalReadingOffer(ctx: Context): Promise<void> {
   const locale = getLocale(ctx);
   const strings = STRINGS[locale];
-  const text = `${strings.professionalTitle}\n\n${strings.professionalDescription}`;
+  const text = `${strings.professionalTitle}\n\n${strings.professionalDescription}\n\n${strings.paymentPrompt}`;
   await ctx.reply(text, { reply_markup: buildSubscriptionKeyboard(locale) });
 }
 
@@ -232,7 +426,7 @@ async function sendMainMenu(ctx: Context): Promise<void> {
 async function sendAbout(ctx: Context): Promise<void> {
   const locale = getLocale(ctx);
   const strings = STRINGS[locale];
-  await ctx.reply(strings.aboutText, {
+  await ctx.reply(`${strings.aboutText}\n\n${strings.sofiaContactCard}`, {
     reply_markup: new InlineKeyboard().text(
       strings.menuButtons.back,
       "menu:home",
@@ -272,12 +466,122 @@ function shouldHandleWebAppAction(userId: number): boolean {
   return true;
 }
 
-async function startPaymentFlow(
+async function startPaymentFlow(ctx: Context, planId: PlanId): Promise<void> {
+  const locale = getLocale(ctx);
+  const strings = STRINGS[locale];
+  const plan = PLANS[planId];
+  const localizedPlan = strings.planLabels[planId];
+
+  await ctx.replyWithInvoice(
+    strings.invoiceTitle,
+    `${strings.invoiceDescription}\n${localizedPlan.label}`,
+    paymentPayload(planId),
+    TELEGRAM_STARS_CURRENCY,
+    [{ label: localizedPlan.notifyLabel, amount: plan.stars }],
+  );
+}
+
+async function notifySofia(
   ctx: Context,
-  locale: SupportedLocale,
-): Promise<void> {
-  // TODO: Wire to the existing payment/subscription flow when available.
-  await ctx.reply(STRINGS[locale].paymentStub);
+  planId: PlanId,
+  purchaseCode: string,
+  expiresAt: Date,
+): Promise<boolean> {
+  const sofiaChatId = config.sofiaChatId;
+  if (!sofiaChatId) {
+    console.error("SOFIA_CHAT_ID is missing; Sofia notification was skipped.");
+    return false;
+  }
+
+  const locale = getLocale(ctx);
+  const strings = STRINGS[locale];
+  const user = ctx.from;
+  const username = user?.username ? `@${user.username}` : "-";
+  const firstName = user?.first_name?.trim() || "-";
+  const lastName = user?.last_name?.trim() || "-";
+  const userId = user?.id ?? "-";
+
+  const plan = PLANS[planId];
+  const label = strings.planLabels[planId].notifyLabel;
+  const expires = formatDateForLocale(expiresAt, "ru");
+
+  const text = [
+    strings.sofiaNotifyTitle,
+    "",
+    `Пользователь: ${username}`,
+    `Имя: ${firstName}`,
+    `Фамилия: ${lastName}`,
+    `User ID: ${userId}`,
+    `Язык: ${locale}`,
+    "",
+    `Покупка: ${label}`,
+    `Стоимость: ${plan.rubles} ₽ / ${plan.stars} ⭐`,
+    `Активно до: ${expires}`,
+    `Код: ${purchaseCode}`,
+  ].join("\n");
+
+  await ctx.api.sendMessage(sofiaChatId, text);
+  return true;
+}
+
+function applyPurchasedPlan(userId: number, planId: PlanId, expiresAt: Date): void {
+  const state = getUserState(userId);
+  state.selectedPlan = planId;
+  if (!PLANS[planId].isSingleUse) {
+    state.activeSubscription = true;
+    state.subscriptionEndsAt = expiresAt.getTime();
+  }
+}
+
+async function handleSuccessfulPayment(ctx: Context): Promise<void> {
+  const userId = ctx.from?.id;
+  const locale = getLocale(ctx);
+  const strings = STRINGS[locale];
+  if (!userId) {
+    return;
+  }
+
+  const payment = ctx.message?.successful_payment;
+  if (!payment) {
+    return;
+  }
+
+  if (processedPayments.has(payment.telegram_payment_charge_id)) {
+    return;
+  }
+
+  const planId = parsePlanFromPayload(payment.invoice_payload);
+  if (!planId) {
+    await ctx.reply(strings.unknownPaymentPlan);
+    return;
+  }
+
+  const plan = PLANS[planId];
+  if (payment.currency !== TELEGRAM_STARS_CURRENCY || payment.total_amount !== plan.stars) {
+    await ctx.reply(strings.paymentCancelled);
+    return;
+  }
+
+  processedPayments.add(payment.telegram_payment_charge_id);
+
+  const now = new Date();
+  const expiresAt = addDays(now, plan.durationDays);
+  applyPurchasedPlan(userId, planId, expiresAt);
+
+  const code = generatePurchaseCode();
+  const expiresText = formatDateForLocale(expiresAt, locale);
+  const instruction = strings.codeInstruction
+    .replace("{code}", code)
+    .replace("{sofia}", SOFIA_PROFILE_URL);
+
+  await ctx.reply(
+    `${strings.paymentSuccess}\n${strings.activationUntil}: ${expiresText}\n\n${instruction}`,
+  );
+
+  const notified = await notifySofia(ctx, planId, code, expiresAt);
+  if (!notified) {
+    await ctx.reply(strings.missingSofiaChatWarn);
+  }
 }
 
 async function sendPlans(
@@ -289,12 +593,6 @@ async function sendPlans(
     return;
   }
   if (!ignoreDebounce && !shouldHandleWebAppAction(userId)) {
-    return;
-  }
-  const locale = getLocale(ctx);
-  const state = getUserState(userId);
-  if (state.activeSubscription) {
-    await ctx.reply(STRINGS[locale].alreadyActive);
     return;
   }
   await sendProfessionalReadingOffer(ctx);
@@ -406,25 +704,50 @@ async function main(): Promise<void> {
     await sendMainMenu(ctx);
   });
 
-  bot.callbackQuery(/^plan:(week|month|year)$/, async (ctx) => {
+  bot.callbackQuery(/^plan:(single|week|month|year)$/, async (ctx) => {
     await ctx.answerCallbackQuery();
     const userId = ctx.from?.id;
     if (!userId) {
       return;
     }
-    const locale = getLocale(ctx);
+
+    const planId = parsePlanId(ctx.match[1]);
+    if (!planId) {
+      return;
+    }
+
     const state = getUserState(userId);
-    if (state.activeSubscription) {
-      await ctx.reply(STRINGS[locale].alreadyActive);
+    state.selectedPlan = planId;
+    await startPaymentFlow(ctx, planId);
+  });
+
+  bot.on("pre_checkout_query", async (ctx) => {
+    const query = ctx.preCheckoutQuery;
+    if (!query) {
       return;
     }
-    const plan = ctx.match[1] as PlanId;
-    if (state.selectedPlan === plan) {
-      await ctx.reply(STRINGS[locale].planAlreadySelected);
+
+    const planId = parsePlanFromPayload(query.invoice_payload);
+    if (!planId) {
+      await ctx.answerPreCheckoutQuery(false, {
+        error_message: STRINGS[getLocale(ctx)].unknownPaymentPlan,
+      });
       return;
     }
-    state.selectedPlan = plan;
-    await startPaymentFlow(ctx, locale);
+
+    const plan = PLANS[planId];
+    if (query.currency !== TELEGRAM_STARS_CURRENCY || query.total_amount !== plan.stars) {
+      await ctx.answerPreCheckoutQuery(false, {
+        error_message: STRINGS[getLocale(ctx)].paymentCancelled,
+      });
+      return;
+    }
+
+    await ctx.answerPreCheckoutQuery(true);
+  });
+
+  bot.on("message:successful_payment", async (ctx) => {
+    await handleSuccessfulPayment(ctx);
   });
 
   bot.on("message:text", async (ctx) => {
@@ -444,7 +767,7 @@ async function main(): Promise<void> {
   });
 
   await bot.start({
-    allowed_updates: ["message", "callback_query"],
+    allowed_updates: ["message", "callback_query", "pre_checkout_query"],
   });
   console.log("Telegram bot started.");
 }

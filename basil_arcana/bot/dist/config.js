@@ -30,8 +30,10 @@ function buildRootUrl(url) {
 function loadConfig() {
     const telegramToken = requireEnv("TELEGRAM_BOT_TOKEN");
     const webAppUrl = optionalEnv("TELEGRAM_WEBAPP_URL");
+    const sofiaChatId = optionalEnv("SOFIA_CHAT_ID") ?? optionalEnv("SOFIA_NOTIFY_CHAT_ID");
     return {
         telegramToken,
         webAppUrl: webAppUrl ? buildRootUrl(webAppUrl) : undefined,
+        sofiaChatId,
     };
 }
