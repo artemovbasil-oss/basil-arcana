@@ -303,6 +303,12 @@ Future<void> _purchaseEnergyPack({
     final topUpRepo = ref.read(energyTopUpRepositoryProvider);
     final invoice = await topUpRepo.createInvoice(packId);
     final status = await TelegramBridge.openInvoice(invoice.invoiceLink);
+    try {
+      await topUpRepo.confirmInvoiceResult(
+        payload: invoice.payload,
+        status: status,
+      );
+    } catch (_) {}
 
     if (!context.mounted) {
       return;

@@ -133,8 +133,8 @@ Production default: `https://api.basilarcana.com`.
 - **Railway environment variables**:
   - Web service: `API_BASE_URL`
   - Web service (optional): `APP_VERSION` (default `2026-02-08-1`), `PUBLIC_ROOT` (default `server/public`)
-  - API service: `OPENAI_API_KEY`, `ARCANA_API_KEY`, `TELEGRAM_BOT_TOKEN` (+ optional `OPENAI_MODEL`, rate limit vars, `STARS_PACK_SMALL_XTR`, `STARS_PACK_MEDIUM_XTR`, `STARS_PACK_FULL_XTR`, `STARS_PACK_YEAR_XTR`)
-  - Bot service: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBAPP_URL` (optional), `APP_VERSION` (optional)
+  - API service: `OPENAI_API_KEY`, `ARCANA_API_KEY`, `TELEGRAM_BOT_TOKEN`, `DATABASE_URL` (+ optional `OPENAI_MODEL`, `SOFIA_NOTIFY_CHAT_ID`, rate limit vars, `STARS_PACK_SMALL_XTR`, `STARS_PACK_MEDIUM_XTR`, `STARS_PACK_FULL_XTR`, `STARS_PACK_YEAR_XTR`)
+  - Bot service: `TELEGRAM_BOT_TOKEN`, `DATABASE_URL`, `TELEGRAM_WEBAPP_URL` (optional), `APP_VERSION` (optional), `SOFIA_CHAT_ID` (or `SOFIA_NOTIFY_CHAT_ID`)
 - **iOS Telegram verification**:
   - Open the mini app via the bot button on iOS.
   - Confirm full-height layout (no black screen, no half-height), header not overlapping, and swipe-down doesn’t collapse the webview.

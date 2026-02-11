@@ -103,6 +103,10 @@ function telegramAuthMiddleware(req, res, next) {
             typeof parsedUser.username === 'string'
               ? parsedUser.username.trim()
               : '',
+          languageCode:
+            typeof parsedUser.language_code === 'string'
+              ? parsedUser.language_code.trim()
+              : '',
           firstName:
             typeof parsedUser.first_name === 'string'
               ? parsedUser.first_name.trim()

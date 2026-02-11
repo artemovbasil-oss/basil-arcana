@@ -30,10 +30,19 @@ const {
   OPENAI_API_KEY,
   TELEGRAM_BOT_TOKEN,
   SOFIA_NOTIFY_CHAT_ID,
-  SOFIA_CONSENT_STORE_PATH
+  DATABASE_URL
 } = require('./src/config');
 const { validateTelegramInitData } = require('./src/telegram');
 const { telegramAuthMiddleware } = require('./src/telegram_auth_middleware');
+const {
+  initDb,
+  hasDb,
+  ensureSchema,
+  upsertUserProfile,
+  recordSofiaConsent,
+  saveCreatedInvoice,
+  confirmInvoiceStatus
+} = require('./src/db');
 
 const app = express();
 
@@ -220,9 +229,6 @@ const STARS_PACK_SMALL_XTR = Number(process.env.STARS_PACK_SMALL_XTR || 25);
 const STARS_PACK_MEDIUM_XTR = Number(process.env.STARS_PACK_MEDIUM_XTR || 45);
 const STARS_PACK_FULL_XTR = Number(process.env.STARS_PACK_FULL_XTR || 75);
 const STARS_PACK_YEAR_XTR = Number(process.env.STARS_PACK_YEAR_XTR || 1000);
-const SOFIA_CONSENT_STATE_FILE =
-  SOFIA_CONSENT_STORE_PATH.trim() ||
-  path.join(__dirname, 'data', 'sofia_consent_state.json');
 
 const ENERGY_STARS_PACKS = {
   small: { energyAmount: 25, starsAmount: STARS_PACK_SMALL_XTR, grantType: 'energy' },
@@ -230,56 +236,6 @@ const ENERGY_STARS_PACKS = {
   full: { energyAmount: 100, starsAmount: STARS_PACK_FULL_XTR, grantType: 'energy' },
   year_unlimited: { energyAmount: 0, starsAmount: STARS_PACK_YEAR_XTR, grantType: 'unlimited_year' }
 };
-
-function defaultSofiaConsentState() {
-  return {
-    totalUsers: 0,
-    userDecisions: {}
-  };
-}
-
-function loadSofiaConsentState() {
-  try {
-    const raw = fs.readFileSync(SOFIA_CONSENT_STATE_FILE, 'utf8');
-    const parsed = JSON.parse(raw);
-    if (!parsed || typeof parsed !== 'object') {
-      return defaultSofiaConsentState();
-    }
-    const totalUsers =
-      Number.isFinite(Number(parsed.totalUsers)) && Number(parsed.totalUsers) >= 0
-        ? Number(parsed.totalUsers)
-        : 0;
-    const userDecisions =
-      parsed.userDecisions && typeof parsed.userDecisions === 'object'
-        ? parsed.userDecisions
-        : {};
-    return {
-      totalUsers,
-      userDecisions
-    };
-  } catch (_) {
-    return defaultSofiaConsentState();
-  }
-}
-
-function persistSofiaConsentState(state) {
-  try {
-    fs.mkdirSync(path.dirname(SOFIA_CONSENT_STATE_FILE), { recursive: true });
-    fs.writeFileSync(
-      SOFIA_CONSENT_STATE_FILE,
-      JSON.stringify(state, null, 2),
-      'utf8'
-    );
-  } catch (error) {
-    console.warn(
-      JSON.stringify({
-        event: 'sofia_consent_state_write_failed',
-        path: SOFIA_CONSENT_STATE_FILE,
-        message: error?.message ? String(error.message).slice(0, 180) : 'unknown'
-      })
-    );
-  }
-}
 
 function normalizeConsentDecision(value) {
   const raw = typeof value === 'string' ? value.trim().toLowerCase() : '';
@@ -343,20 +299,28 @@ async function sendTelegramBotMessage({ chatId, text }) {
   };
 }
 
-const sofiaConsentState = loadSofiaConsentState();
-
-function updateSofiaConsentState({ userId, decision }) {
-  const key = String(userId);
-  const previousDecision = sofiaConsentState.userDecisions[key] || '';
-  if (!previousDecision) {
-    sofiaConsentState.totalUsers += 1;
+async function upsertTelegramUserFromRequest(req, locale = null) {
+  if (!hasDb()) {
+    return;
   }
-  sofiaConsentState.userDecisions[key] = decision;
-  persistSofiaConsentState(sofiaConsentState);
-  return {
-    previousDecision,
-    totalUsers: sofiaConsentState.totalUsers
-  };
+  const telegramUserId =
+    Number.isFinite(Number(req.telegram?.userId)) && Number(req.telegram?.userId) > 0
+      ? Number(req.telegram.userId)
+      : null;
+  if (!telegramUserId) {
+    return;
+  }
+  const resolvedLocale =
+    locale ||
+    (typeof req.telegram?.user?.languageCode === 'string' &&
+    req.telegram.user.languageCode.trim()
+      ? normalizeLocale(req.telegram.user.languageCode)
+      : null);
+  await upsertUserProfile({
+    telegramUserId,
+    telegramUser: req.telegram?.user,
+    locale: resolvedLocale
+  });
 }
 
 function parseUserIdFromInitData(initData) {
@@ -580,6 +544,13 @@ app.post('/api/payments/stars/invoice', telegramAuthMiddleware, async (req, res)
       requestId: req.requestId
     });
   }
+  if (!hasDb()) {
+    return res.status(503).json({
+      error: 'storage_unavailable',
+      reason: 'database_not_configured',
+      requestId: req.requestId
+    });
+  }
 
   const payload = `energy:${packId}:user:${userId}:ts:${Date.now()}`;
   const title =
@@ -592,6 +563,7 @@ app.post('/api/payments/stars/invoice', telegramAuthMiddleware, async (req, res)
       : `Top up oracle energy by ${pack.energyAmount}%`;
 
   try {
+    await upsertTelegramUserFromRequest(req);
     const result = await createTelegramInvoiceLink({
       title,
       description,
@@ -606,6 +578,15 @@ app.post('/api/payments/stars/invoice', telegramAuthMiddleware, async (req, res)
         requestId: req.requestId
       });
     }
+    await saveCreatedInvoice({
+      telegramUserId: userId,
+      packId,
+      grantType: pack.grantType,
+      energyAmount: pack.energyAmount,
+      starsAmount: Math.round(pack.starsAmount),
+      payload,
+      invoiceLink: result.invoiceLink
+    });
     return res.json({
       ok: true,
       packId,
@@ -619,6 +600,77 @@ app.post('/api/payments/stars/invoice', telegramAuthMiddleware, async (req, res)
   } catch (error) {
     return res.status(502).json({
       error: 'telegram_invoice_create_failed',
+      details: error?.message ? String(error.message).slice(0, 300) : 'unknown',
+      requestId: req.requestId
+    });
+  }
+});
+
+app.post('/api/payments/stars/confirm', telegramAuthMiddleware, async (req, res) => {
+  if (!hasDb()) {
+    return res.status(503).json({
+      error: 'storage_unavailable',
+      reason: 'database_not_configured',
+      requestId: req.requestId
+    });
+  }
+  const userId =
+    Number.isFinite(Number(req.telegram?.userId)) && Number(req.telegram?.userId) > 0
+      ? Number(req.telegram.userId)
+      : parseUserIdFromInitData(readTelegramInitData(req).initData);
+  if (!userId) {
+    return res.status(401).json({
+      error: 'unauthorized',
+      reason: 'telegram_user_missing',
+      requestId: req.requestId
+    });
+  }
+
+  const payload = typeof req.body?.payload === 'string' ? req.body.payload.trim() : '';
+  const statusRaw = typeof req.body?.status === 'string' ? req.body.status.trim().toLowerCase() : '';
+  const allowedStatus = new Set(['paid', 'cancelled', 'pending', 'failed']);
+  if (!payload) {
+    return res.status(400).json({
+      error: 'invalid_payload',
+      requestId: req.requestId
+    });
+  }
+  if (!allowedStatus.has(statusRaw)) {
+    return res.status(400).json({
+      error: 'invalid_status',
+      requestId: req.requestId
+    });
+  }
+
+  try {
+    await upsertTelegramUserFromRequest(req);
+    const result = await confirmInvoiceStatus({
+      telegramUserId: userId,
+      payload,
+      status: statusRaw
+    });
+    if (!result.ok) {
+      return res.status(400).json({
+        error: result.reason || 'confirm_failed',
+        requestId: req.requestId
+      });
+    }
+    return res.json({
+      ok: true,
+      payload,
+      status: statusRaw,
+      grantApplied: result.grantApplied,
+      packId: result.packId,
+      grantType: result.grantType,
+      energyAmount: result.energyAmount,
+      starsAmount: result.starsAmount,
+      totalEnergyGranted: result.totalEnergyGranted,
+      unlimitedUntil: result.unlimitedUntil,
+      requestId: req.requestId
+    });
+  } catch (error) {
+    return res.status(502).json({
+      error: 'confirm_failed',
       details: error?.message ? String(error.message).slice(0, 300) : 'unknown',
       requestId: req.requestId
     });
@@ -662,11 +714,20 @@ app.post('/api/sofia/consent', telegramAuthMiddleware, async (req, res) => {
     });
   }
 
-  const state = updateSofiaConsentState({
-    userId: telegramUserId,
+  if (!hasDb()) {
+    return res.status(503).json({
+      error: 'storage_unavailable',
+      reason: 'database_not_configured',
+      requestId: req.requestId
+    });
+  }
+
+  await upsertTelegramUserFromRequest(req);
+  const state = await recordSofiaConsent({
+    telegramUserId,
     decision
   });
-  if (state.previousDecision === decision) {
+  if (state.duplicate) {
     return res.json({
       ok: true,
       duplicate: true,
@@ -1272,22 +1333,37 @@ if (!ARCANA_API_KEY && !TELEGRAM_BOT_TOKEN) {
   );
 }
 
-const port = Number(PORT) || 3000;
-app.listen(port, () => {
-  const region =
-    process.env.RAILWAY_REGION ||
-    process.env.AWS_REGION ||
-    process.env.FLY_REGION ||
-    process.env.VERCEL_REGION ||
-    '';
-  console.log(
-    JSON.stringify({
-      event: 'startup',
-      openaiKeyPresent: Boolean(OPENAI_API_KEY),
-      nodeEnv: process.env.NODE_ENV || '',
-      nodeVersion: process.version,
-      region
-    })
-  );
-  console.log(`Basil's Arcana API listening on ${port}`);
+async function startServer() {
+  if (DATABASE_URL && DATABASE_URL.trim()) {
+    initDb(DATABASE_URL);
+    await ensureSchema();
+    console.log(JSON.stringify({ event: 'db_ready' }));
+  } else {
+    console.warn(JSON.stringify({ event: 'db_missing', message: 'DATABASE_URL is not configured' }));
+  }
+
+  const port = Number(PORT) || 3000;
+  app.listen(port, () => {
+    const region =
+      process.env.RAILWAY_REGION ||
+      process.env.AWS_REGION ||
+      process.env.FLY_REGION ||
+      process.env.VERCEL_REGION ||
+      '';
+    console.log(
+      JSON.stringify({
+        event: 'startup',
+        openaiKeyPresent: Boolean(OPENAI_API_KEY),
+        nodeEnv: process.env.NODE_ENV || '',
+        nodeVersion: process.version,
+        region
+      })
+    );
+    console.log(`Basil's Arcana API listening on ${port}`);
+  });
+}
+
+startServer().catch((error) => {
+  console.error('Server startup failed', error);
+  process.exit(1);
 });
