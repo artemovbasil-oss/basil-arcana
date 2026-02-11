@@ -450,11 +450,24 @@ function buildLanguageKeyboard(): InlineKeyboard {
     .text(labels.en, "lang:en");
 }
 
+function buildLocalizedWebAppUrl(baseUrl: string, locale: SupportedLocale): string {
+  try {
+    const url = new URL(baseUrl);
+    url.searchParams.set("lang", locale);
+    return url.toString();
+  } catch (_) {
+    const separator = baseUrl.includes("?") ? "&" : "?";
+    return `${baseUrl}${separator}lang=${locale}`;
+  }
+}
+
 function buildMainMenuKeyboard(locale: SupportedLocale, hasActiveSubs: boolean): InlineKeyboard {
   const labels = STRINGS[locale].menuButtons;
   const keyboard = new InlineKeyboard();
   if (config.webAppUrl) {
-    keyboard.webApp(labels.launchApp, config.webAppUrl).row();
+    keyboard
+      .webApp(labels.launchApp, buildLocalizedWebAppUrl(config.webAppUrl, locale))
+      .row();
   }
   keyboard.text(labels.buy, "menu:buy").row().text(labels.about, "menu:about");
   if (hasActiveSubs) {

@@ -1,4 +1,6 @@
-import 'package:flutter/material.dart';
+import 'dart:ui';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 
@@ -62,8 +64,21 @@ const _settingsBoxName = 'settings';
 const _languageCodeKey = 'languageCode';
 const _deckIdKey = 'deckId';
 
-Locale _localeFromBox(Box<String> box) {
-  final code = box.get(_languageCodeKey) ?? 'en';
+String? _normalizeSupportedLanguageCode(String? raw) {
+  final code = raw?.trim().toLowerCase() ?? '';
+  if (code.startsWith('ru')) {
+    return 'ru';
+  }
+  if (code.startsWith('kk') || code.startsWith('kz')) {
+    return 'kk';
+  }
+  if (code.startsWith('en')) {
+    return 'en';
+  }
+  return null;
+}
+
+Locale _localeFromLanguageCode(String code) {
   switch (code) {
     case 'ru':
       return const Locale('ru');
@@ -73,6 +88,31 @@ Locale _localeFromBox(Box<String> box) {
     default:
       return const Locale('en');
   }
+}
+
+String _resolveLanguageCode(Box<String> box) {
+  final fromQuery = _normalizeSupportedLanguageCode(
+    Uri.base.queryParameters[_languageCodeKey],
+  );
+  if (fromQuery != null) {
+    return fromQuery;
+  }
+
+  if (kIsWeb) {
+    final fromSystem = _normalizeSupportedLanguageCode(
+      PlatformDispatcher.instance.locale.languageCode,
+    );
+    return fromSystem ?? 'en';
+  }
+
+  final fromStorage =
+      _normalizeSupportedLanguageCode(box.get(_languageCodeKey));
+  return fromStorage ?? 'en';
+}
+
+Locale _localeFromBox(Box<String> box) {
+  final code = _resolveLanguageCode(box);
+  return _localeFromLanguageCode(code);
 }
 
 class LocaleNotifier extends StateNotifier<Locale> {

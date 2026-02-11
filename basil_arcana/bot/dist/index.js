@@ -329,11 +329,24 @@ function buildLanguageKeyboard() {
         .row()
         .text(labels.en, "lang:en");
 }
+function buildLocalizedWebAppUrl(baseUrl, locale) {
+    try {
+        const url = new URL(baseUrl);
+        url.searchParams.set("lang", locale);
+        return url.toString();
+    }
+    catch (_) {
+        const separator = baseUrl.includes("?") ? "&" : "?";
+        return `${baseUrl}${separator}lang=${locale}`;
+    }
+}
 function buildMainMenuKeyboard(locale, hasActiveSubs) {
     const labels = STRINGS[locale].menuButtons;
     const keyboard = new grammy_1.InlineKeyboard();
     if (config.webAppUrl) {
-        keyboard.webApp(labels.launchApp, config.webAppUrl).row();
+        keyboard
+            .webApp(labels.launchApp, buildLocalizedWebAppUrl(config.webAppUrl, locale))
+            .row();
     }
     keyboard.text(labels.buy, "menu:buy").row().text(labels.about, "menu:about");
     if (hasActiveSubs) {
