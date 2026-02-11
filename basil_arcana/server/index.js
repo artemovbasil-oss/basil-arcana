@@ -300,6 +300,50 @@ function buildConfigPayload(req) {
   };
 }
 
+function normalizeLocale(value) {
+  const code = typeof value === 'string' ? value.trim().toLowerCase() : '';
+  if (code.startsWith('ru')) {
+    return 'ru';
+  }
+  if (code.startsWith('kk') || code.startsWith('kz')) {
+    return 'kk';
+  }
+  return 'en';
+}
+
+function buildSofiaPromo(locale) {
+  const normalized = normalizeLocale(locale);
+  if (normalized === 'ru') {
+    return 'Если хочешь более глубокую личную консультацию, обратись к профессиональному тарологу и астрологу Софии Нокс — @SofiaKnoxx. Оформи подписку в нашем Telegram-боте и получи персональный разбор.';
+  }
+  if (normalized === 'kk') {
+    return 'Терең жеке консультация алғың келсе, кәсіби таролог әрі астролог София Ноксқа жүгін — @SofiaKnoxx. Біздің Telegram-ботта жазылымды қосып, жеке талдау ал.';
+  }
+  return 'If you want a deeper personal consultation, contact professional tarot reader and astrologer Sofia Knox — @SofiaKnoxx. Activate a subscription in our Telegram bot to get a one-on-one reading.';
+}
+
+function appendSofiaPromo(text, locale) {
+  const source = typeof text === 'string' ? text.trim() : '';
+  if (source.includes('@SofiaKnoxx')) {
+    return source;
+  }
+  const promo = buildSofiaPromo(locale);
+  return source ? `${source}\n\n${promo}` : promo;
+}
+
+function appendPromoToReadingResult(parsed, locale) {
+  if (!parsed || typeof parsed !== 'object') {
+    return parsed;
+  }
+  const next = { ...parsed };
+  next.action = appendSofiaPromo(next.action, locale);
+  next.fullText = appendSofiaPromo(next.fullText, locale);
+  if (typeof next.detailsText === 'string') {
+    next.detailsText = appendSofiaPromo(next.detailsText, locale);
+  }
+  return next;
+}
+
 app.get('/config.json', (req, res) => {
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
   res.setHeader('Pragma', 'no-cache');
@@ -628,7 +672,9 @@ app.post('/api/reading/generate', telegramAuthMiddleware, async (req, res) => {
     const result = await createResponse(messages, {
       requestId: req.requestId
     });
-    return res.json({ ...result.parsed, requestId: req.requestId });
+    const locale = normalizeLocale(req.body?.language);
+    const enriched = appendPromoToReadingResult(result.parsed, locale);
+    return res.json({ ...enriched, requestId: req.requestId });
   } catch (err) {
     const durationMs = Date.now() - startTime;
     const upstream = {
@@ -692,7 +738,9 @@ app.post('/api/reading/generate_web', telegramAuthMiddleware, async (req, res) =
     const result = await createResponse(messages, {
       requestId: req.requestId
     });
-    return res.json({ ...result.parsed, requestId: req.requestId });
+    const locale = normalizeLocale(payload?.language);
+    const enriched = appendPromoToReadingResult(result.parsed, locale);
+    return res.json({ ...enriched, requestId: req.requestId });
   } catch (err) {
     const durationMs = Date.now() - startTime;
     const upstream = {
@@ -759,7 +807,11 @@ app.post('/api/reading/details', telegramAuthMiddleware, async (req, res) => {
         duration_ms: durationMs,
       })
     );
-    return res.json({ detailsText, requestId: req.requestId });
+    const locale = normalizeLocale(req.body?.locale);
+    return res.json({
+      detailsText: appendSofiaPromo(detailsText, locale),
+      requestId: req.requestId
+    });
   } catch (err) {
     const durationMs = Date.now() - startTime;
     if (err?.name === 'AbortError') {
@@ -839,7 +891,11 @@ app.post('/api/natal-chart/generate', async (req, res) => {
         duration_ms: durationMs,
       })
     );
-    return res.json({ interpretation, requestId: req.requestId });
+    const locale = normalizeLocale(req.body?.language);
+    return res.json({
+      interpretation: appendSofiaPromo(interpretation, locale),
+      requestId: req.requestId
+    });
   } catch (err) {
     const durationMs = Date.now() - startTime;
     if (err?.name === 'AbortError') {
@@ -919,7 +975,11 @@ app.post('/api/natal-chart/generate_web', async (req, res) => {
         duration_ms: durationMs,
       })
     );
-    return res.json({ interpretation, requestId: req.requestId });
+    const locale = normalizeLocale(payload?.language);
+    return res.json({
+      interpretation: appendSofiaPromo(interpretation, locale),
+      requestId: req.requestId
+    });
   } catch (err) {
     const durationMs = Date.now() - startTime;
     if (err?.name === 'AbortError') {
