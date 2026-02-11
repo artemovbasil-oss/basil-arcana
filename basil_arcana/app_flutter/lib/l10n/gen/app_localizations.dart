@@ -1168,11 +1168,23 @@ abstract class AppLocalizations {
   /// **'Buy full energy'**
   String get energyPackFull;
 
+  /// No description provided for @energyPackYearUnlimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited energy for 1 year — 1000 ⭐'**
+  String get energyPackYearUnlimited;
+
   /// No description provided for @energyTopUpSuccess.
   ///
   /// In en, this message translates to:
   /// **'Energy restored by {value}%.'**
   String energyTopUpSuccess(int value);
+
+  /// No description provided for @energyUnlimitedActivated.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited energy activated for 1 year.'**
+  String get energyUnlimitedActivated;
 
   /// No description provided for @energyTopUpProcessing.
   ///

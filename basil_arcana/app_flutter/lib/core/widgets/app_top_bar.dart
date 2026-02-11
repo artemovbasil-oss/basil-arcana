@@ -126,6 +126,7 @@ class _EnergyHeaderPillState extends ConsumerState<_EnergyHeaderPill>
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final energy = ref.watch(energyProvider);
+    final energyValueText = energy.isUnlimited ? '∞' : '${energy.percent}%';
     final isLow = energy.clampedValue < 15;
     const vividPurple = Color(0xFFA05CFF);
     const darkBurgundy = Color(0xFF4A102A);
@@ -146,97 +147,64 @@ class _EnergyHeaderPillState extends ConsumerState<_EnergyHeaderPill>
         final glow = isLow ? (0.25 + 0.22 * curveT) : (0.1 + 0.1 * curveT);
         return Transform.scale(
           scale: pulse,
-          child: Container(
-            height: 38,
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            decoration: BoxDecoration(
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
               borderRadius: BorderRadius.circular(999),
-              gradient: LinearGradient(
-                colors: [
-                  base,
-                  end,
-                ],
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-              ),
-              border: Border.all(color: edge),
-              boxShadow: [
-                BoxShadow(
-                  color: base.withOpacity(glow),
-                  blurRadius: isLow ? 16 : 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    l10n.energyLabel,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.labelMedium?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                    ),
+              onTap: () async {
+                await showEnergyTopUpSheet(context, ref);
+              },
+              child: Container(
+                height: 38,
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(999),
+                  gradient: LinearGradient(
+                    colors: [
+                      base,
+                      end,
+                    ],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
                   ),
-                ),
-                Text(
-                  '${energy.percent}%',
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(width: 4),
-                Tooltip(
-                  triggerMode: TooltipTriggerMode.tap,
-                  waitDuration: Duration.zero,
-                  showDuration: const Duration(seconds: 3),
-                  message: l10n.energyInfoTooltip,
-                  child: Container(
-                    width: 16,
-                    height: 16,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: Colors.white.withOpacity(0.9),
-                      ),
+                  border: Border.all(color: edge),
+                  boxShadow: [
+                    BoxShadow(
+                      color: base.withOpacity(glow),
+                      blurRadius: isLow ? 16 : 10,
+                      offset: const Offset(0, 4),
                     ),
-                    child: const Center(
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
                       child: Text(
-                        'i',
-                        style: TextStyle(
+                        l10n.energyLabel,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.labelMedium?.copyWith(
                           color: Colors.white,
-                          fontSize: 10,
                           fontWeight: FontWeight.w700,
-                          height: 1,
                         ),
                       ),
                     ),
-                  ),
-                ),
-                if (energy.isNearEmpty) ...[
-                  const SizedBox(width: 4),
-                  IconButton(
-                    iconSize: 16,
-                    visualDensity: VisualDensity.compact,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints.tightFor(
-                      width: 22,
-                      height: 22,
+                    Text(
+                      energyValueText,
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
-                    tooltip: l10n.energyTopUpButton,
-                    onPressed: () async {
-                      await showEnergyTopUpSheet(context, ref);
-                    },
-                    icon: const Icon(
-                      Icons.add_circle_outline,
+                    const SizedBox(width: 6),
+                    const Icon(
+                      Icons.chevron_right,
+                      size: 16,
                       color: Colors.white,
                     ),
-                  ),
-                ],
-              ],
+                  ],
+                ),
+              ),
             ),
           ),
         );

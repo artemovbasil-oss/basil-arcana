@@ -593,9 +593,16 @@ class AppLocalizationsRu extends AppLocalizations {
   String get energyPackFull => 'Купить полный заряд';
 
   @override
+  String get energyPackYearUnlimited => 'Бесконечная энергия на 1 год — 1000 ⭐';
+
+  @override
   String energyTopUpSuccess(int value) {
     return 'Энергия пополнена на $value%.';
   }
+
+  @override
+  String get energyUnlimitedActivated =>
+      'Бесконечная энергия активирована на 1 год.';
 
   @override
   String get energyTopUpProcessing => 'Открываем оплату...';

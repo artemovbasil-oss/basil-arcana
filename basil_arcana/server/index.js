@@ -217,11 +217,13 @@ const ASSETS_BASE_URL_ENV = process.env.ASSETS_BASE_URL || 'https://cdn.basilarc
 const STARS_PACK_SMALL_XTR = Number(process.env.STARS_PACK_SMALL_XTR || 25);
 const STARS_PACK_MEDIUM_XTR = Number(process.env.STARS_PACK_MEDIUM_XTR || 45);
 const STARS_PACK_FULL_XTR = Number(process.env.STARS_PACK_FULL_XTR || 75);
+const STARS_PACK_YEAR_XTR = Number(process.env.STARS_PACK_YEAR_XTR || 1000);
 
 const ENERGY_STARS_PACKS = {
-  small: { energyAmount: 25, starsAmount: STARS_PACK_SMALL_XTR },
-  medium: { energyAmount: 50, starsAmount: STARS_PACK_MEDIUM_XTR },
-  full: { energyAmount: 100, starsAmount: STARS_PACK_FULL_XTR }
+  small: { energyAmount: 25, starsAmount: STARS_PACK_SMALL_XTR, grantType: 'energy' },
+  medium: { energyAmount: 50, starsAmount: STARS_PACK_MEDIUM_XTR, grantType: 'energy' },
+  full: { energyAmount: 100, starsAmount: STARS_PACK_FULL_XTR, grantType: 'energy' },
+  year_unlimited: { energyAmount: 0, starsAmount: STARS_PACK_YEAR_XTR, grantType: 'unlimited_year' }
 };
 
 function parseUserIdFromInitData(initData) {
@@ -403,8 +405,14 @@ app.post('/api/payments/stars/invoice', telegramAuthMiddleware, async (req, res)
   }
 
   const payload = `energy:${packId}:user:${userId}:ts:${Date.now()}`;
-  const title = `Energy +${pack.energyAmount}%`;
-  const description = `Top up oracle energy by ${pack.energyAmount}%`;
+  const title =
+    pack.grantType === 'unlimited_year'
+      ? 'Unlimited energy for 1 year'
+      : `Energy +${pack.energyAmount}%`;
+  const description =
+    pack.grantType === 'unlimited_year'
+      ? 'Unlock unlimited oracle energy for 365 days'
+      : `Top up oracle energy by ${pack.energyAmount}%`;
 
   try {
     const result = await createTelegramInvoiceLink({
@@ -424,6 +432,7 @@ app.post('/api/payments/stars/invoice', telegramAuthMiddleware, async (req, res)
     return res.json({
       ok: true,
       packId,
+      grantType: pack.grantType,
       energyAmount: pack.energyAmount,
       starsAmount: Math.round(pack.starsAmount),
       invoiceLink: result.invoiceLink,

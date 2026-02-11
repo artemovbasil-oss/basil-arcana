@@ -587,9 +587,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get energyPackFull => 'Buy full energy';
 
   @override
+  String get energyPackYearUnlimited => 'Unlimited energy for 1 year — 1000 ⭐';
+
+  @override
   String energyTopUpSuccess(int value) {
     return 'Energy restored by $value%.';
   }
+
+  @override
+  String get energyUnlimitedActivated =>
+      'Unlimited energy activated for 1 year.';
 
   @override
   String get energyTopUpProcessing => 'Opening payment...';

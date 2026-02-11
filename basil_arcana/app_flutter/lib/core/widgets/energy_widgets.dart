@@ -58,6 +58,11 @@ Future<void> showEnergyTopUpSheet(BuildContext context, WidgetRef ref) async {
                     l10n.energyTopUpDescription,
                     style: Theme.of(sheetContext).textTheme.bodyMedium,
                   ),
+                  const SizedBox(height: 8),
+                  Text(
+                    l10n.energyInfoTooltip,
+                    style: Theme.of(sheetContext).textTheme.bodySmall,
+                  ),
                   const SizedBox(height: 16),
                   if (processingPack != null)
                     Padding(
@@ -125,6 +130,27 @@ Future<void> showEnergyTopUpSheet(BuildContext context, WidgetRef ref) async {
                             }
                           },
                   ),
+                  const SizedBox(height: 10),
+                  AppGhostButton(
+                    label: l10n.energyPackYearUnlimited,
+                    icon: Icons.all_inclusive,
+                    onPressed: processingPack != null
+                        ? null
+                        : () async {
+                            setState(() =>
+                                processingPack = EnergyPackId.yearUnlimited);
+                            await _purchaseEnergyPack(
+                              context: context,
+                              sheetContext: statefulContext,
+                              ref: ref,
+                              l10n: l10n,
+                              packId: EnergyPackId.yearUnlimited,
+                            );
+                            if (statefulContext.mounted) {
+                              setState(() => processingPack = null);
+                            }
+                          },
+                  ),
                 ],
               ),
             ),
@@ -163,15 +189,24 @@ Future<void> _purchaseEnergyPack({
 
     switch (status) {
       case 'paid':
-        await ref
-            .read(energyProvider.notifier)
-            .addEnergy(invoice.energyAmount.toDouble());
+        if (packId == EnergyPackId.yearUnlimited) {
+          await ref.read(energyProvider.notifier).activateUnlimitedForYear();
+        } else {
+          await ref
+              .read(energyProvider.notifier)
+              .addEnergy(invoice.energyAmount.toDouble());
+        }
         if (sheetContext.mounted) {
           Navigator.of(sheetContext).pop();
         }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(l10n.energyTopUpSuccess(invoice.energyAmount))),
+            content: Text(
+              packId == EnergyPackId.yearUnlimited
+                  ? l10n.energyUnlimitedActivated
+                  : l10n.energyTopUpSuccess(invoice.energyAmount),
+            ),
+          ),
         );
         return;
       case 'cancelled':

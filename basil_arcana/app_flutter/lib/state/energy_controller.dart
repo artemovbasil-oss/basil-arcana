@@ -23,18 +23,29 @@ class EnergyState {
   const EnergyState({
     required this.value,
     required this.lastUpdatedAt,
+    this.unlimitedUntil,
   });
 
   final double value;
   final DateTime lastUpdatedAt;
+  final DateTime? unlimitedUntil;
+
+  bool get isUnlimited {
+    final until = unlimitedUntil;
+    return until != null && until.isAfter(DateTime.now());
+  }
 
   double get clampedValue => value.clamp(0, EnergyController.maxEnergy);
-  double get progress => clampedValue / EnergyController.maxEnergy;
-  int get percent => clampedValue.round();
+  double get progress =>
+      isUnlimited ? 1 : clampedValue / EnergyController.maxEnergy;
+  int get percent => isUnlimited ? 100 : clampedValue.round();
   bool get isLow => clampedValue <= EnergyController.lowThreshold;
   bool get isNearEmpty => clampedValue <= EnergyController.nearEmptyThreshold;
 
   Duration get timeToFull {
+    if (isUnlimited) {
+      return Duration.zero;
+    }
     final missing = EnergyController.maxEnergy - clampedValue;
     if (missing <= 0) {
       return Duration.zero;
@@ -46,10 +57,14 @@ class EnergyState {
   EnergyState copyWith({
     double? value,
     DateTime? lastUpdatedAt,
+    DateTime? unlimitedUntil,
+    bool clearUnlimitedUntil = false,
   }) {
     return EnergyState(
       value: value ?? this.value,
       lastUpdatedAt: lastUpdatedAt ?? this.lastUpdatedAt,
+      unlimitedUntil:
+          clearUnlimitedUntil ? null : (unlimitedUntil ?? this.unlimitedUntil),
     );
   }
 }
@@ -65,11 +80,13 @@ class EnergyController extends StateNotifier<EnergyState> {
   }
 
   static const double maxEnergy = 100;
-  static const double recoveryPerSecond = maxEnergy / 600;
+  static const double recoveryPerSecond = maxEnergy / 1800;
   static const double lowThreshold = 15;
   static const double nearEmptyThreshold = 6;
   static const String valueStorageKey = 'oracle_energy_value';
   static const String timestampStorageKey = 'oracle_energy_updated_at';
+  static const String unlimitedUntilStorageKey =
+      'oracle_energy_unlimited_until';
 
   final Box<String> _box;
   Timer? _ticker;
@@ -79,24 +96,38 @@ class EnergyController extends StateNotifier<EnergyState> {
     final storedTimestamp = DateTime.tryParse(
       box.get(timestampStorageKey) ?? '',
     );
+    final storedUnlimitedUntil = DateTime.tryParse(
+      box.get(unlimitedUntilStorageKey) ?? '',
+    );
     final base = EnergyState(
       value: storedValue ?? maxEnergy,
       lastUpdatedAt: storedTimestamp ?? DateTime.now(),
+      unlimitedUntil: storedUnlimitedUntil,
     );
     return _applyRecovery(base, DateTime.now());
   }
 
   static EnergyState _applyRecovery(EnergyState source, DateTime now) {
+    final unlimitedUntil = source.unlimitedUntil;
+    if (unlimitedUntil != null && unlimitedUntil.isAfter(now)) {
+      return source.copyWith(
+        value: maxEnergy,
+        lastUpdatedAt: now,
+      );
+    }
     final elapsedSeconds =
         now.difference(source.lastUpdatedAt).inMilliseconds / 1000;
     if (elapsedSeconds <= 0) {
-      return source;
+      return source.copyWith(
+        clearUnlimitedUntil: source.unlimitedUntil != null,
+      );
     }
     final recovered = source.clampedValue + elapsedSeconds * recoveryPerSecond;
     final next = recovered.clamp(0, maxEnergy);
     return source.copyWith(
       value: next.toDouble(),
       lastUpdatedAt: now,
+      clearUnlimitedUntil: source.unlimitedUntil != null,
     );
   }
 
@@ -106,12 +137,20 @@ class EnergyController extends StateNotifier<EnergyState> {
 
   bool canAfford(EnergyAction action) {
     refresh();
+    if (state.isUnlimited) {
+      return true;
+    }
     return state.clampedValue + 1e-9 >= action.cost;
   }
 
   Future<bool> spend(EnergyAction action) async {
     final now = DateTime.now();
     final refreshed = _applyRecovery(state, now);
+    if (refreshed.isUnlimited) {
+      state = refreshed;
+      await _persist(refreshed);
+      return true;
+    }
     if (refreshed.clampedValue + 1e-9 < action.cost) {
       state = refreshed;
       return false;
@@ -147,9 +186,26 @@ class EnergyController extends StateNotifier<EnergyState> {
     await _persist(next);
   }
 
+  Future<void> activateUnlimitedForYear() async {
+    final now = DateTime.now();
+    final next = state.copyWith(
+      value: maxEnergy,
+      lastUpdatedAt: now,
+      unlimitedUntil: now.add(const Duration(days: 365)),
+    );
+    state = next;
+    await _persist(next);
+  }
+
   Future<void> _persist(EnergyState source) async {
     await _box.put(valueStorageKey, source.clampedValue.toStringAsFixed(3));
     await _box.put(timestampStorageKey, source.lastUpdatedAt.toIso8601String());
+    final until = source.unlimitedUntil;
+    if (until != null && until.isAfter(DateTime.now())) {
+      await _box.put(unlimitedUntilStorageKey, until.toIso8601String());
+    } else {
+      await _box.delete(unlimitedUntilStorageKey);
+    }
   }
 
   @override

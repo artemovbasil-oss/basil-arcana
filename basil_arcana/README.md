@@ -75,6 +75,7 @@ curl -X POST http://localhost:3000/api/reading/generate \
    - `STARS_PACK_SMALL_XTR` (optional, default `25`)
    - `STARS_PACK_MEDIUM_XTR` (optional, default `45`)
    - `STARS_PACK_FULL_XTR` (optional, default `75`)
+   - `STARS_PACK_YEAR_XTR` (optional, default `1000`)
 4. Ensure the `start` script runs (`npm start`). Railway uses `process.env.PORT`.
 5. Use the Railway public URL to test `/health`.
 
@@ -132,7 +133,7 @@ Production default: `https://api.basilarcana.com`.
 - **Railway environment variables**:
   - Web service: `API_BASE_URL`
   - Web service (optional): `APP_VERSION` (default `2026-02-08-1`), `PUBLIC_ROOT` (default `server/public`)
-  - API service: `OPENAI_API_KEY`, `ARCANA_API_KEY`, `TELEGRAM_BOT_TOKEN` (+ optional `OPENAI_MODEL`, rate limit vars, `STARS_PACK_SMALL_XTR`, `STARS_PACK_MEDIUM_XTR`, `STARS_PACK_FULL_XTR`)
+  - API service: `OPENAI_API_KEY`, `ARCANA_API_KEY`, `TELEGRAM_BOT_TOKEN` (+ optional `OPENAI_MODEL`, rate limit vars, `STARS_PACK_SMALL_XTR`, `STARS_PACK_MEDIUM_XTR`, `STARS_PACK_FULL_XTR`, `STARS_PACK_YEAR_XTR`)
   - Bot service: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBAPP_URL` (optional), `APP_VERSION` (optional)
 - **iOS Telegram verification**:
   - Open the mini app via the bot button on iOS.

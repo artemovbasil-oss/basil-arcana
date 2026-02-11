@@ -591,9 +591,15 @@ class AppLocalizationsKk extends AppLocalizations {
   String get energyPackFull => 'Толық энергияны сатып алу';
 
   @override
+  String get energyPackYearUnlimited => '1 жылға шексіз энергия — 1000 ⭐';
+
+  @override
   String energyTopUpSuccess(int value) {
     return 'Энергия $value%-ға толықты.';
   }
+
+  @override
+  String get energyUnlimitedActivated => 'Шексіз энергия 1 жылға қосылды.';
 
   @override
   String get energyTopUpProcessing => 'Төлем ашылып жатыр...';
