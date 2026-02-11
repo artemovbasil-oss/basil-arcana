@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const grammy_1 = require("grammy");
 const config_1 = require("./config");
+const db_1 = require("./db");
 const config = (0, config_1.loadConfig)();
 const SOFIA_PROFILE_URL = "https://t.me/SofiaKnoxx";
 const TELEGRAM_STARS_CURRENCY = "XTR";
@@ -215,9 +216,6 @@ const STRINGS = {
 const userState = new Map();
 const issuedCodes = new Set();
 const processedPayments = new Set();
-function blankPurchasedByPlan() {
-    return { single: 0, week: 0, month: 0, year: 0 };
-}
 function getUserState(userId) {
     const existing = userState.get(userId);
     if (existing) {
@@ -227,9 +225,6 @@ function getUserState(userId) {
         locale: null,
         pendingStartPayload: null,
         selectedPlan: null,
-        subscriptionEndsAt: null,
-        unspentSingleReadings: 0,
-        purchasedByPlan: blankPurchasedByPlan(),
         username: null,
         firstName: null,
         lastName: null,
@@ -237,15 +232,25 @@ function getUserState(userId) {
     userState.set(userId, initial);
     return initial;
 }
-function rememberUserProfile(ctx) {
+function toDbLocale(locale) {
+    if (!locale) {
+        return null;
+    }
+    return locale;
+}
+async function rememberUserProfile(ctx) {
     const userId = ctx.from?.id;
     if (!userId) {
         return;
     }
     const state = getUserState(userId);
+    if (!state.locale) {
+        state.locale = (await (0, db_1.getUserLocale)(userId));
+    }
     state.username = ctx.from?.username ?? state.username;
     state.firstName = ctx.from?.first_name ?? state.firstName;
     state.lastName = ctx.from?.last_name ?? state.lastName;
+    await (0, db_1.upsertUserProfile)(userId, state.username, state.firstName, state.lastName, toDbLocale(state.locale));
 }
 function detectLocaleFromTelegram(ctx) {
     const code = ctx.from?.language_code?.toLowerCase() ?? "";
@@ -359,12 +364,12 @@ async function sendLanguagePicker(ctx) {
     });
 }
 async function sendMainMenu(ctx) {
-    rememberUserProfile(ctx);
+    await rememberUserProfile(ctx);
     const locale = getLocale(ctx);
     const strings = STRINGS[locale];
     const userId = ctx.from?.id;
-    const state = userId ? getUserState(userId) : null;
-    const hasActiveSubs = state ? isSubscriptionActive(state) : false;
+    const subscription = userId ? await (0, db_1.getUserSubscription)(userId) : null;
+    const hasActiveSubs = subscription ? isSubscriptionActive(subscription) : false;
     const lines = [strings.menuTitle, strings.menuDescription];
     if (!config.webAppUrl) {
         console.error("TELEGRAM_WEBAPP_URL is missing; Launch app button disabled.");
@@ -394,8 +399,8 @@ async function sendMySubscriptions(ctx) {
     }
     const locale = getLocale(ctx);
     const strings = STRINGS[locale];
-    const state = getUserState(userId);
-    if (!isSubscriptionActive(state)) {
+    const state = await (0, db_1.getUserSubscription)(userId);
+    if (!state || !isSubscriptionActive(state)) {
         await ctx.reply(strings.subscriptionsNone, { reply_markup: buildBackKeyboard(locale) });
         return;
     }
@@ -407,7 +412,7 @@ async function sendMySubscriptions(ctx) {
         "",
         `${strings.subscriptionsUntil}: ${endsAt}`,
         `${strings.subscriptionsSingleLeft}: ${state.unspentSingleReadings}`,
-        `${strings.subscriptionsPlansCount}: 1d x${state.purchasedByPlan.single}, 7d x${state.purchasedByPlan.week}, 30d x${state.purchasedByPlan.month}, 365d x${state.purchasedByPlan.year}`,
+        `${strings.subscriptionsPlansCount}: 1d x${state.purchasedSingle}, 7d x${state.purchasedWeek}, 30d x${state.purchasedMonth}, 365d x${state.purchasedYear}`,
     ];
     await ctx.reply(lines.join("\n"), { reply_markup: buildBackKeyboard(locale) });
 }
@@ -482,28 +487,23 @@ async function notifySofia(ctx, planId, purchaseCode, expiresAt) {
     await ctx.api.sendMessage(sofiaChatId, text);
     return true;
 }
-function applyPurchasedPlan(userId, planId) {
-    const state = getUserState(userId);
-    state.selectedPlan = planId;
-    state.purchasedByPlan[planId] += 1;
-    if (PLANS[planId].isSingleUse) {
-        state.unspentSingleReadings += 1;
-    }
-    state.subscriptionEndsAt = extendSubscription(state.subscriptionEndsAt, PLANS[planId].durationDays);
-    return new Date(state.subscriptionEndsAt);
-}
-function consumeOneSingleReading(state) {
-    if (state.unspentSingleReadings <= 0) {
-        return false;
-    }
-    state.unspentSingleReadings -= 1;
-    if (state.subscriptionEndsAt) {
-        state.subscriptionEndsAt = Math.max(0, state.subscriptionEndsAt - DAY_MS);
-    }
-    return true;
+async function applyPurchasedPlan(userId, planId) {
+    const prev = await (0, db_1.getUserSubscription)(userId);
+    const nextEnds = extendSubscription(prev?.subscriptionEndsAt ?? null, PLANS[planId].durationDays);
+    const next = {
+        telegramUserId: userId,
+        subscriptionEndsAt: nextEnds,
+        unspentSingleReadings: (prev?.unspentSingleReadings ?? 0) + (PLANS[planId].isSingleUse ? 1 : 0),
+        purchasedSingle: (prev?.purchasedSingle ?? 0) + (planId === "single" ? 1 : 0),
+        purchasedWeek: (prev?.purchasedWeek ?? 0) + (planId === "week" ? 1 : 0),
+        purchasedMonth: (prev?.purchasedMonth ?? 0) + (planId === "month" ? 1 : 0),
+        purchasedYear: (prev?.purchasedYear ?? 0) + (planId === "year" ? 1 : 0),
+    };
+    await (0, db_1.saveUserSubscription)(next);
+    return new Date(nextEnds);
 }
 async function handleSuccessfulPayment(ctx) {
-    rememberUserProfile(ctx);
+    await rememberUserProfile(ctx);
     const userId = ctx.from?.id;
     const locale = getLocale(ctx);
     const strings = STRINGS[locale];
@@ -517,6 +517,10 @@ async function handleSuccessfulPayment(ctx) {
     if (processedPayments.has(payment.telegram_payment_charge_id)) {
         return;
     }
+    if (await (0, db_1.paymentExists)(payment.telegram_payment_charge_id)) {
+        processedPayments.add(payment.telegram_payment_charge_id);
+        return;
+    }
     const planId = parsePlanFromPayload(payment.invoice_payload);
     if (!planId) {
         await ctx.reply(strings.unknownPaymentPlan);
@@ -528,8 +532,9 @@ async function handleSuccessfulPayment(ctx) {
         return;
     }
     processedPayments.add(payment.telegram_payment_charge_id);
-    const expiresAt = applyPurchasedPlan(userId, planId);
     const code = generatePurchaseCode();
+    const expiresAt = await applyPurchasedPlan(userId, planId);
+    await (0, db_1.insertPayment)(payment.telegram_payment_charge_id, userId, planId, payment.currency, payment.total_amount, code, expiresAt.getTime());
     const expiresText = formatDateForLocale(expiresAt, locale);
     const instruction = strings.codeInstruction
         .replace("{code}", code)
@@ -580,28 +585,30 @@ function parseCommandArg(ctx) {
     const parts = match.split(/\s+/);
     return parts[0] ?? null;
 }
-function formatStateForSofia(userId, state) {
-    const ends = state.subscriptionEndsAt
-        ? formatDateForLocale(new Date(state.subscriptionEndsAt), "ru")
+function formatStateForSofia(row) {
+    const ends = row.subscriptionEndsAt
+        ? formatDateForLocale(new Date(row.subscriptionEndsAt), "ru")
         : "-";
-    const username = state.username ? `@${state.username}` : "-";
-    const fullName = `${state.firstName ?? ""} ${state.lastName ?? ""}`.trim() || "-";
+    const username = row.username ? `@${row.username}` : "-";
+    const fullName = `${row.firstName ?? ""} ${row.lastName ?? ""}`.trim() || "-";
     return [
-        `ID: ${userId}`,
+        `ID: ${row.telegramUserId}`,
         `Username: ${username}`,
         `Имя: ${fullName}`,
         `Активно до: ${ends}`,
-        `Разовые разборы: ${state.unspentSingleReadings}`,
-        `Пакеты: 1d x${state.purchasedByPlan.single}, 7d x${state.purchasedByPlan.week}, 30d x${state.purchasedByPlan.month}, 365d x${state.purchasedByPlan.year}`,
+        `Разовые разборы: ${row.unspentSingleReadings}`,
+        `Пакеты: 1d x${row.purchasedSingle}, 7d x${row.purchasedWeek}, 30d x${row.purchasedMonth}, 365d x${row.purchasedYear}`,
     ].join("\n");
 }
 async function sendLauncherMessage(ctx) {
     await sendMainMenu(ctx);
 }
 async function main() {
+    (0, db_1.initDb)(config.databaseUrl);
+    await (0, db_1.ensureSchema)();
     const bot = new grammy_1.Bot(config.telegramToken);
     bot.command("start", async (ctx) => {
-        rememberUserProfile(ctx);
+        await rememberUserProfile(ctx);
         const userId = ctx.from?.id;
         if (!userId) {
             await sendLauncherMessage(ctx);
@@ -621,7 +628,7 @@ async function main() {
         await sendLauncherMessage(ctx);
     });
     bot.command("help", async (ctx) => {
-        rememberUserProfile(ctx);
+        await rememberUserProfile(ctx);
         const userId = ctx.from?.id;
         if (userId) {
             const state = getUserState(userId);
@@ -642,14 +649,14 @@ async function main() {
         if (!isSofiaOperator(ctx)) {
             return;
         }
-        const active = Array.from(userState.entries()).filter(([, state]) => isSubscriptionActive(state));
+        const active = await (0, db_1.listActiveSubscriptions)();
         if (active.length === 0) {
             await ctx.reply("Активных подписок сейчас нет.");
             return;
         }
         const chunks = [];
-        for (const [userId, state] of active) {
-            chunks.push(formatStateForSofia(userId, state));
+        for (const row of active) {
+            chunks.push(formatStateForSofia(row));
         }
         await ctx.reply(`Активные подписки (${active.length}):\n\n${chunks.join("\n\n----------------\n\n")}\n\nКоманда закрытия: /sub_done <user_id>`);
     });
@@ -663,13 +670,8 @@ async function main() {
             await ctx.reply("Использование: /sub_done <user_id>");
             return;
         }
-        const state = userState.get(userId);
-        if (!state) {
-            await ctx.reply("Пользователь не найден в активной базе бота.");
-            return;
-        }
-        const hadSingle = consumeOneSingleReading(state);
-        if (hadSingle) {
+        const completion = await (0, db_1.completeConsultation)(userId);
+        if (completion === "single") {
             await ctx.reply(`Завершен один разовый разбор для user_id=${userId}.`);
             try {
                 await ctx.api.sendMessage(userId, "✅ София отметила, что консультация оказана. Один разовый разбор списан.");
@@ -679,8 +681,7 @@ async function main() {
             }
             return;
         }
-        if ((state.subscriptionEndsAt ?? 0) > Date.now()) {
-            state.subscriptionEndsAt = Date.now();
+        if (completion === "timed") {
             await ctx.reply(`Подписка пользователя user_id=${userId} завершена.`);
             try {
                 await ctx.api.sendMessage(userId, "✅ София отметила консультацию как завершенную. Текущая подписка закрыта.");
@@ -690,10 +691,10 @@ async function main() {
             }
             return;
         }
-        await ctx.reply("У пользователя нет активной подписки для завершения.");
+        await ctx.reply("У пользователя нет активной подписки для завершения или он не найден.");
     });
     bot.callbackQuery(/^lang:(ru|en|kk)$/, async (ctx) => {
-        rememberUserProfile(ctx);
+        await rememberUserProfile(ctx);
         await ctx.answerCallbackQuery();
         const userId = ctx.from?.id;
         if (!userId) {
@@ -702,6 +703,7 @@ async function main() {
         }
         const state = getUserState(userId);
         state.locale = ctx.match[1];
+        await (0, db_1.upsertUserProfile)(userId, state.username, state.firstName, state.lastName, toDbLocale(state.locale));
         const pending = state.pendingStartPayload;
         state.pendingStartPayload = null;
         if (pending === "plans") {
@@ -711,7 +713,7 @@ async function main() {
         await sendMainMenu(ctx);
     });
     bot.on("message:web_app_data", async (ctx) => {
-        rememberUserProfile(ctx);
+        await rememberUserProfile(ctx);
         const data = ctx.message.web_app_data?.data ?? "";
         const action = parseWebAppAction(data);
         if (action !== "professional_reading" && action !== "show_plans") {
@@ -720,27 +722,27 @@ async function main() {
         await sendPlans(ctx);
     });
     bot.callbackQuery("menu:buy", async (ctx) => {
-        rememberUserProfile(ctx);
+        await rememberUserProfile(ctx);
         await ctx.answerCallbackQuery();
         await sendPlans(ctx, { ignoreDebounce: true });
     });
     bot.callbackQuery("menu:about", async (ctx) => {
-        rememberUserProfile(ctx);
+        await rememberUserProfile(ctx);
         await ctx.answerCallbackQuery();
         await sendAbout(ctx);
     });
     bot.callbackQuery("menu:subscriptions", async (ctx) => {
-        rememberUserProfile(ctx);
+        await rememberUserProfile(ctx);
         await ctx.answerCallbackQuery();
         await sendMySubscriptions(ctx);
     });
     bot.callbackQuery("menu:home", async (ctx) => {
-        rememberUserProfile(ctx);
+        await rememberUserProfile(ctx);
         await ctx.answerCallbackQuery();
         await sendMainMenu(ctx);
     });
     bot.callbackQuery(/^plan:(single|week|month|year)$/, async (ctx) => {
-        rememberUserProfile(ctx);
+        await rememberUserProfile(ctx);
         await ctx.answerCallbackQuery();
         const userId = ctx.from?.id;
         if (!userId) {
@@ -755,7 +757,7 @@ async function main() {
         await startPaymentFlow(ctx, planId);
     });
     bot.on("pre_checkout_query", async (ctx) => {
-        rememberUserProfile(ctx);
+        await rememberUserProfile(ctx);
         const query = ctx.preCheckoutQuery;
         if (!query) {
             return;
@@ -780,7 +782,7 @@ async function main() {
         await handleSuccessfulPayment(ctx);
     });
     bot.on("message:text", async (ctx) => {
-        rememberUserProfile(ctx);
+        await rememberUserProfile(ctx);
         const userId = ctx.from?.id;
         if (userId) {
             const state = getUserState(userId);

@@ -1,5 +1,19 @@
 import { Bot, InlineKeyboard, type Context } from "grammy";
 import { loadConfig } from "./config";
+import {
+  completeConsultation,
+  ensureSchema,
+  getUserLocale,
+  getUserSubscription,
+  initDb,
+  insertPayment,
+  listActiveSubscriptions,
+  paymentExists,
+  saveUserSubscription,
+  upsertUserProfile,
+  type DbLocale,
+  type UserSubscriptionRecord,
+} from "./db";
 
 const config = loadConfig();
 
@@ -23,9 +37,6 @@ interface UserState {
   locale: SupportedLocale | null;
   pendingStartPayload: string | null;
   selectedPlan: PlanId | null;
-  subscriptionEndsAt: number | null;
-  unspentSingleReadings: number;
-  purchasedByPlan: Record<PlanId, number>;
   username: string | null;
   firstName: string | null;
   lastName: string | null;
@@ -305,10 +316,6 @@ const userState = new Map<number, UserState>();
 const issuedCodes = new Set<string>();
 const processedPayments = new Set<string>();
 
-function blankPurchasedByPlan(): Record<PlanId, number> {
-  return { single: 0, week: 0, month: 0, year: 0 };
-}
-
 function getUserState(userId: number): UserState {
   const existing = userState.get(userId);
   if (existing) {
@@ -318,9 +325,6 @@ function getUserState(userId: number): UserState {
     locale: null,
     pendingStartPayload: null,
     selectedPlan: null,
-    subscriptionEndsAt: null,
-    unspentSingleReadings: 0,
-    purchasedByPlan: blankPurchasedByPlan(),
     username: null,
     firstName: null,
     lastName: null,
@@ -329,15 +333,32 @@ function getUserState(userId: number): UserState {
   return initial;
 }
 
-function rememberUserProfile(ctx: Context): void {
+function toDbLocale(locale: SupportedLocale | null): DbLocale | null {
+  if (!locale) {
+    return null;
+  }
+  return locale;
+}
+
+async function rememberUserProfile(ctx: Context): Promise<void> {
   const userId = ctx.from?.id;
   if (!userId) {
     return;
   }
   const state = getUserState(userId);
+  if (!state.locale) {
+    state.locale = (await getUserLocale(userId)) as SupportedLocale | null;
+  }
   state.username = ctx.from?.username ?? state.username;
   state.firstName = ctx.from?.first_name ?? state.firstName;
   state.lastName = ctx.from?.last_name ?? state.lastName;
+  await upsertUserProfile(
+    userId,
+    state.username,
+    state.firstName,
+    state.lastName,
+    toDbLocale(state.locale),
+  );
 }
 
 function detectLocaleFromTelegram(ctx: Context): SupportedLocale {
@@ -399,7 +420,9 @@ function extendSubscription(currentEndsAt: number | null, addDays: number): numb
   return base + addDays * DAY_MS;
 }
 
-function isSubscriptionActive(state: UserState): boolean {
+function isSubscriptionActive(
+  state: Pick<UserSubscriptionRecord, "subscriptionEndsAt" | "unspentSingleReadings">,
+): boolean {
   const now = Date.now();
   return (state.subscriptionEndsAt ?? 0) > now || state.unspentSingleReadings > 0;
 }
@@ -466,12 +489,12 @@ async function sendLanguagePicker(ctx: Context): Promise<void> {
 }
 
 async function sendMainMenu(ctx: Context): Promise<void> {
-  rememberUserProfile(ctx);
+  await rememberUserProfile(ctx);
   const locale = getLocale(ctx);
   const strings = STRINGS[locale];
   const userId = ctx.from?.id;
-  const state = userId ? getUserState(userId) : null;
-  const hasActiveSubs = state ? isSubscriptionActive(state) : false;
+  const subscription = userId ? await getUserSubscription(userId) : null;
+  const hasActiveSubs = subscription ? isSubscriptionActive(subscription) : false;
 
   const lines = [strings.menuTitle, strings.menuDescription];
   if (!config.webAppUrl) {
@@ -507,9 +530,9 @@ async function sendMySubscriptions(ctx: Context): Promise<void> {
   }
   const locale = getLocale(ctx);
   const strings = STRINGS[locale];
-  const state = getUserState(userId);
+  const state = await getUserSubscription(userId);
 
-  if (!isSubscriptionActive(state)) {
+  if (!state || !isSubscriptionActive(state)) {
     await ctx.reply(strings.subscriptionsNone, { reply_markup: buildBackKeyboard(locale) });
     return;
   }
@@ -523,7 +546,7 @@ async function sendMySubscriptions(ctx: Context): Promise<void> {
     "",
     `${strings.subscriptionsUntil}: ${endsAt}`,
     `${strings.subscriptionsSingleLeft}: ${state.unspentSingleReadings}`,
-    `${strings.subscriptionsPlansCount}: 1d x${state.purchasedByPlan.single}, 7d x${state.purchasedByPlan.week}, 30d x${state.purchasedByPlan.month}, 365d x${state.purchasedByPlan.year}`,
+    `${strings.subscriptionsPlansCount}: 1d x${state.purchasedSingle}, 7d x${state.purchasedWeek}, 30d x${state.purchasedMonth}, 365d x${state.purchasedYear}`,
   ];
 
   await ctx.reply(lines.join("\n"), { reply_markup: buildBackKeyboard(locale) });
@@ -622,33 +645,26 @@ async function notifySofia(
   return true;
 }
 
-function applyPurchasedPlan(userId: number, planId: PlanId): Date {
-  const state = getUserState(userId);
-  state.selectedPlan = planId;
-  state.purchasedByPlan[planId] += 1;
-  if (PLANS[planId].isSingleUse) {
-    state.unspentSingleReadings += 1;
-  }
-  state.subscriptionEndsAt = extendSubscription(
-    state.subscriptionEndsAt,
-    PLANS[planId].durationDays,
-  );
-  return new Date(state.subscriptionEndsAt);
-}
+async function applyPurchasedPlan(userId: number, planId: PlanId): Promise<Date> {
+  const prev = await getUserSubscription(userId);
+  const nextEnds = extendSubscription(prev?.subscriptionEndsAt ?? null, PLANS[planId].durationDays);
 
-function consumeOneSingleReading(state: UserState): boolean {
-  if (state.unspentSingleReadings <= 0) {
-    return false;
-  }
-  state.unspentSingleReadings -= 1;
-  if (state.subscriptionEndsAt) {
-    state.subscriptionEndsAt = Math.max(0, state.subscriptionEndsAt - DAY_MS);
-  }
-  return true;
+  const next: UserSubscriptionRecord = {
+    telegramUserId: userId,
+    subscriptionEndsAt: nextEnds,
+    unspentSingleReadings: (prev?.unspentSingleReadings ?? 0) + (PLANS[planId].isSingleUse ? 1 : 0),
+    purchasedSingle: (prev?.purchasedSingle ?? 0) + (planId === "single" ? 1 : 0),
+    purchasedWeek: (prev?.purchasedWeek ?? 0) + (planId === "week" ? 1 : 0),
+    purchasedMonth: (prev?.purchasedMonth ?? 0) + (planId === "month" ? 1 : 0),
+    purchasedYear: (prev?.purchasedYear ?? 0) + (planId === "year" ? 1 : 0),
+  };
+
+  await saveUserSubscription(next);
+  return new Date(nextEnds);
 }
 
 async function handleSuccessfulPayment(ctx: Context): Promise<void> {
-  rememberUserProfile(ctx);
+  await rememberUserProfile(ctx);
   const userId = ctx.from?.id;
   const locale = getLocale(ctx);
   const strings = STRINGS[locale];
@@ -662,6 +678,10 @@ async function handleSuccessfulPayment(ctx: Context): Promise<void> {
   }
 
   if (processedPayments.has(payment.telegram_payment_charge_id)) {
+    return;
+  }
+  if (await paymentExists(payment.telegram_payment_charge_id)) {
+    processedPayments.add(payment.telegram_payment_charge_id);
     return;
   }
 
@@ -679,9 +699,18 @@ async function handleSuccessfulPayment(ctx: Context): Promise<void> {
 
   processedPayments.add(payment.telegram_payment_charge_id);
 
-  const expiresAt = applyPurchasedPlan(userId, planId);
-
   const code = generatePurchaseCode();
+  const expiresAt = await applyPurchasedPlan(userId, planId);
+  await insertPayment(
+    payment.telegram_payment_charge_id,
+    userId,
+    planId,
+    payment.currency,
+    payment.total_amount,
+    code,
+    expiresAt.getTime(),
+  );
+
   const expiresText = formatDateForLocale(expiresAt, locale);
   const instruction = strings.codeInstruction
     .replace("{code}", code)
@@ -744,19 +773,30 @@ function parseCommandArg(ctx: Context): string | null {
   return parts[0] ?? null;
 }
 
-function formatStateForSofia(userId: number, state: UserState): string {
-  const ends = state.subscriptionEndsAt
-    ? formatDateForLocale(new Date(state.subscriptionEndsAt), "ru")
+function formatStateForSofia(row: {
+  telegramUserId: number;
+  username: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  subscriptionEndsAt: number | null;
+  unspentSingleReadings: number;
+  purchasedSingle: number;
+  purchasedWeek: number;
+  purchasedMonth: number;
+  purchasedYear: number;
+}): string {
+  const ends = row.subscriptionEndsAt
+    ? formatDateForLocale(new Date(row.subscriptionEndsAt), "ru")
     : "-";
-  const username = state.username ? `@${state.username}` : "-";
-  const fullName = `${state.firstName ?? ""} ${state.lastName ?? ""}`.trim() || "-";
+  const username = row.username ? `@${row.username}` : "-";
+  const fullName = `${row.firstName ?? ""} ${row.lastName ?? ""}`.trim() || "-";
   return [
-    `ID: ${userId}`,
+    `ID: ${row.telegramUserId}`,
     `Username: ${username}`,
     `Имя: ${fullName}`,
     `Активно до: ${ends}`,
-    `Разовые разборы: ${state.unspentSingleReadings}`,
-    `Пакеты: 1d x${state.purchasedByPlan.single}, 7d x${state.purchasedByPlan.week}, 30d x${state.purchasedByPlan.month}, 365d x${state.purchasedByPlan.year}`,
+    `Разовые разборы: ${row.unspentSingleReadings}`,
+    `Пакеты: 1d x${row.purchasedSingle}, 7d x${row.purchasedWeek}, 30d x${row.purchasedMonth}, 365d x${row.purchasedYear}`,
   ].join("\n");
 }
 
@@ -765,10 +805,13 @@ async function sendLauncherMessage(ctx: Context): Promise<void> {
 }
 
 async function main(): Promise<void> {
+  initDb(config.databaseUrl);
+  await ensureSchema();
+
   const bot = new Bot(config.telegramToken);
 
   bot.command("start", async (ctx) => {
-    rememberUserProfile(ctx);
+    await rememberUserProfile(ctx);
     const userId = ctx.from?.id;
     if (!userId) {
       await sendLauncherMessage(ctx);
@@ -789,7 +832,7 @@ async function main(): Promise<void> {
   });
 
   bot.command("help", async (ctx) => {
-    rememberUserProfile(ctx);
+    await rememberUserProfile(ctx);
     const userId = ctx.from?.id;
     if (userId) {
       const state = getUserState(userId);
@@ -815,9 +858,7 @@ async function main(): Promise<void> {
       return;
     }
 
-    const active = Array.from(userState.entries()).filter(([, state]) =>
-      isSubscriptionActive(state),
-    );
+    const active = await listActiveSubscriptions();
 
     if (active.length === 0) {
       await ctx.reply("Активных подписок сейчас нет.");
@@ -825,8 +866,8 @@ async function main(): Promise<void> {
     }
 
     const chunks: string[] = [];
-    for (const [userId, state] of active) {
-      chunks.push(formatStateForSofia(userId, state));
+    for (const row of active) {
+      chunks.push(formatStateForSofia(row));
     }
 
     await ctx.reply(
@@ -846,14 +887,8 @@ async function main(): Promise<void> {
       return;
     }
 
-    const state = userState.get(userId);
-    if (!state) {
-      await ctx.reply("Пользователь не найден в активной базе бота.");
-      return;
-    }
-
-    const hadSingle = consumeOneSingleReading(state);
-    if (hadSingle) {
+    const completion = await completeConsultation(userId);
+    if (completion === "single") {
       await ctx.reply(`Завершен один разовый разбор для user_id=${userId}.`);
       try {
         await ctx.api.sendMessage(
@@ -866,8 +901,7 @@ async function main(): Promise<void> {
       return;
     }
 
-    if ((state.subscriptionEndsAt ?? 0) > Date.now()) {
-      state.subscriptionEndsAt = Date.now();
+    if (completion === "timed") {
       await ctx.reply(`Подписка пользователя user_id=${userId} завершена.`);
       try {
         await ctx.api.sendMessage(
@@ -880,11 +914,11 @@ async function main(): Promise<void> {
       return;
     }
 
-    await ctx.reply("У пользователя нет активной подписки для завершения.");
+    await ctx.reply("У пользователя нет активной подписки для завершения или он не найден.");
   });
 
   bot.callbackQuery(/^lang:(ru|en|kk)$/, async (ctx) => {
-    rememberUserProfile(ctx);
+    await rememberUserProfile(ctx);
     await ctx.answerCallbackQuery();
     const userId = ctx.from?.id;
     if (!userId) {
@@ -893,6 +927,13 @@ async function main(): Promise<void> {
     }
     const state = getUserState(userId);
     state.locale = ctx.match[1] as SupportedLocale;
+    await upsertUserProfile(
+      userId,
+      state.username,
+      state.firstName,
+      state.lastName,
+      toDbLocale(state.locale),
+    );
     const pending = state.pendingStartPayload;
     state.pendingStartPayload = null;
     if (pending === "plans") {
@@ -903,7 +944,7 @@ async function main(): Promise<void> {
   });
 
   bot.on("message:web_app_data", async (ctx) => {
-    rememberUserProfile(ctx);
+    await rememberUserProfile(ctx);
     const data = ctx.message.web_app_data?.data ?? "";
     const action = parseWebAppAction(data);
     if (action !== "professional_reading" && action !== "show_plans") {
@@ -913,31 +954,31 @@ async function main(): Promise<void> {
   });
 
   bot.callbackQuery("menu:buy", async (ctx) => {
-    rememberUserProfile(ctx);
+    await rememberUserProfile(ctx);
     await ctx.answerCallbackQuery();
     await sendPlans(ctx, { ignoreDebounce: true });
   });
 
   bot.callbackQuery("menu:about", async (ctx) => {
-    rememberUserProfile(ctx);
+    await rememberUserProfile(ctx);
     await ctx.answerCallbackQuery();
     await sendAbout(ctx);
   });
 
   bot.callbackQuery("menu:subscriptions", async (ctx) => {
-    rememberUserProfile(ctx);
+    await rememberUserProfile(ctx);
     await ctx.answerCallbackQuery();
     await sendMySubscriptions(ctx);
   });
 
   bot.callbackQuery("menu:home", async (ctx) => {
-    rememberUserProfile(ctx);
+    await rememberUserProfile(ctx);
     await ctx.answerCallbackQuery();
     await sendMainMenu(ctx);
   });
 
   bot.callbackQuery(/^plan:(single|week|month|year)$/, async (ctx) => {
-    rememberUserProfile(ctx);
+    await rememberUserProfile(ctx);
     await ctx.answerCallbackQuery();
     const userId = ctx.from?.id;
     if (!userId) {
@@ -955,7 +996,7 @@ async function main(): Promise<void> {
   });
 
   bot.on("pre_checkout_query", async (ctx) => {
-    rememberUserProfile(ctx);
+    await rememberUserProfile(ctx);
     const query = ctx.preCheckoutQuery;
     if (!query) {
       return;
@@ -985,7 +1026,7 @@ async function main(): Promise<void> {
   });
 
   bot.on("message:text", async (ctx) => {
-    rememberUserProfile(ctx);
+    await rememberUserProfile(ctx);
     const userId = ctx.from?.id;
     if (userId) {
       const state = getUserState(userId);

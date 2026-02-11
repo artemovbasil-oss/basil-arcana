@@ -1,5 +1,6 @@
 export interface BotConfig {
   telegramToken: string;
+  databaseUrl: string;
   webAppUrl?: string;
   sofiaChatId?: string;
 }
@@ -34,12 +35,14 @@ function buildRootUrl(url: string): string {
 
 export function loadConfig(): BotConfig {
   const telegramToken = requireEnv("TELEGRAM_BOT_TOKEN");
+  const databaseUrl = requireEnv("DATABASE_URL");
   const webAppUrl = optionalEnv("TELEGRAM_WEBAPP_URL");
   const sofiaChatId =
     optionalEnv("SOFIA_CHAT_ID") ?? optionalEnv("SOFIA_NOTIFY_CHAT_ID");
 
   return {
     telegramToken,
+    databaseUrl,
     webAppUrl: webAppUrl ? buildRootUrl(webAppUrl) : undefined,
     sofiaChatId,
   };

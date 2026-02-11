@@ -21,6 +21,7 @@ Telegram bot built with Node.js + TypeScript and grammY. It provides a localized
 ## Environment variables (Railway)
 Set these in Railway **Secrets**:
 - `TELEGRAM_BOT_TOKEN` (required)
+- `DATABASE_URL` (required, Railway Postgres connection string)
 - `TELEGRAM_WEBAPP_URL` (optional, required only for the Launch app button)
 - `SOFIA_CHAT_ID` (optional, enables auto-notifications to Sofia on purchase)
 - `SOFIA_NOTIFY_CHAT_ID` (optional alias for `SOFIA_CHAT_ID`)
@@ -41,6 +42,7 @@ You can provide env vars via your shell:
 
 ```bash
 export TELEGRAM_BOT_TOKEN=...
+export DATABASE_URL=postgresql://...
 export TELEGRAM_WEBAPP_URL=https://your-webapp.example
 export APP_VERSION=2026-02-08-1
 npm run dev
@@ -50,3 +52,8 @@ npm run dev
 - Set the above secrets in Railway.
 - Build command: `cd bot && npm ci && npm run build`
 - Start command: `cd bot && npm run start`
+
+On startup, bot creates the required Postgres tables automatically:
+- `users`
+- `subscriptions`
+- `payments`
