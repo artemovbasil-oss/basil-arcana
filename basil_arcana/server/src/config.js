@@ -11,6 +11,8 @@ const TELEGRAM_BOT_TOKEN =
   process.env.TELEGRAM_TOKEN ||
   process.env.BOT_TOKEN ||
   '';
+const SOFIA_NOTIFY_CHAT_ID = process.env.SOFIA_NOTIFY_CHAT_ID || '';
+const SOFIA_CONSENT_STORE_PATH = process.env.SOFIA_CONSENT_STORE_PATH || '';
 const RATE_LIMIT_WINDOW_MS = process.env.RATE_LIMIT_WINDOW_MS
   ? Number(process.env.RATE_LIMIT_WINDOW_MS)
   : null;
@@ -24,6 +26,8 @@ module.exports = {
   OPENAI_API_KEY,
   OPENAI_MODEL,
   TELEGRAM_BOT_TOKEN,
+  SOFIA_NOTIFY_CHAT_ID,
+  SOFIA_CONSENT_STORE_PATH,
   RATE_LIMIT_WINDOW_MS,
   RATE_LIMIT_MAX,
 };

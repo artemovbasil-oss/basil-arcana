@@ -1,16 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive/hive.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
 import '../../core/navigation/app_route_config.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/app_top_bar.dart';
+import '../../core/widgets/sofia_promo_card.dart';
+import '../../data/repositories/sofia_consent_repository.dart';
 import '../../state/providers.dart';
 import '../../state/reading_flow_controller.dart';
 import '../cards/cards_screen.dart';
 import '../settings/settings_screen.dart';
 import '../spread/spread_screen.dart';
+
+const String _settingsBoxName = 'settings';
+const String _sofiaConsentKey = 'sofiaConsentDecision';
+const String _sofiaConsentAccepted = 'accepted';
+const String _sofiaConsentRejected = 'rejected';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -24,10 +32,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   final FocusNode _focusNode = FocusNode();
   final ScrollController _scrollController = ScrollController();
   final GlobalKey _questionKey = GlobalKey();
+  _SofiaConsentState _sofiaConsentState = _SofiaConsentState.undecided;
+  bool _sendingConsent = false;
 
   @override
   void initState() {
     super.initState();
+    _sofiaConsentState = _readSofiaConsentState();
     _focusNode.addListener(_handleFocusChange);
     final initialQuestion = ref.read(readingFlowControllerProvider).question;
     if (initialQuestion.isNotEmpty) {
@@ -45,6 +56,145 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           composing: TextRange.empty,
         );
         setState(() {});
+      },
+    );
+  }
+
+  _SofiaConsentState _readSofiaConsentState() {
+    final box = Hive.box<String>(_settingsBoxName);
+    final value = box.get(_sofiaConsentKey) ?? '';
+    if (value == _sofiaConsentAccepted) {
+      return _SofiaConsentState.accepted;
+    }
+    if (value == _sofiaConsentRejected) {
+      return _SofiaConsentState.rejected;
+    }
+    return _SofiaConsentState.undecided;
+  }
+
+  Future<void> _setSofiaConsentState(_SofiaConsentState nextState) async {
+    if (_sendingConsent) {
+      return;
+    }
+    final box = Hive.box<String>(_settingsBoxName);
+    final previous = _sofiaConsentState;
+    setState(() {
+      _sofiaConsentState = nextState;
+      _sendingConsent = true;
+    });
+    try {
+      await box.put(_sofiaConsentKey, nextState.storageValue);
+      final decision = nextState == _SofiaConsentState.accepted
+          ? SofiaConsentDecision.accepted
+          : SofiaConsentDecision.rejected;
+      await ref.read(sofiaConsentRepositoryProvider).submitDecision(decision);
+    } catch (_) {
+      await box.put(_sofiaConsentKey, previous.storageValue);
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _sofiaConsentState = previous;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(_SofiaCopy.resolve(context).submitError),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    } finally {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _sendingConsent = false;
+      });
+    }
+  }
+
+  Future<void> _showSofiaInfoModal() async {
+    final copy = _SofiaCopy.resolve(context);
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        final colorScheme = Theme.of(context).colorScheme;
+        final showActions = _sofiaConsentState == _SofiaConsentState.undecided;
+        return SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 42,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: colorScheme.outlineVariant.withOpacity(0.8),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  Text(
+                    copy.modalTitle,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    copy.modalBody,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSurface.withOpacity(0.85),
+                        ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    copy.modalDataScope,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurface.withOpacity(0.72),
+                        ),
+                  ),
+                  const SizedBox(height: 14),
+                  const SofiaPromoCard(compact: true),
+                  if (showActions) ...[
+                    const SizedBox(height: 14),
+                    AppPrimaryButton(
+                      label: copy.acceptButton,
+                      onPressed: _sendingConsent
+                          ? null
+                          : () async {
+                              Navigator.of(context).pop();
+                              await _setSofiaConsentState(
+                                _SofiaConsentState.accepted,
+                              );
+                            },
+                    ),
+                    const SizedBox(height: 10),
+                    AppGhostButton(
+                      label: copy.rejectButton,
+                      onPressed: _sendingConsent
+                          ? null
+                          : () async {
+                              Navigator.of(context).pop();
+                              await _setSofiaConsentState(
+                                _SofiaConsentState.rejected,
+                              );
+                            },
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        );
       },
     );
   }
@@ -89,7 +239,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
     final quickTopics = [
       l10n.homeQuickTopicRelationships,
       l10n.homeQuickTopicMoney,
@@ -98,6 +248,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       l10n.homeQuickTopicWeatherTomorrow,
     ];
     final hasQuestion = _controller.text.trim().isNotEmpty;
+    final copy = _SofiaCopy.resolve(context);
 
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     const buttonHeight = 56.0;
@@ -256,6 +407,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         );
                       },
                     ),
+                    const SizedBox(height: 14),
+                    if (_sofiaConsentState == _SofiaConsentState.undecided)
+                      _SofiaConsentCard(
+                        copy: copy,
+                        isBusy: _sendingConsent,
+                        onOpenInfo: _showSofiaInfoModal,
+                        onAccept: () => _setSofiaConsentState(
+                          _SofiaConsentState.accepted,
+                        ),
+                        onReject: () => _setSofiaConsentState(
+                          _SofiaConsentState.rejected,
+                        ),
+                      )
+                    else
+                      _SofiaInfoCard(
+                        copy: copy,
+                        onTap: _showSofiaInfoModal,
+                      ),
                   ],
                 ),
               ),
@@ -299,6 +468,231 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         settings: appRouteSettings(showBackButton: false),
         builder: (_) => const SpreadScreen(),
       ),
+    );
+  }
+}
+
+enum _SofiaConsentState {
+  undecided(''),
+  accepted(_sofiaConsentAccepted),
+  rejected(_sofiaConsentRejected);
+
+  const _SofiaConsentState(this.storageValue);
+
+  final String storageValue;
+}
+
+class _SofiaConsentCard extends StatelessWidget {
+  const _SofiaConsentCard({
+    required this.copy,
+    required this.isBusy,
+    required this.onOpenInfo,
+    required this.onAccept,
+    required this.onReject,
+  });
+
+  final _SofiaCopy copy;
+  final bool isBusy;
+  final VoidCallback onOpenInfo;
+  final VoidCallback onAccept;
+  final VoidCallback onReject;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return InkWell(
+      borderRadius: BorderRadius.circular(20),
+      onTap: onOpenInfo,
+      child: Ink(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          color: colorScheme.surfaceVariant.withOpacity(0.26),
+          border: Border.all(color: colorScheme.outlineVariant),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    copy.consentTitle,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right,
+                  color: colorScheme.onSurface.withOpacity(0.5),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            RichText(
+              text: TextSpan(
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurface.withOpacity(0.78),
+                    ),
+                children: [
+                  TextSpan(text: '${copy.consentBodyPrefix} '),
+                  TextSpan(
+                    text: copy.sofiaName,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: colorScheme.primary,
+                          fontWeight: FontWeight.w700,
+                        ),
+                  ),
+                  TextSpan(text: ' ${copy.consentBodySuffix}'),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: AppSmallButton(
+                    label: copy.acceptButton,
+                    onPressed: isBusy ? null : onAccept,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: AppSmallButton(
+                    label: copy.rejectButton,
+                    onPressed: isBusy ? null : onReject,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SofiaInfoCard extends StatelessWidget {
+  const _SofiaInfoCard({
+    required this.copy,
+    required this.onTap,
+  });
+
+  final _SofiaCopy copy;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return InkWell(
+      borderRadius: BorderRadius.circular(18),
+      onTap: onTap,
+      child: Ink(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          color: colorScheme.surfaceVariant.withOpacity(0.24),
+          border: Border.all(color: colorScheme.outlineVariant),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.auto_awesome, color: colorScheme.primary, size: 18),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                copy.infoCardTitle,
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+            ),
+            Icon(
+              Icons.chevron_right,
+              color: colorScheme.onSurface.withOpacity(0.45),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SofiaCopy {
+  const _SofiaCopy({
+    required this.sofiaName,
+    required this.consentTitle,
+    required this.consentBodyPrefix,
+    required this.consentBodySuffix,
+    required this.acceptButton,
+    required this.rejectButton,
+    required this.infoCardTitle,
+    required this.modalTitle,
+    required this.modalBody,
+    required this.modalDataScope,
+    required this.submitError,
+  });
+
+  final String sofiaName;
+  final String consentTitle;
+  final String consentBodyPrefix;
+  final String consentBodySuffix;
+  final String acceptButton;
+  final String rejectButton;
+  final String infoCardTitle;
+  final String modalTitle;
+  final String modalBody;
+  final String modalDataScope;
+  final String submitError;
+
+  static _SofiaCopy resolve(BuildContext context) {
+    final code = Localizations.localeOf(context).languageCode;
+    if (code == 'ru') {
+      return const _SofiaCopy(
+        sofiaName: '@SofiaKnoxx',
+        consentTitle: 'Согласие на обработку данных',
+        consentBodyPrefix: 'Передавать имя нашему астрологу',
+        consentBodySuffix: 'для уведомлений',
+        acceptButton: 'Согласен',
+        rejectButton: 'Не согласен',
+        infoCardTitle: 'Наш таролог-астролог София',
+        modalTitle: 'Наш таролог-астролог София',
+        modalBody:
+            'Вы можете разрешить передачу только вашего имени специалисту Софии для уведомлений. Детали получателя: @SofiaKnoxx.',
+        modalDataScope:
+            'Передается только имя. При отказе отправляется только агрегированная статистика без имени.',
+        submitError: 'Не удалось сохранить выбор. Попробуйте еще раз.',
+      );
+    }
+    if (code == 'kk') {
+      return const _SofiaCopy(
+        sofiaName: '@SofiaKnoxx',
+        consentTitle: 'Деректерді өңдеуге келісім',
+        consentBodyPrefix: 'Есімді біздің астрологқа',
+        consentBodySuffix: 'хабарламалар үшін жіберуге рұқсат беру',
+        acceptButton: 'Келісемін',
+        rejectButton: 'Келіспеймін',
+        infoCardTitle: 'Біздің таролог-астролог София',
+        modalTitle: 'Біздің таролог-астролог София',
+        modalBody:
+            'Хабарламалар үшін тек атыңызды София маманына жіберуге рұқсат бере аласыз. Нақты алушы: @SofiaKnoxx.',
+        modalDataScope:
+            'Тек ат беріледі. Бас тартсаңыз, атсыз тек жинақталған статистика жіберіледі.',
+        submitError: 'Таңдауды сақтау мүмкін болмады. Қайтадан көріңіз.',
+      );
+    }
+    return const _SofiaCopy(
+      sofiaName: '@SofiaKnoxx',
+      consentTitle: 'Data Processing Consent',
+      consentBodyPrefix: 'Allow sharing your name with our astrologer',
+      consentBodySuffix: 'for notifications',
+      acceptButton: 'Agree',
+      rejectButton: 'Decline',
+      infoCardTitle: 'Our Tarot Astrologer Sofia',
+      modalTitle: 'Our Tarot Astrologer Sofia',
+      modalBody:
+          'You can allow sending only your name to Sofia for notifications. Recipient details: @SofiaKnoxx.',
+      modalDataScope:
+          'Only your name is shared. If you decline, only anonymous aggregate stats are sent.',
+      submitError: 'Could not save your choice. Please try again.',
     );
   }
 }

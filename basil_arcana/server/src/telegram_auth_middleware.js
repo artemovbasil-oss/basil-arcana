@@ -89,11 +89,29 @@ function telegramAuthMiddleware(req, res, next) {
   }
 
   let userId = null;
+  let telegramUser = null;
   if (validation.data?.user) {
     try {
       const parsedUser = JSON.parse(validation.data.user);
       if (parsedUser && parsedUser.id != null) {
         userId = parsedUser.id;
+      }
+      if (parsedUser && typeof parsedUser === 'object') {
+        telegramUser = {
+          id: parsedUser.id ?? null,
+          username:
+            typeof parsedUser.username === 'string'
+              ? parsedUser.username.trim()
+              : '',
+          firstName:
+            typeof parsedUser.first_name === 'string'
+              ? parsedUser.first_name.trim()
+              : '',
+          lastName:
+            typeof parsedUser.last_name === 'string'
+              ? parsedUser.last_name.trim()
+              : ''
+        };
       }
     } catch (_) {}
   }
@@ -101,7 +119,8 @@ function telegramAuthMiddleware(req, res, next) {
   req.telegram = {
     ok: true,
     initDataLength: initData.length,
-    userId
+    userId,
+    user: telegramUser
   };
 
   console.log(

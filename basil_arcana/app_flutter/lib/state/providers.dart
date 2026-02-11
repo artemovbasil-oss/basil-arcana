@@ -9,6 +9,7 @@ import '../data/repositories/data_repository.dart';
 import '../data/repositories/energy_topup_repository.dart';
 import '../data/repositories/spreads_repository.dart';
 import '../data/repositories/readings_repository.dart';
+import '../data/repositories/sofia_consent_repository.dart';
 import '../data/models/deck_model.dart';
 import 'energy_controller.dart';
 import 'reading_flow_controller.dart';
@@ -39,6 +40,10 @@ final cardStatsRepositoryProvider = Provider<CardStatsRepository>((ref) {
 
 final energyTopUpRepositoryProvider = Provider<EnergyTopUpRepository>((ref) {
   return EnergyTopUpRepository();
+});
+
+final sofiaConsentRepositoryProvider = Provider<SofiaConsentRepository>((ref) {
+  return SofiaConsentRepository();
 });
 
 final readingFlowControllerProvider =

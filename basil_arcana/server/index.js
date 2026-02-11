@@ -28,7 +28,9 @@ const {
   RATE_LIMIT_MAX,
   RATE_LIMIT_WINDOW_MS,
   OPENAI_API_KEY,
-  TELEGRAM_BOT_TOKEN
+  TELEGRAM_BOT_TOKEN,
+  SOFIA_NOTIFY_CHAT_ID,
+  SOFIA_CONSENT_STORE_PATH
 } = require('./src/config');
 const { validateTelegramInitData } = require('./src/telegram');
 const { telegramAuthMiddleware } = require('./src/telegram_auth_middleware');
@@ -218,6 +220,9 @@ const STARS_PACK_SMALL_XTR = Number(process.env.STARS_PACK_SMALL_XTR || 25);
 const STARS_PACK_MEDIUM_XTR = Number(process.env.STARS_PACK_MEDIUM_XTR || 45);
 const STARS_PACK_FULL_XTR = Number(process.env.STARS_PACK_FULL_XTR || 75);
 const STARS_PACK_YEAR_XTR = Number(process.env.STARS_PACK_YEAR_XTR || 1000);
+const SOFIA_CONSENT_STATE_FILE =
+  SOFIA_CONSENT_STORE_PATH.trim() ||
+  path.join(__dirname, 'data', 'sofia_consent_state.json');
 
 const ENERGY_STARS_PACKS = {
   small: { energyAmount: 25, starsAmount: STARS_PACK_SMALL_XTR, grantType: 'energy' },
@@ -225,6 +230,126 @@ const ENERGY_STARS_PACKS = {
   full: { energyAmount: 100, starsAmount: STARS_PACK_FULL_XTR, grantType: 'energy' },
   year_unlimited: { energyAmount: 0, starsAmount: STARS_PACK_YEAR_XTR, grantType: 'unlimited_year' }
 };
+
+function defaultSofiaConsentState() {
+  return {
+    totalUsers: 0,
+    userDecisions: {}
+  };
+}
+
+function loadSofiaConsentState() {
+  try {
+    const raw = fs.readFileSync(SOFIA_CONSENT_STATE_FILE, 'utf8');
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object') {
+      return defaultSofiaConsentState();
+    }
+    const totalUsers =
+      Number.isFinite(Number(parsed.totalUsers)) && Number(parsed.totalUsers) >= 0
+        ? Number(parsed.totalUsers)
+        : 0;
+    const userDecisions =
+      parsed.userDecisions && typeof parsed.userDecisions === 'object'
+        ? parsed.userDecisions
+        : {};
+    return {
+      totalUsers,
+      userDecisions
+    };
+  } catch (_) {
+    return defaultSofiaConsentState();
+  }
+}
+
+function persistSofiaConsentState(state) {
+  try {
+    fs.mkdirSync(path.dirname(SOFIA_CONSENT_STATE_FILE), { recursive: true });
+    fs.writeFileSync(
+      SOFIA_CONSENT_STATE_FILE,
+      JSON.stringify(state, null, 2),
+      'utf8'
+    );
+  } catch (error) {
+    console.warn(
+      JSON.stringify({
+        event: 'sofia_consent_state_write_failed',
+        path: SOFIA_CONSENT_STATE_FILE,
+        message: error?.message ? String(error.message).slice(0, 180) : 'unknown'
+      })
+    );
+  }
+}
+
+function normalizeConsentDecision(value) {
+  const raw = typeof value === 'string' ? value.trim().toLowerCase() : '';
+  if (raw === 'accepted' || raw === 'rejected') {
+    return raw;
+  }
+  return '';
+}
+
+function resolveUserName(telegramUser, userId) {
+  const firstName = typeof telegramUser?.firstName === 'string' ? telegramUser.firstName.trim() : '';
+  const lastName = typeof telegramUser?.lastName === 'string' ? telegramUser.lastName.trim() : '';
+  const fullName = [firstName, lastName].filter(Boolean).join(' ').trim();
+  if (fullName) {
+    return fullName;
+  }
+  const username = typeof telegramUser?.username === 'string' ? telegramUser.username.trim() : '';
+  if (username) {
+    return `@${username}`;
+  }
+  return `Пользователь #${userId}`;
+}
+
+async function sendTelegramBotMessage({ chatId, text }) {
+  const response = await fetch(
+    `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text,
+        disable_web_page_preview: true
+      })
+    }
+  );
+  const responseText = await response.text();
+  let parsed = null;
+  try {
+    parsed = JSON.parse(responseText);
+  } catch (_) {
+    parsed = null;
+  }
+  return {
+    ok: response.ok && Boolean(parsed?.ok),
+    status: response.status,
+    description:
+      typeof parsed?.description === 'string'
+        ? parsed.description
+        : responseText.slice(0, 300)
+  };
+}
+
+const sofiaConsentState = loadSofiaConsentState();
+
+function updateSofiaConsentState({ userId, decision }) {
+  const key = String(userId);
+  const previousDecision = sofiaConsentState.userDecisions[key] || '';
+  if (!previousDecision) {
+    sofiaConsentState.totalUsers += 1;
+  }
+  sofiaConsentState.userDecisions[key] = decision;
+  persistSofiaConsentState(sofiaConsentState);
+  return {
+    previousDecision,
+    totalUsers: sofiaConsentState.totalUsers
+  };
+}
 
 function parseUserIdFromInitData(initData) {
   if (!initData || typeof initData !== 'string') {
@@ -486,6 +611,92 @@ app.post('/api/payments/stars/invoice', telegramAuthMiddleware, async (req, res)
   } catch (error) {
     return res.status(502).json({
       error: 'telegram_invoice_create_failed',
+      details: error?.message ? String(error.message).slice(0, 300) : 'unknown',
+      requestId: req.requestId
+    });
+  }
+});
+
+app.post('/api/sofia/consent', telegramAuthMiddleware, async (req, res) => {
+  if (!TELEGRAM_BOT_TOKEN) {
+    return res.status(503).json({
+      error: 'server_misconfig',
+      reason: 'missing_telegram_bot_token',
+      requestId: req.requestId
+    });
+  }
+  const notifyChatId = SOFIA_NOTIFY_CHAT_ID.trim();
+  if (!notifyChatId) {
+    return res.status(503).json({
+      error: 'server_misconfig',
+      reason: 'missing_sofia_notify_chat_id',
+      requestId: req.requestId
+    });
+  }
+
+  const decision = normalizeConsentDecision(req.body?.decision);
+  if (!decision) {
+    return res.status(400).json({
+      error: 'invalid_decision',
+      requestId: req.requestId
+    });
+  }
+
+  const telegramUserId =
+    Number.isFinite(Number(req.telegram?.userId)) && Number(req.telegram?.userId) > 0
+      ? Number(req.telegram.userId)
+      : parseUserIdFromInitData(readTelegramInitData(req).initData);
+  if (!telegramUserId) {
+    return res.status(401).json({
+      error: 'unauthorized',
+      reason: 'telegram_user_missing',
+      requestId: req.requestId
+    });
+  }
+
+  const state = updateSofiaConsentState({
+    userId: telegramUserId,
+    decision
+  });
+  if (state.previousDecision === decision) {
+    return res.json({
+      ok: true,
+      duplicate: true,
+      totalUsers: state.totalUsers,
+      requestId: req.requestId
+    });
+  }
+
+  const message =
+    decision === 'accepted'
+      ? `✅ Пользователь согласился на передачу имени\nИмя: ${resolveUserName(
+          req.telegram?.user,
+          telegramUserId
+        )}\nВсего пользователей: ${state.totalUsers}`
+      : `ℹ️ Добавился еще 1 пользователь без передачи имени\nВсего пользователей: ${state.totalUsers}`;
+
+  try {
+    const result = await sendTelegramBotMessage({
+      chatId: notifyChatId,
+      text: message
+    });
+    if (!result.ok) {
+      return res.status(502).json({
+        error: 'telegram_send_failed',
+        status: result.status,
+        details: result.description,
+        requestId: req.requestId
+      });
+    }
+    return res.json({
+      ok: true,
+      decision,
+      totalUsers: state.totalUsers,
+      requestId: req.requestId
+    });
+  } catch (error) {
+    return res.status(502).json({
+      error: 'telegram_send_failed',
       details: error?.message ? String(error.message).slice(0, 300) : 'unknown',
       requestId: req.requestId
     });
