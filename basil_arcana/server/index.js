@@ -43,7 +43,8 @@ const {
   saveCreatedInvoice,
   confirmInvoiceStatus,
   logUserQuery,
-  listRecentUserQueries
+  listRecentUserQueries,
+  clearUserQueryHistory
 } = require('./src/db');
 
 const app = express();
@@ -563,6 +564,34 @@ app.get('/api/history/queries', telegramAuthMiddleware, async (req, res) => {
   return res.json({
     ok: true,
     items,
+    requestId: req.requestId
+  });
+});
+
+app.delete('/api/history/queries', telegramAuthMiddleware, async (req, res) => {
+  if (!hasDb()) {
+    return res.status(503).json({
+      error: 'storage_unavailable',
+      reason: 'database_not_configured',
+      requestId: req.requestId
+    });
+  }
+  const telegramUserId =
+    Number.isFinite(Number(req.telegram?.userId)) && Number(req.telegram?.userId) > 0
+      ? Number(req.telegram.userId)
+      : parseUserIdFromInitData(readTelegramInitData(req).initData);
+  if (!telegramUserId) {
+    return res.status(401).json({
+      error: 'unauthorized',
+      reason: 'telegram_user_missing',
+      requestId: req.requestId
+    });
+  }
+  await upsertTelegramUserFromRequest(req);
+  const result = await clearUserQueryHistory({ telegramUserId });
+  return res.json({
+    ok: true,
+    deletedCount: result.deletedCount,
     requestId: req.requestId
   });
 });

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
+import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/app_top_bar.dart';
 import '../../data/repositories/query_history_repository.dart';
 import '../../state/providers.dart';
@@ -18,6 +19,7 @@ class QueryHistoryScreen extends ConsumerStatefulWidget {
 
 class _QueryHistoryScreenState extends ConsumerState<QueryHistoryScreen> {
   late Future<List<QueryHistoryItem>> _future;
+  bool _clearing = false;
 
   @override
   void initState() {
@@ -27,6 +29,31 @@ class _QueryHistoryScreenState extends ConsumerState<QueryHistoryScreen> {
 
   Future<List<QueryHistoryItem>> _load() {
     return ref.read(queryHistoryRepositoryProvider).fetchRecent(limit: 40);
+  }
+
+  Future<void> _clearHistory() async {
+    if (_clearing) {
+      return;
+    }
+    setState(() {
+      _clearing = true;
+    });
+    try {
+      await ref.read(queryHistoryRepositoryProvider).clearAll();
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _future = _load();
+      });
+    } finally {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _clearing = false;
+      });
+    }
   }
 
   String _formatDate(BuildContext context, DateTime date) {
@@ -91,7 +118,7 @@ class _QueryHistoryScreenState extends ConsumerState<QueryHistoryScreen> {
               );
             }
             return ListView.separated(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
               itemCount: items.length,
               separatorBuilder: (_, __) => const Divider(height: 1),
               itemBuilder: (context, index) {
@@ -130,6 +157,22 @@ class _QueryHistoryScreenState extends ConsumerState<QueryHistoryScreen> {
                   ),
                 );
               },
+            );
+          },
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: FutureBuilder<List<QueryHistoryItem>>(
+          future: _future,
+          builder: (context, snapshot) {
+            final canClear = !_clearing && (snapshot.data?.isNotEmpty ?? false);
+            return Padding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+              child: AppPrimaryButton(
+                label: l10n.historyClearButton,
+                onPressed: canClear ? _clearHistory : null,
+              ),
             );
           },
         ),

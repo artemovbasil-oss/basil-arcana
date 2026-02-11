@@ -83,4 +83,19 @@ class QueryHistoryRepository {
       client.close();
     }
   }
+
+  Future<void> clearAll() async {
+    final uri = Uri.parse(ApiConfig.apiBaseUrl).replace(
+      path: '/api/history/queries',
+    );
+    final client = TelegramApiClient(http.Client());
+    try {
+      final response = await client.delete(uri).timeout(_timeout);
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        throw Exception('Failed to clear query history');
+      }
+    } finally {
+      client.close();
+    }
+  }
 }
