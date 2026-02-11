@@ -3,7 +3,8 @@
 Telegram bot built with Node.js + TypeScript and grammY. It provides a localized menu, opens the Basil’s Arcana Telegram Mini App, and shows subscription plans.
 
 ## Features
-- `/start` and `/help` return a localized main menu (launch app, plans, about)
+- On first `/start`, bot asks preferred language (`ru`/`kz`/`en`) with flag buttons
+- `/start` and `/help` then use the selected language for menu and content
 - Plan options are available directly in the bot, even before opening the mini app
 - Graceful fallback if the web app URL is missing
 

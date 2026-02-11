@@ -10,11 +10,17 @@ const STRINGS = {
         menuButtons: {
             launchApp: "🚀 Запустить мини‑приложение",
             buy: "💳 Купить подписку",
-            about: "✨ Что умеет бот",
+            about: "✨ Чем мы можем быть полезны",
             back: "⬅️ В меню",
         },
+        languagePrompt: "На каком языке тебе удобнее общаться?\nТілді таңдаңыз.\nWhich language do you prefer?",
+        languageButtons: {
+            ru: "🇷🇺 Русский · ru",
+            kk: "🇰🇿 Қазақша · kz",
+            en: "🇬🇧 English · en",
+        },
         launchUnavailable: "🚀 Временно недоступно",
-        aboutText: "Basil’s Arcana — магия как сервис. Здесь ты можешь получить быстрые и глубокие расклады, персональные подсказки и историю своих обращений. Открывай мини‑приложение, чтобы начать чтение.",
+        aboutText: "✨ Чем мы можем быть полезны\n\nВ приложении Basil’s Arcana:\n• Быстрые и глубокие расклады на отношения, деньги, карьеру и состояние.\n• Персональные подсказки и понятные шаги по ситуации.\n• История твоих раскладов в одном месте.\n• Мини‑приложение с атмосферой и интерактивными картами.\n\n🔮 Наш таролог и астролог София\n• Мягкий, точный и глубокий разбор запроса.\n• Личная консультация по твоей ситуации.\n• Видео Софии: https://cdn.basilarcana.com/sofia/sofia.webm\n• Профиль Софии: https://t.me/SofiaKnoxx",
         professionalTitle: "🔮 Профессиональное толкование",
         professionalDescription: "Хочешь более глубокий и персональный разбор?\nВыбери подходящий тариф — и оракул раскроется полностью.",
         planLabels: {
@@ -32,11 +38,17 @@ const STRINGS = {
         menuButtons: {
             launchApp: "🚀 Launch app",
             buy: "💳 Buy subscription",
-            about: "✨ What this bot can do",
+            about: "✨ How we can help",
             back: "⬅️ Back to menu",
         },
+        languagePrompt: "На каком языке тебе удобнее общаться?\nТілді таңдаңыз.\nWhich language do you prefer?",
+        languageButtons: {
+            ru: "🇷🇺 Русский · ru",
+            kk: "🇰🇿 Қазақша · kz",
+            en: "🇬🇧 English · en",
+        },
         launchUnavailable: "🚀 Temporarily unavailable",
-        aboutText: "Basil’s Arcana is magic as a service. Get quick and deep readings, personalized insights, and a history of your requests. Open the mini app to begin.",
+        aboutText: "✨ How we can help\n\nInside Basil’s Arcana:\n• Quick and deep readings for love, money, career, and inner state.\n• Personalized insights with clear next steps.\n• Reading history in one place.\n• Atmospheric mini app with interactive cards.\n\n🔮 Our tarot reader and astrologer Sofia\n• Calm, precise, and deep interpretation.\n• Personal consultation for your situation.\n• Sofia video: https://cdn.basilarcana.com/sofia/sofia.webm\n• Sofia profile: https://t.me/SofiaKnoxx",
         professionalTitle: "🔮 Professional reading",
         professionalDescription: "Want a deeper, more personal interpretation?\nPick the plan that fits you — and the oracle will open up fully.",
         planLabels: {
@@ -54,11 +66,17 @@ const STRINGS = {
         menuButtons: {
             launchApp: "🚀 Мини‑қосымшаны ашу",
             buy: "💳 Жазылымды сатып алу",
-            about: "✨ Бот не істей алады",
+            about: "✨ Қалай көмектесе аламыз",
             back: "⬅️ Мәзірге",
         },
+        languagePrompt: "На каком языке тебе удобнее общаться?\nТілді таңдаңыз.\nWhich language do you prefer?",
+        languageButtons: {
+            ru: "🇷🇺 Русский · ru",
+            kk: "🇰🇿 Қазақша · kz",
+            en: "🇬🇧 English · en",
+        },
         launchUnavailable: "🚀 Уақытша қолжетімсіз",
-        aboutText: "Basil’s Arcana — магия қызмет ретінде. Мұнда жылдам әрі терең жорамал, жеке кеңестер және сұраулар тарихын аласың. Бастау үшін мини‑қосымшаны аш.",
+        aboutText: "✨ Қалай көмектесе аламыз\n\nBasil’s Arcana ішінде:\n• Қарым-қатынас, қаржы, мансап және ішкі күйге арналған жедел әрі терең жорамалдар.\n• Жеке кеңес және нақты келесі қадамдар.\n• Барлық жорамалдар тарихы бір жерде.\n• Атмосферасы бар интерактивті мини-қосымша.\n\n🔮 Біздің таролог және астролог София\n• Сұрағыңды жұмсақ әрі дәл талдайды.\n• Жағдайыңа сай жеке консультация береді.\n• София видеосы: https://cdn.basilarcana.com/sofia/sofia.webm\n• София профилі: https://t.me/SofiaKnoxx",
         professionalTitle: "🔮 Кәсіби жорамал",
         professionalDescription: "Терең әрі жеке талдау қалайсың ба?\nӨзіңе ыңғайлы тарифті таңда — сонда оракул толық ашылады.",
         planLabels: {
@@ -81,7 +99,16 @@ function buildMainMenuKeyboard(locale) {
     keyboard.text(labels.buy, "menu:buy").row().text(labels.about, "menu:about");
     return keyboard;
 }
-function getLocale(ctx) {
+function buildLanguageKeyboard() {
+    const labels = STRINGS.ru.languageButtons;
+    return new grammy_1.InlineKeyboard()
+        .text(labels.ru, "lang:ru")
+        .row()
+        .text(labels.kk, "lang:kk")
+        .row()
+        .text(labels.en, "lang:en");
+}
+function detectLocaleFromTelegram(ctx) {
     const code = ctx.from?.language_code?.toLowerCase() ?? "";
     if (code.startsWith("kk") || code.startsWith("kz")) {
         return "kk";
@@ -91,6 +118,16 @@ function getLocale(ctx) {
     }
     return "ru";
 }
+function getLocale(ctx) {
+    const userId = ctx.from?.id;
+    if (userId) {
+        const state = userState.get(userId);
+        if (state?.locale) {
+            return state.locale;
+        }
+    }
+    return detectLocaleFromTelegram(ctx);
+}
 function getUserState(userId) {
     const existing = userState.get(userId);
     if (existing) {
@@ -99,9 +136,16 @@ function getUserState(userId) {
     const initial = {
         activeSubscription: false,
         selectedPlan: null,
+        locale: null,
+        pendingStartPayload: null,
     };
     userState.set(userId, initial);
     return initial;
+}
+async function sendLanguagePicker(ctx) {
+    await ctx.reply(STRINGS.ru.languagePrompt, {
+        reply_markup: buildLanguageKeyboard(),
+    });
 }
 function buildSubscriptionKeyboard(locale) {
     const labels = STRINGS[locale].planLabels;
@@ -209,7 +253,18 @@ async function sendLauncherMessage(ctx) {
 async function main() {
     const bot = new grammy_1.Bot(config.telegramToken);
     bot.command("start", async (ctx) => {
+        const userId = ctx.from?.id;
+        if (!userId) {
+            await sendLauncherMessage(ctx);
+            return;
+        }
+        const state = getUserState(userId);
         const payload = parseStartPayload(ctx);
+        if (!state.locale) {
+            state.pendingStartPayload = payload;
+            await sendLanguagePicker(ctx);
+            return;
+        }
         if (payload === "plans") {
             await sendPlans(ctx, { ignoreDebounce: true });
             return;
@@ -217,6 +272,14 @@ async function main() {
         await sendLauncherMessage(ctx);
     });
     bot.command("help", async (ctx) => {
+        const userId = ctx.from?.id;
+        if (userId) {
+            const state = getUserState(userId);
+            if (!state.locale) {
+                await sendLanguagePicker(ctx);
+                return;
+            }
+        }
         await sendMainMenu(ctx);
     });
     bot.command("chatid", async (ctx) => {
@@ -224,6 +287,23 @@ async function main() {
         const userId = ctx.from?.id;
         const username = ctx.from?.username ? `@${ctx.from.username}` : "-";
         await ctx.reply(`chat_id: ${chatId ?? "-"}\nuser_id: ${userId ?? "-"}\nusername: ${username}`);
+    });
+    bot.callbackQuery(/^lang:(ru|en|kk)$/, async (ctx) => {
+        await ctx.answerCallbackQuery();
+        const userId = ctx.from?.id;
+        if (!userId) {
+            await sendMainMenu(ctx);
+            return;
+        }
+        const state = getUserState(userId);
+        state.locale = ctx.match[1];
+        const pending = state.pendingStartPayload;
+        state.pendingStartPayload = null;
+        if (pending === "plans") {
+            await sendPlans(ctx, { ignoreDebounce: true });
+            return;
+        }
+        await sendMainMenu(ctx);
     });
     bot.on("message:web_app_data", async (ctx) => {
         const data = ctx.message.web_app_data?.data ?? "";
@@ -266,6 +346,14 @@ async function main() {
         await startPaymentFlow(ctx, locale);
     });
     bot.on("message:text", async (ctx) => {
+        const userId = ctx.from?.id;
+        if (userId) {
+            const state = getUserState(userId);
+            if (!state.locale) {
+                await sendLanguagePicker(ctx);
+                return;
+            }
+        }
         await sendMainMenu(ctx);
     });
     bot.catch((err) => {
