@@ -430,6 +430,22 @@ async function listRecentUserQueries({ telegramUserId, limit = 20 }) {
   }));
 }
 
+async function clearUserQueryHistory({ telegramUserId }) {
+  if (!telegramUserId) {
+    return { deletedCount: 0 };
+  }
+  const result = await getDb().query(
+    `
+    DELETE FROM user_query_history
+    WHERE telegram_user_id = $1;
+    `,
+    [telegramUserId]
+  );
+  return {
+    deletedCount: Number(result.rowCount || 0)
+  };
+}
+
 module.exports = {
   initDb,
   hasDb,
@@ -439,5 +455,6 @@ module.exports = {
   saveCreatedInvoice,
   confirmInvoiceStatus,
   logUserQuery,
-  listRecentUserQueries
+  listRecentUserQueries,
+  clearUserQueryHistory
 };
