@@ -72,16 +72,16 @@
 
       .stars::before {
         z-index: -2;
-        background-image: radial-gradient(circle, rgba(255, 255, 255, 0.28) 1.8px, transparent 1.8px);
-        background-size: 130px 130px;
-        animation: drift 18s linear infinite;
+        background-image: radial-gradient(circle, rgba(255, 255, 255, 0.22) 1.5px, transparent 1.5px);
+        background-size: 145px 145px;
+        animation: drift 26s linear infinite;
       }
 
       .stars::after {
         z-index: -1;
-        background-image: radial-gradient(circle, rgba(184, 137, 255, 0.38) 1.5px, transparent 1.5px);
-        background-size: 100px 100px;
-        animation: drift 28s linear infinite reverse;
+        background-image: radial-gradient(circle, rgba(184, 137, 255, 0.3) 1.25px, transparent 1.25px);
+        background-size: 120px 120px;
+        animation: drift 40s linear infinite reverse;
       }
 
       @keyframes drift {
@@ -89,16 +89,55 @@
           transform: translate3d(0, 0, 0) scale(1);
         }
         to {
-          transform: translate3d(0, -180px, 0) scale(1.06);
+          transform: translate3d(0, -120px, 0) scale(1.03);
         }
       }
 
-      .particles {
+      .cursor-aura {
         position: fixed;
-        inset: 0;
-        z-index: -1;
+        top: 0;
+        left: 0;
+        width: 420px;
+        height: 420px;
+        border-radius: 50%;
         pointer-events: none;
-        opacity: 0.95;
+        z-index: -1;
+        opacity: 0;
+        filter: blur(16px);
+        background: radial-gradient(
+          circle at center,
+          rgba(184, 137, 255, 0.48) 0%,
+          rgba(120, 89, 196, 0.28) 36%,
+          rgba(18, 19, 23, 0) 72%
+        );
+        transform: translate3d(-9999px, -9999px, 0);
+        transition: opacity 0.3s ease;
+        will-change: transform, opacity;
+      }
+
+      body.cursor-active .cursor-aura {
+        opacity: 0.9;
+      }
+
+      .cursor-core {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 140px;
+        height: 140px;
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: -1;
+        opacity: 0;
+        filter: blur(8px);
+        background: radial-gradient(circle at center, rgba(224, 204, 255, 0.55) 0%, rgba(184, 137, 255, 0) 75%);
+        transform: translate3d(-9999px, -9999px, 0);
+        transition: opacity 0.24s ease;
+        will-change: transform, opacity;
+      }
+
+      body.cursor-active .cursor-core {
+        opacity: 0.7;
       }
 
       .wrap {
@@ -444,8 +483,24 @@
           grid-template-rows: auto;
         }
 
-        .particles {
-          opacity: 0.75;
+        .stars {
+          opacity: 0.25;
+        }
+
+        .stars::before,
+        .stars::after {
+          animation: none;
+        }
+
+        body {
+          background:
+            radial-gradient(circle at 20% 20%, #2b2d38 0%, transparent 30%),
+            linear-gradient(150deg, #15161b, #1b1c24 60%, #171821);
+        }
+
+        .cursor-aura,
+        .cursor-core {
+          display: none;
         }
 
         .hero {
@@ -517,7 +572,8 @@
   </head>
   <body>
     <div class="stars"></div>
-    <canvas class="particles" id="particles-bg"></canvas>
+    <div class="cursor-aura" id="cursor-aura"></div>
+    <div class="cursor-core" id="cursor-core"></div>
     <main class="wrap">
       <header class="topbar">
         <div class="logo" data-i18n="topLine"></div>
@@ -535,8 +591,8 @@
           <p class="lead reveal" data-delay="2" data-i18n="lead"></p>
           <div class="hero-actions reveal" data-delay="3">
             <a class="btn" href="https://t.me/tarot_arkana_bot" target="_blank" rel="noreferrer" data-i18n="ctaBot"></a>
-            <a class="btn alt" href="https://t.me/SofiaKnoxx" target="_blank" rel="noreferrer" data-i18n="ctaSofia"></a>
             <a class="btn alt" href="https://t.me/tarot_arkana_bot/app" target="_blank" rel="noreferrer" data-i18n="ctaMini"></a>
+            <a class="btn alt" href="https://t.me/SofiaKnoxx" target="_blank" rel="noreferrer" data-i18n="ctaSofia"></a>
           </div>
         </div>
 
@@ -693,161 +749,67 @@
         });
       }
 
-      (function initParticles() {
-        const canvas = document.getElementById("particles-bg");
-        if (!canvas) return;
-        const ctx = canvas.getContext("2d");
-        if (!ctx) return;
+      (function initCursorAura() {
+        const aura = document.getElementById("cursor-aura");
+        const core = document.getElementById("cursor-core");
+        if (!aura || !core) return;
 
         const motionReduced =
           typeof window.matchMedia === "function" &&
           window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-        if (motionReduced) return;
-
-        const isTouchDevice =
+        const isCoarsePointer =
           typeof window.matchMedia === "function" &&
           window.matchMedia("(hover: none), (pointer: coarse)").matches;
+        if (motionReduced || isCoarsePointer) return;
 
         const state = {
-          width: 0,
-          height: 0,
-          dpr: Math.min(window.devicePixelRatio || 1, 2),
-          particles: [],
-          pointer: {
-            x: -1000,
-            y: -1000,
-            active: false,
-            radius: isTouchDevice ? 0 : 150,
-          },
+          currentX: window.innerWidth * 0.5,
+          currentY: window.innerHeight * 0.5,
+          targetX: window.innerWidth * 0.5,
+          targetY: window.innerHeight * 0.5,
+          active: false,
           rafId: 0,
         };
 
-        function resize() {
-          state.width = window.innerWidth;
-          state.height = window.innerHeight;
-          state.dpr = Math.min(window.devicePixelRatio || 1, 2);
-          canvas.width = Math.floor(state.width * state.dpr);
-          canvas.height = Math.floor(state.height * state.dpr);
-          canvas.style.width = `${state.width}px`;
-          canvas.style.height = `${state.height}px`;
-          ctx.setTransform(state.dpr, 0, 0, state.dpr, 0, 0);
-          seedParticles();
+        function placeElements(x, y) {
+          aura.style.transform = `translate3d(${x - 210}px, ${y - 210}px, 0)`;
+          core.style.transform = `translate3d(${x - 70}px, ${y - 70}px, 0)`;
         }
 
-        function seedParticles() {
-          const densityBase = state.width < 960 ? 48 : 84;
-          const count = Math.max(30, Math.floor((state.width * state.height) / (densityBase * 1000)));
-          state.particles = Array.from({ length: count }, () => ({
-            x: Math.random() * state.width,
-            y: Math.random() * state.height,
-            vx: (Math.random() - 0.5) * 0.28,
-            vy: (Math.random() - 0.5) * 0.28,
-            r: 0.7 + Math.random() * 1.9,
-            hue: Math.random() > 0.65 ? 270 : 0,
-            alpha: 0.2 + Math.random() * 0.5,
-          }));
-        }
-
-        function drawParticle(p) {
-          const color =
-            p.hue === 270
-              ? `rgba(192, 151, 255, ${p.alpha})`
-              : `rgba(255, 255, 255, ${p.alpha * 0.85})`;
-          ctx.beginPath();
-          ctx.fillStyle = color;
-          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-          ctx.fill();
-        }
-
-        function updateParticle(p) {
-          p.x += p.vx;
-          p.y += p.vy;
-
-          if (p.x < -20) p.x = state.width + 20;
-          if (p.x > state.width + 20) p.x = -20;
-          if (p.y < -20) p.y = state.height + 20;
-          if (p.y > state.height + 20) p.y = -20;
-
-          if (state.pointer.active && state.pointer.radius > 0) {
-            const dx = p.x - state.pointer.x;
-            const dy = p.y - state.pointer.y;
-            const distSq = dx * dx + dy * dy;
-            const radiusSq = state.pointer.radius * state.pointer.radius;
-            if (distSq < radiusSq && distSq > 0.001) {
-              const dist = Math.sqrt(distSq);
-              const force = (state.pointer.radius - dist) / state.pointer.radius;
-              const nx = dx / dist;
-              const ny = dy / dist;
-              p.vx += nx * force * 0.022;
-              p.vy += ny * force * 0.022;
-            }
-          }
-
-          p.vx *= 0.992;
-          p.vy *= 0.992;
-
-          const maxSpeed = 0.85;
-          p.vx = Math.max(-maxSpeed, Math.min(maxSpeed, p.vx));
-          p.vy = Math.max(-maxSpeed, Math.min(maxSpeed, p.vy));
-        }
-
-        function drawPointerGlow() {
-          if (!state.pointer.active || state.pointer.radius <= 0) return;
-          const gradient = ctx.createRadialGradient(
-            state.pointer.x,
-            state.pointer.y,
-            0,
-            state.pointer.x,
-            state.pointer.y,
-            state.pointer.radius
-          );
-          gradient.addColorStop(0, "rgba(184, 137, 255, 0.20)");
-          gradient.addColorStop(1, "rgba(184, 137, 255, 0)");
-          ctx.fillStyle = gradient;
-          ctx.beginPath();
-          ctx.arc(state.pointer.x, state.pointer.y, state.pointer.radius, 0, Math.PI * 2);
-          ctx.fill();
-        }
-
-        function frame() {
-          ctx.clearRect(0, 0, state.width, state.height);
-          drawPointerGlow();
-          for (const p of state.particles) {
-            updateParticle(p);
-            drawParticle(p);
-          }
-          state.rafId = requestAnimationFrame(frame);
+        function tick() {
+          state.currentX += (state.targetX - state.currentX) * 0.11;
+          state.currentY += (state.targetY - state.currentY) * 0.11;
+          placeElements(state.currentX, state.currentY);
+          state.rafId = requestAnimationFrame(tick);
         }
 
         function onPointerMove(event) {
-          state.pointer.x = event.clientX;
-          state.pointer.y = event.clientY;
-          state.pointer.active = true;
+          state.targetX = event.clientX;
+          state.targetY = event.clientY;
+          if (!state.active) {
+            state.active = true;
+            document.body.classList.add("cursor-active");
+          }
         }
 
         function onPointerLeave() {
-          state.pointer.active = false;
-          state.pointer.x = -1000;
-          state.pointer.y = -1000;
+          state.active = false;
+          document.body.classList.remove("cursor-active");
         }
 
         function onVisibility() {
           if (document.hidden) {
             cancelAnimationFrame(state.rafId);
           } else {
-            state.rafId = requestAnimationFrame(frame);
+            state.rafId = requestAnimationFrame(tick);
           }
         }
 
-        resize();
-        state.rafId = requestAnimationFrame(frame);
-
-        window.addEventListener("resize", resize);
-        if (!isTouchDevice) {
-          window.addEventListener("pointermove", onPointerMove, { passive: true });
-          window.addEventListener("pointerleave", onPointerLeave);
-          window.addEventListener("blur", onPointerLeave);
-        }
+        placeElements(state.currentX, state.currentY);
+        state.rafId = requestAnimationFrame(tick);
+        window.addEventListener("pointermove", onPointerMove, { passive: true });
+        window.addEventListener("pointerleave", onPointerLeave);
+        window.addEventListener("blur", onPointerLeave);
         document.addEventListener("visibilitychange", onVisibility);
       })();
 
