@@ -533,6 +533,7 @@
       gtag("js", new Date());
 
       gtag("config", "AW-16800290711");
+      gtag("config", "G-YGJ2JRCS49");
     </script>
   </head>
   <body>
@@ -553,9 +554,9 @@
           <h1 class="reveal" data-delay="1" data-i18n="title"></h1>
           <p class="lead reveal" data-delay="2" data-i18n="lead"></p>
           <div class="hero-actions reveal" data-delay="3">
-            <a class="btn" href="https://t.me/tarot_arkana_bot" target="_blank" rel="noreferrer" data-i18n="ctaBot"></a>
-            <a class="btn alt" href="https://t.me/tarot_arkana_bot/app" target="_blank" rel="noreferrer" data-i18n="ctaMini"></a>
-            <a class="btn alt" href="https://t.me/SofiaKnoxx" target="_blank" rel="noreferrer" data-i18n="ctaSofia"></a>
+            <a class="btn" href="https://t.me/tarot_arkana_bot" target="_blank" rel="noreferrer" data-i18n="ctaBot" data-track="cta_bot"></a>
+            <a class="btn alt" href="https://t.me/tarot_arkana_bot/app" target="_blank" rel="noreferrer" data-i18n="ctaMini" data-track="cta_mini_app"></a>
+            <a class="btn alt" href="https://t.me/SofiaKnoxx" target="_blank" rel="noreferrer" data-i18n="ctaSofia" data-track="cta_sofia"></a>
           </div>
         </div>
 
@@ -605,9 +606,9 @@
       <section class="bottom-cta">
         <span data-i18n="devCta"></span>
         <div class="bottom-cta-links">
-          <a href="mailto:basiluxd@gmail.com">basiluxd@gmail.com</a>
+          <a href="mailto:basiluxd@gmail.com" data-track="cta_email">basiluxd@gmail.com</a>
           <span class="bottom-cta-sep">•</span>
-          <a href="https://t.me/uxd_ink" target="_blank" rel="noreferrer">@uxd_ink</a>
+          <a href="https://t.me/uxd_ink" target="_blank" rel="noreferrer" data-track="cta_telegram">@uxd_ink</a>
         </div>
       </section>
     </main>
@@ -716,6 +717,26 @@
         });
       }
 
+      function setupAnalyticsEvents() {
+        const links = document.querySelectorAll("[data-track]");
+        links.forEach((link) => {
+          link.addEventListener("click", () => {
+            const eventName = link.getAttribute("data-track") || "cta_click";
+            const href = link.getAttribute("href") || "";
+            if (typeof gtag === "function") {
+              gtag("event", "cta_click", {
+                event_category: "engagement",
+                event_label: eventName,
+                destination: href,
+                link_text: (link.textContent || "").trim(),
+                language: activeLang,
+              });
+            }
+          });
+        });
+      }
+
+      setupAnalyticsEvents();
       applyLang("ru");
     </script>
   </body>
