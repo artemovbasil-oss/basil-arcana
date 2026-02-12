@@ -128,15 +128,15 @@ class _EnergyHeaderPillState extends ConsumerState<_EnergyHeaderPill>
     final energy = ref.watch(energyProvider);
     final energyValueText = energy.isUnlimited ? '∞' : '${energy.percent}%';
     final isLow = energy.clampedValue < 15;
-    const vividPurple = Color(0xFFA35CFF);
-    const richPurple = Color(0xFF7D3FE3);
-    const darkShell = Color(0xFF171320);
-    final progress = energy.isUnlimited ? 1.0 : energy.progress.clamp(0.0, 1.0);
-    final isFull = energy.isUnlimited || progress >= 0.999;
-    final edgeColor = isFull
-        ? vividPurple.withValues(alpha: 0.95)
-        : Color.lerp(darkShell, vividPurple, progress * 0.85)!
-            .withValues(alpha: 0.78);
+    const vividPurple = Color(0xFFA05CFF);
+    const darkBurgundy = Color(0xFF4A102A);
+    const nearBlack = Color(0xFF08060C);
+    final progress = energy.progress.clamp(0, 1);
+    final base = progress >= 0.5
+        ? Color.lerp(darkBurgundy, vividPurple, (progress - 0.5) * 2)!
+        : Color.lerp(nearBlack, darkBurgundy, progress * 2)!;
+    final end = Color.lerp(base, nearBlack, 0.48)!;
+    final edge = Color.lerp(base, Colors.white, 0.08)!;
 
     return AnimatedBuilder(
       animation: _controller,
@@ -159,91 +159,50 @@ class _EnergyHeaderPillState extends ConsumerState<_EnergyHeaderPill>
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(999),
-                  border: Border.all(color: edgeColor),
+                  gradient: LinearGradient(
+                    colors: [
+                      base,
+                      end,
+                    ],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                  ),
+                  border: Border.all(color: edge),
                   boxShadow: [
                     BoxShadow(
-                      color: vividPurple.withValues(alpha: glow),
+                      color: base.withOpacity(glow),
                       blurRadius: isLow ? 16 : 10,
                       offset: const Offset(0, 4),
                     ),
                   ],
                 ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(999),
-                  child: Stack(
-                    children: [
-                      Positioned.fill(
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            color: darkShell.withValues(alpha: 0.92),
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFF1A1525), Color(0xFF111016)],
-                              begin: Alignment.centerLeft,
-                              end: Alignment.centerRight,
-                            ),
-                          ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        l10n.energyLabel,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.labelMedium?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
-                      TweenAnimationBuilder<double>(
-                        duration: const Duration(milliseconds: 420),
-                        curve: Curves.easeOutCubic,
-                        tween: Tween<double>(begin: 0, end: progress),
-                        builder: (context, value, child) {
-                          return Align(
-                            alignment: Alignment.centerLeft,
-                            child: FractionallySizedBox(
-                              widthFactor: value.clamp(0.0, 1.0),
-                              child: DecoratedBox(
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: isFull
-                                        ? const [
-                                            Color(0xFFA45DFF),
-                                            Color(0xFF8A4BF0),
-                                          ]
-                                        : [
-                                            vividPurple,
-                                            richPurple.withValues(alpha: 0.96),
-                                          ],
-                                    begin: Alignment.centerLeft,
-                                    end: Alignment.centerRight,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          );
-                        },
+                    ),
+                    Text(
+                      energyValueText,
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
                       ),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              l10n.energyLabel,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: theme.textTheme.labelMedium?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                          Text(
-                            energyValueText,
-                            style: theme.textTheme.labelMedium?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          const Icon(
-                            Icons.chevron_right,
-                            size: 16,
-                            color: Colors.white,
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(width: 6),
+                    const Icon(
+                      Icons.chevron_right,
+                      size: 16,
+                      color: Colors.white,
+                    ),
+                  ],
                 ),
               ),
             ),

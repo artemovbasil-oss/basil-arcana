@@ -78,42 +78,32 @@ class SofiaPromoCard extends StatelessWidget {
     final buttonLabel = _buttonLabel(localeCode);
     final tip = _tip(localeCode);
     final assetsBaseUrl = AssetsConfig.assetsBaseUrl;
-    final mediaAspectRatio = compact ? 3 / 4 : 3 / 4;
+    final mediaAspectRatio = compact ? 2 / 3 : 2 / 3;
 
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        gradient: LinearGradient(
-          colors: [
-            colorScheme.surface.withValues(alpha: 0.96),
-            colorScheme.primary.withValues(alpha: 0.18),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        border: Border.all(color: colorScheme.primary.withValues(alpha: 0.35)),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: colorScheme.outlineVariant),
+        color: colorScheme.primary.withOpacity(0.05),
       ),
       child: Padding(
-        padding: EdgeInsets.all(compact ? 14 : 16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: ColoredBox(
-                color: colorScheme.surface.withValues(alpha: 0.45),
-                child: AspectRatio(
-                  aspectRatio: mediaAspectRatio,
-                  child: CardMedia(
-                    cardId: 'sofia_promo',
-                    imageUrl: '$assetsBaseUrl/sofia/sofia.webp',
-                    videoUrl: '$assetsBaseUrl/sofia/sofia.webm',
-                    fit: BoxFit.cover,
-                    showGlow: false,
-                    enableVideo: true,
-                    autoPlayOnce: true,
-                    playLabel: l10n.videoTapToPlay,
-                  ),
+              borderRadius: BorderRadius.circular(8),
+              child: AspectRatio(
+                aspectRatio: mediaAspectRatio,
+                child: CardMedia(
+                  cardId: 'sofia_promo',
+                  imageUrl: '$assetsBaseUrl/sofia/sofia.webp',
+                  videoUrl: '$assetsBaseUrl/sofia/sofia.webm',
+                  fit: BoxFit.cover,
+                  showGlow: false,
+                  enableVideo: true,
+                  autoPlayOnce: true,
+                  playLabel: l10n.videoTapToPlay,
                 ),
               ),
             ),

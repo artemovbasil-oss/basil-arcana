@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 
@@ -96,6 +95,12 @@ Locale _localeFromLanguageCode(String code) {
 }
 
 String _resolveLanguageCode(Box<String> box) {
+  final fromStorage =
+      _normalizeSupportedLanguageCode(box.get(_languageCodeKey));
+  if (fromStorage != null) {
+    return fromStorage;
+  }
+
   final fromQuery = _normalizeSupportedLanguageCode(
     Uri.base.queryParameters[_languageCodeKey],
   );
@@ -103,16 +108,10 @@ String _resolveLanguageCode(Box<String> box) {
     return fromQuery;
   }
 
-  if (kIsWeb) {
-    final fromSystem = _normalizeSupportedLanguageCode(
-      PlatformDispatcher.instance.locale.languageCode,
-    );
-    return fromSystem ?? 'en';
-  }
-
-  final fromStorage =
-      _normalizeSupportedLanguageCode(box.get(_languageCodeKey));
-  return fromStorage ?? 'en';
+  final fromSystem = _normalizeSupportedLanguageCode(
+    PlatformDispatcher.instance.locale.languageCode,
+  );
+  return fromSystem ?? 'en';
 }
 
 Locale _localeFromBox(Box<String> box) {
