@@ -108,7 +108,7 @@ class SofiaPromoCard extends StatelessWidget {
                     cardId: 'sofia_promo',
                     imageUrl: '$assetsBaseUrl/sofia/sofia.webp',
                     videoUrl: '$assetsBaseUrl/sofia/sofia.webm',
-                    fit: BoxFit.contain,
+                    fit: BoxFit.cover,
                     showGlow: false,
                     enableVideo: true,
                     autoPlayOnce: true,
