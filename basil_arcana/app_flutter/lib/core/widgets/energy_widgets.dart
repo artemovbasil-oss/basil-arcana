@@ -15,6 +15,13 @@ const Map<EnergyPackId, int> _displayStarsByPack = {
   EnergyPackId.yearUnlimited: 6990,
 };
 
+const Map<EnergyPackId, int> _energyGainByPack = {
+  EnergyPackId.small: 25,
+  EnergyPackId.medium: 50,
+  EnergyPackId.full: 100,
+  EnergyPackId.yearUnlimited: 0,
+};
+
 String _packTitle(AppLocalizations l10n, EnergyPackId packId) {
   switch (packId) {
     case EnergyPackId.small:
@@ -29,6 +36,18 @@ String _packTitle(AppLocalizations l10n, EnergyPackId packId) {
           .trim();
       return normalized.isEmpty ? l10n.energyPackYearUnlimited : normalized;
   }
+}
+
+bool _shouldShowPack(EnergyState energy, EnergyPackId packId) {
+  if (packId == EnergyPackId.yearUnlimited) {
+    return true;
+  }
+  final gain = _energyGainByPack[packId] ?? 0;
+  if (gain <= 0) {
+    return false;
+  }
+  final missing = (100 - energy.clampedValue).clamp(0, 100).toDouble();
+  return missing > 0 && gain <= missing;
 }
 
 Future<bool> trySpendEnergyForAction(
@@ -54,6 +73,7 @@ Future<bool> trySpendEnergyForAction(
 
 Future<void> showEnergyTopUpSheet(BuildContext context, WidgetRef ref) async {
   final l10n = AppLocalizations.of(context);
+  final energy = ref.read(energyProvider);
   await showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
@@ -130,72 +150,40 @@ Future<void> showEnergyTopUpSheet(BuildContext context, WidgetRef ref) async {
                               }
                             },
                     ),
-                    const SizedBox(height: 10),
-                    _PackActionButton(
-                      title: _packTitle(l10n, EnergyPackId.small),
-                      stars: _displayStarsByPack[EnergyPackId.small]!,
-                      enabled: processingPack == null,
-                      onPressed: processingPack != null
-                          ? null
-                          : () async {
-                              setState(
-                                  () => processingPack = EnergyPackId.small);
-                              await _purchaseEnergyPack(
-                                context: context,
-                                sheetContext: statefulContext,
-                                ref: ref,
-                                l10n: l10n,
-                                packId: EnergyPackId.small,
-                              );
-                              if (statefulContext.mounted) {
-                                setState(() => processingPack = null);
-                              }
-                            },
-                    ),
-                    const SizedBox(height: 10),
-                    _PackActionButton(
-                      title: _packTitle(l10n, EnergyPackId.medium),
-                      stars: _displayStarsByPack[EnergyPackId.medium]!,
-                      enabled: processingPack == null,
-                      onPressed: processingPack != null
-                          ? null
-                          : () async {
-                              setState(
-                                  () => processingPack = EnergyPackId.medium);
-                              await _purchaseEnergyPack(
-                                context: context,
-                                sheetContext: statefulContext,
-                                ref: ref,
-                                l10n: l10n,
-                                packId: EnergyPackId.medium,
-                              );
-                              if (statefulContext.mounted) {
-                                setState(() => processingPack = null);
-                              }
-                            },
-                    ),
-                    const SizedBox(height: 10),
-                    _PackActionButton(
-                      title: _packTitle(l10n, EnergyPackId.full),
-                      stars: _displayStarsByPack[EnergyPackId.full]!,
-                      enabled: processingPack == null,
-                      onPressed: processingPack != null
-                          ? null
-                          : () async {
-                              setState(
-                                  () => processingPack = EnergyPackId.full);
-                              await _purchaseEnergyPack(
-                                context: context,
-                                sheetContext: statefulContext,
-                                ref: ref,
-                                l10n: l10n,
-                                packId: EnergyPackId.full,
-                              );
-                              if (statefulContext.mounted) {
-                                setState(() => processingPack = null);
-                              }
-                            },
-                    ),
+                    for (final packId in [
+                      EnergyPackId.small,
+                      EnergyPackId.medium,
+                      EnergyPackId.full,
+                    ])
+                      if (_shouldShowPack(energy, packId)) ...[
+                        const SizedBox(height: 10),
+                        _PackActionButton(
+                          title: _packTitle(l10n, packId),
+                          stars: _displayStarsByPack[packId]!,
+                          enabled: processingPack == null,
+                          onPressed: processingPack != null
+                              ? null
+                              : () async {
+                                  if (!_shouldShowPack(
+                                    ref.read(energyProvider),
+                                    packId,
+                                  )) {
+                                    return;
+                                  }
+                                  setState(() => processingPack = packId);
+                                  await _purchaseEnergyPack(
+                                    context: context,
+                                    sheetContext: statefulContext,
+                                    ref: ref,
+                                    l10n: l10n,
+                                    packId: packId,
+                                  );
+                                  if (statefulContext.mounted) {
+                                    setState(() => processingPack = null);
+                                  }
+                                },
+                        ),
+                      ],
                   ],
                 ),
               ),
@@ -414,6 +402,11 @@ Future<void> _purchaseEnergyPack({
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(l10n.energyTopUpOnlyInTelegram)),
     );
+    return;
+  }
+
+  if (packId != EnergyPackId.yearUnlimited &&
+      !_shouldShowPack(ref.read(energyProvider), packId)) {
     return;
   }
 
