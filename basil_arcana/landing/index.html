@@ -363,9 +363,10 @@
       }
 
       .bottom-cta {
-        background: linear-gradient(135deg, #efe5ff, #c792ff);
-        color: #140e1f;
-        border: 1px solid rgba(0, 0, 0, 0.1);
+        background: linear-gradient(135deg, #f5ebff, #c084ff 52%, #a45cf8);
+        color: #10091c;
+        border: 1px solid rgba(255, 255, 255, 0.35);
+        box-shadow: 0 16px 34px rgba(164, 92, 248, 0.34);
         border-radius: 12px;
         padding: 0.65rem 0.8rem;
         margin-bottom: 0.75rem;
@@ -392,14 +393,26 @@
       }
 
       .bottom-cta a {
-        color: #140e1f;
+        color: #10091c;
         text-decoration: none;
-        border-bottom: 1px solid rgba(20, 14, 31, 0.3);
+        border-bottom: 1px solid rgba(16, 9, 28, 0.4);
         transition: border-color 0.18s ease, opacity 0.18s ease;
       }
 
       .bottom-cta a:hover {
-        border-bottom-color: #140e1f;
+        border-bottom-color: #10091c;
+      }
+
+      .bottom-cta-links {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.65rem;
+        flex-wrap: wrap;
+        font-weight: 800;
+      }
+
+      .bottom-cta-sep {
+        opacity: 0.6;
       }
 
       .reveal {
@@ -580,7 +593,11 @@
       </footer>
       <section class="bottom-cta">
         <span data-i18n="devCta"></span>
-        <a href="mailto:basiluxd@gmail.com">basiluxd@gmail.com</a>
+        <div class="bottom-cta-links">
+          <a href="mailto:basiluxd@gmail.com">basiluxd@gmail.com</a>
+          <span class="bottom-cta-sep">•</span>
+          <a href="https://t.me/uxd_ink" target="_blank" rel="noreferrer">@uxd_ink</a>
+        </div>
       </section>
     </main>
 
