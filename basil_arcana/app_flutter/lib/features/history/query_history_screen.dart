@@ -63,7 +63,17 @@ class _QueryHistoryScreenState extends ConsumerState<QueryHistoryScreen> {
       'kk' => 'kk_KZ',
       _ => 'en_US',
     };
-    return DateFormat('dd.MM.yyyy HH:mm', locale).format(date);
+    return DateFormat('dd.MM.yyyy', locale).format(date);
+  }
+
+  String _formatTime(BuildContext context, DateTime date) {
+    final code = Localizations.localeOf(context).languageCode;
+    final locale = switch (code) {
+      'ru' => 'ru_RU',
+      'kk' => 'kk_KZ',
+      _ => 'en_US',
+    };
+    return DateFormat('HH:mm', locale).format(date);
   }
 
   @override
@@ -146,11 +156,37 @@ class _QueryHistoryScreenState extends ConsumerState<QueryHistoryScreen> {
                           ),
                         ),
                         const SizedBox(width: 12),
-                        Text(
-                          _formatDate(context, item.createdAt),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.bodySmall,
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              _formatDate(context, item.createdAt),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurface
+                                        .withValues(alpha: 0.58),
+                                  ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              _formatTime(context, item.createdAt),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
