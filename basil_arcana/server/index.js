@@ -231,7 +231,7 @@ const ASSETS_BASE_URL_ENV = process.env.ASSETS_BASE_URL || 'https://cdn.basilarc
 const STARS_PACK_SMALL_XTR = Number(process.env.STARS_PACK_SMALL_XTR || 25);
 const STARS_PACK_MEDIUM_XTR = Number(process.env.STARS_PACK_MEDIUM_XTR || 45);
 const STARS_PACK_FULL_XTR = Number(process.env.STARS_PACK_FULL_XTR || 75);
-const STARS_PACK_YEAR_XTR = Number(process.env.STARS_PACK_YEAR_XTR || 1000);
+const STARS_PACK_YEAR_XTR = Number(process.env.STARS_PACK_YEAR_XTR || 6990);
 
 const ENERGY_STARS_PACKS = {
   small: { energyAmount: 25, starsAmount: STARS_PACK_SMALL_XTR, grantType: 'energy' },

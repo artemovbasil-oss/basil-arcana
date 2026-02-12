@@ -8,6 +8,29 @@ import '../../state/energy_controller.dart';
 import '../../state/providers.dart';
 import 'app_buttons.dart';
 
+const Map<EnergyPackId, int> _displayStarsByPack = {
+  EnergyPackId.small: 25,
+  EnergyPackId.medium: 45,
+  EnergyPackId.full: 75,
+  EnergyPackId.yearUnlimited: 6990,
+};
+
+String _packTitle(AppLocalizations l10n, EnergyPackId packId) {
+  switch (packId) {
+    case EnergyPackId.small:
+      return l10n.energyPackSmall;
+    case EnergyPackId.medium:
+      return l10n.energyPackMedium;
+    case EnergyPackId.full:
+      return l10n.energyPackFull;
+    case EnergyPackId.yearUnlimited:
+      final normalized = l10n.energyPackYearUnlimited
+          .replaceAll(RegExp(r'\s*[—-]\s*\d+\s*⭐\s*$', unicode: true), '')
+          .trim();
+      return normalized.isEmpty ? l10n.energyPackYearUnlimited : normalized;
+  }
+}
+
 Future<bool> trySpendEnergyForAction(
   BuildContext context,
   WidgetRef ref,
@@ -85,9 +108,11 @@ Future<void> showEnergyTopUpSheet(BuildContext context, WidgetRef ref) async {
                           style: Theme.of(sheetContext).textTheme.bodySmall,
                         ),
                       ),
-                    AppPrimaryButton(
-                      label: l10n.energyPackYearUnlimited,
-                      icon: Icons.all_inclusive,
+                    _PackActionButton(
+                      title: _packTitle(l10n, EnergyPackId.yearUnlimited),
+                      stars: _displayStarsByPack[EnergyPackId.yearUnlimited]!,
+                      primary: true,
+                      enabled: processingPack == null,
                       onPressed: processingPack != null
                           ? null
                           : () async {
@@ -106,8 +131,10 @@ Future<void> showEnergyTopUpSheet(BuildContext context, WidgetRef ref) async {
                             },
                     ),
                     const SizedBox(height: 10),
-                    AppGhostButton(
-                      label: l10n.energyPackSmall,
+                    _PackActionButton(
+                      title: _packTitle(l10n, EnergyPackId.small),
+                      stars: _displayStarsByPack[EnergyPackId.small]!,
+                      enabled: processingPack == null,
                       onPressed: processingPack != null
                           ? null
                           : () async {
@@ -126,8 +153,10 @@ Future<void> showEnergyTopUpSheet(BuildContext context, WidgetRef ref) async {
                             },
                     ),
                     const SizedBox(height: 10),
-                    AppGhostButton(
-                      label: l10n.energyPackMedium,
+                    _PackActionButton(
+                      title: _packTitle(l10n, EnergyPackId.medium),
+                      stars: _displayStarsByPack[EnergyPackId.medium]!,
+                      enabled: processingPack == null,
                       onPressed: processingPack != null
                           ? null
                           : () async {
@@ -146,9 +175,10 @@ Future<void> showEnergyTopUpSheet(BuildContext context, WidgetRef ref) async {
                             },
                     ),
                     const SizedBox(height: 10),
-                    AppGhostButton(
-                      label: l10n.energyPackFull,
-                      icon: Icons.flash_on,
+                    _PackActionButton(
+                      title: _packTitle(l10n, EnergyPackId.full),
+                      stars: _displayStarsByPack[EnergyPackId.full]!,
+                      enabled: processingPack == null,
                       onPressed: processingPack != null
                           ? null
                           : () async {
@@ -221,6 +251,94 @@ class _EnergyCostsTable extends StatelessWidget {
           row(l10n.energyCostNatalChart,
               '${EnergyAction.natalChart.cost.round()}%'),
         ],
+      ),
+    );
+  }
+}
+
+class _PackActionButton extends StatelessWidget {
+  const _PackActionButton({
+    required this.title,
+    required this.stars,
+    required this.onPressed,
+    this.primary = false,
+    this.enabled = true,
+  });
+
+  final String title;
+  final int stars;
+  final VoidCallback? onPressed;
+  final bool primary;
+  final bool enabled;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final starsText = '$stars ⭐';
+    final content = Row(
+      children: [
+        Expanded(
+          child: Text(
+            title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: (primary ? textTheme.titleMedium : textTheme.labelLarge)
+                ?.copyWith(
+              color: primary
+                  ? colorScheme.onPrimary
+                  : colorScheme.primary.withValues(alpha: 0.96),
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Text(
+          starsText,
+          maxLines: 1,
+          style: (primary ? textTheme.titleMedium : textTheme.labelLarge)
+              ?.copyWith(
+            color: primary
+                ? colorScheme.onPrimary
+                : colorScheme.primary.withValues(alpha: 0.96),
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ],
+    );
+
+    if (primary) {
+      return SizedBox(
+        width: double.infinity,
+        child: ElevatedButton(
+          onPressed: enabled ? onPressed : null,
+          style: ElevatedButton.styleFrom(
+            minimumSize: const Size.fromHeight(54),
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+            backgroundColor: colorScheme.primary,
+            foregroundColor: colorScheme.onPrimary,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+            textStyle: const TextStyle(fontWeight: FontWeight.w600),
+          ),
+          child: content,
+        ),
+      );
+    }
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton(
+        onPressed: enabled ? onPressed : null,
+        style: OutlinedButton.styleFrom(
+          minimumSize: const Size.fromHeight(54),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+          foregroundColor: colorScheme.primary,
+          side: BorderSide(color: colorScheme.primary.withValues(alpha: 0.8)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          textStyle: const TextStyle(fontWeight: FontWeight.w600),
+        ),
+        child: content,
       ),
     );
   }
