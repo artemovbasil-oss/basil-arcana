@@ -45,66 +45,51 @@
       body {
         font-family: "Manrope", sans-serif;
         color: var(--text);
-        background: linear-gradient(145deg, #14151b, #1a1b23 55%, #16171d);
+        background: linear-gradient(145deg, #14151b, #1b1c24 58%, #16171e);
         overflow: hidden;
       }
 
-      .heatmap {
-        --x1: 50%;
-        --y1: 50%;
-        --x2: 30%;
-        --y2: 60%;
-        --x3: 70%;
-        --y3: 30%;
+      .stars,
+      .stars::before,
+      .stars::after {
         position: fixed;
         inset: 0;
         pointer-events: none;
-        z-index: -1;
-        background:
-          radial-gradient(42rem 42rem at var(--x1) var(--y1), rgba(176, 112, 255, 0.42), rgba(176, 112, 255, 0) 66%),
-          radial-gradient(28rem 28rem at var(--x2) var(--y2), rgba(208, 152, 255, 0.34), rgba(208, 152, 255, 0) 70%),
-          radial-gradient(36rem 36rem at var(--x3) var(--y3), rgba(126, 82, 220, 0.3), rgba(126, 82, 220, 0) 72%);
-        mix-blend-mode: screen;
-        filter: blur(24px) saturate(116%);
-        opacity: 0.92;
-        will-change: background;
+        content: "";
+        background-repeat: repeat;
       }
 
-      .vignette {
-        position: fixed;
-        inset: 0;
-        pointer-events: none;
-        z-index: -1;
-        background:
-          radial-gradient(circle at 50% 45%, rgba(0, 0, 0, 0) 36%, rgba(0, 0, 0, 0.52) 100%),
-          linear-gradient(120deg, rgba(12, 12, 16, 0.7), rgba(12, 12, 16, 0.22) 35%, rgba(12, 12, 16, 0.76));
+      .stars {
+        z-index: -2;
+        background-image: radial-gradient(circle, rgba(255, 255, 255, 0.14) 1px, transparent 1px);
+        background-size: 4px 4px;
+        opacity: 0.28;
       }
 
-      .grain {
-        position: fixed;
-        inset: -100%;
-        pointer-events: none;
+      .stars::before {
         z-index: -1;
-        opacity: 0.035;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.8'/%3E%3C/svg%3E");
-        animation: grainShift 7s steps(8) infinite;
+        background-image: radial-gradient(circle, rgba(255, 255, 255, 0.2) 1.4px, transparent 1.4px);
+        background-size: 125px 125px;
+        opacity: 0.35;
+        animation: twinkle 4.8s ease-in-out infinite alternate;
       }
 
-      @keyframes grainShift {
+      .stars::after {
+        z-index: -1;
+        background-image: radial-gradient(circle, rgba(184, 137, 255, 0.24) 1.2px, transparent 1.2px);
+        background-size: 100px 100px;
+        opacity: 0.3;
+        animation: twinkle 6.2s ease-in-out infinite alternate-reverse;
+      }
+
+      @keyframes twinkle {
         0% {
-          transform: translate3d(0, 0, 0);
-        }
-        25% {
-          transform: translate3d(8%, -6%, 0);
-        }
-        50% {
-          transform: translate3d(-6%, 8%, 0);
-        }
-        75% {
-          transform: translate3d(6%, 4%, 0);
+          opacity: 0.18;
+          transform: scale(1);
         }
         100% {
-          transform: translate3d(0, 0, 0);
+          opacity: 0.42;
+          transform: scale(1.015);
         }
       }
 
@@ -455,16 +440,8 @@
           background: linear-gradient(150deg, #16171c, #1b1c24 55%, #16171e);
         }
 
-        .heatmap {
-          display: none;
-        }
-
-        .grain {
-          opacity: 0.02;
-        }
-
-        .vignette {
-          display: none;
+        .stars {
+          opacity: 0.2;
         }
 
         .hero {
@@ -535,9 +512,7 @@
     </style>
   </head>
   <body>
-    <div class="heatmap" id="heatmap"></div>
-    <div class="vignette"></div>
-    <div class="grain"></div>
+    <div class="stars"></div>
     <main class="wrap">
       <header class="topbar">
         <div class="logo" data-i18n="topLine"></div>
@@ -712,101 +687,6 @@
           document.body.classList.add("no-video");
         });
       }
-
-      (function initHeatmap() {
-        const heatmap = document.getElementById("heatmap");
-        if (!heatmap) return;
-
-        const motionReduced =
-          typeof window.matchMedia === "function" &&
-          window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-        const isCoarsePointer =
-          typeof window.matchMedia === "function" &&
-          window.matchMedia("(hover: none), (pointer: coarse)").matches;
-        if (motionReduced || isCoarsePointer) return;
-
-        const state = {
-          width: window.innerWidth,
-          height: window.innerHeight,
-          x: window.innerWidth * 0.5,
-          y: window.innerHeight * 0.5,
-          tx: window.innerWidth * 0.5,
-          ty: window.innerHeight * 0.5,
-          vx: window.innerWidth * 0.35,
-          vy: window.innerHeight * 0.65,
-          vtx: window.innerWidth * 0.35,
-          vty: window.innerHeight * 0.65,
-          wx: window.innerWidth * 0.7,
-          wy: window.innerHeight * 0.28,
-          wtx: window.innerWidth * 0.7,
-          wty: window.innerHeight * 0.28,
-          rafId: 0,
-        };
-
-        function resize() {
-          state.width = window.innerWidth;
-          state.height = window.innerHeight;
-        }
-
-        function asPercent(px, max) {
-          if (!max) return "50%";
-          return `${(px / max) * 100}%`;
-        }
-
-        function paint() {
-          heatmap.style.setProperty("--x1", asPercent(state.x, state.width));
-          heatmap.style.setProperty("--y1", asPercent(state.y, state.height));
-          heatmap.style.setProperty("--x2", asPercent(state.vx, state.width));
-          heatmap.style.setProperty("--y2", asPercent(state.vy, state.height));
-          heatmap.style.setProperty("--x3", asPercent(state.wx, state.width));
-          heatmap.style.setProperty("--y3", asPercent(state.wy, state.height));
-        }
-
-        function tick() {
-          state.x += (state.tx - state.x) * 0.1;
-          state.y += (state.ty - state.y) * 0.1;
-          state.vx += (state.vtx - state.vx) * 0.075;
-          state.vy += (state.vty - state.vy) * 0.075;
-          state.wx += (state.wtx - state.wx) * 0.055;
-          state.wy += (state.wty - state.wy) * 0.055;
-          paint();
-          state.rafId = requestAnimationFrame(tick);
-        }
-
-        function onPointerMove(event) {
-          state.tx = event.clientX;
-          state.ty = event.clientY;
-          state.vtx = event.clientX - state.width * 0.12;
-          state.vty = event.clientY + state.height * 0.1;
-          state.wtx = event.clientX + state.width * 0.14;
-          state.wty = event.clientY - state.height * 0.16;
-        }
-
-        function onPointerLeave() {
-          state.tx = state.width * 0.5;
-          state.ty = state.height * 0.5;
-          state.vtx = state.width * 0.35;
-          state.vty = state.height * 0.65;
-          state.wtx = state.width * 0.7;
-          state.wty = state.height * 0.28;
-        }
-
-        function onVisibility() {
-          if (document.hidden) {
-            cancelAnimationFrame(state.rafId);
-          } else {
-            state.rafId = requestAnimationFrame(tick);
-          }
-        }
-
-        paint();
-        state.rafId = requestAnimationFrame(tick);
-        window.addEventListener("resize", resize);
-        window.addEventListener("pointermove", onPointerMove, { passive: true });
-        window.addEventListener("pointerleave", onPointerLeave);
-        window.addEventListener("blur", onPointerLeave);
-        document.addEventListener("visibilitychange", onVisibility);
-      })();
 
       applyLang("ru");
     </script>
