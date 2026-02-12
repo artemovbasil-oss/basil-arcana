@@ -84,7 +84,7 @@ class _HistoryTile extends StatelessWidget {
           ref
               .read(readingFlowControllerProvider.notifier)
               .setQuestion(reading.question);
-          Navigator.popUntil(context, (route) => route.isFirst);
+          Navigator.pop(context);
         },
       ),
     );

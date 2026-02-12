@@ -33,6 +33,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   final FocusNode _focusNode = FocusNode();
   final ScrollController _scrollController = ScrollController();
   final GlobalKey _questionKey = GlobalKey();
+  ProviderSubscription<ReadingFlowState>? _readingFlowSubscription;
   _SofiaConsentState _sofiaConsentState = _SofiaConsentState.undecided;
   bool _sendingConsent = false;
   bool _hasQueryHistory = false;
@@ -47,7 +48,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       _controller.text = initialQuestion;
     }
     _loadQueryHistoryAvailability();
-    ref.listen<ReadingFlowState>(
+    _readingFlowSubscription = ref.listenManual<ReadingFlowState>(
       readingFlowControllerProvider,
       (prev, next) {
         if (_controller.text == next.question) {
@@ -241,6 +242,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   void dispose() {
+    _readingFlowSubscription?.close();
     _controller.dispose();
     _focusNode.dispose();
     _scrollController.dispose();
@@ -645,14 +647,15 @@ class _SofiaInfoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    const outerRadius = 20.0;
     return InkWell(
-      borderRadius: BorderRadius.circular(18),
+      borderRadius: BorderRadius.circular(outerRadius),
       onTap: onTap,
       child: Ink(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(18),
-          color: colorScheme.surfaceVariant.withOpacity(0.24),
+          borderRadius: BorderRadius.circular(outerRadius),
+          color: colorScheme.surfaceVariant.withValues(alpha: 0.24),
           border: Border.all(color: colorScheme.outlineVariant),
         ),
         child: Row(
@@ -864,14 +867,16 @@ class _HomeNavCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    const outerRadius = 20.0;
+    const innerRadius = 12.0;
     return InkWell(
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(outerRadius),
       onTap: onTap,
       child: Ink(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          color: colorScheme.surfaceVariant.withOpacity(0.3),
+          borderRadius: BorderRadius.circular(outerRadius),
+          color: colorScheme.surfaceVariant.withValues(alpha: 0.3),
           border: Border.all(color: colorScheme.outlineVariant),
         ),
         child: Row(
@@ -880,8 +885,8 @@ class _HomeNavCard extends StatelessWidget {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: colorScheme.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(14),
+                color: colorScheme.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(innerRadius),
               ),
               child: Icon(icon, color: colorScheme.primary),
             ),

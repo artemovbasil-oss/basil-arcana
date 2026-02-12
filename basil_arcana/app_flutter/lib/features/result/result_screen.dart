@@ -1279,18 +1279,35 @@ class _DetailsCardThumbnails extends StatelessWidget {
     if (cards.isEmpty) {
       return const SizedBox.shrink();
     }
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        for (var i = 0; i < cards.length; i++) ...[
-          _DetailThumbnailCard(
-            cardId: cards[i].cardId,
-            isBack: cards[i].isBack,
-            highlight: cards[i].highlight,
-          ),
-          if (i != cards.length - 1) const SizedBox(width: 10),
-        ],
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final count = cards.length;
+        final isFiveCard = count >= 5;
+        final spacing = isFiveCard ? 6.0 : 10.0;
+        const maxCardWidth = 56.0;
+        const minCardWidth = 42.0;
+        final totalSpacing = spacing * (count - 1);
+        final allowedWidth = constraints.maxWidth - totalSpacing;
+        final cardWidth =
+            (allowedWidth / count).clamp(minCardWidth, maxCardWidth);
+        final cardHeight = cardWidth * (88 / 56);
+
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            for (var i = 0; i < cards.length; i++) ...[
+              _DetailThumbnailCard(
+                cardId: cards[i].cardId,
+                isBack: cards[i].isBack,
+                highlight: cards[i].highlight,
+                width: cardWidth,
+                height: cardHeight,
+              ),
+              if (i != cards.length - 1) SizedBox(width: spacing),
+            ],
+          ],
+        );
+      },
     );
   }
 
@@ -1353,16 +1370,20 @@ class _DetailThumbnailCard extends ConsumerWidget {
     required this.cardId,
     required this.isBack,
     required this.highlight,
+    required this.width,
+    required this.height,
   });
 
   final String? cardId;
   final bool isBack;
   final bool highlight;
+  final double width;
+  final double height;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
-    final radius = BorderRadius.circular(12);
+    final radius = BorderRadius.circular(width >= 52 ? 12 : 10);
     final deckId = ref.watch(deckProvider);
     final cards = ref.watch(cardsAllProvider).asData?.value;
     final canonicalId = cardId == null ? null : canonicalCardId(cardId!);
@@ -1408,16 +1429,16 @@ class _DetailThumbnailCard extends ConsumerWidget {
               borderRadius: radius,
               child: Image.network(
                 deckCoverAssetPath(deckId),
-                width: 56,
-                height: 88,
+                width: width,
+                height: height,
                 fit: BoxFit.cover,
                 filterQuality: FilterQuality.high,
                 errorBuilder: (context, error, stackTrace) {
                   if (deckId != DeckType.major) {
                     return Image.network(
                       deckCoverAssetPath(DeckType.major),
-                      width: 56,
-                      height: 88,
+                      width: width,
+                      height: height,
                       fit: BoxFit.cover,
                       filterQuality: FilterQuality.high,
                     );
@@ -1430,8 +1451,8 @@ class _DetailThumbnailCard extends ConsumerWidget {
         : CardAssetImage(
             cardId: cardId ?? '',
             imageUrl: resolvedImageUrl,
-            width: 56,
-            height: 88,
+            width: width,
+            height: height,
             borderRadius: radius,
             showGlow: highlight,
           );
