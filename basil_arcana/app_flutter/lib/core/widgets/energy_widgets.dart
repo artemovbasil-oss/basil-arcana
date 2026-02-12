@@ -337,19 +337,31 @@ class _NextFreeAttemptCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final energy = ref.watch(energyProvider);
-    final missing =
-        (EnergyAction.reading.cost - energy.clampedValue).clamp(0, 100);
-    final seconds = energy.isUnlimited
-        ? 0
-        : (missing / EnergyController.recoveryPerSecond).ceil();
-    final waitText = seconds <= 0
-        ? l10n.energyNextFreeReady
-        : l10n
-            .energyNextFreeIn(_formatShortDuration(Duration(seconds: seconds)));
+    if (energy.isUnlimited || energy.clampedValue >= 100) {
+      return const SizedBox.shrink();
+    }
+
+    final missingToFull = (100 - energy.clampedValue).clamp(0, 100);
+    final secondsToFull =
+        (missingToFull / EnergyController.recoveryPerSecond).ceil();
+    final availableReadings =
+        (energy.clampedValue / EnergyAction.reading.cost).floor().clamp(0, 99);
+
+    final code = Localizations.localeOf(context).languageCode;
+    final toFullLabel = switch (code) {
+      'ru' => 'До 100%',
+      'kk' => '100%-ға дейін',
+      _ => 'To 100%',
+    };
+    final readingsLabel = switch (code) {
+      'ru' => 'Доступно раскладов',
+      'kk' => 'Қолжетімді расклад',
+      _ => 'Readings available',
+    };
+    final toFullValue = _formatMinutesSeconds(secondsToFull);
 
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
@@ -360,12 +372,51 @@ class _NextFreeAttemptCard extends ConsumerWidget {
       ),
       child: Row(
         children: [
-          Icon(Icons.timer_outlined, size: 16, color: colorScheme.primary),
-          const SizedBox(width: 8),
           Expanded(
-            child: Text(
-              waitText,
-              style: textTheme.bodySmall,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  toFullLabel,
+                  style: textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurface.withValues(alpha: 0.7),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  toFullValue,
+                  style: textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            width: 1,
+            height: 30,
+            margin: const EdgeInsets.symmetric(horizontal: 10),
+            color: colorScheme.primary.withValues(alpha: 0.25),
+          ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  readingsLabel,
+                  style: textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurface.withValues(alpha: 0.7),
+                  ),
+                  textAlign: TextAlign.right,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '$availableReadings',
+                  style: textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -374,18 +425,12 @@ class _NextFreeAttemptCard extends ConsumerWidget {
   }
 }
 
-String _formatShortDuration(Duration duration) {
-  final totalSeconds = duration.inSeconds;
-  final hours = totalSeconds ~/ 3600;
-  final minutes = (totalSeconds % 3600) ~/ 60;
-  final seconds = totalSeconds % 60;
-  if (hours > 0) {
-    return '${hours}ч ${minutes}м';
-  }
-  if (minutes > 0) {
-    return '${minutes}м ${seconds}с';
-  }
-  return '${seconds}с';
+String _formatMinutesSeconds(int totalSeconds) {
+  final safeSeconds = totalSeconds < 0 ? 0 : totalSeconds;
+  final minutes = safeSeconds ~/ 60;
+  final seconds = safeSeconds % 60;
+  final secondsPart = seconds.toString().padLeft(2, '0');
+  return '$minutes:$secondsPart';
 }
 
 Future<void> _purchaseEnergyPack({
