@@ -773,6 +773,8 @@
         }
       };
 
+      const LANG_STORAGE_KEY = "basilarcana_lang";
+
       function applyLang(lang) {
         const langCopy = copy[lang] || copy.ru;
         document.documentElement.lang = lang === "kz" ? "kk" : lang;
@@ -782,6 +784,19 @@
         document.querySelectorAll(".lang-btn").forEach((btn) => {
           btn.setAttribute("aria-pressed", String(btn.dataset.lang === lang));
         });
+        updateTarotValuesLink(lang);
+      }
+
+      function updateTarotValuesLink(lang) {
+        const tarotLink = document.querySelector('[data-track="cta_tarot_values"]');
+        if (!tarotLink) {
+          return;
+        }
+        const link = new URL("./tarot-values.html", window.location.href);
+        if (lang && lang !== "ru") {
+          link.searchParams.set("lang", lang);
+        }
+        tarotLink.setAttribute("href", `${link.pathname}${link.search}`);
       }
 
       function updateLangInUrl(lang) {
@@ -807,6 +822,7 @@
           applyLang(nextLang);
           activeLang = nextLang;
           updateLangInUrl(activeLang);
+          window.localStorage.setItem(LANG_STORAGE_KEY, activeLang);
           requestAnimationFrame(() => {
             document.body.classList.remove("lang-switching");
             langSwitchInProgress = false;
@@ -848,9 +864,12 @@
 
       setupAnalyticsEvents();
       const initialLang = new URLSearchParams(window.location.search).get("lang");
-      const resolvedLang = initialLang && copy[initialLang] ? initialLang : "ru";
+      const storedLang = window.localStorage.getItem(LANG_STORAGE_KEY);
+      const preferredLang = initialLang || storedLang || "ru";
+      const resolvedLang = preferredLang && copy[preferredLang] ? preferredLang : "ru";
       applyLang(resolvedLang);
       activeLang = resolvedLang;
+      window.localStorage.setItem(LANG_STORAGE_KEY, activeLang);
     </script>
   </body>
 </html>
