@@ -122,7 +122,7 @@ Production default: `https://api.basilarcana.com`.
   - `cd app_flutter`
   - `flutter pub get`
   - `flutter gen-l10n`
-  - `flutter build web --release --pwa-strategy=none`
+  - `flutter build web --release --pwa-strategy=none --web-define=BUILD_ID=<build-id>`
   - `mkdir -p ../server/public`
   - `cp -R build/web/* ../server/public/`
 - **Local bot build**:
