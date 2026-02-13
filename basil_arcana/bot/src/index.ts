@@ -415,6 +415,10 @@ function parsePlanFromPayload(payload: string): PlanId | null {
   return parsePlanId(payload.replace("purchase:", "").trim());
 }
 
+function isMiniAppEnergyPayload(payload: string): boolean {
+  return payload.startsWith("energy:");
+}
+
 function extendSubscription(currentEndsAt: number | null, addDays: number): number {
   const now = Date.now();
   const base = currentEndsAt && currentEndsAt > now ? currentEndsAt : now;
@@ -701,6 +705,9 @@ async function handleSuccessfulPayment(ctx: Context): Promise<void> {
 
   const planId = parsePlanFromPayload(payment.invoice_payload);
   if (!planId) {
+    if (isMiniAppEnergyPayload(payment.invoice_payload)) {
+      return;
+    }
     await ctx.reply(strings.unknownPaymentPlan);
     return;
   }
@@ -1064,6 +1071,10 @@ async function main(): Promise<void> {
 
     const planId = parsePlanFromPayload(query.invoice_payload);
     if (!planId) {
+      if (isMiniAppEnergyPayload(query.invoice_payload)) {
+        await ctx.answerPreCheckoutQuery(true);
+        return;
+      }
       await ctx.answerPreCheckoutQuery(false, {
         error_message: STRINGS[getLocale(ctx)].unknownPaymentPlan,
       });

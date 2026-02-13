@@ -299,6 +299,9 @@ function parsePlanFromPayload(payload) {
     }
     return parsePlanId(payload.replace("purchase:", "").trim());
 }
+function isMiniAppEnergyPayload(payload) {
+    return payload.startsWith("energy:");
+}
 function extendSubscription(currentEndsAt, addDays) {
     const now = Date.now();
     const base = currentEndsAt && currentEndsAt > now ? currentEndsAt : now;
@@ -536,6 +539,9 @@ async function handleSuccessfulPayment(ctx) {
     }
     const planId = parsePlanFromPayload(payment.invoice_payload);
     if (!planId) {
+        if (isMiniAppEnergyPayload(payment.invoice_payload)) {
+            return;
+        }
         await ctx.reply(strings.unknownPaymentPlan);
         return;
     }
@@ -814,6 +820,10 @@ async function main() {
         }
         const planId = parsePlanFromPayload(query.invoice_payload);
         if (!planId) {
+            if (isMiniAppEnergyPayload(query.invoice_payload)) {
+                await ctx.answerPreCheckoutQuery(true);
+                return;
+            }
             await ctx.answerPreCheckoutQuery(false, {
                 error_message: STRINGS[getLocale(ctx)].unknownPaymentPlan,
             });
