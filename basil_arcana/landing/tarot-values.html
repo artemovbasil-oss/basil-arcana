@@ -1,0 +1,556 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Значения карт Таро · BasilArcana</title>
+    <meta
+      name="description"
+      content="Галерея карт Таро BasilArcana с детальными значениями и быстрым переходом в мини‑приложение."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #111218;
+        --bg-soft: #1a1b23;
+        --text: #f3f3f8;
+        --text-soft: #bbb8ca;
+        --accent: #b889ff;
+        --accent-soft: #e3d2ff;
+        --card: rgba(255, 255, 255, 0.06);
+        --card-border: rgba(184, 137, 255, 0.32);
+        --shadow: 0 18px 48px rgba(0, 0, 0, 0.42);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+      }
+
+      body {
+        font-family: "Manrope", sans-serif;
+        color: var(--text);
+        background: radial-gradient(circle at 15% 20%, rgba(184, 137, 255, 0.12), transparent 40%),
+          linear-gradient(150deg, #14151b, #1a1b24 55%, #15161d);
+      }
+
+      .stars,
+      .stars::before,
+      .stars::after {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        content: "";
+        background-repeat: repeat;
+      }
+
+      .stars {
+        z-index: -2;
+        opacity: 0.22;
+        background-image: radial-gradient(circle, rgba(255, 255, 255, 0.13) 1px, transparent 1px);
+        background-size: 4px 4px;
+      }
+
+      .stars::before {
+        z-index: -1;
+        opacity: 0.28;
+        background-image: radial-gradient(circle, rgba(255, 255, 255, 0.16) 1.3px, transparent 1.3px);
+        background-size: 120px 120px;
+      }
+
+      .wrap {
+        width: min(1180px, calc(100% - 2rem));
+        margin: 0 auto;
+        padding: 1.1rem 0 1.5rem;
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.8rem;
+        margin-bottom: 1rem;
+      }
+
+      .back-link {
+        color: var(--accent-soft);
+        text-decoration: none;
+        font-family: "Space Grotesk", sans-serif;
+        font-weight: 600;
+        font-size: clamp(0.9rem, 1.3vw, 1.1rem);
+      }
+
+      .langs {
+        display: inline-flex;
+        gap: 0.45rem;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid var(--card-border);
+        border-radius: 999px;
+        padding: 0.28rem;
+      }
+
+      .lang-btn {
+        border: 0;
+        background: transparent;
+        color: var(--text-soft);
+        border-radius: 999px;
+        font: inherit;
+        font-weight: 600;
+        letter-spacing: 0.03em;
+        padding: 0.46rem 0.82rem;
+        cursor: pointer;
+      }
+
+      .lang-btn[aria-pressed="true"] {
+        color: #100d17;
+        background: linear-gradient(135deg, var(--accent), var(--accent-soft));
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 0.9rem;
+        align-items: end;
+        border: 1px solid var(--card-border);
+        border-radius: 16px;
+        background: var(--card);
+        backdrop-filter: blur(8px);
+        box-shadow: var(--shadow);
+        padding: 1rem;
+      }
+
+      h1 {
+        margin: 0;
+        font-family: "Space Grotesk", sans-serif;
+        font-size: clamp(1.5rem, 3vw, 2.5rem);
+      }
+
+      .lead {
+        margin: 0.68rem 0 0;
+        color: var(--text-soft);
+        line-height: 1.5;
+        font-size: 0.98rem;
+        max-width: 70ch;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        color: #0f0d16;
+        background: linear-gradient(135deg, var(--accent), var(--accent-soft));
+        border-radius: 12px;
+        padding: 0.64rem 0.9rem;
+        font-weight: 800;
+        font-size: 0.9rem;
+        box-shadow: 0 12px 24px rgba(184, 137, 255, 0.3);
+        white-space: nowrap;
+      }
+
+      .section-title {
+        margin: 1.05rem 0 0.7rem;
+        color: var(--text-soft);
+        font-size: 0.88rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .gallery {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 0.72rem;
+      }
+
+      .tarot-card {
+        border: 1px solid var(--card-border);
+        border-radius: 12px;
+        background: var(--card);
+        padding: 0.5rem;
+        cursor: pointer;
+        text-align: left;
+        color: inherit;
+      }
+
+      .tarot-card:hover {
+        border-color: rgba(227, 210, 255, 0.55);
+        transform: translateY(-3px);
+      }
+
+      .tarot-card img {
+        width: 100%;
+        aspect-ratio: 4 / 7;
+        object-fit: cover;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.06);
+        display: block;
+      }
+
+      .tarot-card h3 {
+        margin: 0.55rem 0 0;
+        font-size: 0.84rem;
+        line-height: 1.26;
+      }
+
+      .tarot-card p {
+        margin: 0.32rem 0 0;
+        color: var(--text-soft);
+        font-size: 0.74rem;
+      }
+
+      .status {
+        margin-top: 0.9rem;
+        color: var(--text-soft);
+        font-size: 0.94rem;
+      }
+
+      .modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(8, 9, 13, 0.76);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        z-index: 10;
+      }
+
+      .modal.open {
+        display: flex;
+      }
+
+      .modal-card {
+        width: min(900px, 100%);
+        max-height: calc(100svh - 2rem);
+        overflow: auto;
+        border: 1px solid var(--card-border);
+        border-radius: 16px;
+        background: #171821;
+        box-shadow: 0 24px 58px rgba(0, 0, 0, 0.56);
+        padding: 0.95rem;
+      }
+
+      .modal-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.8rem;
+      }
+
+      .modal-close {
+        border: 1px solid var(--card-border);
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--text);
+        border-radius: 10px;
+        font: inherit;
+        font-weight: 600;
+        cursor: pointer;
+        padding: 0.45rem 0.72rem;
+      }
+
+      .modal-grid {
+        display: grid;
+        grid-template-columns: 290px 1fr;
+        gap: 0.9rem;
+        margin-top: 0.85rem;
+      }
+
+      .modal-grid img {
+        width: 100%;
+        border-radius: 12px;
+        object-fit: cover;
+      }
+
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.42rem;
+        margin: 0.5rem 0 0.6rem;
+      }
+
+      .chip {
+        border: 1px solid var(--card-border);
+        border-radius: 999px;
+        padding: 0.25rem 0.55rem;
+        color: var(--accent-soft);
+        font-size: 0.78rem;
+      }
+
+      .meaning {
+        margin: 0.35rem 0;
+        color: var(--text-soft);
+        line-height: 1.45;
+        font-size: 0.93rem;
+      }
+
+      .meaning strong {
+        color: var(--text);
+      }
+
+      @media (max-width: 960px) {
+        .hero {
+          grid-template-columns: 1fr;
+          align-items: start;
+        }
+
+        .gallery {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 0.65rem;
+        }
+
+        .modal-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .modal-grid img {
+          max-width: 320px;
+        }
+      }
+
+      @media (max-width: 560px) {
+        .wrap {
+          width: min(1180px, calc(100% - 1rem));
+          padding-top: 0.8rem;
+        }
+
+        .gallery {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .tarot-card h3 {
+          font-size: 0.8rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="stars"></div>
+    <main class="wrap">
+      <header class="topbar">
+        <a class="back-link" href="./index.html" data-i18n="back"></a>
+        <div class="langs" role="group" aria-label="Language switcher">
+          <button class="lang-btn" data-lang="ru" aria-pressed="true">RU</button>
+          <button class="lang-btn" data-lang="kz" aria-pressed="false">KZ</button>
+          <button class="lang-btn" data-lang="en" aria-pressed="false">EN</button>
+        </div>
+      </header>
+
+      <section class="hero">
+        <div>
+          <h1 data-i18n="title"></h1>
+          <p class="lead" data-i18n="lead"></p>
+        </div>
+        <a class="btn" href="https://t.me/tarot_arkana_bot/app" target="_blank" rel="noreferrer" data-i18n="ctaMini" data-track="cta_tarot_values_mini"></a>
+      </section>
+
+      <p class="section-title" data-i18n="galleryLabel"></p>
+      <section class="gallery" id="gallery"></section>
+      <p class="status" id="status"></p>
+    </main>
+
+    <div class="modal" id="modal" aria-hidden="true">
+      <div class="modal-card">
+        <div class="modal-top">
+          <h2 id="modalTitle"></h2>
+          <button class="modal-close" id="modalClose" data-i18n="close"></button>
+        </div>
+        <div class="modal-grid">
+          <img id="modalImg" alt="Tarot card" />
+          <div>
+            <div class="chips" id="modalKeywords"></div>
+            <p class="meaning" id="modalDetailed"></p>
+            <p class="meaning" id="modalGeneral"></p>
+            <p class="meaning" id="modalLight"></p>
+            <p class="meaning" id="modalShadow"></p>
+            <p class="meaning" id="modalAdvice"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const uiCopy = {
+        ru: {
+          back: "← На главную",
+          title: "Значения карт Таро",
+          lead: "Полная галерея BasilArcana: нажми на карту, чтобы посмотреть подробное описание, светлую/теневую грань и практический совет.",
+          ctaMini: "Попробовать приложение",
+          galleryLabel: "Все карты",
+          close: "Закрыть",
+          loading: "Загружаем карты...",
+          error: "Не удалось загрузить карты. Попробуйте обновить страницу.",
+          modalGeneral: "Общее значение",
+          modalLight: "Светлая грань",
+          modalShadow: "Теневая грань",
+          modalAdvice: "Совет"
+        },
+        kz: {
+          back: "← Басты бетке",
+          title: "Таро карталарының мағынасы",
+          lead: "BasilArcana толық галереясы: картаны басып, толық сипаттама, жарық/көлеңке қыры және нақты кеңесті көріңіз.",
+          ctaMini: "Қосымшаны сынап көру",
+          galleryLabel: "Барлық карталар",
+          close: "Жабу",
+          loading: "Карталар жүктелуде...",
+          error: "Карталарды жүктеу мүмкін болмады. Бетті жаңартып көріңіз.",
+          modalGeneral: "Жалпы мағына",
+          modalLight: "Жарық қыры",
+          modalShadow: "Көлеңке қыры",
+          modalAdvice: "Кеңес"
+        },
+        en: {
+          back: "← Back to main",
+          title: "Tarot Card Meanings",
+          lead: "Full BasilArcana gallery: tap any card to open detailed meaning, light/shadow sides, and practical advice.",
+          ctaMini: "Try the app",
+          galleryLabel: "All cards",
+          close: "Close",
+          loading: "Loading cards...",
+          error: "Failed to load cards. Please refresh the page.",
+          modalGeneral: "General meaning",
+          modalLight: "Light side",
+          modalShadow: "Shadow side",
+          modalAdvice: "Advice"
+        }
+      };
+
+      let activeLang = "ru";
+      let cards = [];
+
+      const galleryNode = document.getElementById("gallery");
+      const statusNode = document.getElementById("status");
+      const modalNode = document.getElementById("modal");
+
+      function trackEvent(link, eventName) {
+        if (typeof gtag !== "function") {
+          return;
+        }
+        gtag("event", "cta_click", {
+          event_category: "engagement",
+          event_label: eventName,
+          destination: link,
+          language: activeLang,
+        });
+      }
+
+      function cardImageUrl(cardKey) {
+        const suit = cardKey.split("_")[0];
+        return `https://cdn.basilarcana.com/cards/${suit}/${cardKey}.webp`;
+      }
+
+      function openModal(cardKey, cardData) {
+        const langPack = uiCopy[activeLang] || uiCopy.ru;
+        document.getElementById("modalTitle").textContent = cardData.title;
+        document.getElementById("modalImg").src = cardImageUrl(cardKey);
+        document.getElementById("modalDetailed").textContent = cardData.detailedDescription || "";
+        document.getElementById("modalGeneral").innerHTML = `<strong>${langPack.modalGeneral}:</strong> ${cardData.meaning?.general || ""}`;
+        document.getElementById("modalLight").innerHTML = `<strong>${langPack.modalLight}:</strong> ${cardData.meaning?.light || ""}`;
+        document.getElementById("modalShadow").innerHTML = `<strong>${langPack.modalShadow}:</strong> ${cardData.meaning?.shadow || ""}`;
+        document.getElementById("modalAdvice").innerHTML = `<strong>${langPack.modalAdvice}:</strong> ${cardData.meaning?.advice || ""}`;
+
+        const keywordsNode = document.getElementById("modalKeywords");
+        keywordsNode.innerHTML = "";
+        (cardData.keywords || []).forEach((keyword) => {
+          const chip = document.createElement("span");
+          chip.className = "chip";
+          chip.textContent = keyword;
+          keywordsNode.appendChild(chip);
+        });
+
+        modalNode.classList.add("open");
+        modalNode.setAttribute("aria-hidden", "false");
+      }
+
+      function closeModal() {
+        modalNode.classList.remove("open");
+        modalNode.setAttribute("aria-hidden", "true");
+      }
+
+      function renderCards() {
+        galleryNode.innerHTML = "";
+        cards.forEach(([cardKey, cardData]) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "tarot-card";
+          button.innerHTML = `
+            <img src="${cardImageUrl(cardKey)}" loading="lazy" alt="${cardData.title}" />
+            <h3>${cardData.title}</h3>
+            <p>${(cardData.meaning?.general || "").slice(0, 88)}</p>
+          `;
+          button.addEventListener("click", () => openModal(cardKey, cardData));
+          galleryNode.appendChild(button);
+        });
+      }
+
+      async function loadCards(lang) {
+        const langPack = uiCopy[lang] || uiCopy.ru;
+        statusNode.textContent = langPack.loading;
+        try {
+          const res = await fetch(`https://cdn.basilarcana.com/data/cards_${lang}.json`, {
+            cache: "no-store",
+          });
+          if (!res.ok) {
+            throw new Error(`Failed with status ${res.status}`);
+          }
+          const payload = await res.json();
+          cards = Object.entries(payload);
+          renderCards();
+          statusNode.textContent = "";
+        } catch (err) {
+          cards = [];
+          galleryNode.innerHTML = "";
+          statusNode.textContent = langPack.error;
+        }
+      }
+
+      function applyLang(lang) {
+        activeLang = uiCopy[lang] ? lang : "ru";
+        const langPack = uiCopy[activeLang];
+        document.documentElement.lang = activeLang === "kz" ? "kk" : activeLang;
+        document.querySelectorAll("[data-i18n]").forEach((node) => {
+          node.textContent = langPack[node.dataset.i18n] || "";
+        });
+        document.querySelectorAll(".lang-btn").forEach((btn) => {
+          btn.setAttribute("aria-pressed", String(btn.dataset.lang === activeLang));
+        });
+        loadCards(activeLang);
+      }
+
+      document.querySelectorAll(".lang-btn").forEach((btn) => {
+        btn.addEventListener("click", () => applyLang(btn.dataset.lang));
+      });
+
+      document.getElementById("modalClose").addEventListener("click", closeModal);
+      modalNode.addEventListener("click", (event) => {
+        if (event.target === modalNode) {
+          closeModal();
+        }
+      });
+      window.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          closeModal();
+        }
+      });
+
+      document.querySelectorAll("[data-track]").forEach((link) => {
+        link.addEventListener("click", () => {
+          const eventName = link.getAttribute("data-track") || "cta_click";
+          const href = link.getAttribute("href") || "";
+          trackEvent(href, eventName);
+        });
+      });
+
+      applyLang("ru");
+    </script>
+  </body>
+</html>

@@ -349,6 +349,27 @@
         min-height: 4.1em;
       }
 
+      .card.sofia-card {
+        padding: 0.62rem;
+      }
+
+      .card.sofia-card p {
+        min-height: auto;
+        font-size: 0.8rem;
+        line-height: 1.3;
+      }
+
+      .card-subaction {
+        margin-top: 0.52rem;
+      }
+
+      .card-subaction .btn {
+        width: 100%;
+        padding: 0.52rem 0.66rem;
+        font-size: 0.8rem;
+        border-radius: 10px;
+      }
+
       .card-mark {
         color: var(--accent-soft);
         font-size: 0.78rem;
@@ -504,6 +525,10 @@
           padding: 0.95rem;
         }
 
+        .card.sofia-card {
+          padding: 0.95rem;
+        }
+
         .card h2 {
           font-size: 1.02rem;
           margin-bottom: 0.5rem;
@@ -588,10 +613,13 @@
           <h2 data-i18n="botTitle"></h2>
           <p data-i18n="botDesc"></p>
         </article>
-        <article class="card reveal" data-delay="2">
+        <article class="card sofia-card reveal" data-delay="2">
           <div class="card-mark">02</div>
           <h2 data-i18n="sofiaTitle"></h2>
           <p data-i18n="sofiaDesc"></p>
+          <div class="card-subaction">
+            <a class="btn alt" href="./tarot-values.html" data-i18n="ctaTarotValues" data-track="cta_tarot_values"></a>
+          </div>
         </article>
         <article class="card reveal" data-delay="3">
           <div class="card-mark">03</div>
@@ -623,6 +651,7 @@
           ctaBot: "Открыть бот",
           ctaSofia: "Написать Софии",
           ctaMini: "Открыть mini app",
+          ctaTarotValues: "Значения карт Таро",
           sofiaName: "София Нокс",
           sofiaRole: "@SofiaKnoxx · таролог / астролог",
           botTitle: "Telegram‑бот",
@@ -642,6 +671,7 @@
           ctaBot: "Ботты ашу",
           ctaSofia: "Софияға жазу",
           ctaMini: "Mini app ашу",
+          ctaTarotValues: "Таро карталарының мағынасы",
           sofiaName: "София Нокс",
           sofiaRole: "@SofiaKnoxx · таролог / астролог",
           botTitle: "Telegram-бот",
@@ -661,6 +691,7 @@
           ctaBot: "Open bot",
           ctaSofia: "Message Sofia",
           ctaMini: "Open mini app",
+          ctaTarotValues: "Tarot card meanings",
           sofiaName: "Sofia Knox",
           sofiaRole: "@SofiaKnoxx · tarot reader / astrologer",
           botTitle: "Telegram bot",
