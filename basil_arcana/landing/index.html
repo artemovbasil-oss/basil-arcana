@@ -193,8 +193,12 @@
         display: grid;
         grid-template-columns: 1fr 340px;
         gap: 1.35rem;
-        align-items: center;
+        align-items: start;
         padding: 0.45rem 0 0.95rem;
+      }
+
+      .hero-copy {
+        min-height: 302px;
       }
 
       .badge {
@@ -286,6 +290,43 @@
 
       .btn.alt:hover {
         opacity: 1;
+      }
+
+      .btn.primary-cta {
+        animation: ctaPulse 2.2s ease-in-out infinite;
+      }
+
+      .btn.primary-cta::before {
+        content: "";
+        position: absolute;
+        inset: -2px;
+        border-radius: inherit;
+        border: 1px solid rgba(224, 204, 255, 0.62);
+        opacity: 0;
+        pointer-events: none;
+        animation: ctaRing 2.2s ease-in-out infinite;
+      }
+
+      @keyframes ctaPulse {
+        0%,
+        100% {
+          box-shadow: 0 10px 24px rgba(184, 137, 255, 0.3);
+        }
+        50% {
+          box-shadow: 0 18px 36px rgba(184, 137, 255, 0.48);
+        }
+      }
+
+      @keyframes ctaRing {
+        0%,
+        100% {
+          opacity: 0;
+          transform: scale(1);
+        }
+        45% {
+          opacity: 0.55;
+          transform: scale(1.04);
+        }
       }
 
       .portrait {
@@ -439,11 +480,13 @@
       }
 
       [data-i18n] {
-        transition: opacity 0.2s ease;
+        transition: opacity 0.32s ease, transform 0.32s ease, filter 0.32s ease;
       }
 
       body.lang-switching [data-i18n] {
-        opacity: 0.72;
+        opacity: 0.15;
+        transform: translateY(5px);
+        filter: blur(1.5px);
       }
 
       .bottom-cta a {
@@ -514,7 +557,12 @@
         .hero {
           grid-template-columns: 1fr;
           gap: 1.05rem;
+          align-items: start;
           padding: 0.6rem 0 1rem;
+        }
+
+        .hero-copy {
+          min-height: auto;
         }
 
         h1 {
@@ -578,6 +626,13 @@
           align-items: flex-start;
           padding: 0.88rem 0.9rem;
           margin-bottom: 0.95rem;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .btn.primary-cta,
+        .btn.primary-cta::before {
+          animation: none;
         }
       }
     </style>
@@ -645,12 +700,12 @@
       </header>
 
       <section class="hero">
-        <div>
+        <div class="hero-copy">
           <div class="badge reveal">✦ <span data-i18n="badge"></span></div>
           <h1 class="reveal" data-delay="1" data-i18n="title"></h1>
           <p class="lead reveal" data-delay="2" data-i18n="lead"></p>
           <div class="hero-actions reveal" data-delay="3">
-            <a class="btn" href="https://t.me/tarot_arkana_bot/app" target="_blank" rel="noreferrer" data-i18n="ctaMini" data-track="cta_mini_app"></a>
+            <a class="btn primary-cta" href="https://t.me/tarot_arkana_bot/app" target="_blank" rel="noreferrer" data-i18n="ctaMini" data-track="cta_mini_app"></a>
             <a class="btn alt" href="https://t.me/tarot_arkana_bot" target="_blank" rel="noreferrer" data-i18n="ctaBot" data-track="cta_bot"></a>
             <a class="btn alt" href="https://t.me/SofiaKnoxx" target="_blank" rel="noreferrer" data-i18n="ctaSofia" data-track="cta_sofia"></a>
           </div>
@@ -820,11 +875,17 @@
           return;
         }
         langSwitchInProgress = true;
-        applyLang(nextLang);
-        activeLang = nextLang;
-        updateLangInUrl(activeLang);
-        window.localStorage.setItem(LANG_STORAGE_KEY, activeLang);
-        langSwitchInProgress = false;
+        document.body.classList.add("lang-switching");
+        window.setTimeout(() => {
+          applyLang(nextLang);
+          activeLang = nextLang;
+          updateLangInUrl(activeLang);
+          window.localStorage.setItem(LANG_STORAGE_KEY, activeLang);
+          requestAnimationFrame(() => {
+            document.body.classList.remove("lang-switching");
+            langSwitchInProgress = false;
+          });
+        }, 180);
       }
 
       document.querySelectorAll(".lang-btn").forEach((btn) => {
