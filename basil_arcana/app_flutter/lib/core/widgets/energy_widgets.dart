@@ -35,6 +35,8 @@ String _packTitle(AppLocalizations l10n, EnergyPackId packId) {
           .replaceAll(RegExp(r'\s*[—-]\s*\d+\s*⭐\s*$', unicode: true), '')
           .trim();
       return normalized.isEmpty ? l10n.energyPackYearUnlimited : normalized;
+    case EnergyPackId.fiveCardsSingle:
+      return 'Premium five-card spread';
   }
 }
 
