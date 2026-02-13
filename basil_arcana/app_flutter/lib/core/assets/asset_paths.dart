@@ -35,6 +35,10 @@ String cardImageUrl(
       (deckId == DeckType.all && normalizedId.startsWith('cups_'))) {
     return '$base/cards/cups/$normalizedId.webp';
   }
+  if (deckId == DeckType.lenormand ||
+      (deckId == DeckType.all && normalizedId.startsWith('lenormand_'))) {
+    return '$base/cards/lenormand/$normalizedId.webp';
+  }
   switch (normalizedId) {
     case 'major_10_wheel':
       return '$base/cards/major/major_10_wheel_of_fortune.webp';
@@ -74,6 +78,7 @@ String deckPreviewImageUrl(DeckType deckId) {
     DeckType.swords => swordsCardIds.first,
     DeckType.pentacles => pentaclesCardIds.first,
     DeckType.cups => cupsCardIds.first,
+    DeckType.lenormand => lenormandCardIds.first,
     DeckType.all => majorCardIds.first,
   };
   return cardImageUrl(previewId, deckId: deckId);
@@ -85,6 +90,7 @@ String deckCoverAssetPath(DeckType deckId) {
     case DeckType.swords:
     case DeckType.pentacles:
     case DeckType.cups:
+    case DeckType.lenormand:
     case DeckType.major:
     case DeckType.all:
     default:

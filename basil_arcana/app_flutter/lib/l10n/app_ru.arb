@@ -66,12 +66,15 @@
   "deckCups": "Кубки",
   "deckSwords": "Мечи",
   "deckPentacles": "Пентакли",
+  "deckTarotRiderWaite": "Таро Райдера — Уэйта",
+  "deckLenormand": "Колода Ленорман",
   "deckAllName": "Все колоды",
   "deckMajorName": "Старшие арканы",
   "deckWandsName": "Жезлы",
   "deckCupsName": "Кубки",
   "deckSwordsName": "Мечи",
   "deckPentaclesName": "Пентакли",
+  "deckLenormandName": "Ленорман",
   "deckDebugLogLabel": "Debug: вывести путь для Жезлов",
   "homeTagline": "Ясность в картах.",
   "homeSubtitle": "Задайте вопрос и исследуйте нити, которые определяют ваш следующий шаг",
@@ -141,6 +144,9 @@
   "spreadThreeCardSubtitle": "Короткая дуга: контекст, суть и направление.",
   "spreadFiveCardTitle": "Пять карт",
   "spreadFiveCardSubtitle": "Глубокий разбор: причины, контекст и рекомендации.",
+  "spreadLenormandOneCardSubtitle": "Практичный сигнал на сейчас. Одна карта — один ясный индикатор.",
+  "spreadLenormandThreeCardSubtitle": "Линия причины и исхода. Три карты — импульс, развитие, ближайший результат.",
+  "spreadLenormandFiveCardSubtitle": "Живая цепочка событий. Пять карт — каждая следующая уточняет предыдущую.",
   "spreadFivePosition1": "Суть ситуации",
   "spreadFivePosition2": "Что помогает",
   "spreadFivePosition3": "Что мешает",
@@ -180,6 +186,18 @@
   "resultSectionArcaneSnapshot": "Арканический снимок",
   "resultSectionWhy": "Почему этот расклад",
   "resultSectionAction": "Шаг действия (следующие 24–72 ч)",
+  "resultLenormandStep": "Ленорман: шаг {step} из {total}",
+  "@resultLenormandStep": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "resultLenormandBuildsOn": "Опирается на",
   "resultReferralTitle": "Бонус за рекомендацию",
   "resultReferralBody": "Поделись персональной ссылкой с друзьями и получай 20 бесплатных премиум-раскладов на 5 карт за каждого нового пользователя, который перейдет по ссылке.",
   "resultReferralButton": "Поделиться ссылкой",

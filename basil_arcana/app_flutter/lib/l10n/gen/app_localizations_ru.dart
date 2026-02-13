@@ -129,6 +129,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get deckPentacles => 'Пентакли';
 
   @override
+  String get deckTarotRiderWaite => 'Таро Райдера — Уэйта';
+
+  @override
+  String get deckLenormand => 'Колода Ленорман';
+
+  @override
   String get deckAllName => 'Все колоды';
 
   @override
@@ -145,6 +151,9 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get deckPentaclesName => 'Пентакли';
+
+  @override
+  String get deckLenormandName => 'Ленорман';
 
   @override
   String get deckDebugLogLabel => 'Debug: вывести путь для Жезлов';
@@ -358,6 +367,18 @@ class AppLocalizationsRu extends AppLocalizations {
       'Глубокий разбор: причины, контекст и рекомендации.';
 
   @override
+  String get spreadLenormandOneCardSubtitle =>
+      'Практичный сигнал на сейчас. Одна карта — один ясный индикатор.';
+
+  @override
+  String get spreadLenormandThreeCardSubtitle =>
+      'Линия причины и исхода. Три карты — импульс, развитие, ближайший результат.';
+
+  @override
+  String get spreadLenormandFiveCardSubtitle =>
+      'Живая цепочка событий. Пять карт — каждая следующая уточняет предыдущую.';
+
+  @override
   String get spreadFivePosition1 => 'Суть ситуации';
 
   @override
@@ -436,6 +457,14 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get resultSectionAction => 'Шаг действия (следующие 24–72 ч)';
+
+  @override
+  String resultLenormandStep(int step, int total) {
+    return 'Ленорман: шаг $step из $total';
+  }
+
+  @override
+  String get resultLenormandBuildsOn => 'Опирается на';
 
   @override
   String get resultReferralTitle => 'Бонус за рекомендацию';

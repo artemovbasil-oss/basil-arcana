@@ -130,6 +130,12 @@ class AppLocalizationsKk extends AppLocalizations {
   String get deckPentacles => 'Пентакльдер';
 
   @override
+  String get deckTarotRiderWaite => 'Райдер-Уэйт Таро';
+
+  @override
+  String get deckLenormand => 'Ленорман колодасы';
+
+  @override
   String get deckAllName => 'Барлық топтамалар';
 
   @override
@@ -146,6 +152,9 @@ class AppLocalizationsKk extends AppLocalizations {
 
   @override
   String get deckPentaclesName => 'Пентакльдер';
+
+  @override
+  String get deckLenormandName => 'Ленорман';
 
   @override
   String get deckDebugLogLabel => 'Debug: Таяқтар жолын шығару';
@@ -359,6 +368,18 @@ class AppLocalizationsKk extends AppLocalizations {
       'Жағдайға тереңірек көзқарас. Бес карта — көпқабатты мәнмәтін мен бағыт.';
 
   @override
+  String get spreadLenormandOneCardSubtitle =>
+      'Қазірге арналған нақты белгі. Бір карта — бір айқын нұсқау.';
+
+  @override
+  String get spreadLenormandThreeCardSubtitle =>
+      'Себептен нәтижеге дейінгі желі. Үш карта — түрткі, даму, жақын нәтиже.';
+
+  @override
+  String get spreadLenormandFiveCardSubtitle =>
+      'Оқиғалардың тірі тізбегі. Бес карта — әр келесісі алдыңғы мағынаны нақтылайды.';
+
+  @override
   String get spreadFivePosition1 => 'Жағдайдың мәні';
 
   @override
@@ -434,6 +455,14 @@ class AppLocalizationsKk extends AppLocalizations {
 
   @override
   String get resultSectionAction => 'Әрекет қадамы (келесі 24–72 сағ)';
+
+  @override
+  String resultLenormandStep(int step, int total) {
+    return 'Ленорман: $step/$total қадам';
+  }
+
+  @override
+  String get resultLenormandBuildsOn => 'Осыған сүйенеді';
 
   @override
   String get resultReferralTitle => 'Ұсыныс бонусы';

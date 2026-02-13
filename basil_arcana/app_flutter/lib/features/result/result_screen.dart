@@ -538,6 +538,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
     final aiResult = state.aiResult;
     final l10n = AppLocalizations.of(context)!;
     final isFiveCardPremium = _isFiveCardPremiumReading(state);
+    final isLenormandReading = _isLenormandReading(state);
     if (aiResult == null) {
       return <_ChatItem>[
         _ChatItem.basil(
@@ -593,8 +594,36 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
       ),
     );
 
-    for (final drawn in state.drawnCards) {
+    for (var index = 0; index < state.drawnCards.length; index++) {
+      final drawn = state.drawnCards[index];
       final section = sectionMap[drawn.positionId];
+      if (isLenormandReading) {
+        final step = index + 1;
+        items.add(
+          _ChatItem.basil(
+            id: _nextId(),
+            child: _LenormandSequenceCard(
+              step: step,
+              total: state.drawnCards.length,
+              card: drawn,
+              text: stripSofiaPromo(section?.text ?? ''),
+              previousCards: state.drawnCards.take(index).toList(),
+              onCardTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    settings: appRouteSettings(showBackButton: true),
+                    builder: (_) => CardDetailScreen(
+                      cardId: drawn.cardId,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+        continue;
+      }
       items.add(
         _ChatItem.basil(
           id: _nextId(),
@@ -792,6 +821,15 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
     final spreadCount =
         state.spread?.cardsCount ?? state.spread?.positions.length ?? 0;
     return spreadCount >= 5 && state.drawnCards.length >= 5;
+  }
+
+  bool _isLenormandReading(ReadingFlowState state) {
+    if (state.drawnCards.isEmpty) {
+      return false;
+    }
+    return state.drawnCards.every(
+      (drawn) => canonicalCardId(drawn.cardId).startsWith('lenormand_'),
+    );
   }
 
   String _premiumTitle(BuildContext context) {
@@ -1546,6 +1584,88 @@ class _PremiumReadingCard extends StatelessWidget {
         ],
       ),
       child: child,
+    );
+  }
+}
+
+class _LenormandSequenceCard extends StatelessWidget {
+  const _LenormandSequenceCard({
+    required this.step,
+    required this.total,
+    required this.card,
+    required this.text,
+    required this.previousCards,
+    required this.onCardTap,
+  });
+
+  final int step;
+  final int total;
+  final DrawnCardModel card;
+  final String text;
+  final List<DrawnCardModel> previousCards;
+  final VoidCallback onCardTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final colorScheme = Theme.of(context).colorScheme;
+    final previousNames = previousCards
+        .map((item) => item.cardName.trim())
+        .where((name) => name.isNotEmpty)
+        .join(' → ');
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(18),
+        color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+        border: Border.all(color: colorScheme.primary.withOpacity(0.22)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.resultLenormandStep(step, total),
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: colorScheme.primary,
+                  fontWeight: FontWeight.w700,
+                ),
+          ),
+          const SizedBox(height: 10),
+          CardFaceWidget(
+            cardId: card.cardId,
+            cardName: card.cardName,
+            keywords: card.keywords,
+            onCardTap: onCardTap,
+          ),
+          const SizedBox(height: 10),
+          if (previousNames.isNotEmpty)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              decoration: BoxDecoration(
+                color: colorScheme.surface.withOpacity(0.7),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: colorScheme.outlineVariant),
+              ),
+              child: Text(
+                '${l10n.resultLenormandBuildsOn}: $previousNames',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurface.withOpacity(0.8),
+                    ),
+              ),
+            ),
+          const SizedBox(height: 10),
+          Text(
+            card.positionTitle,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 8),
+          LinkifiedText(
+            text.trim().isEmpty ? l10n.resultStatusUnexpectedResponse : text,
+          ),
+        ],
+      ),
     );
   }
 }

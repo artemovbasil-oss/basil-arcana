@@ -1,4 +1,4 @@
-enum DeckType { all, major, wands, swords, pentacles, cups }
+enum DeckType { all, major, wands, swords, pentacles, cups, lenormand }
 
 const Map<String, String> _cardIdAliases = {
   'major_10_wheel_of_fortune': 'major_10_wheel',
@@ -101,6 +101,45 @@ const List<String> cupsCardIds = [
   'cups_13_ace',
 ];
 
+const List<String> lenormandCardIds = [
+  'lenormand_01_rider',
+  'lenormand_02_clover',
+  'lenormand_03_ship',
+  'lenormand_04_house',
+  'lenormand_05_tree',
+  'lenormand_06_clouds',
+  'lenormand_07_snake',
+  'lenormand_08_coffin',
+  'lenormand_09_bouquet',
+  'lenormand_10_scythe',
+  'lenormand_11_whip',
+  'lenormand_12_birds',
+  'lenormand_13_child',
+  'lenormand_14_fox',
+  'lenormand_15_bear',
+  'lenormand_16_stars',
+  'lenormand_17_stork',
+  'lenormand_18_dog',
+  'lenormand_19_tower',
+  'lenormand_20_garden',
+  'lenormand_21_mountain',
+  'lenormand_22_crossroads',
+  'lenormand_23_mice',
+  'lenormand_24_heart',
+  'lenormand_25_ring',
+  'lenormand_26_book',
+  'lenormand_27_letter',
+  'lenormand_28_man',
+  'lenormand_29_woman',
+  'lenormand_30_lily',
+  'lenormand_31_sun',
+  'lenormand_32_moon',
+  'lenormand_33_key',
+  'lenormand_34_fish',
+  'lenormand_35_anchor',
+  'lenormand_36_cross',
+];
+
 const Map<DeckType, String> deckStorageValues = {
   DeckType.all: 'all',
   DeckType.major: 'major',
@@ -108,6 +147,7 @@ const Map<DeckType, String> deckStorageValues = {
   DeckType.swords: 'swords',
   DeckType.pentacles: 'pentacles',
   DeckType.cups: 'cups',
+  DeckType.lenormand: 'lenormand',
 };
 
 String canonicalCardId(String rawId) {
@@ -145,6 +185,15 @@ DeckType? deckIdFromString(String? value) {
       return DeckType.cups;
     case 'all':
       return DeckType.all;
+    case 'lenormand':
+      return DeckType.lenormand;
   }
   return null;
+}
+
+DeckType normalizePrimaryDeckSelection(DeckType deckType) {
+  if (deckType == DeckType.lenormand) {
+    return DeckType.lenormand;
+  }
+  return DeckType.all;
 }

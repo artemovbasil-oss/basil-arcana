@@ -143,13 +143,17 @@ final localeProvider = StateNotifierProvider<LocaleNotifier, Locale>((ref) {
 });
 
 class DeckNotifier extends StateNotifier<DeckType> {
-  DeckNotifier(this._box) : super(deckIdFromStorage(_box.get(_deckIdKey)));
+  DeckNotifier(this._box)
+      : super(normalizePrimaryDeckSelection(
+          deckIdFromStorage(_box.get(_deckIdKey)),
+        ));
 
   final Box<String> _box;
 
   Future<void> setDeck(DeckType deckId) async {
-    state = deckId;
-    await _box.put(_deckIdKey, deckStorageValues[deckId] ?? 'all');
+    final normalized = normalizePrimaryDeckSelection(deckId);
+    state = normalized;
+    await _box.put(_deckIdKey, deckStorageValues[normalized] ?? 'all');
   }
 }
 

@@ -310,6 +310,18 @@ abstract class AppLocalizations {
   /// **'Pentacles'**
   String get deckPentacles;
 
+  /// No description provided for @deckTarotRiderWaite.
+  ///
+  /// In en, this message translates to:
+  /// **'Rider-Waite Tarot'**
+  String get deckTarotRiderWaite;
+
+  /// No description provided for @deckLenormand.
+  ///
+  /// In en, this message translates to:
+  /// **'Lenormand deck'**
+  String get deckLenormand;
+
   /// No description provided for @deckAllName.
   ///
   /// In en, this message translates to:
@@ -345,6 +357,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pentacles'**
   String get deckPentaclesName;
+
+  /// No description provided for @deckLenormandName.
+  ///
+  /// In en, this message translates to:
+  /// **'Lenormand'**
+  String get deckLenormandName;
 
   /// No description provided for @deckDebugLogLabel.
   ///
@@ -760,6 +778,24 @@ abstract class AppLocalizations {
   /// **'A deeper look at your path. Five cards — layered context and guidance.'**
   String get spreadFiveCardSubtitle;
 
+  /// No description provided for @spreadLenormandOneCardSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A practical signal for right now. One card — one clear indicator.'**
+  String get spreadLenormandOneCardSubtitle;
+
+  /// No description provided for @spreadLenormandThreeCardSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A cause-to-outcome line. Three cards — trigger, development, nearest result.'**
+  String get spreadLenormandThreeCardSubtitle;
+
+  /// No description provided for @spreadLenormandFiveCardSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A living chain of events. Five cards — each next symbol refines the previous one.'**
+  String get spreadLenormandFiveCardSubtitle;
+
   /// No description provided for @spreadFivePosition1.
   ///
   /// In en, this message translates to:
@@ -891,6 +927,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Action step (next 24–72h)'**
   String get resultSectionAction;
+
+  /// No description provided for @resultLenormandStep.
+  ///
+  /// In en, this message translates to:
+  /// **'Lenormand step {step} of {total}'**
+  String resultLenormandStep(int step, int total);
+
+  /// No description provided for @resultLenormandBuildsOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Builds on'**
+  String get resultLenormandBuildsOn;
 
   /// No description provided for @resultReferralTitle.
   ///

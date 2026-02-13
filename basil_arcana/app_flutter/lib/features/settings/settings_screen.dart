@@ -173,7 +173,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
             const SizedBox(height: 8),
             _DeckOption(
-              label: l10n.deckAll,
+              label: l10n.deckTarotRiderWaite,
               deckType: DeckType.all,
               previewUrl: _previewImageUrl(cards, DeckType.all),
               groupValue: settingsState.deckType,
@@ -182,45 +182,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               },
             ),
             _DeckOption(
-              label: l10n.deckMajor,
-              deckType: DeckType.major,
-              previewUrl: _previewImageUrl(cards, DeckType.major),
-              groupValue: settingsState.deckType,
-              onSelected: (value) {
-                settingsController.updateDeck(value);
-              },
-            ),
-            _DeckOption(
-              label: l10n.deckWands,
-              deckType: DeckType.wands,
-              previewUrl: _previewImageUrl(cards, DeckType.wands),
-              groupValue: settingsState.deckType,
-              onSelected: (value) {
-                settingsController.updateDeck(value);
-              },
-            ),
-            _DeckOption(
-              label: l10n.deckSwords,
-              deckType: DeckType.swords,
-              previewUrl: _previewImageUrl(cards, DeckType.swords),
-              groupValue: settingsState.deckType,
-              onSelected: (value) {
-                settingsController.updateDeck(value);
-              },
-            ),
-            _DeckOption(
-              label: l10n.deckPentacles,
-              deckType: DeckType.pentacles,
-              previewUrl: _previewImageUrl(cards, DeckType.pentacles),
-              groupValue: settingsState.deckType,
-              onSelected: (value) {
-                settingsController.updateDeck(value);
-              },
-            ),
-            _DeckOption(
-              label: l10n.deckCups,
-              deckType: DeckType.cups,
-              previewUrl: _previewImageUrl(cards, DeckType.cups),
+              label: l10n.deckLenormand,
+              deckType: DeckType.lenormand,
+              previewUrl: _previewImageUrl(cards, DeckType.lenormand),
               groupValue: settingsState.deckType,
               onSelected: (value) {
                 settingsController.updateDeck(value);
@@ -837,6 +801,8 @@ String? _previewImageUrl(List<CardModel> cards, DeckType deckId) {
       previewId = pentaclesCardIds.first;
     case DeckType.cups:
       previewId = cupsCardIds.first;
+    case DeckType.lenormand:
+      previewId = lenormandCardIds.first;
     case DeckType.major:
     case DeckType.all:
       previewId = majorCardIds.first;

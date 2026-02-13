@@ -66,12 +66,15 @@
   "deckCups": "Cups",
   "deckSwords": "Swords",
   "deckPentacles": "Pentacles",
+  "deckTarotRiderWaite": "Rider-Waite Tarot",
+  "deckLenormand": "Lenormand deck",
   "deckAllName": "All decks",
   "deckMajorName": "Major Arcana",
   "deckWandsName": "Wands",
   "deckCupsName": "Cups",
   "deckSwordsName": "Swords",
   "deckPentaclesName": "Pentacles",
+  "deckLenormandName": "Lenormand",
   "deckDebugLogLabel": "Debug: log Wands asset path",
   "homeTagline": "Clarity, in cards.",
   "homeSubtitle": "Ask a question and explore the threads that shape your next step",
@@ -141,6 +144,9 @@
   "spreadThreeCardSubtitle": "A simple arc of your story. Three cards — context and direction.",
   "spreadFiveCardTitle": "Five cards",
   "spreadFiveCardSubtitle": "A deeper look at your path. Five cards — layered context and guidance.",
+  "spreadLenormandOneCardSubtitle": "A practical signal for right now. One card — one clear indicator.",
+  "spreadLenormandThreeCardSubtitle": "A cause-to-outcome line. Three cards — trigger, development, nearest result.",
+  "spreadLenormandFiveCardSubtitle": "A living chain of events. Five cards — each next symbol refines the previous one.",
   "spreadFivePosition1": "Core energy",
   "spreadFivePosition2": "What helps",
   "spreadFivePosition3": "What blocks",
@@ -180,6 +186,18 @@
   "resultSectionArcaneSnapshot": "Arcane Snapshot",
   "resultSectionWhy": "Why this reading",
   "resultSectionAction": "Action step (next 24–72h)",
+  "resultLenormandStep": "Lenormand step {step} of {total}",
+  "@resultLenormandStep": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "resultLenormandBuildsOn": "Builds on",
   "resultReferralTitle": "Referral bonus",
   "resultReferralBody": "Share your personal link with friends and get 20 free premium five-card readings for every new user who joins from your link.",
   "resultReferralButton": "Share link",

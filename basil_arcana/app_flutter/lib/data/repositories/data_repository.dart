@@ -89,9 +89,10 @@ class DataRepository {
   }
 
   String _buildVersionTag() {
-    final runtimeVersion =
-        (AppConfig.appVersion.isNotEmpty ? AppConfig.appVersion : readWebBuildVersion())
-            .trim();
+    final runtimeVersion = (AppConfig.appVersion.isNotEmpty
+            ? AppConfig.appVersion
+            : readWebBuildVersion())
+        .trim();
     return runtimeVersion.isNotEmpty ? runtimeVersion : 'dev';
   }
 
@@ -158,8 +159,7 @@ class DataRepository {
       }
       final rootType = jsonRootType(parsed.decoded);
       _lastResponseRootTypes[cacheKey] = rootType;
-      if (!expectedRootTypes.contains(rootType) ||
-          !validator(parsed.decoded)) {
+      if (!expectedRootTypes.contains(rootType) || !validator(parsed.decoded)) {
         if (kEnableRuntimeLogs) {
           debugPrint(
             '[DataRepository] schemaMismatch cacheKey=$cacheKey rootType=$rootType',
@@ -203,8 +203,7 @@ class DataRepository {
       }
       final rootType = jsonRootType(parsed.decoded);
       _lastResponseRootTypes[cacheKey] = rootType;
-      if (!expectedRootTypes.contains(rootType) ||
-          !validator(parsed.decoded)) {
+      if (!expectedRootTypes.contains(rootType) || !validator(parsed.decoded)) {
         return null;
       }
       _lastFetchTimes[cacheKey] = DateTime.now();
@@ -232,8 +231,7 @@ class DataRepository {
       final parsed = parseJsonString(raw);
       final rootType = jsonRootType(parsed.decoded);
       _lastResponseRootTypes[cacheKey] = rootType;
-      if (!expectedRootTypes.contains(rootType) ||
-          !validator(parsed.decoded)) {
+      if (!expectedRootTypes.contains(rootType) || !validator(parsed.decoded)) {
         if (kEnableRuntimeLogs) {
           debugPrint(
             '[DataRepository] local schemaMismatch cacheKey=$cacheKey rootType=$rootType',
@@ -444,12 +442,20 @@ List<CardModel> _parseCards({required String raw, required DeckType deckId}) {
             canonicalData[id] as Map<String, dynamic>,
           ))
       .toList();
+  final lenormandCards = lenormandCardIds
+      .where(canonicalData.containsKey)
+      .map((id) => CardModel.fromLocalizedEntry(
+            id,
+            canonicalData[id] as Map<String, dynamic>,
+          ))
+      .toList();
   final deckRegistry = <DeckType, List<CardModel>>{
     DeckType.major: majorCards,
     DeckType.wands: wandsCards,
     DeckType.swords: swordsCards,
     DeckType.pentacles: pentaclesCards,
     DeckType.cups: cupsCards,
+    DeckType.lenormand: lenormandCards,
   };
   return getActiveDeckCards(deckId, deckRegistry);
 }

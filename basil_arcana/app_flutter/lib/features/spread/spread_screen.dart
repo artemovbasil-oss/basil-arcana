@@ -14,6 +14,7 @@ import '../../core/widgets/data_load_error.dart';
 import '../../data/repositories/energy_topup_repository.dart';
 import '../settings/settings_screen.dart';
 import '../../data/models/app_enums.dart';
+import '../../data/models/deck_model.dart';
 import '../../data/models/spread_model.dart';
 import '../../state/providers.dart';
 import '../shuffle/shuffle_screen.dart';
@@ -24,7 +25,9 @@ class SpreadScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final spreadsAsync = ref.watch(spreadsProvider);
+    final deckId = ref.watch(deckProvider);
     final l10n = AppLocalizations.of(context)!;
+    final spreadCopy = _resolveSpreadCopy(l10n: l10n, deckId: deckId);
 
     return Scaffold(
       appBar: buildEnergyTopBar(
@@ -67,8 +70,8 @@ class SpreadScreen extends ConsumerWidget {
                       child: _SpreadOptionCard(
                         spread: oneCardSpread,
                         spreadType: SpreadType.one,
-                        title: l10n.spreadOneCardTitle,
-                        subtitle: l10n.spreadOneCardSubtitle,
+                        title: spreadCopy.oneTitle,
+                        subtitle: spreadCopy.oneSubtitle,
                         animation:
                             const SpreadIconDeck(mode: SpreadIconMode.oneCard),
                       ),
@@ -80,8 +83,8 @@ class SpreadScreen extends ConsumerWidget {
                       child: _SpreadOptionCard(
                         spread: threeCardSpread,
                         spreadType: SpreadType.three,
-                        title: l10n.spreadThreeCardTitle,
-                        subtitle: l10n.spreadThreeCardSubtitle,
+                        title: spreadCopy.threeTitle,
+                        subtitle: spreadCopy.threeSubtitle,
                         animation: const SpreadIconDeck(
                           mode: SpreadIconMode.threeCards,
                         ),
@@ -94,8 +97,8 @@ class SpreadScreen extends ConsumerWidget {
                       child: _SpreadOptionCard(
                         spread: fiveCardSpread,
                         spreadType: SpreadType.five,
-                        title: l10n.spreadFiveCardTitle,
-                        subtitle: l10n.spreadFiveCardSubtitle,
+                        title: spreadCopy.fiveTitle,
+                        subtitle: spreadCopy.fiveSubtitle,
                         animation: const SpreadIconDeck(
                           mode: SpreadIconMode.fiveCards,
                         ),
@@ -635,6 +638,48 @@ class _FiveCardsPremiumCopy {
       premiumTag: 'Premium',
     );
   }
+}
+
+class _SpreadCopy {
+  const _SpreadCopy({
+    required this.oneTitle,
+    required this.oneSubtitle,
+    required this.threeTitle,
+    required this.threeSubtitle,
+    required this.fiveTitle,
+    required this.fiveSubtitle,
+  });
+
+  final String oneTitle;
+  final String oneSubtitle;
+  final String threeTitle;
+  final String threeSubtitle;
+  final String fiveTitle;
+  final String fiveSubtitle;
+}
+
+_SpreadCopy _resolveSpreadCopy({
+  required AppLocalizations l10n,
+  required DeckType deckId,
+}) {
+  if (deckId == DeckType.lenormand) {
+    return _SpreadCopy(
+      oneTitle: l10n.spreadOneCardTitle,
+      oneSubtitle: l10n.spreadLenormandOneCardSubtitle,
+      threeTitle: l10n.spreadThreeCardTitle,
+      threeSubtitle: l10n.spreadLenormandThreeCardSubtitle,
+      fiveTitle: l10n.spreadFiveCardTitle,
+      fiveSubtitle: l10n.spreadLenormandFiveCardSubtitle,
+    );
+  }
+  return _SpreadCopy(
+    oneTitle: l10n.spreadOneCardTitle,
+    oneSubtitle: l10n.spreadOneCardSubtitle,
+    threeTitle: l10n.spreadThreeCardTitle,
+    threeSubtitle: l10n.spreadThreeCardSubtitle,
+    fiveTitle: l10n.spreadFiveCardTitle,
+    fiveSubtitle: l10n.spreadFiveCardSubtitle,
+  );
 }
 
 SpreadModel? _resolveSpreadByType(

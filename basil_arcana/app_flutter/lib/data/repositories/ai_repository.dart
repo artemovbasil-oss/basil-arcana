@@ -14,6 +14,7 @@ import '../../core/telegram/telegram_auth.dart';
 import '../../core/telemetry/web_error_reporter.dart';
 import '../models/ai_result_model.dart';
 import '../models/card_model.dart';
+import '../models/deck_model.dart';
 import '../models/drawn_card_model.dart';
 import '../models/spread_model.dart';
 
@@ -1153,6 +1154,10 @@ class AiRepository {
         .join(', ');
     final spreadCardCount = spread.cardsCount ?? spread.positions.length;
     final isFiveCardSpread = spreadCardCount >= 5 || drawnCards.length >= 5;
+    final isLenormandReading = drawnCards.isNotEmpty &&
+        drawnCards.every(
+          (drawn) => canonicalCardId(drawn.cardId).startsWith('lenormand_'),
+        );
 
     if (normalizedLanguage == 'ru') {
       final depthLine = mode == ReadingMode.deep ||
@@ -1162,11 +1167,15 @@ class AiRepository {
       final premiumDepthLine = isFiveCardSpread
           ? 'Это премиум-расклад на 5 карт: собери целостный сценарий из всех позиций, явно выдели 2-3 ключевых связки между картами и покажи, как каждая связка меняет прогноз. Добавь короткую оценку рисков и возможностей по шкале от низкого к высокому и переведи вывод в конкретный план действий.'
           : '';
+      final lenormandLine = isLenormandReading
+          ? 'Это расклад Ленорман: трактуй карты последовательно, где каждая следующая карта уточняет и модифицирует предыдущую. Покажи цепочку смысла шаг за шагом и избегай мистификации.'
+          : '';
       return '''
 Фокус запроса пользователя: "$focus".
 Ответ должен быть адресным и персональным: напрямую свяжи выводы с вопросом пользователя, позициями расклада ($positions) и картами ($cardNames).
 $depthLine
 $premiumDepthLine
+$lenormandLine
 Избегай общих фраз и повторов. В конце дай 1-2 конкретных шага, что делать дальше именно по этому запросу.''';
     }
 
@@ -1178,11 +1187,15 @@ $premiumDepthLine
       final premiumDepthLine = isFiveCardSpread
           ? 'Бұл 5 карталық премиум жайылма: барлық позицияны біртұтас сценарийге біріктір, карталар арасындағы 2-3 негізгі байланысты анық көрсет және әр байланыс болжамға қалай әсер ететінін түсіндір. Тәуекелдер мен мүмкіндіктерді қысқа түрде төменнен жоғарыға дейін бағалап, қорытындыны нақты әрекет жоспарына айналдыр.'
           : '';
+      final lenormandLine = isLenormandReading
+          ? 'Бұл Ленорман жайылмасы: карталарды тізбектей түсіндір, әр келесі карта алдыңғы мағынаны нақтылап, өзгертіп отырады. Мағына тізбегін қадамдап көрсет.'
+          : '';
       return '''
 Пайдаланушы сұрағының фокусы: "$focus".
 Жауап жеке әрі нысаналы болсын: қорытындыны сұрақпен, жайылма позицияларымен ($positions) және карталармен ($cardNames) тікелей байланыстыр.
 $depthLine
 $premiumDepthLine
+$lenormandLine
 Жалпылама, шаблон тіркестерден қаш. Соңында осы сұраққа сай 1-2 нақты қадам ұсын.''';
     }
 
@@ -1193,11 +1206,15 @@ $premiumDepthLine
     final premiumDepthLine = isFiveCardSpread
         ? 'This is a premium 5-card spread: build one coherent scenario across all positions, call out 2-3 pivotal card-to-card links, and explain how each link changes the forecast. Add a brief risk/opportunity estimate from low to high and convert the synthesis into a concrete action plan.'
         : '';
+    final lenormandLine = isLenormandReading
+        ? 'This is a Lenormand reading: interpret cards in sequence so each next card modifies and sharpens the previous one. Explicitly show the chain of meaning step by step and keep the tone concrete.'
+        : '';
     return '''
 User focus: "$focus".
 Make the reading specific and personal: tie conclusions directly to the question, spread positions ($positions), and drawn cards ($cardNames).
 $depthLine
 $premiumDepthLine
+$lenormandLine
 Avoid generic filler and repetition. Finish with 1-2 concrete next steps tailored to this question.''';
   }
 

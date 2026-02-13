@@ -128,6 +128,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deckPentacles => 'Pentacles';
 
   @override
+  String get deckTarotRiderWaite => 'Rider-Waite Tarot';
+
+  @override
+  String get deckLenormand => 'Lenormand deck';
+
+  @override
   String get deckAllName => 'All decks';
 
   @override
@@ -144,6 +150,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deckPentaclesName => 'Pentacles';
+
+  @override
+  String get deckLenormandName => 'Lenormand';
 
   @override
   String get deckDebugLogLabel => 'Debug: log Wands asset path';
@@ -357,6 +366,18 @@ class AppLocalizationsEn extends AppLocalizations {
       'A deeper look at your path. Five cards — layered context and guidance.';
 
   @override
+  String get spreadLenormandOneCardSubtitle =>
+      'A practical signal for right now. One card — one clear indicator.';
+
+  @override
+  String get spreadLenormandThreeCardSubtitle =>
+      'A cause-to-outcome line. Three cards — trigger, development, nearest result.';
+
+  @override
+  String get spreadLenormandFiveCardSubtitle =>
+      'A living chain of events. Five cards — each next symbol refines the previous one.';
+
+  @override
   String get spreadFivePosition1 => 'Core energy';
 
   @override
@@ -433,6 +454,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get resultSectionAction => 'Action step (next 24–72h)';
+
+  @override
+  String resultLenormandStep(int step, int total) {
+    return 'Lenormand step $step of $total';
+  }
+
+  @override
+  String get resultLenormandBuildsOn => 'Builds on';
 
   @override
   String get resultReferralTitle => 'Referral bonus';

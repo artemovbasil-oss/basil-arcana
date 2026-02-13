@@ -1826,5 +1826,887 @@
       "clarity": 58
     },
     "detailedDescription": "The Ace of Cups points to a new seed and raw potential in the realm of emotion, connection, and intuition. At its best, it shows fresh energy and a clean opening. In shadow, it can show potential without follow-through. Advice: plant the seed and nurture it."
+  },
+  "lenormand_01_rider": {
+    "title": "Rider",
+    "deck": "lenormand",
+    "keywords": [
+      "news",
+      "speed",
+      "contact"
+    ],
+    "meaning": {
+      "general": "Rider points to news, movement, quick developments.",
+      "light": "In the light, this card helps you read signals early and act in time.",
+      "shadow": "In shadow, it can show overreaction, missed context, or a rushed conclusion.",
+      "advice": "Check facts, then take one practical step that matches the sequence of cards."
+    },
+    "fact": "In Lenormand practice, Rider is read through nearby cards rather than in isolation.",
+    "stats": {
+      "luck": 48,
+      "power": 48,
+      "love": 45,
+      "clarity": 53
+    },
+    "detailedDescription": "Rider points to news, movement, quick developments. In the light, this card helps you read signals early and act in time. In shadow, it can show overreaction, missed context, or a rushed conclusion. Check facts, then take one practical step that matches the sequence of cards.",
+    "imageUrl": "cards/lenormand/lenormand_01_rider.webp",
+    "video": "ln_rider.mp4"
+  },
+  "lenormand_02_clover": {
+    "title": "Clover",
+    "deck": "lenormand",
+    "keywords": [
+      "luck",
+      "chance",
+      "window"
+    ],
+    "meaning": {
+      "general": "Clover points to small luck and brief opportunities.",
+      "light": "In the light, this card helps you read signals early and act in time.",
+      "shadow": "In shadow, it can show overreaction, missed context, or a rushed conclusion.",
+      "advice": "Check facts, then take one practical step that matches the sequence of cards."
+    },
+    "fact": "In Lenormand practice, Clover is read through nearby cards rather than in isolation.",
+    "stats": {
+      "luck": 54,
+      "power": 56,
+      "love": 52,
+      "clarity": 62
+    },
+    "detailedDescription": "Clover points to small luck and brief opportunities. In the light, this card helps you read signals early and act in time. In shadow, it can show overreaction, missed context, or a rushed conclusion. Check facts, then take one practical step that matches the sequence of cards.",
+    "imageUrl": "cards/lenormand/lenormand_02_clover.webp",
+    "video": "ln_clover.mp4"
+  },
+  "lenormand_03_ship": {
+    "title": "Ship",
+    "deck": "lenormand",
+    "keywords": [
+      "journey",
+      "distance",
+      "expansion"
+    ],
+    "meaning": {
+      "general": "Ship points to distance, travel, expansion.",
+      "light": "In the light, this card helps you read signals early and act in time.",
+      "shadow": "In shadow, it can show overreaction, missed context, or a rushed conclusion.",
+      "advice": "Check facts, then take one practical step that matches the sequence of cards."
+    },
+    "fact": "In Lenormand practice, Ship is read through nearby cards rather than in isolation.",
+    "stats": {
+      "luck": 60,
+      "power": 64,
+      "love": 59,
+      "clarity": 71
+    },
+    "detailedDescription": "Ship points to distance, travel, expansion. In the light, this card helps you read signals early and act in time. In shadow, it can show overreaction, missed context, or a rushed conclusion. Check facts, then take one practical step that matches the sequence of cards.",
+    "imageUrl": "cards/lenormand/lenormand_03_ship.webp",
+    "video": "ln_ship.mp4"
+  },
+  "lenormand_04_house": {
+    "title": "House",
+    "deck": "lenormand",
+    "keywords": [
+      "home",
+      "safety",
+      "foundation"
+    ],
+    "meaning": {
+      "general": "House points to stability, family, secure base.",
+      "light": "In the light, this card helps you read signals early and act in time.",
+      "shadow": "In shadow, it can show overreaction, missed context, or a rushed conclusion.",
+      "advice": "Check facts, then take one practical step that matches the sequence of cards."
+    },
+    "fact": "In Lenormand practice, House is read through nearby cards rather than in isolation.",
+    "stats": {
+      "luck": 66,
+      "power": 72,
+      "love": 66,
+      "clarity": 44
+    },
+    "detailedDescription": "House points to stability, family, secure base. In the light, this card helps you read signals early and act in time. In shadow, it can show overreaction, missed context, or a rushed conclusion. Check facts, then take one practical step that matches the sequence of cards.",
+    "imageUrl": "cards/lenormand/lenormand_04_house.webp",
+    "video": "ln_house.mp4"
+  },
+  "lenormand_05_tree": {
+    "title": "Tree",
+    "deck": "lenormand",
+    "keywords": [
+      "health",
+      "roots",
+      "growth"
+    ],
+    "meaning": {
+      "general": "Tree points to health, roots, long growth.",
+      "light": "In the light, this card helps you read signals early and act in time.",
+      "shadow": "In shadow, it can show overreaction, missed context, or a rushed conclusion.",
+      "advice": "Check facts, then take one practical step that matches the sequence of cards."
+    },
+    "fact": "In Lenormand practice, Tree is read through nearby cards rather than in isolation.",
+    "stats": {
+      "luck": 72,
+      "power": 40,
+      "love": 73,
+      "clarity": 53
+    },
+    "detailedDescription": "Tree points to health, roots, long growth. In the light, this card helps you read signals early and act in time. In shadow, it can show overreaction, missed context, or a rushed conclusion. Check facts, then take one practical step that matches the sequence of cards.",
+    "imageUrl": "cards/lenormand/lenormand_05_tree.webp",
+    "video": "ln_tree.mp4"
+  },
+  "lenormand_06_clouds": {
+    "title": "Clouds",
+    "deck": "lenormand",
+    "keywords": [
+      "fog",
+      "doubt",
+      "confusion"
+    ],
+    "meaning": {
+      "general": "Clouds points to uncertainty and mixed signals.",
+      "light": "In the light, this card helps you read signals early and act in time.",
+      "shadow": "In shadow, it can show overreaction, missed context, or a rushed conclusion.",
+      "advice": "Check facts, then take one practical step that matches the sequence of cards."
+    },
+    "fact": "In Lenormand practice, Clouds is read through nearby cards rather than in isolation.",
+    "stats": {
+      "luck": 78,
+      "power": 48,
+      "love": 38,
+      "clarity": 62
+    },
+    "detailedDescription": "Clouds points to uncertainty and mixed signals. In the light, this card helps you read signals early and act in time. In shadow, it can show overreaction, missed context, or a rushed conclusion. Check facts, then take one practical step that matches the sequence of cards.",
+    "imageUrl": "cards/lenormand/lenormand_06_clouds.webp",
+    "video": "ln_clouds.mp4"
+  },
+  "lenormand_07_snake": {
+    "title": "Snake",
+    "deck": "lenormand",
+    "keywords": [
+      "strategy",
+      "detour",
+      "motive"
+    ],
+    "meaning": {
+      "general": "Snake points to complexity, strategy, hidden motives.",
+      "light": "In the light, this card helps you read signals early and act in time.",
+      "shadow": "In shadow, it can show overreaction, missed context, or a rushed conclusion.",
+      "advice": "Check facts, then take one practical step that matches the sequence of cards."
+    },
+    "fact": "In Lenormand practice, Snake is read through nearby cards rather than in isolation.",
+    "stats": {
+      "luck": 42,
+      "power": 56,
+      "love": 45,
+      "clarity": 71
+    },
+    "detailedDescription": "Snake points to complexity, strategy, hidden motives. In the light, this card helps you read signals early and act in time. In shadow, it can show overreaction, missed context, or a rushed conclusion. Check facts, then take one practical step that matches the sequence of cards.",
+    "imageUrl": "cards/lenormand/lenormand_07_snake.webp",
+    "video": "ln_snake.mp4"
+  },
+  "lenormand_08_coffin": {
+    "title": "Coffin",
+    "deck": "lenormand",
+    "keywords": [
+      "ending",
+      "pause",
+      "release"
+    ],
+    "meaning": {
+      "general": "Coffin points to completion, pause, release.",
+      "light": "In the light, this card helps you read signals early and act in time.",
+      "shadow": "In shadow, it can show overreaction, missed context, or a rushed conclusion.",
+      "advice": "Check facts, then take one practical step that matches the sequence of cards."
+    },
+    "fact": "In Lenormand practice, Coffin is read through nearby cards rather than in isolation.",
+    "stats": {
+      "luck": 48,
+      "power": 64,
+      "love": 52,
+      "clarity": 44
+    },
+    "detailedDescription": "Coffin points to completion, pause, release. In the light, this card helps you read signals early and act in time. In shadow, it can show overreaction, missed context, or a rushed conclusion. Check facts, then take one practical step that matches the sequence of cards.",
+    "imageUrl": "cards/lenormand/lenormand_08_coffin.webp",
+    "video": "ln_coffin.mp4"
+  },
+  "lenormand_09_bouquet": {
+    "title": "Bouquet",
+    "deck": "lenormand",
+    "keywords": [
+      "gift",
+      "pleasure",
+      "invite"
+    ],
+    "meaning": {
+      "general": "Bouquet points to gift, charm, pleasant opening.",
+      "light": "In the light, this card helps you read signals early and act in time.",
+      "shadow": "In shadow, it can show overreaction, missed context, or a rushed conclusion.",
+      "advice": "Check facts, then take one practical step that matches the sequence of cards."
+    },
+    "fact": "In Lenormand practice, Bouquet is read through nearby cards rather than in isolation.",
+    "stats": {
+      "luck": 54,
+      "power": 72,
+      "love": 59,
+      "clarity": 53
+    },
+    "detailedDescription": "Bouquet points to gift, charm, pleasant opening. In the light, this card helps you read signals early and act in time. In shadow, it can show overreaction, missed context, or a rushed conclusion. Check facts, then take one practical step that matches the sequence of cards.",
+    "imageUrl": "cards/lenormand/lenormand_09_bouquet.webp",
+    "video": "ln_bouquet.mp4"
+  },
+  "lenormand_10_scythe": {
+    "title": "Scythe",
+    "deck": "lenormand",
+    "keywords": [
+      "cut",
+      "risk",
+      "decision"
+    ],
+    "meaning": {
+      "general": "Scythe points to sudden cut and decisive action.",
+      "light": "In the light, this card helps you read signals early and act in time.",
+      "shadow": "In shadow, it can show overreaction, missed context, or a rushed conclusion.",
+      "advice": "Check facts, then take one practical step that matches the sequence of cards."
+    },
+    "fact": "In Lenormand practice, Scythe is read through nearby cards rather than in isolation.",
+    "stats": {
+      "luck": 60,
+      "power": 40,
+      "love": 66,
+      "clarity": 62
+    },
+    "detailedDescription": "Scythe points to sudden cut and decisive action. In the light, this card helps you read signals early and act in time. In shadow, it can show overreaction, missed context, or a rushed conclusion. Check facts, then take one practical step that matches the sequence of cards.",
+    "imageUrl": "cards/lenormand/lenormand_10_scythe.webp",
+    "video": "ln_scythe.mp4"
+  },
+  "lenormand_11_whip": {
+    "title": "Whip",
+    "deck": "lenormand",
+    "keywords": [
+      "repeat",
+      "conflict",
+      "drive"
+    ],
+    "meaning": {
+      "general": "Whip points to repetition, tension, heated dialogue.",
+      "light": "In the light, this card helps you read signals early and act in time.",
+      "shadow": "In shadow, it can show overreaction, missed context, or a rushed conclusion.",
+      "advice": "Check facts, then take one practical step that matches the sequence of cards."
+    },
+    "fact": "In Lenormand practice, Whip is read through nearby cards rather than in isolation.",
+    "stats": {
+      "luck": 66,
+      "power": 48,
+      "love": 73,
+      "clarity": 71
+    },
+    "detailedDescription": "Whip points to repetition, tension, heated dialogue. In the light, this card helps you read signals early and act in time. In shadow, it can show overreaction, missed context, or a rushed conclusion. Check facts, then take one practical step that matches the sequence of cards.",
+    "imageUrl": "cards/lenormand/lenormand_11_whip.webp",
+    "video": "ln_whip.mp4"
+  },
+  "lenormand_12_birds": {
+    "title": "Birds",
+    "deck": "lenormand",
+    "keywords": [
+      "talk",
+      "anxiety",
+      "buzz"
+    ],
+    "meaning": {
+      "general": "Birds points to conversation, noise, anxious chatter.",
+      "light": "In the light, this card helps you read signals early and act in time.",
+      "shadow": "In shadow, it can show overreaction, missed context, or a rushed conclusion.",
+      "advice": "Check facts, then take one practical step that matches the sequence of cards."
+    },
+    "fact": "In Lenormand practice, Birds is read through nearby cards rather than in isolation.",
+    "stats": {
+      "luck": 72,
+      "power": 56,
+      "love": 38,
+      "clarity": 44
+    },
+    "detailedDescription": "Birds points to conversation, noise, anxious chatter. In the light, this card helps you read signals early and act in time. In shadow, it can show overreaction, missed context, or a rushed conclusion. Check facts, then take one practical step that matches the sequence of cards.",
+    "imageUrl": "cards/lenormand/lenormand_12_birds.webp",
+    "video": "ln_birds.mp4"
+  },
+  "lenormand_13_child": {
+    "title": "Child",
+    "deck": "lenormand",
+    "keywords": [
+      "new",
+      "simple",
+      "curious"
+    ],
+    "meaning": {
+      "general": "Child points to fresh start, simplicity, curiosity.",
+      "light": "In the light, this card helps you read signals early and act in time.",
+      "shadow": "In shadow, it can show overreaction, missed context, or a rushed conclusion.",
+      "advice": "Check facts, then take one practical step that matches the sequence of cards."
+    },
+    "fact": "In Lenormand practice, Child is read through nearby cards rather than in isolation.",
+    "stats": {
+      "luck": 78,
+      "power": 64,
+      "love": 45,
+      "clarity": 53
+    },
+    "detailedDescription": "Child points to fresh start, simplicity, curiosity. In the light, this card helps you read signals early and act in time. In shadow, it can show overreaction, missed context, or a rushed conclusion. Check facts, then take one practical step that matches the sequence of cards.",
+    "imageUrl": "cards/lenormand/lenormand_13_child.webp",
+    "video": "ln_child.mp4"
+  },
+  "lenormand_14_fox": {
+    "title": "Fox",
+    "deck": "lenormand",
+    "keywords": [
+      "work",
+      "caution",
+      "clever"
+    ],
+    "meaning": {
+      "general": "Fox points to work, caution, smart adaptation.",
+      "light": "In the light, this card helps you read signals early and act in time.",
+      "shadow": "In shadow, it can show overreaction, missed context, or a rushed conclusion.",
+      "advice": "Check facts, then take one practical step that matches the sequence of cards."
+    },
+    "fact": "In Lenormand practice, Fox is read through nearby cards rather than in isolation.",
+    "stats": {
+      "luck": 42,
+      "power": 72,
+      "love": 52,
+      "clarity": 62
+    },
+    "detailedDescription": "Fox points to work, caution, smart adaptation. In the light, this card helps you read signals early and act in time. In shadow, it can show overreaction, missed context, or a rushed conclusion. Check facts, then take one practical step that matches the sequence of cards.",
+    "imageUrl": "cards/lenormand/lenormand_14_fox.webp",
+    "video": "ln_fox.mp4"
+  },
+  "lenormand_15_bear": {
+    "title": "Bear",
+    "deck": "lenormand",
+    "keywords": [
+      "power",
+      "money",
+      "protector"
+    ],
+    "meaning": {
+      "general": "Bear points to power, resources, protection.",
+      "light": "In the light, this card helps you read signals early and act in time.",
+      "shadow": "In shadow, it can show overreaction, missed context, or a rushed conclusion.",
+      "advice": "Check facts, then take one practical step that matches the sequence of cards."
+    },
+    "fact": "In Lenormand practice, Bear is read through nearby cards rather than in isolation.",
+    "stats": {
+      "luck": 48,
+      "power": 40,
+      "love": 59,
+      "clarity": 71
+    },
+    "detailedDescription": "Bear points to power, resources, protection. In the light, this card helps you read signals early and act in time. In shadow, it can show overreaction, missed context, or a rushed conclusion. Check facts, then take one practical step that matches the sequence of cards.",
+    "imageUrl": "cards/lenormand/lenormand_15_bear.webp",
+    "video": "ln_bear.mp4"
+  },
+  "lenormand_16_stars": {
+    "title": "Stars",
+    "deck": "lenormand",
+    "keywords": [
+      "guide",
+      "clarity",
+      "hope"
+    ],
+    "meaning": {
+      "general": "Stars points to guidance, vision, clear navigation.",
+      "light": "In the light, this card helps you read signals early and act in time.",
+      "shadow": "In shadow, it can show overreaction, missed context, or a rushed conclusion.",
+      "advice": "Check facts, then take one practical step that matches the sequence of cards."
+    },
+    "fact": "In Lenormand practice, Stars is read through nearby cards rather than in isolation.",
+    "stats": {
+      "luck": 54,
+      "power": 48,
+      "love": 66,
+      "clarity": 44
+    },
+    "detailedDescription": "Stars points to guidance, vision, clear navigation. In the light, this card helps you read signals early and act in time. In shadow, it can show overreaction, missed context, or a rushed conclusion. Check facts, then take one practical step that matches the sequence of cards.",
+    "imageUrl": "cards/lenormand/lenormand_16_stars.webp",
+    "video": "ln_stars.mp4"
+  },
+  "lenormand_17_stork": {
+    "title": "Stork",
+    "deck": "lenormand",
+    "keywords": [
+      "change",
+      "move",
+      "upgrade"
+    ],
+    "meaning": {
+      "general": "Stork points to change, transition, improved state.",
+      "light": "In the light, this card helps you read signals early and act in time.",
+      "shadow": "In shadow, it can show overreaction, missed context, or a rushed conclusion.",
+      "advice": "Check facts, then take one practical step that matches the sequence of cards."
+    },
+    "fact": "In Lenormand practice, Stork is read through nearby cards rather than in isolation.",
+    "stats": {
+      "luck": 60,
+      "power": 56,
+      "love": 73,
+      "clarity": 53
+    },
+    "detailedDescription": "Stork points to change, transition, improved state. In the light, this card helps you read signals early and act in time. In shadow, it can show overreaction, missed context, or a rushed conclusion. Check facts, then take one practical step that matches the sequence of cards.",
+    "imageUrl": "cards/lenormand/lenormand_17_stork.webp",
+    "video": "ln_stork.mp4"
+  },
+  "lenormand_18_dog": {
+    "title": "Dog",
+    "deck": "lenormand",
+    "keywords": [
+      "friend",
+      "trust",
+      "support"
+    ],
+    "meaning": {
+      "general": "Dog points to trust, loyalty, reliable support.",
+      "light": "In the light, this card helps you read signals early and act in time.",
+      "shadow": "In shadow, it can show overreaction, missed context, or a rushed conclusion.",
+      "advice": "Check facts, then take one practical step that matches the sequence of cards."
+    },
+    "fact": "In Lenormand practice, Dog is read through nearby cards rather than in isolation.",
+    "stats": {
+      "luck": 66,
+      "power": 64,
+      "love": 38,
+      "clarity": 62
+    },
+    "detailedDescription": "Dog points to trust, loyalty, reliable support. In the light, this card helps you read signals early and act in time. In shadow, it can show overreaction, missed context, or a rushed conclusion. Check facts, then take one practical step that matches the sequence of cards.",
+    "imageUrl": "cards/lenormand/lenormand_18_dog.webp",
+    "video": "ln_dog.mp4"
+  },
+  "lenormand_19_tower": {
+    "title": "Tower",
+    "deck": "lenormand",
+    "keywords": [
+      "distance",
+      "order",
+      "boundaries"
+    ],
+    "meaning": {
+      "general": "Tower points to boundaries, structure, autonomy.",
+      "light": "In the light, this card helps you read signals early and act in time.",
+      "shadow": "In shadow, it can show overreaction, missed context, or a rushed conclusion.",
+      "advice": "Check facts, then take one practical step that matches the sequence of cards."
+    },
+    "fact": "In Lenormand practice, Tower is read through nearby cards rather than in isolation.",
+    "stats": {
+      "luck": 72,
+      "power": 72,
+      "love": 45,
+      "clarity": 71
+    },
+    "detailedDescription": "Tower points to boundaries, structure, autonomy. In the light, this card helps you read signals early and act in time. In shadow, it can show overreaction, missed context, or a rushed conclusion. Check facts, then take one practical step that matches the sequence of cards.",
+    "imageUrl": "cards/lenormand/lenormand_19_tower.webp"
+  },
+  "lenormand_20_garden": {
+    "title": "Garden",
+    "deck": "lenormand",
+    "keywords": [
+      "network",
+      "public",
+      "event"
+    ],
+    "meaning": {
+      "general": "Garden points to society, visibility, public field.",
+      "light": "In the light, this card helps you read signals early and act in time.",
+      "shadow": "In shadow, it can show overreaction, missed context, or a rushed conclusion.",
+      "advice": "Check facts, then take one practical step that matches the sequence of cards."
+    },
+    "fact": "In Lenormand practice, Garden is read through nearby cards rather than in isolation.",
+    "stats": {
+      "luck": 78,
+      "power": 40,
+      "love": 52,
+      "clarity": 44
+    },
+    "detailedDescription": "Garden points to society, visibility, public field. In the light, this card helps you read signals early and act in time. In shadow, it can show overreaction, missed context, or a rushed conclusion. Check facts, then take one practical step that matches the sequence of cards.",
+    "imageUrl": "cards/lenormand/lenormand_20_garden.webp"
+  },
+  "lenormand_21_mountain": {
+    "title": "Mountain",
+    "deck": "lenormand",
+    "keywords": [
+      "delay",
+      "wall",
+      "patience"
+    ],
+    "meaning": {
+      "general": "Mountain points to delay, obstacle, endurance.",
+      "light": "In the light, this card helps you read signals early and act in time.",
+      "shadow": "In shadow, it can show overreaction, missed context, or a rushed conclusion.",
+      "advice": "Check facts, then take one practical step that matches the sequence of cards."
+    },
+    "fact": "In Lenormand practice, Mountain is read through nearby cards rather than in isolation.",
+    "stats": {
+      "luck": 42,
+      "power": 48,
+      "love": 59,
+      "clarity": 53
+    },
+    "detailedDescription": "Mountain points to delay, obstacle, endurance. In the light, this card helps you read signals early and act in time. In shadow, it can show overreaction, missed context, or a rushed conclusion. Check facts, then take one practical step that matches the sequence of cards.",
+    "imageUrl": "cards/lenormand/lenormand_21_mountain.webp"
+  },
+  "lenormand_22_crossroads": {
+    "title": "Crossroads",
+    "deck": "lenormand",
+    "keywords": [
+      "choice",
+      "branch",
+      "option"
+    ],
+    "meaning": {
+      "general": "Crossroads points to choice between comparable paths.",
+      "light": "In the light, this card helps you read signals early and act in time.",
+      "shadow": "In shadow, it can show overreaction, missed context, or a rushed conclusion.",
+      "advice": "Check facts, then take one practical step that matches the sequence of cards."
+    },
+    "fact": "In Lenormand practice, Crossroads is read through nearby cards rather than in isolation.",
+    "stats": {
+      "luck": 48,
+      "power": 56,
+      "love": 66,
+      "clarity": 62
+    },
+    "detailedDescription": "Crossroads points to choice between comparable paths. In the light, this card helps you read signals early and act in time. In shadow, it can show overreaction, missed context, or a rushed conclusion. Check facts, then take one practical step that matches the sequence of cards.",
+    "imageUrl": "cards/lenormand/lenormand_22_crossroads.webp"
+  },
+  "lenormand_23_mice": {
+    "title": "Mice",
+    "deck": "lenormand",
+    "keywords": [
+      "loss",
+      "worry",
+      "drain"
+    ],
+    "meaning": {
+      "general": "Mice points to loss through stress and erosion.",
+      "light": "In the light, this card helps you read signals early and act in time.",
+      "shadow": "In shadow, it can show overreaction, missed context, or a rushed conclusion.",
+      "advice": "Check facts, then take one practical step that matches the sequence of cards."
+    },
+    "fact": "In Lenormand practice, Mice is read through nearby cards rather than in isolation.",
+    "stats": {
+      "luck": 54,
+      "power": 64,
+      "love": 73,
+      "clarity": 71
+    },
+    "detailedDescription": "Mice points to loss through stress and erosion. In the light, this card helps you read signals early and act in time. In shadow, it can show overreaction, missed context, or a rushed conclusion. Check facts, then take one practical step that matches the sequence of cards.",
+    "imageUrl": "cards/lenormand/lenormand_23_mice.webp"
+  },
+  "lenormand_24_heart": {
+    "title": "Heart",
+    "deck": "lenormand",
+    "keywords": [
+      "love",
+      "warmth",
+      "sincerity"
+    ],
+    "meaning": {
+      "general": "Heart points to affection, sincerity, emotional center.",
+      "light": "In the light, this card helps you read signals early and act in time.",
+      "shadow": "In shadow, it can show overreaction, missed context, or a rushed conclusion.",
+      "advice": "Check facts, then take one practical step that matches the sequence of cards."
+    },
+    "fact": "In Lenormand practice, Heart is read through nearby cards rather than in isolation.",
+    "stats": {
+      "luck": 60,
+      "power": 72,
+      "love": 38,
+      "clarity": 44
+    },
+    "detailedDescription": "Heart points to affection, sincerity, emotional center. In the light, this card helps you read signals early and act in time. In shadow, it can show overreaction, missed context, or a rushed conclusion. Check facts, then take one practical step that matches the sequence of cards.",
+    "imageUrl": "cards/lenormand/lenormand_24_heart.webp"
+  },
+  "lenormand_25_ring": {
+    "title": "Ring",
+    "deck": "lenormand",
+    "keywords": [
+      "union",
+      "contract",
+      "cycle"
+    ],
+    "meaning": {
+      "general": "Ring points to agreement, cycle, commitment.",
+      "light": "In the light, this card helps you read signals early and act in time.",
+      "shadow": "In shadow, it can show overreaction, missed context, or a rushed conclusion.",
+      "advice": "Check facts, then take one practical step that matches the sequence of cards."
+    },
+    "fact": "In Lenormand practice, Ring is read through nearby cards rather than in isolation.",
+    "stats": {
+      "luck": 66,
+      "power": 40,
+      "love": 45,
+      "clarity": 53
+    },
+    "detailedDescription": "Ring points to agreement, cycle, commitment. In the light, this card helps you read signals early and act in time. In shadow, it can show overreaction, missed context, or a rushed conclusion. Check facts, then take one practical step that matches the sequence of cards.",
+    "imageUrl": "cards/lenormand/lenormand_25_ring.webp"
+  },
+  "lenormand_26_book": {
+    "title": "Book",
+    "deck": "lenormand",
+    "keywords": [
+      "secret",
+      "learning",
+      "depth"
+    ],
+    "meaning": {
+      "general": "Book points to knowledge, secrecy, study.",
+      "light": "In the light, this card helps you read signals early and act in time.",
+      "shadow": "In shadow, it can show overreaction, missed context, or a rushed conclusion.",
+      "advice": "Check facts, then take one practical step that matches the sequence of cards."
+    },
+    "fact": "In Lenormand practice, Book is read through nearby cards rather than in isolation.",
+    "stats": {
+      "luck": 72,
+      "power": 48,
+      "love": 52,
+      "clarity": 62
+    },
+    "detailedDescription": "Book points to knowledge, secrecy, study. In the light, this card helps you read signals early and act in time. In shadow, it can show overreaction, missed context, or a rushed conclusion. Check facts, then take one practical step that matches the sequence of cards.",
+    "imageUrl": "cards/lenormand/lenormand_26_book.webp"
+  },
+  "lenormand_27_letter": {
+    "title": "Letter",
+    "deck": "lenormand",
+    "keywords": [
+      "message",
+      "paper",
+      "facts"
+    ],
+    "meaning": {
+      "general": "Letter points to message, document, clear wording.",
+      "light": "In the light, this card helps you read signals early and act in time.",
+      "shadow": "In shadow, it can show overreaction, missed context, or a rushed conclusion.",
+      "advice": "Check facts, then take one practical step that matches the sequence of cards."
+    },
+    "fact": "In Lenormand practice, Letter is read through nearby cards rather than in isolation.",
+    "stats": {
+      "luck": 78,
+      "power": 56,
+      "love": 59,
+      "clarity": 71
+    },
+    "detailedDescription": "Letter points to message, document, clear wording. In the light, this card helps you read signals early and act in time. In shadow, it can show overreaction, missed context, or a rushed conclusion. Check facts, then take one practical step that matches the sequence of cards.",
+    "imageUrl": "cards/lenormand/lenormand_27_letter.webp"
+  },
+  "lenormand_28_man": {
+    "title": "Man",
+    "deck": "lenormand",
+    "keywords": [
+      "actor",
+      "initiative",
+      "focus"
+    ],
+    "meaning": {
+      "general": "Man points to active role, decision, direct focus.",
+      "light": "In the light, this card helps you read signals early and act in time.",
+      "shadow": "In shadow, it can show overreaction, missed context, or a rushed conclusion.",
+      "advice": "Check facts, then take one practical step that matches the sequence of cards."
+    },
+    "fact": "In Lenormand practice, Man is read through nearby cards rather than in isolation.",
+    "stats": {
+      "luck": 42,
+      "power": 64,
+      "love": 66,
+      "clarity": 44
+    },
+    "detailedDescription": "Man points to active role, decision, direct focus. In the light, this card helps you read signals early and act in time. In shadow, it can show overreaction, missed context, or a rushed conclusion. Check facts, then take one practical step that matches the sequence of cards.",
+    "imageUrl": "cards/lenormand/lenormand_28_man.webp"
+  },
+  "lenormand_29_woman": {
+    "title": "Woman",
+    "deck": "lenormand",
+    "keywords": [
+      "figure",
+      "intuition",
+      "presence"
+    ],
+    "meaning": {
+      "general": "Woman points to receptive role, intuition, key person.",
+      "light": "In the light, this card helps you read signals early and act in time.",
+      "shadow": "In shadow, it can show overreaction, missed context, or a rushed conclusion.",
+      "advice": "Check facts, then take one practical step that matches the sequence of cards."
+    },
+    "fact": "In Lenormand practice, Woman is read through nearby cards rather than in isolation.",
+    "stats": {
+      "luck": 48,
+      "power": 72,
+      "love": 73,
+      "clarity": 53
+    },
+    "detailedDescription": "Woman points to receptive role, intuition, key person. In the light, this card helps you read signals early and act in time. In shadow, it can show overreaction, missed context, or a rushed conclusion. Check facts, then take one practical step that matches the sequence of cards.",
+    "imageUrl": "cards/lenormand/lenormand_29_woman.webp"
+  },
+  "lenormand_30_lily": {
+    "title": "Lily",
+    "deck": "lenormand",
+    "keywords": [
+      "maturity",
+      "ethics",
+      "peace"
+    ],
+    "meaning": {
+      "general": "Lily points to maturity, calm, ethical balance.",
+      "light": "In the light, this card helps you read signals early and act in time.",
+      "shadow": "In shadow, it can show overreaction, missed context, or a rushed conclusion.",
+      "advice": "Check facts, then take one practical step that matches the sequence of cards."
+    },
+    "fact": "In Lenormand practice, Lily is read through nearby cards rather than in isolation.",
+    "stats": {
+      "luck": 54,
+      "power": 40,
+      "love": 38,
+      "clarity": 62
+    },
+    "detailedDescription": "Lily points to maturity, calm, ethical balance. In the light, this card helps you read signals early and act in time. In shadow, it can show overreaction, missed context, or a rushed conclusion. Check facts, then take one practical step that matches the sequence of cards.",
+    "imageUrl": "cards/lenormand/lenormand_30_lily.webp"
+  },
+  "lenormand_31_sun": {
+    "title": "Sun",
+    "deck": "lenormand",
+    "keywords": [
+      "success",
+      "energy",
+      "clarity"
+    ],
+    "meaning": {
+      "general": "Sun points to success, vitality, visible progress.",
+      "light": "In the light, this card helps you read signals early and act in time.",
+      "shadow": "In shadow, it can show overreaction, missed context, or a rushed conclusion.",
+      "advice": "Check facts, then take one practical step that matches the sequence of cards."
+    },
+    "fact": "In Lenormand practice, Sun is read through nearby cards rather than in isolation.",
+    "stats": {
+      "luck": 60,
+      "power": 48,
+      "love": 45,
+      "clarity": 71
+    },
+    "detailedDescription": "Sun points to success, vitality, visible progress. In the light, this card helps you read signals early and act in time. In shadow, it can show overreaction, missed context, or a rushed conclusion. Check facts, then take one practical step that matches the sequence of cards.",
+    "imageUrl": "cards/lenormand/lenormand_31_sun.webp"
+  },
+  "lenormand_32_moon": {
+    "title": "Moon",
+    "deck": "lenormand",
+    "keywords": [
+      "emotion",
+      "reputation",
+      "rhythm"
+    ],
+    "meaning": {
+      "general": "Moon points to emotions, recognition, intuition.",
+      "light": "In the light, this card helps you read signals early and act in time.",
+      "shadow": "In shadow, it can show overreaction, missed context, or a rushed conclusion.",
+      "advice": "Check facts, then take one practical step that matches the sequence of cards."
+    },
+    "fact": "In Lenormand practice, Moon is read through nearby cards rather than in isolation.",
+    "stats": {
+      "luck": 66,
+      "power": 56,
+      "love": 52,
+      "clarity": 44
+    },
+    "detailedDescription": "Moon points to emotions, recognition, intuition. In the light, this card helps you read signals early and act in time. In shadow, it can show overreaction, missed context, or a rushed conclusion. Check facts, then take one practical step that matches the sequence of cards.",
+    "imageUrl": "cards/lenormand/lenormand_32_moon.webp"
+  },
+  "lenormand_33_key": {
+    "title": "Key",
+    "deck": "lenormand",
+    "keywords": [
+      "answer",
+      "open",
+      "certainty"
+    ],
+    "meaning": {
+      "general": "Key points to solution, access, certainty.",
+      "light": "In the light, this card helps you read signals early and act in time.",
+      "shadow": "In shadow, it can show overreaction, missed context, or a rushed conclusion.",
+      "advice": "Check facts, then take one practical step that matches the sequence of cards."
+    },
+    "fact": "In Lenormand practice, Key is read through nearby cards rather than in isolation.",
+    "stats": {
+      "luck": 72,
+      "power": 64,
+      "love": 59,
+      "clarity": 53
+    },
+    "detailedDescription": "Key points to solution, access, certainty. In the light, this card helps you read signals early and act in time. In shadow, it can show overreaction, missed context, or a rushed conclusion. Check facts, then take one practical step that matches the sequence of cards.",
+    "imageUrl": "cards/lenormand/lenormand_33_key.webp"
+  },
+  "lenormand_34_fish": {
+    "title": "Fish",
+    "deck": "lenormand",
+    "keywords": [
+      "money",
+      "flow",
+      "freedom"
+    ],
+    "meaning": {
+      "general": "Fish points to flow, money, independent movement.",
+      "light": "In the light, this card helps you read signals early and act in time.",
+      "shadow": "In shadow, it can show overreaction, missed context, or a rushed conclusion.",
+      "advice": "Check facts, then take one practical step that matches the sequence of cards."
+    },
+    "fact": "In Lenormand practice, Fish is read through nearby cards rather than in isolation.",
+    "stats": {
+      "luck": 78,
+      "power": 72,
+      "love": 66,
+      "clarity": 62
+    },
+    "detailedDescription": "Fish points to flow, money, independent movement. In the light, this card helps you read signals early and act in time. In shadow, it can show overreaction, missed context, or a rushed conclusion. Check facts, then take one practical step that matches the sequence of cards.",
+    "imageUrl": "cards/lenormand/lenormand_34_fish.webp"
+  },
+  "lenormand_35_anchor": {
+    "title": "Anchor",
+    "deck": "lenormand",
+    "keywords": [
+      "stability",
+      "work",
+      "long-term"
+    ],
+    "meaning": {
+      "general": "Anchor points to stability, commitment, long hold.",
+      "light": "In the light, this card helps you read signals early and act in time.",
+      "shadow": "In shadow, it can show overreaction, missed context, or a rushed conclusion.",
+      "advice": "Check facts, then take one practical step that matches the sequence of cards."
+    },
+    "fact": "In Lenormand practice, Anchor is read through nearby cards rather than in isolation.",
+    "stats": {
+      "luck": 42,
+      "power": 40,
+      "love": 73,
+      "clarity": 71
+    },
+    "detailedDescription": "Anchor points to stability, commitment, long hold. In the light, this card helps you read signals early and act in time. In shadow, it can show overreaction, missed context, or a rushed conclusion. Check facts, then take one practical step that matches the sequence of cards.",
+    "imageUrl": "cards/lenormand/lenormand_35_anchor.webp"
+  },
+  "lenormand_36_cross": {
+    "title": "Cross",
+    "deck": "lenormand",
+    "keywords": [
+      "burden",
+      "fate",
+      "meaning"
+    ],
+    "meaning": {
+      "general": "Cross points to burden, meaning, sacred test.",
+      "light": "In the light, this card helps you read signals early and act in time.",
+      "shadow": "In shadow, it can show overreaction, missed context, or a rushed conclusion.",
+      "advice": "Check facts, then take one practical step that matches the sequence of cards."
+    },
+    "fact": "In Lenormand practice, Cross is read through nearby cards rather than in isolation.",
+    "stats": {
+      "luck": 48,
+      "power": 48,
+      "love": 38,
+      "clarity": 44
+    },
+    "detailedDescription": "Cross points to burden, meaning, sacred test. In the light, this card helps you read signals early and act in time. In shadow, it can show overreaction, missed context, or a rushed conclusion. Check facts, then take one practical step that matches the sequence of cards.",
+    "imageUrl": "cards/lenormand/lenormand_36_cross.webp"
   }
 }

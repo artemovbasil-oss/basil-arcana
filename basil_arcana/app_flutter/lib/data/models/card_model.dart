@@ -119,8 +119,8 @@ class CardDto {
     final fact = _stringFromJson(json['fact']).isNotEmpty
         ? _stringFromJson(json['fact'])
         : _stringFromJson(json['funFact']);
-    final deckId = deckIdFromString(json['deck'] as String?) ??
-        _deckIdFromCardId(id);
+    final deckId =
+        deckIdFromString(json['deck'] as String?) ?? _deckIdFromCardId(id);
     return CardDto(
       id: id,
       deckId: deckId,
@@ -228,7 +228,6 @@ class CardModel {
       videoUrl: dto.videoUrl,
     );
   }
-
 }
 
 String? cardVideoUrl(CardModel card, String assetsBaseUrl) {
@@ -327,6 +326,9 @@ class CardStats {
 
 DeckType _deckIdFromCardId(String id) {
   final normalized = canonicalCardId(id);
+  if (normalized.startsWith('lenormand_')) {
+    return DeckType.lenormand;
+  }
   if (normalized.startsWith('wands_')) {
     return DeckType.wands;
   }

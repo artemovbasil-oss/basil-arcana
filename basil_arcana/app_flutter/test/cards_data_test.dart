@@ -46,6 +46,30 @@ void main() {
       expect(cups.length, 14, reason: 'Expected 14 cups cards in $file.');
     }
   });
+
+  test('lenormand deck contains 36 cards per locale', () {
+    const files = [
+      '../cdn/data/cards_en.json',
+      '../cdn/data/cards_ru.json',
+      '../cdn/data/cards_kz.json',
+    ];
+
+    for (final file in files) {
+      final contents = File(file).readAsStringSync();
+      final data = jsonDecode(contents);
+      final entries = _coerceEntries(data);
+      final lenormand = entries.where((entry) {
+        final deck = entry['deck'] as String?;
+        final id = entry['id'] as String? ?? '';
+        return deck == 'lenormand' || id.startsWith('lenormand_');
+      });
+      expect(
+        lenormand.length,
+        36,
+        reason: 'Expected 36 lenormand cards in $file.',
+      );
+    }
+  });
 }
 
 List<Map<String, dynamic>> _coerceEntries(Object? payload) {
@@ -56,13 +80,12 @@ List<Map<String, dynamic>> _coerceEntries(Object? payload) {
     return payload.entries
         .where((entry) => entry.value is Map<String, dynamic>)
         .map((entry) {
-          final value = Map<String, dynamic>.from(
-            entry.value as Map<String, dynamic>,
-          );
-          value['id'] ??= entry.key;
-          return value;
-        })
-        .toList();
+      final value = Map<String, dynamic>.from(
+        entry.value as Map<String, dynamic>,
+      );
+      value['id'] ??= entry.key;
+      return value;
+    }).toList();
   }
   return [];
 }

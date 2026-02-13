@@ -66,12 +66,15 @@
   "deckCups": "Тостағандар",
   "deckSwords": "Қылыштар",
   "deckPentacles": "Пентакльдер",
+  "deckTarotRiderWaite": "Райдер-Уэйт Таро",
+  "deckLenormand": "Ленорман колодасы",
   "deckAllName": "Барлық топтамалар",
   "deckMajorName": "Үлкен аркандар",
   "deckWandsName": "Таяқтар",
   "deckCupsName": "Тостағандар",
   "deckSwordsName": "Қылыштар",
   "deckPentaclesName": "Пентакльдер",
+  "deckLenormandName": "Ленорман",
   "deckDebugLogLabel": "Debug: Таяқтар жолын шығару",
   "homeTagline": "Карталардағы айқындық.",
   "homeSubtitle": "Сұрақ қойып, келесі қадамыңызды айқындайтын желілерді зерттеңіз",
@@ -141,6 +144,9 @@
   "spreadThreeCardSubtitle": "Оқиғаңның қарапайым доғасы. Үш карта — мәнмәтін мен бағыт.",
   "spreadFiveCardTitle": "Бес карта",
   "spreadFiveCardSubtitle": "Жағдайға тереңірек көзқарас. Бес карта — көпқабатты мәнмәтін мен бағыт.",
+  "spreadLenormandOneCardSubtitle": "Қазірге арналған нақты белгі. Бір карта — бір айқын нұсқау.",
+  "spreadLenormandThreeCardSubtitle": "Себептен нәтижеге дейінгі желі. Үш карта — түрткі, даму, жақын нәтиже.",
+  "spreadLenormandFiveCardSubtitle": "Оқиғалардың тірі тізбегі. Бес карта — әр келесісі алдыңғы мағынаны нақтылайды.",
   "spreadFivePosition1": "Жағдайдың мәні",
   "spreadFivePosition2": "Не көмектеседі",
   "spreadFivePosition3": "Не кедергі",
@@ -180,6 +186,18 @@
   "resultSectionArcaneSnapshot": "Аркандық шолу",
   "resultSectionWhy": "Неге бұл оқылым",
   "resultSectionAction": "Әрекет қадамы (келесі 24–72 сағ)",
+  "resultLenormandStep": "Ленорман: {step}/{total} қадам",
+  "@resultLenormandStep": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "resultLenormandBuildsOn": "Осыған сүйенеді",
   "resultReferralTitle": "Ұсыныс бонусы",
   "resultReferralBody": "Жеке сілтемеңді достарыңмен бөліс және сілтеме арқылы келген әр жаңа қолданушы үшін 5 карталық 20 тегін премиум жайылма ал.",
   "resultReferralButton": "Сілтемемен бөлісу",
