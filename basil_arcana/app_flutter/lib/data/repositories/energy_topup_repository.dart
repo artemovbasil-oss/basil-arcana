@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 import '../../core/config/api_config.dart';
 import '../../core/network/telegram_api_client.dart';
 
-enum EnergyPackId { small, medium, full, yearUnlimited }
+enum EnergyPackId { small, medium, full, yearUnlimited, fiveCardsSingle }
 
 extension EnergyPackIdValue on EnergyPackId {
   String get value {
@@ -15,6 +15,7 @@ extension EnergyPackIdValue on EnergyPackId {
       EnergyPackId.medium => 'medium',
       EnergyPackId.full => 'full',
       EnergyPackId.yearUnlimited => 'year_unlimited',
+      EnergyPackId.fiveCardsSingle => 'five_cards_single',
     };
   }
 }

@@ -535,6 +535,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
   List<_ChatItem> _buildBasilMessages(ReadingFlowState state) {
     final aiResult = state.aiResult;
     final l10n = AppLocalizations.of(context)!;
+    final isFiveCardPremium = _isFiveCardPremiumReading(state);
     if (aiResult == null) {
       return <_ChatItem>[
         _ChatItem.basil(
@@ -555,6 +556,17 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
     final sofiaPrefill = _buildSofiaPrefill(aiResult, l10n);
 
     final items = <_ChatItem>[];
+    if (isFiveCardPremium) {
+      items.add(
+        _ChatItem.basil(
+          id: _nextId(),
+          child: _PremiumReadingBadge(
+            title: _premiumTitle(context),
+            subtitle: _premiumSubtitle(context),
+          ),
+        ),
+      );
+    }
     items.add(
       _ChatItem.basil(
         id: _nextId(),
@@ -584,38 +596,77 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
       items.add(
         _ChatItem.basil(
           id: _nextId(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              CardFaceWidget(
-                cardId: drawn.cardId,
-                cardName: drawn.cardName,
-                keywords: drawn.keywords,
-                onCardTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      settings: appRouteSettings(showBackButton: true),
-                      builder: (_) => CardDetailScreen(
+          child: isFiveCardPremium
+              ? _PremiumReadingCard(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CardFaceWidget(
                         cardId: drawn.cardId,
+                        cardName: drawn.cardName,
+                        keywords: drawn.keywords,
+                        onCardTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              settings: appRouteSettings(showBackButton: true),
+                              builder: (_) => CardDetailScreen(
+                                cardId: drawn.cardId,
+                              ),
+                            ),
+                          );
+                        },
                       ),
+                      const SizedBox(height: 12),
+                      Text(
+                        drawn.positionTitle,
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                      ),
+                      const SizedBox(height: 8),
+                      LinkifiedText(
+                        stripSofiaPromo(section?.text ?? '').trim().isEmpty
+                            ? l10n.resultStatusUnexpectedResponse
+                            : stripSofiaPromo(section?.text ?? ''),
+                      ),
+                    ],
+                  ),
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CardFaceWidget(
+                      cardId: drawn.cardId,
+                      cardName: drawn.cardName,
+                      keywords: drawn.keywords,
+                      onCardTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            settings: appRouteSettings(showBackButton: true),
+                            builder: (_) => CardDetailScreen(
+                              cardId: drawn.cardId,
+                            ),
+                          ),
+                        );
+                      },
                     ),
-                  );
-                },
-              ),
-              const SizedBox(height: 12),
-              Text(
-                drawn.positionTitle,
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 8),
-              LinkifiedText(
-                stripSofiaPromo(section?.text ?? '').trim().isEmpty
-                    ? l10n.resultStatusUnexpectedResponse
-                    : stripSofiaPromo(section?.text ?? ''),
-              ),
-            ],
-          ),
+                    const SizedBox(height: 12),
+                    Text(
+                      drawn.positionTitle,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    LinkifiedText(
+                      stripSofiaPromo(section?.text ?? '').trim().isEmpty
+                          ? l10n.resultStatusUnexpectedResponse
+                          : stripSofiaPromo(section?.text ?? ''),
+                    ),
+                  ],
+                ),
         ),
       );
     }
@@ -625,17 +676,35 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
       items.add(
         _ChatItem.basil(
           id: _nextId(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                l10n.resultSectionWhy,
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 8),
-              LinkifiedText(whyText),
-            ],
-          ),
+          child: isFiveCardPremium
+              ? _PremiumReadingCard(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.resultSectionWhy,
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                      ),
+                      const SizedBox(height: 8),
+                      LinkifiedText(whyText),
+                    ],
+                  ),
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.resultSectionWhy,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    LinkifiedText(whyText),
+                  ],
+                ),
         ),
       );
     }
@@ -645,17 +714,35 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
       items.add(
         _ChatItem.basil(
           id: _nextId(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                l10n.resultSectionAction,
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 8),
-              LinkifiedText(actionText),
-            ],
-          ),
+          child: isFiveCardPremium
+              ? _PremiumReadingCard(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.resultSectionAction,
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                      ),
+                      const SizedBox(height: 8),
+                      LinkifiedText(actionText),
+                    ],
+                  ),
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.resultSectionAction,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    LinkifiedText(actionText),
+                  ],
+                ),
         ),
       );
     }
@@ -679,6 +766,38 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
     }
 
     return items;
+  }
+
+  bool _isFiveCardPremiumReading(ReadingFlowState state) {
+    final spreadType = state.spreadType;
+    if (spreadType == SpreadType.five && state.drawnCards.length >= 5) {
+      return true;
+    }
+    final spreadCount =
+        state.spread?.cardsCount ?? state.spread?.positions.length ?? 0;
+    return spreadCount >= 5 && state.drawnCards.length >= 5;
+  }
+
+  String _premiumTitle(BuildContext context) {
+    final code = Localizations.localeOf(context).languageCode;
+    if (code == 'ru') {
+      return 'Премиум разбор на 5 карт';
+    }
+    if (code == 'kk') {
+      return '5 картаға премиум талдау';
+    }
+    return 'Premium 5-card reading';
+  }
+
+  String _premiumSubtitle(BuildContext context) {
+    final code = Localizations.localeOf(context).languageCode;
+    if (code == 'ru') {
+      return 'Слой за слоем: причины, динамика и точный вектор действия.';
+    }
+    if (code == 'kk') {
+      return 'Қабат бойынша: себеп, динамика және нақты әрекет векторы.';
+    }
+    return 'Layer by layer: causes, dynamics, and a precise next-step vector.';
   }
 
   Widget _buildChatItem(_ChatItem item, ReadingFlowState state) {
@@ -1258,6 +1377,93 @@ class _ActionBar extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _PremiumReadingBadge extends StatelessWidget {
+  const _PremiumReadingBadge({
+    required this.title,
+    required this.subtitle,
+  });
+
+  final String title;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF2C2438),
+            Color(0xFF43305A),
+            Color(0xFF5A3C7A),
+          ],
+        ),
+        border: Border.all(color: const Color(0xFFC39CFF).withOpacity(0.6)),
+        boxShadow: [
+          BoxShadow(
+            color: colorScheme.primary.withOpacity(0.2),
+            blurRadius: 16,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            subtitle,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Colors.white.withOpacity(0.88),
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PremiumReadingCard extends StatelessWidget {
+  const _PremiumReadingCard({
+    required this.child,
+  });
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0x402E273B),
+            Color(0x403A2E4D),
+          ],
+        ),
+        border: Border.all(color: const Color(0xFFAE7EFF).withOpacity(0.35)),
+      ),
+      child: child,
     );
   }
 }

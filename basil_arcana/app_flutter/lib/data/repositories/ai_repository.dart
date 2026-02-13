@@ -264,6 +264,8 @@ class AiRepository {
     final startTimestamp = DateTime.now().toIso8601String();
     final stopwatch = Stopwatch()..start();
     final totalCards = drawnCards.length;
+    final spreadCardCount = spread.cardsCount ?? spread.positions.length;
+    final isFiveCardSpread = spreadCardCount >= 5 || totalCards >= 5;
     final promptQuestion = _composeReadingPromptQuestion(
       question: question,
       languageCode: languageCode,
@@ -272,11 +274,18 @@ class AiRepository {
       drawnCards: drawnCards,
     );
     final responseConstraints = mode == ReadingMode.fast
-        ? {
-            'tldrMaxChars': 180,
-            'sectionMaxChars': 340,
-            'actionMaxChars': 220,
-          }
+        ? isFiveCardSpread
+            ? {
+                'tldrMaxChars': 260,
+                'sectionMaxChars': 520,
+                'whyMaxChars': 560,
+                'actionMaxChars': 280,
+              }
+            : {
+                'tldrMaxChars': 180,
+                'sectionMaxChars': 340,
+                'actionMaxChars': 220,
+              }
         : {
             'tldrMaxChars': 220,
             'sectionMaxChars': 700,
@@ -1142,16 +1151,22 @@ class AiRepository {
         .where((title) => title.isNotEmpty)
         .take(5)
         .join(', ');
+    final spreadCardCount = spread.cardsCount ?? spread.positions.length;
+    final isFiveCardSpread = spreadCardCount >= 5 || drawnCards.length >= 5;
 
     if (normalizedLanguage == 'ru') {
       final depthLine = mode == ReadingMode.deep ||
               mode == ReadingMode.detailsRelationshipsCareer
           ? 'Объясни причинно-следственные связи и внутренние мотивы, а не только итог.'
           : 'Дай прямой и практичный ответ уже в первых строках.';
+      final premiumDepthLine = isFiveCardSpread
+          ? 'Это премиум-расклад на 5 карт: синтезируй все позиции в единую карту ситуации, подчеркни скрытые связи между картами и добавь более детальный практический разбор.'
+          : '';
       return '''
 Фокус запроса пользователя: "$focus".
 Ответ должен быть адресным и персональным: напрямую свяжи выводы с вопросом пользователя, позициями расклада ($positions) и картами ($cardNames).
 $depthLine
+$premiumDepthLine
 Избегай общих фраз и повторов. В конце дай 1-2 конкретных шага, что делать дальше именно по этому запросу.''';
     }
 
@@ -1160,10 +1175,14 @@ $depthLine
               mode == ReadingMode.detailsRelationshipsCareer
           ? 'Себеп-салдарды және ішкі уәждерді ашып түсіндір.'
           : 'Жауаптың басында-ақ нақты практикалық бағыт бер.';
+      final premiumDepthLine = isFiveCardSpread
+          ? 'Бұл 5 карталық премиум жайылма: барлық позицияны біртұтас логикаға біріктір, карталар арасындағы жасырын байланыстарды ашып, практикалық талдауды тереңдет.'
+          : '';
       return '''
 Пайдаланушы сұрағының фокусы: "$focus".
 Жауап жеке әрі нысаналы болсын: қорытындыны сұрақпен, жайылма позицияларымен ($positions) және карталармен ($cardNames) тікелей байланыстыр.
 $depthLine
+$premiumDepthLine
 Жалпылама, шаблон тіркестерден қаш. Соңында осы сұраққа сай 1-2 нақты қадам ұсын.''';
     }
 
@@ -1171,10 +1190,14 @@ $depthLine
             mode == ReadingMode.detailsRelationshipsCareer
         ? 'Explain cause-and-effect and inner drivers, not only conclusions.'
         : 'Give a direct, practical answer in the opening lines.';
+    final premiumDepthLine = isFiveCardSpread
+        ? 'This is a premium 5-card spread: synthesize all positions into one coherent narrative, show hidden links between cards, and provide a more detailed practical breakdown.'
+        : '';
     return '''
 User focus: "$focus".
 Make the reading specific and personal: tie conclusions directly to the question, spread positions ($positions), and drawn cards ($cardNames).
 $depthLine
+$premiumDepthLine
 Avoid generic filler and repetition. Finish with 1-2 concrete next steps tailored to this question.''';
   }
 

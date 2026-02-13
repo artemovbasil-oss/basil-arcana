@@ -7,9 +7,11 @@ import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 import '../../core/config/assets_config.dart';
 import '../../core/config/diagnostics.dart';
 import '../../core/navigation/app_route_config.dart';
+import '../../core/telegram/telegram_bridge.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/app_top_bar.dart';
 import '../../core/widgets/data_load_error.dart';
+import '../../data/repositories/energy_topup_repository.dart';
 import '../settings/settings_screen.dart';
 import '../../data/models/app_enums.dart';
 import '../../data/models/spread_model.dart';
@@ -171,7 +173,7 @@ SpreadModel? _findSpread(
   return null;
 }
 
-class _SpreadOptionCard extends ConsumerWidget {
+class _SpreadOptionCard extends ConsumerStatefulWidget {
   const _SpreadOptionCard({
     required this.spread,
     required this.spreadType,
@@ -187,35 +189,94 @@ class _SpreadOptionCard extends ConsumerWidget {
   final Widget animation;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_SpreadOptionCard> createState() => _SpreadOptionCardState();
+}
+
+class _SpreadOptionCardState extends ConsumerState<_SpreadOptionCard> {
+  bool _isUnlocking = false;
+
+  Future<void> _openSpread() async {
+    ref
+        .read(readingFlowControllerProvider.notifier)
+        .selectSpread(widget.spread, widget.spreadType);
+    if (!mounted) {
+      return;
+    }
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        settings: appRouteSettings(showBackButton: true),
+        builder: (_) => const ShuffleScreen(),
+      ),
+    );
+  }
+
+  Future<void> _handleTap() async {
+    if (_isUnlocking) {
+      return;
+    }
+    if (widget.spreadType != SpreadType.five) {
+      await _openSpread();
+      return;
+    }
+
+    final energy = ref.read(energyProvider);
+    final hasPremiumAccess = energy.isUnlimited || energy.promoCodeActive;
+    if (hasPremiumAccess) {
+      await _openSpread();
+      return;
+    }
+
+    setState(() {
+      _isUnlocking = true;
+    });
+    final unlocked = await _showFiveCardsPremiumModal(context, ref);
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _isUnlocking = false;
+    });
+    if (unlocked) {
+      await _openSpread();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
+    final isFiveCardsPremium = widget.spreadType == SpreadType.five;
     return InkWell(
       borderRadius: BorderRadius.circular(26),
-      onTap: () {
-        ref
-            .read(readingFlowControllerProvider.notifier)
-            .selectSpread(spread, spreadType);
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            settings: appRouteSettings(showBackButton: true),
-            builder: (_) => const ShuffleScreen(),
-          ),
-        );
-      },
+      onTap: _handleTap,
       child: Ink(
         decoration: BoxDecoration(
-          color: theme.colorScheme.surface,
+          gradient: isFiveCardsPremium
+              ? const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Color(0xFF23212A),
+                    Color(0xFF302A39),
+                    Color(0xFF3F2E52),
+                  ],
+                )
+              : null,
+          color: isFiveCardsPremium ? null : theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(26),
           border: Border.all(
-            color: primary.withOpacity(0.32),
-            width: 1.1,
+            color: isFiveCardsPremium
+                ? const Color(0xFFB987F9).withOpacity(0.62)
+                : primary.withOpacity(0.32),
+            width: isFiveCardsPremium ? 1.2 : 1.1,
           ),
           boxShadow: [
             BoxShadow(
-              color: primary.withOpacity(0.14),
-              blurRadius: 20,
+              color: isFiveCardsPremium
+                  ? const Color(0xFF9A67F2).withOpacity(0.24)
+                  : primary.withOpacity(0.14),
+              blurRadius: isFiveCardsPremium ? 24 : 20,
               offset: const Offset(0, 10),
             ),
           ],
@@ -230,18 +291,42 @@ class _SpreadOptionCard extends ConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      title,
+                      widget.title,
                       style: AppTextStyles.title(context)
                           .copyWith(color: theme.colorScheme.onSurface),
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      subtitle,
+                      widget.subtitle,
                       style: AppTextStyles.body(context).copyWith(
                         color: theme.colorScheme.onSurface.withOpacity(0.7),
                         height: 1.35,
                       ),
                     ),
+                    if (isFiveCardsPremium) ...[
+                      const SizedBox(height: 10),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF9B5CFF).withOpacity(0.22),
+                          borderRadius: BorderRadius.circular(999),
+                          border: Border.all(
+                            color: const Color(0xFFB987F9).withOpacity(0.65),
+                            width: 0.8,
+                          ),
+                        ),
+                        child: Text(
+                          _FiveCardsPremiumCopy.resolve(context).premiumTag,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: const Color(0xFFDCC3FF),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -249,12 +334,278 @@ class _SpreadOptionCard extends ConsumerWidget {
               SizedBox(
                 width: 140,
                 height: 140,
-                child: animation,
+                child: widget.animation,
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+Future<bool> _showFiveCardsPremiumModal(
+    BuildContext context, WidgetRef ref) async {
+  final copy = _FiveCardsPremiumCopy.resolve(context);
+  final l10n = AppLocalizations.of(context)!;
+  final granted = await showModalBottomSheet<bool>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Theme.of(context).colorScheme.surface,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+    ),
+    builder: (sheetContext) {
+      var processing = false;
+      return StatefulBuilder(
+        builder: (statefulContext, setState) {
+          return SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 42,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Theme.of(sheetContext)
+                            .colorScheme
+                            .outlineVariant
+                            .withOpacity(0.8),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          copy.title,
+                          style: Theme.of(sheetContext).textTheme.titleLarge,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: processing
+                            ? null
+                            : () => Navigator.of(sheetContext).pop(false),
+                        icon: const Icon(Icons.close),
+                        visualDensity: VisualDensity.compact,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    copy.body,
+                    style: Theme.of(sheetContext).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    copy.scope,
+                    style: Theme.of(sheetContext).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(sheetContext)
+                              .colorScheme
+                              .onSurface
+                              .withOpacity(0.72),
+                        ),
+                  ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: processing
+                          ? null
+                          : () async {
+                              setState(() {
+                                processing = true;
+                              });
+                              final ok = await _purchaseFiveCardsAccess(
+                                context: context,
+                                ref: ref,
+                                l10n: l10n,
+                              );
+                              if (!statefulContext.mounted) {
+                                return;
+                              }
+                              setState(() {
+                                processing = false;
+                              });
+                              if (ok) {
+                                Navigator.of(sheetContext).pop(true);
+                              }
+                            },
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size.fromHeight(54),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 18,
+                          vertical: 14,
+                        ),
+                        backgroundColor:
+                            Theme.of(sheetContext).colorScheme.primary,
+                        foregroundColor:
+                            Theme.of(sheetContext).colorScheme.onPrimary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                        textStyle: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              copy.buyButton,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(sheetContext)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.w700),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            '1 ⭐',
+                            style: Theme.of(sheetContext)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(fontWeight: FontWeight.w800),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    },
+  );
+  return granted == true;
+}
+
+Future<bool> _purchaseFiveCardsAccess({
+  required BuildContext context,
+  required WidgetRef ref,
+  required AppLocalizations l10n,
+}) async {
+  if (!TelegramBridge.isAvailable) {
+    if (!context.mounted) {
+      return false;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.energyTopUpOnlyInTelegram)),
+    );
+    return false;
+  }
+  try {
+    final topUpRepo = ref.read(energyTopUpRepositoryProvider);
+    final invoice = await topUpRepo.createInvoice(EnergyPackId.fiveCardsSingle);
+    final status = await TelegramBridge.openInvoice(invoice.invoiceLink);
+    try {
+      await topUpRepo.confirmInvoiceResult(
+        payload: invoice.payload,
+        status: status,
+      );
+    } catch (_) {}
+    if (!context.mounted) {
+      return false;
+    }
+    switch (status) {
+      case 'paid':
+        return true;
+      case 'cancelled':
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.energyTopUpPaymentCancelled)),
+        );
+        return false;
+      case 'pending':
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.energyTopUpPaymentPending)),
+        );
+        return false;
+      case 'failed':
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.energyTopUpPaymentFailed)),
+        );
+        return false;
+      default:
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.energyTopUpServiceUnavailable)),
+        );
+        return false;
+    }
+  } on EnergyTopUpRepositoryException {
+    if (!context.mounted) {
+      return false;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.energyTopUpServiceUnavailable)),
+    );
+    return false;
+  } catch (_) {
+    if (!context.mounted) {
+      return false;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.energyTopUpServiceUnavailable)),
+    );
+    return false;
+  }
+}
+
+class _FiveCardsPremiumCopy {
+  const _FiveCardsPremiumCopy({
+    required this.title,
+    required this.body,
+    required this.scope,
+    required this.buyButton,
+    required this.premiumTag,
+  });
+
+  final String title;
+  final String body;
+  final String scope;
+  final String buyButton;
+  final String premiumTag;
+
+  static _FiveCardsPremiumCopy resolve(BuildContext context) {
+    final code = Localizations.localeOf(context).languageCode;
+    if (code == 'ru') {
+      return const _FiveCardsPremiumCopy(
+        title: 'Премиум расклад на 5 карт',
+        body:
+            'Этот расклад открывает глубинный слой истории: пять позиций показывают скрытые причины, баланс сил и лучший вектор действий.',
+        scope:
+            'Для владельцев безлимитной подписки на 1 год и пользователей с промокодом LUCY100 доступ открыт. Разовый доступ: 1⭐ за расклад.',
+        buyButton: 'Купить доступ',
+        premiumTag: 'Премиум',
+      );
+    }
+    if (code == 'kk') {
+      return const _FiveCardsPremiumCopy(
+        title: '5 картаға премиум жайылма',
+        body:
+            'Бұл формат жағдайды терең ашады: бес позиция жасырын себептерді, күштердің тепе-теңдігін және ең дәл келесі қадамды көрсетеді.',
+        scope:
+            '1 жылдық шексіз жазылымы бар немесе LUCY100 промокодын енгізгендерге ашық. Бір реттік кіру: 1⭐.',
+        buyButton: 'Қолжетімділікті сатып алу',
+        premiumTag: 'Премиум',
+      );
+    }
+    return const _FiveCardsPremiumCopy(
+      title: 'Premium five-card spread',
+      body:
+          'This spread opens a deeper layer of your story: five positions reveal hidden causes, the balance of forces, and your most practical next move.',
+      scope:
+          'Included in the 1-year unlimited plan and available to users with promo code LUCY100. Single access costs 1⭐ per spread.',
+      buyButton: 'Buy access',
+      premiumTag: 'Premium',
     );
   }
 }

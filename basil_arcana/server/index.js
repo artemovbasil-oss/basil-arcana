@@ -232,12 +232,20 @@ const STARS_PACK_SMALL_XTR = Number(process.env.STARS_PACK_SMALL_XTR || 25);
 const STARS_PACK_MEDIUM_XTR = Number(process.env.STARS_PACK_MEDIUM_XTR || 45);
 const STARS_PACK_FULL_XTR = Number(process.env.STARS_PACK_FULL_XTR || 75);
 const STARS_PACK_YEAR_XTR = Number(process.env.STARS_PACK_YEAR_XTR || 6990);
+const STARS_PACK_FIVE_CARDS_SINGLE_XTR = Number(
+  process.env.STARS_PACK_FIVE_CARDS_SINGLE_XTR || 1
+);
 
 const ENERGY_STARS_PACKS = {
   small: { energyAmount: 25, starsAmount: STARS_PACK_SMALL_XTR, grantType: 'energy' },
   medium: { energyAmount: 50, starsAmount: STARS_PACK_MEDIUM_XTR, grantType: 'energy' },
   full: { energyAmount: 100, starsAmount: STARS_PACK_FULL_XTR, grantType: 'energy' },
-  year_unlimited: { energyAmount: 0, starsAmount: STARS_PACK_YEAR_XTR, grantType: 'unlimited_year' }
+  year_unlimited: { energyAmount: 0, starsAmount: STARS_PACK_YEAR_XTR, grantType: 'unlimited_year' },
+  five_cards_single: {
+    energyAmount: 0,
+    starsAmount: STARS_PACK_FIVE_CARDS_SINGLE_XTR,
+    grantType: 'five_cards_single'
+  }
 };
 
 function normalizeConsentDecision(value) {
@@ -644,10 +652,14 @@ app.post('/api/payments/stars/invoice', telegramAuthMiddleware, async (req, res)
   const title =
     pack.grantType === 'unlimited_year'
       ? 'Unlimited energy for 1 year'
+      : pack.grantType === 'five_cards_single'
+      ? 'Premium five-card reading'
       : `Energy +${pack.energyAmount}%`;
   const description =
     pack.grantType === 'unlimited_year'
       ? 'Unlock unlimited oracle energy for 365 days'
+      : pack.grantType === 'five_cards_single'
+      ? 'Unlock one premium five-card spread'
       : `Top up oracle energy by ${pack.energyAmount}%`;
 
   try {

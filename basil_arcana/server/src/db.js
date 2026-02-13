@@ -295,21 +295,25 @@ async function confirmInvoiceStatus({ telegramUserId, payload, status }) {
     let grantApplied = false;
     if (status === 'paid' && !alreadyApplied) {
       const grantType = String(row.grant_type || 'energy');
-      const energyAmount = Number(row.energy_amount || 0);
+      const energyAmount = Math.max(0, Number(row.energy_amount || 0));
+      const updatesEnergyState =
+        grantType === 'energy' || grantType === 'unlimited_year';
 
-      await client.query(
-        `
-        INSERT INTO user_energy_state (telegram_user_id, total_energy_granted, unlimited_until, updated_at)
-        VALUES ($1, $2, NULL, NOW())
-        ON CONFLICT (telegram_user_id)
-        DO UPDATE SET
-          total_energy_granted = user_energy_state.total_energy_granted + EXCLUDED.total_energy_granted,
-          updated_at = NOW();
-        `,
-        [telegramUserId, Math.max(0, energyAmount)]
-      );
+      if (updatesEnergyState) {
+        await client.query(
+          `
+          INSERT INTO user_energy_state (telegram_user_id, total_energy_granted, unlimited_until, updated_at)
+          VALUES ($1, $2, NULL, NOW())
+          ON CONFLICT (telegram_user_id)
+          DO UPDATE SET
+            total_energy_granted = user_energy_state.total_energy_granted + EXCLUDED.total_energy_granted,
+            updated_at = NOW();
+          `,
+          [telegramUserId, energyAmount]
+        );
+      }
 
-      if (grantType === 'unlimited_year') {
+      if (grantType === 'unlimited_year' && updatesEnergyState) {
         await client.query(
           `
           UPDATE user_energy_state
@@ -336,8 +340,12 @@ async function confirmInvoiceStatus({ telegramUserId, payload, status }) {
         `,
         [
           telegramUserId,
-          Math.max(0, energyAmount),
-          grantType === 'unlimited_year' ? 'grant_unlimited_year' : 'grant_energy_topup',
+          updatesEnergyState ? energyAmount : 0,
+          grantType === 'unlimited_year'
+            ? 'grant_unlimited_year'
+            : grantType === 'five_cards_single'
+            ? 'grant_five_cards_single'
+            : 'grant_energy_topup',
           payload,
           JSON.stringify({
             grantType,
