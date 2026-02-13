@@ -41,9 +41,9 @@
   </script>
   <script>
     function resolveBuildId() {
-      var buildId = '{{BUILD_ID}}';
-      if (!buildId || buildId === '{{BUILD_ID}}' || buildId === 'null') {
-        buildId = 'dev';
+      var buildId = '__BUILD_ID__';
+      if (!buildId || buildId === '__BUILD_ID__' || buildId === 'null') {
+        buildId = String(Date.now());
       }
       return String(buildId).trim() || 'dev';
     }

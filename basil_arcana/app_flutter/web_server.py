@@ -89,6 +89,7 @@ class WebAppHandler(SimpleHTTPRequestHandler):
 
         version = self._effective_app_version()
         text = text.replace("{{BUILD_ID}}", version)
+        text = text.replace("__BUILD_ID__", version)
         text = text.replace("{{flutter_service_worker_version}}", version)
         body = text.encode("utf-8")
 

@@ -27,6 +27,7 @@ app_version = sys.argv[2]
 text = index_path.read_text(encoding='utf-8')
 
 text = text.replace("{{BUILD_ID}}", app_version)
+text = text.replace("__BUILD_ID__", app_version)
 text = text.replace("{{flutter_service_worker_version}}", app_version)
 
 def ensure_versioned(content: str, asset: str, version: str) -> str:

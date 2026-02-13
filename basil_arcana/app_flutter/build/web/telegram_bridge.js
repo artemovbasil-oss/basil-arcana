@@ -167,4 +167,30 @@
       return false;
     }
   };
+
+  window.tgOpenInvoice = function (url) {
+    return new Promise(function (resolve) {
+      var webApp = getWebApp();
+      if (!webApp || typeof webApp.openInvoice !== 'function') {
+        resolve('unsupported');
+        return;
+      }
+      var invoiceUrl = String(url || '').trim();
+      if (!invoiceUrl) {
+        resolve('failed');
+        return;
+      }
+      try {
+        webApp.openInvoice(invoiceUrl, function (status) {
+          if (typeof status === 'string' && status.trim()) {
+            resolve(status);
+            return;
+          }
+          resolve('unknown');
+        });
+      } catch (error) {
+        resolve('failed');
+      }
+    });
+  };
 })();
