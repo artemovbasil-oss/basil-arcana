@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://www.basilarcana.com/sitemap.xml
+Host: www.basilarcana.com

@@ -8,6 +8,36 @@
       name="description"
       content="Basil's Arcana — Telegram bot, Sofia tarot/astrology readings, and immersive mini app."
     />
+    <meta
+      name="keywords"
+      content="таро, tarot, telegram bot, mini app, расклад таро, таролог софия, basil arcana"
+    />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="theme-color" content="#121317" />
+    <link rel="canonical" href="https://www.basilarcana.com/" />
+    <link rel="alternate" hreflang="ru" href="https://www.basilarcana.com/?lang=ru" />
+    <link rel="alternate" hreflang="kk" href="https://www.basilarcana.com/?lang=kz" />
+    <link rel="alternate" hreflang="en" href="https://www.basilarcana.com/?lang=en" />
+    <link rel="alternate" hreflang="x-default" href="https://www.basilarcana.com/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="BasilArcana" />
+    <meta property="og:title" content="BasilArcana — The Real Magic" />
+    <meta
+      property="og:description"
+      content="Telegram-first tarot experience: bot, mini app, and personal readings with Sofia."
+    />
+    <meta property="og:url" content="https://www.basilarcana.com/" />
+    <meta property="og:image" content="https://cdn.basilarcana.com/sofia/sofia.webp" />
+    <meta property="og:locale" content="ru_RU" />
+    <meta property="og:locale:alternate" content="en_US" />
+    <meta property="og:locale:alternate" content="kk_KZ" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="BasilArcana — The Real Magic" />
+    <meta
+      name="twitter:description"
+      content="Telegram-first tarot experience: bot, mini app, and personal readings with Sofia."
+    />
+    <meta name="twitter:image" content="https://cdn.basilarcana.com/sofia/sofia.webp" />
     <link
       rel="icon"
       type="image/svg+xml"
@@ -560,6 +590,44 @@
       gtag("config", "AW-16800290711");
       gtag("config", "G-YGJ2JRCS49");
     </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://www.basilarcana.com/#org",
+            "name": "BasilArcana",
+            "url": "https://www.basilarcana.com/",
+            "logo": "https://cdn.basilarcana.com/sofia/sofia.webp",
+            "sameAs": [
+              "https://t.me/tarot_arkana_bot",
+              "https://t.me/SofiaKnoxx"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.basilarcana.com/#website",
+            "url": "https://www.basilarcana.com/",
+            "name": "BasilArcana",
+            "inLanguage": ["ru", "en", "kk"],
+            "publisher": {
+              "@id": "https://www.basilarcana.com/#org"
+            }
+          },
+          {
+            "@type": "WebPage",
+            "@id": "https://www.basilarcana.com/#webpage",
+            "url": "https://www.basilarcana.com/",
+            "name": "BasilArcana — The Real Magic",
+            "description": "Telegram-first tarot experience: bot, mini app, and personal readings with Sofia.",
+            "isPartOf": {
+              "@id": "https://www.basilarcana.com/#website"
+            }
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
     <div class="stars"></div>
@@ -716,6 +784,16 @@
         });
       }
 
+      function updateLangInUrl(lang) {
+        const url = new URL(window.location.href);
+        if (lang === "ru") {
+          url.searchParams.delete("lang");
+        } else {
+          url.searchParams.set("lang", lang);
+        }
+        window.history.replaceState({}, "", url.toString());
+      }
+
       let activeLang = "ru";
       let langSwitchInProgress = false;
 
@@ -728,6 +806,7 @@
         window.setTimeout(() => {
           applyLang(nextLang);
           activeLang = nextLang;
+          updateLangInUrl(activeLang);
           requestAnimationFrame(() => {
             document.body.classList.remove("lang-switching");
             langSwitchInProgress = false;
@@ -768,7 +847,10 @@
       }
 
       setupAnalyticsEvents();
-      applyLang("ru");
+      const initialLang = new URLSearchParams(window.location.search).get("lang");
+      const resolvedLang = initialLang && copy[initialLang] ? initialLang : "ru";
+      applyLang(resolvedLang);
+      activeLang = resolvedLang;
     </script>
   </body>
 </html>
