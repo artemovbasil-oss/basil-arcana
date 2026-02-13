@@ -227,6 +227,14 @@ class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
                                   if (!mounted) {
                                     return;
                                   }
+                                  if (cards.isEmpty) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(l10n.cardsLoadError),
+                                      ),
+                                    );
+                                    return;
+                                  }
                                   await ref
                                       .read(
                                         readingFlowControllerProvider.notifier,
@@ -234,6 +242,15 @@ class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
                                       .drawAndGenerate(cards);
                                   final latest =
                                       ref.read(readingFlowControllerProvider);
+                                  if (latest.errorMessage != null &&
+                                      latest.errorMessage!.trim().isNotEmpty) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(latest.errorMessage!),
+                                      ),
+                                    );
+                                    return;
+                                  }
                                   if (latest.aiResult != null ||
                                       latest.drawnCards.isNotEmpty) {
                                     _navigateToResultIfNeeded();

@@ -266,6 +266,16 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       1,
       state.spreadType?.cardCount ?? spread.positions.length,
     );
+    if (cards.length < desiredCount) {
+      state = state.copyWith(
+        isLoading: false,
+        aiResult: null,
+        drawnCards: const [],
+        errorMessage: _l10n().cardsLoadError,
+        clearError: true,
+      );
+      return;
+    }
     final positions = _resolvePositionsForDraw(
       spread,
       desiredCount,

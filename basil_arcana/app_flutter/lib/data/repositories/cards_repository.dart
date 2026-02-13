@@ -92,7 +92,24 @@ class CardsRepository {
         raw = remoteRaw;
       }
     }
-    return _parseCards(raw: raw, deckId: deckId);
+    var cards = _parseCards(raw: raw, deckId: deckId);
+
+    // Safety fallback for newly introduced decks in older app bundles:
+    // if Lenormand is selected but not present locally, force a remote retry.
+    if (deckId == DeckType.lenormand && cards.isEmpty) {
+      final remoteRaw = await _tryLoadRemoteCards(
+        cacheKey: cacheKey,
+        locale: locale,
+      );
+      if (remoteRaw != null) {
+        final remoteCards = _parseCards(raw: remoteRaw, deckId: deckId);
+        if (remoteCards.isNotEmpty) {
+          cards = remoteCards;
+        }
+      }
+    }
+
+    return cards;
   }
 
   Future<String> _loadLocalCards({
