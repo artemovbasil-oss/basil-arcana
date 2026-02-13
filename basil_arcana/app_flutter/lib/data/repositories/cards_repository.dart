@@ -109,6 +109,14 @@ class CardsRepository {
       }
     }
 
+    if (deckId == DeckType.lenormand && cards.isEmpty) {
+      return _buildLenormandFallback(locale);
+    }
+    if (deckId == DeckType.all &&
+        !cards.any((card) => card.deckId == DeckType.lenormand)) {
+      return [...cards, ..._buildLenormandFallback(locale)];
+    }
+
     return cards;
   }
 
@@ -379,3 +387,308 @@ String _stringOrEmpty(Object? value) {
   }
   return '';
 }
+
+List<CardModel> _buildLenormandFallback(Locale locale) {
+  final lang = locale.languageCode.toLowerCase();
+  return _lenormandDefs.map((def) {
+    final title = switch (lang) {
+      'ru' => def.titleRu,
+      'kk' => def.titleKk,
+      _ => def.titleEn,
+    };
+    final keywords = switch (lang) {
+      'ru' => <String>[title, 'последовательность', 'сигнал'],
+      'kk' => <String>[title, 'тізбек', 'белгі'],
+      _ => <String>[title, 'sequence', 'signal'],
+    };
+    final general = switch (lang) {
+      'ru' => '$title указывает на конкретный фактор ситуации прямо сейчас.',
+      'kk' => '$title дәл қазір жағдайға әсер ететін нақты факторды көрсетеді.',
+      _ => '$title points to a concrete factor shaping the situation now.',
+    };
+    final light = switch (lang) {
+      'ru' => 'В светлом проявлении помогает быстро увидеть рабочий вектор.',
+      'kk' => 'Жарық қырында жұмыс істейтін бағытты жылдам көруге көмектеседі.',
+      _ => 'In light, it helps you spot the workable direction quickly.',
+    };
+    final shadow = switch (lang) {
+      'ru' => 'В тени дает поспешность или неверное чтение контекста.',
+      'kk' => 'Көлеңке қырында асығыстық не контексті қате оқу байқалады.',
+      _ => 'In shadow, it can produce haste or a misread of context.',
+    };
+    final advice = switch (lang) {
+      'ru' =>
+        'Сверьте карту с предыдущими: в Ленорман смысл раскрывается цепочкой.',
+      'kk' =>
+        'Алдыңғы карталармен бірге оқыңыз: Ленорманда мағына тізбекпен ашылады.',
+      _ =>
+        'Read it with previous cards: in Lenormand, meaning unfolds as a chain.',
+    };
+    final fact = switch (lang) {
+      'ru' =>
+        'Карты Ленорман читаются как практичные сигналы, а не абстракции.',
+      'kk' =>
+        'Ленорман карталары абстракция емес, практикалық белгі ретінде оқылады.',
+      _ => 'Lenormand cards are read as practical signals, not abstractions.',
+    };
+    final imageUrl =
+        'https://basilarcana-assets.b-cdn.net/cards/lenormand/${def.id}.webp';
+    final videoUrl = def.number <= 18
+        ? 'https://basilarcana-assets.b-cdn.net/video/ln_${def.slug}.mp4'
+        : null;
+
+    return CardModel(
+      id: def.id,
+      deckId: DeckType.lenormand,
+      name: title,
+      keywords: keywords,
+      meaning: CardMeaning(
+        general: general,
+        light: light,
+        shadow: shadow,
+        advice: advice,
+      ),
+      detailedDescription: '$general $light $shadow $advice',
+      funFact: fact,
+      imageUrl: imageUrl,
+      videoUrl: videoUrl,
+    );
+  }).toList(growable: false);
+}
+
+class _LenormandDef {
+  const _LenormandDef({
+    required this.number,
+    required this.slug,
+    required this.titleEn,
+    required this.titleRu,
+    required this.titleKk,
+  });
+
+  final int number;
+  final String slug;
+  final String titleEn;
+  final String titleRu;
+  final String titleKk;
+
+  String get id => 'lenormand_${number.toString().padLeft(2, '0')}_$slug';
+}
+
+const List<_LenormandDef> _lenormandDefs = [
+  _LenormandDef(
+      number: 1,
+      slug: 'rider',
+      titleEn: 'Rider',
+      titleRu: 'Всадник',
+      titleKk: 'Салт аттылы'),
+  _LenormandDef(
+      number: 2,
+      slug: 'clover',
+      titleEn: 'Clover',
+      titleRu: 'Клевер',
+      titleKk: 'Беде'),
+  _LenormandDef(
+      number: 3,
+      slug: 'ship',
+      titleEn: 'Ship',
+      titleRu: 'Корабль',
+      titleKk: 'Кеме'),
+  _LenormandDef(
+      number: 4,
+      slug: 'house',
+      titleEn: 'House',
+      titleRu: 'Дом',
+      titleKk: 'Үй'),
+  _LenormandDef(
+      number: 5,
+      slug: 'tree',
+      titleEn: 'Tree',
+      titleRu: 'Дерево',
+      titleKk: 'Ағаш'),
+  _LenormandDef(
+      number: 6,
+      slug: 'clouds',
+      titleEn: 'Clouds',
+      titleRu: 'Тучи',
+      titleKk: 'Бұлттар'),
+  _LenormandDef(
+      number: 7,
+      slug: 'snake',
+      titleEn: 'Snake',
+      titleRu: 'Змея',
+      titleKk: 'Жылан'),
+  _LenormandDef(
+      number: 8,
+      slug: 'coffin',
+      titleEn: 'Coffin',
+      titleRu: 'Гроб',
+      titleKk: 'Табыт'),
+  _LenormandDef(
+      number: 9,
+      slug: 'bouquet',
+      titleEn: 'Bouquet',
+      titleRu: 'Букет',
+      titleKk: 'Гүл шоғы'),
+  _LenormandDef(
+      number: 10,
+      slug: 'scythe',
+      titleEn: 'Scythe',
+      titleRu: 'Коса',
+      titleKk: 'Орақ'),
+  _LenormandDef(
+      number: 11,
+      slug: 'whip',
+      titleEn: 'Whip',
+      titleRu: 'Метла и Плеть',
+      titleKk: 'Қамшы'),
+  _LenormandDef(
+      number: 12,
+      slug: 'birds',
+      titleEn: 'Birds',
+      titleRu: 'Птицы',
+      titleKk: 'Құстар'),
+  _LenormandDef(
+      number: 13,
+      slug: 'child',
+      titleEn: 'Child',
+      titleRu: 'Ребенок',
+      titleKk: 'Бала'),
+  _LenormandDef(
+      number: 14,
+      slug: 'fox',
+      titleEn: 'Fox',
+      titleRu: 'Лиса',
+      titleKk: 'Түлкі'),
+  _LenormandDef(
+      number: 15,
+      slug: 'bear',
+      titleEn: 'Bear',
+      titleRu: 'Медведь',
+      titleKk: 'Аю'),
+  _LenormandDef(
+      number: 16,
+      slug: 'stars',
+      titleEn: 'Stars',
+      titleRu: 'Звезды',
+      titleKk: 'Жұлдыздар'),
+  _LenormandDef(
+      number: 17,
+      slug: 'stork',
+      titleEn: 'Stork',
+      titleRu: 'Аист',
+      titleKk: 'Ләйлек'),
+  _LenormandDef(
+      number: 18,
+      slug: 'dog',
+      titleEn: 'Dog',
+      titleRu: 'Собака',
+      titleKk: 'Ит'),
+  _LenormandDef(
+      number: 19,
+      slug: 'tower',
+      titleEn: 'Tower',
+      titleRu: 'Башня',
+      titleKk: 'Мұнара'),
+  _LenormandDef(
+      number: 20,
+      slug: 'garden',
+      titleEn: 'Garden',
+      titleRu: 'Сад',
+      titleKk: 'Бақ'),
+  _LenormandDef(
+      number: 21,
+      slug: 'mountain',
+      titleEn: 'Mountain',
+      titleRu: 'Гора',
+      titleKk: 'Тау'),
+  _LenormandDef(
+      number: 22,
+      slug: 'crossroads',
+      titleEn: 'Crossroads',
+      titleRu: 'Развилка',
+      titleKk: 'Жол айырығы'),
+  _LenormandDef(
+      number: 23,
+      slug: 'mice',
+      titleEn: 'Mice',
+      titleRu: 'Мыши',
+      titleKk: 'Тышқандар'),
+  _LenormandDef(
+      number: 24,
+      slug: 'heart',
+      titleEn: 'Heart',
+      titleRu: 'Сердце',
+      titleKk: 'Жүрек'),
+  _LenormandDef(
+      number: 25,
+      slug: 'ring',
+      titleEn: 'Ring',
+      titleRu: 'Кольцо',
+      titleKk: 'Сақина'),
+  _LenormandDef(
+      number: 26,
+      slug: 'book',
+      titleEn: 'Book',
+      titleRu: 'Книга',
+      titleKk: 'Кітап'),
+  _LenormandDef(
+      number: 27,
+      slug: 'letter',
+      titleEn: 'Letter',
+      titleRu: 'Письмо',
+      titleKk: 'Хат'),
+  _LenormandDef(
+      number: 28,
+      slug: 'man',
+      titleEn: 'Man',
+      titleRu: 'Мужчина',
+      titleKk: 'Ер адам'),
+  _LenormandDef(
+      number: 29,
+      slug: 'woman',
+      titleEn: 'Woman',
+      titleRu: 'Женщина',
+      titleKk: 'Әйел'),
+  _LenormandDef(
+      number: 30,
+      slug: 'lily',
+      titleEn: 'Lily',
+      titleRu: 'Лилии',
+      titleKk: 'Лалагүл'),
+  _LenormandDef(
+      number: 31,
+      slug: 'sun',
+      titleEn: 'Sun',
+      titleRu: 'Солнце',
+      titleKk: 'Күн'),
+  _LenormandDef(
+      number: 32,
+      slug: 'moon',
+      titleEn: 'Moon',
+      titleRu: 'Луна',
+      titleKk: 'Ай'),
+  _LenormandDef(
+      number: 33,
+      slug: 'key',
+      titleEn: 'Key',
+      titleRu: 'Ключ',
+      titleKk: 'Кілт'),
+  _LenormandDef(
+      number: 34,
+      slug: 'fish',
+      titleEn: 'Fish',
+      titleRu: 'Рыбы',
+      titleKk: 'Балықтар'),
+  _LenormandDef(
+      number: 35,
+      slug: 'anchor',
+      titleEn: 'Anchor',
+      titleRu: 'Якорь',
+      titleKk: 'Зәкір'),
+  _LenormandDef(
+      number: 36,
+      slug: 'cross',
+      titleEn: 'Cross',
+      titleRu: 'Крест',
+      titleKk: 'Айқыш'),
+];
