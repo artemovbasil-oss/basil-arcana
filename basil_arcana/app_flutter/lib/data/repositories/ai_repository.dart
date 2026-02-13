@@ -1160,7 +1160,7 @@ class AiRepository {
           ? 'Объясни причинно-следственные связи и внутренние мотивы, а не только итог.'
           : 'Дай прямой и практичный ответ уже в первых строках.';
       final premiumDepthLine = isFiveCardSpread
-          ? 'Это премиум-расклад на 5 карт: синтезируй все позиции в единую карту ситуации, подчеркни скрытые связи между картами и добавь более детальный практический разбор.'
+          ? 'Это премиум-расклад на 5 карт: собери целостный сценарий из всех позиций, явно выдели 2-3 ключевых связки между картами и покажи, как каждая связка меняет прогноз. Добавь короткую оценку рисков и возможностей по шкале от низкого к высокому и переведи вывод в конкретный план действий.'
           : '';
       return '''
 Фокус запроса пользователя: "$focus".
@@ -1176,7 +1176,7 @@ $premiumDepthLine
           ? 'Себеп-салдарды және ішкі уәждерді ашып түсіндір.'
           : 'Жауаптың басында-ақ нақты практикалық бағыт бер.';
       final premiumDepthLine = isFiveCardSpread
-          ? 'Бұл 5 карталық премиум жайылма: барлық позицияны біртұтас логикаға біріктір, карталар арасындағы жасырын байланыстарды ашып, практикалық талдауды тереңдет.'
+          ? 'Бұл 5 карталық премиум жайылма: барлық позицияны біртұтас сценарийге біріктір, карталар арасындағы 2-3 негізгі байланысты анық көрсет және әр байланыс болжамға қалай әсер ететінін түсіндір. Тәуекелдер мен мүмкіндіктерді қысқа түрде төменнен жоғарыға дейін бағалап, қорытындыны нақты әрекет жоспарына айналдыр.'
           : '';
       return '''
 Пайдаланушы сұрағының фокусы: "$focus".
@@ -1191,7 +1191,7 @@ $premiumDepthLine
         ? 'Explain cause-and-effect and inner drivers, not only conclusions.'
         : 'Give a direct, practical answer in the opening lines.';
     final premiumDepthLine = isFiveCardSpread
-        ? 'This is a premium 5-card spread: synthesize all positions into one coherent narrative, show hidden links between cards, and provide a more detailed practical breakdown.'
+        ? 'This is a premium 5-card spread: build one coherent scenario across all positions, call out 2-3 pivotal card-to-card links, and explain how each link changes the forecast. Add a brief risk/opportunity estimate from low to high and convert the synthesis into a concrete action plan.'
         : '';
     return '''
 User focus: "$focus".

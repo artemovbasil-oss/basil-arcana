@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
@@ -754,6 +755,19 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
           child: SofiaPromoCard(prefilledMessage: sofiaPrefill),
         ),
       );
+      items.add(
+        _ChatItem.basil(
+          id: _nextId(),
+          child: _ShareWithFriendsCard(
+            title: _shareOfferTitle(context),
+            body: _shareOfferBody(context),
+            buttonLabel: _shareOfferButtonLabel(context),
+            copiedLabel: _shareOfferCopiedLabel(context),
+            shareUrl: _shareOfferUrl,
+            shareMessage: _shareOfferMessage(context),
+          ),
+        ),
+      );
     }
 
     if (_warmTip != null) {
@@ -798,6 +812,63 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
       return 'Қабат бойынша: себеп, динамика және нақты әрекет векторы.';
     }
     return 'Layer by layer: causes, dynamics, and a precise next-step vector.';
+  }
+
+  static const String _shareOfferUrl = 'https://t.me/tarot_arkana_bot/app';
+
+  String _shareOfferTitle(BuildContext context) {
+    final code = Localizations.localeOf(context).languageCode;
+    if (code == 'ru') {
+      return 'Бонус за рекомендацию';
+    }
+    if (code == 'kk') {
+      return 'Ұсынғаныңыз үшін бонус';
+    }
+    return 'Referral bonus';
+  }
+
+  String _shareOfferBody(BuildContext context) {
+    final code = Localizations.localeOf(context).languageCode;
+    if (code == 'ru') {
+      return 'Поделись ссылкой с друзьями и получи 20 премиум-раскладов на 5 карт бесплатно.';
+    }
+    if (code == 'kk') {
+      return 'Сілтемені достарыңмен бөлісіп, 5 карталық 20 премиум жайылманы тегін ал.';
+    }
+    return 'Share the link with friends and get 20 premium five-card readings for free.';
+  }
+
+  String _shareOfferButtonLabel(BuildContext context) {
+    final code = Localizations.localeOf(context).languageCode;
+    if (code == 'ru') {
+      return 'Поделиться ссылкой';
+    }
+    if (code == 'kk') {
+      return 'Сілтемемен бөлісу';
+    }
+    return 'Share link';
+  }
+
+  String _shareOfferCopiedLabel(BuildContext context) {
+    final code = Localizations.localeOf(context).languageCode;
+    if (code == 'ru') {
+      return 'Ссылка скопирована. Отправь друзьям в Telegram.';
+    }
+    if (code == 'kk') {
+      return 'Сілтеме көшірілді. Оны Telegram-да достарыңа жібер.';
+    }
+    return 'Link copied. Send it to your friends on Telegram.';
+  }
+
+  String _shareOfferMessage(BuildContext context) {
+    final code = Localizations.localeOf(context).languageCode;
+    if (code == 'ru') {
+      return 'Загляни в Basil Arcana: красивые и точные расклады Таро прямо в Telegram.';
+    }
+    if (code == 'kk') {
+      return 'Basil Arcana-ны байқап көр: Telegram ішіндегі әдемі әрі нақты Таро жайылмалары.';
+    }
+    return 'Try Basil Arcana: stylish and accurate Tarot readings right in Telegram.';
   }
 
   Widget _buildChatItem(_ChatItem item, ReadingFlowState state) {
@@ -1395,34 +1466,67 @@ class _PremiumReadingBadge extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        gradient: const LinearGradient(
+        borderRadius: BorderRadius.circular(18),
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color(0xFF2C2438),
-            Color(0xFF43305A),
-            Color(0xFF5A3C7A),
+            Color.alphaBlend(
+              colorScheme.primary.withOpacity(0.4),
+              colorScheme.surface,
+            ),
+            Color.alphaBlend(
+              colorScheme.primaryContainer.withOpacity(0.58),
+              colorScheme.surface,
+            ),
+            Color.alphaBlend(
+              colorScheme.tertiaryContainer.withOpacity(0.42),
+              colorScheme.surface,
+            ),
           ],
         ),
-        border: Border.all(color: const Color(0xFFC39CFF).withOpacity(0.6)),
+        border: Border.all(color: colorScheme.primary.withOpacity(0.48)),
         boxShadow: [
           BoxShadow(
-            color: colorScheme.primary.withOpacity(0.2),
-            blurRadius: 16,
-            offset: const Offset(0, 8),
+            color: colorScheme.primary.withOpacity(0.16),
+            blurRadius: 22,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(999),
+              color: Colors.white.withOpacity(0.12),
+              border: Border.all(color: Colors.white.withOpacity(0.25)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.auto_awesome, size: 14, color: Colors.white),
+                const SizedBox(width: 6),
+                Text(
+                  _badgeLabel(context),
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.2,
+                      ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 10),
           Text(
             title,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Colors.white,
+                  color: colorScheme.onPrimaryContainer,
                   fontWeight: FontWeight.w700,
                 ),
           ),
@@ -1430,12 +1534,23 @@ class _PremiumReadingBadge extends StatelessWidget {
           Text(
             subtitle,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.white.withOpacity(0.88),
+                  color: colorScheme.onPrimaryContainer.withOpacity(0.86),
                 ),
           ),
         ],
       ),
     );
+  }
+
+  String _badgeLabel(BuildContext context) {
+    final code = Localizations.localeOf(context).languageCode;
+    if (code == 'ru') {
+      return 'ПРЕМИУМ-РЕЖИМ';
+    }
+    if (code == 'kk') {
+      return 'ПРЕМИУМ РЕЖИМ';
+    }
+    return 'PREMIUM MODE';
   }
 }
 
@@ -1448,22 +1563,101 @@ class _PremiumReadingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        gradient: const LinearGradient(
+        borderRadius: BorderRadius.circular(18),
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color(0x402E273B),
-            Color(0x403A2E4D),
+            Color.alphaBlend(
+              colorScheme.primary.withOpacity(0.08),
+              colorScheme.surface,
+            ),
+            Color.alphaBlend(
+              colorScheme.secondary.withOpacity(0.06),
+              colorScheme.surface,
+            ),
           ],
         ),
-        border: Border.all(color: const Color(0xFFAE7EFF).withOpacity(0.35)),
+        border: Border.all(color: colorScheme.primary.withOpacity(0.26)),
+        boxShadow: [
+          BoxShadow(
+            color: colorScheme.primary.withOpacity(0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: child,
+    );
+  }
+}
+
+class _ShareWithFriendsCard extends StatelessWidget {
+  const _ShareWithFriendsCard({
+    required this.title,
+    required this.body,
+    required this.buttonLabel,
+    required this.copiedLabel,
+    required this.shareUrl,
+    required this.shareMessage,
+  });
+
+  final String title;
+  final String body;
+  final String buttonLabel;
+  final String copiedLabel;
+  final String shareUrl;
+  final String shareMessage;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        color: colorScheme.primary.withOpacity(0.06),
+        border: Border.all(color: colorScheme.primary.withOpacity(0.24)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  color: colorScheme.primary,
+                  fontWeight: FontWeight.w700,
+                ),
+          ),
+          const SizedBox(height: 8),
+          Text(body, style: Theme.of(context).textTheme.bodyMedium),
+          const SizedBox(height: 12),
+          AppGhostButton(
+            label: buttonLabel,
+            icon: Icons.ios_share,
+            onPressed: () async {
+              final textToCopy = '$shareMessage\n$shareUrl';
+              await Clipboard.setData(ClipboardData(text: textToCopy));
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(copiedLabel)),
+                );
+              }
+              final shareUri = Uri.parse(
+                'https://t.me/share/url?url=${Uri.encodeComponent(shareUrl)}'
+                '&text=${Uri.encodeComponent(shareMessage)}',
+              );
+              await launchUrl(shareUri, mode: LaunchMode.externalApplication);
+            },
+          ),
+        ],
+      ),
     );
   }
 }
