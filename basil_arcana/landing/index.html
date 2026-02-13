@@ -281,6 +281,11 @@
         background: rgba(255, 255, 255, 0.08);
         border: 1px solid var(--card-border);
         box-shadow: none;
+        opacity: 0.84;
+      }
+
+      .btn.alt:hover {
+        opacity: 1;
       }
 
       .portrait {
@@ -434,13 +439,11 @@
       }
 
       [data-i18n] {
-        transition: opacity 0.32s ease, transform 0.32s ease, filter 0.32s ease;
+        transition: opacity 0.2s ease;
       }
 
       body.lang-switching [data-i18n] {
-        opacity: 0.15;
-        transform: translateY(5px);
-        filter: blur(1.5px);
+        opacity: 0.72;
       }
 
       .bottom-cta a {
@@ -647,8 +650,8 @@
           <h1 class="reveal" data-delay="1" data-i18n="title"></h1>
           <p class="lead reveal" data-delay="2" data-i18n="lead"></p>
           <div class="hero-actions reveal" data-delay="3">
-            <a class="btn" href="https://t.me/tarot_arkana_bot" target="_blank" rel="noreferrer" data-i18n="ctaBot" data-track="cta_bot"></a>
-            <a class="btn alt" href="https://t.me/tarot_arkana_bot/app" target="_blank" rel="noreferrer" data-i18n="ctaMini" data-track="cta_mini_app"></a>
+            <a class="btn" href="https://t.me/tarot_arkana_bot/app" target="_blank" rel="noreferrer" data-i18n="ctaMini" data-track="cta_mini_app"></a>
+            <a class="btn alt" href="https://t.me/tarot_arkana_bot" target="_blank" rel="noreferrer" data-i18n="ctaBot" data-track="cta_bot"></a>
             <a class="btn alt" href="https://t.me/SofiaKnoxx" target="_blank" rel="noreferrer" data-i18n="ctaSofia" data-track="cta_sofia"></a>
           </div>
         </div>
@@ -716,9 +719,9 @@
           badge: "премиум‑таро в Telegram",
           title: "BasilArcana — The Real Magic",
           lead: "Молодой премиум‑формат для тех, кто хочет красиво, глубоко и по делу. Выбирай расклад, лови инсайт и переходи в действие.",
-          ctaBot: "Открыть бот",
+          ctaBot: "Открыть Telegram-бот",
           ctaSofia: "Написать Софии",
-          ctaMini: "Открыть mini app",
+          ctaMini: "Получить бесплатный расклад",
           ctaTarotValues: "Значения карт Таро",
           sofiaName: "София Нокс",
           sofiaRole: "@SofiaKnoxx · таролог / астролог",
@@ -736,9 +739,9 @@
           badge: "Telegram ішіндегі премиум таро",
           title: "BasilArcana — The Real Magic",
           lead: "Әдемі, терең әрі нақты формат. Сұрағыңды таңда, инсайт ал да, нақты әрекетке өт.",
-          ctaBot: "Ботты ашу",
+          ctaBot: "Telegram-ботты ашу",
           ctaSofia: "Софияға жазу",
-          ctaMini: "Mini app ашу",
+          ctaMini: "Тегін таралым алу",
           ctaTarotValues: "Таро карталарының мағынасы",
           sofiaName: "София Нокс",
           sofiaRole: "@SofiaKnoxx · таролог / астролог",
@@ -756,9 +759,9 @@
           badge: "premium tarot on Telegram",
           title: "BasilArcana — The Real Magic",
           lead: "A premium but youthful format for clarity with style. Pick your spread, catch the insight, and move with confidence.",
-          ctaBot: "Open bot",
+          ctaBot: "Open Telegram bot",
           ctaSofia: "Message Sofia",
-          ctaMini: "Open mini app",
+          ctaMini: "Get a free tarot reading",
           ctaTarotValues: "Tarot card meanings",
           sofiaName: "Sofia Knox",
           sofiaRole: "@SofiaKnoxx · tarot reader / astrologer",
@@ -817,17 +820,11 @@
           return;
         }
         langSwitchInProgress = true;
-        document.body.classList.add("lang-switching");
-        window.setTimeout(() => {
-          applyLang(nextLang);
-          activeLang = nextLang;
-          updateLangInUrl(activeLang);
-          window.localStorage.setItem(LANG_STORAGE_KEY, activeLang);
-          requestAnimationFrame(() => {
-            document.body.classList.remove("lang-switching");
-            langSwitchInProgress = false;
-          });
-        }, 180);
+        applyLang(nextLang);
+        activeLang = nextLang;
+        updateLangInUrl(activeLang);
+        window.localStorage.setItem(LANG_STORAGE_KEY, activeLang);
+        langSwitchInProgress = false;
       }
 
       document.querySelectorAll(".lang-btn").forEach((btn) => {
