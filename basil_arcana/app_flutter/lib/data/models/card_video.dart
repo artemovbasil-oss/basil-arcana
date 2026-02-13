@@ -100,6 +100,36 @@ String? resolveCardVideoFileName(
   return _cardVideoFiles[normalizedId];
 }
 
+String? resolveCardVideoAsset(
+  String cardId, {
+  Set<String>? availableAssets,
+}) {
+  Set<String>? availableFiles;
+  if (availableAssets != null && availableAssets.isNotEmpty) {
+    availableFiles = availableAssets
+        .map((assetPath) => assetPath.split('/').last)
+        .map(normalizeVideoFileName)
+        .map((fileName) => fileName.toLowerCase())
+        .toSet();
+  }
+
+  final fileName = resolveCardVideoFileName(
+    cardId,
+    availableFiles: availableFiles,
+  );
+  if (fileName == null || fileName.isEmpty) {
+    return null;
+  }
+
+  final assetPath = 'assets/cards/video/$fileName';
+  if (availableAssets != null &&
+      availableAssets.isNotEmpty &&
+      !availableAssets.contains(assetPath)) {
+    return null;
+  }
+  return assetPath;
+}
+
 Map<String, String> _buildCardVideoFiles() {
   final assets = <String, String>{};
   for (final entry in _majorVideoKeys.entries) {
