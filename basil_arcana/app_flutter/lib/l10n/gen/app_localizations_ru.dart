@@ -341,21 +341,21 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get spreadOneCardSubtitle =>
-      'Быстрое зеркало момента. Одна карта — один ясный фокус.';
+      'Быстрый фокус: одна карта, один ясный ответ.';
 
   @override
   String get spreadThreeCardTitle => 'Три карты';
 
   @override
   String get spreadThreeCardSubtitle =>
-      'Простая дуга истории. Три карты — контекст и направление.';
+      'Короткая дуга: контекст, суть и направление.';
 
   @override
   String get spreadFiveCardTitle => 'Пять карт';
 
   @override
   String get spreadFiveCardSubtitle =>
-      'Более глубокий взгляд на ситуацию. Пять карт — слои контекста и рекомендации.';
+      'Глубокий разбор: причины, контекст и рекомендации.';
 
   @override
   String get spreadFivePosition1 => 'Суть ситуации';

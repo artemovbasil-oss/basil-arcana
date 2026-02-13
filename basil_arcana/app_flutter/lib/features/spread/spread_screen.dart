@@ -310,7 +310,9 @@ class _SpreadOptionCardState extends ConsumerState<_SpreadOptionCard> {
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: isFiveCardsPremium
+                      ? MainAxisAlignment.start
+                      : MainAxisAlignment.center,
                   children: [
                     Text(
                       widget.title,
@@ -320,13 +322,16 @@ class _SpreadOptionCardState extends ConsumerState<_SpreadOptionCard> {
                     const SizedBox(height: 6),
                     Text(
                       widget.subtitle,
+                      maxLines: isFiveCardsPremium ? 3 : 4,
+                      overflow: TextOverflow.ellipsis,
                       style: AppTextStyles.body(context).copyWith(
                         color: theme.colorScheme.onSurface.withOpacity(0.7),
                         height: 1.35,
                       ),
                     ),
                     if (isFiveCardsPremium) ...[
-                      const SizedBox(height: 10),
+                      const Spacer(),
+                      const SizedBox(height: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 8,
