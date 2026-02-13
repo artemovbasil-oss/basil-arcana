@@ -11,6 +11,50 @@
   "settingsPromoApplied": "Промокод іске қосылды: 1 жылдық шексіз қолжетімділік берілді.",
   "settingsPromoResetButton": "Промокодтан бас тарту",
   "settingsPromoResetDone": "Промокод өшірілді. Тегін нұсқаға қайттық.",
+  "settingsDashboardTitle": "Профиль және көрсеткіштер",
+  "settingsDashboardTopCardsTitle": "Түсу жиілігі бойынша топ карталар",
+  "settingsDashboardTopCardsEmpty": "Карталар статистикасы әлі жоқ.",
+  "settingsDashboardServicesTitle": "Ақылы сервистер",
+  "settingsDashboardServicesEmpty": "Белсенді ақылы сервис жоқ.",
+  "settingsDashboardServiceUnlimitedNoDate": "Шексіз энергия белсенді.",
+  "settingsDashboardServiceUnlimitedWithDate": "Шексіз энергия {date} дейін белсенді.",
+  "@settingsDashboardServiceUnlimitedWithDate": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "settingsDashboardEnergy": "Қазіргі энергия: {value}",
+  "@settingsDashboardEnergy": {
+    "placeholders": {
+      "value": {}
+    }
+  },
+  "settingsDashboardFreePremium": "5 картаға тегін премиум жайылмалар: {count}",
+  "@settingsDashboardFreePremium": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsDashboardFreePremiumRemaining": "Қалған тегін премиум жайылмалар: {count}",
+  "@settingsDashboardFreePremiumRemaining": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsDashboardInvited": "Шақырылған пайдаланушылар: {count}",
+  "@settingsDashboardInvited": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsDashboardShareButton": "Жеке реферал сілтемені бөлісу",
+  "settingsDashboardLoadError": "Дашборд деректерін жүктеу мүмкін болмады.",
   "languageLabel": "Тіл",
   "languageEnglish": "English (EN)",
   "languageRussian": "Русский (RU)",
@@ -136,6 +180,11 @@
   "resultSectionArcaneSnapshot": "Аркандық шолу",
   "resultSectionWhy": "Неге бұл оқылым",
   "resultSectionAction": "Әрекет қадамы (келесі 24–72 сағ)",
+  "resultReferralTitle": "Ұсыныс бонусы",
+  "resultReferralBody": "Жеке сілтемеңді достарыңмен бөліс және сілтеме арқылы келген әр жаңа қолданушы үшін 5 карталық 20 тегін премиум жайылма ал.",
+  "resultReferralButton": "Сілтемемен бөлісу",
+  "resultReferralCopied": "Реферал сілтеме көшірілді. Оны Telegram-да жібер.",
+  "resultReferralShareMessage": "Basil Arcana-ны байқап көр: Telegram ішіндегі әдемі әрі нақты Таро жайылмалары.",
   "resultDeepPrompt": "Қарым-қатынас пен мансап туралы толығырақ керек пе?",
   "resultDeepNotNow": "Қазір емес",
   "resultDeepShowDetails": "Иә",

@@ -45,6 +45,58 @@ class AppLocalizationsKk extends AppLocalizations {
       'Промокод өшірілді. Тегін нұсқаға қайттық.';
 
   @override
+  String get settingsDashboardTitle => 'Профиль және көрсеткіштер';
+
+  @override
+  String get settingsDashboardTopCardsTitle =>
+      'Түсу жиілігі бойынша топ карталар';
+
+  @override
+  String get settingsDashboardTopCardsEmpty => 'Карталар статистикасы әлі жоқ.';
+
+  @override
+  String get settingsDashboardServicesTitle => 'Ақылы сервистер';
+
+  @override
+  String get settingsDashboardServicesEmpty => 'Белсенді ақылы сервис жоқ.';
+
+  @override
+  String get settingsDashboardServiceUnlimitedNoDate =>
+      'Шексіз энергия белсенді.';
+
+  @override
+  String settingsDashboardServiceUnlimitedWithDate(Object date) {
+    return 'Шексіз энергия $date дейін белсенді.';
+  }
+
+  @override
+  String settingsDashboardEnergy(Object value) {
+    return 'Қазіргі энергия: $value';
+  }
+
+  @override
+  String settingsDashboardFreePremium(int count) {
+    return '5 картаға тегін премиум жайылмалар: $count';
+  }
+
+  @override
+  String settingsDashboardFreePremiumRemaining(int count) {
+    return 'Қалған тегін премиум жайылмалар: $count';
+  }
+
+  @override
+  String settingsDashboardInvited(int count) {
+    return 'Шақырылған пайдаланушылар: $count';
+  }
+
+  @override
+  String get settingsDashboardShareButton => 'Жеке реферал сілтемені бөлісу';
+
+  @override
+  String get settingsDashboardLoadError =>
+      'Дашборд деректерін жүктеу мүмкін болмады.';
+
+  @override
   String get languageLabel => 'Тіл';
 
   @override
@@ -382,6 +434,24 @@ class AppLocalizationsKk extends AppLocalizations {
 
   @override
   String get resultSectionAction => 'Әрекет қадамы (келесі 24–72 сағ)';
+
+  @override
+  String get resultReferralTitle => 'Ұсыныс бонусы';
+
+  @override
+  String get resultReferralBody =>
+      'Жеке сілтемеңді достарыңмен бөліс және сілтеме арқылы келген әр жаңа қолданушы үшін 5 карталық 20 тегін премиум жайылма ал.';
+
+  @override
+  String get resultReferralButton => 'Сілтемемен бөлісу';
+
+  @override
+  String get resultReferralCopied =>
+      'Реферал сілтеме көшірілді. Оны Telegram-да жібер.';
+
+  @override
+  String get resultReferralShareMessage =>
+      'Basil Arcana-ны байқап көр: Telegram ішіндегі әдемі әрі нақты Таро жайылмалары.';
 
   @override
   String get resultDeepPrompt =>

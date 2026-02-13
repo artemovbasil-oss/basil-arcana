@@ -227,6 +227,28 @@ class _SpreadOptionCardState extends ConsumerState<_SpreadOptionCard> {
       return;
     }
 
+    try {
+      final consumeResult = await ref
+          .read(userDashboardRepositoryProvider)
+          .consumeFreeFiveCardsCredit();
+      if (consumeResult.consumed) {
+        if (!mounted) {
+          return;
+        }
+        final l10n = AppLocalizations.of(context)!;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              l10n.settingsDashboardFreePremiumRemaining(
+                  consumeResult.remaining),
+            ),
+          ),
+        );
+        await _openSpread();
+        return;
+      }
+    } catch (_) {}
+
     setState(() {
       _isUnlocking = true;
     });

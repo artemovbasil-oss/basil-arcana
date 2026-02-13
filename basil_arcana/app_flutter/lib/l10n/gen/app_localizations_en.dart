@@ -44,6 +44,57 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsPromoResetDone => 'Promo disabled. Back to free version.';
 
   @override
+  String get settingsDashboardTitle => 'Your profile dashboard';
+
+  @override
+  String get settingsDashboardTopCardsTitle => 'Top cards by frequency';
+
+  @override
+  String get settingsDashboardTopCardsEmpty => 'No card stats yet.';
+
+  @override
+  String get settingsDashboardServicesTitle => 'Paid services';
+
+  @override
+  String get settingsDashboardServicesEmpty => 'No active paid services.';
+
+  @override
+  String get settingsDashboardServiceUnlimitedNoDate =>
+      'Unlimited energy plan is active.';
+
+  @override
+  String settingsDashboardServiceUnlimitedWithDate(Object date) {
+    return 'Unlimited energy plan is active until $date.';
+  }
+
+  @override
+  String settingsDashboardEnergy(Object value) {
+    return 'Current energy: $value';
+  }
+
+  @override
+  String settingsDashboardFreePremium(int count) {
+    return 'Free premium five-card readings: $count';
+  }
+
+  @override
+  String settingsDashboardFreePremiumRemaining(int count) {
+    return 'Free premium readings left: $count';
+  }
+
+  @override
+  String settingsDashboardInvited(int count) {
+    return 'Invited users: $count';
+  }
+
+  @override
+  String get settingsDashboardShareButton => 'Share personal referral link';
+
+  @override
+  String get settingsDashboardLoadError =>
+      'Could not load dashboard data right now.';
+
+  @override
   String get languageLabel => 'Language';
 
   @override
@@ -382,6 +433,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get resultSectionAction => 'Action step (next 24–72h)';
+
+  @override
+  String get resultReferralTitle => 'Referral bonus';
+
+  @override
+  String get resultReferralBody =>
+      'Share your personal link with friends and get 20 free premium five-card readings for every new user who joins from your link.';
+
+  @override
+  String get resultReferralButton => 'Share link';
+
+  @override
+  String get resultReferralCopied =>
+      'Referral link copied. Send it in Telegram.';
+
+  @override
+  String get resultReferralShareMessage =>
+      'Try Basil Arcana: stylish and accurate Tarot readings right in Telegram.';
 
   @override
   String get resultDeepPrompt => 'Want details on relationships and career?';

@@ -40,10 +40,16 @@ async function ensureSchema() {
       username TEXT,
       first_name TEXT,
       last_name TEXT,
+      photo_url TEXT,
       locale TEXT,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
+  `);
+
+  await pool.query(`
+    ALTER TABLE users
+    ADD COLUMN IF NOT EXISTS photo_url TEXT;
   `);
 
   await pool.query(`
@@ -122,6 +128,35 @@ async function ensureSchema() {
   await pool.query(
     "CREATE INDEX IF NOT EXISTS idx_query_history_user_created ON user_query_history (telegram_user_id, created_at DESC);"
   );
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS user_perks_state (
+      telegram_user_id BIGINT PRIMARY KEY REFERENCES users(telegram_user_id) ON DELETE CASCADE,
+      free_five_cards_credits INTEGER NOT NULL DEFAULT 0,
+      total_referral_credits_granted INTEGER NOT NULL DEFAULT 0,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS referral_events (
+      id BIGSERIAL PRIMARY KEY,
+      referrer_user_id BIGINT NOT NULL REFERENCES users(telegram_user_id) ON DELETE CASCADE,
+      referred_user_id BIGINT NOT NULL REFERENCES users(telegram_user_id) ON DELETE CASCADE,
+      start_param TEXT,
+      bonus_credits INTEGER NOT NULL DEFAULT 20,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      UNIQUE (referrer_user_id, referred_user_id)
+    );
+  `);
+
+  await pool.query(
+    "CREATE UNIQUE INDEX IF NOT EXISTS uq_referral_events_referred_user ON referral_events (referred_user_id);"
+  );
+
+  await pool.query(
+    "CREATE INDEX IF NOT EXISTS idx_referral_events_referrer_created ON referral_events (referrer_user_id, created_at DESC);"
+  );
 }
 
 function normalizeText(value) {
@@ -136,7 +171,8 @@ function mapTelegramUser(telegramUser) {
   return {
     username: normalizeText(telegramUser?.username),
     firstName: normalizeText(telegramUser?.firstName),
-    lastName: normalizeText(telegramUser?.lastName)
+    lastName: normalizeText(telegramUser?.lastName),
+    photoUrl: normalizeText(telegramUser?.photoUrl)
   };
 }
 
@@ -148,18 +184,284 @@ async function upsertUserProfile({ telegramUserId, telegramUser, locale = null }
   const normalizedLocale = normalizeText(locale);
   await pool.query(
     `
-    INSERT INTO users (telegram_user_id, username, first_name, last_name, locale)
-    VALUES ($1, $2, $3, $4, $5)
+    INSERT INTO users (telegram_user_id, username, first_name, last_name, photo_url, locale)
+    VALUES ($1, $2, $3, $4, $5, $6)
     ON CONFLICT (telegram_user_id)
     DO UPDATE SET
       username = COALESCE(EXCLUDED.username, users.username),
       first_name = COALESCE(EXCLUDED.first_name, users.first_name),
       last_name = COALESCE(EXCLUDED.last_name, users.last_name),
+      photo_url = COALESCE(EXCLUDED.photo_url, users.photo_url),
       locale = COALESCE(EXCLUDED.locale, users.locale),
       updated_at = NOW();
     `,
-    [telegramUserId, user.username, user.firstName, user.lastName, normalizedLocale]
+    [
+      telegramUserId,
+      user.username,
+      user.firstName,
+      user.lastName,
+      user.photoUrl,
+      normalizedLocale
+    ]
   );
+}
+
+async function claimReferralBonus({
+  referredUserId,
+  referrerUserId,
+  startParam,
+  bonusCredits = 20
+}) {
+  if (!referredUserId || !referrerUserId) {
+    return { claimed: false, reason: 'invalid_user' };
+  }
+  if (Number(referredUserId) === Number(referrerUserId)) {
+    return { claimed: false, reason: 'self_referral' };
+  }
+  const safeBonus = Math.max(0, Number(bonusCredits) || 0);
+  if (safeBonus <= 0) {
+    return { claimed: false, reason: 'invalid_bonus' };
+  }
+
+  const client = await getDb().connect();
+  try {
+    await client.query('BEGIN');
+
+    const referrerRes = await client.query(
+      'SELECT telegram_user_id FROM users WHERE telegram_user_id = $1 LIMIT 1;',
+      [referrerUserId]
+    );
+    if (!referrerRes.rows[0]) {
+      await client.query('ROLLBACK');
+      return { claimed: false, reason: 'referrer_not_found' };
+    }
+
+    const insertRes = await client.query(
+      `
+      INSERT INTO referral_events (
+        referrer_user_id,
+        referred_user_id,
+        start_param,
+        bonus_credits,
+        created_at
+      )
+      VALUES ($1, $2, $3, $4, NOW())
+      ON CONFLICT (referred_user_id) DO NOTHING
+      RETURNING id;
+      `,
+      [referrerUserId, referredUserId, normalizeText(startParam), safeBonus]
+    );
+    const inserted = Boolean(insertRes.rows[0]?.id);
+    if (!inserted) {
+      await client.query('ROLLBACK');
+      return { claimed: false, reason: 'already_claimed' };
+    }
+
+    await client.query(
+      `
+      INSERT INTO user_perks_state (
+        telegram_user_id,
+        free_five_cards_credits,
+        total_referral_credits_granted,
+        updated_at
+      )
+      VALUES ($1, $2, $2, NOW())
+      ON CONFLICT (telegram_user_id)
+      DO UPDATE SET
+        free_five_cards_credits = user_perks_state.free_five_cards_credits + EXCLUDED.free_five_cards_credits,
+        total_referral_credits_granted = user_perks_state.total_referral_credits_granted + EXCLUDED.total_referral_credits_granted,
+        updated_at = NOW();
+      `,
+      [referrerUserId, safeBonus]
+    );
+
+    await client.query(
+      `
+      INSERT INTO energy_ledger (
+        telegram_user_id,
+        delta_energy,
+        operation,
+        payload,
+        metadata
+      )
+      VALUES ($1, 0, 'grant_referral_five_cards_credits', NULL, $2::jsonb);
+      `,
+      [
+        referrerUserId,
+        JSON.stringify({
+          referredUserId: Number(referredUserId),
+          bonusCredits: safeBonus,
+          startParam: normalizeText(startParam)
+        })
+      ]
+    );
+
+    const stateRes = await client.query(
+      `
+      SELECT free_five_cards_credits
+      FROM user_perks_state
+      WHERE telegram_user_id = $1;
+      `,
+      [referrerUserId]
+    );
+    await client.query('COMMIT');
+    return {
+      claimed: true,
+      referrerUserId: Number(referrerUserId),
+      freeFiveCardsCredits: Number(stateRes.rows[0]?.free_five_cards_credits || 0),
+      bonusCredits: safeBonus
+    };
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+async function consumeFreeFiveCardsCredit({ telegramUserId, reason = null }) {
+  if (!telegramUserId) {
+    return {
+      ok: false,
+      consumed: false,
+      remaining: 0,
+      reason: 'invalid_user'
+    };
+  }
+  const client = await getDb().connect();
+  try {
+    await client.query('BEGIN');
+    const decRes = await client.query(
+      `
+      UPDATE user_perks_state
+      SET
+        free_five_cards_credits = free_five_cards_credits - 1,
+        updated_at = NOW()
+      WHERE telegram_user_id = $1
+        AND free_five_cards_credits > 0
+      RETURNING free_five_cards_credits;
+      `,
+      [telegramUserId]
+    );
+    if (!decRes.rows[0]) {
+      const balanceRes = await client.query(
+        `
+        SELECT free_five_cards_credits
+        FROM user_perks_state
+        WHERE telegram_user_id = $1;
+        `,
+        [telegramUserId]
+      );
+      const remaining = Number(balanceRes.rows[0]?.free_five_cards_credits || 0);
+      await client.query('COMMIT');
+      return { ok: true, consumed: false, remaining };
+    }
+    const remaining = Number(decRes.rows[0].free_five_cards_credits || 0);
+    await client.query(
+      `
+      INSERT INTO energy_ledger (
+        telegram_user_id,
+        delta_energy,
+        operation,
+        payload,
+        metadata
+      )
+      VALUES ($1, 0, 'consume_referral_five_cards_credit', NULL, $2::jsonb);
+      `,
+      [
+        telegramUserId,
+        JSON.stringify({
+          reason: normalizeText(reason) || 'five_cards_access',
+          remaining
+        })
+      ]
+    );
+    await client.query('COMMIT');
+    return { ok: true, consumed: true, remaining };
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+async function getUserDashboard({ telegramUserId }) {
+  const client = await getDb().connect();
+  try {
+    const profileRes = await client.query(
+      `
+      SELECT telegram_user_id, username, first_name, last_name, photo_url, locale
+      FROM users
+      WHERE telegram_user_id = $1
+      LIMIT 1;
+      `,
+      [telegramUserId]
+    );
+    const perksRes = await client.query(
+      `
+      SELECT
+        free_five_cards_credits,
+        total_referral_credits_granted
+      FROM user_perks_state
+      WHERE telegram_user_id = $1
+      LIMIT 1;
+      `,
+      [telegramUserId]
+    );
+    const referralRes = await client.query(
+      `
+      SELECT COUNT(*)::int AS total
+      FROM referral_events
+      WHERE referrer_user_id = $1;
+      `,
+      [telegramUserId]
+    );
+    const energyRes = await client.query(
+      `
+      SELECT total_energy_granted, unlimited_until
+      FROM user_energy_state
+      WHERE telegram_user_id = $1
+      LIMIT 1;
+      `,
+      [telegramUserId]
+    );
+
+    const profile = profileRes.rows[0] || {};
+    const perks = perksRes.rows[0] || {};
+    const energy = energyRes.rows[0] || {};
+
+    const services = [];
+    if (energy.unlimited_until && new Date(energy.unlimited_until).getTime() > Date.now()) {
+      services.push({
+        id: 'year_unlimited',
+        type: 'year_unlimited',
+        status: 'active',
+        expiresAt: new Date(energy.unlimited_until).toISOString()
+      });
+    }
+
+    return {
+      profile: {
+        telegramUserId: Number(profile.telegram_user_id || telegramUserId),
+        username: profile.username ? String(profile.username) : '',
+        firstName: profile.first_name ? String(profile.first_name) : '',
+        lastName: profile.last_name ? String(profile.last_name) : '',
+        photoUrl: profile.photo_url ? String(profile.photo_url) : '',
+        locale: profile.locale ? String(profile.locale) : ''
+      },
+      perks: {
+        freeFiveCardsCredits: Number(perks.free_five_cards_credits || 0),
+        totalReferralCreditsGranted: Number(perks.total_referral_credits_granted || 0)
+      },
+      referrals: {
+        totalInvited: Number(referralRes.rows[0]?.total || 0)
+      },
+      services
+    };
+  } finally {
+    client.release();
+  }
 }
 
 async function recordSofiaConsent({ telegramUserId, decision }) {
@@ -462,6 +764,9 @@ module.exports = {
   recordSofiaConsent,
   saveCreatedInvoice,
   confirmInvoiceStatus,
+  claimReferralBonus,
+  consumeFreeFiveCardsCredit,
+  getUserDashboard,
   logUserQuery,
   listRecentUserQueries,
   clearUserQueryHistory

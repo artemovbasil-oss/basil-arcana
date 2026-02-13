@@ -11,6 +11,50 @@
   "settingsPromoApplied": "Promo activated: 1-year unlimited access enabled.",
   "settingsPromoResetButton": "Disable promo code",
   "settingsPromoResetDone": "Promo disabled. Back to free version.",
+  "settingsDashboardTitle": "Your profile dashboard",
+  "settingsDashboardTopCardsTitle": "Top cards by frequency",
+  "settingsDashboardTopCardsEmpty": "No card stats yet.",
+  "settingsDashboardServicesTitle": "Paid services",
+  "settingsDashboardServicesEmpty": "No active paid services.",
+  "settingsDashboardServiceUnlimitedNoDate": "Unlimited energy plan is active.",
+  "settingsDashboardServiceUnlimitedWithDate": "Unlimited energy plan is active until {date}.",
+  "@settingsDashboardServiceUnlimitedWithDate": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "settingsDashboardEnergy": "Current energy: {value}",
+  "@settingsDashboardEnergy": {
+    "placeholders": {
+      "value": {}
+    }
+  },
+  "settingsDashboardFreePremium": "Free premium five-card readings: {count}",
+  "@settingsDashboardFreePremium": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsDashboardFreePremiumRemaining": "Free premium readings left: {count}",
+  "@settingsDashboardFreePremiumRemaining": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsDashboardInvited": "Invited users: {count}",
+  "@settingsDashboardInvited": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsDashboardShareButton": "Share personal referral link",
+  "settingsDashboardLoadError": "Could not load dashboard data right now.",
   "languageLabel": "Language",
   "languageEnglish": "English (EN)",
   "languageRussian": "Russian (RU)",
@@ -136,6 +180,11 @@
   "resultSectionArcaneSnapshot": "Arcane Snapshot",
   "resultSectionWhy": "Why this reading",
   "resultSectionAction": "Action step (next 24–72h)",
+  "resultReferralTitle": "Referral bonus",
+  "resultReferralBody": "Share your personal link with friends and get 20 free premium five-card readings for every new user who joins from your link.",
+  "resultReferralButton": "Share link",
+  "resultReferralCopied": "Referral link copied. Send it in Telegram.",
+  "resultReferralShareMessage": "Try Basil Arcana: stylish and accurate Tarot readings right in Telegram.",
   "resultDeepPrompt": "Want details on relationships and career?",
   "resultDeepNotNow": "Not now",
   "resultDeepShowDetails": "Yes",

@@ -45,6 +45,57 @@ class AppLocalizationsRu extends AppLocalizations {
       'Промокод отключен. Возвращаемся к бесплатной версии.';
 
   @override
+  String get settingsDashboardTitle => 'Профиль и показатели';
+
+  @override
+  String get settingsDashboardTopCardsTitle => 'Топ карт по частоте';
+
+  @override
+  String get settingsDashboardTopCardsEmpty => 'Пока нет статистики по картам.';
+
+  @override
+  String get settingsDashboardServicesTitle => 'Платные сервисы';
+
+  @override
+  String get settingsDashboardServicesEmpty => 'Активных платных сервисов нет.';
+
+  @override
+  String get settingsDashboardServiceUnlimitedNoDate =>
+      'Безлимитная энергия активна.';
+
+  @override
+  String settingsDashboardServiceUnlimitedWithDate(Object date) {
+    return 'Безлимитная энергия активна до $date.';
+  }
+
+  @override
+  String settingsDashboardEnergy(Object value) {
+    return 'Энергия сейчас: $value';
+  }
+
+  @override
+  String settingsDashboardFreePremium(int count) {
+    return 'Бесплатные премиум-расклады на 5 карт: $count';
+  }
+
+  @override
+  String settingsDashboardFreePremiumRemaining(int count) {
+    return 'Осталось бесплатных премиум-раскладов: $count';
+  }
+
+  @override
+  String settingsDashboardInvited(int count) {
+    return 'Приглашено пользователей: $count';
+  }
+
+  @override
+  String get settingsDashboardShareButton => 'Поделиться персональной ссылкой';
+
+  @override
+  String get settingsDashboardLoadError =>
+      'Не удалось загрузить данные дашборда.';
+
+  @override
   String get languageLabel => 'Язык';
 
   @override
@@ -385,6 +436,24 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get resultSectionAction => 'Шаг действия (следующие 24–72 ч)';
+
+  @override
+  String get resultReferralTitle => 'Бонус за рекомендацию';
+
+  @override
+  String get resultReferralBody =>
+      'Поделись персональной ссылкой с друзьями и получай 20 бесплатных премиум-раскладов на 5 карт за каждого нового пользователя, который перейдет по ссылке.';
+
+  @override
+  String get resultReferralButton => 'Поделиться ссылкой';
+
+  @override
+  String get resultReferralCopied =>
+      'Реферальная ссылка скопирована. Отправь ее в Telegram.';
+
+  @override
+  String get resultReferralShareMessage =>
+      'Загляни в Basil Arcana: красивые и точные расклады Таро прямо в Telegram.';
 
   @override
   String get resultDeepPrompt => 'Хочешь детали про отношения и карьеру?';

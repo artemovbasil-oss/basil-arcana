@@ -12,6 +12,7 @@ import '../data/repositories/query_history_repository.dart';
 import '../data/repositories/spreads_repository.dart';
 import '../data/repositories/readings_repository.dart';
 import '../data/repositories/sofia_consent_repository.dart';
+import '../data/repositories/user_dashboard_repository.dart';
 import '../data/models/deck_model.dart';
 import 'energy_controller.dart';
 import 'reading_flow_controller.dart';
@@ -50,6 +51,11 @@ final sofiaConsentRepositoryProvider = Provider<SofiaConsentRepository>((ref) {
 
 final queryHistoryRepositoryProvider = Provider<QueryHistoryRepository>((ref) {
   return QueryHistoryRepository();
+});
+
+final userDashboardRepositoryProvider =
+    Provider<UserDashboardRepository>((ref) {
+  return UserDashboardRepository();
 });
 
 final readingFlowControllerProvider =

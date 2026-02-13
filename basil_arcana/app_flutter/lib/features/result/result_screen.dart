@@ -15,6 +15,7 @@ import '../../core/assets/asset_paths.dart';
 import '../../core/widgets/tarot_asset_widgets.dart';
 import '../../core/widgets/linkified_text.dart';
 import '../../core/widgets/sofia_promo_card.dart';
+import '../../core/telegram/telegram_user_profile.dart';
 import '../../data/models/card_model.dart';
 import '../../data/models/deck_model.dart';
 import '../../data/models/app_enums.dart';
@@ -749,6 +750,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
     }
 
     if (hasSofiaPromo) {
+      final referralLink = _resolveReferralLink();
       items.add(
         _ChatItem.basil(
           id: _nextId(),
@@ -759,12 +761,12 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
         _ChatItem.basil(
           id: _nextId(),
           child: _ShareWithFriendsCard(
-            title: _shareOfferTitle(context),
-            body: _shareOfferBody(context),
-            buttonLabel: _shareOfferButtonLabel(context),
-            copiedLabel: _shareOfferCopiedLabel(context),
-            shareUrl: _shareOfferUrl,
-            shareMessage: _shareOfferMessage(context),
+            title: l10n.resultReferralTitle,
+            body: l10n.resultReferralBody,
+            buttonLabel: l10n.resultReferralButton,
+            copiedLabel: l10n.resultReferralCopied,
+            shareUrl: referralLink,
+            shareMessage: l10n.resultReferralShareMessage,
           ),
         ),
       );
@@ -814,61 +816,12 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
     return 'Layer by layer: causes, dynamics, and a precise next-step vector.';
   }
 
-  static const String _shareOfferUrl = 'https://t.me/tarot_arkana_bot/app';
-
-  String _shareOfferTitle(BuildContext context) {
-    final code = Localizations.localeOf(context).languageCode;
-    if (code == 'ru') {
-      return 'Бонус за рекомендацию';
+  String _resolveReferralLink() {
+    final profile = readTelegramUserProfile();
+    if (profile == null) {
+      return 'https://t.me/tarot_arkana_bot/app';
     }
-    if (code == 'kk') {
-      return 'Ұсынғаныңыз үшін бонус';
-    }
-    return 'Referral bonus';
-  }
-
-  String _shareOfferBody(BuildContext context) {
-    final code = Localizations.localeOf(context).languageCode;
-    if (code == 'ru') {
-      return 'Поделись ссылкой с друзьями и получи 20 премиум-раскладов на 5 карт бесплатно.';
-    }
-    if (code == 'kk') {
-      return 'Сілтемені достарыңмен бөлісіп, 5 карталық 20 премиум жайылманы тегін ал.';
-    }
-    return 'Share the link with friends and get 20 premium five-card readings for free.';
-  }
-
-  String _shareOfferButtonLabel(BuildContext context) {
-    final code = Localizations.localeOf(context).languageCode;
-    if (code == 'ru') {
-      return 'Поделиться ссылкой';
-    }
-    if (code == 'kk') {
-      return 'Сілтемемен бөлісу';
-    }
-    return 'Share link';
-  }
-
-  String _shareOfferCopiedLabel(BuildContext context) {
-    final code = Localizations.localeOf(context).languageCode;
-    if (code == 'ru') {
-      return 'Ссылка скопирована. Отправь друзьям в Telegram.';
-    }
-    if (code == 'kk') {
-      return 'Сілтеме көшірілді. Оны Telegram-да достарыңа жібер.';
-    }
-    return 'Link copied. Send it to your friends on Telegram.';
-  }
-
-  String _shareOfferMessage(BuildContext context) {
-    final code = Localizations.localeOf(context).languageCode;
-    if (code == 'ru') {
-      return 'Загляни в Basil Arcana: красивые и точные расклады Таро прямо в Telegram.';
-    }
-    if (code == 'kk') {
-      return 'Basil Arcana-ны байқап көр: Telegram ішіндегі әдемі әрі нақты Таро жайылмалары.';
-    }
-    return 'Try Basil Arcana: stylish and accurate Tarot readings right in Telegram.';
+    return buildReferralLinkForUserId(profile.userId);
   }
 
   Widget _buildChatItem(_ChatItem item, ReadingFlowState state) {

@@ -42,6 +42,9 @@ const {
   recordSofiaConsent,
   saveCreatedInvoice,
   confirmInvoiceStatus,
+  claimReferralBonus,
+  consumeFreeFiveCardsCredit,
+  getUserDashboard,
   logUserQuery,
   listRecentUserQueries,
   clearUserQueryHistory
@@ -334,6 +337,45 @@ async function upsertTelegramUserFromRequest(req, locale = null) {
   });
 }
 
+async function tryClaimReferralForRequest(req) {
+  if (!hasDb()) {
+    return;
+  }
+  const referredUserId =
+    Number.isFinite(Number(req.telegram?.userId)) && Number(req.telegram?.userId) > 0
+      ? Number(req.telegram.userId)
+      : null;
+  if (!referredUserId) {
+    return;
+  }
+  const startParam = typeof req.telegram?.startParam === 'string' ? req.telegram.startParam : '';
+  if (!startParam) {
+    return;
+  }
+  const referrerUserId = parseReferrerUserIdFromStartParam(startParam);
+  if (!referrerUserId) {
+    return;
+  }
+  const claim = await claimReferralBonus({
+    referredUserId,
+    referrerUserId,
+    startParam,
+    bonusCredits: 20
+  });
+  if (claim.claimed) {
+    console.log(
+      JSON.stringify({
+        event: 'referral_claimed',
+        requestId: req.requestId,
+        referredUserId,
+        referrerUserId,
+        bonusCredits: claim.bonusCredits,
+        referrerCredits: claim.freeFiveCardsCredits
+      })
+    );
+  }
+}
+
 async function logHistoryFromRequest({
   req,
   queryType,
@@ -441,6 +483,46 @@ function normalizeLocale(value) {
     return 'kk';
   }
   return 'en';
+}
+
+function encodeReferralCode(userId) {
+  const numeric = Number(userId);
+  if (!Number.isFinite(numeric) || numeric <= 0) {
+    return '';
+  }
+  return `u${numeric.toString(36)}`;
+}
+
+function decodeReferralCode(code) {
+  const raw = typeof code === 'string' ? code.trim().toLowerCase() : '';
+  if (!raw.startsWith('u') || raw.length < 2) {
+    return null;
+  }
+  const payload = raw.slice(1);
+  if (!/^[0-9a-z]+$/.test(payload)) {
+    return null;
+  }
+  const decoded = parseInt(payload, 36);
+  if (!Number.isFinite(decoded) || decoded <= 0) {
+    return null;
+  }
+  return decoded;
+}
+
+function parseReferrerUserIdFromStartParam(startParam) {
+  const raw = typeof startParam === 'string' ? startParam.trim() : '';
+  if (!raw.startsWith('ref_')) {
+    return null;
+  }
+  return decodeReferralCode(raw.slice(4));
+}
+
+function buildReferralLink(userId) {
+  const code = encodeReferralCode(userId);
+  if (!code) {
+    return 'https://t.me/tarot_arkana_bot/app';
+  }
+  return `https://t.me/tarot_arkana_bot/app?startapp=ref_${code}`;
 }
 
 function buildSofiaPromo(locale) {
@@ -565,6 +647,7 @@ app.get('/api/history/queries', telegramAuthMiddleware, async (req, res) => {
   const limitRaw = Number(req.query?.limit);
   const limit = Number.isFinite(limitRaw) ? limitRaw : 20;
   await upsertTelegramUserFromRequest(req);
+  await tryClaimReferralForRequest(req);
   const items = await listRecentUserQueries({
     telegramUserId,
     limit
@@ -596,10 +679,80 @@ app.delete('/api/history/queries', telegramAuthMiddleware, async (req, res) => {
     });
   }
   await upsertTelegramUserFromRequest(req);
+  await tryClaimReferralForRequest(req);
   const result = await clearUserQueryHistory({ telegramUserId });
   return res.json({
     ok: true,
     deletedCount: result.deletedCount,
+    requestId: req.requestId
+  });
+});
+
+app.get('/api/user/dashboard', telegramAuthMiddleware, async (req, res) => {
+  if (!hasDb()) {
+    return res.status(503).json({
+      error: 'storage_unavailable',
+      reason: 'database_not_configured',
+      requestId: req.requestId
+    });
+  }
+  const telegramUserId =
+    Number.isFinite(Number(req.telegram?.userId)) && Number(req.telegram?.userId) > 0
+      ? Number(req.telegram.userId)
+      : parseUserIdFromInitData(readTelegramInitData(req).initData);
+  if (!telegramUserId) {
+    return res.status(401).json({
+      error: 'unauthorized',
+      reason: 'telegram_user_missing',
+      requestId: req.requestId
+    });
+  }
+  await upsertTelegramUserFromRequest(req);
+  await tryClaimReferralForRequest(req);
+  const data = await getUserDashboard({ telegramUserId });
+  return res.json({
+    ok: true,
+    profile: data.profile,
+    perks: data.perks,
+    referrals: data.referrals,
+    services: data.services,
+    referral: {
+      code: encodeReferralCode(telegramUserId),
+      link: buildReferralLink(telegramUserId)
+    },
+    requestId: req.requestId
+  });
+});
+
+app.post('/api/premium/five-cards/consume', telegramAuthMiddleware, async (req, res) => {
+  if (!hasDb()) {
+    return res.status(503).json({
+      error: 'storage_unavailable',
+      reason: 'database_not_configured',
+      requestId: req.requestId
+    });
+  }
+  const telegramUserId =
+    Number.isFinite(Number(req.telegram?.userId)) && Number(req.telegram?.userId) > 0
+      ? Number(req.telegram.userId)
+      : parseUserIdFromInitData(readTelegramInitData(req).initData);
+  if (!telegramUserId) {
+    return res.status(401).json({
+      error: 'unauthorized',
+      reason: 'telegram_user_missing',
+      requestId: req.requestId
+    });
+  }
+  await upsertTelegramUserFromRequest(req);
+  await tryClaimReferralForRequest(req);
+  const result = await consumeFreeFiveCardsCredit({
+    telegramUserId,
+    reason: 'spread_five_unlock'
+  });
+  return res.json({
+    ok: result.ok,
+    consumed: result.consumed,
+    remaining: result.remaining,
     requestId: req.requestId
   });
 });
@@ -664,6 +817,7 @@ app.post('/api/payments/stars/invoice', telegramAuthMiddleware, async (req, res)
 
   try {
     await upsertTelegramUserFromRequest(req);
+    await tryClaimReferralForRequest(req);
     const result = await createTelegramInvoiceLink({
       title,
       description,
@@ -744,6 +898,7 @@ app.post('/api/payments/stars/confirm', telegramAuthMiddleware, async (req, res)
 
   try {
     await upsertTelegramUserFromRequest(req);
+    await tryClaimReferralForRequest(req);
     const result = await confirmInvoiceStatus({
       telegramUserId: userId,
       payload,
@@ -823,6 +978,7 @@ app.post('/api/sofia/consent', telegramAuthMiddleware, async (req, res) => {
   }
 
   await upsertTelegramUserFromRequest(req);
+  await tryClaimReferralForRequest(req);
   const state = await recordSofiaConsent({
     telegramUserId,
     decision
@@ -1051,11 +1207,13 @@ app.post('/api/reading/generate', telegramAuthMiddleware, async (req, res) => {
 
   const startTime = Date.now();
   try {
+    const locale = normalizeLocale(req.body?.language);
+    await upsertTelegramUserFromRequest(req, locale);
+    await tryClaimReferralForRequest(req);
     const messages = buildPromptMessages(req.body, mode);
     const result = await createResponse(messages, {
       requestId: req.requestId
     });
-    const locale = normalizeLocale(req.body?.language);
     const enriched = appendPromoToReadingResult(result.parsed, locale);
     await logHistoryFromRequest({
       req,
@@ -1123,11 +1281,13 @@ app.post('/api/reading/generate_web', telegramAuthMiddleware, async (req, res) =
 
   const startTime = Date.now();
   try {
+    const locale = normalizeLocale(payload?.language);
+    await upsertTelegramUserFromRequest(req, locale);
+    await tryClaimReferralForRequest(req);
     const messages = buildPromptMessages(payload, mode);
     const result = await createResponse(messages, {
       requestId: req.requestId
     });
-    const locale = normalizeLocale(payload?.language);
     const enriched = appendPromoToReadingResult(result.parsed, locale);
     await logHistoryFromRequest({
       req,
@@ -1182,6 +1342,9 @@ app.post('/api/reading/details', telegramAuthMiddleware, async (req, res) => {
 
   const startTime = Date.now();
   try {
+    const locale = normalizeLocale(req.body?.locale);
+    await upsertTelegramUserFromRequest(req, locale);
+    await tryClaimReferralForRequest(req);
     const messages = buildDetailsPrompt(req.body);
     const result = await createTextResponse(messages, {
       requestId: req.requestId,
@@ -1202,7 +1365,6 @@ app.post('/api/reading/details', telegramAuthMiddleware, async (req, res) => {
         duration_ms: durationMs,
       })
     );
-    const locale = normalizeLocale(req.body?.locale);
     return res.json({
       detailsText: appendSofiaPromo(detailsText, locale),
       requestId: req.requestId

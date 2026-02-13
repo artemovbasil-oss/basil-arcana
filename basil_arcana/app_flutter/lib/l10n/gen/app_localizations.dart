@@ -166,6 +166,84 @@ abstract class AppLocalizations {
   /// **'Promo disabled. Back to free version.'**
   String get settingsPromoResetDone;
 
+  /// No description provided for @settingsDashboardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your profile dashboard'**
+  String get settingsDashboardTitle;
+
+  /// No description provided for @settingsDashboardTopCardsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Top cards by frequency'**
+  String get settingsDashboardTopCardsTitle;
+
+  /// No description provided for @settingsDashboardTopCardsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No card stats yet.'**
+  String get settingsDashboardTopCardsEmpty;
+
+  /// No description provided for @settingsDashboardServicesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid services'**
+  String get settingsDashboardServicesTitle;
+
+  /// No description provided for @settingsDashboardServicesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No active paid services.'**
+  String get settingsDashboardServicesEmpty;
+
+  /// No description provided for @settingsDashboardServiceUnlimitedNoDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited energy plan is active.'**
+  String get settingsDashboardServiceUnlimitedNoDate;
+
+  /// No description provided for @settingsDashboardServiceUnlimitedWithDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited energy plan is active until {date}.'**
+  String settingsDashboardServiceUnlimitedWithDate(Object date);
+
+  /// No description provided for @settingsDashboardEnergy.
+  ///
+  /// In en, this message translates to:
+  /// **'Current energy: {value}'**
+  String settingsDashboardEnergy(Object value);
+
+  /// No description provided for @settingsDashboardFreePremium.
+  ///
+  /// In en, this message translates to:
+  /// **'Free premium five-card readings: {count}'**
+  String settingsDashboardFreePremium(int count);
+
+  /// No description provided for @settingsDashboardFreePremiumRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Free premium readings left: {count}'**
+  String settingsDashboardFreePremiumRemaining(int count);
+
+  /// No description provided for @settingsDashboardInvited.
+  ///
+  /// In en, this message translates to:
+  /// **'Invited users: {count}'**
+  String settingsDashboardInvited(int count);
+
+  /// No description provided for @settingsDashboardShareButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Share personal referral link'**
+  String get settingsDashboardShareButton;
+
+  /// No description provided for @settingsDashboardLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load dashboard data right now.'**
+  String get settingsDashboardLoadError;
+
   /// No description provided for @languageLabel.
   ///
   /// In en, this message translates to:
@@ -813,6 +891,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Action step (next 24–72h)'**
   String get resultSectionAction;
+
+  /// No description provided for @resultReferralTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Referral bonus'**
+  String get resultReferralTitle;
+
+  /// No description provided for @resultReferralBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Share your personal link with friends and get 20 free premium five-card readings for every new user who joins from your link.'**
+  String get resultReferralBody;
+
+  /// No description provided for @resultReferralButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Share link'**
+  String get resultReferralButton;
+
+  /// No description provided for @resultReferralCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Referral link copied. Send it in Telegram.'**
+  String get resultReferralCopied;
+
+  /// No description provided for @resultReferralShareMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Try Basil Arcana: stylish and accurate Tarot readings right in Telegram.'**
+  String get resultReferralShareMessage;
 
   /// No description provided for @resultDeepPrompt.
   ///

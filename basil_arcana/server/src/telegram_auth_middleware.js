@@ -107,6 +107,10 @@ function telegramAuthMiddleware(req, res, next) {
             typeof parsedUser.language_code === 'string'
               ? parsedUser.language_code.trim()
               : '',
+          photoUrl:
+            typeof parsedUser.photo_url === 'string'
+              ? parsedUser.photo_url.trim()
+              : '',
           firstName:
             typeof parsedUser.first_name === 'string'
               ? parsedUser.first_name.trim()
@@ -123,6 +127,10 @@ function telegramAuthMiddleware(req, res, next) {
   req.telegram = {
     ok: true,
     initDataLength: initData.length,
+    startParam:
+      typeof validation.data?.start_param === 'string'
+        ? validation.data.start_param.trim()
+        : '',
     userId,
     user: telegramUser
   };

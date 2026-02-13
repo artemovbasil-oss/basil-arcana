@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
 import 'energy_widgets.dart';
+import '../telegram/telegram_user_profile.dart';
 import '../../state/providers.dart';
 
 PreferredSizeWidget buildTopBar(
@@ -66,13 +67,8 @@ PreferredSizeWidget buildEnergyTopBar(
         ),
         const SizedBox(width: 8),
         _TopBarActionSlot(
-          child: showSettings
-              ? IconButton(
-                  icon: const Icon(Icons.settings),
-                  tooltip: AppLocalizations.of(context).settingsTitle,
-                  onPressed: onSettings,
-                )
-              : null,
+          child:
+              showSettings ? _TopBarProfileButton(onPressed: onSettings) : null,
         ),
       ],
     ),
@@ -90,6 +86,67 @@ class _TopBarActionSlot extends StatelessWidget {
       width: 40,
       height: 40,
       child: child ?? const SizedBox.shrink(),
+    );
+  }
+}
+
+class _TopBarProfileButton extends StatelessWidget {
+  const _TopBarProfileButton({this.onPressed});
+
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final profile = readTelegramUserProfile();
+    final initials = profile?.initials ?? 'BA';
+    final photoUrl = profile?.photoUrl ?? '';
+    return SizedBox(
+      width: 40,
+      height: 40,
+      child: IconButton(
+        padding: EdgeInsets.zero,
+        tooltip: AppLocalizations.of(context).settingsTitle,
+        onPressed: onPressed,
+        icon: photoUrl.isNotEmpty
+            ? ClipOval(
+                child: Image.network(
+                  photoUrl,
+                  width: 32,
+                  height: 32,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return _InitialsAvatar(initials: initials);
+                  },
+                ),
+              )
+            : _InitialsAvatar(initials: initials),
+      ),
+    );
+  }
+}
+
+class _InitialsAvatar extends StatelessWidget {
+  const _InitialsAvatar({required this.initials});
+
+  final String initials;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 32,
+      height: 32,
+      decoration: BoxDecoration(
+        color: const Color(0xFF8F4BFF),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        initials,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+            ),
+      ),
     );
   }
 }
