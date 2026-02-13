@@ -13,6 +13,7 @@ import '../../core/widgets/tarot_asset_widgets.dart';
 import '../../core/assets/asset_paths.dart';
 import '../../core/navigation/app_route_config.dart';
 import '../../data/models/app_enums.dart';
+import '../../data/models/deck_model.dart';
 import '../../data/repositories/cards_repository.dart';
 import '../../state/energy_controller.dart';
 import '../../state/reading_flow_controller.dart';
@@ -41,7 +42,6 @@ class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
 
   static const _cardWidth = 140.0;
   static const _cardHeight = 210.0;
-  static String get _deckCoverUrl => deckCoverImageUrl();
 
   void _navigateToResultIfNeeded() {
     if (_hasNavigatedToResult) {
@@ -81,9 +81,11 @@ class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
       vsync: this,
       duration: const Duration(seconds: 14),
     );
+    final selectedDeck = ref.read(deckProvider);
+    final deckCoverUrl = deckCoverImageUrl(selectedDeck);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       precacheImage(
-        NetworkImage(_deckCoverUrl),
+        NetworkImage(deckCoverUrl),
         context,
       );
     });
@@ -128,6 +130,8 @@ class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(readingFlowControllerProvider);
+    final deckId = ref.watch(deckProvider);
+    final deckCoverUrl = deckCoverImageUrl(deckId);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context)!;
@@ -172,6 +176,7 @@ class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
                             height: 340,
                             child: hasDrawnCards
                                 ? _DrawnStack(
+                                    deckCoverUrl: deckCoverUrl,
                                     keptCount: keptCount,
                                     fallAnimation: CurvedAnimation(
                                       parent: _fallController,
@@ -183,7 +188,10 @@ class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
                                       curve: Curves.easeInOut,
                                     ),
                                   )
-                                : _ShufflingStack(animation: _controller),
+                                : _ShufflingStack(
+                                    animation: _controller,
+                                    deckCoverUrl: deckCoverUrl,
+                                  ),
                           ),
                           const SizedBox(height: 24),
                           Text(
@@ -292,12 +300,14 @@ class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
 
 class _DrawnStack extends StatelessWidget {
   const _DrawnStack({
+    required this.deckCoverUrl,
     required this.keptCount,
     required this.fallAnimation,
     required this.showGlow,
     required this.glowAnimation,
   });
 
+  final String deckCoverUrl;
   final int keptCount;
   final Animation<double> fallAnimation;
   final bool showGlow;
@@ -317,9 +327,13 @@ class _DrawnStack extends StatelessWidget {
         return Stack(
           alignment: Alignment.center,
           children: [
-            _DeckStack(glowStrength: glowStrength),
+            _DeckStack(
+              glowStrength: glowStrength,
+              deckCoverUrl: deckCoverUrl,
+            ),
             for (var i = 0; i < drawnCount; i++)
               _DrawnCard(
+                deckCoverUrl: deckCoverUrl,
                 index: i,
                 targetOffset: targets[i],
                 targetRotation: rotations[i],
@@ -358,12 +372,14 @@ List<double> _drawRotations(int count) {
 
 class _DrawnCard extends StatelessWidget {
   const _DrawnCard({
+    required this.deckCoverUrl,
     required this.index,
     required this.targetOffset,
     required this.targetRotation,
     required this.progress,
   });
 
+  final String deckCoverUrl;
   final int index;
   final Offset targetOffset;
   final double targetRotation;
@@ -397,16 +413,20 @@ class _DrawnCard extends StatelessWidget {
       child: DeckCoverBack(
         width: _ShuffleScreenState._cardWidth,
         height: _ShuffleScreenState._cardHeight,
-        imageUrl: _ShuffleScreenState._deckCoverUrl,
+        imageUrl: deckCoverUrl,
       ),
     );
   }
 }
 
 class _DeckStack extends StatelessWidget {
-  const _DeckStack({required this.glowStrength});
+  const _DeckStack({
+    required this.glowStrength,
+    required this.deckCoverUrl,
+  });
 
   final double glowStrength;
+  final String deckCoverUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -426,20 +446,27 @@ class _DeckStack extends StatelessWidget {
               child: DeckCoverBack(
                 width: _ShuffleScreenState._cardWidth,
                 height: _ShuffleScreenState._cardHeight,
-                imageUrl: _ShuffleScreenState._deckCoverUrl,
+                imageUrl: deckCoverUrl,
               ),
             ),
           ),
-        _MagicalGlowCard(glowStrength: glowStrength),
+        _MagicalGlowCard(
+          glowStrength: glowStrength,
+          deckCoverUrl: deckCoverUrl,
+        ),
       ],
     );
   }
 }
 
 class _ShufflingStack extends StatelessWidget {
-  const _ShufflingStack({required this.animation});
+  const _ShufflingStack({
+    required this.animation,
+    required this.deckCoverUrl,
+  });
 
   final Animation<double> animation;
+  final String deckCoverUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -464,7 +491,7 @@ class _ShufflingStack extends StatelessWidget {
               child: Transform.rotate(
                 angle: angle,
                 child: DeckCoverBack(
-                  imageUrl: _ShuffleScreenState._deckCoverUrl,
+                  imageUrl: deckCoverUrl,
                 ),
               ),
             );
@@ -476,9 +503,13 @@ class _ShufflingStack extends StatelessWidget {
 }
 
 class _MagicalGlowCard extends StatelessWidget {
-  const _MagicalGlowCard({required this.glowStrength});
+  const _MagicalGlowCard({
+    required this.glowStrength,
+    required this.deckCoverUrl,
+  });
 
   final double glowStrength;
+  final String deckCoverUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -525,7 +556,7 @@ class _MagicalGlowCard extends StatelessWidget {
           child: DeckCoverBack(
             width: _ShuffleScreenState._cardWidth,
             height: _ShuffleScreenState._cardHeight,
-            imageUrl: _ShuffleScreenState._deckCoverUrl,
+            imageUrl: deckCoverUrl,
           ),
         ),
       ],

@@ -3,8 +3,11 @@ import '../../data/models/deck_model.dart';
 import '../config/app_config.dart';
 import '../config/assets_config.dart';
 
-String deckCoverImageUrl() {
+String deckCoverImageUrl([DeckType deckId = DeckType.all]) {
   final base = AssetsConfig.assetsBaseUrl;
+  if (deckId == DeckType.lenormand) {
+    return '$base/deck/lenormand.webp';
+  }
   return '$base/deck/new-deck.webp';
 }
 
