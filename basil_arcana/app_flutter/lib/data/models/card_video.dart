@@ -88,6 +88,14 @@ String? resolveCardVideoFileName(
   Set<String>? availableFiles,
 }) {
   final normalizedId = canonicalCardId(cardId);
+  final lenormandVideo = _lenormandVideoFileForCardId(normalizedId);
+  if (lenormandVideo != null) {
+    if (availableFiles != null && availableFiles.isNotEmpty) {
+      final normalized = lenormandVideo.toLowerCase();
+      return availableFiles.contains(normalized) ? lenormandVideo : null;
+    }
+    return lenormandVideo;
+  }
   if (availableFiles != null && availableFiles.isNotEmpty) {
     final fileName = _videoFileFromKey(_videoKeyForCardId(normalizedId));
     if (fileName == null) {
@@ -202,4 +210,16 @@ String normalizeVideoFileName(String name) {
     normalized = '$normalized.mp4';
   }
   return normalized;
+}
+
+String? _lenormandVideoFileForCardId(String normalizedId) {
+  if (!normalizedId.startsWith('lenormand_')) {
+    return null;
+  }
+  final parts = normalizedId.split('_');
+  if (parts.length < 3) {
+    return null;
+  }
+  final slug = parts.sublist(2).join('_');
+  return 'ln_$slug.mp4';
 }

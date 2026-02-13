@@ -238,6 +238,12 @@ String? cardVideoUrl(CardModel card, String assetsBaseUrl) {
   }
   final explicitUrl = card.videoUrl?.trim();
   if (explicitUrl == null || explicitUrl.isEmpty) {
+    if (card.deckId == DeckType.lenormand) {
+      final fallbackName = _lenormandVideoFileName(card.id);
+      if (fallbackName != null) {
+        return '$assetsBaseUrl/video/$fallbackName';
+      }
+    }
     return null;
   }
   if (explicitUrl.startsWith('http://') || explicitUrl.startsWith('https://')) {
@@ -245,6 +251,18 @@ String? cardVideoUrl(CardModel card, String assetsBaseUrl) {
   }
   final normalized = explicitUrl.replaceFirst(RegExp(r'^/+'), '');
   return '$assetsBaseUrl/video/$normalized';
+}
+
+String? _lenormandVideoFileName(String cardId) {
+  final normalizedId = canonicalCardId(cardId);
+  if (!normalizedId.startsWith('lenormand_')) {
+    return null;
+  }
+  final parts = normalizedId.split('_');
+  if (parts.length < 3) {
+    return null;
+  }
+  return 'ln_${parts.sublist(2).join('_')}.mp4';
 }
 
 String? _videoFileNameFromJson(Map<String, dynamic> json) {

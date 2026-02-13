@@ -366,9 +366,38 @@ String _resolveImageUrl(String rawUrl, String cardId, DeckType deckId) {
   final normalized = trimmed.replaceFirst(RegExp(r'^/+'), '');
   if (normalized.startsWith('cards/') ||
       (normalized.contains('/') && normalized.endsWith('.webp'))) {
+    if (deckId == DeckType.lenormand &&
+        normalized.startsWith('cards/lenormand/')) {
+      final corrected = _normalizeLenormandImagePath(
+        normalized,
+        cardId: cardId,
+      );
+      return '${AssetsConfig.assetsBaseUrl}/$corrected';
+    }
     return '${AssetsConfig.assetsBaseUrl}/$normalized';
   }
   return cardImageUrl(cardId, deckId: deckId);
+}
+
+String _normalizeLenormandImagePath(
+  String rawPath, {
+  required String cardId,
+}) {
+  final path = rawPath.replaceFirst(RegExp(r'^/+'), '');
+  final basename = path.split('/').last;
+  if (basename.startsWith('ln_')) {
+    return path;
+  }
+  final normalizedCardId = canonicalCardId(cardId);
+  if (!normalizedCardId.startsWith('lenormand_')) {
+    return path;
+  }
+  final parts = normalizedCardId.split('_');
+  if (parts.length < 3) {
+    return path;
+  }
+  final slug = parts.sublist(2).join('_');
+  return 'cards/lenormand/ln_$slug.webp';
 }
 
 List<CardModel> _getActiveDeckCards(
@@ -432,10 +461,9 @@ List<CardModel> _buildLenormandFallback(Locale locale) {
       _ => 'Lenormand cards are read as practical signals, not abstractions.',
     };
     final imageUrl =
-        'https://basilarcana-assets.b-cdn.net/cards/lenormand/${def.id}.webp';
-    final videoUrl = def.number <= 18
-        ? 'https://basilarcana-assets.b-cdn.net/video/ln_${def.slug}.mp4'
-        : null;
+        'https://basilarcana-assets.b-cdn.net/cards/lenormand/ln_${def.slug}.webp';
+    final videoUrl =
+        'https://basilarcana-assets.b-cdn.net/video/ln_${def.slug}.mp4';
 
     return CardModel(
       id: def.id,
