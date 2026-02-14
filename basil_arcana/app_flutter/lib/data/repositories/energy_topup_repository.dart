@@ -6,14 +6,20 @@ import 'package:http/http.dart' as http;
 import '../../core/config/api_config.dart';
 import '../../core/network/telegram_api_client.dart';
 
-enum EnergyPackId { small, medium, full, yearUnlimited, fiveCardsSingle }
+enum EnergyPackId {
+  full,
+  weekUnlimited,
+  monthUnlimited,
+  yearUnlimited,
+  fiveCardsSingle
+}
 
 extension EnergyPackIdValue on EnergyPackId {
   String get value {
     return switch (this) {
-      EnergyPackId.small => 'small',
-      EnergyPackId.medium => 'medium',
       EnergyPackId.full => 'full',
+      EnergyPackId.weekUnlimited => 'week_unlimited',
+      EnergyPackId.monthUnlimited => 'month_unlimited',
       EnergyPackId.yearUnlimited => 'year_unlimited',
       EnergyPackId.fiveCardsSingle => 'five_cards_single',
     };

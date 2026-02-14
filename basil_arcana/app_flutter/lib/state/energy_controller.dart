@@ -196,16 +196,31 @@ class EnergyController extends StateNotifier<EnergyState> {
     await _persist(next);
   }
 
-  Future<void> activateUnlimitedForYear() async {
+  Future<void> activateUnlimitedForDays(int days) async {
+    if (days <= 0) {
+      return;
+    }
     final now = DateTime.now();
     final next = state.copyWith(
       value: maxEnergy,
       lastUpdatedAt: now,
-      unlimitedUntil: now.add(const Duration(days: 365)),
+      unlimitedUntil: now.add(Duration(days: days)),
       promoCodeActive: false,
     );
     state = next;
     await _persist(next);
+  }
+
+  Future<void> activateUnlimitedForWeek() async {
+    await activateUnlimitedForDays(7);
+  }
+
+  Future<void> activateUnlimitedForMonth() async {
+    await activateUnlimitedForDays(30);
+  }
+
+  Future<void> activateUnlimitedForYear() async {
+    await activateUnlimitedForDays(365);
   }
 
   Future<bool> applyPromoCode(String rawCode) async {

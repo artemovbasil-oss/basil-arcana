@@ -754,10 +754,16 @@ class AppLocalizationsKk extends AppLocalizations {
   String get energyPackMedium => '+50% энергия сатып алу';
 
   @override
-  String get energyPackFull => 'Толық энергияны сатып алу';
+  String get energyPackFull => '100%-ға дейін толықтыру';
 
   @override
-  String get energyPackYearUnlimited => '1 жылға шексіз энергия — 1000 ⭐';
+  String get energyPackWeekUnlimited => '1 аптаға шексіз — 99 ⭐';
+
+  @override
+  String get energyPackMonthUnlimited => '1 айға шексіз — 499 ⭐';
+
+  @override
+  String get energyPackYearUnlimited => '1 жылға шексіз — 9999 ⭐';
 
   @override
   String energyTopUpSuccess(int value) {
@@ -765,7 +771,7 @@ class AppLocalizationsKk extends AppLocalizations {
   }
 
   @override
-  String get energyUnlimitedActivated => 'Шексіз энергия 1 жылға қосылды.';
+  String get energyUnlimitedActivated => 'Шексіз энергия қосылды.';
 
   @override
   String get energyTopUpProcessing => 'Төлем ашылып жатыр...';

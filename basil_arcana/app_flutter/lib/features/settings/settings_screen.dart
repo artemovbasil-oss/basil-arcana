@@ -532,8 +532,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   String _serviceLabel(BuildContext context, UserDashboardService service) {
-    final l10n = AppLocalizations.of(context)!;
-    if (service.type == 'year_unlimited') {
+    final l10n = AppLocalizations.of(context);
+    if (service.type == 'year_unlimited' || service.type == 'unlimited') {
       if (service.expiresAt == null) {
         return l10n.settingsDashboardServiceUnlimitedNoDate;
       }

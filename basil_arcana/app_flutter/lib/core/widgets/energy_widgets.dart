@@ -9,27 +9,27 @@ import '../../state/providers.dart';
 import 'app_buttons.dart';
 
 const Map<EnergyPackId, int> _displayStarsByPack = {
-  EnergyPackId.small: 25,
-  EnergyPackId.medium: 45,
-  EnergyPackId.full: 75,
-  EnergyPackId.yearUnlimited: 6990,
+  EnergyPackId.full: 5,
+  EnergyPackId.weekUnlimited: 99,
+  EnergyPackId.monthUnlimited: 499,
+  EnergyPackId.yearUnlimited: 9999,
 };
 
 const Map<EnergyPackId, int> _energyGainByPack = {
-  EnergyPackId.small: 25,
-  EnergyPackId.medium: 50,
   EnergyPackId.full: 100,
+  EnergyPackId.weekUnlimited: 0,
+  EnergyPackId.monthUnlimited: 0,
   EnergyPackId.yearUnlimited: 0,
 };
 
 String _packTitle(AppLocalizations l10n, EnergyPackId packId) {
   switch (packId) {
-    case EnergyPackId.small:
-      return l10n.energyPackSmall;
-    case EnergyPackId.medium:
-      return l10n.energyPackMedium;
     case EnergyPackId.full:
       return l10n.energyPackFull;
+    case EnergyPackId.weekUnlimited:
+      return l10n.energyPackWeekUnlimited;
+    case EnergyPackId.monthUnlimited:
+      return l10n.energyPackMonthUnlimited;
     case EnergyPackId.yearUnlimited:
       final normalized = l10n.energyPackYearUnlimited
           .replaceAll(RegExp(r'\s*[—-]\s*\d+\s*⭐\s*$', unicode: true), '')
@@ -41,7 +41,9 @@ String _packTitle(AppLocalizations l10n, EnergyPackId packId) {
 }
 
 bool _shouldShowPack(EnergyState energy, EnergyPackId packId) {
-  if (packId == EnergyPackId.yearUnlimited) {
+  if (packId == EnergyPackId.weekUnlimited ||
+      packId == EnergyPackId.monthUnlimited ||
+      packId == EnergyPackId.yearUnlimited) {
     return true;
   }
   final gain = _energyGainByPack[packId] ?? 0;
@@ -75,7 +77,6 @@ Future<bool> trySpendEnergyForAction(
 
 Future<void> showEnergyTopUpSheet(BuildContext context, WidgetRef ref) async {
   final l10n = AppLocalizations.of(context);
-  final energy = ref.read(energyProvider);
   await showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
@@ -131,6 +132,81 @@ Future<void> showEnergyTopUpSheet(BuildContext context, WidgetRef ref) async {
                         ),
                       ),
                     _PackActionButton(
+                      title: _packTitle(l10n, EnergyPackId.full),
+                      stars: _displayStarsByPack[EnergyPackId.full]!,
+                      primary: false,
+                      enabled: processingPack == null,
+                      onPressed: processingPack != null
+                          ? null
+                          : () async {
+                              if (!_shouldShowPack(
+                                ref.read(energyProvider),
+                                EnergyPackId.full,
+                              )) {
+                                return;
+                              }
+                              setState(
+                                  () => processingPack = EnergyPackId.full);
+                              await _purchaseEnergyPack(
+                                context: context,
+                                sheetContext: statefulContext,
+                                ref: ref,
+                                l10n: l10n,
+                                packId: EnergyPackId.full,
+                              );
+                              if (statefulContext.mounted) {
+                                setState(() => processingPack = null);
+                              }
+                            },
+                    ),
+                    const SizedBox(height: 10),
+                    _PackActionButton(
+                      title: _packTitle(l10n, EnergyPackId.weekUnlimited),
+                      stars: _displayStarsByPack[EnergyPackId.weekUnlimited]!,
+                      primary: false,
+                      enabled: processingPack == null,
+                      onPressed: processingPack != null
+                          ? null
+                          : () async {
+                              setState(() =>
+                                  processingPack = EnergyPackId.weekUnlimited);
+                              await _purchaseEnergyPack(
+                                context: context,
+                                sheetContext: statefulContext,
+                                ref: ref,
+                                l10n: l10n,
+                                packId: EnergyPackId.weekUnlimited,
+                              );
+                              if (statefulContext.mounted) {
+                                setState(() => processingPack = null);
+                              }
+                            },
+                    ),
+                    const SizedBox(height: 10),
+                    _PackActionButton(
+                      title: _packTitle(l10n, EnergyPackId.monthUnlimited),
+                      stars: _displayStarsByPack[EnergyPackId.monthUnlimited]!,
+                      primary: false,
+                      enabled: processingPack == null,
+                      onPressed: processingPack != null
+                          ? null
+                          : () async {
+                              setState(() =>
+                                  processingPack = EnergyPackId.monthUnlimited);
+                              await _purchaseEnergyPack(
+                                context: context,
+                                sheetContext: statefulContext,
+                                ref: ref,
+                                l10n: l10n,
+                                packId: EnergyPackId.monthUnlimited,
+                              );
+                              if (statefulContext.mounted) {
+                                setState(() => processingPack = null);
+                              }
+                            },
+                    ),
+                    const SizedBox(height: 10),
+                    _PackActionButton(
                       title: _packTitle(l10n, EnergyPackId.yearUnlimited),
                       stars: _displayStarsByPack[EnergyPackId.yearUnlimited]!,
                       primary: true,
@@ -152,40 +228,6 @@ Future<void> showEnergyTopUpSheet(BuildContext context, WidgetRef ref) async {
                               }
                             },
                     ),
-                    for (final packId in [
-                      EnergyPackId.small,
-                      EnergyPackId.medium,
-                      EnergyPackId.full,
-                    ])
-                      if (_shouldShowPack(energy, packId)) ...[
-                        const SizedBox(height: 10),
-                        _PackActionButton(
-                          title: _packTitle(l10n, packId),
-                          stars: _displayStarsByPack[packId]!,
-                          enabled: processingPack == null,
-                          onPressed: processingPack != null
-                              ? null
-                              : () async {
-                                  if (!_shouldShowPack(
-                                    ref.read(energyProvider),
-                                    packId,
-                                  )) {
-                                    return;
-                                  }
-                                  setState(() => processingPack = packId);
-                                  await _purchaseEnergyPack(
-                                    context: context,
-                                    sheetContext: statefulContext,
-                                    ref: ref,
-                                    l10n: l10n,
-                                    packId: packId,
-                                  );
-                                  if (statefulContext.mounted) {
-                                    setState(() => processingPack = null);
-                                  }
-                                },
-                        ),
-                      ],
                   ],
                 ),
               ),
@@ -454,7 +496,7 @@ Future<void> _purchaseEnergyPack({
     return;
   }
 
-  if (packId != EnergyPackId.yearUnlimited &&
+  if (packId == EnergyPackId.full &&
       !_shouldShowPack(ref.read(energyProvider), packId)) {
     return;
   }
@@ -476,7 +518,11 @@ Future<void> _purchaseEnergyPack({
 
     switch (status) {
       case 'paid':
-        if (packId == EnergyPackId.yearUnlimited) {
+        if (packId == EnergyPackId.weekUnlimited) {
+          await ref.read(energyProvider.notifier).activateUnlimitedForWeek();
+        } else if (packId == EnergyPackId.monthUnlimited) {
+          await ref.read(energyProvider.notifier).activateUnlimitedForMonth();
+        } else if (packId == EnergyPackId.yearUnlimited) {
           await ref.read(energyProvider.notifier).activateUnlimitedForYear();
         } else {
           await ref
@@ -489,7 +535,9 @@ Future<void> _purchaseEnergyPack({
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              packId == EnergyPackId.yearUnlimited
+              packId == EnergyPackId.weekUnlimited ||
+                      packId == EnergyPackId.monthUnlimited ||
+                      packId == EnergyPackId.yearUnlimited
                   ? l10n.energyUnlimitedActivated
                   : l10n.energyTopUpSuccess(invoice.energyAmount),
             ),

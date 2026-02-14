@@ -748,10 +748,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get energyPackMedium => 'Buy +50% energy';
 
   @override
-  String get energyPackFull => 'Buy full energy';
+  String get energyPackFull => 'Top up to 100%';
 
   @override
-  String get energyPackYearUnlimited => 'Unlimited energy for 1 year — 1000 ⭐';
+  String get energyPackWeekUnlimited => 'Unlimited for 1 week — 99 ⭐';
+
+  @override
+  String get energyPackMonthUnlimited => 'Unlimited for 1 month — 499 ⭐';
+
+  @override
+  String get energyPackYearUnlimited => 'Unlimited for 1 year — 9999 ⭐';
 
   @override
   String energyTopUpSuccess(int value) {
@@ -759,8 +765,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get energyUnlimitedActivated =>
-      'Unlimited energy activated for 1 year.';
+  String get energyUnlimitedActivated => 'Unlimited energy activated.';
 
   @override
   String get energyTopUpProcessing => 'Opening payment...';

@@ -1447,13 +1447,25 @@ abstract class AppLocalizations {
   /// No description provided for @energyPackFull.
   ///
   /// In en, this message translates to:
-  /// **'Buy full energy'**
+  /// **'Top up to 100%'**
   String get energyPackFull;
+
+  /// No description provided for @energyPackWeekUnlimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited for 1 week — 99 ⭐'**
+  String get energyPackWeekUnlimited;
+
+  /// No description provided for @energyPackMonthUnlimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited for 1 month — 499 ⭐'**
+  String get energyPackMonthUnlimited;
 
   /// No description provided for @energyPackYearUnlimited.
   ///
   /// In en, this message translates to:
-  /// **'Unlimited energy for 1 year — 1000 ⭐'**
+  /// **'Unlimited for 1 year — 9999 ⭐'**
   String get energyPackYearUnlimited;
 
   /// No description provided for @energyTopUpSuccess.
@@ -1465,7 +1477,7 @@ abstract class AppLocalizations {
   /// No description provided for @energyUnlimitedActivated.
   ///
   /// In en, this message translates to:
-  /// **'Unlimited energy activated for 1 year.'**
+  /// **'Unlimited energy activated.'**
   String get energyUnlimitedActivated;
 
   /// No description provided for @energyTopUpProcessing.

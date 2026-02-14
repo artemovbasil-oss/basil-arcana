@@ -755,10 +755,16 @@ class AppLocalizationsRu extends AppLocalizations {
   String get energyPackMedium => 'Купить +50% энергии';
 
   @override
-  String get energyPackFull => 'Купить полный заряд';
+  String get energyPackFull => 'Пополнить до 100%';
 
   @override
-  String get energyPackYearUnlimited => 'Бесконечная энергия на 1 год — 1000 ⭐';
+  String get energyPackWeekUnlimited => 'Безлимит на 1 неделю — 99 ⭐';
+
+  @override
+  String get energyPackMonthUnlimited => 'Безлимит на 1 месяц — 499 ⭐';
+
+  @override
+  String get energyPackYearUnlimited => 'Безлимит на 1 год — 9999 ⭐';
 
   @override
   String energyTopUpSuccess(int value) {
@@ -766,8 +772,7 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get energyUnlimitedActivated =>
-      'Бесконечная энергия активирована на 1 год.';
+  String get energyUnlimitedActivated => 'Безлимитная энергия активирована.';
 
   @override
   String get energyTopUpProcessing => 'Открываем оплату...';

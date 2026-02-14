@@ -434,8 +434,8 @@ async function getUserDashboard({ telegramUserId }) {
     const services = [];
     if (energy.unlimited_until && new Date(energy.unlimited_until).getTime() > Date.now()) {
       services.push({
-        id: 'year_unlimited',
-        type: 'year_unlimited',
+        id: 'unlimited',
+        type: 'unlimited',
         status: 'active',
         expiresAt: new Date(energy.unlimited_until).toISOString()
       });
@@ -598,8 +598,11 @@ async function confirmInvoiceStatus({ telegramUserId, payload, status }) {
     if (status === 'paid' && !alreadyApplied) {
       const grantType = String(row.grant_type || 'energy');
       const energyAmount = Math.max(0, Number(row.energy_amount || 0));
-      const updatesEnergyState =
-        grantType === 'energy' || grantType === 'unlimited_year';
+      const isUnlimitedGrant =
+        grantType === 'unlimited_week' ||
+        grantType === 'unlimited_month' ||
+        grantType === 'unlimited_year';
+      const updatesEnergyState = grantType === 'energy' || isUnlimitedGrant;
 
       if (updatesEnergyState) {
         await client.query(
@@ -615,18 +618,24 @@ async function confirmInvoiceStatus({ telegramUserId, payload, status }) {
         );
       }
 
-      if (grantType === 'unlimited_year' && updatesEnergyState) {
+      if (isUnlimitedGrant && updatesEnergyState) {
+        const intervalDays =
+          grantType === 'unlimited_week'
+            ? 7
+            : grantType === 'unlimited_month'
+            ? 30
+            : 365;
         await client.query(
           `
           UPDATE user_energy_state
           SET
             unlimited_until = (
-              GREATEST(COALESCE(unlimited_until, NOW()), NOW()) + INTERVAL '365 days'
+              GREATEST(COALESCE(unlimited_until, NOW()), NOW()) + ($2 || ' days')::interval
             ),
             updated_at = NOW()
           WHERE telegram_user_id = $1;
           `,
-          [telegramUserId]
+          [telegramUserId, String(intervalDays)]
         );
       }
 
@@ -643,7 +652,11 @@ async function confirmInvoiceStatus({ telegramUserId, payload, status }) {
         [
           telegramUserId,
           updatesEnergyState ? energyAmount : 0,
-          grantType === 'unlimited_year'
+          grantType === 'unlimited_week'
+            ? 'grant_unlimited_week'
+            : grantType === 'unlimited_month'
+            ? 'grant_unlimited_month'
+            : grantType === 'unlimited_year'
             ? 'grant_unlimited_year'
             : grantType === 'five_cards_single'
             ? 'grant_five_cards_single'
