@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:video_player/video_player.dart';
@@ -28,6 +29,7 @@ class _SplashScreenState extends State<SplashScreen> {
   Timer? _hardTimeoutTimer;
   Timer? _onboardingTimeoutTimer;
   late final bool _canNavigate;
+  late final bool _enableSplashVideo;
   bool _hasShownOnboarding = false;
   bool _showOnboarding = false;
   bool _didNavigate = false;
@@ -36,39 +38,40 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     _canNavigate = AppConfig.isConfigured;
+    _enableSplashVideo = !(kIsWeb &&
+        TelegramWebApp.isTelegramWebView &&
+        TelegramWebApp.isTelegramMobile);
     final box = Hive.box<String>(_settingsBoxName);
     _hasShownOnboarding = (box.get(_splashOnboardingSeenKey) ?? '') == '1';
     if (TelegramWebApp.isTelegramWebView) {
       TelegramWebApp.expand();
       TelegramWebApp.disableVerticalSwipes();
     }
-    if (_canNavigate) {
-      _hardTimeoutTimer = Timer(const Duration(seconds: 8), () {
+    _hardTimeoutTimer = Timer(const Duration(seconds: 8), () {
+      if (!mounted || _didNavigate) {
+        return;
+      }
+      _goHome();
+    });
+    _navigationTimer = Timer(const Duration(seconds: 3), () {
+      if (!mounted || _didNavigate) {
+        return;
+      }
+      if (_hasShownOnboarding) {
+        _goHome();
+        return;
+      }
+      setState(() {
+        _showOnboarding = true;
+      });
+      _onboardingTimeoutTimer?.cancel();
+      _onboardingTimeoutTimer = Timer(const Duration(seconds: 8), () {
         if (!mounted || _didNavigate) {
           return;
         }
         _goHome();
       });
-      _navigationTimer = Timer(const Duration(seconds: 3), () {
-        if (!mounted || _didNavigate) {
-          return;
-        }
-        if (_hasShownOnboarding) {
-          _goHome();
-          return;
-        }
-        setState(() {
-          _showOnboarding = true;
-        });
-        _onboardingTimeoutTimer?.cancel();
-        _onboardingTimeoutTimer = Timer(const Duration(seconds: 8), () {
-          if (!mounted || _didNavigate) {
-            return;
-          }
-          _goHome();
-        });
-      });
-    }
+    });
   }
 
   @override
@@ -95,12 +98,12 @@ class _SplashScreenState extends State<SplashScreen> {
           DeckSplashMedia(
             posterUrl: _deckSplashPosterUrl,
             videoUrl: _deckSplashVideoUrl,
+            enableVideo: _enableSplashVideo,
           ),
           SafeArea(
             top: useTelegramSafeArea,
-            child: _canNavigate
-                ? const SizedBox.shrink()
-                : Padding(
+            child: !_canNavigate
+                ? Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: Center(
                       child: Column(
@@ -123,9 +126,10 @@ class _SplashScreenState extends State<SplashScreen> {
                         ],
                       ),
                     ),
-                  ),
+                  )
+                : const SizedBox.shrink(),
           ),
-          if (_canNavigate && _showOnboarding)
+          if (_showOnboarding)
             _SplashOnboardingOverlay(
               onClose: () async {
                 final box = Hive.box<String>(_settingsBoxName);
@@ -170,10 +174,12 @@ class DeckSplashMedia extends StatefulWidget {
     super.key,
     required this.posterUrl,
     required this.videoUrl,
+    required this.enableVideo,
   });
 
   final String posterUrl;
   final String videoUrl;
+  final bool enableVideo;
 
   @override
   State<DeckSplashMedia> createState() => _DeckSplashMediaState();
@@ -186,6 +192,9 @@ class _DeckSplashMediaState extends State<DeckSplashMedia> {
   @override
   void initState() {
     super.initState();
+    if (!widget.enableVideo) {
+      return;
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeVideo();
     });
