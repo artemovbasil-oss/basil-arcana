@@ -459,6 +459,29 @@
         font-size: 0.82rem;
       }
 
+      .site-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem 1.05rem;
+        margin: 0.3rem 0 0.65rem;
+        padding: 0.66rem 0.72rem;
+        border: 1px solid var(--card-border);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.06);
+      }
+
+      .site-links a {
+        color: var(--accent-soft);
+        text-decoration: none;
+        border-bottom: 1px solid rgba(227, 210, 255, 0.38);
+        font-size: 0.88rem;
+        font-weight: 700;
+      }
+
+      .site-links a:hover {
+        border-bottom-color: rgba(227, 210, 255, 0.82);
+      }
+
       .bottom-cta {
         background: linear-gradient(135deg, #f5ebff, #c084ff 52%, #a45cf8);
         color: #10091c;
@@ -627,6 +650,11 @@
           padding: 0.88rem 0.9rem;
           margin-bottom: 0.95rem;
         }
+
+        .site-links {
+          gap: 0.62rem 0.9rem;
+          padding: 0.76rem 0.8rem;
+        }
       }
 
       @media (prefers-reduced-motion: reduce) {
@@ -743,9 +771,6 @@
           <div class="card-mark">02</div>
           <h2 data-i18n="sofiaTitle"></h2>
           <p data-i18n="sofiaDesc"></p>
-          <div class="card-subaction">
-            <a class="btn alt" href="./tarot-values.html" data-i18n="ctaTarotValues" data-track="cta_tarot_values"></a>
-          </div>
         </article>
         <article class="card reveal" data-delay="3">
           <div class="card-mark">03</div>
@@ -753,6 +778,12 @@
           <p data-i18n="miniDesc"></p>
         </article>
       </section>
+
+      <nav class="site-links" aria-label="Внутренние ссылки">
+        <a href="./news.html" data-i18n="navNews" data-track="nav_news"></a>
+        <a href="./tarot-values.html" data-i18n="navTarot" data-track="nav_tarot"></a>
+        <a href="./lenormand-values.html" data-i18n="navLenormand" data-track="nav_lenormand"></a>
+      </nav>
 
       <footer class="footer">
         <span data-i18n="footer"></span>
@@ -777,7 +808,9 @@
           ctaBot: "Открыть Telegram-бот",
           ctaSofia: "Написать Софии",
           ctaMini: "Получить бесплатный расклад",
-          ctaTarotValues: "Значения карт Таро",
+          navNews: "Новости",
+          navTarot: "Карты Таро",
+          navLenormand: "Колода Ленорман",
           sofiaName: "София Нокс",
           sofiaRole: "@SofiaKnoxx · таролог / астролог",
           botTitle: "Telegram‑бот",
@@ -797,7 +830,9 @@
           ctaBot: "Telegram-ботты ашу",
           ctaSofia: "Софияға жазу",
           ctaMini: "Тегін таралым алу",
-          ctaTarotValues: "Таро карталарының мағынасы",
+          navNews: "Жаңалықтар",
+          navTarot: "Таро карталары",
+          navLenormand: "Ленорман колодасы",
           sofiaName: "София Нокс",
           sofiaRole: "@SofiaKnoxx · таролог / астролог",
           botTitle: "Telegram-бот",
@@ -817,7 +852,9 @@
           ctaBot: "Open Telegram bot",
           ctaSofia: "Message Sofia",
           ctaMini: "Get a free tarot reading",
-          ctaTarotValues: "Tarot card meanings",
+          navNews: "News",
+          navTarot: "Tarot cards",
+          navLenormand: "Lenormand deck",
           sofiaName: "Sofia Knox",
           sofiaRole: "@SofiaKnoxx · tarot reader / astrologer",
           botTitle: "Telegram bot",
@@ -842,19 +879,26 @@
         document.querySelectorAll(".lang-btn").forEach((btn) => {
           btn.setAttribute("aria-pressed", String(btn.dataset.lang === lang));
         });
-        updateTarotValuesLink(lang);
+        updateInternalLinks(lang);
       }
 
-      function updateTarotValuesLink(lang) {
-        const tarotLink = document.querySelector('[data-track="cta_tarot_values"]');
-        if (!tarotLink) {
-          return;
-        }
-        const link = new URL("./tarot-values.html", window.location.href);
-        if (lang && lang !== "ru") {
-          link.searchParams.set("lang", lang);
-        }
-        tarotLink.setAttribute("href", `${link.pathname}${link.search}`);
+      function updateInternalLinks(lang) {
+        const navLinks = [
+          { selector: '[data-track="nav_news"]', path: "./news.html" },
+          { selector: '[data-track="nav_tarot"]', path: "./tarot-values.html" },
+          { selector: '[data-track="nav_lenormand"]', path: "./lenormand-values.html" },
+        ];
+        navLinks.forEach(({ selector, path }) => {
+          const node = document.querySelector(selector);
+          if (!node) {
+            return;
+          }
+          const link = new URL(path, window.location.href);
+          if (lang && lang !== "ru") {
+            link.searchParams.set("lang", lang);
+          }
+          node.setAttribute("href", `${link.pathname}${link.search}`);
+        });
       }
 
       function updateLangInUrl(lang) {
