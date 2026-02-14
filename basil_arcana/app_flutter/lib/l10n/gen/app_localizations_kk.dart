@@ -21,8 +21,7 @@ class AppLocalizationsKk extends AppLocalizations {
   String get settingsPromoTitle => 'Промокод';
 
   @override
-  String get settingsPromoDescription =>
-      'Промокод енгізіп, 1 жылға шексіз энергияны аш.';
+  String get settingsPromoDescription => 'Іске қосу үшін промокод енгізіңіз.';
 
   @override
   String get settingsPromoHint => 'Промокод енгіз';
@@ -34,8 +33,7 @@ class AppLocalizationsKk extends AppLocalizations {
   String get settingsPromoInvalid => 'Промокод жарамсыз.';
 
   @override
-  String get settingsPromoApplied =>
-      'Промокод іске қосылды: 1 жылдық шексіз қолжетімділік берілді.';
+  String get settingsPromoApplied => 'Промокод сәтті іске қосылды.';
 
   @override
   String get settingsPromoResetButton => 'Промокодтан бас тарту';
@@ -737,6 +735,9 @@ class AppLocalizationsKk extends AppLocalizations {
 
   @override
   String get energyCostNatalChart => 'Наталдық карта';
+
+  @override
+  String get energyCostCompatibility => 'Махаббат үйлесімділігі';
 
   @override
   String get energyNextFreeReady => 'Келесі тегін әрекет дайын.';

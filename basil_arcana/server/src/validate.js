@@ -157,8 +157,51 @@ function validateNatalChartRequest(body) {
   return null;
 }
 
+function validateCompatibilityRequest(body) {
+  if (!body || typeof body !== 'object') {
+    return 'Request body must be an object';
+  }
+
+  const { personOne, personTwo, language } = body;
+  if (!personOne || typeof personOne !== 'object') {
+    return 'personOne is required';
+  }
+  if (!personTwo || typeof personTwo !== 'object') {
+    return 'personTwo is required';
+  }
+  const checkPerson = (person, key) => {
+    if (!isNonEmptyString(person.name)) {
+      return `${key}.name is required`;
+    }
+    if (!isNonEmptyString(person.birthDate)) {
+      return `${key}.birthDate is required`;
+    }
+    if (!isNonEmptyString(person.birthTime)) {
+      return `${key}.birthTime is required`;
+    }
+    return null;
+  };
+  const p1Error = checkPerson(personOne, 'personOne');
+  if (p1Error) {
+    return p1Error;
+  }
+  const p2Error = checkPerson(personTwo, 'personTwo');
+  if (p2Error) {
+    return p2Error;
+  }
+  if (!isNonEmptyString(language)) {
+    return 'language is required';
+  }
+  if (!['en', 'ru', 'kk'].includes(language)) {
+    return 'language must be one of en, ru, kk';
+  }
+
+  return null;
+}
+
 module.exports = {
   validateReadingRequest,
   validateDetailsRequest,
   validateNatalChartRequest,
+  validateCompatibilityRequest,
 };

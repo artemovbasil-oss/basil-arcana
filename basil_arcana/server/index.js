@@ -9,7 +9,8 @@ const { v4: uuidv4 } = require('uuid');
 const {
   buildPromptMessages,
   buildDetailsPrompt,
-  buildNatalChartPrompt
+  buildNatalChartPrompt,
+  buildCompatibilityPrompt
 } = require('./src/prompt');
 const {
   createResponse,
@@ -20,7 +21,8 @@ const {
 const {
   validateReadingRequest,
   validateDetailsRequest,
-  validateNatalChartRequest
+  validateNatalChartRequest,
+  validateCompatibilityRequest
 } = require('./src/validate');
 const {
   ARCANA_API_KEY,
@@ -1561,6 +1563,172 @@ app.post('/api/natal-chart/generate_web', async (req, res) => {
     console.error(
       JSON.stringify({
         event: 'natal_chart_error',
+        requestId: req.requestId,
+        duration_ms: durationMs,
+        status: upstream.status,
+        errorCode: upstream.code,
+        errorType: upstream.type
+      })
+    );
+    return res.status(502).json({
+      error: 'upstream_failed',
+      requestId: req.requestId,
+      upstream
+    });
+  }
+});
+
+app.post('/api/compatibility/generate', async (req, res) => {
+  if (!OPENAI_API_KEY) {
+    return res.status(503).json({
+      error: 'server_misconfig',
+      reason: 'missing_openai_api_key',
+      requestId: req.requestId
+    });
+  }
+  if (!verifyArcanaApiKey(req, res)) {
+    return;
+  }
+  const error = validateCompatibilityRequest(req.body);
+  if (error) {
+    return res.status(400).json({ error, requestId: req.requestId });
+  }
+
+  const startTime = Date.now();
+  try {
+    const messages = buildCompatibilityPrompt(req.body);
+    const result = await createTextResponse(messages, {
+      requestId: req.requestId,
+      timeoutMs: 35000,
+    });
+    const interpretation = result.text.trim();
+    if (!interpretation) {
+      throw new OpenAIRequestError('Empty OpenAI response', {
+        status: result.meta?.status,
+      });
+    }
+    const durationMs = Date.now() - startTime;
+    console.log(
+      JSON.stringify({
+        event: 'compatibility_request',
+        requestId: req.requestId,
+        status: 200,
+        duration_ms: durationMs,
+      })
+    );
+    const locale = normalizeLocale(req.body?.language);
+    return res.json({
+      interpretation: appendSofiaPromo(interpretation, locale),
+      requestId: req.requestId
+    });
+  } catch (err) {
+    const durationMs = Date.now() - startTime;
+    if (err?.name === 'AbortError') {
+      console.error(
+        JSON.stringify({
+          event: 'compatibility_timeout',
+          requestId: req.requestId,
+          duration_ms: durationMs,
+        })
+      );
+      return res.status(504).json({
+        error: 'timeout',
+        requestId: req.requestId,
+      });
+    }
+    const upstream = {
+      status: err instanceof OpenAIRequestError ? err.status : null,
+      code: err instanceof OpenAIRequestError ? err.errorCode : null,
+      type: err instanceof OpenAIRequestError ? err.errorType : err.name,
+      message: err.message ? err.message.slice(0, 300) : null
+    };
+    console.error(
+      JSON.stringify({
+        event: 'compatibility_error',
+        requestId: req.requestId,
+        duration_ms: durationMs,
+        status: upstream.status,
+        errorCode: upstream.code,
+        errorType: upstream.type
+      })
+    );
+    return res.status(502).json({
+      error: 'upstream_failed',
+      requestId: req.requestId,
+      upstream
+    });
+  }
+});
+
+app.post('/api/compatibility/generate_web', async (req, res) => {
+  if (!OPENAI_API_KEY || !TELEGRAM_BOT_TOKEN) {
+    return res.status(503).json({
+      error: 'server_misconfig',
+      reason: !OPENAI_API_KEY ? 'missing_openai_api_key' : 'missing_telegram_bot_token',
+      requestId: req.requestId
+    });
+  }
+  const { payload } = req.body || {};
+  const initData = requireTelegramInitData(req, res);
+  if (!initData) {
+    return;
+  }
+  const error = validateCompatibilityRequest(payload);
+  if (error) {
+    return res.status(400).json({ error, requestId: req.requestId });
+  }
+
+  const startTime = Date.now();
+  try {
+    const messages = buildCompatibilityPrompt(payload);
+    const result = await createTextResponse(messages, {
+      requestId: req.requestId,
+      timeoutMs: 35000,
+    });
+    const interpretation = result.text.trim();
+    if (!interpretation) {
+      throw new OpenAIRequestError('Empty OpenAI response', {
+        status: result.meta?.status,
+      });
+    }
+    const durationMs = Date.now() - startTime;
+    console.log(
+      JSON.stringify({
+        event: 'compatibility_request',
+        requestId: req.requestId,
+        status: 200,
+        duration_ms: durationMs,
+      })
+    );
+    const locale = normalizeLocale(payload?.language);
+    return res.json({
+      interpretation: appendSofiaPromo(interpretation, locale),
+      requestId: req.requestId
+    });
+  } catch (err) {
+    const durationMs = Date.now() - startTime;
+    if (err?.name === 'AbortError') {
+      console.error(
+        JSON.stringify({
+          event: 'compatibility_timeout',
+          requestId: req.requestId,
+          duration_ms: durationMs,
+        })
+      );
+      return res.status(504).json({
+        error: 'timeout',
+        requestId: req.requestId,
+      });
+    }
+    const upstream = {
+      status: err instanceof OpenAIRequestError ? err.status : null,
+      code: err instanceof OpenAIRequestError ? err.errorCode : null,
+      type: err instanceof OpenAIRequestError ? err.errorType : err.name,
+      message: err.message ? err.message.slice(0, 300) : null
+    };
+    console.error(
+      JSON.stringify({
+        event: 'compatibility_error',
         requestId: req.requestId,
         duration_ms: durationMs,
         status: upstream.status,

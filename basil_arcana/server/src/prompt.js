@@ -133,4 +133,42 @@ function buildNatalChartPrompt(payload) {
   ];
 }
 
-module.exports = { buildPromptMessages, buildDetailsPrompt, buildNatalChartPrompt };
+function buildCompatibilityPrompt(payload) {
+  const { personOne, personTwo, language } = payload;
+  const system = [
+    'You are a warm, grounded astrologer for Basil\'s Arcana.',
+    'Write a relationship compatibility interpretation based on two birth profiles.',
+    'Avoid absolute predictions and avoid the word "will". Use "may", "could", "suggests", "likely".',
+    'Do not give medical, legal, or financial directives.',
+    'Use plain text only (no markdown, no bullets, no JSON).',
+    'Keep it practical, nuanced, and useful in real life.',
+    'Structure the response with short section headers in this order: 1) Overall dynamic, 2) Emotional fit, 3) Communication patterns, 4) Strengths as a pair, 5) Friction points, 6) Practical next steps for 7 days.',
+    'Target length: about 350-700 words.',
+    `Respond in the requested language (${language || 'infer from the input'}).`,
+  ].join(' ');
+
+  const user = {
+    personOne,
+    personTwo,
+    language,
+  };
+
+  return [
+    { role: 'system', content: system },
+    {
+      role: 'user',
+      content: `Use this data to generate a compatibility reading:\n${JSON.stringify(
+        user,
+        null,
+        2
+      )}`,
+    },
+  ];
+}
+
+module.exports = {
+  buildPromptMessages,
+  buildDetailsPrompt,
+  buildNatalChartPrompt,
+  buildCompatibilityPrompt,
+};

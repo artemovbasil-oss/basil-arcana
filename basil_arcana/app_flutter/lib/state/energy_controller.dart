@@ -7,6 +7,7 @@ enum EnergyAction {
   reading,
   deepDetails,
   natalChart,
+  compatibility,
 }
 
 extension EnergyActionCost on EnergyAction {
@@ -15,6 +16,7 @@ extension EnergyActionCost on EnergyAction {
       EnergyAction.reading => 20,
       EnergyAction.deepDetails => 12,
       EnergyAction.natalChart => 35,
+      EnergyAction.compatibility => 35,
     };
   }
 }

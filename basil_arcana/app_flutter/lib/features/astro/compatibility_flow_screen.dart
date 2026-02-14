@@ -1,22 +1,28 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/navigation/app_route_config.dart';
 import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/app_top_bar.dart';
+import '../../core/widgets/energy_widgets.dart';
+import '../../data/repositories/ai_repository.dart';
+import '../../state/energy_controller.dart';
+import '../../state/providers.dart';
 import '../settings/settings_screen.dart';
 import 'astro_result_screen.dart';
 
-class CompatibilityFlowScreen extends StatefulWidget {
+class CompatibilityFlowScreen extends ConsumerStatefulWidget {
   const CompatibilityFlowScreen({super.key});
 
   @override
-  State<CompatibilityFlowScreen> createState() =>
+  ConsumerState<CompatibilityFlowScreen> createState() =>
       _CompatibilityFlowScreenState();
 }
 
-class _CompatibilityFlowScreenState extends State<CompatibilityFlowScreen> {
+class _CompatibilityFlowScreenState
+    extends ConsumerState<CompatibilityFlowScreen> {
   final TextEditingController _p1NameController = TextEditingController();
   final TextEditingController _p1DateController = TextEditingController();
   final TextEditingController _p1TimeController = TextEditingController();
@@ -105,7 +111,20 @@ class _CompatibilityFlowScreenState extends State<CompatibilityFlowScreen> {
       _isSubmitting = true;
     });
 
-    await Future<void>.delayed(const Duration(milliseconds: 650));
+    final canProceed = await trySpendEnergyForAction(
+      context,
+      ref,
+      EnergyAction.compatibility,
+    );
+    if (!canProceed) {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
+      return;
+    }
+
     if (!mounted) {
       return;
     }
@@ -113,20 +132,48 @@ class _CompatibilityFlowScreenState extends State<CompatibilityFlowScreen> {
     final copy = _CompatibilityCopy.resolve(context);
     final p1Name = _p1NameController.text.trim();
     final p2Name = _p2NameController.text.trim();
-    final p1Sign = _zodiacSign(_p1DateController.text.trim(), copy);
-    final p2Sign = _zodiacSign(_p2DateController.text.trim(), copy);
-    final score = _compatibilityScore(
-      _elementForSign(p1Sign),
-      _elementForSign(p2Sign),
-    );
+    final p1Date = _p1DateController.text.trim();
+    final p1Time = _p1TimeController.text.trim();
+    final p2Date = _p2DateController.text.trim();
+    final p2Time = _p2TimeController.text.trim();
+    final localeCode = Localizations.localeOf(context).languageCode;
 
-    final summary = copy.summaryTemplate(
-      p1Name: p1Name,
-      p2Name: p2Name,
-      p1Sign: p1Sign,
-      p2Sign: p2Sign,
-      score: score,
-    );
+    String summary;
+    int score;
+    try {
+      summary = await ref.read(aiRepositoryProvider).generateCompatibility(
+            personOneName: p1Name,
+            personOneBirthDate: p1Date,
+            personOneBirthTime: p1Time,
+            personTwoName: p2Name,
+            personTwoBirthDate: p2Date,
+            personTwoBirthTime: p2Time,
+            languageCode: localeCode,
+          );
+      score = 72 + Random().nextInt(17);
+    } on AiRepositoryException {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _isSubmitting = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(copy.errorText)),
+      );
+      return;
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _isSubmitting = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(copy.errorText)),
+      );
+      return;
+    }
 
     await Navigator.push(
       context,
@@ -153,112 +200,6 @@ class _CompatibilityFlowScreenState extends State<CompatibilityFlowScreen> {
     setState(() {
       _isSubmitting = false;
     });
-  }
-
-  int _compatibilityScore(String e1, String e2) {
-    if (e1 == e2) {
-      return 88;
-    }
-    const goodPairs = {
-      'fire-air',
-      'air-fire',
-      'earth-water',
-      'water-earth',
-    };
-    if (goodPairs.contains('$e1-$e2')) {
-      return 77;
-    }
-    return 64 + Random().nextInt(6);
-  }
-
-  String _elementForSign(String sign) {
-    const fire = {
-      'Aries',
-      'Leo',
-      'Sagittarius',
-      'Тоқты',
-      'Арыстан',
-      'Мерген',
-      'Овен',
-      'Лев',
-      'Стрелец'
-    };
-    const earth = {
-      'Taurus',
-      'Virgo',
-      'Capricorn',
-      'Торпақ',
-      'Бикеш',
-      'Тауешкі',
-      'Телец',
-      'Дева',
-      'Козерог'
-    };
-    const air = {
-      'Gemini',
-      'Libra',
-      'Aquarius',
-      'Егіздер',
-      'Таразы',
-      'Суқұйғыш',
-      'Близнецы',
-      'Весы',
-      'Водолей'
-    };
-    if (fire.contains(sign)) {
-      return 'fire';
-    }
-    if (earth.contains(sign)) {
-      return 'earth';
-    }
-    if (air.contains(sign)) {
-      return 'air';
-    }
-    return 'water';
-  }
-
-  String _zodiacSign(String date, _CompatibilityCopy copy) {
-    final match = RegExp(r'^(\d{4})-(\d{2})-(\d{2})$').firstMatch(date);
-    if (match == null) {
-      return copy.signFallback;
-    }
-    final month = int.tryParse(match.group(2) ?? '') ?? 1;
-    final day = int.tryParse(match.group(3) ?? '') ?? 1;
-
-    if ((month == 3 && day >= 21) || (month == 4 && day <= 19)) {
-      return copy.signAries;
-    }
-    if ((month == 4 && day >= 20) || (month == 5 && day <= 20)) {
-      return copy.signTaurus;
-    }
-    if ((month == 5 && day >= 21) || (month == 6 && day <= 20)) {
-      return copy.signGemini;
-    }
-    if ((month == 6 && day >= 21) || (month == 7 && day <= 22)) {
-      return copy.signCancer;
-    }
-    if ((month == 7 && day >= 23) || (month == 8 && day <= 22)) {
-      return copy.signLeo;
-    }
-    if ((month == 8 && day >= 23) || (month == 9 && day <= 22)) {
-      return copy.signVirgo;
-    }
-    if ((month == 9 && day >= 23) || (month == 10 && day <= 22)) {
-      return copy.signLibra;
-    }
-    if ((month == 10 && day >= 23) || (month == 11 && day <= 21)) {
-      return copy.signScorpio;
-    }
-    if ((month == 11 && day >= 22) || (month == 12 && day <= 21)) {
-      return copy.signSagittarius;
-    }
-    if ((month == 12 && day >= 22) || (month == 1 && day <= 19)) {
-      return copy.signCapricorn;
-    }
-    if ((month == 1 && day >= 20) || (month == 2 && day <= 18)) {
-      return copy.signAquarius;
-    }
-    return copy.signPisces;
   }
 
   @override
@@ -377,21 +318,9 @@ class _CompatibilityCopy {
     required this.nextButton,
     required this.generateButton,
     required this.resultTitle,
+    required this.errorText,
     required this.conflictLine,
     required this.action,
-    required this.signFallback,
-    required this.signAries,
-    required this.signTaurus,
-    required this.signGemini,
-    required this.signCancer,
-    required this.signLeo,
-    required this.signVirgo,
-    required this.signLibra,
-    required this.signScorpio,
-    required this.signSagittarius,
-    required this.signCapricorn,
-    required this.signAquarius,
-    required this.signPisces,
   });
 
   final String screenTitle;
@@ -400,21 +329,9 @@ class _CompatibilityCopy {
   final String nextButton;
   final String generateButton;
   final String resultTitle;
+  final String errorText;
   final String conflictLine;
   final String action;
-  final String signFallback;
-  final String signAries;
-  final String signTaurus;
-  final String signGemini;
-  final String signCancer;
-  final String signLeo;
-  final String signVirgo;
-  final String signLibra;
-  final String signScorpio;
-  final String signSagittarius;
-  final String signCapricorn;
-  final String signAquarius;
-  final String signPisces;
 
   String stepTitle(int step) {
     if (screenTitle == 'Любовная совместимость') {
@@ -480,22 +397,6 @@ class _CompatibilityCopy {
     return 'Check compatibility: $p1 and $p2';
   }
 
-  String summaryTemplate({
-    required String p1Name,
-    required String p2Name,
-    required String p1Sign,
-    required String p2Sign,
-    required int score,
-  }) {
-    if (screenTitle == 'Любовная совместимость') {
-      return '$p1Name ($p1Sign) и $p2Name ($p2Sign) дают совместимость примерно $score%. Пара раскрывается лучше, когда один задает ритм, а второй поддерживает эмоциональную глубину. Сильная сторона союза: быстрое восстановление после конфликтов.';
-    }
-    if (screenTitle == 'Махаббат үйлесімділігі') {
-      return '$p1Name ($p1Sign) және $p2Name ($p2Sign) жұбының үйлесімділігі шамамен $score%. Бұл жұпта біреуі ырғақ берсе, екіншісі эмоциялық тереңдікпен қолдағанда байланыс күшейеді. Күшті жағы: келіспеушіліктен кейін тез қалпына келу.';
-    }
-    return '$p1Name ($p1Sign) and $p2Name ($p2Sign) show about $score% compatibility. This pair works best when one sets rhythm and the other supports emotional depth. Their key strength is recovering quickly after friction.';
-  }
-
   String scoreLine(int score) {
     if (screenTitle == 'Любовная совместимость') {
       return 'Индекс совместимости: $score%';
@@ -526,23 +427,12 @@ class _CompatibilityCopy {
         nextButton: 'Далее',
         generateButton: 'Сгенерировать',
         resultTitle: 'Разбор совместимости',
+        errorText:
+            'Не удалось сгенерировать совместимость. Попробуйте еще раз.',
         conflictLine:
             'Зона внимания: заранее проговаривайте ожидания к темпу общения и личным границам.',
         action:
             'Сделайте один мини-ритуал пары на эту неделю: 20 минут честного диалога без телефонов в одно и то же время.',
-        signFallback: 'Неизвестный знак',
-        signAries: 'Овен',
-        signTaurus: 'Телец',
-        signGemini: 'Близнецы',
-        signCancer: 'Рак',
-        signLeo: 'Лев',
-        signVirgo: 'Дева',
-        signLibra: 'Весы',
-        signScorpio: 'Скорпион',
-        signSagittarius: 'Стрелец',
-        signCapricorn: 'Козерог',
-        signAquarius: 'Водолей',
-        signPisces: 'Рыбы',
       );
     }
     if (code == 'kk') {
@@ -553,23 +443,11 @@ class _CompatibilityCopy {
         nextButton: 'Келесі',
         generateButton: 'Жасау',
         resultTitle: 'Үйлесімділік талдауы',
+        errorText: 'Үйлесімділікті жасау мүмкін болмады. Қайта көріңіз.',
         conflictLine:
             'Назар аймағы: қарым-қатынас қарқыны мен жеке шекаралар туралы күтулерді алдын ала келісіп алыңыз.',
         action:
             'Осы аптаға жұптың шағын ритуалын жасаңыз: бір уақытта 20 минут телефонсыз ашық әңгіме.',
-        signFallback: 'Белгісіз белгі',
-        signAries: 'Тоқты',
-        signTaurus: 'Торпақ',
-        signGemini: 'Егіздер',
-        signCancer: 'Шаян',
-        signLeo: 'Арыстан',
-        signVirgo: 'Бикеш',
-        signLibra: 'Таразы',
-        signScorpio: 'Сарышаян',
-        signSagittarius: 'Мерген',
-        signCapricorn: 'Тауешкі',
-        signAquarius: 'Суқұйғыш',
-        signPisces: 'Балықтар',
       );
     }
     return const _CompatibilityCopy(
@@ -579,23 +457,11 @@ class _CompatibilityCopy {
       nextButton: 'Next',
       generateButton: 'Generate',
       resultTitle: 'Compatibility reading',
+      errorText: 'Could not generate compatibility. Please try again.',
       conflictLine:
           'Watch area: align expectations early on communication pace and personal boundaries.',
       action:
           'Create one mini ritual for this week: 20 minutes of honest conversation without phones at the same time each day.',
-      signFallback: 'Unknown sign',
-      signAries: 'Aries',
-      signTaurus: 'Taurus',
-      signGemini: 'Gemini',
-      signCancer: 'Cancer',
-      signLeo: 'Leo',
-      signVirgo: 'Virgo',
-      signLibra: 'Libra',
-      signScorpio: 'Scorpio',
-      signSagittarius: 'Sagittarius',
-      signCapricorn: 'Capricorn',
-      signAquarius: 'Aquarius',
-      signPisces: 'Pisces',
     );
   }
 }

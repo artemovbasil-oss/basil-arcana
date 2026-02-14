@@ -803,6 +803,198 @@ class AiRepository {
     }
   }
 
+  Future<String> generateCompatibility({
+    required String personOneName,
+    required String personOneBirthDate,
+    required String personOneBirthTime,
+    required String personTwoName,
+    required String personTwoBirthDate,
+    required String personTwoBirthTime,
+    required String languageCode,
+    String? requestIdOverride,
+    http.Client? client,
+    Duration timeout = _requestTimeout,
+  }) async {
+    if (!isApiConfigured) {
+      _reportWebError(
+        AiErrorType.misconfigured,
+        message: 'Missing API_BASE_URL',
+      );
+      throw const AiRepositoryException(
+        AiErrorType.misconfigured,
+        message: 'Missing API_BASE_URL',
+      );
+    }
+
+    final telegramAuth = await _getTelegramAuthState();
+    final useTelegramAuth = kIsWeb && telegramAuth.hasInitData;
+    final endpoint = kIsWeb
+        ? (useTelegramAuth
+            ? '/api/compatibility/generate_web'
+            : '/api/compatibility/generate')
+        : '/api/compatibility/generate';
+    final uri = Uri.parse(apiBaseUrl).replace(path: endpoint);
+    final requestId = requestIdOverride ?? const Uuid().v4();
+    final startTimestamp = DateTime.now().toIso8601String();
+    final stopwatch = Stopwatch()..start();
+    final payload = {
+      'personOne': {
+        'name': personOneName,
+        'birthDate': personOneBirthDate,
+        'birthTime': personOneBirthTime,
+      },
+      'personTwo': {
+        'name': personTwoName,
+        'birthDate': personTwoBirthDate,
+        'birthTime': personTwoBirthTime,
+      },
+      'language': languageCode,
+    };
+
+    final headers = {
+      'Content-Type': 'application/json',
+      'x-request-id': requestId,
+      if (telegramAuth.hasInitData)
+        'X-Telegram-InitData': telegramAuth.initData,
+    };
+    final requestPayload = useTelegramAuth
+        ? {
+            if (telegramAuth.hasInitData) 'initData': telegramAuth.initData,
+            'payload': payload,
+          }
+        : payload;
+
+    final baseClient = client ?? http.Client();
+    final httpClient = _wrapClient(baseClient);
+    http.Response response;
+    try {
+      _logStart(
+        uri,
+        requestId: requestId,
+        startTimestamp: startTimestamp,
+        timeout: timeout,
+      );
+      response = await httpClient
+          .post(
+            uri,
+            headers: headers,
+            body: jsonEncode(requestPayload),
+          )
+          .timeout(timeout);
+    } on TimeoutException catch (error) {
+      _logFailure(
+        uri,
+        stopwatch,
+        requestId: requestId,
+        errorType: AiErrorType.timeout,
+        exception: error,
+      );
+      _reportWebError(AiErrorType.timeout,
+          message: error.toString(), requestId: requestId);
+      throw const AiRepositoryException(AiErrorType.timeout);
+    } on Exception catch (error) {
+      if (isSocketException(error) || error is http.ClientException) {
+        _logFailure(
+          uri,
+          stopwatch,
+          requestId: requestId,
+          errorType: AiErrorType.noInternet,
+          exception: error,
+        );
+        _reportWebError(AiErrorType.noInternet,
+            message: error.toString(), requestId: requestId);
+        throw const AiRepositoryException(AiErrorType.noInternet);
+      }
+      rethrow;
+    } finally {
+      if (client == null) {
+        httpClient.close();
+      }
+    }
+
+    if (response.statusCode == 401 || response.statusCode == 403) {
+      _logFailure(
+        uri,
+        stopwatch,
+        requestId: requestId,
+        statusCode: response.statusCode,
+        errorType: AiErrorType.unauthorized,
+        responseBody: response.body,
+      );
+      throw const AiRepositoryException(AiErrorType.unauthorized);
+    }
+
+    if (response.statusCode == 429) {
+      _logFailure(
+        uri,
+        stopwatch,
+        requestId: requestId,
+        statusCode: response.statusCode,
+        errorType: AiErrorType.rateLimited,
+        responseBody: response.body,
+      );
+      throw const AiRepositoryException(AiErrorType.rateLimited);
+    }
+
+    if (response.statusCode >= 500) {
+      _logFailure(
+        uri,
+        stopwatch,
+        requestId: requestId,
+        statusCode: response.statusCode,
+        errorType: AiErrorType.serverError,
+        responseBody: response.body,
+      );
+      throw AiRepositoryException(
+        AiErrorType.serverError,
+        statusCode: response.statusCode,
+      );
+    }
+
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      _logFailure(
+        uri,
+        stopwatch,
+        requestId: requestId,
+        statusCode: response.statusCode,
+        errorType: AiErrorType.badResponse,
+        responseBody: response.body,
+      );
+      throw AiRepositoryException(
+        AiErrorType.badResponse,
+        statusCode: response.statusCode,
+      );
+    }
+
+    try {
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      final interpretation = data['interpretation'];
+      if (interpretation is String && interpretation.trim().isNotEmpty) {
+        _logSuccess(
+          uri,
+          stopwatch,
+          requestId: data['requestId'] as String? ?? requestId,
+          statusCode: response.statusCode,
+        );
+        return interpretation.trim();
+      }
+      throw const FormatException('Missing interpretation');
+    } catch (error) {
+      _logFailure(
+        uri,
+        stopwatch,
+        requestId: requestId,
+        statusCode: response.statusCode,
+        errorType: AiErrorType.badResponse,
+        responseBody: response.body,
+      );
+      throw AiRepositoryException(
+        AiErrorType.badResponse,
+        message: error.toString(),
+      );
+    }
+  }
+
   Future<String?> fetchReadingDetails({
     required String question,
     required SpreadModel spread,

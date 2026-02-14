@@ -21,8 +21,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsPromoTitle => 'Промокод';
 
   @override
-  String get settingsPromoDescription =>
-      'Введи промокод, чтобы открыть безлимитную энергию на 1 год.';
+  String get settingsPromoDescription => 'Введите промокод для активации.';
 
   @override
   String get settingsPromoHint => 'Введи промокод';
@@ -34,8 +33,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsPromoInvalid => 'Промокод не найден.';
 
   @override
-  String get settingsPromoApplied =>
-      'Промокод активирован: безлимит на 1 год включен.';
+  String get settingsPromoApplied => 'Промокод успешно активирован.';
 
   @override
   String get settingsPromoResetButton => 'Отказаться от промокода';
@@ -738,6 +736,9 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get energyCostNatalChart => 'Натальная карта';
+
+  @override
+  String get energyCostCompatibility => 'Любовная совместимость';
 
   @override
   String get energyNextFreeReady => 'Следующая бесплатная попытка уже готова.';

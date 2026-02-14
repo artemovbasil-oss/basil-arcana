@@ -21,8 +21,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsPromoTitle => 'Promo code';
 
   @override
-  String get settingsPromoDescription =>
-      'Enter a promo code to unlock unlimited energy for 1 year.';
+  String get settingsPromoDescription => 'Enter a promo code to activate it.';
 
   @override
   String get settingsPromoHint => 'Enter promo code';
@@ -34,8 +33,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsPromoInvalid => 'Promo code is invalid.';
 
   @override
-  String get settingsPromoApplied =>
-      'Promo activated: 1-year unlimited access enabled.';
+  String get settingsPromoApplied => 'Promo code activated successfully.';
 
   @override
   String get settingsPromoResetButton => 'Disable promo code';
@@ -731,6 +729,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get energyCostNatalChart => 'Natal chart';
+
+  @override
+  String get energyCostCompatibility => 'Love compatibility';
 
   @override
   String get energyNextFreeReady => 'Your next free attempt is ready.';

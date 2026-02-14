@@ -240,6 +240,8 @@ class _EnergyCostsTable extends StatelessWidget {
               '${EnergyAction.deepDetails.cost.round()}%'),
           row(l10n.energyCostNatalChart,
               '${EnergyAction.natalChart.cost.round()}%'),
+          row(l10n.energyCostCompatibility,
+              '${EnergyAction.compatibility.cost.round()}%'),
         ],
       ),
     );

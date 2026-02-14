@@ -127,7 +127,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsPromoDescription.
   ///
   /// In en, this message translates to:
-  /// **'Enter a promo code to unlock unlimited energy for 1 year.'**
+  /// **'Enter a promo code to activate it.'**
   String get settingsPromoDescription;
 
   /// No description provided for @settingsPromoHint.
@@ -151,7 +151,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsPromoApplied.
   ///
   /// In en, this message translates to:
-  /// **'Promo activated: 1-year unlimited access enabled.'**
+  /// **'Promo code activated successfully.'**
   String get settingsPromoApplied;
 
   /// No description provided for @settingsPromoResetButton.
@@ -217,13 +217,13 @@ abstract class AppLocalizations {
   /// No description provided for @settingsDashboardFreePremium.
   ///
   /// In en, this message translates to:
-  /// **'Free premium five-card readings: {count}'**
+  /// **'Free bonuses (five-card reading / compatibility / natal chart): {count}'**
   String settingsDashboardFreePremium(int count);
 
   /// No description provided for @settingsDashboardFreePremiumRemaining.
   ///
   /// In en, this message translates to:
-  /// **'Free premium readings left: {count}'**
+  /// **'Free bonuses left: {count}'**
   String settingsDashboardFreePremiumRemaining(int count);
 
   /// No description provided for @settingsDashboardInvited.
@@ -949,7 +949,7 @@ abstract class AppLocalizations {
   /// No description provided for @resultReferralBody.
   ///
   /// In en, this message translates to:
-  /// **'Share your personal link with friends and get 20 free premium five-card readings for every new user who joins from your link.'**
+  /// **'Share your personal link with friends and get 20 free premium five-card readings, 20 compatibility tests, and 20 natal charts for every new user who joins from your link.'**
   String get resultReferralBody;
 
   /// No description provided for @resultReferralButton.
@@ -1413,6 +1413,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Natal chart'**
   String get energyCostNatalChart;
+
+  /// No description provided for @energyCostCompatibility.
+  ///
+  /// In en, this message translates to:
+  /// **'Love compatibility'**
+  String get energyCostCompatibility;
 
   /// No description provided for @energyNextFreeReady.
   ///
