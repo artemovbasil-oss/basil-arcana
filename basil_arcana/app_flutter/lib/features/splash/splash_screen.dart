@@ -1,10 +1,9 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
-import 'package:video_player/video_player.dart';
 
-import '../../core/config/app_config.dart';
 import '../../core/navigation/app_route_config.dart';
 import '../../core/telegram/telegram_web_app.dart';
 import '../home/home_screen.dart';
@@ -18,14 +17,11 @@ class SplashScreen extends StatefulWidget {
 
 const String _deckSplashPosterUrl =
     'https://basilarcana-assets.b-cdn.net/splash/splash.webp';
-const String _deckSplashVideoUrl =
-    'https://basilarcana-assets.b-cdn.net/splash/splash.mp4';
 const String _settingsBoxName = 'settings';
 const String _splashOnboardingSeenKey = 'splashOnboardingSeenV1';
 
 class _SplashScreenState extends State<SplashScreen> {
-  Timer? _navigationTimer;
-  late final bool _canNavigate;
+  Timer? _splashTimer;
   bool _hasShownOnboarding = false;
   bool _showOnboarding = false;
   bool _didNavigate = false;
@@ -33,14 +29,13 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _canNavigate = AppConfig.isConfigured;
     final box = Hive.box<String>(_settingsBoxName);
     _hasShownOnboarding = (box.get(_splashOnboardingSeenKey) ?? '').isNotEmpty;
     if (TelegramWebApp.isTelegramWebView) {
       TelegramWebApp.expand();
       TelegramWebApp.disableVerticalSwipes();
     }
-    _navigationTimer = Timer(const Duration(seconds: 3), () {
+    _splashTimer = Timer(const Duration(seconds: 1), () {
       if (!mounted || _didNavigate) {
         return;
       }
@@ -56,56 +51,20 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   void dispose() {
-    _navigationTimer?.cancel();
+    _splashTimer?.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final useTelegramSafeArea =
-        TelegramWebApp.isTelegramWebView && TelegramWebApp.isTelegramMobile;
-    final errorMessage = AppConfig.lastError?.trim().isNotEmpty == true
-        ? AppConfig.lastError!.trim()
-        : 'Missing configuration: API_BASE_URL';
     return Scaffold(
-      backgroundColor: colorScheme.background,
+      backgroundColor: Colors.black,
       body: Stack(
         fit: StackFit.expand,
         children: [
-          DeckSplashMedia(
-            posterUrl: _deckSplashPosterUrl,
-            videoUrl: _deckSplashVideoUrl,
-            enableVideo: true,
-          ),
-          SafeArea(
-            top: useTelegramSafeArea,
-            child: !_canNavigate
-                ? Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.warning_amber_rounded,
-                            size: 48,
-                            color: colorScheme.error,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            errorMessage,
-                            textAlign: TextAlign.center,
-                            style:
-                                Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                      color: colorScheme.onBackground,
-                                    ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  )
-                : const SizedBox.shrink(),
+          _SplashBackdrop(
+            imageUrl: _deckSplashPosterUrl,
+            blur: _showOnboarding,
           ),
           if (_showOnboarding)
             _SplashOnboardingOverlay(
@@ -146,79 +105,14 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 }
 
-class DeckSplashMedia extends StatefulWidget {
-  const DeckSplashMedia({
-    super.key,
-    required this.posterUrl,
-    required this.videoUrl,
-    required this.enableVideo,
+class _SplashBackdrop extends StatelessWidget {
+  const _SplashBackdrop({
+    required this.imageUrl,
+    required this.blur,
   });
 
-  final String posterUrl;
-  final String videoUrl;
-  final bool enableVideo;
-
-  @override
-  State<DeckSplashMedia> createState() => _DeckSplashMediaState();
-}
-
-class _DeckSplashMediaState extends State<DeckSplashMedia> {
-  VideoPlayerController? _controller;
-  bool _isVideoReady = false;
-
-  @override
-  void initState() {
-    super.initState();
-    if (!widget.enableVideo) {
-      return;
-    }
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _initializeVideo();
-    });
-  }
-
-  Future<void> _initializeVideo() async {
-    final controller = VideoPlayerController.networkUrl(
-      Uri.parse(widget.videoUrl),
-      videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
-    );
-    try {
-      await controller.initialize().timeout(const Duration(seconds: 3));
-      if (!mounted) {
-        await controller.dispose();
-        return;
-      }
-      await controller.setLooping(false);
-      await controller.setVolume(0);
-      await controller.play();
-      controller.addListener(_handleVideoStatus);
-      setState(() {
-        _controller = controller;
-        _isVideoReady = controller.value.isInitialized;
-      });
-    } catch (_) {
-      await controller.dispose();
-    }
-  }
-
-  void _handleVideoStatus() {
-    final controller = _controller;
-    if (controller == null) {
-      return;
-    }
-    if (controller.value.hasError && _isVideoReady) {
-      setState(() {
-        _isVideoReady = false;
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller?.removeListener(_handleVideoStatus);
-    _controller?.dispose();
-    super.dispose();
-  }
+  final String imageUrl;
+  final bool blur;
 
   @override
   Widget build(BuildContext context) {
@@ -238,47 +132,20 @@ class _DeckSplashMediaState extends State<DeckSplashMedia> {
           ),
         ),
         Image.network(
-          widget.posterUrl,
+          imageUrl,
           fit: BoxFit.cover,
           filterQuality: FilterQuality.high,
           gaplessPlayback: true,
           errorBuilder: (_, __, ___) => const SizedBox.expand(),
         ),
-        AnimatedOpacity(
-          opacity: _isVideoReady ? 1 : 0,
-          duration: const Duration(milliseconds: 250),
-          child: _VideoCover(controller: _controller),
-        ),
+        if (blur)
+          Positioned.fill(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 9, sigmaY: 9),
+              child: Container(color: Colors.black.withValues(alpha: 0.24)),
+            ),
+          ),
       ],
-    );
-  }
-}
-
-class _VideoCover extends StatelessWidget {
-  const _VideoCover({required this.controller});
-
-  final VideoPlayerController? controller;
-
-  @override
-  Widget build(BuildContext context) {
-    final controller = this.controller;
-    if (controller == null || !controller.value.isInitialized) {
-      return const SizedBox.expand();
-    }
-    final size = controller.value.size;
-    if (size.isEmpty) {
-      return const SizedBox.expand();
-    }
-    return ClipRect(
-      child: FittedBox(
-        fit: BoxFit.cover,
-        alignment: Alignment.center,
-        child: SizedBox(
-          width: size.width,
-          height: size.height,
-          child: VideoPlayer(controller),
-        ),
-      ),
     );
   }
 }
