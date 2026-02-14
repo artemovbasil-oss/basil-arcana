@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:video_player/video_player.dart';
 
-import '../../core/assets/asset_paths.dart';
 import '../../core/config/app_config.dart';
 import '../../core/navigation/app_route_config.dart';
 import '../../core/telegram/telegram_web_app.dart';
@@ -16,32 +16,42 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-String get _deckSplashPosterUrl => deckCoverImageUrl();
-String get _deckSplashVideoUrl => deckCoverVideoUrl();
+const String _deckSplashPosterUrl =
+    'https://basilarcana-assets.b-cdn.net/splash/splash.webp';
+const String _deckSplashVideoUrl =
+    'https://basilarcana-assets.b-cdn.net/splash/splash.mp4';
+const String _settingsBoxName = 'settings';
+const String _splashOnboardingSeenKey = 'splashOnboardingSeenV1';
 
 class _SplashScreenState extends State<SplashScreen> {
   Timer? _navigationTimer;
   late final bool _canNavigate;
+  bool _hasShownOnboarding = false;
+  bool _showOnboarding = false;
+  bool _didNavigate = false;
 
   @override
   void initState() {
     super.initState();
     _canNavigate = AppConfig.isConfigured;
+    final box = Hive.box<String>(_settingsBoxName);
+    _hasShownOnboarding = (box.get(_splashOnboardingSeenKey) ?? '') == '1';
     if (TelegramWebApp.isTelegramWebView) {
       TelegramWebApp.expand();
       TelegramWebApp.disableVerticalSwipes();
     }
     if (_canNavigate) {
-      _navigationTimer = Timer(const Duration(milliseconds: 1400), () {
-        if (!mounted) {
+      _navigationTimer = Timer(const Duration(seconds: 3), () {
+        if (!mounted || _didNavigate) {
           return;
         }
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            settings: appRouteSettings(showBackButton: false),
-            builder: (_) => const HomeScreen(),
-          ),
-        );
+        if (_hasShownOnboarding) {
+          _goHome();
+          return;
+        }
+        setState(() {
+          _showOnboarding = true;
+        });
       });
     }
   }
@@ -98,7 +108,35 @@ class _SplashScreenState extends State<SplashScreen> {
                     ),
                   ),
           ),
+          if (_canNavigate && _showOnboarding)
+            _SplashOnboardingOverlay(
+              onClose: () async {
+                final box = Hive.box<String>(_settingsBoxName);
+                await box.put(_splashOnboardingSeenKey, '1');
+                if (!mounted) {
+                  return;
+                }
+                setState(() {
+                  _hasShownOnboarding = true;
+                  _showOnboarding = false;
+                });
+                _goHome();
+              },
+            ),
         ],
+      ),
+    );
+  }
+
+  void _goHome() {
+    if (!mounted || _didNavigate) {
+      return;
+    }
+    _didNavigate = true;
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        settings: appRouteSettings(showBackButton: false),
+        builder: (_) => const HomeScreen(),
       ),
     );
   }
@@ -141,7 +179,7 @@ class _DeckSplashMediaState extends State<DeckSplashMedia> {
         await controller.dispose();
         return;
       }
-      await controller.setLooping(true);
+      await controller.setLooping(false);
       await controller.setVolume(0);
       await controller.play();
       controller.addListener(_handleVideoStatus);
@@ -224,7 +262,7 @@ class _VideoCover extends StatelessWidget {
     }
     return ClipRect(
       child: FittedBox(
-        fit: BoxFit.cover,
+        fit: BoxFit.contain,
         alignment: Alignment.center,
         child: SizedBox(
           width: size.width,
@@ -232,6 +270,188 @@ class _VideoCover extends StatelessWidget {
           child: VideoPlayer(controller),
         ),
       ),
+    );
+  }
+}
+
+class _SplashOnboardingOverlay extends StatelessWidget {
+  const _SplashOnboardingOverlay({
+    required this.onClose,
+  });
+
+  final Future<void> Function() onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final copy = _SplashOnboardingCopy.resolve(context);
+    return Container(
+      color: Colors.black.withValues(alpha: 0.4),
+      alignment: Alignment.center,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 360),
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+            decoration: BoxDecoration(
+              color: colorScheme.surface.withValues(alpha: 0.96),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(
+                color: colorScheme.primary.withValues(alpha: 0.42),
+              ),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  copy.title,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                      ),
+                ),
+                const SizedBox(height: 10),
+                _OnboardingBullet(
+                  title: copy.itemLenormand,
+                  subtitle: copy.itemLenormandHint,
+                ),
+                const SizedBox(height: 8),
+                _OnboardingBullet(
+                  title: copy.itemCompatibility,
+                  subtitle: copy.itemCompatibilityHint,
+                ),
+                const SizedBox(height: 8),
+                _OnboardingBullet(
+                  title: copy.itemNatal,
+                  subtitle: copy.itemNatalHint,
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () async => onClose(),
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size.fromHeight(44),
+                      backgroundColor: colorScheme.primary,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    child: Text(copy.closeButton),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _OnboardingBullet extends StatelessWidget {
+  const _OnboardingBullet({
+    required this.title,
+    required this.subtitle,
+  });
+
+  final String title;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.only(top: 3),
+          child: Text('✨'),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+              Text(
+                subtitle,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.white.withValues(alpha: 0.78),
+                    ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _SplashOnboardingCopy {
+  const _SplashOnboardingCopy({
+    required this.title,
+    required this.itemLenormand,
+    required this.itemLenormandHint,
+    required this.itemCompatibility,
+    required this.itemCompatibilityHint,
+    required this.itemNatal,
+    required this.itemNatalHint,
+    required this.closeButton,
+  });
+
+  final String title;
+  final String itemLenormand;
+  final String itemLenormandHint;
+  final String itemCompatibility;
+  final String itemCompatibilityHint;
+  final String itemNatal;
+  final String itemNatalHint;
+  final String closeButton;
+
+  static _SplashOnboardingCopy resolve(BuildContext context) {
+    final code = Localizations.localeOf(context).languageCode;
+    if (code == 'ru') {
+      return const _SplashOnboardingCopy(
+        title: 'Добро пожаловать в магический вайб. Теперь у нас доступно:',
+        itemLenormand: 'Гадание по колоде Ленорман',
+        itemLenormandHint: 'Выбери колоду в профиле',
+        itemCompatibility: 'Проверка совместимости пары',
+        itemCompatibilityHint: 'Попробуй бесплатно',
+        itemNatal: 'Чтение натальной карты',
+        itemNatalHint: 'Попробуй бесплатно',
+        closeButton: 'Отлично',
+      );
+    }
+    if (code == 'kk') {
+      return const _SplashOnboardingCopy(
+        title: 'Сиқырлы вайбқа қош келдің. Енді мыналар қолжетімді:',
+        itemLenormand: 'Ленорман колодасы бойынша болжау',
+        itemLenormandHint: 'Колоданы профильден таңда',
+        itemCompatibility: 'Жұп үйлесімділігін тексеру',
+        itemCompatibilityHint: 'Тегін байқап көр',
+        itemNatal: 'Наталдық картаны оқу',
+        itemNatalHint: 'Тегін байқап көр',
+        closeButton: 'Керемет',
+      );
+    }
+    return const _SplashOnboardingCopy(
+      title: 'Welcome to the magic vibe. You now have:',
+      itemLenormand: 'Lenormand card reading',
+      itemLenormandHint: 'Choose deck in profile',
+      itemCompatibility: 'Couple compatibility check',
+      itemCompatibilityHint: 'Try it for free',
+      itemNatal: 'Natal chart reading',
+      itemNatalHint: 'Try it for free',
+      closeButton: 'Great',
     );
   }
 }
