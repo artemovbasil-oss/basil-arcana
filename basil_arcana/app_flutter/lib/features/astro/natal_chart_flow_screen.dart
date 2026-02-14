@@ -5,7 +5,9 @@ import 'package:intl/intl.dart';
 import '../../core/navigation/app_route_config.dart';
 import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/app_top_bar.dart';
+import '../../core/widgets/energy_widgets.dart';
 import '../../data/repositories/ai_repository.dart';
+import '../../state/energy_controller.dart';
 import '../../state/providers.dart';
 import '../settings/settings_screen.dart';
 import 'astro_result_screen.dart';
@@ -99,6 +101,20 @@ class _NatalChartFlowScreenState extends ConsumerState<NatalChartFlowScreen> {
       _isSubmitting = true;
     });
 
+    final canProceed = await trySpendEnergyForAction(
+      context,
+      ref,
+      EnergyAction.natalChart,
+    );
+    if (!canProceed) {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
+      return;
+    }
+
     final localeCode = Localizations.localeOf(context).languageCode;
     String summary;
     try {
@@ -133,6 +149,7 @@ class _NatalChartFlowScreenState extends ConsumerState<NatalChartFlowScreen> {
           ],
           action: copy.action,
           sofiaPrefill: '$summary\n\n${copy.highlightDate(birthDate)}',
+          tarotQuestion: copy.tarotQuestion(name),
         ),
       ),
     );
@@ -325,6 +342,17 @@ class _NatalCopy {
     return 'Birth time: $time';
   }
 
+  String tarotQuestion(String name) {
+    final normalizedName = name.trim();
+    if (screenTitle == 'Натальная карта') {
+      return 'Расклад на удачу для $normalizedName';
+    }
+    if (screenTitle == 'Наталдық карта') {
+      return '$normalizedName үшін сәттілікке расклад';
+    }
+    return 'Luck spread for $normalizedName';
+  }
+
   static _NatalCopy resolve(BuildContext context) {
     final code = Localizations.localeOf(context).languageCode;
     if (code == 'ru') {
@@ -339,7 +367,7 @@ class _NatalCopy {
         loadingLabel: 'Создаем натальную карту…',
         backButton: 'Назад',
         nextButton: 'Далее',
-        generateButton: 'Сгенерировать',
+        generateButton: 'Построить',
         resultTitle: 'Ваш разбор',
         highlightAdvice:
             'Главный фокус: раскрывайте сильные стороны постепенно, через устойчивый ритм.',
@@ -359,7 +387,7 @@ class _NatalCopy {
         loadingLabel: 'Наталдық карта жасалуда…',
         backButton: 'Артқа',
         nextButton: 'Келесі',
-        generateButton: 'Жасау',
+        generateButton: 'Құру',
         resultTitle: 'Түсіндірме',
         highlightAdvice:
             'Негізгі фокус: күшті қырларыңызды тұрақты ырғақ арқылы біртіндеп ашыңыз.',
@@ -378,7 +406,7 @@ class _NatalCopy {
       loadingLabel: 'Creating your natal chart…',
       backButton: 'Back',
       nextButton: 'Next',
-      generateButton: 'Generate',
+      generateButton: 'Build',
       resultTitle: 'Your interpretation',
       highlightAdvice:
           'Main focus: unfold your strengths gradually through a steady rhythm.',

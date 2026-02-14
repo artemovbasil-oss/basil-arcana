@@ -4,10 +4,10 @@ import 'package:hive/hive.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
 import '../../core/navigation/app_route_config.dart';
-import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/app_top_bar.dart';
 import '../../core/widgets/sofia_promo_card.dart';
+import '../../data/models/deck_model.dart';
 import '../../data/repositories/sofia_consent_repository.dart';
 import '../../state/providers.dart';
 import '../../state/reading_flow_controller.dart';
@@ -30,7 +30,8 @@ class HomeScreen extends ConsumerStatefulWidget {
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen>
+    with SingleTickerProviderStateMixin {
   final TextEditingController _controller = TextEditingController();
   final FocusNode _focusNode = FocusNode();
   final ScrollController _scrollController = ScrollController();
@@ -39,10 +40,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   _SofiaConsentState _sofiaConsentState = _SofiaConsentState.undecided;
   bool _sendingConsent = false;
   bool _hasQueryHistory = false;
+  late final AnimationController _fieldGlowController;
 
   @override
   void initState() {
     super.initState();
+    _fieldGlowController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1800),
+    )..repeat(reverse: true);
     _sofiaConsentState = _readSofiaConsentState();
     _focusNode.addListener(_handleFocusChange);
     final initialQuestion = ref.read(readingFlowControllerProvider).question;
@@ -245,6 +251,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   void dispose() {
     _readingFlowSubscription?.close();
+    _fieldGlowController.dispose();
     _controller.dispose();
     _focusNode.dispose();
     _scrollController.dispose();
@@ -284,6 +291,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context);
+    final deckId = ref.watch(deckProvider);
     final quickTopics = [
       l10n.homeQuickTopicRelationships,
       l10n.homeQuickTopicMoney,
@@ -294,6 +302,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final hasQuestion = _controller.text.trim().isNotEmpty;
     final copy = _SofiaCopy.resolve(context);
     final featureCopy = _HomeFeatureCopy.resolve(context);
+    final deckHint = _deckHint(l10n, deckId);
 
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     const buttonHeight = 56.0;
@@ -342,84 +351,140 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      l10n.homeDescription,
-                      style: AppTextStyles.title(context).copyWith(
-                        color: colorScheme.onSurface,
-                      ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            height: 1,
+                            color: colorScheme.outlineVariant
+                                .withValues(alpha: 0.45),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: Text(
+                            l10n.homeDescription,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleSmall
+                                ?.copyWith(
+                                  color: colorScheme.onSurface
+                                      .withValues(alpha: 0.88),
+                                  fontWeight: FontWeight.w400,
+                                ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        Expanded(
+                          child: Container(
+                            height: 1,
+                            color: colorScheme.outlineVariant
+                                .withValues(alpha: 0.45),
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 20),
-                    Container(
-                      key: _questionKey,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(22),
-                        color: colorScheme.surfaceVariant.withOpacity(0.25),
-                        boxShadow: [
-                          BoxShadow(
-                            color: colorScheme.primary.withOpacity(0.18),
-                            blurRadius: 20,
-                            offset: const Offset(0, 10),
-                          ),
-                        ],
-                        border: Border.all(
-                          color: colorScheme.primary.withOpacity(0.35),
-                        ),
-                      ),
-                      child: Stack(
-                        children: [
-                          TextField(
-                            controller: _controller,
-                            focusNode: _focusNode,
-                            maxLines: 6,
-                            minLines: 5,
-                            decoration: InputDecoration(
-                              hintText: l10n.homeQuestionPlaceholder,
-                              hintStyle: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
-                                  ?.copyWith(
-                                    color:
-                                        colorScheme.onSurface.withOpacity(0.45),
-                                  ),
-                              border: InputBorder.none,
-                              contentPadding:
-                                  const EdgeInsets.fromLTRB(16, 16, 48, 32),
-                              alignLabelWithHint: true,
-                            ),
-                            onChanged: (value) {
-                              ref
-                                  .read(readingFlowControllerProvider.notifier)
-                                  .setQuestion(value);
-                              setState(() {});
-                            },
-                          ),
-                          if (hasQuestion)
-                            Positioned(
-                              right: 10,
-                              bottom: 10,
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  _InlineIconButton(
-                                    icon: Icons.close,
-                                    tooltip: l10n.homeClearQuestionTooltip,
-                                    onTap: _clearQuestion,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  _InlineIconButton(
-                                    icon: Icons.arrow_forward,
-                                    tooltip: l10n.homeContinueButton,
-                                    onTap: () =>
-                                        _handlePrimaryAction(hasQuestion),
-                                    backgroundColor:
-                                        colorScheme.primary.withOpacity(0.2),
-                                    iconColor: colorScheme.primary,
-                                  ),
-                                ],
+                    AnimatedBuilder(
+                      animation: _fieldGlowController,
+                      builder: (context, child) {
+                        final pulse =
+                            0.35 + (_fieldGlowController.value * 0.65);
+                        return Container(
+                          key: _questionKey,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(22),
+                            color: colorScheme.surfaceContainerHighest
+                                .withValues(alpha: 0.2),
+                            boxShadow: [
+                              BoxShadow(
+                                color: colorScheme.primary
+                                    .withValues(alpha: 0.18 + (0.22 * pulse)),
+                                blurRadius: 24 + (16 * pulse),
+                                spreadRadius: 1 + (2 * pulse),
+                                offset: const Offset(0, 10),
                               ),
+                            ],
+                            border: Border.all(
+                              color: colorScheme.primary
+                                  .withValues(alpha: 0.55 + (0.25 * pulse)),
+                              width: 1.7,
                             ),
-                        ],
-                      ),
+                          ),
+                          child: Stack(
+                            children: [
+                              TextField(
+                                controller: _controller,
+                                focusNode: _focusNode,
+                                maxLines: 6,
+                                minLines: 5,
+                                decoration: InputDecoration(
+                                  hintText: l10n.homeQuestionPlaceholder,
+                                  hintStyle: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(
+                                        color: colorScheme.onSurface
+                                            .withValues(alpha: 0.45),
+                                      ),
+                                  border: InputBorder.none,
+                                  contentPadding:
+                                      const EdgeInsets.fromLTRB(16, 16, 48, 40),
+                                  alignLabelWithHint: true,
+                                ),
+                                onChanged: (value) {
+                                  ref
+                                      .read(
+                                        readingFlowControllerProvider.notifier,
+                                      )
+                                      .setQuestion(value);
+                                  setState(() {});
+                                },
+                              ),
+                              Positioned(
+                                left: 14,
+                                bottom: 12,
+                                child: Text(
+                                  deckHint,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .labelSmall
+                                      ?.copyWith(
+                                        color: colorScheme.onSurface
+                                            .withValues(alpha: 0.62),
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                ),
+                              ),
+                              if (hasQuestion)
+                                Positioned(
+                                  right: 10,
+                                  bottom: 10,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      _InlineIconButton(
+                                        icon: Icons.close,
+                                        tooltip: l10n.homeClearQuestionTooltip,
+                                        onTap: _clearQuestion,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      _InlineIconButton(
+                                        icon: Icons.arrow_forward,
+                                        tooltip: l10n.homeContinueButton,
+                                        onTap: () =>
+                                            _handlePrimaryAction(hasQuestion),
+                                        backgroundColor: colorScheme.primary
+                                            .withValues(alpha: 0.2),
+                                        iconColor: colorScheme.primary,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                            ],
+                          ),
+                        );
+                      },
                     ),
                     const SizedBox(height: 16),
                     Text(
@@ -575,6 +640,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         builder: (_) => const SpreadScreen(),
       ),
     );
+  }
+
+  String _deckHint(AppLocalizations l10n, DeckType deckId) {
+    return switch (deckId) {
+      DeckType.lenormand => '${l10n.deckLabel}: ${l10n.deckLenormandName}',
+      _ => '${l10n.deckLabel}: ${l10n.deckTarotRiderWaite}',
+    };
   }
 }
 
@@ -938,10 +1010,11 @@ class _FeatureSquareCard extends StatelessWidget {
             Text(
               title,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w400,
+                    fontSize: 13,
                     height: 1.15,
                   ),
-              maxLines: 2,
+              maxLines: 3,
               textAlign: TextAlign.center,
             ),
           ],

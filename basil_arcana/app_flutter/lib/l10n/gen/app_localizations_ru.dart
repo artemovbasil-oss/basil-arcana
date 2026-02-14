@@ -167,7 +167,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get homeDescription => 'Поймай магический вайб';
 
   @override
-  String get homeQuestionPlaceholder => 'Напишите свой вопрос…';
+  String get homeQuestionPlaceholder => 'Напиши свой вопрос…';
 
   @override
   String get homeQuestionLabel => 'Какой у вас вопрос?';

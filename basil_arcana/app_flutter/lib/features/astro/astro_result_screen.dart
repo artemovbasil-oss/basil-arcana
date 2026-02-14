@@ -8,6 +8,7 @@ import '../../core/telegram/telegram_user_profile.dart';
 import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/app_top_bar.dart';
 import '../../core/widgets/sofia_promo_card.dart';
+import '../../state/providers.dart';
 import '../result/widgets/chat_widgets.dart';
 import '../settings/settings_screen.dart';
 
@@ -19,6 +20,7 @@ class AstroResultScreen extends ConsumerWidget {
     required this.highlights,
     required this.action,
     required this.sofiaPrefill,
+    this.tarotQuestion,
     super.key,
   });
 
@@ -28,6 +30,7 @@ class AstroResultScreen extends ConsumerWidget {
   final List<String> highlights;
   final String action;
   final String sofiaPrefill;
+  final String? tarotQuestion;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -132,6 +135,30 @@ class AstroResultScreen extends ConsumerWidget {
                     avatarEmoji: '🪄',
                     child: _ReferralCard(copy: copy),
                   ),
+                  if (tarotQuestion != null &&
+                      tarotQuestion!.trim().isNotEmpty) ...[
+                    const SizedBox(height: 14),
+                    ChatBubble(
+                      isUser: false,
+                      avatarEmoji: '🪄',
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: AppPrimaryButton(
+                          label: copy.tarotCtaButton,
+                          icon: Icons.auto_awesome,
+                          onPressed: () {
+                            ref
+                                .read(readingFlowControllerProvider.notifier)
+                                .setQuestion(tarotQuestion!.trim());
+                            Navigator.popUntil(
+                              context,
+                              (route) => route.isFirst,
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -224,6 +251,7 @@ class _AstroResultCopy {
     required this.referralTitle,
     required this.referralBody,
     required this.referralButton,
+    required this.tarotCtaButton,
     required this.referralCopied,
     required this.referralShareMessage,
   });
@@ -234,6 +262,7 @@ class _AstroResultCopy {
   final String referralTitle;
   final String referralBody;
   final String referralButton;
+  final String tarotCtaButton;
   final String referralCopied;
   final String referralShareMessage;
 
@@ -248,6 +277,7 @@ class _AstroResultCopy {
         referralBody:
             'Поделись персональной ссылкой с друзьями и получай 20 бесплатных премиум-раскладов на 5 карт, 20 тестов на совместимость и 20 натальных карт за каждого нового пользователя.',
         referralButton: 'Поделиться ссылкой',
+        tarotCtaButton: 'Сделать расклад Таро',
         referralCopied:
             'Реферальная ссылка скопирована. Отправь ее в Telegram.',
         referralShareMessage:
@@ -263,6 +293,7 @@ class _AstroResultCopy {
         referralBody:
             'Жеке сілтемеңді достарыңмен бөліс және әр жаңа қолданушы үшін 5 карталық 20 премиум жайылма, 20 үйлесімділік тесті және 20 наталдық карта ал.',
         referralButton: 'Сілтемемен бөлісу',
+        tarotCtaButton: 'Таро расклад жасау',
         referralCopied: 'Реферал сілтеме көшірілді. Оны Telegram-да жібер.',
         referralShareMessage:
             'Basil Arcana-ны байқап көр: Telegram ішіндегі Таро жайылмалары, үйлесімділік және наталдық карталар.',
@@ -276,6 +307,7 @@ class _AstroResultCopy {
       referralBody:
           'Share your personal link with friends and get 20 free premium five-card readings, 20 compatibility tests, and 20 natal charts for every new user who joins.',
       referralButton: 'Share link',
+      tarotCtaButton: 'Do a Tarot spread',
       referralCopied: 'Referral link copied. Send it in Telegram.',
       referralShareMessage:
           'Try Basil Arcana: stylish Tarot readings, compatibility checks, and natal charts right in Telegram.',

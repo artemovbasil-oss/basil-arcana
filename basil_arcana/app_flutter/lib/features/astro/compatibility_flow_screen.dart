@@ -190,6 +190,7 @@ class _CompatibilityFlowScreenState
           ],
           action: copy.action,
           sofiaPrefill: summary,
+          tarotQuestion: copy.tarotQuestion(p1Name, p2Name),
         ),
       ),
     );
@@ -417,6 +418,16 @@ class _CompatibilityCopy {
     return '$p1 + $p2 couple style: "emotional honesty + clear agreements."';
   }
 
+  String tarotQuestion(String p1, String p2) {
+    if (screenTitle == 'Любовная совместимость') {
+      return 'узнать совместимость $p1 и $p2';
+    }
+    if (screenTitle == 'Махаббат үйлесімділігі') {
+      return '$p1 және $p2 үйлесімділігін білу';
+    }
+    return 'check compatibility between $p1 and $p2';
+  }
+
   static _CompatibilityCopy resolve(BuildContext context) {
     final code = Localizations.localeOf(context).languageCode;
     if (code == 'ru') {
@@ -425,7 +436,7 @@ class _CompatibilityCopy {
         loadingLabel: 'Считаем совместимость…',
         backButton: 'Назад',
         nextButton: 'Далее',
-        generateButton: 'Сгенерировать',
+        generateButton: 'Проверить',
         resultTitle: 'Разбор совместимости',
         errorText:
             'Не удалось сгенерировать совместимость. Попробуйте еще раз.',
@@ -441,7 +452,7 @@ class _CompatibilityCopy {
         loadingLabel: 'Үйлесімділік есептелуде…',
         backButton: 'Артқа',
         nextButton: 'Келесі',
-        generateButton: 'Жасау',
+        generateButton: 'Тексеру',
         resultTitle: 'Үйлесімділік талдауы',
         errorText: 'Үйлесімділікті жасау мүмкін болмады. Қайта көріңіз.',
         conflictLine:
@@ -455,7 +466,7 @@ class _CompatibilityCopy {
       loadingLabel: 'Calculating compatibility…',
       backButton: 'Back',
       nextButton: 'Next',
-      generateButton: 'Generate',
+      generateButton: 'Check',
       resultTitle: 'Compatibility reading',
       errorText: 'Could not generate compatibility. Please try again.',
       conflictLine:
