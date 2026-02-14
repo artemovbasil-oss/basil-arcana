@@ -8,6 +8,7 @@ const SOFIA_PROFILE_URL = "https://t.me/SofiaKnoxx";
 const TELEGRAM_STARS_CURRENCY = "XTR";
 const PURCHASE_CODE_LENGTH = 6;
 const DAY_MS = 24 * 60 * 60 * 1000;
+const MINI_APP_VERSION_TAG = "20260214-novideo";
 const PLANS = {
     single: {
         id: "single",
@@ -336,11 +337,12 @@ function buildLocalizedWebAppUrl(baseUrl, locale) {
     try {
         const url = new URL(baseUrl);
         url.searchParams.set("lang", locale);
+        url.searchParams.set("v", MINI_APP_VERSION_TAG);
         return url.toString();
     }
     catch (_) {
         const separator = baseUrl.includes("?") ? "&" : "?";
-        return `${baseUrl}${separator}lang=${locale}`;
+        return `${baseUrl}${separator}lang=${locale}&v=${MINI_APP_VERSION_TAG}`;
     }
 }
 function buildMainMenuKeyboard(locale, hasActiveSubs) {
@@ -638,6 +640,45 @@ function formatQueryTypeForSofia(queryType) {
     }
     return queryType;
 }
+function newsMessageForLocale(locale) {
+    if (locale === "en") {
+        return [
+            "✨ The real magic update",
+            "",
+            "New in this version:",
+            "• Lenormand reading (choose your deck in Profile)",
+            "• Couple compatibility check (try it for free)",
+            "• Natal chart reading (try it for free)",
+        ].join("\n");
+    }
+    if (locale === "kk") {
+        return [
+            "✨ The real magic жаңартуы",
+            "",
+            "Осы нұсқада жаңасы:",
+            "• Ленорман колодасымен болжау (колоданы Профильден таңда)",
+            "• Жұп үйлесімділігін тексеру (тегін байқап көр)",
+            "• Наталдық картаны оқу (тегін байқап көр)",
+        ].join("\n");
+    }
+    return [
+        "✨ Обновление The real magic",
+        "",
+        "Что нового в этой версии:",
+        "• Гадание по колоде Ленорман (выбери колоду в профиле)",
+        "• Проверка совместимости пары (попробуй бесплатно)",
+        "• Чтение натальной карты (попробуй бесплатно)",
+    ].join("\n");
+}
+function supportedLocaleFromDb(value) {
+    if (value === "en" || value === "kk" || value === "ru") {
+        return value;
+    }
+    return "ru";
+}
+function delay(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
 async function sendLauncherMessage(ctx) {
     await sendMainMenu(ctx);
 }
@@ -748,6 +789,33 @@ async function main() {
             return `${index + 1}. ${date} • ${type}\n${question}`;
         });
         await ctx.reply(`Недавние запросы user_id=${userId} (${rows.length}):\n\n${lines.join("\n\n")}`);
+    });
+    bot.command("broadcast_whatsnew", async (ctx) => {
+        if (!isSofiaOperator(ctx)) {
+            return;
+        }
+        const users = await (0, db_1.listUsersForBroadcast)();
+        if (users.length === 0) {
+            await ctx.reply("В таблице users пока нет получателей.");
+            return;
+        }
+        await ctx.reply(`Начинаю рассылку новинок. Получателей: ${users.length}.`);
+        let sent = 0;
+        let failed = 0;
+        for (const user of users) {
+            const locale = supportedLocaleFromDb(user.locale);
+            try {
+                await ctx.api.sendMessage(user.telegramUserId, newsMessageForLocale(locale));
+                sent += 1;
+            }
+            catch (error) {
+                failed += 1;
+                console.error(`Broadcast failed for user_id=${user.telegramUserId}`, error);
+            }
+            // Keeps a safe pace and reduces rate-limit spikes.
+            await delay(45);
+        }
+        await ctx.reply(`Рассылка завершена.\nОтправлено: ${sent}\nОшибок: ${failed}\nВсего: ${users.length}`);
     });
     bot.callbackQuery(/^lang:(ru|en|kk)$/, async (ctx) => {
         await rememberUserProfile(ctx);

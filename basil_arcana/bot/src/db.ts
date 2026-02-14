@@ -34,6 +34,11 @@ export interface RecentUserQueryRow {
   createdAt: number | null;
 }
 
+export interface BroadcastUserRow {
+  telegramUserId: number;
+  locale: DbLocale | null;
+}
+
 let pool: Pool | null = null;
 
 function requirePool(): Pool {
@@ -400,6 +405,21 @@ export async function listRecentUserQueriesForUser(
     question: String(row.question ?? ""),
     locale: (row.locale as string | null) ?? null,
     createdAt: toMillis((row.created_at as Date | null) ?? null),
+  }));
+}
+
+export async function listUsersForBroadcast(): Promise<BroadcastUserRow[]> {
+  const db = requirePool();
+  const { rows } = await db.query(
+    `
+    SELECT telegram_user_id, locale
+    FROM users
+    ORDER BY telegram_user_id ASC;
+    `,
+  );
+  return rows.map((row) => ({
+    telegramUserId: Number(row.telegram_user_id),
+    locale: (row.locale as DbLocale | null) ?? null,
   }));
 }
 

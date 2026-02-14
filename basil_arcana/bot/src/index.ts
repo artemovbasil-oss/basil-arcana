@@ -9,6 +9,7 @@ import {
   insertPayment,
   listActiveSubscriptions,
   listRecentUserQueriesForUser,
+  listUsersForBroadcast,
   paymentExists,
   saveUserSubscription,
   upsertUserProfile,
@@ -844,6 +845,48 @@ function formatQueryTypeForSofia(queryType: string): string {
   return queryType;
 }
 
+function newsMessageForLocale(locale: SupportedLocale): string {
+  if (locale === "en") {
+    return [
+      "✨ The real magic update",
+      "",
+      "New in this version:",
+      "• Lenormand reading (choose your deck in Profile)",
+      "• Couple compatibility check (try it for free)",
+      "• Natal chart reading (try it for free)",
+    ].join("\n");
+  }
+  if (locale === "kk") {
+    return [
+      "✨ The real magic жаңартуы",
+      "",
+      "Осы нұсқада жаңасы:",
+      "• Ленорман колодасымен болжау (колоданы Профильден таңда)",
+      "• Жұп үйлесімділігін тексеру (тегін байқап көр)",
+      "• Наталдық картаны оқу (тегін байқап көр)",
+    ].join("\n");
+  }
+  return [
+    "✨ Обновление The real magic",
+    "",
+    "Что нового в этой версии:",
+    "• Гадание по колоде Ленорман (выбери колоду в профиле)",
+    "• Проверка совместимости пары (попробуй бесплатно)",
+    "• Чтение натальной карты (попробуй бесплатно)",
+  ].join("\n");
+}
+
+function supportedLocaleFromDb(value: DbLocale | null): SupportedLocale {
+  if (value === "en" || value === "kk" || value === "ru") {
+    return value;
+  }
+  return "ru";
+}
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 async function sendLauncherMessage(ctx: Context): Promise<void> {
   await sendMainMenu(ctx);
 }
@@ -983,6 +1026,39 @@ async function main(): Promise<void> {
 
     await ctx.reply(
       `Недавние запросы user_id=${userId} (${rows.length}):\n\n${lines.join("\n\n")}`,
+    );
+  });
+
+  bot.command("broadcast_whatsnew", async (ctx) => {
+    if (!isSofiaOperator(ctx)) {
+      return;
+    }
+    const users = await listUsersForBroadcast();
+    if (users.length === 0) {
+      await ctx.reply("В таблице users пока нет получателей.");
+      return;
+    }
+
+    await ctx.reply(`Начинаю рассылку новинок. Получателей: ${users.length}.`);
+
+    let sent = 0;
+    let failed = 0;
+
+    for (const user of users) {
+      const locale = supportedLocaleFromDb(user.locale);
+      try {
+        await ctx.api.sendMessage(user.telegramUserId, newsMessageForLocale(locale));
+        sent += 1;
+      } catch (error) {
+        failed += 1;
+        console.error(`Broadcast failed for user_id=${user.telegramUserId}`, error);
+      }
+      // Keeps a safe pace and reduces rate-limit spikes.
+      await delay(45);
+    }
+
+    await ctx.reply(
+      `Рассылка завершена.\nОтправлено: ${sent}\nОшибок: ${failed}\nВсего: ${users.length}`,
     );
   });
 

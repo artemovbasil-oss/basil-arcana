@@ -11,6 +11,7 @@ exports.insertPayment = insertPayment;
 exports.listActiveSubscriptions = listActiveSubscriptions;
 exports.completeConsultation = completeConsultation;
 exports.listRecentUserQueriesForUser = listRecentUserQueriesForUser;
+exports.listUsersForBroadcast = listUsersForBroadcast;
 const pg_1 = require("pg");
 let pool = null;
 function requirePool() {
@@ -301,6 +302,18 @@ async function listRecentUserQueriesForUser(telegramUserId, limit = 10) {
         question: String(row.question ?? ""),
         locale: row.locale ?? null,
         createdAt: toMillis(row.created_at ?? null),
+    }));
+}
+async function listUsersForBroadcast() {
+    const db = requirePool();
+    const { rows } = await db.query(`
+    SELECT telegram_user_id, locale
+    FROM users
+    ORDER BY telegram_user_id ASC;
+    `);
+    return rows.map((row) => ({
+        telegramUserId: Number(row.telegram_user_id),
+        locale: row.locale ?? null,
     }));
 }
 async function getSubscriptionForUpdate(client, telegramUserId) {
