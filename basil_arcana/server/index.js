@@ -236,7 +236,10 @@ const ASSETS_BASE_URL_ENV = process.env.ASSETS_BASE_URL || 'https://cdn.basilarc
 const STARS_PACK_FULL_XTR = Number(process.env.STARS_PACK_FULL_XTR || 5);
 const STARS_PACK_WEEK_XTR = Number(process.env.STARS_PACK_WEEK_XTR || 99);
 const STARS_PACK_MONTH_XTR = Number(process.env.STARS_PACK_MONTH_XTR || 499);
-const STARS_PACK_YEAR_XTR = Number(process.env.STARS_PACK_YEAR_XTR || 9999);
+const STARS_PACK_YEAR_XTR = Math.min(
+  4999,
+  Number(process.env.STARS_PACK_YEAR_XTR || 4999)
+);
 const STARS_PACK_FIVE_CARDS_SINGLE_XTR = Number(
   process.env.STARS_PACK_FIVE_CARDS_SINGLE_XTR || 1
 );

@@ -12,7 +12,7 @@ const Map<EnergyPackId, int> _displayStarsByPack = {
   EnergyPackId.full: 5,
   EnergyPackId.weekUnlimited: 99,
   EnergyPackId.monthUnlimited: 499,
-  EnergyPackId.yearUnlimited: 9999,
+  EnergyPackId.yearUnlimited: 4999,
 };
 
 const Map<EnergyPackId, int> _energyGainByPack = {
@@ -46,6 +46,9 @@ bool _shouldShowPack(EnergyState energy, EnergyPackId packId) {
       packId == EnergyPackId.yearUnlimited) {
     return true;
   }
+  if (packId == EnergyPackId.full) {
+    return energy.clampedValue < 100;
+  }
   final gain = _energyGainByPack[packId] ?? 0;
   if (gain <= 0) {
     return false;
@@ -77,6 +80,8 @@ Future<bool> trySpendEnergyForAction(
 
 Future<void> showEnergyTopUpSheet(BuildContext context, WidgetRef ref) async {
   final l10n = AppLocalizations.of(context);
+  final energy = ref.read(energyProvider);
+  final showFullPack = _shouldShowPack(energy, EnergyPackId.full);
   await showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
@@ -131,35 +136,31 @@ Future<void> showEnergyTopUpSheet(BuildContext context, WidgetRef ref) async {
                           style: Theme.of(sheetContext).textTheme.bodySmall,
                         ),
                       ),
-                    _PackActionButton(
-                      title: _packTitle(l10n, EnergyPackId.full),
-                      stars: _displayStarsByPack[EnergyPackId.full]!,
-                      primary: false,
-                      enabled: processingPack == null,
-                      onPressed: processingPack != null
-                          ? null
-                          : () async {
-                              if (!_shouldShowPack(
-                                ref.read(energyProvider),
-                                EnergyPackId.full,
-                              )) {
-                                return;
-                              }
-                              setState(
-                                  () => processingPack = EnergyPackId.full);
-                              await _purchaseEnergyPack(
-                                context: context,
-                                sheetContext: statefulContext,
-                                ref: ref,
-                                l10n: l10n,
-                                packId: EnergyPackId.full,
-                              );
-                              if (statefulContext.mounted) {
-                                setState(() => processingPack = null);
-                              }
-                            },
-                    ),
-                    const SizedBox(height: 10),
+                    if (showFullPack) ...[
+                      _PackActionButton(
+                        title: _packTitle(l10n, EnergyPackId.full),
+                        stars: _displayStarsByPack[EnergyPackId.full]!,
+                        primary: false,
+                        enabled: processingPack == null,
+                        onPressed: processingPack != null
+                            ? null
+                            : () async {
+                                setState(
+                                    () => processingPack = EnergyPackId.full);
+                                await _purchaseEnergyPack(
+                                  context: context,
+                                  sheetContext: statefulContext,
+                                  ref: ref,
+                                  l10n: l10n,
+                                  packId: EnergyPackId.full,
+                                );
+                                if (statefulContext.mounted) {
+                                  setState(() => processingPack = null);
+                                }
+                              },
+                      ),
+                      const SizedBox(height: 10),
+                    ],
                     _PackActionButton(
                       title: _packTitle(l10n, EnergyPackId.weekUnlimited),
                       stars: _displayStarsByPack[EnergyPackId.weekUnlimited]!,
@@ -210,6 +211,9 @@ Future<void> showEnergyTopUpSheet(BuildContext context, WidgetRef ref) async {
                       title: _packTitle(l10n, EnergyPackId.yearUnlimited),
                       stars: _displayStarsByPack[EnergyPackId.yearUnlimited]!,
                       primary: true,
+                      badgeLabel: 'Выгодно',
+                      badgeBackground: const Color(0xFF6EEBFF),
+                      badgeForeground: Colors.black,
                       enabled: processingPack == null,
                       onPressed: processingPack != null
                           ? null
@@ -297,6 +301,9 @@ class _PackActionButton extends StatelessWidget {
     required this.onPressed,
     this.primary = false,
     this.enabled = true,
+    this.badgeLabel,
+    this.badgeBackground,
+    this.badgeForeground,
   });
 
   final String title;
@@ -304,6 +311,9 @@ class _PackActionButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final bool primary;
   final bool enabled;
+  final String? badgeLabel;
+  final Color? badgeBackground;
+  final Color? badgeForeground;
 
   @override
   Widget build(BuildContext context) {
@@ -313,17 +323,43 @@ class _PackActionButton extends StatelessWidget {
     final content = Row(
       children: [
         Expanded(
-          child: Text(
-            title,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: (primary ? textTheme.titleMedium : textTheme.labelLarge)
-                ?.copyWith(
-              color: primary
-                  ? colorScheme.onPrimary
-                  : colorScheme.primary.withValues(alpha: 0.96),
-              fontWeight: FontWeight.w700,
-            ),
+          child: Row(
+            children: [
+              Flexible(
+                child: Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style:
+                      (primary ? textTheme.titleMedium : textTheme.labelLarge)
+                          ?.copyWith(
+                    color: primary
+                        ? Colors.white
+                        : colorScheme.primary.withValues(alpha: 0.96),
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              if (badgeLabel != null && badgeLabel!.trim().isNotEmpty) ...[
+                const SizedBox(width: 8),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: badgeBackground ?? const Color(0xFF6EEBFF),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                    badgeLabel!,
+                    style: textTheme.labelSmall?.copyWith(
+                      color: badgeForeground ?? Colors.black,
+                      fontWeight: FontWeight.w800,
+                      height: 1.0,
+                    ),
+                  ),
+                ),
+              ],
+            ],
           ),
         ),
         const SizedBox(width: 12),
@@ -333,7 +369,7 @@ class _PackActionButton extends StatelessWidget {
           style: (primary ? textTheme.titleMedium : textTheme.labelLarge)
               ?.copyWith(
             color: primary
-                ? colorScheme.onPrimary
+                ? Colors.white
                 : colorScheme.primary.withValues(alpha: 0.96),
             fontWeight: FontWeight.w800,
           ),
@@ -350,7 +386,7 @@ class _PackActionButton extends StatelessWidget {
             minimumSize: const Size.fromHeight(54),
             padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
             backgroundColor: colorScheme.primary,
-            foregroundColor: colorScheme.onPrimary,
+            foregroundColor: Colors.white,
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
             textStyle: const TextStyle(fontWeight: FontWeight.w600),

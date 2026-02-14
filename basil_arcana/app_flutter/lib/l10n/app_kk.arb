@@ -338,7 +338,7 @@
   "energyPackFull": "100%-ға дейін толықтыру",
   "energyPackWeekUnlimited": "1 аптаға шексіз — 99 ⭐",
   "energyPackMonthUnlimited": "1 айға шексіз — 499 ⭐",
-  "energyPackYearUnlimited": "1 жылға шексіз — 9999 ⭐",
+  "energyPackYearUnlimited": "1 жылға шексіз — 4999 ⭐",
   "energyTopUpSuccess": "Энергия {value}%-ға толықты.",
   "energyUnlimitedActivated": "Шексіз энергия қосылды.",
   "energyTopUpProcessing": "Төлем ашылып жатыр...",

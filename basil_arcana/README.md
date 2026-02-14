@@ -75,7 +75,7 @@ curl -X POST http://localhost:3000/api/reading/generate \
    - `STARS_PACK_FULL_XTR` (optional, default `5`)
    - `STARS_PACK_WEEK_XTR` (optional, default `99`)
    - `STARS_PACK_MONTH_XTR` (optional, default `499`)
-   - `STARS_PACK_YEAR_XTR` (optional, default `9999`)
+   - `STARS_PACK_YEAR_XTR` (optional, default `4999`)
 4. Ensure the `start` script runs (`npm start`). Railway uses `process.env.PORT`.
 5. Use the Railway public URL to test `/health`.
 

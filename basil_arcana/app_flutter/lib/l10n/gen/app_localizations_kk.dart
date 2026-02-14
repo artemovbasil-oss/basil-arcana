@@ -763,7 +763,7 @@ class AppLocalizationsKk extends AppLocalizations {
   String get energyPackMonthUnlimited => '1 айға шексіз — 499 ⭐';
 
   @override
-  String get energyPackYearUnlimited => '1 жылға шексіз — 9999 ⭐';
+  String get energyPackYearUnlimited => '1 жылға шексіз — 4999 ⭐';
 
   @override
   String energyTopUpSuccess(int value) {

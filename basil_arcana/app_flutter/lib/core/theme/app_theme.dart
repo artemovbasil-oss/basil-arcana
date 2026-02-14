@@ -12,6 +12,8 @@ ThemeData buildAppTheme() {
     brightness: Brightness.dark,
   ).copyWith(
     primary: primary,
+    onPrimary: Colors.white,
+    onPrimaryContainer: Colors.white,
     background: background,
     surface: surface,
     surfaceVariant: surfaceVariant,
@@ -66,7 +68,7 @@ ThemeData buildAppTheme() {
       style: ElevatedButton.styleFrom(
         minimumSize: const Size.fromHeight(54),
         backgroundColor: primary,
-        foregroundColor: colorScheme.onPrimary,
+        foregroundColor: Colors.white,
         elevation: 8,
         shadowColor: primary.withOpacity(0.4),
         shape: const StadiumBorder(),

@@ -1465,7 +1465,7 @@ abstract class AppLocalizations {
   /// No description provided for @energyPackYearUnlimited.
   ///
   /// In en, this message translates to:
-  /// **'Unlimited for 1 year — 9999 ⭐'**
+  /// **'Unlimited for 1 year — 4999 ⭐'**
   String get energyPackYearUnlimited;
 
   /// No description provided for @energyTopUpSuccess.

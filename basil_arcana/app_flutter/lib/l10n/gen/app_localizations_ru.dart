@@ -764,7 +764,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get energyPackMonthUnlimited => 'Безлимит на 1 месяц — 499 ⭐';
 
   @override
-  String get energyPackYearUnlimited => 'Безлимит на 1 год — 9999 ⭐';
+  String get energyPackYearUnlimited => 'Безлимит на 1 год — 4999 ⭐';
 
   @override
   String energyTopUpSuccess(int value) {

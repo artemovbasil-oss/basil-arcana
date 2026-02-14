@@ -20,17 +20,29 @@ class NatalChartFlowScreen extends ConsumerStatefulWidget {
       _NatalChartFlowScreenState();
 }
 
-class _NatalChartFlowScreenState extends ConsumerState<NatalChartFlowScreen> {
+class _NatalChartFlowScreenState extends ConsumerState<NatalChartFlowScreen>
+    with SingleTickerProviderStateMixin {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _timeController = TextEditingController();
 
   int _step = 0;
   bool _isSubmitting = false;
+  late final AnimationController _magicController;
   static final DateFormat _dateFormat = DateFormat('yyyy-MM-dd');
 
   @override
+  void initState() {
+    super.initState();
+    _magicController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2200),
+    )..repeat();
+  }
+
+  @override
   void dispose() {
+    _magicController.dispose();
     _nameController.dispose();
     _dateController.dispose();
     _timeController.dispose();
@@ -232,16 +244,9 @@ class _NatalChartFlowScreenState extends ConsumerState<NatalChartFlowScreen> {
                 ),
               if (_isSubmitting) ...[
                 const SizedBox(height: 14),
-                Row(
-                  children: [
-                    const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(child: Text(copy.loadingLabel)),
-                  ],
+                _MagicLoadingCard(
+                  label: copy.loadingLabel,
+                  animation: _magicController,
                 ),
               ],
               const Spacer(),
@@ -274,6 +279,95 @@ class _NatalChartFlowScreenState extends ConsumerState<NatalChartFlowScreen> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _MagicLoadingCard extends StatelessWidget {
+  const _MagicLoadingCard({
+    required this.label,
+    required this.animation,
+  });
+
+  final String label;
+  final Animation<double> animation;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, _) {
+        final t = animation.value;
+        final glow = 0.35 + (0.65 * (0.5 - (t - 0.5).abs()) * 2);
+        return Container(
+          padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                colorScheme.primary.withValues(alpha: 0.22),
+                colorScheme.surfaceContainerHighest.withValues(alpha: 0.32),
+              ],
+            ),
+            border: Border.all(
+              color: colorScheme.primary.withValues(alpha: 0.45 + 0.3 * glow),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color:
+                    colorScheme.primary.withValues(alpha: 0.18 + 0.22 * glow),
+                blurRadius: 18 + 18 * glow,
+                spreadRadius: 1 + 2 * glow,
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Transform.rotate(
+                angle: t * 6.283185307,
+                child: Text(
+                  '✶',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                      ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                    const SizedBox(height: 8),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(999),
+                      child: LinearProgressIndicator(
+                        minHeight: 5,
+                        value: (t + 0.15).clamp(0.0, 1.0),
+                        backgroundColor:
+                            colorScheme.primary.withValues(alpha: 0.2),
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                          Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

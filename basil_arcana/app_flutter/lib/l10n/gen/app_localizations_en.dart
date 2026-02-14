@@ -757,7 +757,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get energyPackMonthUnlimited => 'Unlimited for 1 month — 499 ⭐';
 
   @override
-  String get energyPackYearUnlimited => 'Unlimited for 1 year — 9999 ⭐';
+  String get energyPackYearUnlimited => 'Unlimited for 1 year — 4999 ⭐';
 
   @override
   String energyTopUpSuccess(int value) {
