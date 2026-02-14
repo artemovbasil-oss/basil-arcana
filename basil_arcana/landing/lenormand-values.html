@@ -27,7 +27,7 @@
       content="Практичная система Ленорман: 36 карт, читаемые цепочки событий и ясные решения на сейчас."
     />
     <meta property="og:url" content="https://www.basilarcana.com/lenormand-values.html" />
-    <meta property="og:image" content="https://cdn.basilarcana.com/cards/lenormand/ln_rider.webp" />
+    <meta property="og:image" content="https://basilarcana-assets.b-cdn.net/cards/lenormand/ln_rider.webp" />
     <meta property="og:locale" content="ru_RU" />
     <meta property="og:locale:alternate" content="en_US" />
     <meta property="og:locale:alternate" content="kk_KZ" />
@@ -37,7 +37,7 @@
       name="twitter:description"
       content="Изучайте значения карт Ленорман с примерами светлой и теневой стороны и практичным советом."
     />
-    <meta name="twitter:image" content="https://cdn.basilarcana.com/cards/lenormand/ln_rider.webp" />
+    <meta name="twitter:image" content="https://basilarcana-assets.b-cdn.net/cards/lenormand/ln_rider.webp" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -668,12 +668,22 @@
         return `https://cdn.basilarcana.com/${url.replace(/^\/+/, "")}`;
       }
 
+      const LENORMAND_ASSET_BASE = "https://basilarcana-assets.b-cdn.net/cards/lenormand/";
+      const lenormandSlugAlias = {
+        stars: "star",
+        crossroads: "crossroad",
+      };
+
       function cardImageUrl(cardKey, cardData) {
         if (cardData && cardData.imageUrl) {
-          return toAbsoluteCdn(cardData.imageUrl);
+          const file = cardData.imageUrl.split("/").pop();
+          if (file) {
+            return `${LENORMAND_ASSET_BASE}${file}`;
+          }
         }
-        const tail = cardKey.replace(/^lenormand_\d+_/, "");
-        return `https://cdn.basilarcana.com/cards/lenormand/ln_${tail}.webp`;
+        const rawTail = cardKey.replace(/^lenormand_\d+_/, "");
+        const tail = lenormandSlugAlias[rawTail] || rawTail;
+        return `${LENORMAND_ASSET_BASE}ln_${tail}.webp`;
       }
 
       function lenormandOrder(key) {
