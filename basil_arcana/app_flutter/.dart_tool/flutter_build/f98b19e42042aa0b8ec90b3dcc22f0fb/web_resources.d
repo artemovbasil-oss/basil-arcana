@@ -1,1 +1,0 @@
- /Users/basilart/basil_arcana/basil_arcana/app_flutter/build/web/telegram_bridge.js /Users/basilart/basil_arcana/basil_arcana/app_flutter/build/web/manifest.json:  /Users/basilart/basil_arcana/basil_arcana/app_flutter/web/index.html /Users/basilart/basil_arcana/basil_arcana/app_flutter/web/telegram_bridge.js /Users/basilart/basil_arcana/basil_arcana/app_flutter/web/manifest.json

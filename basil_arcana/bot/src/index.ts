@@ -47,6 +47,7 @@ const SOFIA_PROFILE_URL = "https://t.me/SofiaKnoxx";
 const TELEGRAM_STARS_CURRENCY = "XTR";
 const PURCHASE_CODE_LENGTH = 6;
 const DAY_MS = 24 * 60 * 60 * 1000;
+const MINI_APP_VERSION_TAG = "20260214-novideo";
 
 const PLANS: Record<PlanId, Plan> = {
   single: {
@@ -459,10 +460,11 @@ function buildLocalizedWebAppUrl(baseUrl: string, locale: SupportedLocale): stri
   try {
     const url = new URL(baseUrl);
     url.searchParams.set("lang", locale);
+    url.searchParams.set("v", MINI_APP_VERSION_TAG);
     return url.toString();
   } catch (_) {
     const separator = baseUrl.includes("?") ? "&" : "?";
-    return `${baseUrl}${separator}lang=${locale}`;
+    return `${baseUrl}${separator}lang=${locale}&v=${MINI_APP_VERSION_TAG}`;
   }
 }
 

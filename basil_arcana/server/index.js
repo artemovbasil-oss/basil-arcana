@@ -519,15 +519,18 @@ function parseReferrerUserIdFromStartParam(startParam) {
   if (!raw.startsWith('ref_')) {
     return null;
   }
-  return decodeReferralCode(raw.slice(4));
+  const payload = raw.slice(4);
+  const referralCode = payload.split('_')[0];
+  return decodeReferralCode(referralCode);
 }
 
 function buildReferralLink(userId) {
+  const miniAppVersion = '20260214-novideo';
   const code = encodeReferralCode(userId);
   if (!code) {
-    return 'https://t.me/tarot_arkana_bot/app';
+    return `https://t.me/tarot_arkana_bot/app?startapp=v_${miniAppVersion}`;
   }
-  return `https://t.me/tarot_arkana_bot/app?startapp=ref_${code}`;
+  return `https://t.me/tarot_arkana_bot/app?startapp=ref_${code}_v_${miniAppVersion}`;
 }
 
 function buildSofiaPromo(locale) {
