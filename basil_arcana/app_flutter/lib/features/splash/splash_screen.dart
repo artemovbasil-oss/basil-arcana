@@ -25,6 +25,8 @@ const String _splashOnboardingSeenKey = 'splashOnboardingSeenV1';
 
 class _SplashScreenState extends State<SplashScreen> {
   Timer? _navigationTimer;
+  Timer? _hardTimeoutTimer;
+  Timer? _onboardingTimeoutTimer;
   late final bool _canNavigate;
   bool _hasShownOnboarding = false;
   bool _showOnboarding = false;
@@ -41,6 +43,12 @@ class _SplashScreenState extends State<SplashScreen> {
       TelegramWebApp.disableVerticalSwipes();
     }
     if (_canNavigate) {
+      _hardTimeoutTimer = Timer(const Duration(seconds: 8), () {
+        if (!mounted || _didNavigate) {
+          return;
+        }
+        _goHome();
+      });
       _navigationTimer = Timer(const Duration(seconds: 3), () {
         if (!mounted || _didNavigate) {
           return;
@@ -52,6 +60,13 @@ class _SplashScreenState extends State<SplashScreen> {
         setState(() {
           _showOnboarding = true;
         });
+        _onboardingTimeoutTimer?.cancel();
+        _onboardingTimeoutTimer = Timer(const Duration(seconds: 8), () {
+          if (!mounted || _didNavigate) {
+            return;
+          }
+          _goHome();
+        });
       });
     }
   }
@@ -59,6 +74,8 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void dispose() {
     _navigationTimer?.cancel();
+    _hardTimeoutTimer?.cancel();
+    _onboardingTimeoutTimer?.cancel();
     super.dispose();
   }
 
@@ -120,6 +137,7 @@ class _SplashScreenState extends State<SplashScreen> {
                   _hasShownOnboarding = true;
                   _showOnboarding = false;
                 });
+                _onboardingTimeoutTimer?.cancel();
                 _goHome();
               },
             ),
@@ -133,12 +151,17 @@ class _SplashScreenState extends State<SplashScreen> {
       return;
     }
     _didNavigate = true;
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        settings: appRouteSettings(showBackButton: false),
-        builder: (_) => const HomeScreen(),
-      ),
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          settings: appRouteSettings(showBackButton: false),
+          builder: (_) => const HomeScreen(),
+        ),
+      );
+    });
   }
 }
 
