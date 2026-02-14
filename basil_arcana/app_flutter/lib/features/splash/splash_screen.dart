@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:video_player/video_player.dart';
@@ -26,10 +25,7 @@ const String _splashOnboardingSeenKey = 'splashOnboardingSeenV1';
 
 class _SplashScreenState extends State<SplashScreen> {
   Timer? _navigationTimer;
-  Timer? _hardTimeoutTimer;
-  Timer? _onboardingTimeoutTimer;
   late final bool _canNavigate;
-  late final bool _enableSplashVideo;
   bool _hasShownOnboarding = false;
   bool _showOnboarding = false;
   bool _didNavigate = false;
@@ -38,21 +34,12 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     _canNavigate = AppConfig.isConfigured;
-    _enableSplashVideo = !(kIsWeb &&
-        TelegramWebApp.isTelegramWebView &&
-        TelegramWebApp.isTelegramMobile);
     final box = Hive.box<String>(_settingsBoxName);
-    _hasShownOnboarding = (box.get(_splashOnboardingSeenKey) ?? '') == '1';
+    _hasShownOnboarding = (box.get(_splashOnboardingSeenKey) ?? '').isNotEmpty;
     if (TelegramWebApp.isTelegramWebView) {
       TelegramWebApp.expand();
       TelegramWebApp.disableVerticalSwipes();
     }
-    _hardTimeoutTimer = Timer(const Duration(seconds: 8), () {
-      if (!mounted || _didNavigate) {
-        return;
-      }
-      _goHome();
-    });
     _navigationTimer = Timer(const Duration(seconds: 3), () {
       if (!mounted || _didNavigate) {
         return;
@@ -64,21 +51,12 @@ class _SplashScreenState extends State<SplashScreen> {
       setState(() {
         _showOnboarding = true;
       });
-      _onboardingTimeoutTimer?.cancel();
-      _onboardingTimeoutTimer = Timer(const Duration(seconds: 8), () {
-        if (!mounted || _didNavigate) {
-          return;
-        }
-        _goHome();
-      });
     });
   }
 
   @override
   void dispose() {
     _navigationTimer?.cancel();
-    _hardTimeoutTimer?.cancel();
-    _onboardingTimeoutTimer?.cancel();
     super.dispose();
   }
 
@@ -98,7 +76,7 @@ class _SplashScreenState extends State<SplashScreen> {
           DeckSplashMedia(
             posterUrl: _deckSplashPosterUrl,
             videoUrl: _deckSplashVideoUrl,
-            enableVideo: _enableSplashVideo,
+            enableVideo: true,
           ),
           SafeArea(
             top: useTelegramSafeArea,
@@ -133,7 +111,7 @@ class _SplashScreenState extends State<SplashScreen> {
             _SplashOnboardingOverlay(
               onClose: () async {
                 final box = Hive.box<String>(_settingsBoxName);
-                await box.put(_splashOnboardingSeenKey, '1');
+                await box.put(_splashOnboardingSeenKey, 'seen');
                 if (!mounted) {
                   return;
                 }
@@ -141,7 +119,6 @@ class _SplashScreenState extends State<SplashScreen> {
                   _hasShownOnboarding = true;
                   _showOnboarding = false;
                 });
-                _onboardingTimeoutTimer?.cancel();
                 _goHome();
               },
             ),
@@ -294,7 +271,7 @@ class _VideoCover extends StatelessWidget {
     }
     return ClipRect(
       child: FittedBox(
-        fit: BoxFit.contain,
+        fit: BoxFit.cover,
         alignment: Alignment.center,
         child: SizedBox(
           width: size.width,
