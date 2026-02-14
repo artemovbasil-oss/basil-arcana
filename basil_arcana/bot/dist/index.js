@@ -679,6 +679,17 @@ function supportedLocaleFromDb(value) {
 function delay(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
+function isGetUpdatesConflictError(error) {
+    if (!error || typeof error !== "object") {
+        return false;
+    }
+    const details = error;
+    const errorCode = details.error_code ?? details.payload?.error_code;
+    const method = details.method ?? details.payload?.method;
+    const text = `${details.description ?? ""} ${details.message ?? ""}`;
+    return (errorCode === 409 &&
+        (method === "getUpdates" || text.includes("terminated by other getUpdates request")));
+}
 async function sendLauncherMessage(ctx) {
     await sendMainMenu(ctx);
 }
@@ -924,10 +935,23 @@ async function main() {
     bot.catch((err) => {
         console.error("Bot error", err.error);
     });
-    await bot.start({
-        allowed_updates: ["message", "callback_query", "pre_checkout_query"],
-    });
-    console.log("Telegram bot started.");
+    const retryDelayMs = 5000;
+    for (;;) {
+        try {
+            await bot.start({
+                allowed_updates: ["message", "callback_query", "pre_checkout_query"],
+            });
+            console.log("Telegram bot stopped.");
+            return;
+        }
+        catch (error) {
+            if (!isGetUpdatesConflictError(error)) {
+                throw error;
+            }
+            console.warn(`Detected Telegram getUpdates conflict (409). Retrying in ${retryDelayMs}ms.`);
+            await delay(retryDelayMs);
+        }
+    }
 }
 main().catch((error) => {
     console.error("Startup failure", error);
