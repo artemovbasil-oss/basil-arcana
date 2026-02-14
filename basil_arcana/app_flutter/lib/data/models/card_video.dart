@@ -213,13 +213,5 @@ String normalizeVideoFileName(String name) {
 }
 
 String? _lenormandVideoFileForCardId(String normalizedId) {
-  if (!normalizedId.startsWith('lenormand_')) {
-    return null;
-  }
-  final parts = normalizedId.split('_');
-  if (parts.length < 3) {
-    return null;
-  }
-  final slug = parts.sublist(2).join('_');
-  return 'ln_$slug.mp4';
+  return lenormandVideoFileNameFromCardId(normalizedId);
 }

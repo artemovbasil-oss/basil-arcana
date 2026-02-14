@@ -388,16 +388,11 @@ String _normalizeLenormandImagePath(
   if (basename.startsWith('ln_')) {
     return path;
   }
-  final normalizedCardId = canonicalCardId(cardId);
-  if (!normalizedCardId.startsWith('lenormand_')) {
+  final stem = lenormandImageFileStemFromCardId(cardId);
+  if (stem == null) {
     return path;
   }
-  final parts = normalizedCardId.split('_');
-  if (parts.length < 3) {
-    return path;
-  }
-  final slug = parts.sublist(2).join('_');
-  return 'cards/lenormand/ln_$slug.webp';
+  return 'cards/lenormand/$stem.webp';
 }
 
 List<CardModel> _getActiveDeckCards(
@@ -460,10 +455,13 @@ List<CardModel> _buildLenormandFallback(Locale locale) {
         'Ленорман карталары абстракция емес, практикалық белгі ретінде оқылады.',
       _ => 'Lenormand cards are read as practical signals, not abstractions.',
     };
+    final normalizedSlug = normalizeLenormandAssetSlug(def.slug);
     final imageUrl =
-        'https://basilarcana-assets.b-cdn.net/cards/lenormand/ln_${def.slug}.webp';
-    final videoUrl =
-        'https://basilarcana-assets.b-cdn.net/video/ln_${def.slug}.mp4';
+        'https://basilarcana-assets.b-cdn.net/cards/lenormand/ln_${normalizedSlug}.webp';
+    final videoFileName = lenormandVideoFileNameFromCardId(def.id);
+    final videoUrl = videoFileName == null
+        ? null
+        : 'https://basilarcana-assets.b-cdn.net/video/$videoFileName';
 
     return CardModel(
       id: def.id,

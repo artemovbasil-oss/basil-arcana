@@ -197,3 +197,64 @@ DeckType normalizePrimaryDeckSelection(DeckType deckType) {
   }
   return DeckType.all;
 }
+
+String? lenormandSlugFromCardId(String rawId) {
+  final normalizedId = canonicalCardId(rawId);
+  if (!normalizedId.startsWith('lenormand_')) {
+    return null;
+  }
+  final parts = normalizedId.split('_');
+  if (parts.length < 3) {
+    return null;
+  }
+  final slug = parts.sublist(2).join('_');
+  return normalizeLenormandAssetSlug(slug);
+}
+
+String normalizeLenormandAssetSlug(String slug) {
+  switch (slug) {
+    case 'stars':
+      return 'star';
+    case 'crossroads':
+      return 'crossroad';
+    default:
+      return slug;
+  }
+}
+
+String? lenormandImageFileStemFromCardId(String rawId) {
+  final slug = lenormandSlugFromCardId(rawId);
+  if (slug == null) {
+    return null;
+  }
+  return 'ln_$slug';
+}
+
+String? lenormandVideoFileNameFromCardId(String rawId) {
+  final slug = lenormandSlugFromCardId(rawId);
+  if (slug == null || !_lenormandVideoSlugs.contains(slug)) {
+    return null;
+  }
+  return 'ln_$slug.mp4';
+}
+
+const Set<String> _lenormandVideoSlugs = {
+  'rider',
+  'tree',
+  'clouds',
+  'snake',
+  'scythe',
+  'birds',
+  'bear',
+  'star',
+  'crossroad',
+  'ring',
+  'book',
+  'man',
+  'woman',
+  'lily',
+  'sun',
+  'moon',
+  'fish',
+  'anchor',
+};

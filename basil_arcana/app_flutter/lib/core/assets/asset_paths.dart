@@ -40,7 +40,8 @@ String cardImageUrl(
   }
   if (deckId == DeckType.lenormand ||
       (deckId == DeckType.all && normalizedId.startsWith('lenormand_'))) {
-    final fileName = _lenormandFileStem(normalizedId);
+    final fileName =
+        lenormandImageFileStemFromCardId(normalizedId) ?? normalizedId;
     return '$base/cards/lenormand/$fileName.webp';
   }
   switch (normalizedId) {
@@ -49,21 +50,6 @@ String cardImageUrl(
     default:
       return '$base/cards/major/$normalizedId.webp';
   }
-}
-
-String _lenormandFileStem(String normalizedCardId) {
-  if (normalizedCardId.startsWith('ln_')) {
-    return normalizedCardId;
-  }
-  if (!normalizedCardId.startsWith('lenormand_')) {
-    return normalizedCardId;
-  }
-  final parts = normalizedCardId.split('_');
-  if (parts.length < 3) {
-    return normalizedCardId;
-  }
-  final slug = parts.sublist(2).join('_');
-  return 'ln_$slug';
 }
 
 String spreadsUrl(String languageCode) {

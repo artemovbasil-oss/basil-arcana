@@ -50,12 +50,16 @@ class CardMediaResolver {
           ),
           imageUrl: imageUrl,
         );
+    final hasExplicitVideo =
+        videoUrlOverride != null || _hasExplicitVideo(card);
+    final directVideoUrl = videoUrlOverride ??
+        cardVideoUrl(fallbackCard, AssetsConfig.assetsBaseUrl);
     String? resolvedVideo =
-        videoUrlOverride ?? cardVideoUrl(fallbackCard, AssetsConfig.assetsBaseUrl);
-    resolvedVideo ??= _videoUrlFromCardId(cardId, availableVideoFiles);
+        directVideoUrl ?? _videoUrlFromCardId(cardId, availableVideoFiles);
     if (resolvedVideo != null &&
         availableVideoFiles != null &&
-        availableVideoFiles!.isNotEmpty) {
+        availableVideoFiles!.isNotEmpty &&
+        !hasExplicitVideo) {
       final fileName = resolvedVideo.split('/').last.toLowerCase();
       if (!availableVideoFiles!.contains(fileName)) {
         resolvedVideo = null;
@@ -79,6 +83,15 @@ class CardMediaResolver {
       return null;
     }
     return '${AssetsConfig.assetsBaseUrl}/video/$fileName';
+  }
+
+  bool _hasExplicitVideo(CardModel? card) {
+    if (card == null) {
+      return false;
+    }
+    final hasVideoFileName = card.videoFileName?.trim().isNotEmpty ?? false;
+    final hasVideoUrl = card.videoUrl?.trim().isNotEmpty ?? false;
+    return hasVideoFileName || hasVideoUrl;
   }
 }
 
@@ -586,6 +599,7 @@ class DeckCoverBack extends ConsumerWidget {
         },
       );
     }
+
     return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: radius,

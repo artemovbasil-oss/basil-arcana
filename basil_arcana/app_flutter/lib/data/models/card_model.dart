@@ -254,15 +254,7 @@ String? cardVideoUrl(CardModel card, String assetsBaseUrl) {
 }
 
 String? _lenormandVideoFileName(String cardId) {
-  final normalizedId = canonicalCardId(cardId);
-  if (!normalizedId.startsWith('lenormand_')) {
-    return null;
-  }
-  final parts = normalizedId.split('_');
-  if (parts.length < 3) {
-    return null;
-  }
-  return 'ln_${parts.sublist(2).join('_')}.mp4';
+  return lenormandVideoFileNameFromCardId(cardId);
 }
 
 String? _videoFileNameFromJson(Map<String, dynamic> json) {
