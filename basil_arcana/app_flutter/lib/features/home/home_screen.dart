@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
@@ -269,71 +271,163 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       return;
     }
     final copy = _HomeOnboardingCopy.resolve(context);
-    await showDialog<void>(
+    await showGeneralDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (dialogContext) {
+      barrierLabel: 'Onboarding',
+      barrierColor: Colors.black.withValues(alpha: 0.35),
+      transitionDuration: const Duration(milliseconds: 220),
+      pageBuilder: (dialogContext, animation, secondaryAnimation) {
         final colorScheme = Theme.of(dialogContext).colorScheme;
-        return Dialog(
-          insetPadding: const EdgeInsets.symmetric(horizontal: 20),
-          backgroundColor: colorScheme.surface.withValues(alpha: 0.98),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18),
-            side: BorderSide(
-              color: colorScheme.primary.withValues(alpha: 0.38),
+        return Stack(
+          fit: StackFit.expand,
+          children: [
+            BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 7, sigmaY: 7),
+              child: Container(color: Colors.transparent),
             ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  copy.title,
-                  style: Theme.of(dialogContext).textTheme.titleMedium?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                      ),
-                ),
-                const SizedBox(height: 10),
-                _OnboardingBullet(
-                  title: copy.itemLenormand,
-                  subtitle: copy.itemLenormandHint,
-                ),
-                const SizedBox(height: 8),
-                _OnboardingBullet(
-                  title: copy.itemCompatibility,
-                  subtitle: copy.itemCompatibilityHint,
-                ),
-                const SizedBox(height: 8),
-                _OnboardingBullet(
-                  title: copy.itemNatal,
-                  subtitle: copy.itemNatalHint,
-                ),
-                const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      await box.put(_splashOnboardingSeenKey, 'seen');
-                      if (dialogContext.mounted) {
-                        Navigator.of(dialogContext).pop();
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: const Size.fromHeight(44),
-                      backgroundColor: colorScheme.primary,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
-                    child: Text(copy.closeButton),
+            Center(
+              child: Dialog(
+                insetPadding: const EdgeInsets.symmetric(horizontal: 36),
+                backgroundColor: colorScheme.surface.withValues(alpha: 0.98),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18),
+                  side: BorderSide(
+                    color: colorScheme.primary.withValues(alpha: 0.38),
                   ),
                 ),
-              ],
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Center(
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          alignment: Alignment.center,
+                          children: [
+                            Container(
+                              width: 68,
+                              height: 68,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color:
+                                    colorScheme.primary.withValues(alpha: 0.16),
+                                border: Border.all(
+                                  color: colorScheme.primary
+                                      .withValues(alpha: 0.55),
+                                ),
+                              ),
+                              alignment: Alignment.center,
+                              child: const Text(
+                                '🔮',
+                                style: TextStyle(fontSize: 34),
+                              ),
+                            ),
+                            Positioned(
+                              top: -8,
+                              right: -14,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: colorScheme.primary,
+                                  borderRadius: BorderRadius.circular(999),
+                                ),
+                                child: Text(
+                                  copy.badge,
+                                  style: Theme.of(dialogContext)
+                                      .textTheme
+                                      .labelSmall
+                                      ?.copyWith(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        copy.title,
+                        style: Theme.of(dialogContext)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                            ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        copy.subtitle,
+                        style: Theme.of(dialogContext)
+                            .textTheme
+                            .bodySmall
+                            ?.copyWith(
+                              color: Colors.white.withValues(alpha: 0.72),
+                            ),
+                      ),
+                      const SizedBox(height: 10),
+                      _OnboardingBullet(
+                        title: copy.itemLenormand,
+                        subtitle: copy.itemLenormandHint,
+                      ),
+                      const SizedBox(height: 8),
+                      _OnboardingBullet(
+                        title: copy.itemCompatibility,
+                        subtitle: copy.itemCompatibilityHint,
+                      ),
+                      const SizedBox(height: 8),
+                      _OnboardingBullet(
+                        title: copy.itemNatal,
+                        subtitle: copy.itemNatalHint,
+                      ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            await box.put(_splashOnboardingSeenKey, 'seen');
+                            if (dialogContext.mounted) {
+                              Navigator.of(dialogContext).pop();
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            minimumSize: const Size.fromHeight(44),
+                            backgroundColor: colorScheme.primary,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                          child: Text(copy.closeButton),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
+          ],
+        );
+      },
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        return FadeTransition(
+          opacity: CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOut,
+          ),
+          child: ScaleTransition(
+            scale: Tween<double>(begin: 0.96, end: 1.0).animate(
+              CurvedAnimation(parent: animation, curve: Curves.easeOutBack),
+            ),
+            child: child,
           ),
         );
       },
@@ -863,6 +957,8 @@ class _OnboardingBullet extends StatelessWidget {
 class _HomeOnboardingCopy {
   const _HomeOnboardingCopy({
     required this.title,
+    required this.subtitle,
+    required this.badge,
     required this.itemLenormand,
     required this.itemLenormandHint,
     required this.itemCompatibility,
@@ -873,6 +969,8 @@ class _HomeOnboardingCopy {
   });
 
   final String title;
+  final String subtitle;
+  final String badge;
   final String itemLenormand;
   final String itemLenormandHint;
   final String itemCompatibility;
@@ -885,7 +983,9 @@ class _HomeOnboardingCopy {
     final code = Localizations.localeOf(context).languageCode;
     if (code == 'ru') {
       return const _HomeOnboardingCopy(
-        title: 'Добро пожаловать в магический вайб. Теперь у нас доступно:',
+        title: 'The real magic',
+        subtitle: '14.02.2026',
+        badge: 'новая магия',
         itemLenormand: 'Гадание по колоде Ленорман',
         itemLenormandHint: 'Выбери колоду в профиле',
         itemCompatibility: 'Проверка совместимости пары',
@@ -897,7 +997,9 @@ class _HomeOnboardingCopy {
     }
     if (code == 'kk') {
       return const _HomeOnboardingCopy(
-        title: 'Сиқырлы вайбқа қош келдің. Енді мыналар қолжетімді:',
+        title: 'The real magic',
+        subtitle: '14.02.2026',
+        badge: 'жаңа сиқыр',
         itemLenormand: 'Ленорман колодасы бойынша болжау',
         itemLenormandHint: 'Колоданы профильден таңда',
         itemCompatibility: 'Жұп үйлесімділігін тексеру',
@@ -908,7 +1010,9 @@ class _HomeOnboardingCopy {
       );
     }
     return const _HomeOnboardingCopy(
-      title: 'Welcome to the magic vibe. You now have:',
+      title: 'The real magic',
+      subtitle: '14.02.2026',
+      badge: 'new magic',
       itemLenormand: 'Lenormand card reading',
       itemLenormandHint: 'Choose deck in profile',
       itemCompatibility: 'Couple compatibility check',
