@@ -1450,9 +1450,8 @@ app.post('/api/natal-chart/generate', async (req, res) => {
         duration_ms: durationMs,
       })
     );
-    const locale = normalizeLocale(req.body?.language);
     return res.json({
-      interpretation: appendSofiaPromo(interpretation, locale),
+      interpretation,
       requestId: req.requestId
     });
   } catch (err) {
@@ -1534,9 +1533,8 @@ app.post('/api/natal-chart/generate_web', async (req, res) => {
         duration_ms: durationMs,
       })
     );
-    const locale = normalizeLocale(payload?.language);
     return res.json({
-      interpretation: appendSofiaPromo(interpretation, locale),
+      interpretation,
       requestId: req.requestId
     });
   } catch (err) {
@@ -1616,9 +1614,8 @@ app.post('/api/compatibility/generate', async (req, res) => {
         duration_ms: durationMs,
       })
     );
-    const locale = normalizeLocale(req.body?.language);
     return res.json({
-      interpretation: appendSofiaPromo(interpretation, locale),
+      interpretation,
       requestId: req.requestId
     });
   } catch (err) {
@@ -1700,9 +1697,8 @@ app.post('/api/compatibility/generate_web', async (req, res) => {
         duration_ms: durationMs,
       })
     );
-    const locale = normalizeLocale(payload?.language);
     return res.json({
-      interpretation: appendSofiaPromo(interpretation, locale),
+      interpretation,
       requestId: req.requestId
     });
   } catch (err) {

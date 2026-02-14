@@ -147,7 +147,7 @@ class _NatalChartFlowScreenState extends ConsumerState<NatalChartFlowScreen> {
             copy.highlightTime(birthTime),
             copy.highlightAdvice,
           ],
-          action: copy.action,
+          action: copy.randomAction(name),
           sofiaPrefill: '$summary\n\n${copy.highlightDate(birthDate)}',
           tarotQuestion: copy.tarotQuestion(name),
         ),
@@ -293,7 +293,6 @@ class _NatalCopy {
     required this.generateButton,
     required this.resultTitle,
     required this.highlightAdvice,
-    required this.action,
   });
 
   final String screenTitle;
@@ -309,7 +308,6 @@ class _NatalCopy {
   final String generateButton;
   final String resultTitle;
   final String highlightAdvice;
-  final String action;
 
   String userPrompt(String name) {
     final normalizedName = name.trim();
@@ -353,6 +351,38 @@ class _NatalCopy {
     return 'Luck spread for $normalizedName';
   }
 
+  String randomAction(String name) {
+    final normalizedName = name.trim();
+    if (screenTitle == 'Натальная карта') {
+      final options = [
+        '$normalizedName, разберите завал на столе и в заметках за 25 минут: хаос вокруг съедает фокус быстрее любых сомнений.',
+        'Поставьте один «земной» дедлайн на 48 часов: счет, звонок, документы. Духовность работает лучше, когда быт под контролем.',
+        'Сделайте ревизию окружения: с кем после общения вы выжаты. На неделю сократите контакт хотя бы на 30%.',
+        'Проверьте режим сна на три ночи подряд. Если спите рвано, никакие инсайты не закрепятся в действии.',
+        'Выберите одну привычку-утечку (скролл, сахар, поздние чаты) и урежьте ее вдвое на 7 дней.',
+      ];
+      return options[DateTime.now().microsecondsSinceEpoch % options.length];
+    }
+    if (screenTitle == 'Наталдық карта') {
+      final options = [
+        '$normalizedName, 25 минут ішінде үстел мен жазбаларды реттеңіз: сыртқы ретсіздік фокусты жейді.',
+        'Алдағы 48 сағатқа бір нақты тұрмыстық дедлайн қойыңыз: төлем, қоңырау, құжат.',
+        'Қарым-қатынасты сүзгіден өткізіңіз: қай адамнан кейін күшіңіз түседі. Бір апта сол байланысты азайтыңыз.',
+        'Үш түн ұйқы режимін реттеңіз. Ұйқы бұзылса, жақсы ой да іске айналмайды.',
+        'Бір зиянды әдетті таңдаңыз да (артық скролл, кеш чат), 7 күнге екі есе қысқартыңыз.',
+      ];
+      return options[DateTime.now().microsecondsSinceEpoch % options.length];
+    }
+    final options = [
+      '$normalizedName, do a 25-minute cleanup of your desk and notes. External mess drains decision quality fast.',
+      'Set one practical 48-hour deadline: bill, call, document. Spiritual clarity needs operational traction.',
+      'Audit your circle: who leaves you depleted. Reduce that contact by 30% this week.',
+      'Stabilize sleep for three nights in a row. Insights without recovery rarely turn into action.',
+      'Pick one leakage habit (doomscrolling, late chats, sugar spikes) and cut it in half for 7 days.',
+    ];
+    return options[DateTime.now().microsecondsSinceEpoch % options.length];
+  }
+
   static _NatalCopy resolve(BuildContext context) {
     final code = Localizations.localeOf(context).languageCode;
     if (code == 'ru') {
@@ -371,8 +401,6 @@ class _NatalCopy {
         resultTitle: 'Ваш разбор',
         highlightAdvice:
             'Главный фокус: раскрывайте сильные стороны постепенно, через устойчивый ритм.',
-        action:
-            'В течение 72 часов выберите один шаг, который поддержит ваш долгий вектор, и закрепите его в расписании.',
       );
     }
     if (code == 'kk') {
@@ -391,8 +419,6 @@ class _NatalCopy {
         resultTitle: 'Түсіндірме',
         highlightAdvice:
             'Негізгі фокус: күшті қырларыңызды тұрақты ырғақ арқылы біртіндеп ашыңыз.',
-        action:
-            'Келесі 72 сағатта ұзақ мерзімді бағытыңызды қолдайтын бір қадамды таңдап, оны кестеге бекітіңіз.',
       );
     }
     return const _NatalCopy(
@@ -410,8 +436,6 @@ class _NatalCopy {
       resultTitle: 'Your interpretation',
       highlightAdvice:
           'Main focus: unfold your strengths gradually through a steady rhythm.',
-      action:
-          'Within 72 hours, choose one concrete step that supports your long-term vector and lock it into your calendar.',
     );
   }
 }

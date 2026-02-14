@@ -11,6 +11,7 @@ import '../core/telegram/telegram_env.dart';
 import '../core/utils/local_reading_builder.dart';
 import '../data/models/ai_result_model.dart';
 import '../data/models/card_model.dart';
+import '../data/models/deck_model.dart';
 import '../data/models/drawn_card_model.dart';
 import '../data/models/reading_model.dart';
 import '../data/models/spread_model.dart';
@@ -250,8 +251,13 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
   }
 
   List<CardModel> drawCards(int count, List<CardModel> deck) {
+    final selectedDeck = ref.read(deckProvider);
+    final sourceDeck = selectedDeck == DeckType.lenormand
+        ? deck.where((card) => card.deckId == DeckType.lenormand).toList()
+        : deck.where((card) => card.deckId != DeckType.lenormand).toList();
+    final effectiveDeck = sourceDeck.isNotEmpty ? sourceDeck : deck;
     final rng = Random();
-    final shuffled = [...deck]..shuffle(rng);
+    final shuffled = [...effectiveDeck]..shuffle(rng);
     return shuffled.take(count).toList();
   }
 

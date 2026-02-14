@@ -41,6 +41,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   bool _sendingConsent = false;
   bool _hasQueryHistory = false;
   late final AnimationController _fieldGlowController;
+  late final AnimationController _titleShimmerController;
 
   @override
   void initState() {
@@ -49,6 +50,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       vsync: this,
       duration: const Duration(milliseconds: 1800),
     )..repeat(reverse: true);
+    _titleShimmerController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2400),
+    )..repeat();
     _sofiaConsentState = _readSofiaConsentState();
     _focusNode.addListener(_handleFocusChange);
     final initialQuestion = ref.read(readingFlowControllerProvider).question;
@@ -252,6 +257,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   void dispose() {
     _readingFlowSubscription?.close();
     _fieldGlowController.dispose();
+    _titleShimmerController.dispose();
     _controller.dispose();
     _focusNode.dispose();
     _scrollController.dispose();
@@ -362,17 +368,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         ),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 12),
-                          child: Text(
-                            l10n.homeDescription,
-                            style: Theme.of(context)
+                          child: _ShimmerTitle(
+                            text: l10n.homeDescription,
+                            animation: _titleShimmerController,
+                            baseStyle: Theme.of(context)
                                 .textTheme
                                 .titleSmall
                                 ?.copyWith(
                                   color: colorScheme.onSurface
-                                      .withValues(alpha: 0.88),
+                                      .withValues(alpha: 0.86),
                                   fontWeight: FontWeight.w400,
                                 ),
-                            textAlign: TextAlign.center,
+                            shimmerColor:
+                                colorScheme.primary.withValues(alpha: 0.95),
                           ),
                         ),
                         Expanded(
@@ -389,7 +397,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       animation: _fieldGlowController,
                       builder: (context, child) {
                         final pulse =
-                            0.35 + (_fieldGlowController.value * 0.65);
+                            0.15 + (_fieldGlowController.value * 0.85);
                         return Container(
                           key: _questionKey,
                           decoration: BoxDecoration(
@@ -399,16 +407,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                             boxShadow: [
                               BoxShadow(
                                 color: colorScheme.primary
-                                    .withValues(alpha: 0.18 + (0.22 * pulse)),
-                                blurRadius: 24 + (16 * pulse),
-                                spreadRadius: 1 + (2 * pulse),
+                                    .withValues(alpha: 0.34 + (0.28 * pulse)),
+                                blurRadius: 34 + (24 * pulse),
+                                spreadRadius: 2 + (3 * pulse),
                                 offset: const Offset(0, 10),
+                              ),
+                              BoxShadow(
+                                color: colorScheme.primary
+                                    .withValues(alpha: 0.16 + (0.2 * pulse)),
+                                blurRadius: 60 + (36 * pulse),
+                                spreadRadius: 3 + (4 * pulse),
+                                offset: const Offset(0, 0),
                               ),
                             ],
                             border: Border.all(
                               color: colorScheme.primary
-                                  .withValues(alpha: 0.55 + (0.25 * pulse)),
-                              width: 1.7,
+                                  .withValues(alpha: 0.72 + (0.2 * pulse)),
+                              width: 2.1,
                             ),
                           ),
                           child: Stack(
@@ -658,6 +673,60 @@ enum _SofiaConsentState {
   const _SofiaConsentState(this.storageValue);
 
   final String storageValue;
+}
+
+class _ShimmerTitle extends StatelessWidget {
+  const _ShimmerTitle({
+    required this.text,
+    required this.animation,
+    required this.baseStyle,
+    required this.shimmerColor,
+  });
+
+  final String text;
+  final Animation<double> animation;
+  final TextStyle? baseStyle;
+  final Color shimmerColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, _) {
+        return ShaderMask(
+          blendMode: BlendMode.srcIn,
+          shaderCallback: (bounds) {
+            final shift =
+                (-bounds.width) + (bounds.width * 2 * animation.value);
+            return LinearGradient(
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+              colors: [
+                Colors.white.withValues(alpha: 0.72),
+                Colors.white.withValues(alpha: 0.92),
+                shimmerColor,
+                Colors.white.withValues(alpha: 0.92),
+                Colors.white.withValues(alpha: 0.72),
+              ],
+              stops: const [0.0, 0.35, 0.5, 0.65, 1.0],
+            ).createShader(
+              Rect.fromLTWH(
+                shift,
+                bounds.top,
+                bounds.width,
+                bounds.height,
+              ),
+            );
+          },
+          child: Text(
+            text,
+            textAlign: TextAlign.center,
+            style: baseStyle?.copyWith(color: Colors.white),
+          ),
+        );
+      },
+    );
+  }
 }
 
 class _SofiaConsentCard extends StatelessWidget {
@@ -1040,7 +1109,7 @@ class _HomeFeatureCopy {
     if (code == 'ru') {
       return const _HomeFeatureCopy(
         natalTitle: 'Натальная\nкарта',
-        compatibilityTitle: 'Любовная\nсовместимость',
+        compatibilityTitle: 'Проверка\nпары',
         libraryTitle: 'Библиотека\nкарт',
       );
     }

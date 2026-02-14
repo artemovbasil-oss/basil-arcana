@@ -188,7 +188,7 @@ class _CompatibilityFlowScreenState
             copy.styleLine(p1Name, p2Name),
             copy.conflictLine,
           ],
-          action: copy.action,
+          action: copy.randomAction(p1Name, p2Name),
           sofiaPrefill: summary,
           tarotQuestion: copy.tarotQuestion(p1Name, p2Name),
         ),
@@ -321,7 +321,6 @@ class _CompatibilityCopy {
     required this.resultTitle,
     required this.errorText,
     required this.conflictLine,
-    required this.action,
   });
 
   final String screenTitle;
@@ -332,7 +331,6 @@ class _CompatibilityCopy {
   final String resultTitle;
   final String errorText;
   final String conflictLine;
-  final String action;
 
   String stepTitle(int step) {
     if (screenTitle == 'Любовная совместимость') {
@@ -428,6 +426,37 @@ class _CompatibilityCopy {
     return 'check compatibility between $p1 and $p2';
   }
 
+  String randomAction(String p1, String p2) {
+    if (screenTitle == 'Любовная совместимость') {
+      final options = [
+        'Отключите телефоны и 15 минут обсудите только один бытовой конфликт без «всегда/никогда». На выходе: одно правило на неделю.',
+        'Сверьте деньги: кто и за что платит до конца месяца. Без романтики, просто цифры и дедлайны.',
+        'Назначьте «тихий час» после работы: 60 минут без претензий и разборок. Потом коротко: что помогло, что бесит.',
+        'Разведите триггеры по углам: каждому по одной теме, куда второй не лезет до договоренного времени.',
+        'Сделайте проверку быта: сон, еда, усталость. Половина ссор не про чувства, а про ресурс.',
+      ];
+      return options[Random().nextInt(options.length)];
+    }
+    if (screenTitle == 'Махаббат үйлесімділігі') {
+      final options = [
+        '15 минут телефонсыз бір тұрмыстық мәселені ғана талқылаңыз. Соңында бір аптаға ортақ бір ереже бекітіңіз.',
+        'Ай соңына дейінгі төлемдерді ашық бөлісіңіз: кім, не, қашан төлейді.',
+        'Жұмыстан кейін 60 минут «тыныш аймақ» жасаңыз: шағымсыз. Кейін қысқа қорытынды айтыңыз.',
+        'Тітіркендіретін тақырыптарды алдын ала бөліп алыңыз: әрқайсысына өз шекарасы болсын.',
+        'Тұрмысты тексеріңіз: ұйқы, тамақ, шаршау. Көп жанжал сезімнен емес, шаршаудан туады.',
+      ];
+      return options[Random().nextInt(options.length)];
+    }
+    final options = [
+      'No phones for 15 minutes. Discuss one real-life friction point and leave with one clear rule for this week.',
+      'Align money expectations for the month: who pays what, by when, no vague promises.',
+      'Set a 60-minute post-work quiet zone with no criticism. Debrief in two short sentences each.',
+      'Identify one trigger topic for each person and set boundaries on when it can be discussed.',
+      'Audit basics first: sleep, food, stress. Many fights are energy problems, not love problems.',
+    ];
+    return options[Random().nextInt(options.length)];
+  }
+
   static _CompatibilityCopy resolve(BuildContext context) {
     final code = Localizations.localeOf(context).languageCode;
     if (code == 'ru') {
@@ -442,8 +471,6 @@ class _CompatibilityCopy {
             'Не удалось сгенерировать совместимость. Попробуйте еще раз.',
         conflictLine:
             'Зона внимания: заранее проговаривайте ожидания к темпу общения и личным границам.',
-        action:
-            'Сделайте один мини-ритуал пары на эту неделю: 20 минут честного диалога без телефонов в одно и то же время.',
       );
     }
     if (code == 'kk') {
@@ -457,8 +484,6 @@ class _CompatibilityCopy {
         errorText: 'Үйлесімділікті жасау мүмкін болмады. Қайта көріңіз.',
         conflictLine:
             'Назар аймағы: қарым-қатынас қарқыны мен жеке шекаралар туралы күтулерді алдын ала келісіп алыңыз.',
-        action:
-            'Осы аптаға жұптың шағын ритуалын жасаңыз: бір уақытта 20 минут телефонсыз ашық әңгіме.',
       );
     }
     return const _CompatibilityCopy(
@@ -471,8 +496,6 @@ class _CompatibilityCopy {
       errorText: 'Could not generate compatibility. Please try again.',
       conflictLine:
           'Watch area: align expectations early on communication pace and personal boundaries.',
-      action:
-          'Create one mini ritual for this week: 20 minutes of honest conversation without phones at the same time each day.',
     );
   }
 }
