@@ -31,6 +31,15 @@ LONG_CACHE_EXTENSIONS = {
     ".map",
 }
 
+
+def _is_client_disconnect(exc: BaseException) -> bool:
+    if isinstance(exc, (BrokenPipeError, ConnectionResetError, ConnectionAbortedError)):
+        return True
+    if isinstance(exc, OSError):
+        return exc.errno in {32, 54, 104}
+    return False
+
+
 def _read_env(*keys: str) -> str:
     for key in keys:
         value = os.environ.get(key)
@@ -104,9 +113,11 @@ class WebAppHandler(SimpleHTTPRequestHandler):
         self.end_headers()
         try:
             self.wfile.write(body)
-        except BrokenPipeError:
-            print("Broken pipe while writing index.html response.")
-            return
+        except Exception as exc:
+            if _is_client_disconnect(exc):
+                print("Client disconnected while writing index.html response.")
+                return
+            raise
 
     def _handle_video_range(self, file_path: str) -> bool:
         range_header = self.headers.get("Range")
@@ -146,9 +157,11 @@ class WebAppHandler(SimpleHTTPRequestHandler):
             with open(file_path, "rb") as handle:
                 handle.seek(start)
                 self.wfile.write(handle.read(length))
-        except BrokenPipeError:
-            print("Broken pipe while streaming video range.")
-            return True
+        except Exception as exc:
+            if _is_client_disconnect(exc):
+                print("Client disconnected while streaming video range.")
+                return True
+            raise
         return True
 
     def do_GET(self):
@@ -166,8 +179,11 @@ class WebAppHandler(SimpleHTTPRequestHandler):
             self.end_headers()
             try:
                 self.wfile.write(body)
-            except BrokenPipeError:
-                print("Broken pipe while writing /healthz response.")
+            except Exception as exc:
+                if _is_client_disconnect(exc):
+                    print("Client disconnected while writing /healthz response.")
+                else:
+                    raise
             return
         if parsed.path == "/flutter_service_worker.js":
             body = b"service worker disabled"
@@ -178,8 +194,13 @@ class WebAppHandler(SimpleHTTPRequestHandler):
             self.end_headers()
             try:
                 self.wfile.write(body)
-            except BrokenPipeError:
-                print("Broken pipe while writing /flutter_service_worker.js response.")
+            except Exception as exc:
+                if _is_client_disconnect(exc):
+                    print(
+                        "Client disconnected while writing /flutter_service_worker.js response."
+                    )
+                else:
+                    raise
             return
         if parsed.path == "/config.json":
             payload = build_config_payload()
@@ -195,8 +216,11 @@ class WebAppHandler(SimpleHTTPRequestHandler):
             self.end_headers()
             try:
                 self.wfile.write(body)
-            except BrokenPipeError:
-                print("Broken pipe while writing /config.json response.")
+            except Exception as exc:
+                if _is_client_disconnect(exc):
+                    print("Client disconnected while writing /config.json response.")
+                else:
+                    raise
             return
         if parsed.path.endswith(".mp4"):
             file_path = self.translate_path(parsed.path)
@@ -209,8 +233,11 @@ class WebAppHandler(SimpleHTTPRequestHandler):
                 return
         try:
             super().do_GET()
-        except BrokenPipeError:
-            print("Broken pipe while serving static content.")
+        except Exception as exc:
+            if _is_client_disconnect(exc):
+                print("Client disconnected while serving static content.")
+                return
+            raise
 
     def end_headers(self):
         path = self._request_path or urlparse(self.path).path
