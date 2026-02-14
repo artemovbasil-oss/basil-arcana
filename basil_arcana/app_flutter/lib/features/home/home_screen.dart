@@ -22,6 +22,7 @@ const String _settingsBoxName = 'settings';
 const String _sofiaConsentKey = 'sofiaConsentDecision';
 const String _sofiaConsentAccepted = 'accepted';
 const String _sofiaConsentRejected = 'rejected';
+const String _splashOnboardingSeenKey = 'splashOnboardingSeenV1';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -40,6 +41,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   _SofiaConsentState _sofiaConsentState = _SofiaConsentState.undecided;
   bool _sendingConsent = false;
   bool _hasQueryHistory = false;
+  bool _didRequestOnboarding = false;
   late final AnimationController _fieldGlowController;
   late final AnimationController _titleShimmerController;
 
@@ -60,6 +62,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     if (initialQuestion.isNotEmpty) {
       _controller.text = initialQuestion;
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _showOnboardingIfNeeded();
+    });
     _loadQueryHistoryAvailability();
     _readingFlowSubscription = ref.listenManual<ReadingFlowState>(
       readingFlowControllerProvider,
@@ -246,6 +251,88 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   ],
                 ],
               ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _showOnboardingIfNeeded() async {
+    if (!mounted || _didRequestOnboarding) {
+      return;
+    }
+    _didRequestOnboarding = true;
+    final box = Hive.box<String>(_settingsBoxName);
+    final alreadySeen = (box.get(_splashOnboardingSeenKey) ?? '').isNotEmpty;
+    if (alreadySeen || !mounted) {
+      return;
+    }
+    final copy = _HomeOnboardingCopy.resolve(context);
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        final colorScheme = Theme.of(dialogContext).colorScheme;
+        return Dialog(
+          insetPadding: const EdgeInsets.symmetric(horizontal: 20),
+          backgroundColor: colorScheme.surface.withValues(alpha: 0.98),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+            side: BorderSide(
+              color: colorScheme.primary.withValues(alpha: 0.38),
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  copy.title,
+                  style: Theme.of(dialogContext).textTheme.titleMedium?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                      ),
+                ),
+                const SizedBox(height: 10),
+                _OnboardingBullet(
+                  title: copy.itemLenormand,
+                  subtitle: copy.itemLenormandHint,
+                ),
+                const SizedBox(height: 8),
+                _OnboardingBullet(
+                  title: copy.itemCompatibility,
+                  subtitle: copy.itemCompatibilityHint,
+                ),
+                const SizedBox(height: 8),
+                _OnboardingBullet(
+                  title: copy.itemNatal,
+                  subtitle: copy.itemNatalHint,
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      await box.put(_splashOnboardingSeenKey, 'seen');
+                      if (dialogContext.mounted) {
+                        Navigator.of(dialogContext).pop();
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size.fromHeight(44),
+                      backgroundColor: colorScheme.primary,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    child: Text(copy.closeButton),
+                  ),
+                ),
+              ],
             ),
           ),
         );
@@ -725,6 +812,110 @@ class _ShimmerTitle extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class _OnboardingBullet extends StatelessWidget {
+  const _OnboardingBullet({
+    required this.title,
+    required this.subtitle,
+  });
+
+  final String title;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.only(top: 3),
+          child: Text('✨'),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+              Text(
+                subtitle,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.white.withValues(alpha: 0.78),
+                    ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _HomeOnboardingCopy {
+  const _HomeOnboardingCopy({
+    required this.title,
+    required this.itemLenormand,
+    required this.itemLenormandHint,
+    required this.itemCompatibility,
+    required this.itemCompatibilityHint,
+    required this.itemNatal,
+    required this.itemNatalHint,
+    required this.closeButton,
+  });
+
+  final String title;
+  final String itemLenormand;
+  final String itemLenormandHint;
+  final String itemCompatibility;
+  final String itemCompatibilityHint;
+  final String itemNatal;
+  final String itemNatalHint;
+  final String closeButton;
+
+  static _HomeOnboardingCopy resolve(BuildContext context) {
+    final code = Localizations.localeOf(context).languageCode;
+    if (code == 'ru') {
+      return const _HomeOnboardingCopy(
+        title: 'Добро пожаловать в магический вайб. Теперь у нас доступно:',
+        itemLenormand: 'Гадание по колоде Ленорман',
+        itemLenormandHint: 'Выбери колоду в профиле',
+        itemCompatibility: 'Проверка совместимости пары',
+        itemCompatibilityHint: 'Попробуй бесплатно',
+        itemNatal: 'Чтение натальной карты',
+        itemNatalHint: 'Попробуй бесплатно',
+        closeButton: 'Отлично',
+      );
+    }
+    if (code == 'kk') {
+      return const _HomeOnboardingCopy(
+        title: 'Сиқырлы вайбқа қош келдің. Енді мыналар қолжетімді:',
+        itemLenormand: 'Ленорман колодасы бойынша болжау',
+        itemLenormandHint: 'Колоданы профильден таңда',
+        itemCompatibility: 'Жұп үйлесімділігін тексеру',
+        itemCompatibilityHint: 'Тегін байқап көр',
+        itemNatal: 'Наталдық картаны оқу',
+        itemNatalHint: 'Тегін байқап көр',
+        closeButton: 'Керемет',
+      );
+    }
+    return const _HomeOnboardingCopy(
+      title: 'Welcome to the magic vibe. You now have:',
+      itemLenormand: 'Lenormand card reading',
+      itemLenormandHint: 'Choose deck in profile',
+      itemCompatibility: 'Couple compatibility check',
+      itemCompatibilityHint: 'Try it for free',
+      itemNatal: 'Natal chart reading',
+      itemNatalHint: 'Try it for free',
+      closeButton: 'Great',
     );
   }
 }
