@@ -29,7 +29,7 @@
       "value": {}
     }
   },
-  "settingsDashboardFreePremium": "Бесплатные премиум-расклады на 5 карт: {count}",
+  "settingsDashboardFreePremium": "Бесплатные бонусы (5 карт / совместимость / натальная карта): {count}",
   "@settingsDashboardFreePremium": {
     "placeholders": {
       "count": {
@@ -37,7 +37,7 @@
       }
     }
   },
-  "settingsDashboardFreePremiumRemaining": "Осталось бесплатных премиум-раскладов: {count}",
+  "settingsDashboardFreePremiumRemaining": "Осталось бесплатных бонусов: {count}",
   "@settingsDashboardFreePremiumRemaining": {
     "placeholders": {
       "count": {
@@ -199,7 +199,7 @@
   },
   "resultLenormandBuildsOn": "Опирается на",
   "resultReferralTitle": "Бонус за рекомендацию",
-  "resultReferralBody": "Поделись персональной ссылкой с друзьями и получай 20 бесплатных премиум-раскладов на 5 карт за каждого нового пользователя, который перейдет по ссылке.",
+  "resultReferralBody": "Поделись персональной ссылкой с друзьями и получай 20 бесплатных премиум-раскладов на 5 карт, 20 тестов на совместимость и 20 натальных карт за каждого нового пользователя, который перейдет по ссылке.",
   "resultReferralButton": "Поделиться ссылкой",
   "resultReferralCopied": "Реферальная ссылка скопирована. Отправь ее в Telegram.",
   "resultReferralShareMessage": "Загляни в Basil Arcana: красивые и точные расклады Таро прямо в Telegram.",

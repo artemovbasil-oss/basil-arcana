@@ -29,7 +29,7 @@
       "value": {}
     }
   },
-  "settingsDashboardFreePremium": "5 картаға тегін премиум жайылмалар: {count}",
+  "settingsDashboardFreePremium": "Тегін бонустар (5 карта / үйлесімділік / наталдық карта): {count}",
   "@settingsDashboardFreePremium": {
     "placeholders": {
       "count": {
@@ -37,7 +37,7 @@
       }
     }
   },
-  "settingsDashboardFreePremiumRemaining": "Қалған тегін премиум жайылмалар: {count}",
+  "settingsDashboardFreePremiumRemaining": "Қалған тегін бонустар: {count}",
   "@settingsDashboardFreePremiumRemaining": {
     "placeholders": {
       "count": {
@@ -199,7 +199,7 @@
   },
   "resultLenormandBuildsOn": "Осыған сүйенеді",
   "resultReferralTitle": "Ұсыныс бонусы",
-  "resultReferralBody": "Жеке сілтемеңді достарыңмен бөліс және сілтеме арқылы келген әр жаңа қолданушы үшін 5 карталық 20 тегін премиум жайылма ал.",
+  "resultReferralBody": "Жеке сілтемеңді достарыңмен бөліс және сілтеме арқылы келген әр жаңа қолданушы үшін 5 карталық 20 тегін премиум жайылма, 20 үйлесімділік тесті және 20 наталдық карта ал.",
   "resultReferralButton": "Сілтемемен бөлісу",
   "resultReferralCopied": "Реферал сілтеме көшірілді. Оны Telegram-да жібер.",
   "resultReferralShareMessage": "Basil Arcana-ны байқап көр: Telegram ішіндегі әдемі әрі нақты Таро жайылмалары.",

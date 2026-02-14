@@ -76,12 +76,12 @@ class AppLocalizationsKk extends AppLocalizations {
 
   @override
   String settingsDashboardFreePremium(int count) {
-    return '5 картаға тегін премиум жайылмалар: $count';
+    return 'Тегін бонустар (5 карта / үйлесімділік / наталдық карта): $count';
   }
 
   @override
   String settingsDashboardFreePremiumRemaining(int count) {
-    return 'Қалған тегін премиум жайылмалар: $count';
+    return 'Қалған тегін бонустар: $count';
   }
 
   @override
@@ -469,7 +469,7 @@ class AppLocalizationsKk extends AppLocalizations {
 
   @override
   String get resultReferralBody =>
-      'Жеке сілтемеңді достарыңмен бөліс және сілтеме арқылы келген әр жаңа қолданушы үшін 5 карталық 20 тегін премиум жайылма ал.';
+      'Жеке сілтемеңді достарыңмен бөліс және сілтеме арқылы келген әр жаңа қолданушы үшін 5 карталық 20 тегін премиум жайылма, 20 үйлесімділік тесті және 20 наталдық карта ал.';
 
   @override
   String get resultReferralButton => 'Сілтемемен бөлісу';

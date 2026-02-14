@@ -74,12 +74,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String settingsDashboardFreePremium(int count) {
-    return 'Free premium five-card readings: $count';
+    return 'Free bonuses (five-card reading / compatibility / natal chart): $count';
   }
 
   @override
   String settingsDashboardFreePremiumRemaining(int count) {
-    return 'Free premium readings left: $count';
+    return 'Free bonuses left: $count';
   }
 
   @override
@@ -468,7 +468,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get resultReferralBody =>
-      'Share your personal link with friends and get 20 free premium five-card readings for every new user who joins from your link.';
+      'Share your personal link with friends and get 20 free premium five-card readings, 20 compatibility tests, and 20 natal charts for every new user who joins from your link.';
 
   @override
   String get resultReferralButton => 'Share link';

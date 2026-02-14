@@ -75,12 +75,12 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String settingsDashboardFreePremium(int count) {
-    return 'Бесплатные премиум-расклады на 5 карт: $count';
+    return 'Бесплатные бонусы (5 карт / совместимость / натальная карта): $count';
   }
 
   @override
   String settingsDashboardFreePremiumRemaining(int count) {
-    return 'Осталось бесплатных премиум-раскладов: $count';
+    return 'Осталось бесплатных бонусов: $count';
   }
 
   @override
@@ -471,7 +471,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get resultReferralBody =>
-      'Поделись персональной ссылкой с друзьями и получай 20 бесплатных премиум-раскладов на 5 карт за каждого нового пользователя, который перейдет по ссылке.';
+      'Поделись персональной ссылкой с друзьями и получай 20 бесплатных премиум-раскладов на 5 карт, 20 тестов на совместимость и 20 натальных карт за каждого нового пользователя, который перейдет по ссылке.';
 
   @override
   String get resultReferralButton => 'Поделиться ссылкой';

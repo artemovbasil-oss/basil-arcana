@@ -29,7 +29,7 @@
       "value": {}
     }
   },
-  "settingsDashboardFreePremium": "Free premium five-card readings: {count}",
+  "settingsDashboardFreePremium": "Free bonuses (five-card reading / compatibility / natal chart): {count}",
   "@settingsDashboardFreePremium": {
     "placeholders": {
       "count": {
@@ -37,7 +37,7 @@
       }
     }
   },
-  "settingsDashboardFreePremiumRemaining": "Free premium readings left: {count}",
+  "settingsDashboardFreePremiumRemaining": "Free bonuses left: {count}",
   "@settingsDashboardFreePremiumRemaining": {
     "placeholders": {
       "count": {
@@ -199,7 +199,7 @@
   },
   "resultLenormandBuildsOn": "Builds on",
   "resultReferralTitle": "Referral bonus",
-  "resultReferralBody": "Share your personal link with friends and get 20 free premium five-card readings for every new user who joins from your link.",
+  "resultReferralBody": "Share your personal link with friends and get 20 free premium five-card readings, 20 compatibility tests, and 20 natal charts for every new user who joins from your link.",
   "resultReferralButton": "Share link",
   "resultReferralCopied": "Referral link copied. Send it in Telegram.",
   "resultReferralShareMessage": "Try Basil Arcana: stylish and accurate Tarot readings right in Telegram.",

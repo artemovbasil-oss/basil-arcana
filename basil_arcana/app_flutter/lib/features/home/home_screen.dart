@@ -12,6 +12,8 @@ import '../../data/repositories/sofia_consent_repository.dart';
 import '../../state/providers.dart';
 import '../../state/reading_flow_controller.dart';
 import '../cards/cards_screen.dart';
+import '../astro/compatibility_flow_screen.dart';
+import '../astro/natal_chart_flow_screen.dart';
 import '../history/query_history_screen.dart';
 import '../settings/settings_screen.dart';
 import '../spread/spread_screen.dart';
@@ -291,6 +293,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     ];
     final hasQuestion = _controller.text.trim().isNotEmpty;
     final copy = _SofiaCopy.resolve(context);
+    final featureCopy = _HomeFeatureCopy.resolve(context);
 
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     const buttonHeight = 56.0;
@@ -455,19 +458,60 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                     ),
                     const SizedBox(height: 28),
-                    _HomeNavCard(
-                      title: l10n.homeAllCardsButton,
-                      description: l10n.homeAllCardsDescription,
-                      icon: Icons.auto_awesome,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            settings: appRouteSettings(showBackButton: true),
-                            builder: (_) => const CardsScreen(),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _FeatureSquareCard(
+                            emoji: '🧝‍♀️',
+                            title: featureCopy.natalTitle,
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  settings:
+                                      appRouteSettings(showBackButton: true),
+                                  builder: (_) => const NatalChartFlowScreen(),
+                                ),
+                              );
+                            },
                           ),
-                        );
-                      },
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: _FeatureSquareCard(
+                            emoji: '❤️',
+                            title: featureCopy.compatibilityTitle,
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  settings:
+                                      appRouteSettings(showBackButton: true),
+                                  builder: (_) =>
+                                      const CompatibilityFlowScreen(),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: _FeatureSquareCard(
+                            emoji: '🃏',
+                            title: featureCopy.libraryTitle,
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  settings:
+                                      appRouteSettings(showBackButton: true),
+                                  builder: (_) => const CardsScreen(),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 14),
                     if (_sofiaConsentState == _SofiaConsentState.undecided)
@@ -851,71 +895,93 @@ class _RecentQueriesChip extends StatelessWidget {
   }
 }
 
-class _HomeNavCard extends StatelessWidget {
-  const _HomeNavCard({
+class _FeatureSquareCard extends StatelessWidget {
+  const _FeatureSquareCard({
+    required this.emoji,
     required this.title,
-    required this.description,
-    required this.icon,
     required this.onTap,
   });
 
+  final String emoji;
   final String title;
-  final String description;
-  final IconData icon;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    const outerRadius = 20.0;
-    const innerRadius = 12.0;
     return InkWell(
-      borderRadius: BorderRadius.circular(outerRadius),
+      borderRadius: BorderRadius.circular(20),
       onTap: onTap,
       child: Ink(
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(outerRadius),
-          color: colorScheme.surfaceVariant.withValues(alpha: 0.3),
-          border: Border.all(color: colorScheme.outlineVariant),
+          borderRadius: BorderRadius.circular(20),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              colorScheme.primary.withOpacity(0.28),
+              colorScheme.surface.withOpacity(0.7),
+            ],
+          ),
+          border: Border.all(
+            color: colorScheme.primary.withOpacity(0.35),
+          ),
         ),
-        child: Row(
+        child: Column(
           children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: colorScheme.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(innerRadius),
-              ),
-              child: Icon(icon, color: colorScheme.primary),
+            Text(
+              emoji,
+              style: Theme.of(context).textTheme.headlineSmall,
             ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: Theme.of(context).textTheme.titleMedium,
+            const SizedBox(height: 6),
+            Text(
+              title,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    height: 1.15,
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    description,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurface.withOpacity(0.65),
-                        ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(
-              Icons.chevron_right,
-              color: colorScheme.onSurface.withOpacity(0.4),
+              maxLines: 2,
+              textAlign: TextAlign.center,
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _HomeFeatureCopy {
+  const _HomeFeatureCopy({
+    required this.natalTitle,
+    required this.compatibilityTitle,
+    required this.libraryTitle,
+  });
+
+  final String natalTitle;
+  final String compatibilityTitle;
+  final String libraryTitle;
+
+  static _HomeFeatureCopy resolve(BuildContext context) {
+    final code = Localizations.localeOf(context).languageCode;
+    if (code == 'ru') {
+      return const _HomeFeatureCopy(
+        natalTitle: 'Натальная\nкарта',
+        compatibilityTitle: 'Любовная\nсовместимость',
+        libraryTitle: 'Библиотека\nкарт',
+      );
+    }
+    if (code == 'kk') {
+      return const _HomeFeatureCopy(
+        natalTitle: 'Наталдық\nкарта',
+        compatibilityTitle: 'Махаббат\nүйлесімділігі',
+        libraryTitle: 'Карталар\nкітапханасы',
+      );
+    }
+    return const _HomeFeatureCopy(
+      natalTitle: 'Natal\nchart',
+      compatibilityTitle: 'Love\ncompatibility',
+      libraryTitle: 'Cards\nlibrary',
     );
   }
 }
