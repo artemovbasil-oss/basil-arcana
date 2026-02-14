@@ -22,6 +22,7 @@ const String _splashOnboardingSeenKey = 'splashOnboardingSeenV1';
 
 class _SplashScreenState extends State<SplashScreen> {
   Timer? _splashTimer;
+  Timer? _forceHomeTimer;
   bool _hasShownOnboarding = false;
   bool _showOnboarding = false;
   bool _didNavigate = false;
@@ -35,6 +36,12 @@ class _SplashScreenState extends State<SplashScreen> {
       TelegramWebApp.expand();
       TelegramWebApp.disableVerticalSwipes();
     }
+    _forceHomeTimer = Timer(const Duration(seconds: 3), () {
+      if (!mounted || _didNavigate) {
+        return;
+      }
+      _goHome();
+    });
     _splashTimer = Timer(const Duration(seconds: 1), () {
       if (!mounted || _didNavigate) {
         return;
@@ -52,6 +59,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void dispose() {
     _splashTimer?.cancel();
+    _forceHomeTimer?.cancel();
     super.dispose();
   }
 
@@ -91,17 +99,13 @@ class _SplashScreenState extends State<SplashScreen> {
       return;
     }
     _didNavigate = true;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) {
-        return;
-      }
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          settings: appRouteSettings(showBackButton: false),
-          builder: (_) => const HomeScreen(),
-        ),
-      );
-    });
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(
+        settings: appRouteSettings(showBackButton: false),
+        builder: (_) => const HomeScreen(),
+      ),
+      (_) => false,
+    );
   }
 }
 
