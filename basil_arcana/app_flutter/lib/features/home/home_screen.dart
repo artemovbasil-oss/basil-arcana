@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
+import '../../core/config/app_version.dart';
 import '../../core/navigation/app_route_config.dart';
 import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/app_top_bar.dart';
@@ -302,68 +303,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Center(
-                        child: Stack(
-                          clipBehavior: Clip.none,
-                          alignment: Alignment.center,
-                          children: [
-                            Container(
-                              width: 68,
-                              height: 68,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color:
-                                    colorScheme.primary.withValues(alpha: 0.16),
-                                border: Border.all(
-                                  color: colorScheme.primary
-                                      .withValues(alpha: 0.55),
-                                ),
-                              ),
-                              alignment: Alignment.center,
-                              child: const Text(
-                                '🔮',
-                                style: TextStyle(fontSize: 34),
-                              ),
-                            ),
-                            Positioned(
-                              top: -8,
-                              right: -14,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 2,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: colorScheme.primary,
-                                  borderRadius: BorderRadius.circular(999),
-                                ),
-                                child: Text(
-                                  copy.badge,
-                                  style: Theme.of(dialogContext)
-                                      .textTheme
-                                      .labelSmall
-                                      ?.copyWith(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 12),
                       Text(
                         copy.title,
                         style: Theme.of(dialogContext)
                             .textTheme
-                            .titleMedium
+                            .headlineSmall
                             ?.copyWith(
                               color: Colors.white,
                               fontWeight: FontWeight.w700,
                             ),
                       ),
-                      const SizedBox(height: 2),
+                      const SizedBox(height: 8),
                       Text(
                         copy.subtitle,
                         style: Theme.of(dialogContext)
@@ -373,7 +323,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                               color: Colors.white.withValues(alpha: 0.72),
                             ),
                       ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 16),
                       _OnboardingBullet(
                         title: copy.itemLenormand,
                         subtitle: copy.itemLenormandHint,
@@ -388,7 +338,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         title: copy.itemNatal,
                         subtitle: copy.itemNatalHint,
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 18),
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
@@ -958,7 +908,6 @@ class _HomeOnboardingCopy {
   const _HomeOnboardingCopy({
     required this.title,
     required this.subtitle,
-    required this.badge,
     required this.itemLenormand,
     required this.itemLenormandHint,
     required this.itemCompatibility,
@@ -970,7 +919,6 @@ class _HomeOnboardingCopy {
 
   final String title;
   final String subtitle;
-  final String badge;
   final String itemLenormand;
   final String itemLenormandHint;
   final String itemCompatibility;
@@ -979,13 +927,21 @@ class _HomeOnboardingCopy {
   final String itemNatalHint;
   final String closeButton;
 
+  static String _buildVersionSubtitle() {
+    final now = DateTime.now();
+    final day = now.day.toString().padLeft(2, '0');
+    final month = now.month.toString().padLeft(2, '0');
+    final year = now.year.toString();
+    return 'v$appVersion • $day.$month.$year';
+  }
+
   static _HomeOnboardingCopy resolve(BuildContext context) {
     final code = Localizations.localeOf(context).languageCode;
+    final subtitle = _buildVersionSubtitle();
     if (code == 'ru') {
-      return const _HomeOnboardingCopy(
+      return _HomeOnboardingCopy(
         title: 'The real magic',
-        subtitle: '14.02.2026',
-        badge: 'новая магия',
+        subtitle: subtitle,
         itemLenormand: 'Гадание по колоде Ленорман',
         itemLenormandHint: 'Выбери колоду в профиле',
         itemCompatibility: 'Проверка совместимости пары',
@@ -996,10 +952,9 @@ class _HomeOnboardingCopy {
       );
     }
     if (code == 'kk') {
-      return const _HomeOnboardingCopy(
+      return _HomeOnboardingCopy(
         title: 'The real magic',
-        subtitle: '14.02.2026',
-        badge: 'жаңа сиқыр',
+        subtitle: subtitle,
         itemLenormand: 'Ленорман колодасы бойынша болжау',
         itemLenormandHint: 'Колоданы профильден таңда',
         itemCompatibility: 'Жұп үйлесімділігін тексеру',
@@ -1009,10 +964,9 @@ class _HomeOnboardingCopy {
         closeButton: 'Керемет',
       );
     }
-    return const _HomeOnboardingCopy(
+    return _HomeOnboardingCopy(
       title: 'The real magic',
-      subtitle: '14.02.2026',
-      badge: 'new magic',
+      subtitle: subtitle,
       itemLenormand: 'Lenormand card reading',
       itemLenormandHint: 'Choose deck in profile',
       itemCompatibility: 'Couple compatibility check',
