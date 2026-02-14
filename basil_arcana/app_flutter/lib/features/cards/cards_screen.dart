@@ -41,6 +41,7 @@ class _CardsScreenState extends ConsumerState<CardsScreen> {
   @override
   Widget build(BuildContext context) {
     final cardsAsync = ref.watch(cardsAllProvider);
+    final selectedDeck = ref.watch(deckProvider);
     final l10n = AppLocalizations.of(context)!;
     final statsRepository = ref.watch(cardStatsRepositoryProvider);
     return Scaffold(
@@ -63,7 +64,11 @@ class _CardsScreenState extends ConsumerState<CardsScreen> {
             return ValueListenableBuilder(
               valueListenable: statsRepository.listenable(),
               builder: (context, box, _) {
-                final sections = _buildDeckSections(cards, l10n);
+                final sections = _buildDeckSections(
+                  cards,
+                  l10n,
+                  selectedDeck: selectedDeck,
+                );
                 return CustomScrollView(
                   controller: _scrollController,
                   slivers: [
@@ -221,9 +226,8 @@ class _CardsScreenState extends ConsumerState<CardsScreen> {
   }
 
   List<_DeckSection> _buildDeckSections(
-    List<CardModel> cards,
-    AppLocalizations l10n,
-  ) {
+      List<CardModel> cards, AppLocalizations l10n,
+      {required DeckType selectedDeck}) {
     final labels = <DeckType, String>{
       DeckType.major: l10n.deckMajorName,
       DeckType.wands: l10n.deckWandsName,
@@ -240,6 +244,11 @@ class _CardsScreenState extends ConsumerState<CardsScreen> {
       DeckType.cups,
       DeckType.lenormand,
     ];
+    if (selectedDeck == DeckType.lenormand) {
+      order
+        ..remove(DeckType.lenormand)
+        ..insert(0, DeckType.lenormand);
+    }
     return [
       for (final deck in order)
         _DeckSection(

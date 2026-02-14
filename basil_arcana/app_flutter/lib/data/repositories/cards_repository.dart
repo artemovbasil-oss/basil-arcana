@@ -94,16 +94,23 @@ class CardsRepository {
     }
     var cards = _parseCards(raw: raw, deckId: deckId);
 
-    // Safety fallback for newly introduced decks in older app bundles:
-    // if Lenormand is selected but not present locally, force a remote retry.
-    if (deckId == DeckType.lenormand && cards.isEmpty) {
+    // Safety fallback for newly introduced decks in older app bundles.
+    // If Lenormand data is missing locally, retry from CDN once.
+    final lenormandMissing = deckId == DeckType.lenormand
+        ? cards.isEmpty
+        : deckId == DeckType.all &&
+            !cards.any((card) => card.deckId == DeckType.lenormand);
+    if (lenormandMissing) {
       final remoteRaw = await _tryLoadRemoteCards(
         cacheKey: cacheKey,
         locale: locale,
       );
       if (remoteRaw != null) {
         final remoteCards = _parseCards(raw: remoteRaw, deckId: deckId);
-        if (remoteCards.isNotEmpty) {
+        final remoteHasLenormand = deckId == DeckType.lenormand
+            ? remoteCards.isNotEmpty
+            : remoteCards.any((card) => card.deckId == DeckType.lenormand);
+        if (remoteHasLenormand) {
           cards = remoteCards;
         }
       }
@@ -450,10 +457,11 @@ List<CardModel> _buildLenormandFallback(Locale locale) {
     };
     final fact = switch (lang) {
       'ru' =>
-        'Карты Ленорман читаются как практичные сигналы, а не абстракции.',
+        '$title в Ленорман читается буквально и усиливает смысл соседних карт.',
       'kk' =>
-        'Ленорман карталары абстракция емес, практикалық белгі ретінде оқылады.',
-      _ => 'Lenormand cards are read as practical signals, not abstractions.',
+        '$title Ленорманда көбіне нақты белгі ретінде, көрші карталармен бірге оқылады.',
+      _ =>
+        '$title in Lenormand is read literally and sharpened by nearby cards.',
     };
     final normalizedSlug = normalizeLenormandAssetSlug(def.slug);
     final imageUrl =
@@ -476,10 +484,21 @@ List<CardModel> _buildLenormandFallback(Locale locale) {
       ),
       detailedDescription: '$general $light $shadow $advice',
       funFact: fact,
+      stats: _lenormandFallbackStats(def.number),
       imageUrl: imageUrl,
       videoUrl: videoUrl,
     );
   }).toList(growable: false);
+}
+
+CardStats _lenormandFallbackStats(int cardNumber) {
+  final base = (cardNumber * 7) % 21;
+  return CardStats(
+    luck: 45 + base,
+    power: 42 + ((base + 5) % 21),
+    love: 44 + ((base + 10) % 21),
+    clarity: 46 + ((base + 15) % 21),
+  );
 }
 
 class _LenormandDef {

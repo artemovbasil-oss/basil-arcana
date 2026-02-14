@@ -360,18 +360,24 @@ class _CardMediaState extends State<CardMedia> {
     await _ensureInitialized();
     final controller = _controller;
     if (controller == null || !controller.value.isInitialized) {
+      if (mounted && autoPlay) {
+        setState(() {
+          _autoPlayFailed = true;
+        });
+      }
       return;
     }
     try {
       await controller.seekTo(Duration.zero);
       await controller.play();
+      final isPlayingNow = controller.value.isPlaying;
       if (!mounted) {
         return;
       }
       setState(() {
-        _showVideo = true;
+        _showVideo = isPlayingNow;
         if (autoPlay) {
-          _autoPlayFailed = false;
+          _autoPlayFailed = !isPlayingNow;
         }
       });
     } catch (_) {
