@@ -20,29 +20,17 @@ class NatalChartFlowScreen extends ConsumerStatefulWidget {
       _NatalChartFlowScreenState();
 }
 
-class _NatalChartFlowScreenState extends ConsumerState<NatalChartFlowScreen>
-    with SingleTickerProviderStateMixin {
+class _NatalChartFlowScreenState extends ConsumerState<NatalChartFlowScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _timeController = TextEditingController();
 
   int _step = 0;
   bool _isSubmitting = false;
-  late final AnimationController _magicController;
   static final DateFormat _dateFormat = DateFormat('yyyy-MM-dd');
 
   @override
-  void initState() {
-    super.initState();
-    _magicController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 2200),
-    )..repeat();
-  }
-
-  @override
   void dispose() {
-    _magicController.dispose();
     _nameController.dispose();
     _dateController.dispose();
     _timeController.dispose();
@@ -246,10 +234,18 @@ class _NatalChartFlowScreenState extends ConsumerState<NatalChartFlowScreen>
                 const SizedBox(height: 14),
                 _MagicLoadingCard(
                   label: copy.loadingLabel,
-                  animation: _magicController,
                 ),
               ],
               const Spacer(),
+              Text(
+                copy.footerHint,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurfaceVariant.withValues(alpha: 0.78),
+                    ),
+              ),
+              const SizedBox(height: 10),
               Row(
                 children: [
                   if (_step > 0) ...[
@@ -286,88 +282,52 @@ class _NatalChartFlowScreenState extends ConsumerState<NatalChartFlowScreen>
 class _MagicLoadingCard extends StatelessWidget {
   const _MagicLoadingCard({
     required this.label,
-    required this.animation,
   });
 
   final String label;
-  final Animation<double> animation;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    return AnimatedBuilder(
-      animation: animation,
-      builder: (context, _) {
-        final t = animation.value;
-        final glow = 0.35 + (0.65 * (0.5 - (t - 0.5).abs()) * 2);
-        return Container(
-          padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                colorScheme.primary.withValues(alpha: 0.22),
-                colorScheme.surfaceContainerHighest.withValues(alpha: 0.32),
-              ],
+    return Container(
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            colorScheme.primary.withValues(alpha: 0.22),
+            colorScheme.surfaceContainerHighest.withValues(alpha: 0.32),
+          ],
+        ),
+        border: Border.all(
+          color: colorScheme.primary.withValues(alpha: 0.55),
+        ),
+      ),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 22,
+            height: 22,
+            child: CircularProgressIndicator(
+              strokeWidth: 2.4,
+              valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+              backgroundColor: Colors.white.withValues(alpha: 0.22),
             ),
-            border: Border.all(
-              color: colorScheme.primary.withValues(alpha: 0.45 + 0.3 * glow),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              label,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
-            boxShadow: [
-              BoxShadow(
-                color:
-                    colorScheme.primary.withValues(alpha: 0.18 + 0.22 * glow),
-                blurRadius: 18 + 18 * glow,
-                spreadRadius: 1 + 2 * glow,
-              ),
-            ],
           ),
-          child: Row(
-            children: [
-              Transform.rotate(
-                angle: t * 6.283185307,
-                child: Text(
-                  '✶',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                      ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      label,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                          ),
-                    ),
-                    const SizedBox(height: 8),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(999),
-                      child: LinearProgressIndicator(
-                        minHeight: 5,
-                        value: (t + 0.15).clamp(0.0, 1.0),
-                        backgroundColor:
-                            colorScheme.primary.withValues(alpha: 0.2),
-                        valueColor: const AlwaysStoppedAnimation<Color>(
-                          Colors.white,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      },
+        ],
+      ),
     );
   }
 }
@@ -387,6 +347,7 @@ class _NatalCopy {
     required this.generateButton,
     required this.resultTitle,
     required this.highlightAdvice,
+    required this.footerHint,
   });
 
   final String screenTitle;
@@ -402,6 +363,7 @@ class _NatalCopy {
   final String generateButton;
   final String resultTitle;
   final String highlightAdvice;
+  final String footerHint;
 
   String userPrompt(String name) {
     final normalizedName = name.trim();
@@ -495,6 +457,8 @@ class _NatalCopy {
         resultTitle: 'Ваш разбор',
         highlightAdvice:
             'Главный фокус: раскрывайте сильные стороны постепенно, через устойчивый ритм.',
+        footerHint:
+            'Натальная карта — это личная астрологическая схема по дате, времени и месту рождения.',
       );
     }
     if (code == 'kk') {
@@ -513,6 +477,8 @@ class _NatalCopy {
         resultTitle: 'Түсіндірме',
         highlightAdvice:
             'Негізгі фокус: күшті қырларыңызды тұрақты ырғақ арқылы біртіндеп ашыңыз.',
+        footerHint:
+            'Наталдық карта — туған күн, уақыт және орынға негізделген жеке астрологиялық сызба.',
       );
     }
     return const _NatalCopy(
@@ -530,6 +496,8 @@ class _NatalCopy {
       resultTitle: 'Your interpretation',
       highlightAdvice:
           'Main focus: unfold your strengths gradually through a steady rhythm.',
+      footerHint:
+          'A natal chart is your personal astrological map based on date, time, and place of birth.',
     );
   }
 }

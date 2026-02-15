@@ -22,8 +22,7 @@ class CompatibilityFlowScreen extends ConsumerStatefulWidget {
 }
 
 class _CompatibilityFlowScreenState
-    extends ConsumerState<CompatibilityFlowScreen>
-    with SingleTickerProviderStateMixin {
+    extends ConsumerState<CompatibilityFlowScreen> {
   final TextEditingController _p1NameController = TextEditingController();
   final TextEditingController _p1DateController = TextEditingController();
   final TextEditingController _p1TimeController = TextEditingController();
@@ -33,20 +32,9 @@ class _CompatibilityFlowScreenState
 
   int _step = 0;
   bool _isSubmitting = false;
-  late final AnimationController _magicController;
-
-  @override
-  void initState() {
-    super.initState();
-    _magicController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 2200),
-    )..repeat();
-  }
 
   @override
   void dispose() {
-    _magicController.dispose();
     _p1NameController.dispose();
     _p1DateController.dispose();
     _p1TimeController.dispose();
@@ -279,10 +267,18 @@ class _CompatibilityFlowScreenState
                 const SizedBox(height: 14),
                 _MagicLoadingCard(
                   label: copy.loadingLabel,
-                  animation: _magicController,
                 ),
               ],
               const Spacer(),
+              Text(
+                copy.footerHint,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurfaceVariant.withValues(alpha: 0.78),
+                    ),
+              ),
+              const SizedBox(height: 10),
               Row(
                 children: [
                   if (_step > 0) ...[
@@ -319,88 +315,52 @@ class _CompatibilityFlowScreenState
 class _MagicLoadingCard extends StatelessWidget {
   const _MagicLoadingCard({
     required this.label,
-    required this.animation,
   });
 
   final String label;
-  final Animation<double> animation;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    return AnimatedBuilder(
-      animation: animation,
-      builder: (context, _) {
-        final t = animation.value;
-        final glow = 0.35 + (0.65 * (0.5 - (t - 0.5).abs()) * 2);
-        return Container(
-          padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                colorScheme.primary.withValues(alpha: 0.22),
-                colorScheme.surfaceContainerHighest.withValues(alpha: 0.32),
-              ],
+    return Container(
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            colorScheme.primary.withValues(alpha: 0.22),
+            colorScheme.surfaceContainerHighest.withValues(alpha: 0.32),
+          ],
+        ),
+        border: Border.all(
+          color: colorScheme.primary.withValues(alpha: 0.55),
+        ),
+      ),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 22,
+            height: 22,
+            child: CircularProgressIndicator(
+              strokeWidth: 2.4,
+              valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+              backgroundColor: Colors.white.withValues(alpha: 0.22),
             ),
-            border: Border.all(
-              color: colorScheme.primary.withValues(alpha: 0.45 + 0.3 * glow),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              label,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
-            boxShadow: [
-              BoxShadow(
-                color:
-                    colorScheme.primary.withValues(alpha: 0.18 + 0.22 * glow),
-                blurRadius: 18 + 18 * glow,
-                spreadRadius: 1 + 2 * glow,
-              ),
-            ],
           ),
-          child: Row(
-            children: [
-              Transform.rotate(
-                angle: t * 6.283185307,
-                child: Text(
-                  '✶',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                      ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      label,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                          ),
-                    ),
-                    const SizedBox(height: 8),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(999),
-                      child: LinearProgressIndicator(
-                        minHeight: 5,
-                        value: (t + 0.15).clamp(0.0, 1.0),
-                        backgroundColor:
-                            colorScheme.primary.withValues(alpha: 0.2),
-                        valueColor: const AlwaysStoppedAnimation<Color>(
-                          Colors.white,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      },
+        ],
+      ),
     );
   }
 }
@@ -415,6 +375,7 @@ class _CompatibilityCopy {
     required this.resultTitle,
     required this.errorText,
     required this.conflictLine,
+    required this.footerHint,
   });
 
   final String screenTitle;
@@ -425,6 +386,7 @@ class _CompatibilityCopy {
   final String resultTitle;
   final String errorText;
   final String conflictLine;
+  final String footerHint;
 
   String stepTitle(int step) {
     if (screenTitle == 'Любовная совместимость') {
@@ -565,6 +527,8 @@ class _CompatibilityCopy {
             'Не удалось сгенерировать совместимость. Попробуйте еще раз.',
         conflictLine:
             'Зона внимания: заранее проговаривайте ожидания к темпу общения и личным границам.',
+        footerHint:
+            'Проверка совместимости пары показывает, как ваши характеры, ритм и ценности сочетаются в отношениях.',
       );
     }
     if (code == 'kk') {
@@ -578,6 +542,8 @@ class _CompatibilityCopy {
         errorText: 'Үйлесімділікті жасау мүмкін болмады. Қайта көріңіз.',
         conflictLine:
             'Назар аймағы: қарым-қатынас қарқыны мен жеке шекаралар туралы күтулерді алдын ала келісіп алыңыз.',
+        footerHint:
+            'Жұп үйлесімділігін тексеру қарым-қатынаста мінез, ырғақ және құндылықтардың қалай үйлесетінін көрсетеді.',
       );
     }
     return const _CompatibilityCopy(
@@ -590,6 +556,8 @@ class _CompatibilityCopy {
       errorText: 'Could not generate compatibility. Please try again.',
       conflictLine:
           'Watch area: align expectations early on communication pace and personal boundaries.',
+      footerHint:
+          'Compatibility shows how your personalities, pace, and values interact in a relationship.',
     );
   }
 }
