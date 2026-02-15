@@ -1685,6 +1685,7 @@ app.post('/api/natal-chart/generate_web', async (req, res) => {
   if (!initData) {
     return;
   }
+  const telegramUserId = parseUserIdFromInitData(initData);
   const error = validateNatalChartRequest(payload);
   if (error) {
     return res.status(400).json({ error, requestId: req.requestId });
@@ -1712,6 +1713,14 @@ app.post('/api/natal-chart/generate_web', async (req, res) => {
         duration_ms: durationMs,
       })
     );
+    if (hasDb() && telegramUserId) {
+      await logUserQuery({
+        telegramUserId,
+        queryType: 'natal_chart',
+        question: `Natal chart: ${payload?.birthDate || ''}`,
+        locale: normalizeLocale(payload?.language)
+      });
+    }
     return res.json({
       interpretation,
       requestId: req.requestId
@@ -1849,6 +1858,7 @@ app.post('/api/compatibility/generate_web', async (req, res) => {
   if (!initData) {
     return;
   }
+  const telegramUserId = parseUserIdFromInitData(initData);
   const error = validateCompatibilityRequest(payload);
   if (error) {
     return res.status(400).json({ error, requestId: req.requestId });
@@ -1876,6 +1886,16 @@ app.post('/api/compatibility/generate_web', async (req, res) => {
         duration_ms: durationMs,
       })
     );
+    if (hasDb() && telegramUserId) {
+      const p1 = String(payload?.personOne?.name || '').trim();
+      const p2 = String(payload?.personTwo?.name || '').trim();
+      await logUserQuery({
+        telegramUserId,
+        queryType: 'compatibility',
+        question: `Compatibility: ${p1} / ${p2}`.trim(),
+        locale: normalizeLocale(payload?.language)
+      });
+    }
     return res.json({
       interpretation,
       requestId: req.requestId

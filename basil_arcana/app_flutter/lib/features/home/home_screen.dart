@@ -50,7 +50,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   HomeStreakStats _streakStats = HomeStreakStats.empty;
   String? _dailyCardInterpretation;
   String? _dailyCardInterpretationCardId;
-  bool _loadingDailyCardInterpretation = false;
   bool _didRequestOnboarding = false;
   late final AnimationController _fieldGlowController;
   late final AnimationController _titleShimmerController;
@@ -482,6 +481,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     final primaryColor = colorScheme.primary;
     final disabledColor = Color.lerp(primaryColor, colorScheme.surface, 0.45)!;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final isCompactScreen = screenHeight < 760;
+    final questionMinLines = isCompactScreen ? 3 : 5;
+    final questionMaxLines = isCompactScreen ? 4 : 6;
 
     return Scaffold(
       appBar: buildEnergyTopBar(
@@ -597,8 +600,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                               TextField(
                                 controller: _controller,
                                 focusNode: _focusNode,
-                                maxLines: 6,
-                                minLines: 5,
+                                maxLines: questionMaxLines,
+                                minLines: questionMinLines,
                                 decoration: InputDecoration(
                                   hintText: l10n.homeQuestionPlaceholder,
                                   hintStyle: Theme.of(context)
@@ -609,8 +612,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                             .withValues(alpha: 0.45),
                                       ),
                                   border: InputBorder.none,
-                                  contentPadding:
-                                      const EdgeInsets.fromLTRB(16, 16, 48, 40),
+                                  contentPadding: EdgeInsets.fromLTRB(
+                                    16,
+                                    16,
+                                    48,
+                                    isCompactScreen ? 34 : 40,
+                                  ),
                                   alignLabelWithHint: true,
                                 ),
                                 onChanged: (value) {
@@ -949,9 +956,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       ),
                       const SizedBox(width: 8),
                       Expanded(
-                        child: _StatPill(
-                          label: copy.activeDaysLabel,
-                          value: '${_streakStats.activeDays}',
+                        child: _AwarenessPill(
+                          label: copy.awarenessLabel,
+                          value: _streakStats.awarenessPercent,
+                          locked: _streakStats.awarenessLocked,
+                          shimmer: _titleShimmerController,
                         ),
                       ),
                     ],
@@ -1014,37 +1023,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     required CardModel dailyCard,
     required _HomeStreakCopy copy,
   }) async {
-    if (_dailyCardInterpretationCardId != dailyCard.id &&
-        !_loadingDailyCardInterpretation) {
-      setState(() {
-        _loadingDailyCardInterpretation = true;
-        _dailyCardInterpretationCardId = dailyCard.id;
-      });
-      final locale = Localizations.localeOf(context).languageCode;
-      ref
-          .read(homeInsightsRepositoryProvider)
-          .fetchDailyCardInterpretation(
-            card: dailyCard,
-            locale: locale,
-          )
-          .then((text) {
-        if (!mounted) {
-          return;
-        }
-        setState(() {
-          _dailyCardInterpretation = text;
-          _loadingDailyCardInterpretation = false;
-        });
-      }).catchError((_) {
-        if (!mounted) {
-          return;
-        }
-        setState(() {
-          _dailyCardInterpretation = copy.dailyCardError;
-          _loadingDailyCardInterpretation = false;
-        });
-      });
-    }
+    final hasCache = _dailyCardInterpretationCardId == dailyCard.id &&
+        (_dailyCardInterpretation?.trim().isNotEmpty ?? false);
+    final locale = Localizations.localeOf(context).languageCode;
+    final requestFuture = hasCache
+        ? null
+        : ref.read(homeInsightsRepositoryProvider).fetchDailyCardInterpretation(
+              card: dailyCard,
+              locale: locale,
+            );
 
     final colorScheme = Theme.of(context).colorScheme;
     await showModalBottomSheet<void>(
@@ -1055,11 +1042,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (context) {
-        final loading = _loadingDailyCardInterpretation &&
-            _dailyCardInterpretationCardId == dailyCard.id;
-        final interpretation = _dailyCardInterpretationCardId == dailyCard.id
-            ? _dailyCardInterpretation
-            : null;
         return FractionallySizedBox(
           heightFactor: 0.95,
           child: SafeArea(
@@ -1148,21 +1130,48 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     ),
                   ),
                   const SizedBox(height: 12),
-                  if (loading)
-                    const _HomeMagicLoadingCard()
-                  else
-                    Expanded(
-                      child: SingleChildScrollView(
-                        child: Text(
-                          interpretation ?? copy.dailyCardPending,
-                          style:
-                              Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: colorScheme.onSurface
-                                        .withValues(alpha: 0.9),
-                                  ),
-                        ),
-                      ),
+                  Expanded(
+                    child: FutureBuilder<String>(
+                      future: requestFuture,
+                      initialData: hasCache ? _dailyCardInterpretation : null,
+                      builder: (context, snapshot) {
+                        final hasValue = snapshot.hasData &&
+                            (snapshot.data?.trim().isNotEmpty ?? false);
+                        if (snapshot.connectionState ==
+                                ConnectionState.waiting &&
+                            !hasValue) {
+                          return const _HomeMagicLoadingCard();
+                        }
+                        final resolved = hasValue
+                            ? snapshot.data!.trim()
+                            : copy.dailyCardError;
+                        if (_dailyCardInterpretationCardId != dailyCard.id ||
+                            _dailyCardInterpretation != resolved) {
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            if (!mounted) {
+                              return;
+                            }
+                            setState(() {
+                              _dailyCardInterpretationCardId = dailyCard.id;
+                              _dailyCardInterpretation = resolved;
+                            });
+                          });
+                        }
+                        return SingleChildScrollView(
+                          child: Text(
+                            resolved,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  color: colorScheme.onSurface
+                                      .withValues(alpha: 0.9),
+                                ),
+                          ),
+                        );
+                      },
                     ),
+                  ),
                 ],
               ),
             ),
@@ -1396,7 +1405,7 @@ class _HomeStreakCopy {
     required this.modalTitle,
     required this.currentStreakLabel,
     required this.bestStreakLabel,
-    required this.activeDaysLabel,
+    required this.awarenessLabel,
     required this.topCardsTitle,
     required this.topCardsEmpty,
     required this.hitsLabel,
@@ -1413,7 +1422,7 @@ class _HomeStreakCopy {
   final String modalTitle;
   final String currentStreakLabel;
   final String bestStreakLabel;
-  final String activeDaysLabel;
+  final String awarenessLabel;
   final String topCardsTitle;
   final String topCardsEmpty;
   final String hitsLabel;
@@ -1425,7 +1434,7 @@ class _HomeStreakCopy {
   final String lastActivePrefix;
   final String closeLabel;
 
-  String tileTitle(int days) => '$days🔥';
+  String tileTitle(int days) => '🔥 ${days < 1 ? 1 : days}';
 
   String lastActiveLabel(DateTime date) {
     final day = date.day.toString().padLeft(2, '0');
@@ -1442,7 +1451,7 @@ class _HomeStreakCopy {
         modalTitle: 'Твой streak',
         currentStreakLabel: 'Сейчас',
         bestStreakLabel: 'Рекорд',
-        activeDaysLabel: 'Активных дней',
+        awarenessLabel: 'Осознанность',
         topCardsTitle: 'Топ карт',
         topCardsEmpty: 'Пока нет статистики по картам.',
         hitsLabel: 'Выпадала',
@@ -1461,7 +1470,7 @@ class _HomeStreakCopy {
         modalTitle: 'Сенің streak',
         currentStreakLabel: 'Қазір',
         bestStreakLabel: 'Рекорд',
-        activeDaysLabel: 'Белсенді күндер',
+        awarenessLabel: 'Саналылық',
         topCardsTitle: 'Топ карталар',
         topCardsEmpty: 'Карта статистикасы әзірге жоқ.',
         hitsLabel: 'Түскен саны',
@@ -1479,7 +1488,7 @@ class _HomeStreakCopy {
       modalTitle: 'Your streak',
       currentStreakLabel: 'Current',
       bestStreakLabel: 'Best',
-      activeDaysLabel: 'Active days',
+      awarenessLabel: 'Awareness',
       topCardsTitle: 'Top cards',
       topCardsEmpty: 'No card stats yet.',
       hitsLabel: 'Drawn',
@@ -1587,6 +1596,76 @@ class _StatPill extends StatelessWidget {
                   fontWeight: FontWeight.w700,
                 ),
           ),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: colorScheme.onSurface.withValues(alpha: 0.72),
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AwarenessPill extends StatelessWidget {
+  const _AwarenessPill({
+    required this.label,
+    required this.value,
+    required this.locked,
+    required this.shimmer,
+  });
+
+  final String label;
+  final int value;
+  final bool locked;
+  final Animation<double> shimmer;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final percent = value.clamp(30, 100);
+    final textStyle = Theme.of(context).textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.w700,
+          color: locked ? colorScheme.primary : null,
+        );
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        gradient: locked
+            ? LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  colorScheme.primary.withValues(alpha: 0.28),
+                  colorScheme.surfaceContainerHighest.withValues(alpha: 0.38),
+                ],
+              )
+            : null,
+        color: locked
+            ? null
+            : colorScheme.surfaceContainerHighest.withValues(alpha: 0.24),
+        border: locked
+            ? Border.all(color: colorScheme.primary.withValues(alpha: 0.5))
+            : null,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (locked && percent == 100)
+            _ShimmerTitle(
+              text: '$percent%',
+              animation: shimmer,
+              baseStyle: textStyle,
+              shimmerColor: colorScheme.primary,
+            )
+          else
+            Text(
+              '$percent%',
+              style: textStyle,
+            ),
           const SizedBox(height: 2),
           Text(
             label,

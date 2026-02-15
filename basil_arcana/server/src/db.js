@@ -810,37 +810,119 @@ async function getUserVisitStreak({ telegramUserId }) {
       currentStreakDays: 0,
       longestStreakDays: 0,
       activeDays: 0,
+      awarenessPercent: 30,
+      awarenessLocked: false,
       lastActiveAt: null
     };
   }
 
-  const dailyRowsRes = await getDb().query(
-    `
-    WITH all_days AS (
-      SELECT activity_date AS day, created_at
-      FROM user_daily_activity
-      WHERE telegram_user_id = $1
-      UNION ALL
-      SELECT (created_at AT TIME ZONE 'UTC')::date AS day, created_at
+  const [dailyRowsRes, awarenessRes, premiumRes] = await Promise.all([
+    getDb().query(
+      `
+      WITH all_days AS (
+        SELECT activity_date AS day, created_at
+        FROM user_daily_activity
+        WHERE telegram_user_id = $1
+        UNION ALL
+        SELECT (created_at AT TIME ZONE 'UTC')::date AS day, created_at
+        FROM user_query_history
+        WHERE telegram_user_id = $1
+          AND query_type LIKE 'reading_%'
+      )
+      SELECT day::text AS activity_date, MAX(created_at) AS last_created_at
+      FROM all_days
+      GROUP BY day
+      ORDER BY day DESC;
+      `,
+      [telegramUserId]
+    ),
+    getDb().query(
+      `
+      SELECT
+        COALESCE(SUM(
+          CASE
+            WHEN query_type = 'natal_chart' THEN 4
+            WHEN query_type = 'compatibility' THEN 4
+            WHEN query_type = 'reading_daily_card' THEN 2
+            WHEN query_type LIKE 'reading_%' THEN 3
+            ELSE 0
+          END
+        ), 0)::int AS awareness_points,
+        MAX(created_at) AS last_action_at
       FROM user_query_history
-      WHERE telegram_user_id = $1
-        AND query_type LIKE 'reading_%'
+      WHERE telegram_user_id = $1;
+      `,
+      [telegramUserId]
+    ),
+    getDb().query(
+      `
+      SELECT
+        EXISTS (
+          SELECT 1
+          FROM user_energy_state ues
+          WHERE ues.telegram_user_id = $1
+            AND ues.unlimited_until IS NOT NULL
+            AND ues.unlimited_until > NOW()
+        ) AS has_active_unlimited,
+        EXISTS (
+          SELECT 1
+          FROM energy_payment_invoices epi
+          WHERE epi.telegram_user_id = $1
+            AND epi.grant_type = 'unlimited_year'
+            AND epi.status = 'paid'
+            AND epi.grant_applied_at IS NOT NULL
+            AND epi.grant_applied_at > NOW() - INTERVAL '400 days'
+        ) AS has_year_purchase;
+      `,
+      [telegramUserId]
     )
-    SELECT day::text AS activity_date, MAX(created_at) AS last_created_at
-    FROM all_days
-    GROUP BY day
-    ORDER BY day DESC;
-    `,
-    [telegramUserId]
-  );
+  ]);
 
   const rows = dailyRowsRes.rows || [];
+  const awarenessRow = awarenessRes.rows[0] || {};
+  const premiumRow = premiumRes.rows[0] || {};
+  const awarenessPoints = Number(awarenessRow.awareness_points || 0);
+  const lastActionAt = awarenessRow.last_action_at
+    ? new Date(awarenessRow.last_action_at)
+    : null;
+  const premiumLocked = Boolean(
+    premiumRow.has_active_unlimited && premiumRow.has_year_purchase
+  );
+
+  let awarenessPercent = 30;
+  if (premiumLocked) {
+    awarenessPercent = 100;
+  } else {
+    const base = 30 + awarenessPoints;
+    let decayDays = 0;
+    if (lastActionAt && Number.isFinite(lastActionAt.getTime())) {
+      const now = new Date();
+      const todayUtc = new Date(
+        Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
+      );
+      const actionUtc = new Date(
+        Date.UTC(
+          lastActionAt.getUTCFullYear(),
+          lastActionAt.getUTCMonth(),
+          lastActionAt.getUTCDate()
+        )
+      );
+      decayDays = Math.max(
+        0,
+        Math.floor((todayUtc.getTime() - actionUtc.getTime()) / (24 * 60 * 60 * 1000))
+      );
+    }
+    awarenessPercent = Math.max(30, Math.min(100, base - decayDays * 10));
+  }
+
   if (rows.length === 0) {
     return {
-      currentStreakDays: 0,
-      longestStreakDays: 0,
-      activeDays: 0,
-      lastActiveAt: null
+      currentStreakDays: 1,
+      longestStreakDays: 1,
+      activeDays: 1,
+      awarenessPercent,
+      awarenessLocked: premiumLocked,
+      lastActiveAt: new Date().toISOString()
     };
   }
 
@@ -897,9 +979,11 @@ async function getUserVisitStreak({ telegramUserId }) {
     : null;
 
   return {
-    currentStreakDays,
+    currentStreakDays: Math.max(1, currentStreakDays),
     longestStreakDays,
     activeDays,
+    awarenessPercent,
+    awarenessLocked: premiumLocked,
     lastActiveAt
   };
 }
