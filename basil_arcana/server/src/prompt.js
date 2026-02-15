@@ -166,9 +166,44 @@ function buildCompatibilityPrompt(payload) {
   ];
 }
 
+function buildDailyCardPrompt(payload) {
+  const { locale, card, profile } = payload;
+  const system = [
+    'You are a warm, grounded tarot guide for Basil\'s Arcana.',
+    'Interpret the card of the day for this specific user.',
+    'Avoid deterministic predictions. Avoid the word "will". Use "may", "could", "suggests", "likely".',
+    'Do not give medical, legal, or financial directives.',
+    'Use plain text only (no markdown, no bullets, no JSON).',
+    'Structure as 2 short paragraphs:',
+    '1) What this card highlights today.',
+    '2) One practical focus for today.',
+    'Keep it concise: 90-170 words.',
+    `Respond in locale: ${locale || 'en'}.`,
+  ].join(' ');
+
+  const user = {
+    card,
+    profile,
+    locale,
+  };
+
+  return [
+    { role: 'system', content: system },
+    {
+      role: 'user',
+      content: `Generate today card interpretation for this input:\n${JSON.stringify(
+        user,
+        null,
+        2
+      )}`,
+    },
+  ];
+}
+
 module.exports = {
   buildPromptMessages,
   buildDetailsPrompt,
   buildNatalChartPrompt,
   buildCompatibilityPrompt,
+  buildDailyCardPrompt,
 };

@@ -10,7 +10,9 @@ import '../../core/navigation/app_route_config.dart';
 import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/app_top_bar.dart';
 import '../../core/widgets/sofia_promo_card.dart';
+import '../../data/models/card_model.dart';
 import '../../data/models/deck_model.dart';
+import '../../data/repositories/home_insights_repository.dart';
 import '../../data/repositories/sofia_consent_repository.dart';
 import '../../state/providers.dart';
 import '../../state/reading_flow_controller.dart';
@@ -44,6 +46,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   _SofiaConsentState _sofiaConsentState = _SofiaConsentState.undecided;
   bool _sendingConsent = false;
   bool _hasQueryHistory = false;
+  bool _loadingStreak = false;
+  HomeStreakStats _streakStats = HomeStreakStats.empty;
+  String? _dailyCardInterpretation;
+  String? _dailyCardInterpretationCardId;
+  bool _loadingDailyCardInterpretation = false;
   bool _didRequestOnboarding = false;
   late final AnimationController _fieldGlowController;
   late final AnimationController _titleShimmerController;
@@ -69,6 +76,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       _showOnboardingIfNeeded();
     });
     _loadQueryHistoryAvailability();
+    _loadStreakStats();
     _readingFlowSubscription = ref.listenManual<ReadingFlowState>(
       readingFlowControllerProvider,
       (prev, next) {
@@ -101,6 +109,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       }
       setState(() {
         _hasQueryHistory = false;
+      });
+    }
+  }
+
+  Future<void> _loadStreakStats() async {
+    setState(() {
+      _loadingStreak = true;
+    });
+    try {
+      final streak =
+          await ref.read(homeInsightsRepositoryProvider).fetchStreakStats();
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _streakStats = streak;
+        _loadingStreak = false;
+      });
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _loadingStreak = false;
       });
     }
   }
@@ -429,6 +461,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     final colorScheme = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context);
     final deckId = ref.watch(deckProvider);
+    final cardsAsync = ref.watch(cardsAllProvider);
     final quickTopics = [
       l10n.homeQuickTopicRelationships,
       l10n.homeQuickTopicMoney,
@@ -439,10 +472,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     final hasQuestion = _controller.text.trim().isNotEmpty;
     final copy = _SofiaCopy.resolve(context);
     final featureCopy = _HomeFeatureCopy.resolve(context);
+    final streakCopy = _HomeStreakCopy.resolve(context);
     final deckHint = _deckHint(l10n, deckId);
+    final cards = cardsAsync.maybeWhen(
+        data: (list) => list, orElse: () => const <CardModel>[]);
+    final topCards = _topCards(cards);
+    final dailyCard = _resolveDailyCard(cards, deckId);
 
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
-    const buttonHeight = 56.0;
     final primaryColor = colorScheme.primary;
     final disabledColor = Color.lerp(primaryColor, colorScheme.surface, 0.45)!;
 
@@ -474,17 +511,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       resizeToAvoidBottomInset: false,
       body: SafeArea(
         top: false,
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                controller: _scrollController,
-                padding: EdgeInsets.fromLTRB(
-                  20,
-                  10,
-                  20,
-                  24 + buttonHeight,
-                ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              controller: _scrollController,
+              physics: const ClampingScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(20, 10, 20, 12),
+              child: ConstrainedBox(
+                constraints:
+                    BoxConstraints(minHeight: constraints.maxHeight - 22),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -633,13 +668,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       },
                     ),
                     const SizedBox(height: 16),
-                    Text(
-                      l10n.homeTryPrompt,
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            color: colorScheme.onSurface.withOpacity(0.7),
-                          ),
-                    ),
-                    const SizedBox(height: 12),
                     SizedBox(
                       height: 40,
                       child: ListView.separated(
@@ -724,29 +752,44 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         ),
                       ],
                     ),
-                    const SizedBox(height: 14),
-                    if (_sofiaConsentState == _SofiaConsentState.undecided)
-                      _SofiaConsentCard(
-                        copy: copy,
-                        isBusy: _sendingConsent,
-                        onOpenInfo: _showSofiaInfoModal,
-                        onAccept: () => _setSofiaConsentState(
-                          _SofiaConsentState.accepted,
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _SecondaryFeatureCard(
+                            emoji: '🔥',
+                            title: streakCopy
+                                .tileTitle(_streakStats.currentStreakDays),
+                            subtitle: streakCopy.tileSubtitle,
+                            onTap: () => _showStreakModal(
+                              copy: streakCopy,
+                              topCards: topCards,
+                            ),
+                          ),
                         ),
-                        onReject: () => _setSofiaConsentState(
-                          _SofiaConsentState.rejected,
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: _SecondaryFeatureCard(
+                            emoji: '🗓️',
+                            title: streakCopy.dailyCardTileTitle,
+                            subtitle:
+                                dailyCard?.name ?? streakCopy.dailyCardFallback,
+                            onTap: dailyCard == null
+                                ? null
+                                : () => _showDailyCardModal(
+                                      dailyCard: dailyCard,
+                                      copy: streakCopy,
+                                    ),
+                          ),
                         ),
-                      )
-                    else
-                      _SofiaInfoCard(
-                        copy: copy,
-                        onTap: _showSofiaInfoModal,
-                      ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
                   ],
                 ),
               ),
-            ),
-          ],
+            );
+          },
         ),
       ),
       bottomNavigationBar: SafeArea(
@@ -758,6 +801,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              if (_sofiaConsentState == _SofiaConsentState.undecided)
+                _SofiaConsentCard(
+                  copy: copy,
+                  isBusy: _sendingConsent,
+                  compact: true,
+                  onOpenInfo: _showSofiaInfoModal,
+                  onAccept: () => _setSofiaConsentState(
+                    _SofiaConsentState.accepted,
+                  ),
+                  onReject: () => _setSofiaConsentState(
+                    _SofiaConsentState.rejected,
+                  ),
+                )
+              else
+                _SofiaInfoCard(
+                  copy: copy,
+                  compact: true,
+                  onTap: _showSofiaInfoModal,
+                ),
+              const SizedBox(height: 10),
               _PrimaryActionButton(
                 isActive: hasQuestion,
                 primaryColor: primaryColor,
@@ -769,6 +832,286 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           ),
         ),
       ),
+    );
+  }
+
+  List<_TopCardStat> _topCards(List<CardModel> cards) {
+    final stats = ref.read(cardStatsRepositoryProvider).getAllCounts();
+    if (stats.isEmpty || cards.isEmpty) {
+      return const [];
+    }
+    final byId = {for (final card in cards) card.id: card};
+    final entries = stats.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+    final top = <_TopCardStat>[];
+    for (final entry in entries) {
+      final card = byId[entry.key];
+      final name = card?.name ?? entry.key;
+      top.add(
+        _TopCardStat(
+          name: name,
+          count: entry.value,
+          imageUrl: card?.imageUrl ?? '',
+        ),
+      );
+      if (top.length == 3) {
+        break;
+      }
+    }
+    return top;
+  }
+
+  CardModel? _resolveDailyCard(List<CardModel> cards, DeckType deckId) {
+    if (cards.isEmpty) {
+      return null;
+    }
+    final filtered = cards.where((card) {
+      if (deckId == DeckType.lenormand) {
+        return card.deckId == DeckType.lenormand;
+      }
+      return card.deckId != DeckType.lenormand;
+    }).toList();
+    final source = filtered.isEmpty ? cards : filtered;
+    final now = DateTime.now().toUtc();
+    final seed = now.year * 10000 + now.month * 100 + now.day;
+    final index = seed % source.length;
+    return source[index];
+  }
+
+  Future<void> _showStreakModal({
+    required _HomeStreakCopy copy,
+    required List<_TopCardStat> topCards,
+  }) async {
+    final colorScheme = Theme.of(context).colorScheme;
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(18, 14, 18, 20),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color:
+                            colorScheme.outlineVariant.withValues(alpha: 0.8),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  Text(
+                    copy.modalTitle,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _StatPill(
+                          label: copy.currentStreakLabel,
+                          value: '${_streakStats.currentStreakDays}',
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _StatPill(
+                          label: copy.bestStreakLabel,
+                          value: '${_streakStats.longestStreakDays}',
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _StatPill(
+                          label: copy.totalReadingsLabel,
+                          value: '${_streakStats.totalReadings}',
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  if (_loadingStreak)
+                    const SizedBox(
+                      height: 28,
+                      child: Center(
+                          child: CircularProgressIndicator(strokeWidth: 2)),
+                    ),
+                  if (!_loadingStreak && _streakStats.lastActiveAt != null)
+                    Text(
+                      copy.lastActiveLabel(_streakStats.lastActiveAt!),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color:
+                                colorScheme.onSurface.withValues(alpha: 0.68),
+                          ),
+                    ),
+                  const SizedBox(height: 14),
+                  Text(
+                    copy.topCardsTitle,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                  ),
+                  const SizedBox(height: 8),
+                  if (topCards.isEmpty)
+                    Text(
+                      copy.topCardsEmpty,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurface.withValues(alpha: 0.7),
+                          ),
+                    )
+                  else
+                    Row(
+                      children: [
+                        for (var i = 0; i < topCards.length; i++) ...[
+                          Expanded(
+                            child: _MiniTopCardTile(
+                              rank: i + 1,
+                              stat: topCards[i],
+                              hitsLabel: copy.hitsLabel,
+                            ),
+                          ),
+                          if (i != topCards.length - 1)
+                            const SizedBox(width: 8),
+                        ],
+                      ],
+                    ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _showDailyCardModal({
+    required CardModel dailyCard,
+    required _HomeStreakCopy copy,
+  }) async {
+    if (_dailyCardInterpretationCardId != dailyCard.id &&
+        !_loadingDailyCardInterpretation) {
+      setState(() {
+        _loadingDailyCardInterpretation = true;
+        _dailyCardInterpretationCardId = dailyCard.id;
+      });
+      final locale = Localizations.localeOf(context).languageCode;
+      ref
+          .read(homeInsightsRepositoryProvider)
+          .fetchDailyCardInterpretation(
+            card: dailyCard,
+            locale: locale,
+          )
+          .then((text) {
+        if (!mounted) {
+          return;
+        }
+        setState(() {
+          _dailyCardInterpretation = text;
+          _loadingDailyCardInterpretation = false;
+        });
+      }).catchError((_) {
+        if (!mounted) {
+          return;
+        }
+        setState(() {
+          _dailyCardInterpretation = copy.dailyCardError;
+          _loadingDailyCardInterpretation = false;
+        });
+      });
+    }
+
+    final colorScheme = Theme.of(context).colorScheme;
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        final loading = _loadingDailyCardInterpretation &&
+            _dailyCardInterpretationCardId == dailyCard.id;
+        final interpretation = _dailyCardInterpretationCardId == dailyCard.id
+            ? _dailyCardInterpretation
+            : null;
+        return SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(18, 14, 18, 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: colorScheme.outlineVariant.withValues(alpha: 0.8),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Text(
+                  copy.dailyCardModalTitle,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  dailyCard.name,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: colorScheme.primary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                ),
+                const SizedBox(height: 8),
+                if (dailyCard.imageUrl.trim().isNotEmpty)
+                  Center(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.network(
+                        dailyCard.imageUrl,
+                        height: 160,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                const SizedBox(height: 10),
+                if (loading)
+                  const SizedBox(
+                    height: 36,
+                    child: Center(
+                        child: CircularProgressIndicator(strokeWidth: 2)),
+                  )
+                else
+                  Text(
+                    interpretation ?? copy.dailyCardPending,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSurface.withValues(alpha: 0.9),
+                        ),
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -978,6 +1321,286 @@ class _HomeOnboardingCopy {
   }
 }
 
+class _TopCardStat {
+  const _TopCardStat({
+    required this.name,
+    required this.count,
+    required this.imageUrl,
+  });
+
+  final String name;
+  final int count;
+  final String imageUrl;
+}
+
+class _HomeStreakCopy {
+  const _HomeStreakCopy({
+    required this.tileSubtitle,
+    required this.modalTitle,
+    required this.currentStreakLabel,
+    required this.bestStreakLabel,
+    required this.totalReadingsLabel,
+    required this.topCardsTitle,
+    required this.topCardsEmpty,
+    required this.hitsLabel,
+    required this.dailyCardTileTitle,
+    required this.dailyCardModalTitle,
+    required this.dailyCardFallback,
+    required this.dailyCardPending,
+    required this.dailyCardError,
+    required this.lastActivePrefix,
+  });
+
+  final String tileSubtitle;
+  final String modalTitle;
+  final String currentStreakLabel;
+  final String bestStreakLabel;
+  final String totalReadingsLabel;
+  final String topCardsTitle;
+  final String topCardsEmpty;
+  final String hitsLabel;
+  final String dailyCardTileTitle;
+  final String dailyCardModalTitle;
+  final String dailyCardFallback;
+  final String dailyCardPending;
+  final String dailyCardError;
+  final String lastActivePrefix;
+
+  String tileTitle(int days) => '$days🔥';
+
+  String lastActiveLabel(DateTime date) {
+    final day = date.day.toString().padLeft(2, '0');
+    final month = date.month.toString().padLeft(2, '0');
+    final year = date.year.toString();
+    return '$lastActivePrefix: $day.$month.$year';
+  }
+
+  static _HomeStreakCopy resolve(BuildContext context) {
+    final code = Localizations.localeOf(context).languageCode;
+    if (code == 'ru') {
+      return const _HomeStreakCopy(
+        tileSubtitle: 'Серия и статистика',
+        modalTitle: 'Твой streak',
+        currentStreakLabel: 'Сейчас',
+        bestStreakLabel: 'Рекорд',
+        totalReadingsLabel: 'Раскладов',
+        topCardsTitle: 'Топ карт',
+        topCardsEmpty: 'Пока нет статистики по картам.',
+        hitsLabel: 'Выпадала',
+        dailyCardTileTitle: 'Карта дня',
+        dailyCardModalTitle: 'Карта дня',
+        dailyCardFallback: 'Подбираем карту...',
+        dailyCardPending: 'Нажми еще раз через пару секунд.',
+        dailyCardError: 'Не получилось получить трактовку. Попробуй еще раз.',
+        lastActivePrefix: 'Последняя активность',
+      );
+    }
+    if (code == 'kk') {
+      return const _HomeStreakCopy(
+        tileSubtitle: 'Серия мен статистика',
+        modalTitle: 'Сенің streak',
+        currentStreakLabel: 'Қазір',
+        bestStreakLabel: 'Рекорд',
+        totalReadingsLabel: 'Ашылымдар',
+        topCardsTitle: 'Топ карталар',
+        topCardsEmpty: 'Карта статистикасы әзірге жоқ.',
+        hitsLabel: 'Түскен саны',
+        dailyCardTileTitle: 'Күн картасы',
+        dailyCardModalTitle: 'Күн картасы',
+        dailyCardFallback: 'Карта таңдалып жатыр...',
+        dailyCardPending: 'Бірнеше секундтан кейін қайта ашып көр.',
+        dailyCardError: 'Түсіндірмені алу мүмкін болмады. Қайта көріңіз.',
+        lastActivePrefix: 'Соңғы белсенділік',
+      );
+    }
+    return const _HomeStreakCopy(
+      tileSubtitle: 'Streak and stats',
+      modalTitle: 'Your streak',
+      currentStreakLabel: 'Current',
+      bestStreakLabel: 'Best',
+      totalReadingsLabel: 'Readings',
+      topCardsTitle: 'Top cards',
+      topCardsEmpty: 'No card stats yet.',
+      hitsLabel: 'Drawn',
+      dailyCardTileTitle: 'Daily card',
+      dailyCardModalTitle: 'Daily card',
+      dailyCardFallback: 'Selecting card...',
+      dailyCardPending: 'Open again in a couple of seconds.',
+      dailyCardError: 'Could not load interpretation. Try again.',
+      lastActivePrefix: 'Last activity',
+    );
+  }
+}
+
+class _SecondaryFeatureCard extends StatelessWidget {
+  const _SecondaryFeatureCard({
+    required this.emoji,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  final String emoji;
+  final String title;
+  final String subtitle;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: onTap,
+      child: Ink(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          color: colorScheme.surfaceVariant.withValues(alpha: 0.2),
+          border: Border.all(
+            color: colorScheme.outlineVariant.withValues(alpha: 0.7),
+          ),
+        ),
+        child: Row(
+          children: [
+            Text(
+              emoji,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurface.withValues(alpha: 0.74),
+                        ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _StatPill extends StatelessWidget {
+  const _StatPill({
+    required this.label,
+    required this.value,
+  });
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: colorScheme.surfaceVariant.withValues(alpha: 0.24),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            value,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: colorScheme.onSurface.withValues(alpha: 0.72),
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MiniTopCardTile extends StatelessWidget {
+  const _MiniTopCardTile({
+    required this.rank,
+    required this.stat,
+    required this.hitsLabel,
+  });
+
+  final int rank;
+  final _TopCardStat stat;
+  final String hitsLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: colorScheme.surfaceVariant.withValues(alpha: 0.2),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '#$rank',
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: colorScheme.primary,
+                  fontWeight: FontWeight.w700,
+                ),
+          ),
+          const SizedBox(height: 6),
+          if (stat.imageUrl.trim().isNotEmpty)
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.network(
+                stat.imageUrl,
+                height: 72,
+                width: double.infinity,
+                fit: BoxFit.cover,
+              ),
+            ),
+          const SizedBox(height: 6),
+          Text(
+            stat.name,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 2),
+          Text(
+            '$hitsLabel: ${stat.count}',
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: colorScheme.onSurface.withValues(alpha: 0.68),
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _SofiaConsentCard extends StatelessWidget {
   const _SofiaConsentCard({
     required this.copy,
@@ -985,6 +1608,7 @@ class _SofiaConsentCard extends StatelessWidget {
     required this.onOpenInfo,
     required this.onAccept,
     required this.onReject,
+    this.compact = false,
   });
 
   final _SofiaCopy copy;
@@ -992,6 +1616,7 @@ class _SofiaConsentCard extends StatelessWidget {
   final VoidCallback onOpenInfo;
   final VoidCallback onAccept;
   final VoidCallback onReject;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -1000,11 +1625,15 @@ class _SofiaConsentCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(20),
       onTap: onOpenInfo,
       child: Ink(
-        padding: const EdgeInsets.all(14),
+        padding: EdgeInsets.all(compact ? 12 : 14),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
-          color: colorScheme.surfaceVariant.withOpacity(0.26),
-          border: Border.all(color: colorScheme.outlineVariant),
+          color: colorScheme.surfaceVariant
+              .withValues(alpha: compact ? 0.18 : 0.26),
+          border: Border.all(
+            color:
+                colorScheme.outlineVariant.withValues(alpha: compact ? 0.7 : 1),
+          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1025,11 +1654,12 @@ class _SofiaConsentCard extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 6),
+            SizedBox(height: compact ? 4 : 6),
             RichText(
               text: TextSpan(
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurface.withOpacity(0.78),
+                      color: colorScheme.onSurface
+                          .withValues(alpha: compact ? 0.72 : 0.78),
                     ),
                 children: [
                   TextSpan(text: '${copy.consentBodyPrefix} '),
@@ -1044,7 +1674,7 @@ class _SofiaConsentCard extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 10),
+            SizedBox(height: compact ? 8 : 10),
             Row(
               children: [
                 Expanded(
@@ -1073,10 +1703,12 @@ class _SofiaInfoCard extends StatelessWidget {
   const _SofiaInfoCard({
     required this.copy,
     required this.onTap,
+    this.compact = false,
   });
 
   final _SofiaCopy copy;
   final VoidCallback onTap;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -1086,11 +1718,15 @@ class _SofiaInfoCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(outerRadius),
       onTap: onTap,
       child: Ink(
-        padding: const EdgeInsets.all(14),
+        padding: EdgeInsets.all(compact ? 12 : 14),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(outerRadius),
-          color: colorScheme.surfaceVariant.withValues(alpha: 0.24),
-          border: Border.all(color: colorScheme.outlineVariant),
+          color: colorScheme.surfaceVariant
+              .withValues(alpha: compact ? 0.16 : 0.24),
+          border: Border.all(
+            color: colorScheme.outlineVariant
+                .withValues(alpha: compact ? 0.68 : 1),
+          ),
         ),
         child: Row(
           children: [

@@ -41,7 +41,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   UserDashboardData? _dashboard;
   bool _loadingDashboard = false;
   String? _dashboardError;
-  bool _isTopCardsExpanded = false;
 
   @override
   void initState() {
@@ -67,7 +66,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final settingsController = ref.read(settingsControllerProvider.notifier);
     final cards =
         ref.watch(cardsAllProvider).asData?.value ?? const <CardModel>[];
-    final topCards = _topCards(cards);
     final telegramProfile = readTelegramUserProfile();
     final displayProfile = _dashboard?.profile;
     final userInitials = _resolveInitials(displayProfile, telegramProfile);
@@ -131,7 +129,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             _buildDashboardCard(
               context: context,
               l10n: l10n,
-              topCards: topCards,
               photoUrl: userPhoto,
               initials: userInitials,
               referralLink: referralLink,
@@ -349,32 +346,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
-  List<_TopCardStat> _topCards(List<CardModel> cards) {
-    final stats = ref.read(cardStatsRepositoryProvider).getAllCounts();
-    if (stats.isEmpty) {
-      return const [];
-    }
-    final byId = {for (final card in cards) card.id: card};
-    final entries = stats.entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
-    final top = <_TopCardStat>[];
-    for (final entry in entries) {
-      final card = byId[entry.key];
-      final name = card?.name ?? entry.key;
-      top.add(
-        _TopCardStat(
-          name: name,
-          count: entry.value,
-          imageUrl: card?.imageUrl ?? '',
-        ),
-      );
-      if (top.length == 3) {
-        break;
-      }
-    }
-    return top;
-  }
-
   String _resolveInitials(
     UserDashboardProfile? dashboardProfile,
     TelegramUserProfile? telegramProfile,
@@ -402,7 +373,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget _buildDashboardCard({
     required BuildContext context,
     required AppLocalizations l10n,
-    required List<_TopCardStat> topCards,
     required String photoUrl,
     required String initials,
     required String referralLink,
@@ -511,64 +481,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             _dashboardNatalBonusLine(context, freeFiveCardCredits),
             style: sectionDetailStyle,
           ),
-          const SizedBox(height: 12),
-          InkWell(
-            borderRadius: BorderRadius.circular(10),
-            onTap: () {
-              setState(() {
-                _isTopCardsExpanded = !_isTopCardsExpanded;
-              });
-            },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 2),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      l10n.settingsDashboardTopCardsTitle,
-                      style: sectionTitleStyle,
-                    ),
-                  ),
-                  SizedBox(
-                    width: 22,
-                    height: 22,
-                    child: Icon(
-                      _isTopCardsExpanded
-                          ? Icons.expand_less
-                          : Icons.expand_more,
-                      size: 22,
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          if (_isTopCardsExpanded) ...[
-            const SizedBox(height: 8),
-            if (topCards.isEmpty)
-              Text(
-                l10n.settingsDashboardTopCardsEmpty,
-                style: sectionDetailStyle,
-              )
-            else
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  for (var i = 0; i < topCards.length; i++) ...[
-                    Expanded(
-                      child: _TopCardTile(
-                        rank: i + 1,
-                        stat: topCards[i],
-                        hitsLabel: _topCardsHitsLabel(context),
-                        detailStyle: sectionDetailStyle,
-                      ),
-                    ),
-                    if (i != topCards.length - 1) const SizedBox(width: 10),
-                  ],
-                ],
-              ),
-          ],
           const SizedBox(height: 14),
           AppGhostButton(
             label: l10n.settingsDashboardShareButton,
@@ -670,17 +582,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return 'Natal chart and compatibility: $count';
   }
 
-  String _topCardsHitsLabel(BuildContext context) {
-    final code = Localizations.localeOf(context).languageCode;
-    if (code == 'ru') {
-      return 'Выпадала';
-    }
-    if (code == 'kk') {
-      return 'Түскен саны';
-    }
-    return 'Drawn';
-  }
-
   String _revokeConsentLabel(BuildContext context) {
     final code = Localizations.localeOf(context).languageCode;
     if (code == 'ru') {
@@ -737,18 +638,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 }
 
-class _TopCardStat {
-  const _TopCardStat({
-    required this.name,
-    required this.count,
-    required this.imageUrl,
-  });
-
-  final String name;
-  final int count;
-  final String imageUrl;
-}
-
 class _DashboardSectionTitle extends StatelessWidget {
   const _DashboardSectionTitle({
     required this.title,
@@ -763,83 +652,6 @@ class _DashboardSectionTitle extends StatelessWidget {
     return Text(
       title,
       style: style,
-    );
-  }
-}
-
-class _TopCardTile extends StatelessWidget {
-  const _TopCardTile({
-    required this.rank,
-    required this.stat,
-    required this.hitsLabel,
-    required this.detailStyle,
-  });
-
-  final int rank;
-  final _TopCardStat stat;
-  final String hitsLabel;
-  final TextStyle? detailStyle;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: AspectRatio(
-            aspectRatio: 0.68,
-            child: stat.imageUrl.isEmpty
-                ? Container(
-                    color: colorScheme.surfaceVariant,
-                    alignment: Alignment.center,
-                    child: Icon(
-                      Icons.style_outlined,
-                      size: 18,
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  )
-                : Image.network(
-                    stat.imageUrl,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        color: colorScheme.surfaceVariant,
-                        alignment: Alignment.center,
-                        child: Icon(
-                          Icons.style_outlined,
-                          size: 18,
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      );
-                    },
-                  ),
-          ),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          '№$rank',
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: detailStyle,
-        ),
-        Text(
-          stat.name,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: detailStyle?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-        ),
-        Text(
-          '$hitsLabel: ${stat.count}',
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: detailStyle,
-        ),
-      ],
     );
   }
 }

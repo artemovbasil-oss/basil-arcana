@@ -769,6 +769,116 @@ async function clearUserQueryHistory({ telegramUserId }) {
   };
 }
 
+async function getUserReadingStreak({ telegramUserId }) {
+  if (!telegramUserId) {
+    return {
+      currentStreakDays: 0,
+      longestStreakDays: 0,
+      activeDays: 0,
+      totalReadings: 0,
+      lastActiveAt: null
+    };
+  }
+
+  const [dailyRowsRes, totalRes] = await Promise.all([
+    getDb().query(
+      `
+      SELECT
+        (created_at AT TIME ZONE 'UTC')::date AS reading_date,
+        COUNT(*)::int AS readings_count,
+        MAX(created_at) AS last_created_at
+      FROM user_query_history
+      WHERE telegram_user_id = $1
+        AND query_type LIKE 'reading_%'
+      GROUP BY reading_date
+      ORDER BY reading_date DESC;
+      `,
+      [telegramUserId]
+    ),
+    getDb().query(
+      `
+      SELECT COUNT(*)::int AS total
+      FROM user_query_history
+      WHERE telegram_user_id = $1
+        AND query_type LIKE 'reading_%';
+      `,
+      [telegramUserId]
+    )
+  ]);
+
+  const rows = dailyRowsRes.rows || [];
+  const totalReadings = Number(totalRes.rows[0]?.total || 0);
+  if (rows.length === 0) {
+    return {
+      currentStreakDays: 0,
+      longestStreakDays: 0,
+      activeDays: 0,
+      totalReadings,
+      lastActiveAt: null
+    };
+  }
+
+  const dayValues = rows
+    .map((row) => {
+      const raw = row.reading_date;
+      if (!raw) {
+        return null;
+      }
+      const isoDate = String(raw).slice(0, 10);
+      const date = new Date(`${isoDate}T00:00:00.000Z`);
+      return Number.isFinite(date.getTime()) ? date : null;
+    })
+    .filter(Boolean);
+
+  const activeDays = dayValues.length;
+  const today = new Date();
+  const todayUtc = new Date(
+    Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate())
+  );
+  const latestDay = dayValues[0];
+  const dayMs = 24 * 60 * 60 * 1000;
+  const diffFromToday = Math.floor((todayUtc - latestDay) / dayMs);
+
+  let currentStreakDays = 0;
+  if (diffFromToday === 0) {
+    currentStreakDays = 1;
+    for (let i = 1; i < dayValues.length; i += 1) {
+      const expected = dayValues[i - 1].getTime() - dayMs;
+      if (dayValues[i].getTime() !== expected) {
+        break;
+      }
+      currentStreakDays += 1;
+    }
+  }
+
+  let longestStreakDays = 1;
+  let running = 1;
+  for (let i = 1; i < dayValues.length; i += 1) {
+    const expected = dayValues[i - 1].getTime() - dayMs;
+    if (dayValues[i].getTime() === expected) {
+      running += 1;
+      if (running > longestStreakDays) {
+        longestStreakDays = running;
+      }
+      continue;
+    }
+    running = 1;
+  }
+
+  const lastActiveAtRaw = rows[0]?.last_created_at;
+  const lastActiveAt = lastActiveAtRaw
+    ? new Date(lastActiveAtRaw).toISOString()
+    : null;
+
+  return {
+    currentStreakDays,
+    longestStreakDays,
+    activeDays,
+    totalReadings,
+    lastActiveAt
+  };
+}
+
 module.exports = {
   initDb,
   hasDb,
@@ -782,5 +892,6 @@ module.exports = {
   getUserDashboard,
   logUserQuery,
   listRecentUserQueries,
-  clearUserQueryHistory
+  clearUserQueryHistory,
+  getUserReadingStreak
 };

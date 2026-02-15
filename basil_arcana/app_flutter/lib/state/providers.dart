@@ -8,6 +8,7 @@ import '../data/repositories/card_stats_repository.dart';
 import '../data/repositories/cards_repository.dart';
 import '../data/repositories/data_repository.dart';
 import '../data/repositories/energy_topup_repository.dart';
+import '../data/repositories/home_insights_repository.dart';
 import '../data/repositories/query_history_repository.dart';
 import '../data/repositories/spreads_repository.dart';
 import '../data/repositories/readings_repository.dart';
@@ -51,6 +52,10 @@ final sofiaConsentRepositoryProvider = Provider<SofiaConsentRepository>((ref) {
 
 final queryHistoryRepositoryProvider = Provider<QueryHistoryRepository>((ref) {
   return QueryHistoryRepository();
+});
+
+final homeInsightsRepositoryProvider = Provider<HomeInsightsRepository>((ref) {
+  return HomeInsightsRepository();
 });
 
 final userDashboardRepositoryProvider =

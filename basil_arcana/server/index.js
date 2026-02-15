@@ -10,7 +10,8 @@ const {
   buildPromptMessages,
   buildDetailsPrompt,
   buildNatalChartPrompt,
-  buildCompatibilityPrompt
+  buildCompatibilityPrompt,
+  buildDailyCardPrompt
 } = require('./src/prompt');
 const {
   createResponse,
@@ -49,7 +50,8 @@ const {
   getUserDashboard,
   logUserQuery,
   listRecentUserQueries,
-  clearUserQueryHistory
+  clearUserQueryHistory,
+  getUserReadingStreak
 } = require('./src/db');
 
 const app = express();
@@ -728,6 +730,35 @@ app.get('/api/user/dashboard', telegramAuthMiddleware, async (req, res) => {
       code: encodeReferralCode(telegramUserId),
       link: buildReferralLink(telegramUserId)
     },
+    requestId: req.requestId
+  });
+});
+
+app.get('/api/user/streak', telegramAuthMiddleware, async (req, res) => {
+  if (!hasDb()) {
+    return res.status(503).json({
+      error: 'storage_unavailable',
+      reason: 'database_not_configured',
+      requestId: req.requestId
+    });
+  }
+  const telegramUserId =
+    Number.isFinite(Number(req.telegram?.userId)) && Number(req.telegram?.userId) > 0
+      ? Number(req.telegram.userId)
+      : parseUserIdFromInitData(readTelegramInitData(req).initData);
+  if (!telegramUserId) {
+    return res.status(401).json({
+      error: 'unauthorized',
+      reason: 'telegram_user_missing',
+      requestId: req.requestId
+    });
+  }
+  await upsertTelegramUserFromRequest(req);
+  await tryClaimReferralForRequest(req);
+  const data = await getUserReadingStreak({ telegramUserId });
+  return res.json({
+    ok: true,
+    ...data,
     requestId: req.requestId
   });
 });
@@ -1425,6 +1456,136 @@ app.post('/api/reading/details', telegramAuthMiddleware, async (req, res) => {
         requestId: req.requestId,
         upstream
       });
+  }
+});
+
+app.post('/api/home/daily-card', telegramAuthMiddleware, async (req, res) => {
+  if (!OPENAI_API_KEY) {
+    return res.status(503).json({
+      error: 'server_misconfig',
+      reason: 'missing_openai_api_key',
+      requestId: req.requestId
+    });
+  }
+
+  const locale = normalizeLocale(req.body?.locale);
+  const card = req.body?.card;
+  if (!card || typeof card !== 'object') {
+    return res.status(400).json({
+      error: 'invalid_card_payload',
+      requestId: req.requestId
+    });
+  }
+  const cardName = typeof card.name === 'string' ? card.name.trim() : '';
+  if (!cardName) {
+    return res.status(400).json({
+      error: 'invalid_card_name',
+      requestId: req.requestId
+    });
+  }
+
+  const telegramUserId =
+    Number.isFinite(Number(req.telegram?.userId)) && Number(req.telegram?.userId) > 0
+      ? Number(req.telegram.userId)
+      : parseUserIdFromInitData(readTelegramInitData(req).initData);
+
+  const startTime = Date.now();
+  try {
+    await upsertTelegramUserFromRequest(req, locale);
+    await tryClaimReferralForRequest(req);
+    const messages = buildDailyCardPrompt({
+      locale,
+      card: {
+        id: typeof card.id === 'string' ? card.id.trim() : '',
+        name: cardName,
+        keywords: Array.isArray(card.keywords)
+          ? card.keywords
+              .map((entry) => String(entry || '').trim())
+              .filter(Boolean)
+              .slice(0, 8)
+          : [],
+        meaning: {
+          general:
+            typeof card.meaning?.general === 'string'
+              ? card.meaning.general.trim()
+              : '',
+          light:
+            typeof card.meaning?.light === 'string'
+              ? card.meaning.light.trim()
+              : '',
+          shadow:
+            typeof card.meaning?.shadow === 'string'
+              ? card.meaning.shadow.trim()
+              : '',
+          advice:
+            typeof card.meaning?.advice === 'string'
+              ? card.meaning.advice.trim()
+              : ''
+        }
+      },
+      profile: {
+        userId: telegramUserId || null
+      }
+    });
+    const result = await createTextResponse(messages, {
+      requestId: req.requestId,
+      timeoutMs: 28000,
+    });
+    const interpretation = result.text.trim();
+    if (!interpretation) {
+      throw new OpenAIRequestError('Empty OpenAI response', {
+        status: result.meta?.status,
+      });
+    }
+    await logHistoryFromRequest({
+      req,
+      queryType: 'reading_daily_card',
+      question: `Daily card: ${cardName}`,
+      locale
+    });
+    const durationMs = Date.now() - startTime;
+    console.log(
+      JSON.stringify({
+        event: 'daily_card_request',
+        requestId: req.requestId,
+        status: 200,
+        duration_ms: durationMs,
+      })
+    );
+    return res.json({
+      ok: true,
+      interpretation: appendSofiaPromo(interpretation, locale),
+      requestId: req.requestId
+    });
+  } catch (err) {
+    const durationMs = Date.now() - startTime;
+    if (err?.name === 'AbortError') {
+      return res.status(504).json({
+        error: 'timeout',
+        requestId: req.requestId,
+      });
+    }
+    const upstream = {
+      status: err instanceof OpenAIRequestError ? err.status : null,
+      code: err instanceof OpenAIRequestError ? err.errorCode : null,
+      type: err instanceof OpenAIRequestError ? err.errorType : err.name,
+      message: err.message ? err.message.slice(0, 300) : null
+    };
+    console.error(
+      JSON.stringify({
+        event: 'daily_card_error',
+        requestId: req.requestId,
+        duration_ms: durationMs,
+        status: upstream.status,
+        errorCode: upstream.code,
+        errorType: upstream.type
+      })
+    );
+    return res.status(502).json({
+      error: 'upstream_failed',
+      requestId: req.requestId,
+      upstream
+    });
   }
 });
 
