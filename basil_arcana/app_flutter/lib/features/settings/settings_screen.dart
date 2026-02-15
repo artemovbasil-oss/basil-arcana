@@ -529,12 +529,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       style: sectionTitleStyle,
                     ),
                   ),
-                  Icon(
-                    _isTopCardsExpanded
-                        ? Icons.expand_less_rounded
-                        : Icons.expand_more_rounded,
-                    size: 20,
-                    color: colorScheme.onSurface.withValues(alpha: 0.78),
+                  SizedBox(
+                    width: 22,
+                    height: 22,
+                    child: Icon(
+                      _isTopCardsExpanded
+                          ? Icons.expand_less
+                          : Icons.expand_more,
+                      size: 22,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),
