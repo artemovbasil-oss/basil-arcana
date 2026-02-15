@@ -734,18 +734,43 @@
         });
       }
 
+      function lenormandOrder(cardKey) {
+        const match = cardKey.match(/^lenormand_(\d+)_/);
+        return match ? Number(match[1]) : 999;
+      }
+
+      async function fetchCardsPayload(lang) {
+        const sources = [
+          `https://basilarcana-assets.b-cdn.net/data/cards_${lang}.json`,
+          `https://cdn.basilarcana.com/data/cards_${lang}.json`,
+        ];
+
+        let lastError = null;
+        for (const source of sources) {
+          try {
+            const res = await fetch(source, { cache: "no-store" });
+            if (!res.ok) {
+              throw new Error(`Failed with status ${res.status} from ${source}`);
+            }
+            return await res.json();
+          } catch (err) {
+            lastError = err;
+          }
+        }
+        throw lastError || new Error("Failed to load cards payload");
+      }
+
       async function loadCards(lang) {
         const langPack = uiCopy[lang] || uiCopy.ru;
         statusNode.textContent = langPack.loading;
         try {
-          const res = await fetch(`https://cdn.basilarcana.com/data/cards_${lang}.json`, {
-            cache: "no-store",
-          });
-          if (!res.ok) {
-            throw new Error(`Failed with status ${res.status}`);
+          const payload = await fetchCardsPayload(lang);
+          cards = Object.entries(payload)
+            .filter(([key, card]) => key.startsWith("lenormand_") || card.deck === "lenormand")
+            .sort((a, b) => lenormandOrder(a[0]) - lenormandOrder(b[0]));
+          if (!cards.length) {
+            throw new Error("Lenormand cards are missing in payload");
           }
-          const payload = await res.json();
-          cards = Object.entries(payload).filter(([key, card]) => key.startsWith("lenormand_") || card.deck === "lenormand");
           renderCards();
           statusNode.textContent = "";
         } catch (err) {
