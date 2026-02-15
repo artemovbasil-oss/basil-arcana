@@ -353,13 +353,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     if (stats.isEmpty) {
       return const [];
     }
-    final byId = {for (final card in cards) card.id: card.name};
+    final byId = {for (final card in cards) card.id: card};
     final entries = stats.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
     final top = <_TopCardStat>[];
     for (final entry in entries) {
-      final name = byId[entry.key] ?? entry.key;
-      top.add(_TopCardStat(name: name, count: entry.value));
+      final card = byId[entry.key];
+      final name = card?.name ?? entry.key;
+      top.add(
+        _TopCardStat(
+          name: name,
+          count: entry.value,
+          imageUrl: card?.imageUrl ?? '',
+        ),
+      );
       if (top.length == 3) {
         break;
       }
@@ -401,6 +408,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     required EnergyState energyState,
   }) {
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final sectionTitleStyle = textTheme.titleSmall?.copyWith(
+      fontWeight: FontWeight.w700,
+      color: colorScheme.onSurface.withOpacity(0.92),
+    );
+    final sectionValueStyle = textTheme.bodyLarge?.copyWith(
+      fontWeight: FontWeight.w600,
+      color: colorScheme.onSurface,
+    );
+    final sectionDetailStyle = textTheme.bodyMedium?.copyWith(
+      fontWeight: FontWeight.w500,
+      color: colorScheme.onSurfaceVariant,
+    );
     final recoveryLabel = energyState.isUnlimited
         ? l10n.energyUnlimitedActivated
         : energyState.clampedValue >= 100
@@ -440,65 +460,88 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
             ],
           ),
-          const SizedBox(height: 12),
-          Text(
-            l10n.settingsDashboardEnergy(
-              energyState.isUnlimited ? '∞' : '${energyState.percent}%',
-            ),
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            recoveryLabel,
-            style: AppTextStyles.caption(context),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            l10n.settingsDashboardFreePremium(freeFiveCardCredits),
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            l10n.settingsDashboardInvited(_dashboard?.totalInvited ?? 0),
-            style: AppTextStyles.caption(context),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            l10n.settingsDashboardTopCardsTitle,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
+          const SizedBox(height: 14),
+          _DashboardSectionTitle(
+            icon: Icons.bolt_outlined,
+            title: _dashboardEnergyTitle(context),
+            style: sectionTitleStyle,
           ),
           const SizedBox(height: 6),
-          if (topCards.isEmpty)
-            Text(l10n.settingsDashboardTopCardsEmpty,
-                style: AppTextStyles.caption(context))
-          else
-            for (var i = 0; i < topCards.length; i++)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 4),
-                child: Text(
-                  '${i + 1}. ${topCards[i].name} — ${topCards[i].count}',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ),
-          const SizedBox(height: 12),
           Text(
-            l10n.settingsDashboardServicesTitle,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
+            energyState.isUnlimited ? '∞' : '${energyState.percent}%',
+            style: sectionValueStyle,
+          ),
+          const SizedBox(height: 2),
+          Text(
+            recoveryLabel,
+            style: sectionDetailStyle,
+          ),
+          const SizedBox(height: 12),
+          _DashboardSectionTitle(
+            icon: Icons.workspace_premium_outlined,
+            title: _dashboardPaidSubscriptionsTitle(context),
+            style: sectionTitleStyle,
           ),
           const SizedBox(height: 6),
           if ((_dashboard?.services ?? const <UserDashboardService>[]).isEmpty)
-            Text(l10n.settingsDashboardServicesEmpty,
-                style: AppTextStyles.caption(context))
+            Text(
+              l10n.settingsDashboardServicesEmpty,
+              style: sectionDetailStyle,
+            )
           else
             for (final service in _dashboard!.services)
-              Text(
-                _serviceLabel(context, service),
-                style: Theme.of(context).textTheme.bodySmall,
+              Padding(
+                padding: const EdgeInsets.only(bottom: 2),
+                child: Text(
+                  _serviceLabel(context, service),
+                  style: sectionDetailStyle,
+                ),
               ),
+          const SizedBox(height: 12),
+          _DashboardSectionTitle(
+            icon: Icons.card_giftcard_outlined,
+            title: _dashboardReferralBonusesTitle(context),
+            style: sectionTitleStyle,
+          ),
+          const SizedBox(height: 6),
+          Text(
+            _dashboardBonusLine(context, freeFiveCardCredits),
+            style: sectionValueStyle,
+          ),
+          const SizedBox(height: 2),
+          Text(
+            _dashboardInvitedLine(context, _dashboard?.totalInvited ?? 0),
+            style: sectionDetailStyle,
+          ),
+          const SizedBox(height: 12),
+          _DashboardSectionTitle(
+            icon: Icons.stars_rounded,
+            title: l10n.settingsDashboardTopCardsTitle,
+            style: sectionTitleStyle,
+          ),
+          const SizedBox(height: 8),
+          if (topCards.isEmpty)
+            Text(
+              l10n.settingsDashboardTopCardsEmpty,
+              style: sectionDetailStyle,
+            )
+          else
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (var i = 0; i < topCards.length; i++) ...[
+                  Expanded(
+                    child: _TopCardTile(
+                      rank: i + 1,
+                      stat: topCards[i],
+                      hitsLabel: _topCardsHitsLabel(context),
+                      detailStyle: sectionDetailStyle,
+                    ),
+                  ),
+                  if (i != topCards.length - 1) const SizedBox(width: 10),
+                ],
+              ],
+            ),
           const SizedBox(height: 14),
           AppGhostButton(
             label: l10n.settingsDashboardShareButton,
@@ -543,6 +586,72 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       );
     }
     return service.id;
+  }
+
+  String _dashboardEnergyTitle(BuildContext context) {
+    final code = Localizations.localeOf(context).languageCode;
+    if (code == 'ru') {
+      return 'Энергия сейчас';
+    }
+    if (code == 'kk') {
+      return 'Қазіргі энергия';
+    }
+    return 'Current energy';
+  }
+
+  String _dashboardPaidSubscriptionsTitle(BuildContext context) {
+    final code = Localizations.localeOf(context).languageCode;
+    if (code == 'ru') {
+      return 'Платные подписки';
+    }
+    if (code == 'kk') {
+      return 'Ақылы жазылымдар';
+    }
+    return 'Paid subscriptions';
+  }
+
+  String _dashboardReferralBonusesTitle(BuildContext context) {
+    final code = Localizations.localeOf(context).languageCode;
+    if (code == 'ru') {
+      return 'Бонусы за приглашения';
+    }
+    if (code == 'kk') {
+      return 'Шақыру үшін бонустар';
+    }
+    return 'Referral bonuses';
+  }
+
+  String _dashboardBonusLine(BuildContext context, int count) {
+    final code = Localizations.localeOf(context).languageCode;
+    if (code == 'ru') {
+      return 'Бонус: $count';
+    }
+    if (code == 'kk') {
+      return 'Бонус: $count';
+    }
+    return 'Bonus: $count';
+  }
+
+  String _dashboardInvitedLine(BuildContext context, int count) {
+    final code = Localizations.localeOf(context).languageCode;
+    if (code == 'ru') {
+      return 'Приглашенные пользователи: $count';
+    }
+    if (code == 'kk') {
+      return 'Шақырылған пайдаланушылар: $count';
+    }
+    return 'Invited users: $count';
+  }
+
+  String _topCardsHitsLabel(BuildContext context) {
+    final code = Localizations.localeOf(context).languageCode;
+    if (code == 'ru') {
+      return 'Выпадала';
+    }
+    if (code == 'kk') {
+      return 'Түскен саны';
+    }
+    return 'Drawn';
   }
 
   String _revokeConsentLabel(BuildContext context) {
@@ -605,10 +714,118 @@ class _TopCardStat {
   const _TopCardStat({
     required this.name,
     required this.count,
+    required this.imageUrl,
   });
 
   final String name;
   final int count;
+  final String imageUrl;
+}
+
+class _DashboardSectionTitle extends StatelessWidget {
+  const _DashboardSectionTitle({
+    required this.icon,
+    required this.title,
+    this.style,
+  });
+
+  final IconData icon;
+  final String title;
+  final TextStyle? style;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme.onSurfaceVariant;
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: color.withOpacity(0.85)),
+        const SizedBox(width: 6),
+        Expanded(
+          child: Text(
+            title,
+            style: style,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _TopCardTile extends StatelessWidget {
+  const _TopCardTile({
+    required this.rank,
+    required this.stat,
+    required this.hitsLabel,
+    required this.detailStyle,
+  });
+
+  final int rank;
+  final _TopCardStat stat;
+  final String hitsLabel;
+  final TextStyle? detailStyle;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: AspectRatio(
+            aspectRatio: 0.68,
+            child: stat.imageUrl.isEmpty
+                ? Container(
+                    color: colorScheme.surfaceVariant,
+                    alignment: Alignment.center,
+                    child: Icon(
+                      Icons.style_outlined,
+                      size: 18,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  )
+                : Image.network(
+                    stat.imageUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        color: colorScheme.surfaceVariant,
+                        alignment: Alignment.center,
+                        child: Icon(
+                          Icons.style_outlined,
+                          size: 18,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      );
+                    },
+                  ),
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          '№$rank',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: detailStyle,
+        ),
+        Text(
+          stat.name,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: detailStyle?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
+        ),
+        Text(
+          '$hitsLabel: ${stat.count}',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: detailStyle,
+        ),
+      ],
+    );
+  }
 }
 
 class _SettingsAvatar extends StatelessWidget {
