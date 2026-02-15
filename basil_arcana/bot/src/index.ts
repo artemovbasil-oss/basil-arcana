@@ -6,6 +6,7 @@ import {
   getUserLocale,
   getUserSubscription,
   initDb,
+  insertFunnelEvent,
   insertPayment,
   listActiveSubscriptions,
   listRecentUserQueriesForUser,
@@ -105,6 +106,10 @@ const STRINGS: Record<
     codeInstruction: string;
     sofiaNotifyTitle: string;
     sofiaContactCard: string;
+    contactSofiaButton: string;
+    contactSofiaDoneButton: string;
+    contactSofiaDoneAck: string;
+    sofiaMessageTemplate: string;
     missingSofiaChatWarn: string;
     unknownPaymentPlan: string;
     subscriptionsTitle: string;
@@ -171,6 +176,11 @@ const STRINGS: Record<
     sofiaNotifyTitle: "🧾 Новая покупка в Basil’s Arcana",
     sofiaContactCard:
       "👩‍💼 Контакт Софии\n• София Нокс — таролог/астролог\n• Telegram: @SofiaKnoxx\n• Написать: https://t.me/SofiaKnoxx",
+    contactSofiaButton: "✉️ Написать Софии с кодом",
+    contactSofiaDoneButton: "✅ Я отправил(а) код Софии",
+    contactSofiaDoneAck: "Отлично, София свяжется с тобой после проверки кода.",
+    sofiaMessageTemplate:
+      "Здравствуйте! Я оплатил(а) консультацию в Basil’s Arcana. Код доступа: {code}",
     missingSofiaChatWarn:
       "Оплата прошла, но уведомление Софии не отправлено автоматически. Напиши ей и отправь код вручную: https://t.me/SofiaKnoxx",
     unknownPaymentPlan: "Не удалось определить тариф оплаты.",
@@ -238,6 +248,11 @@ const STRINGS: Record<
     sofiaNotifyTitle: "🧾 New purchase in Basil’s Arcana",
     sofiaContactCard:
       "👩‍💼 Sofia contact\n• Sofia Knox — tarot reader/astrologer\n• Telegram: @SofiaKnoxx\n• Message: https://t.me/SofiaKnoxx",
+    contactSofiaButton: "✉️ Message Sofia with code",
+    contactSofiaDoneButton: "✅ I sent Sofia the code",
+    contactSofiaDoneAck: "Great, Sofia will contact you after code verification.",
+    sofiaMessageTemplate:
+      "Hi! I paid for a consultation in Basil’s Arcana. My access code is {code}",
     missingSofiaChatWarn:
       "Payment is complete, but Sofia was not notified automatically. Please message Sofia and send the code manually: https://t.me/SofiaKnoxx",
     unknownPaymentPlan: "Could not determine payment plan.",
@@ -304,6 +319,11 @@ const STRINGS: Record<
     sofiaNotifyTitle: "🧾 Basil’s Arcana ішіндегі жаңа сатып алу",
     sofiaContactCard:
       "👩‍💼 София байланысы\n• София Нокс — таролог/астролог\n• Telegram: @SofiaKnoxx\n• Жазу: https://t.me/SofiaKnoxx",
+    contactSofiaButton: "✉️ Кодпен Софияға жазу",
+    contactSofiaDoneButton: "✅ Кодты Софияға жібердім",
+    contactSofiaDoneAck: "Тамаша, код тексерілгеннен кейін София сізбен байланысады.",
+    sofiaMessageTemplate:
+      "Сәлеметсіз бе! Basil’s Arcana ішінде консультация төледім. Қолжетімділік кодым: {code}",
     missingSofiaChatWarn:
       "Төлем өтті, бірақ Софияға автоматты хабарлама жіберілмеді. Кодты Софияға қолмен жіберіңіз: https://t.me/SofiaKnoxx",
     unknownPaymentPlan: "Төлем тарифін анықтау мүмкін болмады.",
@@ -503,6 +523,52 @@ function buildBackKeyboard(locale: SupportedLocale): InlineKeyboard {
   return new InlineKeyboard().text(STRINGS[locale].menuButtons.back, "menu:home");
 }
 
+function buildSofiaDeepLink(message: string): string {
+  const encoded = encodeURIComponent(message);
+  return `${SOFIA_PROFILE_URL}?text=${encoded}`;
+}
+
+function buildSofiaContactKeyboard(locale: SupportedLocale, code: string): InlineKeyboard {
+  const strings = STRINGS[locale];
+  const message = strings.sofiaMessageTemplate.replace("{code}", code);
+  return new InlineKeyboard()
+    .url(strings.contactSofiaButton, buildSofiaDeepLink(message))
+    .row()
+    .text(strings.contactSofiaDoneButton, "sofia:contacted");
+}
+
+async function trackFunnelEvent(
+  ctx: Context,
+  eventName:
+    | "start"
+    | "language_selected"
+    | "menu_buy_click"
+    | "plan_selected"
+    | "invoice_sent"
+    | "precheckout_ok"
+    | "payment_success"
+    | "show_plans"
+    | "sofia_contact_clicked",
+  {
+    planId = null,
+    source = null,
+  }: { planId?: PlanId | null; source?: string | null } = {},
+): Promise<void> {
+  const userId = ctx.from?.id ?? null;
+  const locale = toDbLocale(getLocale(ctx));
+  try {
+    await insertFunnelEvent({
+      telegramUserId: userId,
+      eventName,
+      locale,
+      planId,
+      source,
+    });
+  } catch (error) {
+    console.error("Failed to track funnel event", error);
+  }
+}
+
 async function sendLanguagePicker(ctx: Context): Promise<void> {
   await ctx.reply(STRINGS.ru.languagePrompt, {
     reply_markup: buildLanguageKeyboard(),
@@ -618,6 +684,7 @@ async function startPaymentFlow(ctx: Context, planId: PlanId): Promise<void> {
     TELEGRAM_STARS_CURRENCY,
     [{ label: localizedPlan.notifyLabel, amount: plan.stars }],
   );
+  await trackFunnelEvent(ctx, "invoice_sent", { planId });
 }
 
 async function notifySofia(
@@ -742,7 +809,11 @@ async function handleSuccessfulPayment(ctx: Context): Promise<void> {
 
   await ctx.reply(
     `${strings.paymentSuccess}\n${strings.activationUntil}: ${expiresText}\n\n${instruction}`,
+    {
+      reply_markup: buildSofiaContactKeyboard(locale, code),
+    },
   );
+  await trackFunnelEvent(ctx, "payment_success", { planId });
 
   const notified = await notifySofia(ctx, planId, code, expiresAt);
   if (!notified) {
@@ -752,7 +823,10 @@ async function handleSuccessfulPayment(ctx: Context): Promise<void> {
 
 async function sendPlans(
   ctx: Context,
-  { ignoreDebounce = false }: { ignoreDebounce?: boolean } = {},
+  {
+    ignoreDebounce = false,
+    source = null,
+  }: { ignoreDebounce?: boolean; source?: string | null } = {},
 ): Promise<void> {
   const userId = ctx.from?.id;
   if (!userId) {
@@ -762,6 +836,7 @@ async function sendPlans(
     return;
   }
   await sendProfessionalReadingOffer(ctx);
+  await trackFunnelEvent(ctx, "show_plans", { source });
 }
 
 function parseStartPayload(ctx: Context): string | null {
@@ -927,7 +1002,19 @@ async function main(): Promise<void> {
     const state = getUserState(userId);
     const payload = parseStartPayload(ctx);
     state.pendingStartPayload = payload;
-    await sendLanguagePicker(ctx);
+    await trackFunnelEvent(ctx, "start", { source: payload ?? "direct" });
+
+    if (!state.locale) {
+      await sendLanguagePicker(ctx);
+      return;
+    }
+
+    state.pendingStartPayload = null;
+    if (payload === "plans") {
+      await sendPlans(ctx, { ignoreDebounce: true, source: "start_payload_plans" });
+      return;
+    }
+    await sendMainMenu(ctx);
   });
 
   bot.command("help", async (ctx) => {
@@ -1099,10 +1186,11 @@ async function main(): Promise<void> {
       state.lastName,
       toDbLocale(state.locale),
     );
+    await trackFunnelEvent(ctx, "language_selected");
     const pending = state.pendingStartPayload;
     state.pendingStartPayload = null;
     if (pending === "plans") {
-      await sendPlans(ctx, { ignoreDebounce: true });
+      await sendPlans(ctx, { ignoreDebounce: true, source: "lang_after_start_payload_plans" });
       return;
     }
     await sendMainMenu(ctx);
@@ -1115,13 +1203,14 @@ async function main(): Promise<void> {
     if (action !== "professional_reading" && action !== "show_plans") {
       return;
     }
-    await sendPlans(ctx);
+    await sendPlans(ctx, { source: `web_app_data:${action}` });
   });
 
   bot.callbackQuery("menu:buy", async (ctx) => {
     await rememberUserProfile(ctx);
     await ctx.answerCallbackQuery();
-    await sendPlans(ctx, { ignoreDebounce: true });
+    await trackFunnelEvent(ctx, "menu_buy_click", { source: "menu" });
+    await sendPlans(ctx, { ignoreDebounce: true, source: "menu_buy" });
   });
 
   bot.callbackQuery("menu:about", async (ctx) => {
@@ -1142,6 +1231,16 @@ async function main(): Promise<void> {
     await sendMainMenu(ctx);
   });
 
+  bot.callbackQuery("sofia:contacted", async (ctx) => {
+    await rememberUserProfile(ctx);
+    await ctx.answerCallbackQuery();
+    const locale = getLocale(ctx);
+    await trackFunnelEvent(ctx, "sofia_contact_clicked");
+    await ctx.reply(STRINGS[locale].contactSofiaDoneAck, {
+      reply_markup: buildBackKeyboard(locale),
+    });
+  });
+
   bot.callbackQuery(/^plan:(single|week|month|year)$/, async (ctx) => {
     await rememberUserProfile(ctx);
     await ctx.answerCallbackQuery();
@@ -1157,6 +1256,7 @@ async function main(): Promise<void> {
 
     const state = getUserState(userId);
     state.selectedPlan = planId;
+    await trackFunnelEvent(ctx, "plan_selected", { planId, source: "plans_keyboard" });
     await startPaymentFlow(ctx, planId);
   });
 
@@ -1188,6 +1288,7 @@ async function main(): Promise<void> {
     }
 
     await ctx.answerPreCheckoutQuery(true);
+    await trackFunnelEvent(ctx, "precheckout_ok", { planId });
   });
 
   bot.on("message:successful_payment", async (ctx) => {

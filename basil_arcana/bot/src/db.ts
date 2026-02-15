@@ -39,6 +39,17 @@ export interface BroadcastUserRow {
   locale: DbLocale | null;
 }
 
+export type FunnelEventName =
+  | "start"
+  | "language_selected"
+  | "menu_buy_click"
+  | "plan_selected"
+  | "invoice_sent"
+  | "precheckout_ok"
+  | "payment_success"
+  | "show_plans"
+  | "sofia_contact_clicked";
+
 let pool: Pool | null = null;
 
 function requirePool(): Pool {
@@ -137,6 +148,25 @@ export async function ensureSchema(): Promise<void> {
 
   await db.query(
     "CREATE INDEX IF NOT EXISTS idx_query_history_user_created ON user_query_history (telegram_user_id, created_at DESC);",
+  );
+
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS bot_funnel_events (
+      id BIGSERIAL PRIMARY KEY,
+      telegram_user_id BIGINT REFERENCES users(telegram_user_id) ON DELETE CASCADE,
+      event_name TEXT NOT NULL,
+      locale TEXT,
+      plan_id TEXT,
+      source TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+
+  await db.query(
+    "CREATE INDEX IF NOT EXISTS idx_bot_funnel_events_user_created ON bot_funnel_events (telegram_user_id, created_at DESC);",
+  );
+  await db.query(
+    "CREATE INDEX IF NOT EXISTS idx_bot_funnel_events_event_created ON bot_funnel_events (event_name, created_at DESC);",
   );
 }
 
@@ -340,19 +370,15 @@ export async function completeConsultation(
 
     if (sub.unspentSingleReadings > 0) {
       const nextSingle = sub.unspentSingleReadings - 1;
-      const nextEnds = sub.subscriptionEndsAt
-        ? Math.max(0, sub.subscriptionEndsAt - 24 * 60 * 60 * 1000)
-        : null;
       await client.query(
         `
         UPDATE subscriptions
         SET
           unspent_single_readings = $2,
-          subscription_ends_at = $3,
           updated_at = NOW()
         WHERE telegram_user_id = $1;
         `,
-        [telegramUserId, nextSingle, nextEnds ? new Date(nextEnds) : null],
+        [telegramUserId, nextSingle],
       );
       await client.query("COMMIT");
       return "single";
@@ -421,6 +447,35 @@ export async function listUsersForBroadcast(): Promise<BroadcastUserRow[]> {
     telegramUserId: Number(row.telegram_user_id),
     locale: (row.locale as DbLocale | null) ?? null,
   }));
+}
+
+export async function insertFunnelEvent(input: {
+  telegramUserId: number | null;
+  eventName: FunnelEventName;
+  locale?: DbLocale | null;
+  planId?: DbPlanId | null;
+  source?: string | null;
+}): Promise<void> {
+  const db = requirePool();
+  await db.query(
+    `
+    INSERT INTO bot_funnel_events (
+      telegram_user_id,
+      event_name,
+      locale,
+      plan_id,
+      source
+    )
+    VALUES ($1, $2, $3, $4, $5);
+    `,
+    [
+      input.telegramUserId,
+      input.eventName,
+      input.locale ?? null,
+      input.planId ?? null,
+      input.source ?? null,
+    ],
+  );
 }
 
 async function getSubscriptionForUpdate(

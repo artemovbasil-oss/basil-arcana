@@ -12,6 +12,7 @@ exports.listActiveSubscriptions = listActiveSubscriptions;
 exports.completeConsultation = completeConsultation;
 exports.listRecentUserQueriesForUser = listRecentUserQueriesForUser;
 exports.listUsersForBroadcast = listUsersForBroadcast;
+exports.insertFunnelEvent = insertFunnelEvent;
 const pg_1 = require("pg");
 let pool = null;
 function requirePool() {
@@ -97,6 +98,19 @@ async function ensureSchema() {
     );
   `);
     await db.query("CREATE INDEX IF NOT EXISTS idx_query_history_user_created ON user_query_history (telegram_user_id, created_at DESC);");
+    await db.query(`
+    CREATE TABLE IF NOT EXISTS bot_funnel_events (
+      id BIGSERIAL PRIMARY KEY,
+      telegram_user_id BIGINT REFERENCES users(telegram_user_id) ON DELETE CASCADE,
+      event_name TEXT NOT NULL,
+      locale TEXT,
+      plan_id TEXT,
+      source TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+    await db.query("CREATE INDEX IF NOT EXISTS idx_bot_funnel_events_user_created ON bot_funnel_events (telegram_user_id, created_at DESC);");
+    await db.query("CREATE INDEX IF NOT EXISTS idx_bot_funnel_events_event_created ON bot_funnel_events (event_name, created_at DESC);");
 }
 async function upsertUserProfile(telegramUserId, username, firstName, lastName, locale) {
     const db = requirePool();
@@ -250,17 +264,13 @@ async function completeConsultation(telegramUserId) {
         }
         if (sub.unspentSingleReadings > 0) {
             const nextSingle = sub.unspentSingleReadings - 1;
-            const nextEnds = sub.subscriptionEndsAt
-                ? Math.max(0, sub.subscriptionEndsAt - 24 * 60 * 60 * 1000)
-                : null;
             await client.query(`
         UPDATE subscriptions
         SET
           unspent_single_readings = $2,
-          subscription_ends_at = $3,
           updated_at = NOW()
         WHERE telegram_user_id = $1;
-        `, [telegramUserId, nextSingle, nextEnds ? new Date(nextEnds) : null]);
+        `, [telegramUserId, nextSingle]);
             await client.query("COMMIT");
             return "single";
         }
@@ -315,6 +325,25 @@ async function listUsersForBroadcast() {
         telegramUserId: Number(row.telegram_user_id),
         locale: row.locale ?? null,
     }));
+}
+async function insertFunnelEvent(input) {
+    const db = requirePool();
+    await db.query(`
+    INSERT INTO bot_funnel_events (
+      telegram_user_id,
+      event_name,
+      locale,
+      plan_id,
+      source
+    )
+    VALUES ($1, $2, $3, $4, $5);
+    `, [
+        input.telegramUserId,
+        input.eventName,
+        input.locale ?? null,
+        input.planId ?? null,
+        input.source ?? null,
+    ]);
 }
 async function getSubscriptionForUpdate(client, telegramUserId) {
     const { rows } = await client.query(`

@@ -9,7 +9,9 @@ Telegram bot built with Node.js + TypeScript and grammY. It provides a localized
 - Telegram Stars payments for:
   - One detailed reading
   - Weekly, monthly, yearly subscription
+- Funnel tracking events in Postgres (`start`, plan selection, invoice, payment success, etc.)
 - After successful payment user gets a unique 6-digit code and instructions to send it to Sofia
+- After payment bot shows a direct "message Sofia with code" button (pre-filled text)
 - Bot sends Sofia purchase notification with user details, plan and validity date
 - Active subscription durations are summed on repeated purchases
 - If user has active subscriptions, main menu shows a dedicated "My active subscriptions" button
@@ -57,3 +59,5 @@ On startup, bot creates the required Postgres tables automatically:
 - `users`
 - `subscriptions`
 - `payments`
+- `user_query_history`
+- `bot_funnel_events`
