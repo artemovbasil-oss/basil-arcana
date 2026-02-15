@@ -677,9 +677,15 @@
       }
 
       function cardImageUrl(cardKey, cardData) {
-        const rawTail = cardKey.replace(/^lenormand_\d+_/, "");
-        const tail = lenormandSlugAlias[rawTail] || rawTail;
         if (cardKey.startsWith("lenormand_")) {
+          if (cardData && cardData.imageUrl) {
+            const fileName = cardData.imageUrl.split("/").pop();
+            if (fileName) {
+              return `${LENORMAND_ASSET_BASE}${fileName}`;
+            }
+          }
+          const rawTail = cardKey.replace(/^lenormand_\d+_/, "");
+          const tail = lenormandSlugAlias[rawTail] || rawTail;
           return `${LENORMAND_ASSET_BASE}ln_${tail}.webp`;
         }
         if (cardData && cardData.imageUrl) {
@@ -694,7 +700,16 @@
         const langPack = uiCopy[activeLang] || uiCopy.ru;
         document.getElementById("modalTitle").textContent = cardData.title;
         document.getElementById("modalImg").src = cardImageUrl(cardKey, cardData);
-        document.getElementById("modalDetailed").textContent = cardData.detailedDescription || "";
+        const fallbackDetailed = [
+          cardData.meaning?.general || "",
+          cardData.meaning?.light || "",
+          cardData.meaning?.shadow || "",
+          cardData.meaning?.advice || "",
+        ]
+          .filter(Boolean)
+          .join(" ");
+        document.getElementById("modalDetailed").textContent =
+          cardData.detailedDescription || fallbackDetailed;
         document.getElementById("modalGeneral").innerHTML = `<strong>${langPack.modalGeneral}:</strong> ${cardData.meaning?.general || ""}`;
         document.getElementById("modalLight").innerHTML = `<strong>${langPack.modalLight}:</strong> ${cardData.meaning?.light || ""}`;
         document.getElementById("modalShadow").innerHTML = `<strong>${langPack.modalShadow}:</strong> ${cardData.meaning?.shadow || ""}`;
@@ -772,8 +787,8 @@
           cards = Object.entries(payload)
             .filter(([key, card]) => key.startsWith("lenormand_") || card.deck === "lenormand")
             .sort((a, b) => lenormandOrder(a[0]) - lenormandOrder(b[0]));
-          if (!cards.length) {
-            throw new Error("Lenormand cards are missing in payload");
+          if (cards.length < 36) {
+            throw new Error(`Lenormand cards are missing in payload (${cards.length}/36)`);
           }
           renderCards();
           statusNode.textContent = "";
