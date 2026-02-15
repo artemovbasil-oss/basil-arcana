@@ -992,7 +992,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     ],
                   ),
                   const SizedBox(height: 8),
-                  if (_loadingStreak) const _HomeMagicLoadingCard(),
                   if (!_loadingStreak && _streakStats.lastActiveAt != null)
                     Text(
                       copy.lastActiveLabel(_streakStats.lastActiveAt!),
