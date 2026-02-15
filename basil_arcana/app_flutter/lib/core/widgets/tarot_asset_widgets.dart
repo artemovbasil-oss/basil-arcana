@@ -290,8 +290,13 @@ class _CardMediaState extends State<CardMedia> {
     if (controller == null || !controller.value.isInitialized) {
       return;
     }
-    if (controller.value.position >= controller.value.duration &&
-        !controller.value.isPlaying) {
+    final duration = controller.value.duration;
+    if (duration <= Duration.zero) {
+      return;
+    }
+    final isEnded = controller.value.position >=
+        (duration - const Duration(milliseconds: 40));
+    if (isEnded && !controller.value.isPlaying) {
       if (mounted && _showVideo) {
         setState(() {
           _showVideo = false;
