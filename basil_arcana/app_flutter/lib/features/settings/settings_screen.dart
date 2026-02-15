@@ -41,6 +41,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   UserDashboardData? _dashboard;
   bool _loadingDashboard = false;
   String? _dashboardError;
+  bool _isTopCardsExpanded = false;
 
   @override
   void initState() {
@@ -409,15 +410,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final sectionTitleStyle = textTheme.titleSmall?.copyWith(
-      fontWeight: FontWeight.w700,
+    final sectionTitleStyle = textTheme.bodyLarge?.copyWith(
+      fontWeight: FontWeight.w600,
       color: colorScheme.onSurface.withOpacity(0.92),
     );
-    final sectionValueStyle = textTheme.bodyLarge?.copyWith(
-      fontWeight: FontWeight.w600,
+    final sectionValueStyle = textTheme.bodyMedium?.copyWith(
+      fontWeight: FontWeight.w500,
       color: colorScheme.onSurface,
     );
-    final sectionDetailStyle = textTheme.bodyMedium?.copyWith(
+    final sectionDetailStyle = textTheme.bodySmall?.copyWith(
       fontWeight: FontWeight.w500,
       color: colorScheme.onSurfaceVariant,
     );
@@ -447,7 +448,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               Expanded(
                 child: Text(
                   l10n.settingsDashboardTitle,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
                 ),
@@ -462,7 +463,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           const SizedBox(height: 14),
           _DashboardSectionTitle(
-            icon: Icons.bolt_outlined,
             title: _dashboardEnergyTitle(context),
             style: sectionTitleStyle,
           ),
@@ -478,7 +478,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           const SizedBox(height: 12),
           _DashboardSectionTitle(
-            icon: Icons.workspace_premium_outlined,
             title: _dashboardPaidSubscriptionsTitle(context),
             style: sectionTitleStyle,
           ),
@@ -499,49 +498,73 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ),
           const SizedBox(height: 12),
           _DashboardSectionTitle(
-            icon: Icons.card_giftcard_outlined,
             title: _dashboardReferralBonusesTitle(context),
             style: sectionTitleStyle,
           ),
           const SizedBox(height: 6),
           Text(
-            _dashboardBonusLine(context, freeFiveCardCredits),
+            _dashboardFiveCardsBonusLine(context, freeFiveCardCredits),
             style: sectionValueStyle,
           ),
           const SizedBox(height: 2),
           Text(
-            _dashboardInvitedLine(context, _dashboard?.totalInvited ?? 0),
+            _dashboardNatalBonusLine(context, freeFiveCardCredits),
             style: sectionDetailStyle,
           ),
           const SizedBox(height: 12),
-          _DashboardSectionTitle(
-            icon: Icons.stars_rounded,
-            title: l10n.settingsDashboardTopCardsTitle,
-            style: sectionTitleStyle,
-          ),
-          const SizedBox(height: 8),
-          if (topCards.isEmpty)
-            Text(
-              l10n.settingsDashboardTopCardsEmpty,
-              style: sectionDetailStyle,
-            )
-          else
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                for (var i = 0; i < topCards.length; i++) ...[
+          InkWell(
+            borderRadius: BorderRadius.circular(10),
+            onTap: () {
+              setState(() {
+                _isTopCardsExpanded = !_isTopCardsExpanded;
+              });
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 2),
+              child: Row(
+                children: [
                   Expanded(
-                    child: _TopCardTile(
-                      rank: i + 1,
-                      stat: topCards[i],
-                      hitsLabel: _topCardsHitsLabel(context),
-                      detailStyle: sectionDetailStyle,
+                    child: Text(
+                      l10n.settingsDashboardTopCardsTitle,
+                      style: sectionTitleStyle,
                     ),
                   ),
-                  if (i != topCards.length - 1) const SizedBox(width: 10),
+                  Icon(
+                    _isTopCardsExpanded
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
+                    size: 18,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
                 ],
-              ],
+              ),
             ),
+          ),
+          if (_isTopCardsExpanded) ...[
+            const SizedBox(height: 8),
+            if (topCards.isEmpty)
+              Text(
+                l10n.settingsDashboardTopCardsEmpty,
+                style: sectionDetailStyle,
+              )
+            else
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  for (var i = 0; i < topCards.length; i++) ...[
+                    Expanded(
+                      child: _TopCardTile(
+                        rank: i + 1,
+                        stat: topCards[i],
+                        hitsLabel: _topCardsHitsLabel(context),
+                        detailStyle: sectionDetailStyle,
+                      ),
+                    ),
+                    if (i != topCards.length - 1) const SizedBox(width: 10),
+                  ],
+                ],
+              ),
+          ],
           const SizedBox(height: 14),
           AppGhostButton(
             label: l10n.settingsDashboardShareButton,
@@ -621,26 +644,26 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return 'Referral bonuses';
   }
 
-  String _dashboardBonusLine(BuildContext context, int count) {
+  String _dashboardFiveCardsBonusLine(BuildContext context, int count) {
     final code = Localizations.localeOf(context).languageCode;
     if (code == 'ru') {
-      return 'Бонус: $count';
+      return 'Премиальный расклад на 5 карт: $count';
     }
     if (code == 'kk') {
-      return 'Бонус: $count';
+      return '5 картаға премиум ашылым: $count';
     }
-    return 'Bonus: $count';
+    return 'Premium five-card spread: $count';
   }
 
-  String _dashboardInvitedLine(BuildContext context, int count) {
+  String _dashboardNatalBonusLine(BuildContext context, int count) {
     final code = Localizations.localeOf(context).languageCode;
     if (code == 'ru') {
-      return 'Приглашенные пользователи: $count';
+      return 'Натальная карта и совместимость: $count';
     }
     if (code == 'kk') {
-      return 'Шақырылған пайдаланушылар: $count';
+      return 'Натал карта және үйлесімділік: $count';
     }
-    return 'Invited users: $count';
+    return 'Natal chart and compatibility: $count';
   }
 
   String _topCardsHitsLabel(BuildContext context) {
@@ -724,29 +747,18 @@ class _TopCardStat {
 
 class _DashboardSectionTitle extends StatelessWidget {
   const _DashboardSectionTitle({
-    required this.icon,
     required this.title,
     this.style,
   });
 
-  final IconData icon;
   final String title;
   final TextStyle? style;
 
   @override
   Widget build(BuildContext context) {
-    final color = Theme.of(context).colorScheme.onSurfaceVariant;
-    return Row(
-      children: [
-        Icon(icon, size: 16, color: color.withOpacity(0.85)),
-        const SizedBox(width: 6),
-        Expanded(
-          child: Text(
-            title,
-            style: style,
-          ),
-        ),
-      ],
+    return Text(
+      title,
+      style: style,
     );
   }
 }
