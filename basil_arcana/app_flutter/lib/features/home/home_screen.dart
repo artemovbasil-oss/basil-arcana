@@ -1113,6 +1113,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     required CardModel dailyCard,
     required _HomeStreakCopy copy,
   }) async {
+    final rootContext = context;
     final hasCache = _dailyCardInterpretationCardId == dailyCard.id &&
         (_dailyCardInterpretation?.trim().isNotEmpty ?? false);
     final locale = Localizations.localeOf(context).languageCode;
@@ -1131,7 +1132,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (context) {
+      builder: (sheetContext) {
         return FractionallySizedBox(
           heightFactor: 0.95,
           child: SafeArea(
@@ -1158,80 +1159,124 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       Expanded(
                         child: Text(
                           copy.dailyCardModalTitle,
-                          style:
-                              Theme.of(context).textTheme.titleLarge?.copyWith(
-                                    fontWeight: FontWeight.w700,
-                                  ),
+                          style: Theme.of(sheetContext)
+                              .textTheme
+                              .titleLarge
+                              ?.copyWith(
+                                fontWeight: FontWeight.w700,
+                              ),
                         ),
                       ),
                       IconButton(
-                        onPressed: () => Navigator.of(context).pop(),
+                        onPressed: () => Navigator.of(sheetContext).pop(),
                         icon: const Icon(Icons.close),
                         tooltip: copy.closeLabel,
                         visualDensity: VisualDensity.compact,
                       ),
                     ],
                   ),
-                  const SizedBox(height: 6),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(
-                        width: 110,
-                        child: AspectRatio(
-                          aspectRatio: 0.68,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(14),
-                            child: Image.network(
-                              dailyCard.imageUrl,
-                              fit: BoxFit.contain,
-                              errorBuilder: (_, __, ___) => Container(
-                                color: colorScheme.surfaceContainerHighest
-                                    .withValues(alpha: 0.32),
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(
+                        color:
+                            colorScheme.outlineVariant.withValues(alpha: 0.8),
+                      ),
+                      color: colorScheme.surfaceVariant.withValues(alpha: 0.16),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          width: 112,
+                          child: AspectRatio(
+                            aspectRatio: 0.68,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(14),
+                              child: Image.network(
+                                dailyCard.imageUrl,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => Container(
+                                  color: colorScheme.surfaceContainerHighest
+                                      .withValues(alpha: 0.32),
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              dailyCard.name,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.copyWith(
-                                    color: colorScheme.primary,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              dailyCard.meaning.general.trim().isEmpty
-                                  ? copy.dailyCardFallback
-                                  : dailyCard.meaning.general.trim(),
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.copyWith(
-                                    color: colorScheme.onSurface
-                                        .withValues(alpha: 0.8),
-                                  ),
-                            ),
-                          ],
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(999),
+                                  color: colorScheme.primary
+                                      .withValues(alpha: 0.14),
+                                ),
+                                child: Text(
+                                  copy.dailyCardBadgeLabel,
+                                  style: Theme.of(sheetContext)
+                                      .textTheme
+                                      .labelSmall
+                                      ?.copyWith(
+                                        color: colorScheme.primary,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                dailyCard.name,
+                                style: Theme.of(sheetContext)
+                                    .textTheme
+                                    .titleMedium
+                                    ?.copyWith(
+                                      color: colorScheme.primary,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                dailyCard.meaning.general.trim().isEmpty
+                                    ? copy.dailyCardFallback
+                                    : dailyCard.meaning.general.trim(),
+                                style: Theme.of(sheetContext)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
+                                      color: colorScheme.onSurface
+                                          .withValues(alpha: 0.8),
+                                      height: 1.38,
+                                    ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 14),
+                  Text(
+                    copy.dailyCardInsightTitle,
+                    style:
+                        Theme.of(sheetContext).textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                  ),
+                  const SizedBox(height: 8),
                   Expanded(
                     child: FutureBuilder<String>(
                       future: requestFuture,
                       initialData: hasCache ? _dailyCardInterpretation : null,
-                      builder: (context, snapshot) {
+                      builder: (builderContext, snapshot) {
                         final hasValue = snapshot.hasData &&
                             (snapshot.data?.trim().isNotEmpty ?? false);
                         if (snapshot.connectionState ==
@@ -1257,19 +1302,62 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                           });
                         }
                         return SingleChildScrollView(
-                          child: Text(
-                            resolved,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
-                                ?.copyWith(
-                                  color: colorScheme.onSurface
-                                      .withValues(alpha: 0.9),
-                                ),
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              color: colorScheme.surfaceVariant
+                                  .withValues(alpha: 0.13),
+                              border: Border.all(
+                                color: colorScheme.outlineVariant
+                                    .withValues(alpha: 0.68),
+                              ),
+                            ),
+                            child: Text(
+                              resolved,
+                              style: Theme.of(builderContext)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
+                                    color: colorScheme.onSurface
+                                        .withValues(alpha: 0.92),
+                                    height: 1.45,
+                                  ),
+                            ),
                           ),
                         );
                       },
                     ),
+                  ),
+                  const SizedBox(height: 12),
+                  _DailyCardConversionBlock(
+                    copy: copy,
+                    onStartReading: () {
+                      final question = copy.dailyCardQuestion(dailyCard.name);
+                      _controller.text = question;
+                      ref
+                          .read(readingFlowControllerProvider.notifier)
+                          .setQuestion(question);
+                      Navigator.of(sheetContext).pop();
+                      Navigator.push(
+                        rootContext,
+                        MaterialPageRoute(
+                          settings: appRouteSettings(showBackButton: false),
+                          builder: (_) => const SpreadScreen(),
+                        ),
+                      );
+                    },
+                    onSofiaTap: () async {
+                      Navigator.of(sheetContext).pop();
+                      await Future<void>.delayed(
+                        const Duration(milliseconds: 140),
+                      );
+                      if (!mounted) {
+                        return;
+                      }
+                      await _showSofiaInfoModal();
+                    },
                   ),
                 ],
               ),
@@ -1513,6 +1601,12 @@ class _HomeStreakCopy {
     required this.dailyCardFallback,
     required this.dailyCardPending,
     required this.dailyCardError,
+    required this.dailyCardBadgeLabel,
+    required this.dailyCardInsightTitle,
+    required this.dailyCardActionsTitle,
+    required this.dailyCardPrimaryCta,
+    required this.dailyCardSecondaryCta,
+    required this.dailyCardQuestionPrefix,
     required this.streakInsightTitle,
     required this.streakInsightPending,
     required this.streakInsightFallback,
@@ -1533,11 +1627,25 @@ class _HomeStreakCopy {
   final String dailyCardFallback;
   final String dailyCardPending;
   final String dailyCardError;
+  final String dailyCardBadgeLabel;
+  final String dailyCardInsightTitle;
+  final String dailyCardActionsTitle;
+  final String dailyCardPrimaryCta;
+  final String dailyCardSecondaryCta;
+  final String dailyCardQuestionPrefix;
   final String streakInsightTitle;
   final String streakInsightPending;
   final String streakInsightFallback;
   final String lastActivePrefix;
   final String closeLabel;
+
+  String dailyCardQuestion(String cardName) {
+    final name = cardName.trim();
+    if (name.isEmpty) {
+      return dailyCardFallback;
+    }
+    return '$dailyCardQuestionPrefix "$name"?';
+  }
 
   String tileTitle(int days) => '🔥 ${days < 1 ? 1 : days}';
 
@@ -1565,6 +1673,13 @@ class _HomeStreakCopy {
         dailyCardFallback: 'Подбираем карту...',
         dailyCardPending: 'Смотрим, что карта дня значит именно для тебя…',
         dailyCardError: 'Не получилось получить трактовку. Попробуй еще раз.',
+        dailyCardBadgeLabel: 'Энергия дня',
+        dailyCardInsightTitle: 'Трактовка',
+        dailyCardActionsTitle: 'Сделать следующий шаг',
+        dailyCardPrimaryCta: 'Сделать расклад по карте',
+        dailyCardSecondaryCta: 'Личная консультация Софии',
+        dailyCardQuestionPrefix:
+            'Какой следующий шаг мне сделать сегодня, учитывая карту',
         streakInsightTitle: 'Что это значит',
         streakInsightPending: 'Собираем короткий смысл по твоей статистике…',
         streakInsightFallback:
@@ -1588,6 +1703,13 @@ class _HomeStreakCopy {
         dailyCardFallback: 'Карта таңдалып жатыр...',
         dailyCardPending: 'Күн картасының саған не айтатынын қарап жатырмыз…',
         dailyCardError: 'Түсіндірмені алу мүмкін болмады. Қайта көріңіз.',
+        dailyCardBadgeLabel: 'Күн энергиясы',
+        dailyCardInsightTitle: 'Түсіндірме',
+        dailyCardActionsTitle: 'Келесі қадам',
+        dailyCardPrimaryCta: 'Карта бойынша расклад жасау',
+        dailyCardSecondaryCta: 'Софиямен жеке консультация',
+        dailyCardQuestionPrefix:
+            'Осы картаға сүйеніп, бүгін мен қандай келесі қадам жасауым керек',
         streakInsightTitle: 'Бұл нені білдіреді',
         streakInsightPending:
             'Статистикаңыз бойынша қысқа түсіндірме дайындап жатырмыз…',
@@ -1611,12 +1733,67 @@ class _HomeStreakCopy {
       dailyCardFallback: 'Selecting card...',
       dailyCardPending: 'Reading what this card means for you today...',
       dailyCardError: 'Could not load interpretation. Try again.',
+      dailyCardBadgeLabel: 'Energy of the day',
+      dailyCardInsightTitle: 'Interpretation',
+      dailyCardActionsTitle: 'Take the next step',
+      dailyCardPrimaryCta: 'Start a reading from this card',
+      dailyCardSecondaryCta: 'Personal consultation with Sofia',
+      dailyCardQuestionPrefix:
+          'What next step should I take today based on the card',
       streakInsightTitle: 'What this means',
       streakInsightPending: 'Building a short insight from your stats...',
       streakInsightFallback:
           'Your stats reflect practice rhythm: consistency and repetition improve interpretation quality over time.',
       lastActivePrefix: 'Last activity',
       closeLabel: 'Close',
+    );
+  }
+}
+
+class _DailyCardConversionBlock extends StatelessWidget {
+  const _DailyCardConversionBlock({
+    required this.copy,
+    required this.onStartReading,
+    required this.onSofiaTap,
+  });
+
+  final _HomeStreakCopy copy;
+  final VoidCallback onStartReading;
+  final VoidCallback onSofiaTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: colorScheme.primary.withValues(alpha: 0.35),
+        ),
+        color: colorScheme.primary.withValues(alpha: 0.08),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            copy.dailyCardActionsTitle,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+          ),
+          const SizedBox(height: 10),
+          AppPrimaryButton(
+            label: copy.dailyCardPrimaryCta,
+            onPressed: onStartReading,
+          ),
+          const SizedBox(height: 8),
+          AppGhostButton(
+            label: copy.dailyCardSecondaryCta,
+            onPressed: onSofiaTap,
+          ),
+        ],
+      ),
     );
   }
 }
