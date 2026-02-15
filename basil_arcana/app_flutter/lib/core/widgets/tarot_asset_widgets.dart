@@ -280,7 +280,7 @@ class _CardMediaState extends State<CardMedia> {
           return;
         }
         _autoPlayAttempted = true;
-        _playOnce(autoPlay: true);
+        _playOnce();
       });
     }
   }
@@ -359,7 +359,7 @@ class _CardMediaState extends State<CardMedia> {
     }
   }
 
-  Future<void> _playOnce({required bool autoPlay}) async {
+  Future<void> _playOnce() async {
     await _ensureInitialized();
     final controller = _controller;
     if (controller == null || !controller.value.isInitialized) {
@@ -367,26 +367,13 @@ class _CardMediaState extends State<CardMedia> {
     }
     try {
       await controller.seekTo(Duration.zero);
+      await controller.setVolume(0.0);
       await controller.play();
       if (!mounted) {
         return;
       }
       setState(() {
         _showVideo = true;
-      });
-      if (!autoPlay) {
-        return;
-      }
-      // On Telegram iOS/Web the player state can lag after `play()`.
-      await Future<void>.delayed(const Duration(milliseconds: 260));
-      final value = controller.value;
-      final hasStarted =
-          value.isPlaying || value.position > const Duration(milliseconds: 80);
-      if (!mounted) {
-        return;
-      }
-      setState(() {
-        _showVideo = hasStarted;
       });
     } catch (_) {
       if (!mounted) {
@@ -438,7 +425,7 @@ class _CardMediaState extends State<CardMedia> {
         widget.enableVideo && _resolvedVideoUrl != null && !_videoFailed;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: hasVideo ? () => _playOnce(autoPlay: false) : null,
+      onTap: hasVideo ? _playOnce : null,
       child: Stack(
         alignment: Alignment.center,
         children: [
@@ -465,37 +452,6 @@ class _CardMediaState extends State<CardMedia> {
                     width: _controller!.value.size.width,
                     height: _controller!.value.size.height,
                     child: VideoPlayer(_controller!),
-                  ),
-                ),
-              ),
-            ),
-          if (hasVideo && !_showVideo)
-            Positioned.fill(
-              child: ClipRRect(
-                borderRadius: radius,
-                child: ColoredBox(
-                  color: Colors.black.withOpacity(0.35),
-                  child: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          Icons.play_circle_fill,
-                          size: 48,
-                          color: Colors.white,
-                        ),
-                        if (widget.playLabel != null) ...[
-                          const SizedBox(height: 8),
-                          Text(
-                            widget.playLabel!,
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelMedium
-                                ?.copyWith(color: Colors.white),
-                          ),
-                        ],
-                      ],
-                    ),
                   ),
                 ),
               ),
