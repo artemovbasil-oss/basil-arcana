@@ -110,4 +110,51 @@ class HomeInsightsRepository {
       client.close();
     }
   }
+
+  Future<String> fetchStreakInterpretation({
+    required HomeStreakStats stats,
+    required String locale,
+    required List<Map<String, Object?>> topCards,
+  }) async {
+    final uri =
+        Uri.parse(ApiConfig.apiBaseUrl).replace(path: '/api/home/streak');
+    final client = TelegramApiClient(http.Client());
+    try {
+      final payload = {
+        'locale': locale,
+        'stats': {
+          'currentStreakDays': stats.currentStreakDays,
+          'longestStreakDays': stats.longestStreakDays,
+          'activeDays': stats.activeDays,
+          'awarenessPercent': stats.awarenessPercent,
+        },
+        'topCards': topCards,
+      };
+      final response = await client
+          .post(
+            uri,
+            headers: const {'Content-Type': 'application/json'},
+            body: jsonEncode(payload),
+          )
+          .timeout(_timeout);
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        throw Exception('Failed to load streak interpretation');
+      }
+      final decoded = jsonDecode(response.body);
+      if (decoded is! Map<String, dynamic>) {
+        throw Exception('Invalid streak interpretation response');
+      }
+      final interpretation = ((decoded['interpretation'] ??
+                  decoded['summary'] ??
+                  decoded['text']) as String?)
+              ?.trim() ??
+          '';
+      if (interpretation.isEmpty) {
+        throw Exception('Empty streak interpretation');
+      }
+      return interpretation;
+    } finally {
+      client.close();
+    }
+  }
 }

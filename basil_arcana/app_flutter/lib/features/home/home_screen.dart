@@ -50,6 +50,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   HomeStreakStats _streakStats = HomeStreakStats.empty;
   String? _dailyCardInterpretation;
   String? _dailyCardInterpretationCardId;
+  String? _streakInterpretation;
+  String? _streakInterpretationCacheKey;
   bool _didRequestOnboarding = false;
   late final AnimationController _fieldGlowController;
   late final AnimationController _titleShimmerController;
@@ -889,6 +891,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     required _HomeStreakCopy copy,
     required List<_TopCardStat> topCards,
   }) async {
+    final locale = Localizations.localeOf(context).languageCode;
+    final streakCacheKey = [
+      locale,
+      _streakStats.currentStreakDays,
+      _streakStats.longestStreakDays,
+      _streakStats.awarenessPercent,
+      topCards.map((card) => '${card.name}:${card.count}').join('|'),
+    ].join(':');
+    final hasCache = _streakInterpretationCacheKey == streakCacheKey &&
+        (_streakInterpretation?.trim().isNotEmpty ?? false);
+    final requestFuture = hasCache
+        ? null
+        : ref.read(homeInsightsRepositoryProvider).fetchStreakInterpretation(
+            stats: _streakStats,
+            locale: locale,
+            topCards: [
+              for (final card in topCards)
+                {
+                  'name': card.name,
+                  'count': card.count,
+                },
+            ],
+          );
+
     final colorScheme = Theme.of(context).colorScheme;
     await showModalBottomSheet<void>(
       context: context,
@@ -984,8 +1010,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   ),
                   const SizedBox(height: 8),
                   Expanded(
-                    child: topCards.isEmpty
-                        ? Text(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (topCards.isEmpty)
+                          Text(
                             copy.topCardsEmpty,
                             style:
                                 Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -993,22 +1022,85 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                           .withValues(alpha: 0.7),
                                     ),
                           )
-                        : Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              for (var i = 0; i < topCards.length; i++) ...[
-                                Expanded(
-                                  child: _MiniTopCardTile(
-                                    rank: i + 1,
-                                    stat: topCards[i],
-                                    hitsLabel: copy.hitsLabel,
+                        else
+                          SizedBox(
+                            height: 300,
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                for (var i = 0; i < topCards.length; i++) ...[
+                                  Expanded(
+                                    child: _MiniTopCardTile(
+                                      rank: i + 1,
+                                      stat: topCards[i],
+                                      hitsLabel: copy.hitsLabel,
+                                    ),
                                   ),
-                                ),
-                                if (i != topCards.length - 1)
-                                  const SizedBox(width: 10),
+                                  if (i != topCards.length - 1)
+                                    const SizedBox(width: 10),
+                                ],
                               ],
-                            ],
+                            ),
                           ),
+                        const SizedBox(height: 12),
+                        Text(
+                          copy.streakInsightTitle,
+                          style:
+                              Theme.of(context).textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                        ),
+                        const SizedBox(height: 8),
+                        Expanded(
+                          child: FutureBuilder<String>(
+                            future: requestFuture,
+                            initialData:
+                                hasCache ? _streakInterpretation : null,
+                            builder: (context, snapshot) {
+                              final hasValue = snapshot.hasData &&
+                                  (snapshot.data?.trim().isNotEmpty ?? false);
+                              if (snapshot.connectionState ==
+                                      ConnectionState.waiting &&
+                                  !hasValue) {
+                                return _HomeMagicLoadingCard(
+                                  label: copy.streakInsightPending,
+                                );
+                              }
+                              final resolved = hasValue
+                                  ? snapshot.data!.trim()
+                                  : copy.streakInsightFallback;
+                              if (_streakInterpretationCacheKey !=
+                                      streakCacheKey ||
+                                  _streakInterpretation != resolved) {
+                                WidgetsBinding.instance
+                                    .addPostFrameCallback((_) {
+                                  if (!mounted) {
+                                    return;
+                                  }
+                                  setState(() {
+                                    _streakInterpretationCacheKey =
+                                        streakCacheKey;
+                                    _streakInterpretation = resolved;
+                                  });
+                                });
+                              }
+                              return SingleChildScrollView(
+                                child: Text(
+                                  resolved,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(
+                                        color: colorScheme.onSurface
+                                            .withValues(alpha: 0.9),
+                                      ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -1083,51 +1175,58 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     ],
                   ),
                   const SizedBox(height: 6),
-                  Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 260),
-                      child: Column(
-                        children: [
-                          Text(
-                            dailyCard.name,
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium
-                                ?.copyWith(
-                                  color: colorScheme.primary,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                          ),
-                          const SizedBox(height: 8),
-                          AspectRatio(
-                            aspectRatio: 0.68,
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(14),
-                              child: Image.network(
-                                dailyCard.imageUrl,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => Container(
-                                  color: colorScheme.surfaceContainerHighest
-                                      .withValues(alpha: 0.32),
-                                ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        width: 110,
+                        child: AspectRatio(
+                          aspectRatio: 0.68,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(14),
+                            child: Image.network(
+                              dailyCard.imageUrl,
+                              fit: BoxFit.contain,
+                              errorBuilder: (_, __, ___) => Container(
+                                color: colorScheme.surfaceContainerHighest
+                                    .withValues(alpha: 0.32),
                               ),
                             ),
                           ),
-                          const SizedBox(height: 8),
-                          Text(
-                            dailyCard.meaning.general.trim().isEmpty
-                                ? copy.dailyCardFallback
-                                : dailyCard.meaning.general.trim(),
-                            textAlign: TextAlign.center,
-                            style:
-                                Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: colorScheme.onSurface
-                                          .withValues(alpha: 0.8),
-                                    ),
-                          ),
-                        ],
+                        ),
                       ),
-                    ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              dailyCard.name,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(
+                                    color: colorScheme.primary,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              dailyCard.meaning.general.trim().isEmpty
+                                  ? copy.dailyCardFallback
+                                  : dailyCard.meaning.general.trim(),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color: colorScheme.onSurface
+                                        .withValues(alpha: 0.8),
+                                  ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 12),
                   Expanded(
@@ -1140,7 +1239,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         if (snapshot.connectionState ==
                                 ConnectionState.waiting &&
                             !hasValue) {
-                          return const _HomeMagicLoadingCard();
+                          return _HomeMagicLoadingCard(
+                            label: copy.dailyCardPending,
+                          );
                         }
                         final resolved = hasValue
                             ? snapshot.data!.trim()
@@ -1414,6 +1515,9 @@ class _HomeStreakCopy {
     required this.dailyCardFallback,
     required this.dailyCardPending,
     required this.dailyCardError,
+    required this.streakInsightTitle,
+    required this.streakInsightPending,
+    required this.streakInsightFallback,
     required this.lastActivePrefix,
     required this.closeLabel,
   });
@@ -1431,6 +1535,9 @@ class _HomeStreakCopy {
   final String dailyCardFallback;
   final String dailyCardPending;
   final String dailyCardError;
+  final String streakInsightTitle;
+  final String streakInsightPending;
+  final String streakInsightFallback;
   final String lastActivePrefix;
   final String closeLabel;
 
@@ -1460,6 +1567,10 @@ class _HomeStreakCopy {
         dailyCardFallback: 'Подбираем карту...',
         dailyCardPending: 'Смотрим, что карта дня значит именно для тебя…',
         dailyCardError: 'Не получилось получить трактовку. Попробуй еще раз.',
+        streakInsightTitle: 'Что это значит',
+        streakInsightPending: 'Собираем короткий смысл по твоей статистике…',
+        streakInsightFallback:
+            'Статистика показывает темп твоей практики: регулярность и повторяемость усиливают точность интерпретаций.',
         lastActivePrefix: 'Последняя активность',
         closeLabel: 'Закрыть',
       );
@@ -1479,6 +1590,11 @@ class _HomeStreakCopy {
         dailyCardFallback: 'Карта таңдалып жатыр...',
         dailyCardPending: 'Күн картасының саған не айтатынын қарап жатырмыз…',
         dailyCardError: 'Түсіндірмені алу мүмкін болмады. Қайта көріңіз.',
+        streakInsightTitle: 'Бұл нені білдіреді',
+        streakInsightPending:
+            'Статистикаңыз бойынша қысқа түсіндірме дайындап жатырмыз…',
+        streakInsightFallback:
+            'Бұл статистика тәжірибе ырғағын көрсетеді: тұрақты қайталау интерпретация дәлдігін арттырады.',
         lastActivePrefix: 'Соңғы белсенділік',
         closeLabel: 'Жабу',
       );
@@ -1497,6 +1613,10 @@ class _HomeStreakCopy {
       dailyCardFallback: 'Selecting card...',
       dailyCardPending: 'Reading what this card means for you today...',
       dailyCardError: 'Could not load interpretation. Try again.',
+      streakInsightTitle: 'What this means',
+      streakInsightPending: 'Building a short insight from your stats...',
+      streakInsightFallback:
+          'Your stats reflect practice rhythm: consistency and repetition improve interpretation quality over time.',
       lastActivePrefix: 'Last activity',
       closeLabel: 'Close',
     );
@@ -1585,7 +1705,17 @@ class _StatPill extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        color: colorScheme.surfaceVariant.withValues(alpha: 0.24),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            colorScheme.primary.withValues(alpha: 0.24),
+            colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+          ],
+        ),
+        border: Border.all(
+          color: colorScheme.primary.withValues(alpha: 0.45),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1634,22 +1764,17 @@ class _AwarenessPill extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        gradient: locked
-            ? LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  colorScheme.primary.withValues(alpha: 0.28),
-                  colorScheme.surfaceContainerHighest.withValues(alpha: 0.38),
-                ],
-              )
-            : null,
-        color: locked
-            ? null
-            : colorScheme.surfaceContainerHighest.withValues(alpha: 0.24),
-        border: locked
-            ? Border.all(color: colorScheme.primary.withValues(alpha: 0.5))
-            : null,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            colorScheme.primary.withValues(alpha: locked ? 0.3 : 0.24),
+            colorScheme.surfaceContainerHighest.withValues(
+              alpha: locked ? 0.38 : 0.3,
+            ),
+          ],
+        ),
+        border: Border.all(color: colorScheme.primary.withValues(alpha: 0.5)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1718,7 +1843,7 @@ class _MiniTopCardTile extends StatelessWidget {
                 child: stat.imageUrl.trim().isNotEmpty
                     ? Image.network(
                         stat.imageUrl,
-                        fit: BoxFit.cover,
+                        fit: BoxFit.contain,
                         errorBuilder: (_, __, ___) => Container(
                           color: colorScheme.surfaceContainerHighest
                               .withValues(alpha: 0.35),
@@ -1754,7 +1879,11 @@ class _MiniTopCardTile extends StatelessWidget {
 }
 
 class _HomeMagicLoadingCard extends StatelessWidget {
-  const _HomeMagicLoadingCard();
+  const _HomeMagicLoadingCard({
+    this.label,
+  });
+
+  final String? label;
 
   String _label(BuildContext context) {
     final code = Localizations.localeOf(context).languageCode;
@@ -1800,7 +1929,7 @@ class _HomeMagicLoadingCard extends StatelessWidget {
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              _label(context),
+              label ?? _label(context),
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
