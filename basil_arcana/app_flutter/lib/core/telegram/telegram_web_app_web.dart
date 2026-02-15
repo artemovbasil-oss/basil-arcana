@@ -1,6 +1,9 @@
 import 'dart:js_util' as js_util;
 
 class TelegramWebApp {
+  static void Function()? _backButtonCallback;
+  static Function? _backButtonCallbackJs;
+
   static Object? get _telegram {
     try {
       return js_util.getProperty(
@@ -166,13 +169,26 @@ class TelegramWebApp {
   }
 
   static void onBackButtonClicked(void Function() callback) {
+    _backButtonCallback = callback;
+    _backButtonCallbackJs ??= js_util.allowInterop(() {
+      _backButtonCallback?.call();
+    });
+
     final backButton = _backButton;
-    if (backButton == null) {
-      return;
-    }
-    if (js_util.hasProperty(backButton, 'onClick')) {
+    if (backButton != null && js_util.hasProperty(backButton, 'onClick')) {
       try {
-        js_util.callMethod(backButton, 'onClick', [callback]);
+        js_util.callMethod(backButton, 'onClick', [_backButtonCallbackJs]);
+      } catch (_) {}
+    }
+
+    // Fallback for clients where BackButton.onClick is flaky.
+    final webApp = _webApp;
+    if (webApp != null && js_util.hasProperty(webApp, 'onEvent')) {
+      try {
+        js_util.callMethod(webApp, 'onEvent', [
+          'backButtonClicked',
+          _backButtonCallbackJs,
+        ]);
       } catch (_) {}
     }
   }

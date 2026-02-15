@@ -5,21 +5,31 @@ import 'telegram_web_app.dart';
 
 class TelegramBackButtonObserver extends NavigatorObserver {
   Route<dynamic>? _currentRoute;
+  bool _backListenerBound = false;
 
-  TelegramBackButtonObserver() {
-    if (TelegramWebApp.isTelegramWebView && TelegramWebApp.isTelegramMobile) {
-      TelegramWebApp.onBackButtonClicked(_handleBackButton);
-    }
-  }
+  TelegramBackButtonObserver();
 
   void _handleBackButton() {
-    navigator?.maybePop();
+    final nav = navigator;
+    if (nav == null) {
+      return;
+    }
+    nav.maybePop();
+  }
+
+  void _ensureBackListenerBound() {
+    if (_backListenerBound || !TelegramWebApp.isTelegramWebView) {
+      return;
+    }
+    TelegramWebApp.onBackButtonClicked(_handleBackButton);
+    _backListenerBound = true;
   }
 
   void _syncBackButton() {
-    if (!TelegramWebApp.isTelegramWebView || !TelegramWebApp.isTelegramMobile) {
+    if (!TelegramWebApp.isTelegramWebView) {
       return;
     }
+    _ensureBackListenerBound();
     final canPop = navigator?.canPop() ?? false;
     final allowBack = routeShowsBackButton(_currentRoute);
     if (canPop && allowBack) {
