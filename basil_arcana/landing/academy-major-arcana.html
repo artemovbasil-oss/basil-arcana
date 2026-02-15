@@ -3,8 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Старшие арканы: как читать большие темы · BasilArcana</title>
-    <meta name="description" content="Как распознавать важные жизненные развилки по старшим арканам." />
+    <title>Старшие арканы Таро: как читать ключевые жизненные темы · BasilArcana</title>
+    <meta name="description" content="Старшие арканы Таро простыми словами: как читать судьбоносные периоды, кризисы роста и поворотные решения без мистификации." />
+    <meta name="keywords" content="академия таро, статьи таро, обучение таро, значения арканов, практика таро" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <meta name="theme-color" content="#111218" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -29,16 +30,42 @@
   </head>
   <body>
     <main class="wrap">
-      <header class="topbar"><a class="logo" href="./index.html">Магический плюс вайб</a></header>
-      <article class="article"><h1>Старшие арканы: как читать большие темы</h1><p>Старшие арканы обычно указывают на ключевой этап, урок или перелом в теме вопроса. Это маркеры глубины, а не бытовой мелочи.</p><p>Если в раскладе много старших арканов, фокусируйтесь на смысле процесса: что меняется в вашей роли, ценностях и границах.</p><p>Читая старший аркан, ищите не «страшный» или «хороший» прогноз, а зрелый выбор: что именно нужно принять, завершить или начать.</p><p>Практика: выпишите три действия, которые соответствуют карте, и одно действие, которое ей противоречит.</p></article>
+      <header class="topbar"><a class="logo" href="./index.html" data-i18n="topLine" data-link="home">Магический плюс вайб</a></header>
+      <article class="article"><h1>Старшие арканы Таро: как читать ключевые жизненные темы</h1><p>Старшие арканы в Таро показывают не мелкие эпизоды дня, а крупные процессы: смену роли, внутренний кризис, переоценку ценностей или новый этап ответственности. Когда в раскладе много старших арканов, это сигнал смотреть глубже, чем «получится или нет».</p><p>Практичный принцип чтения: сначала определите тему карты, затем соотнесите ее с вашим текущим контекстом. Например, «Император» может говорить о необходимости структуры, а «Отшельник» о паузе для анализа перед важным выбором.</p><p>Полезно смотреть не только на «светлую» сторону аркана, но и на его тень. Сила может быть зрелой устойчивостью, а может стать жестким контролем. Влюбленные могут про зрелый выбор, а могут про внутренний конфликт ценностей.</p><p>Для точности добавляйте к старшему аркану уточняющий вопрос: «какое действие выравнивает ситуацию?», «какой риск важно не игнорировать?». Тогда карта превращается из абстрактного символа в ориентир для конкретного шага.</p><p>Ошибка интерпретации: воспринимать старшие арканы как приговор. На практике они показывают вектор и урок, а не лишают человека свободы решения. Даже сложные карты становятся ресурсом, если читать их как приглашение к осознанности.</p><p>Если хотите развивать навык, изучайте старшие арканы в связках с реальными событиями недели. Так вы заметите, что они описывают не «фатум», а повторяющиеся сценарии взросления, где главная задача — выбрать более зрелую стратегию действия.</p></article>
       <nav class="site-links" aria-label="Внутренние ссылки">
-        <a href="./news.html">Новости</a>
-        <a href="./tarot-values.html">Карты Таро</a>
-        <a href="./lenormand-values.html">Колода Ленорман</a>
-        <a href="./academy.html">Академия Таро</a>
+        <a href="./news.html" data-i18n="navNews" data-link="news">Новости</a>
+        <a href="./tarot-values.html" data-i18n="navTarot" data-link="tarot">Карты Таро</a>
+        <a href="./lenormand-values.html" data-i18n="navLenormand" data-link="lenormand">Колода Ленорман</a>
+        <a href="./academy.html" data-i18n="navAcademy" data-link="academy">Академия Таро</a>
       </nav>
-      <footer class="footer">BasilArcana · RU / KZ / EN · Telegram-first experience</footer>
-      <section class="bottom-cta"><span>Разработка ботов и приложений на заказ под ключ — напишите нам</span><div class="bottom-cta-links"><a href="mailto:basiluxd@gmail.com">basiluxd@gmail.com</a><span class="bottom-cta-sep">•</span><a href="https://t.me/uxd_ink" target="_blank" rel="noreferrer">@uxd_ink</a></div></section>
+      <footer class="footer" data-i18n="footer">BasilArcana · RU / KZ / EN · Telegram-first experience</footer>
+      <section class="bottom-cta"><span data-i18n="devCta">Разработка ботов и приложений на заказ под ключ — напишите нам</span><div class="bottom-cta-links"><a href="mailto:basiluxd@gmail.com">basiluxd@gmail.com</a><span class="bottom-cta-sep">•</span><a href="https://t.me/uxd_ink" target="_blank" rel="noreferrer">@uxd_ink</a></div></section>
     </main>
+    <script>
+      const LANG_STORAGE_KEY = "basilarcana_lang";
+      const ui = {
+        ru: { topLine:"Магический плюс вайб", navNews:"Новости", navTarot:"Карты Таро", navLenormand:"Колода Ленорман", navAcademy:"Академия Таро", footer:"BasilArcana · RU / KZ / EN · Telegram-first experience", devCta:"Разработка ботов и приложений на заказ под ключ — напишите нам" },
+        kz: { topLine:"Магия плюс vibe", navNews:"Жаңалықтар", navTarot:"Таро карталары", navLenormand:"Ленорман колодасы", navAcademy:"Таро академиясы", footer:"BasilArcana · RU / KZ / EN · Telegram-first experience", devCta:"Тапсырыс бойынша bot және app толық әзірлеу — бізге жазыңыз" },
+        en: { topLine:"Magic plus vibe", navNews:"News", navTarot:"Tarot cards", navLenormand:"Lenormand deck", navAcademy:"Tarot Academy", footer:"BasilArcana · RU / KZ / EN · Telegram-first experience", devCta:"Turnkey custom bot and app development — write to us" }
+      };
+      function withLang(path, lang){ const url = new URL(path, window.location.href); if(lang && lang !== "ru") url.searchParams.set("lang", lang); return url.pathname + url.search; }
+      function applyLang(lang){
+        const resolved = ui[lang] ? lang : "ru";
+        const pack = ui[resolved];
+        document.documentElement.lang = resolved === "kz" ? "kk" : resolved;
+        document.querySelectorAll("[data-i18n]").forEach((node)=>{ const key = node.dataset.i18n; if(pack[key]) node.textContent = pack[key]; });
+        const links = { home:"./index.html", news:"./news.html", tarot:"./tarot-values.html", lenormand:"./lenormand-values.html", academy:"./academy.html" };
+        Object.entries(links).forEach(([key,path]) => {
+          document.querySelectorAll("[data-link=\"" + key + "\"]").forEach((node)=>node.setAttribute("href", withLang(path, resolved)));
+        });
+        const url = new URL(window.location.href);
+        if(resolved === "ru") url.searchParams.delete("lang"); else url.searchParams.set("lang", resolved);
+        window.history.replaceState({}, "", url.toString());
+        window.localStorage.setItem(LANG_STORAGE_KEY, resolved);
+      }
+      const initialLang = new URLSearchParams(window.location.search).get("lang");
+      const storedLang = window.localStorage.getItem(LANG_STORAGE_KEY);
+      applyLang(initialLang || storedLang || "ru");
+    </script>
   </body>
 </html>

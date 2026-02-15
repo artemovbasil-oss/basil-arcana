@@ -3,10 +3,22 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Академия Таро · BasilArcana</title>
-    <meta name="description" content="Академия Таро BasilArcana: статьи о таро, арканах, психологии и антискам-практике." />
+    <title>Академия Таро BasilArcana: статьи, гайды и разборы</title>
+    <meta name="description" content="Академия Таро BasilArcana: подробные статьи о Таро для начинающих и практиков, старшие и младшие арканы, психология чтения, этика и антискам." />
+    <meta name="keywords" content="академия таро, статьи таро, таро для начинающих, старшие арканы, младшие арканы, как читать таро, этика таро, антискам" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <meta name="theme-color" content="#111218" />
+    <link rel="canonical" href="https://www.basilarcana.com/academy.html" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="BasilArcana" />
+    <meta property="og:title" content="Академия Таро BasilArcana" />
+    <meta property="og:description" content="Практические статьи и гайды по Таро: от базовых принципов до этичной и безопасной практики." />
+    <meta property="og:url" content="https://www.basilarcana.com/academy.html" />
+    <meta property="og:image" content="https://cdn.basilarcana.com/sofia/sofia.webp" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Академия Таро BasilArcana" />
+    <meta name="twitter:description" content="Полезные статьи по Таро: вопросы, арканы, психология, этика и защита от манипуляций." />
+    <meta name="twitter:image" content="https://cdn.basilarcana.com/sofia/sofia.webp" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
@@ -17,6 +29,9 @@
       .wrap{width:min(1120px,calc(100% - 2rem));margin:0 auto;padding:1.05rem 0 1.6rem;}
       .topbar{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:0 0 .75rem;}
       .logo{font-family:"Space Grotesk",sans-serif;font-weight:600;letter-spacing:.02em;font-size:clamp(.95rem,1.35vw,1.2rem);color:var(--accent-soft);text-decoration:none;}
+      .langs{display:inline-flex;gap:.45rem;background:rgba(255,255,255,.08);border:1px solid var(--card-border);border-radius:999px;padding:.28rem;}
+      .lang-btn{border:0;background:transparent;color:var(--text-soft);border-radius:999px;font:inherit;font-weight:600;letter-spacing:.03em;padding:.46rem .82rem;cursor:pointer;}
+      .lang-btn[aria-pressed="true"]{color:#100d17;background:linear-gradient(135deg,#b889ff,#e3d2ff);}
       .article{border:1px solid var(--card-border);border-radius:20px;background:var(--card);padding:1.35rem;}
       h1{margin:0;font-family:"Space Grotesk",sans-serif;font-size:clamp(1.5rem,3vw,2.5rem);} p{margin:.72rem 0;color:var(--text-soft);line-height:1.58;font-size:1rem;max-width:74ch;}
       .site-links{display:flex;flex-wrap:wrap;gap:.75rem 1.05rem;margin:1.35rem 0 .65rem;padding:.66rem .72rem;border:1px solid var(--card-border);border-radius:12px;background:rgba(255,255,255,.06);} 
@@ -25,30 +40,100 @@
       .bottom-cta{background:linear-gradient(135deg,#f5ebff,#c084ff 52%,#a45cf8);color:#10091c;border:1px solid rgba(255,255,255,.35);border-radius:12px;padding:.65rem .8rem;margin-bottom:.4rem;display:flex;gap:.5rem;align-items:center;justify-content:space-between;font-weight:700;font-size:.88rem;}
       .bottom-cta-links{display:inline-flex;align-items:center;gap:.65rem;flex-wrap:wrap;font-weight:800;} .bottom-cta a{color:#10091c;text-decoration:none;border-bottom:1px solid rgba(16,9,28,.4);} .bottom-cta-sep{opacity:.6;}
       @media (max-width:960px){.bottom-cta{flex-direction:column;align-items:flex-start;}}
-    .tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.9rem;margin-top:1rem;} .tile{border:1px solid var(--card-border);border-radius:14px;background:rgba(255,255,255,.04);padding:.85rem;} .tile h2{margin:0 0 .45rem;font-size:1rem;} .tile p{margin:0;color:var(--text-soft);font-size:.92rem;line-height:1.45;min-height:3em;} .tile a{display:inline-block;margin-top:.65rem;color:var(--accent-soft);text-decoration:none;border-bottom:1px solid rgba(227,210,255,.38);font-weight:700;} @media (max-width:960px){.tiles{grid-template-columns:1fr;}}
+      .tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.9rem;margin-top:1rem;} .tile{border:1px solid var(--card-border);border-radius:14px;background:rgba(255,255,255,.04);padding:.85rem;} .tile h2{margin:0 0 .45rem;font-size:1rem;} .tile p{margin:0;color:var(--text-soft);font-size:.92rem;line-height:1.45;min-height:3em;} .tile a{display:inline-block;margin-top:.65rem;color:var(--accent-soft);text-decoration:none;border-bottom:1px solid rgba(227,210,255,.38);font-weight:700;} @media (max-width:960px){.tiles{grid-template-columns:1fr;}}
     </style>
   </head>
   <body>
     <main class="wrap">
-      <header class="topbar"><a class="logo" href="./index.html">Магический плюс вайб</a></header>
-      <section class="article"><h1>Академия Таро</h1><p>Короткие статьи о картах Таро, арканах, психологии интерпретации и безопасной практике без манипуляций.</p><div class="tiles"><article class="tile"><h2>Таро для начинающих: с чего начать</h2><p>Короткий вводный гид по первой практике с колодой.</p><a href="./academy-tarot-basics.html">Открыть статью</a></article>
-<article class="tile"><h2>Старшие арканы: как читать большие темы</h2><p>Как распознавать важные жизненные развилки по старшим арканам.</p><a href="./academy-major-arcana.html">Открыть статью</a></article>
-<article class="tile"><h2>Младшие арканы: события, люди и динамика</h2><p>Быстрый способ читать бытовые и рабочие ситуации через масти.</p><a href="./academy-minor-arcana.html">Открыть статью</a></article>
-<article class="tile"><h2>Как правильно формулировать вопрос к Таро</h2><p>Плохой и хороший формат вопроса, который реально работает.</p><a href="./academy-how-to-ask.html">Открыть статью</a></article>
-<article class="tile"><h2>Таро и психология: почему символы работают</h2><p>Как карты помогают увидеть внутренний конфликт и принять решение.</p><a href="./academy-tarot-psychology.html">Открыть статью</a></article>
-<article class="tile"><h2>Интуиция или тревога: как не перепутать</h2><p>Простые маркеры, чтобы читать карты трезво и без паники.</p><a href="./academy-intuition-vs-anxiety.html">Открыть статью</a></article>
-<article class="tile"><h2>Этичный расклад: границы в темах любви и отношений</h2><p>Как делать расклады про отношения без манипуляций и зависимости.</p><a href="./academy-ethical-reading.html">Открыть статью</a></article>
-<article class="tile"><h2>Как выбрать таролога и не попасть в зависимость</h2><p>Признаки профессионального и небезопасного консультанта.</p><a href="./academy-choose-reader.html">Открыть статью</a></article>
-<article class="tile"><h2>Антискам-чеклист: как защититься от мошенников в эзотерике</h2><p>Практический список проверок перед оплатой расклада.</p><a href="./academy-anti-scam.html">Открыть статью</a></article>
-<article class="tile"><h2>Почему расклады Таро не нарушают религиозные догмы</h2><p>Как верующему человеку использовать Таро без конфликта с верой.</p><a href="./academy-tarot-and-faith.html">Открыть статью</a></article></div></section>
+      <header class="topbar">
+        <a class="logo" href="./index.html" data-i18n="topLine"></a>
+        <div class="langs" role="group" aria-label="Language switcher">
+          <button class="lang-btn" data-lang="ru" aria-pressed="true">RU</button>
+          <button class="lang-btn" data-lang="kz" aria-pressed="false">KZ</button>
+          <button class="lang-btn" data-lang="en" aria-pressed="false">EN</button>
+        </div>
+      </header>
+      <section class="article">
+        <h1 data-i18n="title"></h1>
+        <p data-i18n="lead"></p>
+        <div class="tiles">
+          <article class="tile"><h2 data-i18n="t1Title"></h2><p data-i18n="t1Desc"></p><a href="./academy-tarot-basics.html" data-i18n="open" data-link="a1"></a></article>
+          <article class="tile"><h2 data-i18n="t2Title"></h2><p data-i18n="t2Desc"></p><a href="./academy-major-arcana.html" data-i18n="open" data-link="a2"></a></article>
+          <article class="tile"><h2 data-i18n="t3Title"></h2><p data-i18n="t3Desc"></p><a href="./academy-minor-arcana.html" data-i18n="open" data-link="a3"></a></article>
+          <article class="tile"><h2 data-i18n="t4Title"></h2><p data-i18n="t4Desc"></p><a href="./academy-how-to-ask.html" data-i18n="open" data-link="a4"></a></article>
+          <article class="tile"><h2 data-i18n="t5Title"></h2><p data-i18n="t5Desc"></p><a href="./academy-tarot-psychology.html" data-i18n="open" data-link="a5"></a></article>
+          <article class="tile"><h2 data-i18n="t6Title"></h2><p data-i18n="t6Desc"></p><a href="./academy-intuition-vs-anxiety.html" data-i18n="open" data-link="a6"></a></article>
+          <article class="tile"><h2 data-i18n="t7Title"></h2><p data-i18n="t7Desc"></p><a href="./academy-ethical-reading.html" data-i18n="open" data-link="a7"></a></article>
+          <article class="tile"><h2 data-i18n="t8Title"></h2><p data-i18n="t8Desc"></p><a href="./academy-choose-reader.html" data-i18n="open" data-link="a8"></a></article>
+          <article class="tile"><h2 data-i18n="t9Title"></h2><p data-i18n="t9Desc"></p><a href="./academy-anti-scam.html" data-i18n="open" data-link="a9"></a></article>
+          <article class="tile"><h2 data-i18n="t10Title"></h2><p data-i18n="t10Desc"></p><a href="./academy-tarot-and-faith.html" data-i18n="open" data-link="a10"></a></article>
+        </div>
+      </section>
       <nav class="site-links" aria-label="Внутренние ссылки">
-        <a href="./news.html">Новости</a>
-        <a href="./tarot-values.html">Карты Таро</a>
-        <a href="./lenormand-values.html">Колода Ленорман</a>
-        <a href="./academy.html">Академия Таро</a>
+        <a href="./news.html" data-i18n="navNews" data-link="news"></a>
+        <a href="./tarot-values.html" data-i18n="navTarot" data-link="tarot"></a>
+        <a href="./lenormand-values.html" data-i18n="navLenormand" data-link="lenormand"></a>
+        <a href="./academy.html" data-i18n="navAcademy" data-link="academy"></a>
       </nav>
-      <footer class="footer">BasilArcana · RU / KZ / EN · Telegram-first experience</footer>
-      <section class="bottom-cta"><span>Разработка ботов и приложений на заказ под ключ — напишите нам</span><div class="bottom-cta-links"><a href="mailto:basiluxd@gmail.com">basiluxd@gmail.com</a><span class="bottom-cta-sep">•</span><a href="https://t.me/uxd_ink" target="_blank" rel="noreferrer">@uxd_ink</a></div></section>
+      <footer class="footer" data-i18n="footer"></footer>
+      <section class="bottom-cta"><span data-i18n="devCta"></span><div class="bottom-cta-links"><a href="mailto:basiluxd@gmail.com">basiluxd@gmail.com</a><span class="bottom-cta-sep">•</span><a href="https://t.me/uxd_ink" target="_blank" rel="noreferrer">@uxd_ink</a></div></section>
     </main>
+    <script>
+      const LANG_STORAGE_KEY = "basilarcana_lang";
+      const copy = {
+        ru: { topLine:"Магический плюс вайб", title:"Академия Таро", lead:"Подробные статьи о картах Таро, арканах, психологии интерпретации и безопасной практике без манипуляций.", open:"Открыть статью", t1Title:"Таро для начинающих: с чего начать", t1Desc:"Пошаговый старт: первая колода, первый вопрос, первый рабочий ритуал практики.", t2Title:"Старшие арканы: как читать большие темы", t2Desc:"Как распознавать жизненные циклы, кризисы роста и решения с долгим эффектом.", t3Title:"Младшие арканы: события, люди и динамика", t3Desc:"Практичное чтение повседневных ситуаций через масти и числовые паттерны.", t4Title:"Как правильно формулировать вопрос к Таро", t4Desc:"Формулы вопросов, которые повышают точность трактовки и дают план действий.", t5Title:"Таро и психология: почему символы работают", t5Desc:"Как символический язык помогает понять эмоции, мотивацию и внутренние конфликты.", t6Title:"Интуиция или тревога: как не перепутать", t6Desc:"Проверки, которые отделяют спокойный внутренний сигнал от тревожного шума.", t7Title:"Этичный расклад: границы в темах любви и отношений", t7Desc:"Как работать с отношениями бережно: без контроля, давления и манипуляций.", t8Title:"Как выбрать таролога и не попасть в зависимость", t8Desc:"Критерии профессионального специалиста и красные флаги небезопасной практики.", t9Title:"Антискам-чеклист: как защититься от мошенников в эзотерике", t9Desc:"Практический список проверок перед оплатой консультации или расклада.", t10Title:"Почему расклады Таро не нарушают религиозные догмы", t10Desc:"Как сочетать личную веру и практику Таро без внутреннего конфликта.", navNews:"Новости", navTarot:"Карты Таро", navLenormand:"Колода Ленорман", navAcademy:"Академия Таро", footer:"BasilArcana · RU / KZ / EN · Telegram-first experience", devCta:"Разработка ботов и приложений на заказ под ключ — напишите нам" },
+        kz: { topLine:"Магия плюс vibe", title:"Таро академиясы", lead:"Таро карталары, аркандар, интерпретация психологиясы және қауіпсіз практика туралы толық мақалалар.", open:"Мақаланы ашу", t1Title:"Жаңадан бастаушыларға Таро: неден бастау керек", t1Desc:"Бірінші колода, бірінші сұрақ және тұрақты тәжірибе ритуалы бойынша қадамдық старт.", t2Title:"Үлкен аркандар: ірі тақырыптарды қалай оқу керек", t2Desc:"Өмірлік циклдер, өсу дағдарыстары және ұзақ әсері бар шешімдерді тану.", t3Title:"Кіші аркандар: оқиғалар, адамдар және динамика", t3Desc:"Күнделікті жағдайларды масть пен сандар паттерні арқылы практикалық оқу.", t4Title:"Тароға сұрақты қалай дұрыс қою керек", t4Desc:"Интерпретация дәлдігін арттырып, әрекет жоспарын беретін сұрақ формулалары.", t5Title:"Таро және психология: символдар неге жұмыс істейді", t5Desc:"Символдық тіл эмоцияны, мотивацияны және ішкі қақтығысты қалай ашады.", t6Title:"Интуиция ма, әлде мазасыздық па: қалай ажырату керек", t6Desc:"Тыныш ішкі сигналды мазасыз ой шуынан бөлуге арналған тексерулер.", t7Title:"Этикалық таралым: махаббат пен қатынастағы шекара", t7Desc:"Қарым-қатынаспен қысымсыз, бақылаусыз және манипуляциясыз жұмыс істеу.", t8Title:"Тарологты қалай таңдап, тәуелділікке түспеу керек", t8Desc:"Кәсіби маман критерийлері және қауіпті практиканың қызыл жалаулары.", t9Title:"Антискам-чеклист: эзотерикадағы алаяқтан қорғану", t9Desc:"Кеңес немесе таралым үшін төлемге дейінгі нақты тексеру тізімі.", t10Title:"Неге Таро таралымдары діни догмаға қайшы емес", t10Desc:"Жеке сенімді және Таро практикасını ішкі қайшылықсыз үйлестіру жолы.", navNews:"Жаңалықтар", navTarot:"Таро карталары", navLenormand:"Ленорман колодасы", navAcademy:"Таро академиясы", footer:"BasilArcana · RU / KZ / EN · Telegram-first experience", devCta:"Тапсырыс бойынша bot және app толық әзірлеу — бізге жазыңыз" },
+        en: { topLine:"Magic plus vibe", title:"Tarot Academy", lead:"In-depth articles on tarot cards, arcana, reading psychology, and safe practice without manipulation.", open:"Open article", t1Title:"Tarot for beginners: where to start", t1Desc:"Step-by-step start with your first deck, first question, and first sustainable routine.", t2Title:"Major Arcana: how to read big themes", t2Desc:"How to identify life cycles, growth crises, and decisions with long-term impact.", t3Title:"Minor Arcana: events, people, and dynamics", t3Desc:"A practical method to read daily situations through suits and number patterns.", t4Title:"How to ask Tarot the right question", t4Desc:"Question formulas that improve reading accuracy and lead to concrete actions.", t5Title:"Tarot and psychology: why symbols work", t5Desc:"How symbolic language helps reveal emotions, motives, and inner conflicts.", t6Title:"Intuition or anxiety: how not to confuse them", t6Desc:"Simple checks to separate calm inner signals from anxious noise.", t7Title:"Ethical reading: boundaries in love and relationship topics", t7Desc:"How to read relationship topics without control, pressure, or manipulation.", t8Title:"How to choose a tarot reader and avoid dependency", t8Desc:"Criteria of a professional reader and red flags of unsafe consulting.", t9Title:"Anti-scam checklist: protect yourself in esoteric services", t9Desc:"A practical checklist to verify before paying for any reading.", t10Title:"Why Tarot readings do not violate religious values", t10Desc:"How to combine personal faith and tarot practice without internal conflict.", navNews:"News", navTarot:"Tarot cards", navLenormand:"Lenormand deck", navAcademy:"Tarot Academy", footer:"BasilArcana · RU / KZ / EN · Telegram-first experience", devCta:"Turnkey custom bot and app development — write to us" }
+      };
+      function withLang(path, lang) {
+        const url = new URL(path, window.location.href);
+        if (lang && lang !== "ru") url.searchParams.set("lang", lang);
+        return `${url.pathname}${url.search}`;
+      }
+      function applyLang(lang) {
+        const resolved = copy[lang] ? lang : "ru";
+        const pack = copy[resolved];
+        document.documentElement.lang = resolved === "kz" ? "kk" : resolved;
+        document.querySelectorAll("[data-i18n]").forEach((node) => {
+          node.textContent = pack[node.dataset.i18n] || "";
+        });
+        document.querySelectorAll(".lang-btn").forEach((btn) => {
+          btn.setAttribute("aria-pressed", String(btn.dataset.lang === resolved));
+        });
+        const links = {
+          news: "./news.html",
+          tarot: "./tarot-values.html",
+          lenormand: "./lenormand-values.html",
+          academy: "./academy.html",
+          a1: "./academy-tarot-basics.html",
+          a2: "./academy-major-arcana.html",
+          a3: "./academy-minor-arcana.html",
+          a4: "./academy-how-to-ask.html",
+          a5: "./academy-tarot-psychology.html",
+          a6: "./academy-intuition-vs-anxiety.html",
+          a7: "./academy-ethical-reading.html",
+          a8: "./academy-choose-reader.html",
+          a9: "./academy-anti-scam.html",
+          a10: "./academy-tarot-and-faith.html"
+        };
+        Object.entries(links).forEach(([key, path]) => {
+          document.querySelectorAll(`[data-link="${key}"]`).forEach((node) => {
+            node.setAttribute("href", withLang(path, resolved));
+          });
+        });
+        document.querySelector(".logo").setAttribute("href", withLang("./index.html", resolved));
+        const url = new URL(window.location.href);
+        if (resolved === "ru") url.searchParams.delete("lang");
+        else url.searchParams.set("lang", resolved);
+        window.history.replaceState({}, "", url.toString());
+        window.localStorage.setItem(LANG_STORAGE_KEY, resolved);
+      }
+      document.querySelectorAll(".lang-btn").forEach((btn) => {
+        btn.addEventListener("click", () => applyLang(btn.dataset.lang));
+      });
+      const initialLang = new URLSearchParams(window.location.search).get("lang");
+      const storedLang = window.localStorage.getItem(LANG_STORAGE_KEY);
+      applyLang(initialLang || storedLang || "ru");
+    </script>
   </body>
 </html>

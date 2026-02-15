@@ -3,8 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Как правильно формулировать вопрос к Таро · BasilArcana</title>
-    <meta name="description" content="Плохой и хороший формат вопроса, который реально работает." />
+    <title>Как правильно задавать вопрос Таро для точного и полезного ответа · BasilArcana</title>
+    <meta name="description" content="Как формулировать вопросы к Таро: рабочие формулы, частые ошибки и примеры, которые делают расклад точнее и полезнее." />
+    <meta name="keywords" content="академия таро, статьи таро, обучение таро, значения арканов, практика таро" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <meta name="theme-color" content="#111218" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -29,16 +30,42 @@
   </head>
   <body>
     <main class="wrap">
-      <header class="topbar"><a class="logo" href="./index.html">Магический плюс вайб</a></header>
-      <article class="article"><h1>Как правильно формулировать вопрос к Таро</h1><p>Хороший вопрос направлен на действие: «что мне важно учесть, чтобы улучшить результат».</p><p>Слабый вопрос звучит как просьба снять ответственность: «скажи, что точно будет». Такой формат делает интерпретацию туманной.</p><p>Добавляйте контекст: срок, сфера, цель. Например: «Что поможет мне стабилизировать доход в ближайший месяц?»</p><p>После расклада обязательно фиксируйте конкретный следующий шаг. Без шага даже точная трактовка теряет ценность.</p></article>
+      <header class="topbar"><a class="logo" href="./index.html" data-i18n="topLine" data-link="home">Магический плюс вайб</a></header>
+      <article class="article"><h1>Как правильно задавать вопрос Таро для точного и полезного ответа</h1><p>Качество расклада начинается с формулировки вопроса. Если вопрос расплывчатый, ответ тоже будет расплывчатым. Если вопрос конкретный и в зоне вашего влияния, карты дают ясный и практичный ориентир.</p><p>Рабочая формула: «Что мне важно учесть, чтобы получить X в срок Y?». В этой конструкции есть цель, контекст и временная рамка, поэтому интерпретация становится более точной и проверяемой.</p><p>Слабые вопросы обычно звучат как попытка снять ответственность: «Скажи точно, что будет». Такой запрос делает человека пассивным и усиливает тревожное ожидание. Таро работает лучше как инструмент осознанного выбора, а не как замена решениям.</p><p>Добавляйте ограничитель по времени: неделя, месяц, квартал. Без горизонта вопрос теряет фокус, а трактовка превращается в общий текст. С временной рамкой проще оценить результат и корректировать стратегию.</p><p>Полезно завершать расклад практическим уточнением: «какой один шаг даст максимальный эффект сейчас?». Этот вопрос переводит смысл карты в действие и делает сессию реально полезной для жизни.</p><p>После расклада зафиксируйте решение письменно: что делаю, когда, по какому критерию пойму прогресс. Такой подход развивает зрелую практику Таро, где символы помогают думать точнее, а не уходить в бесконечные интерпретации.</p></article>
       <nav class="site-links" aria-label="Внутренние ссылки">
-        <a href="./news.html">Новости</a>
-        <a href="./tarot-values.html">Карты Таро</a>
-        <a href="./lenormand-values.html">Колода Ленорман</a>
-        <a href="./academy.html">Академия Таро</a>
+        <a href="./news.html" data-i18n="navNews" data-link="news">Новости</a>
+        <a href="./tarot-values.html" data-i18n="navTarot" data-link="tarot">Карты Таро</a>
+        <a href="./lenormand-values.html" data-i18n="navLenormand" data-link="lenormand">Колода Ленорман</a>
+        <a href="./academy.html" data-i18n="navAcademy" data-link="academy">Академия Таро</a>
       </nav>
-      <footer class="footer">BasilArcana · RU / KZ / EN · Telegram-first experience</footer>
-      <section class="bottom-cta"><span>Разработка ботов и приложений на заказ под ключ — напишите нам</span><div class="bottom-cta-links"><a href="mailto:basiluxd@gmail.com">basiluxd@gmail.com</a><span class="bottom-cta-sep">•</span><a href="https://t.me/uxd_ink" target="_blank" rel="noreferrer">@uxd_ink</a></div></section>
+      <footer class="footer" data-i18n="footer">BasilArcana · RU / KZ / EN · Telegram-first experience</footer>
+      <section class="bottom-cta"><span data-i18n="devCta">Разработка ботов и приложений на заказ под ключ — напишите нам</span><div class="bottom-cta-links"><a href="mailto:basiluxd@gmail.com">basiluxd@gmail.com</a><span class="bottom-cta-sep">•</span><a href="https://t.me/uxd_ink" target="_blank" rel="noreferrer">@uxd_ink</a></div></section>
     </main>
+    <script>
+      const LANG_STORAGE_KEY = "basilarcana_lang";
+      const ui = {
+        ru: { topLine:"Магический плюс вайб", navNews:"Новости", navTarot:"Карты Таро", navLenormand:"Колода Ленорман", navAcademy:"Академия Таро", footer:"BasilArcana · RU / KZ / EN · Telegram-first experience", devCta:"Разработка ботов и приложений на заказ под ключ — напишите нам" },
+        kz: { topLine:"Магия плюс vibe", navNews:"Жаңалықтар", navTarot:"Таро карталары", navLenormand:"Ленорман колодасы", navAcademy:"Таро академиясы", footer:"BasilArcana · RU / KZ / EN · Telegram-first experience", devCta:"Тапсырыс бойынша bot және app толық әзірлеу — бізге жазыңыз" },
+        en: { topLine:"Magic plus vibe", navNews:"News", navTarot:"Tarot cards", navLenormand:"Lenormand deck", navAcademy:"Tarot Academy", footer:"BasilArcana · RU / KZ / EN · Telegram-first experience", devCta:"Turnkey custom bot and app development — write to us" }
+      };
+      function withLang(path, lang){ const url = new URL(path, window.location.href); if(lang && lang !== "ru") url.searchParams.set("lang", lang); return url.pathname + url.search; }
+      function applyLang(lang){
+        const resolved = ui[lang] ? lang : "ru";
+        const pack = ui[resolved];
+        document.documentElement.lang = resolved === "kz" ? "kk" : resolved;
+        document.querySelectorAll("[data-i18n]").forEach((node)=>{ const key = node.dataset.i18n; if(pack[key]) node.textContent = pack[key]; });
+        const links = { home:"./index.html", news:"./news.html", tarot:"./tarot-values.html", lenormand:"./lenormand-values.html", academy:"./academy.html" };
+        Object.entries(links).forEach(([key,path]) => {
+          document.querySelectorAll("[data-link=\"" + key + "\"]").forEach((node)=>node.setAttribute("href", withLang(path, resolved)));
+        });
+        const url = new URL(window.location.href);
+        if(resolved === "ru") url.searchParams.delete("lang"); else url.searchParams.set("lang", resolved);
+        window.history.replaceState({}, "", url.toString());
+        window.localStorage.setItem(LANG_STORAGE_KEY, resolved);
+      }
+      const initialLang = new URLSearchParams(window.location.search).get("lang");
+      const storedLang = window.localStorage.getItem(LANG_STORAGE_KEY);
+      applyLang(initialLang || storedLang || "ru");
+    </script>
   </body>
 </html>

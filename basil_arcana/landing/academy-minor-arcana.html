@@ -3,8 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Младшие арканы: события, люди и динамика · BasilArcana</title>
-    <meta name="description" content="Быстрый способ читать бытовые и рабочие ситуации через масти." />
+    <title>Младшие арканы Таро: как читать события, людей и детали ситуации · BasilArcana</title>
+    <meta name="description" content="Младшие арканы Таро в практике: как читать масти и числа, понимать динамику ситуации и выбирать следующий практический шаг." />
+    <meta name="keywords" content="академия таро, статьи таро, обучение таро, значения арканов, практика таро" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <meta name="theme-color" content="#111218" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -29,16 +30,42 @@
   </head>
   <body>
     <main class="wrap">
-      <header class="topbar"><a class="logo" href="./index.html">Магический плюс вайб</a></header>
-      <article class="article"><h1>Младшие арканы: события, люди и динамика</h1><p>Младшие арканы описывают повседневную реальность: коммуникации, эмоции, ресурсы, рабочие задачи и темп развития событий.</p><p>Масть Жезлов часто про импульс и действие, Кубки про эмоциональные связи, Мечи про решения и границы, Пентакли про материю и устойчивость.</p><p>Сочетание нескольких младших арканов показывает практический сценарий: что уже запущено, где узкое место, какой шаг даст эффект.</p><p>Полезно читать младшие арканы как «операционный план», а не как абстрактную мистику.</p></article>
+      <header class="topbar"><a class="logo" href="./index.html" data-i18n="topLine" data-link="home">Магический плюс вайб</a></header>
+      <article class="article"><h1>Младшие арканы Таро: как читать события, людей и детали ситуации</h1><p>Если старшие арканы про большие этапы, то младшие арканы про повседневную механику: переговоры, эмоции, ресурсы, сроки, конфликты и рабочие задачи. Именно они часто дают самый практичный ответ на вопрос «что делать дальше».</p><p>Базовый ориентир по мастям: Жезлы про инициативу и действие, Кубки про чувства и связь, Мечи про анализ и границы, Пентакли про деньги, тело и устойчивость. Уже один этот уровень помогает быстро собрать контекст расклада.</p><p>Число карты уточняет фазу процесса. Тузы часто показывают старт импульса, середина ряда — развитие или напряжение, десятки — завершение цикла и результат накопленных решений. Так расклад читается как динамика, а не набор отдельных слов.</p><p>Полезный алгоритм: 1) что уже происходит, 2) где узкое место, 3) какой шаг улучшит позицию в ближайшие 48 часов. Младшие арканы особенно сильны именно в таком прикладном формате, где нужен не прогноз ради прогноза, а действие.</p><p>Частая ошибка — переоценивать «негативные» карты и игнорировать контекст. Например, карта напряжения может не «обещать провал», а подсвечивать конкретный процесс, который стоит пересобрать: сроки, коммуникацию, приоритеты.</p><p>Чтобы быстрее расти в чтении младших арканов, фиксируйте связки карт и реальный итог. Через несколько недель у вас появится свой рабочий словарь значений, основанный на практике, а не только на книжных интерпретациях.</p></article>
       <nav class="site-links" aria-label="Внутренние ссылки">
-        <a href="./news.html">Новости</a>
-        <a href="./tarot-values.html">Карты Таро</a>
-        <a href="./lenormand-values.html">Колода Ленорман</a>
-        <a href="./academy.html">Академия Таро</a>
+        <a href="./news.html" data-i18n="navNews" data-link="news">Новости</a>
+        <a href="./tarot-values.html" data-i18n="navTarot" data-link="tarot">Карты Таро</a>
+        <a href="./lenormand-values.html" data-i18n="navLenormand" data-link="lenormand">Колода Ленорман</a>
+        <a href="./academy.html" data-i18n="navAcademy" data-link="academy">Академия Таро</a>
       </nav>
-      <footer class="footer">BasilArcana · RU / KZ / EN · Telegram-first experience</footer>
-      <section class="bottom-cta"><span>Разработка ботов и приложений на заказ под ключ — напишите нам</span><div class="bottom-cta-links"><a href="mailto:basiluxd@gmail.com">basiluxd@gmail.com</a><span class="bottom-cta-sep">•</span><a href="https://t.me/uxd_ink" target="_blank" rel="noreferrer">@uxd_ink</a></div></section>
+      <footer class="footer" data-i18n="footer">BasilArcana · RU / KZ / EN · Telegram-first experience</footer>
+      <section class="bottom-cta"><span data-i18n="devCta">Разработка ботов и приложений на заказ под ключ — напишите нам</span><div class="bottom-cta-links"><a href="mailto:basiluxd@gmail.com">basiluxd@gmail.com</a><span class="bottom-cta-sep">•</span><a href="https://t.me/uxd_ink" target="_blank" rel="noreferrer">@uxd_ink</a></div></section>
     </main>
+    <script>
+      const LANG_STORAGE_KEY = "basilarcana_lang";
+      const ui = {
+        ru: { topLine:"Магический плюс вайб", navNews:"Новости", navTarot:"Карты Таро", navLenormand:"Колода Ленорман", navAcademy:"Академия Таро", footer:"BasilArcana · RU / KZ / EN · Telegram-first experience", devCta:"Разработка ботов и приложений на заказ под ключ — напишите нам" },
+        kz: { topLine:"Магия плюс vibe", navNews:"Жаңалықтар", navTarot:"Таро карталары", navLenormand:"Ленорман колодасы", navAcademy:"Таро академиясы", footer:"BasilArcana · RU / KZ / EN · Telegram-first experience", devCta:"Тапсырыс бойынша bot және app толық әзірлеу — бізге жазыңыз" },
+        en: { topLine:"Magic plus vibe", navNews:"News", navTarot:"Tarot cards", navLenormand:"Lenormand deck", navAcademy:"Tarot Academy", footer:"BasilArcana · RU / KZ / EN · Telegram-first experience", devCta:"Turnkey custom bot and app development — write to us" }
+      };
+      function withLang(path, lang){ const url = new URL(path, window.location.href); if(lang && lang !== "ru") url.searchParams.set("lang", lang); return url.pathname + url.search; }
+      function applyLang(lang){
+        const resolved = ui[lang] ? lang : "ru";
+        const pack = ui[resolved];
+        document.documentElement.lang = resolved === "kz" ? "kk" : resolved;
+        document.querySelectorAll("[data-i18n]").forEach((node)=>{ const key = node.dataset.i18n; if(pack[key]) node.textContent = pack[key]; });
+        const links = { home:"./index.html", news:"./news.html", tarot:"./tarot-values.html", lenormand:"./lenormand-values.html", academy:"./academy.html" };
+        Object.entries(links).forEach(([key,path]) => {
+          document.querySelectorAll("[data-link=\"" + key + "\"]").forEach((node)=>node.setAttribute("href", withLang(path, resolved)));
+        });
+        const url = new URL(window.location.href);
+        if(resolved === "ru") url.searchParams.delete("lang"); else url.searchParams.set("lang", resolved);
+        window.history.replaceState({}, "", url.toString());
+        window.localStorage.setItem(LANG_STORAGE_KEY, resolved);
+      }
+      const initialLang = new URLSearchParams(window.location.search).get("lang");
+      const storedLang = window.localStorage.getItem(LANG_STORAGE_KEY);
+      applyLang(initialLang || storedLang || "ru");
+    </script>
   </body>
 </html>

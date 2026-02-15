@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Новая фича BasilArcana: Карта дня · Пресс-релиз</title>
+    <meta name="description" content="Пресс-релиз BasilArcana о запуске функции Карта дня: ежедневный фокус, интерпретация и практический шаг на 24 часа." />
+    <meta name="keywords" content="карта дня, card of the day, basil arcana, ежедневный расклад, пресс-релиз" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <link rel="canonical" href="https://www.basilarcana.com/news-card-of-the-day.html" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Новая фича BasilArcana: Карта дня" />
+    <meta property="og:description" content="В BasilArcana появилась Карта дня: короткий ежедневный формат для фокуса и осознанного действия." />
+    <meta property="og:url" content="https://www.basilarcana.com/news-card-of-the-day.html" />
+    <meta property="og:image" content="https://cdn.basilarcana.com/sofia/sofia.webp" />
+    <meta property="article:published_time" content="2026-02-15" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Новая фича BasilArcana: Карта дня" />
+    <meta name="twitter:description" content="Релиз Карты дня: персональный ежедневный ориентир с интерпретацией и конкретным шагом." />
+    <meta name="twitter:image" content="https://cdn.basilarcana.com/sofia/sofia.webp" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      :root { --text:#f3f3f8; --text-soft:#bbb8ca; --accent-soft:#e3d2ff; --card:rgba(255,255,255,0.06); --card-border:rgba(184,137,255,0.32); }
+      *{box-sizing:border-box;} html,body{margin:0;min-height:100%;}
+      body{font-family:"Manrope",sans-serif;color:var(--text);background:radial-gradient(circle at 15% 20%, rgba(184,137,255,0.12), transparent 40%),linear-gradient(150deg,#14151b,#1a1b24 55%,#15161d);}
+      .stars,.stars::before{position:fixed;inset:0;pointer-events:none;content:"";background-repeat:repeat;}
+      .stars{z-index:-2;opacity:.22;background-image:radial-gradient(circle,rgba(255,255,255,.13) 1px,transparent 1px);background-size:4px 4px;}
+      .stars::before{z-index:-1;opacity:.28;background-image:radial-gradient(circle,rgba(255,255,255,.16) 1.3px,transparent 1.3px);background-size:120px 120px;}
+      .wrap{width:min(1120px,calc(100% - 2rem));margin:0 auto;padding:1.05rem 0 1.6rem;}
+      .topbar{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:0 0 .75rem;}
+      .logo{font-family:"Space Grotesk",sans-serif;font-weight:600;letter-spacing:.02em;font-size:clamp(.95rem,1.35vw,1.2rem);color:var(--accent-soft);text-decoration:none;}
+      .langs{display:inline-flex;gap:.45rem;background:rgba(255,255,255,.08);border:1px solid var(--card-border);border-radius:999px;padding:.28rem;}
+      .lang-btn{border:0;background:transparent;color:var(--text-soft);border-radius:999px;font:inherit;font-weight:600;letter-spacing:.03em;padding:.46rem .82rem;cursor:pointer;}
+      .lang-btn[aria-pressed="true"]{color:#100d17;background:linear-gradient(135deg,#b889ff,#e3d2ff);}
+      .article{border:1px solid var(--card-border);border-radius:20px;background:var(--card);padding:1.35rem;}
+      h1{margin:0;font-family:"Space Grotesk",sans-serif;font-size:clamp(1.5rem,3vw,2.5rem);} .meta{margin:.7rem 0 1rem;color:var(--text-soft);font-size:.9rem;}
+      p{margin:.72rem 0;color:var(--text-soft);line-height:1.58;font-size:1rem;max-width:74ch;}
+      .site-links{display:flex;flex-wrap:wrap;gap:.75rem 1.05rem;margin:1.35rem 0 .65rem;padding:.66rem .72rem;border:1px solid var(--card-border);border-radius:12px;background:rgba(255,255,255,.06);} .site-links a{color:var(--accent-soft);text-decoration:none;border-bottom:1px solid rgba(227,210,255,.38);font-size:.88rem;font-weight:700;}
+      .footer{border-top:1px solid rgba(184,137,255,.3);margin:0 0 .5rem;padding:.58rem 0 .15rem;color:var(--text-soft);font-size:.82rem;}
+      .bottom-cta{background:linear-gradient(135deg,#f5ebff,#c084ff 52%,#a45cf8);color:#10091c;border:1px solid rgba(255,255,255,.35);border-radius:12px;padding:.65rem .8rem;margin-bottom:.4rem;display:flex;gap:.5rem;align-items:center;justify-content:space-between;font-weight:700;font-size:.88rem;} .bottom-cta-links{display:inline-flex;align-items:center;gap:.65rem;flex-wrap:wrap;font-weight:800;} .bottom-cta a{color:#10091c;text-decoration:none;border-bottom:1px solid rgba(16,9,28,.4);} .bottom-cta-sep{opacity:.6;}
+      @media (max-width:960px){.bottom-cta{flex-direction:column;align-items:flex-start;}}
+    </style>
+  </head>
+  <body>
+    <div class="stars"></div>
+    <main class="wrap">
+      <header class="topbar"><a class="logo" href="./index.html" data-i18n="topLine"></a><div class="langs" role="group" aria-label="Language switcher"><button class="lang-btn" data-lang="ru" aria-pressed="true">RU</button><button class="lang-btn" data-lang="kz" aria-pressed="false">KZ</button><button class="lang-btn" data-lang="en" aria-pressed="false">EN</button></div></header>
+      <article class="article"><h1 data-i18n="title"></h1><p class="meta" data-i18n="meta"></p><p data-i18n="p1"></p><p data-i18n="p2"></p><p data-i18n="p3"></p><p data-i18n="p4"></p></article>
+      <nav class="site-links" aria-label="Внутренние ссылки"><a href="./news.html" data-i18n="navNews" data-link="news"></a><a href="./tarot-values.html" data-i18n="navTarot" data-link="tarot"></a><a href="./lenormand-values.html" data-i18n="navLenormand" data-link="lenormand"></a><a href="./academy.html" data-i18n="navAcademy" data-link="academy"></a></nav>
+      <footer class="footer" data-i18n="footer"></footer>
+      <section class="bottom-cta"><span data-i18n="devCta"></span><div class="bottom-cta-links"><a href="mailto:basiluxd@gmail.com">basiluxd@gmail.com</a><span class="bottom-cta-sep">•</span><a href="https://t.me/uxd_ink" target="_blank" rel="noreferrer">@uxd_ink</a></div></section>
+    </main>
+
+    <script>
+      const LANG_STORAGE_KEY = "basilarcana_lang";
+      const copy = {
+        ru: { topLine:"Магический плюс вайб", title:"Новая фича BasilArcana: Карта дня", meta:"Пресс-релиз · 15 февраля 2026", p1:"BasilArcana запустила новую функцию «Карта дня» — короткий ежедневный формат, который помогает пользователю быстро сфокусироваться на главной теме текущего дня.", p2:"Сценарий включает выбор карты, лаконичную интерпретацию и практический ориентир на ближайшие 24 часа. Формат создан для тех, кому важна регулярная польза без длинных раскладов.", p3:"«Карта дня» встроена в пользовательский поток и сочетается с остальными продуктами платформы: при необходимости пользователь может перейти от короткого фокуса к более глубокому чтению.", p4:"Новая фича уже доступна в BasilArcana внутри Telegram mini app и работает в связке с языковыми и персональными настройками пользователя.", navNews:"Новости", navTarot:"Карты Таро", navLenormand:"Колода Ленорман", navAcademy:"Академия Таро", footer:"BasilArcana · RU / KZ / EN · Telegram-first experience", devCta:"Разработка ботов и приложений на заказ под ключ — напишите нам" },
+        kz: { topLine:"Магия плюс vibe", title:"BasilArcana-ның жаңа функциясы: Күн картасы", meta:"Пресс-релиз · 2026 жылғы 15 ақпан", p1:"BasilArcana «Күн картасы» атты жаңа функцияны іске қосты — бұл пайдаланушыға күннің басты тақырыбына тез фокус беретін қысқа күнделікті формат.", p2:"Сценарий карта таңдаудан, қысқа интерпретациядан және алдағы 24 сағатқа арналған практикалық қадамнан тұрады. Формат ұзақ таралымсыз тұрақты пайда алғысы келетіндерге арналған.", p3:"«Күн картасы» жалпы пайдаланушы ағынына біріктірілген және платформаның басқа өнімдерімен үйлеседі: қажет болса, қысқа фокустан терең оқуға өтуге болады.", p4:"Жаңа функция BasilArcana-да Telegram mini app ішінде қолжетімді және пайдаланушының тілдік әрі жеке баптауларымен бірге жұмыс істейді.", navNews:"Жаңалықтар", navTarot:"Таро карталары", navLenormand:"Ленорман колодасы", navAcademy:"Таро академиясы", footer:"BasilArcana · RU / KZ / EN · Telegram-first experience", devCta:"Тапсырыс бойынша bot және app толық әзірлеу — бізге жазыңыз" },
+        en: { topLine:"Magic plus vibe", title:"New BasilArcana feature: Card of the Day", meta:"Press release · February 15, 2026", p1:"BasilArcana has launched a new Card of the Day feature, a short daily format designed to help users focus on the most relevant theme of the day.", p2:"The flow includes a card draw, concise interpretation, and a practical next step for the next 24 hours. It is built for users who want daily value without long reading sessions.", p3:"Card of the Day is integrated into the main product flow and works alongside deeper reading formats, allowing users to scale from quick focus to a full interpretation when needed.", p4:"The feature is already live in BasilArcana inside the Telegram mini app and works with user language and personalization settings.", navNews:"News", navTarot:"Tarot cards", navLenormand:"Lenormand deck", navAcademy:"Tarot Academy", footer:"BasilArcana · RU / KZ / EN · Telegram-first experience", devCta:"Turnkey custom bot and app development — write to us" }
+      };
+      function withLang(path, lang){ const url = new URL(path, window.location.href); if(lang && lang !== "ru") url.searchParams.set("lang", lang); return `${url.pathname}${url.search}`; }
+      function applyLang(lang){ const resolved = copy[lang] ? lang : "ru"; const pack = copy[resolved]; document.documentElement.lang = resolved === "kz" ? "kk" : resolved; document.querySelectorAll("[data-i18n]").forEach((node)=>{ node.textContent = pack[node.dataset.i18n] || ""; }); document.querySelectorAll(".lang-btn").forEach((btn)=>btn.setAttribute("aria-pressed", String(btn.dataset.lang === resolved))); document.querySelector(".logo").setAttribute("href", withLang("./index.html", resolved)); document.querySelector('[data-link="news"]').setAttribute("href", withLang("./news.html", resolved)); document.querySelector('[data-link="tarot"]').setAttribute("href", withLang("./tarot-values.html", resolved)); document.querySelector('[data-link="lenormand"]').setAttribute("href", withLang("./lenormand-values.html", resolved)); document.querySelector('[data-link="academy"]').setAttribute("href", withLang("./academy.html", resolved)); const url = new URL(window.location.href); if(resolved === "ru") url.searchParams.delete("lang"); else url.searchParams.set("lang", resolved); window.history.replaceState({}, "", url.toString()); window.localStorage.setItem(LANG_STORAGE_KEY, resolved); }
+      document.querySelectorAll(".lang-btn").forEach((btn)=>btn.addEventListener("click",()=>applyLang(btn.dataset.lang)));
+      const initialLang = new URLSearchParams(window.location.search).get("lang");
+      const storedLang = window.localStorage.getItem(LANG_STORAGE_KEY);
+      applyLang(initialLang || storedLang || "ru");
+    </script>
+  </body>
+</html>
