@@ -891,13 +891,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (context) {
-        return SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(18, 14, 18, 20),
-            child: SingleChildScrollView(
+        return FractionallySizedBox(
+          heightFactor: 0.95,
+          child: SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(18, 14, 18, 20),
               child: Column(
-                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Center(
@@ -911,14 +911,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       ),
                     ),
                   ),
-                  const SizedBox(height: 14),
-                  Text(
-                    copy.modalTitle,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w700,
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          copy.modalTitle,
+                          style:
+                              Theme.of(context).textTheme.titleLarge?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                  ),
                         ),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: const Icon(Icons.close),
+                        tooltip: copy.closeLabel,
+                        visualDensity: VisualDensity.compact,
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 8),
                   Row(
                     children: [
                       Expanded(
@@ -937,19 +950,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       const SizedBox(width: 8),
                       Expanded(
                         child: _StatPill(
-                          label: copy.totalReadingsLabel,
-                          value: '${_streakStats.totalReadings}',
+                          label: copy.activeDaysLabel,
+                          value: '${_streakStats.activeDays}',
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 8),
-                  if (_loadingStreak)
-                    const SizedBox(
-                      height: 28,
-                      child: Center(
-                          child: CircularProgressIndicator(strokeWidth: 2)),
-                    ),
+                  if (_loadingStreak) const _HomeMagicLoadingCard(),
                   if (!_loadingStreak && _streakStats.lastActiveAt != null)
                     Text(
                       copy.lastActiveLabel(_streakStats.lastActiveAt!),
@@ -966,29 +974,33 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         ),
                   ),
                   const SizedBox(height: 8),
-                  if (topCards.isEmpty)
-                    Text(
-                      copy.topCardsEmpty,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onSurface.withValues(alpha: 0.7),
+                  Expanded(
+                    child: topCards.isEmpty
+                        ? Text(
+                            copy.topCardsEmpty,
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: colorScheme.onSurface
+                                          .withValues(alpha: 0.7),
+                                    ),
+                          )
+                        : Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              for (var i = 0; i < topCards.length; i++) ...[
+                                Expanded(
+                                  child: _MiniTopCardTile(
+                                    rank: i + 1,
+                                    stat: topCards[i],
+                                    hitsLabel: copy.hitsLabel,
+                                  ),
+                                ),
+                                if (i != topCards.length - 1)
+                                  const SizedBox(width: 10),
+                              ],
+                            ],
                           ),
-                    )
-                  else
-                    Row(
-                      children: [
-                        for (var i = 0; i < topCards.length; i++) ...[
-                          Expanded(
-                            child: _MiniTopCardTile(
-                              rank: i + 1,
-                              stat: topCards[i],
-                              hitsLabel: copy.hitsLabel,
-                            ),
-                          ),
-                          if (i != topCards.length - 1)
-                            const SizedBox(width: 8),
-                        ],
-                      ],
-                    ),
+                  ),
                 ],
               ),
             ),
@@ -1048,66 +1060,111 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         final interpretation = _dailyCardInterpretationCardId == dailyCard.id
             ? _dailyCardInterpretation
             : null;
-        return SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(18, 14, 18, 20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: colorScheme.outlineVariant.withValues(alpha: 0.8),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 14),
-                Text(
-                  copy.dailyCardModalTitle,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  dailyCard.name,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: colorScheme.primary,
-                        fontWeight: FontWeight.w700,
-                      ),
-                ),
-                const SizedBox(height: 8),
-                if (dailyCard.imageUrl.trim().isNotEmpty)
+        return FractionallySizedBox(
+          heightFactor: 0.95,
+          child: SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(18, 14, 18, 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Center(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.network(
-                        dailyCard.imageUrl,
-                        height: 160,
-                        fit: BoxFit.cover,
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color:
+                            colorScheme.outlineVariant.withValues(alpha: 0.8),
+                        borderRadius: BorderRadius.circular(8),
                       ),
                     ),
                   ),
-                const SizedBox(height: 10),
-                if (loading)
-                  const SizedBox(
-                    height: 36,
-                    child: Center(
-                        child: CircularProgressIndicator(strokeWidth: 2)),
-                  )
-                else
-                  Text(
-                    interpretation ?? copy.dailyCardPending,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.onSurface.withValues(alpha: 0.9),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          copy.dailyCardModalTitle,
+                          style:
+                              Theme.of(context).textTheme.titleLarge?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                  ),
                         ),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: const Icon(Icons.close),
+                        tooltip: copy.closeLabel,
+                        visualDensity: VisualDensity.compact,
+                      ),
+                    ],
                   ),
-              ],
+                  const SizedBox(height: 6),
+                  Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 260),
+                      child: Column(
+                        children: [
+                          Text(
+                            dailyCard.name,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(
+                                  color: colorScheme.primary,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                          ),
+                          const SizedBox(height: 8),
+                          AspectRatio(
+                            aspectRatio: 0.68,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(14),
+                              child: Image.network(
+                                dailyCard.imageUrl,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => Container(
+                                  color: colorScheme.surfaceContainerHighest
+                                      .withValues(alpha: 0.32),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            dailyCard.meaning.general.trim().isEmpty
+                                ? copy.dailyCardFallback
+                                : dailyCard.meaning.general.trim(),
+                            textAlign: TextAlign.center,
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: colorScheme.onSurface
+                                          .withValues(alpha: 0.8),
+                                    ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  if (loading)
+                    const _HomeMagicLoadingCard()
+                  else
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Text(
+                          interpretation ?? copy.dailyCardPending,
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: colorScheme.onSurface
+                                        .withValues(alpha: 0.9),
+                                  ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ),
           ),
         );
@@ -1339,7 +1396,7 @@ class _HomeStreakCopy {
     required this.modalTitle,
     required this.currentStreakLabel,
     required this.bestStreakLabel,
-    required this.totalReadingsLabel,
+    required this.activeDaysLabel,
     required this.topCardsTitle,
     required this.topCardsEmpty,
     required this.hitsLabel,
@@ -1349,13 +1406,14 @@ class _HomeStreakCopy {
     required this.dailyCardPending,
     required this.dailyCardError,
     required this.lastActivePrefix,
+    required this.closeLabel,
   });
 
   final String tileSubtitle;
   final String modalTitle;
   final String currentStreakLabel;
   final String bestStreakLabel;
-  final String totalReadingsLabel;
+  final String activeDaysLabel;
   final String topCardsTitle;
   final String topCardsEmpty;
   final String hitsLabel;
@@ -1365,6 +1423,7 @@ class _HomeStreakCopy {
   final String dailyCardPending;
   final String dailyCardError;
   final String lastActivePrefix;
+  final String closeLabel;
 
   String tileTitle(int days) => '$days🔥';
 
@@ -1383,16 +1442,17 @@ class _HomeStreakCopy {
         modalTitle: 'Твой streak',
         currentStreakLabel: 'Сейчас',
         bestStreakLabel: 'Рекорд',
-        totalReadingsLabel: 'Раскладов',
+        activeDaysLabel: 'Активных дней',
         topCardsTitle: 'Топ карт',
         topCardsEmpty: 'Пока нет статистики по картам.',
         hitsLabel: 'Выпадала',
         dailyCardTileTitle: 'Карта дня',
         dailyCardModalTitle: 'Карта дня',
         dailyCardFallback: 'Подбираем карту...',
-        dailyCardPending: 'Нажми еще раз через пару секунд.',
+        dailyCardPending: 'Смотрим, что карта дня значит именно для тебя…',
         dailyCardError: 'Не получилось получить трактовку. Попробуй еще раз.',
         lastActivePrefix: 'Последняя активность',
+        closeLabel: 'Закрыть',
       );
     }
     if (code == 'kk') {
@@ -1401,16 +1461,17 @@ class _HomeStreakCopy {
         modalTitle: 'Сенің streak',
         currentStreakLabel: 'Қазір',
         bestStreakLabel: 'Рекорд',
-        totalReadingsLabel: 'Ашылымдар',
+        activeDaysLabel: 'Белсенді күндер',
         topCardsTitle: 'Топ карталар',
         topCardsEmpty: 'Карта статистикасы әзірге жоқ.',
         hitsLabel: 'Түскен саны',
         dailyCardTileTitle: 'Күн картасы',
         dailyCardModalTitle: 'Күн картасы',
         dailyCardFallback: 'Карта таңдалып жатыр...',
-        dailyCardPending: 'Бірнеше секундтан кейін қайта ашып көр.',
+        dailyCardPending: 'Күн картасының саған не айтатынын қарап жатырмыз…',
         dailyCardError: 'Түсіндірмені алу мүмкін болмады. Қайта көріңіз.',
         lastActivePrefix: 'Соңғы белсенділік',
+        closeLabel: 'Жабу',
       );
     }
     return const _HomeStreakCopy(
@@ -1418,16 +1479,17 @@ class _HomeStreakCopy {
       modalTitle: 'Your streak',
       currentStreakLabel: 'Current',
       bestStreakLabel: 'Best',
-      totalReadingsLabel: 'Readings',
+      activeDaysLabel: 'Active days',
       topCardsTitle: 'Top cards',
       topCardsEmpty: 'No card stats yet.',
       hitsLabel: 'Drawn',
       dailyCardTileTitle: 'Daily card',
       dailyCardModalTitle: 'Daily card',
       dailyCardFallback: 'Selecting card...',
-      dailyCardPending: 'Open again in a couple of seconds.',
+      dailyCardPending: 'Reading what this card means for you today...',
       dailyCardError: 'Could not load interpretation. Try again.',
       lastActivePrefix: 'Last activity',
+      closeLabel: 'Close',
     );
   }
 }
@@ -1569,16 +1631,27 @@ class _MiniTopCardTile extends StatelessWidget {
                 ),
           ),
           const SizedBox(height: 6),
-          if (stat.imageUrl.trim().isNotEmpty)
-            ClipRRect(
+          Expanded(
+            child: ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: Image.network(
-                stat.imageUrl,
-                height: 72,
-                width: double.infinity,
-                fit: BoxFit.cover,
+              child: AspectRatio(
+                aspectRatio: 0.68,
+                child: stat.imageUrl.trim().isNotEmpty
+                    ? Image.network(
+                        stat.imageUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Container(
+                          color: colorScheme.surfaceContainerHighest
+                              .withValues(alpha: 0.35),
+                        ),
+                      )
+                    : Container(
+                        color: colorScheme.surfaceContainerHighest
+                            .withValues(alpha: 0.35),
+                      ),
               ),
             ),
+          ),
           const SizedBox(height: 6),
           Text(
             stat.name,
@@ -1594,6 +1667,66 @@ class _MiniTopCardTile extends StatelessWidget {
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
                   color: colorScheme.onSurface.withValues(alpha: 0.68),
                 ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HomeMagicLoadingCard extends StatelessWidget {
+  const _HomeMagicLoadingCard();
+
+  String _label(BuildContext context) {
+    final code = Localizations.localeOf(context).languageCode;
+    if (code == 'ru') {
+      return 'Подожди пару секунд…';
+    }
+    if (code == 'kk') {
+      return 'Бірнеше секунд күте тұр…';
+    }
+    return 'Give me a couple of seconds...';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            colorScheme.primary.withValues(alpha: 0.22),
+            colorScheme.surfaceContainerHighest.withValues(alpha: 0.32),
+          ],
+        ),
+        border: Border.all(
+          color: colorScheme.primary.withValues(alpha: 0.55),
+        ),
+      ),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 22,
+            height: 22,
+            child: CircularProgressIndicator(
+              strokeWidth: 2.4,
+              valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+              backgroundColor: Colors.white.withValues(alpha: 0.22),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              _label(context),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
           ),
         ],
       ),

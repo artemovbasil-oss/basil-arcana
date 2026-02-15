@@ -130,6 +130,19 @@ async function ensureSchema() {
   );
 
   await pool.query(`
+    CREATE TABLE IF NOT EXISTS user_daily_activity (
+      id BIGSERIAL PRIMARY KEY,
+      telegram_user_id BIGINT NOT NULL REFERENCES users(telegram_user_id) ON DELETE CASCADE,
+      activity_date DATE NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      UNIQUE (telegram_user_id, activity_date)
+    );
+  `);
+  await pool.query(
+    "CREATE INDEX IF NOT EXISTS idx_user_daily_activity_user_date ON user_daily_activity (telegram_user_id, activity_date DESC);"
+  );
+
+  await pool.query(`
     CREATE TABLE IF NOT EXISTS user_perks_state (
       telegram_user_id BIGINT PRIMARY KEY REFERENCES users(telegram_user_id) ON DELETE CASCADE,
       free_five_cards_credits INTEGER NOT NULL DEFAULT 0,
@@ -769,51 +782,64 @@ async function clearUserQueryHistory({ telegramUserId }) {
   };
 }
 
-async function getUserReadingStreak({ telegramUserId }) {
+async function recordUserDailyActivity({ telegramUserId, occurredAt = new Date() }) {
+  if (!telegramUserId) {
+    return;
+  }
+  const date = new Date(occurredAt);
+  if (!Number.isFinite(date.getTime())) {
+    return;
+  }
+  const utcDate = new Date(
+    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())
+  );
+  const isoDate = utcDate.toISOString().slice(0, 10);
+  await getDb().query(
+    `
+    INSERT INTO user_daily_activity (telegram_user_id, activity_date)
+    VALUES ($1, $2::date)
+    ON CONFLICT (telegram_user_id, activity_date) DO NOTHING;
+    `,
+    [telegramUserId, isoDate]
+  );
+}
+
+async function getUserVisitStreak({ telegramUserId }) {
   if (!telegramUserId) {
     return {
       currentStreakDays: 0,
       longestStreakDays: 0,
       activeDays: 0,
-      totalReadings: 0,
       lastActiveAt: null
     };
   }
 
-  const [dailyRowsRes, totalRes] = await Promise.all([
-    getDb().query(
-      `
-      SELECT
-        (created_at AT TIME ZONE 'UTC')::date AS reading_date,
-        COUNT(*)::int AS readings_count,
-        MAX(created_at) AS last_created_at
+  const dailyRowsRes = await getDb().query(
+    `
+    WITH all_days AS (
+      SELECT activity_date AS day, created_at
+      FROM user_daily_activity
+      WHERE telegram_user_id = $1
+      UNION ALL
+      SELECT (created_at AT TIME ZONE 'UTC')::date AS day, created_at
       FROM user_query_history
       WHERE telegram_user_id = $1
         AND query_type LIKE 'reading_%'
-      GROUP BY reading_date
-      ORDER BY reading_date DESC;
-      `,
-      [telegramUserId]
-    ),
-    getDb().query(
-      `
-      SELECT COUNT(*)::int AS total
-      FROM user_query_history
-      WHERE telegram_user_id = $1
-        AND query_type LIKE 'reading_%';
-      `,
-      [telegramUserId]
     )
-  ]);
+    SELECT day::text AS activity_date, MAX(created_at) AS last_created_at
+    FROM all_days
+    GROUP BY day
+    ORDER BY day DESC;
+    `,
+    [telegramUserId]
+  );
 
   const rows = dailyRowsRes.rows || [];
-  const totalReadings = Number(totalRes.rows[0]?.total || 0);
   if (rows.length === 0) {
     return {
       currentStreakDays: 0,
       longestStreakDays: 0,
       activeDays: 0,
-      totalReadings,
       lastActiveAt: null
     };
   }
@@ -874,7 +900,6 @@ async function getUserReadingStreak({ telegramUserId }) {
     currentStreakDays,
     longestStreakDays,
     activeDays,
-    totalReadings,
     lastActiveAt
   };
 }
@@ -893,5 +918,6 @@ module.exports = {
   logUserQuery,
   listRecentUserQueries,
   clearUserQueryHistory,
-  getUserReadingStreak
+  recordUserDailyActivity,
+  getUserVisitStreak
 };

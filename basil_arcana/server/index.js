@@ -51,7 +51,8 @@ const {
   logUserQuery,
   listRecentUserQueries,
   clearUserQueryHistory,
-  getUserReadingStreak
+  recordUserDailyActivity,
+  getUserVisitStreak
 } = require('./src/db');
 
 const app = express();
@@ -755,7 +756,8 @@ app.get('/api/user/streak', telegramAuthMiddleware, async (req, res) => {
   }
   await upsertTelegramUserFromRequest(req);
   await tryClaimReferralForRequest(req);
-  const data = await getUserReadingStreak({ telegramUserId });
+  await recordUserDailyActivity({ telegramUserId });
+  const data = await getUserVisitStreak({ telegramUserId });
   return res.json({
     ok: true,
     ...data,
@@ -1554,7 +1556,7 @@ app.post('/api/home/daily-card', telegramAuthMiddleware, async (req, res) => {
     );
     return res.json({
       ok: true,
-      interpretation: appendSofiaPromo(interpretation, locale),
+      interpretation,
       requestId: req.requestId
     });
   } catch (err) {

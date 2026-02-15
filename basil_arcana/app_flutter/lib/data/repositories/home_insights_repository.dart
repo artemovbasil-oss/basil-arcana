@@ -11,21 +11,18 @@ class HomeStreakStats {
     required this.currentStreakDays,
     required this.longestStreakDays,
     required this.activeDays,
-    required this.totalReadings,
     this.lastActiveAt,
   });
 
   final int currentStreakDays;
   final int longestStreakDays;
   final int activeDays;
-  final int totalReadings;
   final DateTime? lastActiveAt;
 
   static const empty = HomeStreakStats(
     currentStreakDays: 0,
     longestStreakDays: 0,
     activeDays: 0,
-    totalReadings: 0,
   );
 }
 
@@ -49,7 +46,6 @@ class HomeInsightsRepository {
         currentStreakDays: (decoded['currentStreakDays'] as num?)?.toInt() ?? 0,
         longestStreakDays: (decoded['longestStreakDays'] as num?)?.toInt() ?? 0,
         activeDays: (decoded['activeDays'] as num?)?.toInt() ?? 0,
-        totalReadings: (decoded['totalReadings'] as num?)?.toInt() ?? 0,
         lastActiveAt: decoded['lastActiveAt'] is String
             ? DateTime.tryParse(decoded['lastActiveAt'] as String)?.toLocal()
             : null,
