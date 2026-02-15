@@ -18,20 +18,27 @@
       .wrap{width:min(1120px,calc(100% - 2rem));margin:0 auto;padding:1.05rem 0 1.6rem;}
       .topbar{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:0 0 .75rem;}
       .logo{font-family:"Space Grotesk",sans-serif;font-weight:600;letter-spacing:.02em;font-size:clamp(.95rem,1.35vw,1.2rem);color:var(--accent-soft);text-decoration:none;}
-      .article{border:1px solid var(--card-border);border-radius:20px;background:var(--card);padding:1.35rem;}
-      h1{margin:0;font-family:"Space Grotesk",sans-serif;font-size:clamp(1.5rem,3vw,2.5rem);} p{margin:.72rem 0;color:var(--text-soft);line-height:1.58;font-size:1rem;max-width:74ch;}
+      .langs{display:inline-flex;gap:.45rem;background:rgba(255,255,255,.08);border:1px solid var(--card-border);border-radius:999px;padding:.28rem;}
+      .lang-btn{border:0;background:transparent;color:var(--text-soft);border-radius:999px;font:inherit;font-weight:600;letter-spacing:.03em;padding:.46rem .82rem;cursor:pointer;}
+      .lang-btn[aria-pressed="true"]{color:#100d17;background:linear-gradient(135deg,#b889ff,#e3d2ff);}
+      .article{border:1px solid var(--card-border);border-radius:20px;background:var(--card);padding:1.85rem 1.95rem 2rem;}
+      h1{margin:0 0 .85rem;font-family:"Space Grotesk",sans-serif;font-size:clamp(1.55rem,3vw,2.5rem);line-height:1.15;}
+      .article p{margin:.78rem 0;color:var(--text-soft);line-height:1.7;font-size:1.02rem;max-width:72ch;}
+      .article h2{margin:1.35rem 0 .35rem;font-family:"Space Grotesk",sans-serif;font-size:1.08rem;line-height:1.35;color:var(--text);}
+      .article ul{margin:.35rem 0 .9rem;padding-left:1.15rem;max-width:72ch;}
+      .article li{margin:.42rem 0;color:var(--text-soft);line-height:1.62;}
       .site-links{display:flex;flex-wrap:wrap;gap:.75rem 1.05rem;margin:1.35rem 0 .65rem;padding:.66rem .72rem;border:1px solid var(--card-border);border-radius:12px;background:rgba(255,255,255,.06);} 
       .site-links a{color:var(--accent-soft);text-decoration:none;border-bottom:1px solid rgba(227,210,255,.38);font-size:.88rem;font-weight:700;}
       .footer{border-top:1px solid rgba(184,137,255,.3);margin:0 0 .5rem;padding:.58rem 0 .15rem;color:var(--text-soft);font-size:.82rem;}
       .bottom-cta{background:linear-gradient(135deg,#f5ebff,#c084ff 52%,#a45cf8);color:#10091c;border:1px solid rgba(255,255,255,.35);border-radius:12px;padding:.65rem .8rem;margin-bottom:.4rem;display:flex;gap:.5rem;align-items:center;justify-content:space-between;font-weight:700;font-size:.88rem;}
       .bottom-cta-links{display:inline-flex;align-items:center;gap:.65rem;flex-wrap:wrap;font-weight:800;} .bottom-cta a{color:#10091c;text-decoration:none;border-bottom:1px solid rgba(16,9,28,.4);} .bottom-cta-sep{opacity:.6;}
-      @media (max-width:960px){.bottom-cta{flex-direction:column;align-items:flex-start;}}
+      @media (max-width:960px){.bottom-cta{flex-direction:column;align-items:flex-start;} .article{padding:1.25rem;} .lang-btn{padding:.4rem .68rem;}}
     </style>
   </head>
   <body>
     <main class="wrap">
-      <header class="topbar"><a class="logo" href="./index.html" data-i18n="topLine" data-link="home">Магический плюс вайб</a></header>
-      <article class="article"><h1>Этичный расклад Таро про отношения: границы и безопасная практика</h1><p>Расклады на любовь и отношения особенно чувствительны, потому что затрагивают уязвимость, страх потери и сильные ожидания. Этичный подход нужен, чтобы интерпретация помогала человеку взрослеть в контакте, а не усиливала контроль и зависимость.</p><p>Главный принцип: фокус на вашей зоне влияния. Вместо «что партнер обязан сделать» полезнее рассматривать «как мне выстроить коммуникацию, границы и собственную устойчивость». Такой сдвиг делает расклад практичным и психологически безопасным.</p><p>Небезопасный формат чтения распознается по призывам к слежке, давлению, манипуляциям и ультиматумам. Если интерпретация толкает вас к действиям, которые нарушают чужие границы, это красный флаг, а не «глубина» практики.</p><p>В здоровом раскладе всегда есть два слоя: честный диагноз динамики и конструктивный шаг. Например: как снизить конфликт, как вести разговор, где перестать спасать отношения в одиночку, как вернуть себе опору.</p><p>Полезный набор вопросов: «Что я не хочу видеть в этой связи?», «Какой мой следующий зрелый шаг?», «Какой формат контакта будет для меня экологичным в ближайший месяц?» Эти вопросы снижают драму и возвращают субъектность.</p><p>Этичный расклад не обещает «идеальный исход», но повышает ясность и уважение к границам. Именно это и делает Таро инструментом взросления в теме отношений, а не источником эмоциональной зависимости.</p></article>
+      <header class="topbar"><a class="logo" href="./index.html" data-i18n="topLine" data-link="home">Магический плюс вайб</a><div class="langs" role="group" aria-label="Language switcher"><button class="lang-btn" data-lang="ru" aria-pressed="true">RU</button><button class="lang-btn" data-lang="kz" aria-pressed="false">KZ</button><button class="lang-btn" data-lang="en" aria-pressed="false">EN</button></div></header>
+      <article class="article"><h1>Этичный расклад Таро про отношения: границы и безопасная практика</h1><p class="lead">В теме отношений особенно важно читать карты этично: с уважением к границам и без попытки контроля другого человека.</p><h2>На чем строится этичный подход</h2><ul><li>Фокус на вашей зоне влияния, а не на управлении партнером.</li><li>Отказ от сценариев давления, слежки и эмоционального шантажа.</li><li>Переход от драмы к конкретным шагам коммуникации.</li></ul><h2>Какие вопросы работают лучше</h2><ul><li>Что я не хочу видеть в этой динамике?</li><li>Какой мой зрелый шаг в ближайшую неделю?</li><li>Как сохранить самоуважение и контакт одновременно?</li></ul><h2>Итог хорошего расклада</h2><p>Больше ясности, меньше зависимости. Если после интерпретации вы чувствуете опору и понимаете следующий шаг, формат выбран правильно.</p></article>
       <nav class="site-links" aria-label="Внутренние ссылки">
         <a href="./news.html" data-i18n="navNews" data-link="news">Новости</a>
         <a href="./tarot-values.html" data-i18n="navTarot" data-link="tarot">Карты Таро</a>
@@ -54,6 +61,7 @@
         const pack = ui[resolved];
         document.documentElement.lang = resolved === "kz" ? "kk" : resolved;
         document.querySelectorAll("[data-i18n]").forEach((node)=>{ const key = node.dataset.i18n; if(pack[key]) node.textContent = pack[key]; });
+        document.querySelectorAll(".lang-btn").forEach((btn)=>btn.setAttribute("aria-pressed", String(btn.dataset.lang === resolved)));
         const links = { home:"./index.html", news:"./news.html", tarot:"./tarot-values.html", lenormand:"./lenormand-values.html", academy:"./academy.html" };
         Object.entries(links).forEach(([key,path]) => {
           document.querySelectorAll("[data-link=\"" + key + "\"]").forEach((node)=>node.setAttribute("href", withLang(path, resolved)));
@@ -63,6 +71,7 @@
         window.history.replaceState({}, "", url.toString());
         window.localStorage.setItem(LANG_STORAGE_KEY, resolved);
       }
+      document.querySelectorAll(".lang-btn").forEach((btn)=>btn.addEventListener("click",()=>applyLang(btn.dataset.lang)));
       const initialLang = new URLSearchParams(window.location.search).get("lang");
       const storedLang = window.localStorage.getItem(LANG_STORAGE_KEY);
       applyLang(initialLang || storedLang || "ru");
