@@ -740,24 +740,28 @@
       }
 
       async function fetchCardsPayload(lang) {
-        const sources = [
+        try {
+          const localRes = await fetch("./lenormand-data.json", { cache: "no-store" });
+          if (localRes.ok) {
+            const allLangs = await localRes.json();
+            const localPayload = allLangs?.[lang] || allLangs?.ru;
+            if (localPayload && typeof localPayload === "object") {
+              return localPayload;
+            }
+          }
+        } catch (_) {}
+
+        const fallbackSources = [
           `https://basilarcana-assets.b-cdn.net/data/cards_${lang}.json`,
           `https://cdn.basilarcana.com/data/cards_${lang}.json`,
         ];
-
-        let lastError = null;
-        for (const source of sources) {
-          try {
-            const res = await fetch(source, { cache: "no-store" });
-            if (!res.ok) {
-              throw new Error(`Failed with status ${res.status} from ${source}`);
-            }
+        for (const source of fallbackSources) {
+          const res = await fetch(source, { cache: "no-store" });
+          if (res.ok) {
             return await res.json();
-          } catch (err) {
-            lastError = err;
           }
         }
-        throw lastError || new Error("Failed to load cards payload");
+        throw new Error("Failed to load Lenormand cards data");
       }
 
       async function loadCards(lang) {
