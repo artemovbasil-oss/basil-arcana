@@ -504,7 +504,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const SizedBox(height: 6),
           Text(
             _dashboardFiveCardsBonusLine(context, freeFiveCardCredits),
-            style: sectionValueStyle,
+            style: sectionDetailStyle,
           ),
           const SizedBox(height: 2),
           Text(
@@ -531,10 +531,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
                   Icon(
                     _isTopCardsExpanded
-                        ? Icons.keyboard_arrow_up
-                        : Icons.keyboard_arrow_down,
-                    size: 18,
-                    color: colorScheme.onSurfaceVariant,
+                        ? Icons.expand_less_rounded
+                        : Icons.expand_more_rounded,
+                    size: 20,
+                    color: colorScheme.onSurface.withValues(alpha: 0.78),
                   ),
                 ],
               ),
