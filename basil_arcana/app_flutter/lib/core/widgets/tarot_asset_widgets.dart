@@ -370,14 +370,19 @@ class _CardMediaState extends State<CardMedia> {
     try {
       await controller.seekTo(Duration.zero);
       await controller.play();
-      final isPlayingNow = controller.value.isPlaying;
+      // In Telegram iOS/Web the player state can lag behind `play()`.
+      // Give it a short moment before deciding whether playback started.
+      await Future<void>.delayed(const Duration(milliseconds: 120));
+      final value = controller.value;
+      final hasStarted =
+          value.isPlaying || value.position > const Duration(milliseconds: 60);
       if (!mounted) {
         return;
       }
       setState(() {
-        _showVideo = isPlayingNow;
+        _showVideo = hasStarted;
         if (autoPlay) {
-          _autoPlayFailed = !isPlayingNow;
+          _autoPlayFailed = !hasStarted;
         }
       });
     } catch (_) {
