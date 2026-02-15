@@ -1010,22 +1010,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   ),
                   const SizedBox(height: 8),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (topCards.isEmpty)
-                          Text(
-                            copy.topCardsEmpty,
-                            style:
-                                Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: colorScheme.onSurface
-                                          .withValues(alpha: 0.7),
-                                    ),
-                          )
-                        else
-                          SizedBox(
-                            height: 300,
-                            child: Row(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (topCards.isEmpty)
+                            Text(
+                              copy.topCardsEmpty,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color: colorScheme.onSurface
+                                        .withValues(alpha: 0.7),
+                                  ),
+                            )
+                          else
+                            Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 for (var i = 0; i < topCards.length; i++) ...[
@@ -1041,18 +1042,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                 ],
                               ],
                             ),
+                          const SizedBox(height: 12),
+                          Text(
+                            copy.streakInsightTitle,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleSmall
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                ),
                           ),
-                        const SizedBox(height: 12),
-                        Text(
-                          copy.streakInsightTitle,
-                          style:
-                              Theme.of(context).textTheme.titleSmall?.copyWith(
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                        ),
-                        const SizedBox(height: 8),
-                        Expanded(
-                          child: FutureBuilder<String>(
+                          const SizedBox(height: 8),
+                          FutureBuilder<String>(
                             future: requestFuture,
                             initialData:
                                 hasCache ? _streakInterpretation : null,
@@ -1084,22 +1085,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                   });
                                 });
                               }
-                              return SingleChildScrollView(
-                                child: Text(
-                                  resolved,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium
-                                      ?.copyWith(
-                                        color: colorScheme.onSurface
-                                            .withValues(alpha: 0.9),
-                                      ),
-                                ),
+                              return Text(
+                                resolved,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(
+                                      color: colorScheme.onSurface
+                                          .withValues(alpha: 0.9),
+                                    ),
                               );
                             },
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -1835,25 +1834,23 @@ class _MiniTopCardTile extends StatelessWidget {
                 ),
           ),
           const SizedBox(height: 6),
-          Expanded(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: AspectRatio(
-                aspectRatio: 0.68,
-                child: stat.imageUrl.trim().isNotEmpty
-                    ? Image.network(
-                        stat.imageUrl,
-                        fit: BoxFit.contain,
-                        errorBuilder: (_, __, ___) => Container(
-                          color: colorScheme.surfaceContainerHighest
-                              .withValues(alpha: 0.35),
-                        ),
-                      )
-                    : Container(
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: AspectRatio(
+              aspectRatio: 0.68,
+              child: stat.imageUrl.trim().isNotEmpty
+                  ? Image.network(
+                      stat.imageUrl,
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, __, ___) => Container(
                         color: colorScheme.surfaceContainerHighest
                             .withValues(alpha: 0.35),
                       ),
-              ),
+                    )
+                  : Container(
+                      color: colorScheme.surfaceContainerHighest
+                          .withValues(alpha: 0.35),
+                    ),
             ),
           ),
           const SizedBox(height: 6),

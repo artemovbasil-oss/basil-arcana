@@ -201,10 +201,45 @@ function buildDailyCardPrompt(payload) {
   ];
 }
 
+function buildStreakPrompt(payload) {
+  const { locale, stats, topCards } = payload;
+  const system = [
+    'You are a warm, grounded tarot guide for Basil\'s Arcana.',
+    'Interpret the user streak stats and top cards in a supportive and concise style.',
+    'Address the user directly. For Russian use informal "ты". For Kazakh use informal "сен".',
+    'Avoid deterministic predictions. Avoid the word "will". Use "may", "could", "suggests", "likely".',
+    'Do not give medical, legal, or financial directives.',
+    'Use plain text only (no markdown, no bullets, no JSON).',
+    'Output exactly 2 short sentences.',
+    'Make it specific to the provided top cards and counts.',
+    'Total length: 120-220 characters if locale is ru/kk, 90-180 characters if locale is en.',
+    `Respond in locale: ${locale || 'en'}.`,
+  ].join(' ');
+
+  const user = {
+    stats,
+    topCards,
+    locale,
+  };
+
+  return [
+    { role: 'system', content: system },
+    {
+      role: 'user',
+      content: `Generate a short streak insight from this input:\n${JSON.stringify(
+        user,
+        null,
+        2
+      )}`,
+    },
+  ];
+}
+
 module.exports = {
   buildPromptMessages,
   buildDetailsPrompt,
   buildNatalChartPrompt,
   buildCompatibilityPrompt,
   buildDailyCardPrompt,
+  buildStreakPrompt,
 };

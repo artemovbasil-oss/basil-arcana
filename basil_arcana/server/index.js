@@ -11,7 +11,8 @@ const {
   buildDetailsPrompt,
   buildNatalChartPrompt,
   buildCompatibilityPrompt,
-  buildDailyCardPrompt
+  buildDailyCardPrompt,
+  buildStreakPrompt
 } = require('./src/prompt');
 const {
   createResponse,
@@ -1576,6 +1577,135 @@ app.post('/api/home/daily-card', telegramAuthMiddleware, async (req, res) => {
     console.error(
       JSON.stringify({
         event: 'daily_card_error',
+        requestId: req.requestId,
+        duration_ms: durationMs,
+        status: upstream.status,
+        errorCode: upstream.code,
+        errorType: upstream.type
+      })
+    );
+    return res.status(502).json({
+      error: 'upstream_failed',
+      requestId: req.requestId,
+      upstream
+    });
+  }
+});
+
+app.post('/api/home/streak', telegramAuthMiddleware, async (req, res) => {
+  if (!OPENAI_API_KEY) {
+    return res.status(503).json({
+      error: 'server_misconfig',
+      reason: 'missing_openai_api_key',
+      requestId: req.requestId
+    });
+  }
+
+  const locale = normalizeLocale(req.body?.locale);
+  const rawStats = req.body?.stats;
+  const rawTopCards = req.body?.topCards;
+  if (!rawStats || typeof rawStats !== 'object') {
+    return res.status(400).json({
+      error: 'invalid_stats_payload',
+      requestId: req.requestId
+    });
+  }
+  if (!Array.isArray(rawTopCards) || rawTopCards.length === 0) {
+    return res.status(400).json({
+      error: 'invalid_top_cards_payload',
+      requestId: req.requestId
+    });
+  }
+
+  const topCards = rawTopCards
+    .map((entry) => {
+      if (!entry || typeof entry !== 'object') {
+        return null;
+      }
+      const name = typeof entry.name === 'string' ? entry.name.trim() : '';
+      const count = Number.isFinite(Number(entry.count))
+        ? Math.max(0, Number(entry.count))
+        : 0;
+      if (!name || count <= 0) {
+        return null;
+      }
+      return { name, count };
+    })
+    .filter(Boolean)
+    .slice(0, 3);
+
+  if (topCards.length === 0) {
+    return res.status(400).json({
+      error: 'empty_top_cards',
+      requestId: req.requestId
+    });
+  }
+
+  const stats = {
+    currentStreakDays: Number.isFinite(Number(rawStats.currentStreakDays))
+      ? Math.max(0, Number(rawStats.currentStreakDays))
+      : 0,
+    longestStreakDays: Number.isFinite(Number(rawStats.longestStreakDays))
+      ? Math.max(0, Number(rawStats.longestStreakDays))
+      : 0,
+    activeDays: Number.isFinite(Number(rawStats.activeDays))
+      ? Math.max(0, Number(rawStats.activeDays))
+      : 0,
+    awarenessPercent: Number.isFinite(Number(rawStats.awarenessPercent))
+      ? Math.max(0, Math.min(100, Number(rawStats.awarenessPercent)))
+      : 0
+  };
+
+  const startTime = Date.now();
+  try {
+    await upsertTelegramUserFromRequest(req, locale);
+    await tryClaimReferralForRequest(req);
+    const messages = buildStreakPrompt({
+      locale,
+      stats,
+      topCards
+    });
+    const result = await createTextResponse(messages, {
+      requestId: req.requestId,
+      timeoutMs: 28000,
+    });
+    const interpretation = result.text.trim();
+    if (!interpretation) {
+      throw new OpenAIRequestError('Empty OpenAI response', {
+        status: result.meta?.status,
+      });
+    }
+    const durationMs = Date.now() - startTime;
+    console.log(
+      JSON.stringify({
+        event: 'streak_insight_request',
+        requestId: req.requestId,
+        status: 200,
+        duration_ms: durationMs,
+      })
+    );
+    return res.json({
+      ok: true,
+      interpretation,
+      requestId: req.requestId
+    });
+  } catch (err) {
+    const durationMs = Date.now() - startTime;
+    if (err?.name === 'AbortError') {
+      return res.status(504).json({
+        error: 'timeout',
+        requestId: req.requestId,
+      });
+    }
+    const upstream = {
+      status: err instanceof OpenAIRequestError ? err.status : null,
+      code: err instanceof OpenAIRequestError ? err.errorCode : null,
+      type: err instanceof OpenAIRequestError ? err.errorType : err.name,
+      message: err.message ? err.message.slice(0, 300) : null
+    };
+    console.error(
+      JSON.stringify({
+        event: 'streak_insight_error',
         requestId: req.requestId,
         duration_ms: durationMs,
         status: upstream.status,
