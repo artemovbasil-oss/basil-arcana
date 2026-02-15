@@ -230,7 +230,6 @@ class _CardMediaState extends State<CardMedia> {
   String? _resolvedVideoUrl;
   String? _cacheKey;
   bool _autoPlayAttempted = false;
-  bool _autoPlayFailed = false;
 
   @override
   void initState() {
@@ -272,7 +271,6 @@ class _CardMediaState extends State<CardMedia> {
     _videoFailed = false;
     _showVideo = false;
     _autoPlayAttempted = false;
-    _autoPlayFailed = false;
     if (!widget.enableVideo || _resolvedVideoUrl == null) {
       return;
     }
@@ -360,30 +358,30 @@ class _CardMediaState extends State<CardMedia> {
     await _ensureInitialized();
     final controller = _controller;
     if (controller == null || !controller.value.isInitialized) {
-      if (mounted && autoPlay) {
-        setState(() {
-          _autoPlayFailed = true;
-        });
-      }
       return;
     }
     try {
       await controller.seekTo(Duration.zero);
       await controller.play();
-      // In Telegram iOS/Web the player state can lag behind `play()`.
-      // Give it a short moment before deciding whether playback started.
-      await Future<void>.delayed(const Duration(milliseconds: 120));
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _showVideo = true;
+      });
+      if (!autoPlay) {
+        return;
+      }
+      // On Telegram iOS/Web the player state can lag after `play()`.
+      await Future<void>.delayed(const Duration(milliseconds: 260));
       final value = controller.value;
       final hasStarted =
-          value.isPlaying || value.position > const Duration(milliseconds: 60);
+          value.isPlaying || value.position > const Duration(milliseconds: 80);
       if (!mounted) {
         return;
       }
       setState(() {
         _showVideo = hasStarted;
-        if (autoPlay) {
-          _autoPlayFailed = !hasStarted;
-        }
       });
     } catch (_) {
       if (!mounted) {
@@ -391,9 +389,6 @@ class _CardMediaState extends State<CardMedia> {
       }
       setState(() {
         _showVideo = false;
-        if (autoPlay) {
-          _autoPlayFailed = true;
-        }
       });
     }
   }
@@ -469,9 +464,7 @@ class _CardMediaState extends State<CardMedia> {
                 ),
               ),
             ),
-          if (hasVideo &&
-              !_showVideo &&
-              (!widget.autoPlayOnce || _autoPlayFailed))
+          if (hasVideo && !_showVideo)
             Positioned.fill(
               child: ClipRRect(
                 borderRadius: radius,
