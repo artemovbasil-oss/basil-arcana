@@ -119,9 +119,16 @@ class CardsRepository {
     if (deckId == DeckType.lenormand && cards.isEmpty) {
       return _buildLenormandFallback(locale);
     }
+    if (deckId == DeckType.crowley && cards.isEmpty) {
+      return _buildCrowleyFallback(locale);
+    }
     if (deckId == DeckType.all &&
         !cards.any((card) => card.deckId == DeckType.lenormand)) {
       return [...cards, ..._buildLenormandFallback(locale)];
+    }
+    if (deckId == DeckType.all &&
+        !cards.any((card) => card.deckId == DeckType.crowley)) {
+      return [...cards, ..._buildCrowleyFallback(locale)];
     }
 
     return cards;
@@ -491,6 +498,287 @@ List<CardModel> _buildLenormandFallback(Locale locale) {
     );
   }).toList(growable: false);
 }
+
+List<CardModel> _buildCrowleyFallback(Locale locale) {
+  final lang = locale.languageCode.toLowerCase();
+  return _crowleyDefs.map((def) {
+    final title = switch (lang) {
+      'ru' => def.titleRu,
+      'kk' => def.titleKk,
+      _ => def.titleEn,
+    };
+    final keywords = switch (lang) {
+      'ru' => <String>[title, 'Кроули', 'архетип'],
+      'kk' => <String>[title, 'Кроули', 'архетип'],
+      _ => <String>[title, 'Crowley', 'archetype'],
+    };
+    final general = switch (lang) {
+      'ru' =>
+        '$title показывает ключевой архетип момента и усиливает фокус на внутреннем выборе.',
+      'kk' =>
+        '$title сәттің негізгі архетипін көрсетіп, ішкі таңдауға назарды күшейтеді.',
+      _ =>
+        '$title reveals the key archetype of the moment and sharpens your inner choice.',
+    };
+    final light = switch (lang) {
+      'ru' =>
+        'В светлом проявлении помогает действовать зрелее и точнее по выбранному курсу.',
+      'kk' =>
+        'Жарық қырында таңдалған бағыт бойынша дәлірек әрі жетілген әрекет етуге көмектеседі.',
+      _ =>
+        'In light, it supports mature, precise action aligned with your chosen direction.',
+    };
+    final shadow = switch (lang) {
+      'ru' =>
+        'В тени может давать крайности, жесткий контроль или эмоциональные качели.',
+      'kk' =>
+        'Көлеңке қырында шектен шығу, қатаң бақылау не эмоциялық тербеліс беруі мүмкін.',
+      _ =>
+        'In shadow, it can amplify extremes, rigid control, or emotional swings.',
+    };
+    final advice = switch (lang) {
+      'ru' =>
+        'Сверь символ карты с контекстом вопроса и переведи инсайт в один конкретный шаг сегодня.',
+      'kk' =>
+        'Карта символын сұрағыңыздың контекстімен салыстырып, инсайтты бүгінгі бір нақты қадамға айналдырыңыз.',
+      _ =>
+        'Match the card symbol to your question context and turn the insight into one concrete step today.',
+    };
+    final fact = switch (lang) {
+      'ru' =>
+        '$title в колоде Кроули читается через архетип, композицию и ритм символов.',
+      'kk' =>
+        '$title Кроули колодасында архетип, композиция және символдар ырғағы арқылы оқылады.',
+      _ =>
+        '$title in the Crowley deck is read through archetype, composition, and symbolic rhythm.',
+    };
+    return CardModel(
+      id: def.id,
+      deckId: DeckType.crowley,
+      name: title,
+      keywords: keywords,
+      meaning: CardMeaning(
+        general: general,
+        light: light,
+        shadow: shadow,
+        advice: advice,
+      ),
+      detailedDescription: '$general $light $shadow $advice',
+      funFact: fact,
+      stats: _crowleyFallbackStats(def.number),
+      imageUrl: 'https://basilarcana-assets.b-cdn.net/${def.imagePath}',
+    );
+  }).toList(growable: false);
+}
+
+CardStats _crowleyFallbackStats(int cardNumber) {
+  final base = (cardNumber * 5) % 21;
+  return CardStats(
+    luck: 44 + base,
+    power: 46 + ((base + 4) % 21),
+    love: 43 + ((base + 9) % 21),
+    clarity: 45 + ((base + 14) % 21),
+  );
+}
+
+class _CrowleyDef {
+  const _CrowleyDef({
+    required this.number,
+    required this.slug,
+    required this.titleEn,
+    required this.titleRu,
+    required this.titleKk,
+    required this.imagePath,
+  });
+
+  final int number;
+  final String slug;
+  final String titleEn;
+  final String titleRu;
+  final String titleKk;
+  final String imagePath;
+
+  String get id => 'ac_${number.toString().padLeft(2, '0')}_$slug';
+}
+
+const List<_CrowleyDef> _crowleyDefs = [
+  _CrowleyDef(
+    number: 0,
+    slug: 'fool',
+    titleEn: 'The Fool',
+    titleRu: 'Шут',
+    titleKk: 'Ақымақ',
+    imagePath: 'cards/ac/ac-joker.webp',
+  ),
+  _CrowleyDef(
+    number: 1,
+    slug: 'magician',
+    titleEn: 'The Magician',
+    titleRu: 'Маг',
+    titleKk: 'Сиқыршы',
+    imagePath: 'cards/ac/ac-magician.webp',
+  ),
+  _CrowleyDef(
+    number: 2,
+    slug: 'high_priestess',
+    titleEn: 'The High Priestess',
+    titleRu: 'Верховная Жрица',
+    titleKk: 'Жоғарғы Абыз әйел',
+    imagePath: 'cards/ac/ac-high-priestess.webp',
+  ),
+  _CrowleyDef(
+    number: 3,
+    slug: 'empress',
+    titleEn: 'The Empress',
+    titleRu: 'Императрица',
+    titleKk: 'Императрица',
+    imagePath: 'cards/ac/ac-empress.webp',
+  ),
+  _CrowleyDef(
+    number: 4,
+    slug: 'emperor',
+    titleEn: 'The Emperor',
+    titleRu: 'Император',
+    titleKk: 'Император',
+    imagePath: 'cards/ac/ac-emperor.webp',
+  ),
+  _CrowleyDef(
+    number: 5,
+    slug: 'hierophant',
+    titleEn: 'The Hierophant',
+    titleRu: 'Иерофант',
+    titleKk: 'Иерофант',
+    imagePath: 'cards/ac/ac-hierophant.webp',
+  ),
+  _CrowleyDef(
+    number: 6,
+    slug: 'lovers',
+    titleEn: 'The Lovers',
+    titleRu: 'Влюблённые',
+    titleKk: 'Ғашықтар',
+    imagePath: 'cards/ac/ac-lovers.webp',
+  ),
+  _CrowleyDef(
+    number: 7,
+    slug: 'chariot',
+    titleEn: 'The Chariot',
+    titleRu: 'Колесница',
+    titleKk: 'Арба',
+    imagePath: 'cards/ac/ac-chariot.webp',
+  ),
+  _CrowleyDef(
+    number: 8,
+    slug: 'strength',
+    titleEn: 'Strength',
+    titleRu: 'Сила',
+    titleKk: 'Күш',
+    imagePath: 'cards/ac/ac-power.webp',
+  ),
+  _CrowleyDef(
+    number: 9,
+    slug: 'hermit',
+    titleEn: 'The Hermit',
+    titleRu: 'Отшельник',
+    titleKk: 'Тақуа',
+    imagePath: 'cards/ac/ac-hermit.webp',
+  ),
+  _CrowleyDef(
+    number: 10,
+    slug: 'wheel_of_fortune',
+    titleEn: 'Wheel of Fortune',
+    titleRu: 'Колесо Фортуны',
+    titleKk: 'Фортуна Дөңгелегі',
+    imagePath: 'cards/ac/ac-wheel-of-fortune.webp',
+  ),
+  _CrowleyDef(
+    number: 11,
+    slug: 'justice',
+    titleEn: 'Justice',
+    titleRu: 'Правосудие',
+    titleKk: 'Әділет',
+    imagePath: 'cards/ac/ac-justice.webp',
+  ),
+  _CrowleyDef(
+    number: 12,
+    slug: 'hanged_man',
+    titleEn: 'The Hanged Man',
+    titleRu: 'Повешенный',
+    titleKk: 'Асылған',
+    imagePath: 'cards/ac/ac-punishment.webp',
+  ),
+  _CrowleyDef(
+    number: 13,
+    slug: 'death',
+    titleEn: 'Death',
+    titleRu: 'Смерть',
+    titleKk: 'Өлім',
+    imagePath: 'cards/ac/ac-death.webp',
+  ),
+  _CrowleyDef(
+    number: 14,
+    slug: 'temperance',
+    titleEn: 'Temperance',
+    titleRu: 'Умеренность',
+    titleKk: 'Теңгерім',
+    imagePath: 'cards/ac/ac-temperance.webp',
+  ),
+  _CrowleyDef(
+    number: 15,
+    slug: 'devil',
+    titleEn: 'The Devil',
+    titleRu: 'Дьявол',
+    titleKk: 'Ібіліс',
+    imagePath: 'cards/ac/ac-devil.webp',
+  ),
+  _CrowleyDef(
+    number: 16,
+    slug: 'tower',
+    titleEn: 'The Tower',
+    titleRu: 'Башня',
+    titleKk: 'Мұнара',
+    imagePath: 'cards/ac/ac-tower.webp',
+  ),
+  _CrowleyDef(
+    number: 17,
+    slug: 'star',
+    titleEn: 'The Star',
+    titleRu: 'Звезда',
+    titleKk: 'Жұлдыз',
+    imagePath: 'cards/ac/ac-star.webp',
+  ),
+  _CrowleyDef(
+    number: 18,
+    slug: 'moon',
+    titleEn: 'The Moon',
+    titleRu: 'Луна',
+    titleKk: 'Ай',
+    imagePath: 'cards/ac/ac-moon.webp',
+  ),
+  _CrowleyDef(
+    number: 19,
+    slug: 'sun',
+    titleEn: 'The Sun',
+    titleRu: 'Солнце',
+    titleKk: 'Күн',
+    imagePath: 'cards/ac/ac-sun.webp',
+  ),
+  _CrowleyDef(
+    number: 20,
+    slug: 'judgement',
+    titleEn: 'Judgement',
+    titleRu: 'Суд',
+    titleKk: 'Сот',
+    imagePath: 'cards/ac/ac-judgement.webp',
+  ),
+  _CrowleyDef(
+    number: 21,
+    slug: 'world',
+    titleEn: 'The World',
+    titleRu: 'Мир',
+    titleKk: 'Әлем',
+    imagePath: 'cards/ac/ac-world.webp',
+  ),
+];
 
 CardStats _lenormandFallbackStats(int cardNumber) {
   final base = (cardNumber * 7) % 21;
