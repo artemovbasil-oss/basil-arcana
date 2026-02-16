@@ -12,6 +12,8 @@ exports.listActiveSubscriptions = listActiveSubscriptions;
 exports.completeConsultation = completeConsultation;
 exports.listRecentUserQueriesForUser = listRecentUserQueriesForUser;
 exports.listUsersForBroadcast = listUsersForBroadcast;
+exports.listUsersForSofia = listUsersForSofia;
+exports.listUsersCreatedTodayForSofia = listUsersCreatedTodayForSofia;
 exports.insertFunnelEvent = insertFunnelEvent;
 const pg_1 = require("pg");
 let pool = null;
@@ -324,6 +326,40 @@ async function listUsersForBroadcast() {
     return rows.map((row) => ({
         telegramUserId: Number(row.telegram_user_id),
         locale: row.locale ?? null,
+    }));
+}
+async function listUsersForSofia() {
+    const db = requirePool();
+    const { rows } = await db.query(`
+    SELECT telegram_user_id, username, first_name, last_name, locale, created_at
+    FROM users
+    ORDER BY created_at DESC, telegram_user_id DESC;
+    `);
+    return rows.map((row) => ({
+        telegramUserId: Number(row.telegram_user_id),
+        username: row.username ?? null,
+        firstName: row.first_name ?? null,
+        lastName: row.last_name ?? null,
+        locale: row.locale ?? null,
+        createdAt: toMillis(row.created_at ?? null),
+    }));
+}
+async function listUsersCreatedTodayForSofia() {
+    const db = requirePool();
+    const { rows } = await db.query(`
+    SELECT telegram_user_id, username, first_name, last_name, locale, created_at
+    FROM users
+    WHERE created_at >= date_trunc('day', NOW())
+      AND created_at < date_trunc('day', NOW()) + INTERVAL '1 day'
+    ORDER BY created_at DESC, telegram_user_id DESC;
+    `);
+    return rows.map((row) => ({
+        telegramUserId: Number(row.telegram_user_id),
+        username: row.username ?? null,
+        firstName: row.first_name ?? null,
+        lastName: row.last_name ?? null,
+        locale: row.locale ?? null,
+        createdAt: toMillis(row.created_at ?? null),
     }));
 }
 async function insertFunnelEvent(input) {

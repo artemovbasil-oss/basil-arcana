@@ -39,6 +39,15 @@ export interface BroadcastUserRow {
   locale: DbLocale | null;
 }
 
+export interface SofiaUserRow {
+  telegramUserId: number;
+  username: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  locale: DbLocale | null;
+  createdAt: number | null;
+}
+
 export type FunnelEventName =
   | "start"
   | "language_selected"
@@ -446,6 +455,46 @@ export async function listUsersForBroadcast(): Promise<BroadcastUserRow[]> {
   return rows.map((row) => ({
     telegramUserId: Number(row.telegram_user_id),
     locale: (row.locale as DbLocale | null) ?? null,
+  }));
+}
+
+export async function listUsersForSofia(): Promise<SofiaUserRow[]> {
+  const db = requirePool();
+  const { rows } = await db.query(
+    `
+    SELECT telegram_user_id, username, first_name, last_name, locale, created_at
+    FROM users
+    ORDER BY created_at DESC, telegram_user_id DESC;
+    `,
+  );
+  return rows.map((row) => ({
+    telegramUserId: Number(row.telegram_user_id),
+    username: (row.username as string | null) ?? null,
+    firstName: (row.first_name as string | null) ?? null,
+    lastName: (row.last_name as string | null) ?? null,
+    locale: (row.locale as DbLocale | null) ?? null,
+    createdAt: toMillis((row.created_at as Date | null) ?? null),
+  }));
+}
+
+export async function listUsersCreatedTodayForSofia(): Promise<SofiaUserRow[]> {
+  const db = requirePool();
+  const { rows } = await db.query(
+    `
+    SELECT telegram_user_id, username, first_name, last_name, locale, created_at
+    FROM users
+    WHERE created_at >= date_trunc('day', NOW())
+      AND created_at < date_trunc('day', NOW()) + INTERVAL '1 day'
+    ORDER BY created_at DESC, telegram_user_id DESC;
+    `,
+  );
+  return rows.map((row) => ({
+    telegramUserId: Number(row.telegram_user_id),
+    username: (row.username as string | null) ?? null,
+    firstName: (row.first_name as string | null) ?? null,
+    lastName: (row.last_name as string | null) ?? null,
+    locale: (row.locale as DbLocale | null) ?? null,
+    createdAt: toMillis((row.created_at as Date | null) ?? null),
   }));
 }
 

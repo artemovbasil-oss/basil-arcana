@@ -232,6 +232,7 @@ const STRINGS = {
 const userState = new Map();
 const issuedCodes = new Set();
 const processedPayments = new Set();
+const sofiaAwaitingPushText = new Set();
 function getUserState(userId) {
     const existing = userState.get(userId);
     if (existing) {
@@ -672,6 +673,39 @@ function parseCommandArgs(ctx) {
     }
     return match.split(/\s+/).filter(Boolean);
 }
+function formatUserRowForSofia(row) {
+    const created = row.createdAt
+        ? formatDateForLocale(new Date(row.createdAt), "ru")
+        : "-";
+    const username = row.username ? `@${row.username}` : "-";
+    const fullName = `${row.firstName ?? ""} ${row.lastName ?? ""}`.trim() || "-";
+    const locale = row.locale ?? "-";
+    return `ID: ${row.telegramUserId} | ${username} | ${fullName} | lang=${locale} | created=${created}`;
+}
+async function replyTextChunks(ctx, lines) {
+    const maxChunkSize = 3800;
+    let chunk = "";
+    for (const line of lines) {
+        if (!line) {
+            continue;
+        }
+        const next = chunk.length === 0 ? line : `${chunk}\n${line}`;
+        if (next.length > maxChunkSize) {
+            if (chunk.length > 0) {
+                await ctx.reply(chunk);
+            }
+            chunk = line;
+            continue;
+        }
+        chunk = next;
+    }
+    if (chunk.length > 0) {
+        await ctx.reply(chunk);
+    }
+}
+function buildSofiaPushComposeKeyboard() {
+    return new grammy_1.InlineKeyboard().text("📝 Ввести текст пуша", "sofia_push:compose");
+}
 function formatStateForSofia(row) {
     const ends = row.subscriptionEndsAt
         ? formatDateForLocale(new Date(row.subscriptionEndsAt), "ru")
@@ -874,6 +908,60 @@ async function main() {
         });
         await ctx.reply(`Недавние запросы user_id=${userId} (${rows.length}):\n\n${lines.join("\n\n")}`);
     });
+    bot.command("users_today", async (ctx) => {
+        if (!isSofiaOperator(ctx)) {
+            return;
+        }
+        const rows = await (0, db_1.listUsersCreatedTodayForSofia)();
+        if (rows.length === 0) {
+            await ctx.reply("Сегодня новых пользователей пока нет.");
+            return;
+        }
+        const lines = rows.map((row, index) => `${index + 1}. ${formatUserRowForSofia(row)}`);
+        await replyTextChunks(ctx, [
+            `Новые пользователи за сегодня: ${rows.length}`,
+            "",
+            ...lines,
+        ]);
+    });
+    bot.command("users_all", async (ctx) => {
+        if (!isSofiaOperator(ctx)) {
+            return;
+        }
+        const rows = await (0, db_1.listUsersForSofia)();
+        if (rows.length === 0) {
+            await ctx.reply("В users пока нет записей.");
+            return;
+        }
+        const lines = rows.map((row, index) => `${index + 1}. ${formatUserRowForSofia(row)}`);
+        await replyTextChunks(ctx, [
+            `Все пользователи: ${rows.length}`,
+            "",
+            ...lines,
+        ]);
+    });
+    bot.command("push", async (ctx) => {
+        if (!isSofiaOperator(ctx)) {
+            return;
+        }
+        const fromId = ctx.from?.id;
+        if (!fromId) {
+            return;
+        }
+        sofiaAwaitingPushText.delete(fromId);
+        await ctx.reply("Нажми кнопку ниже, затем отправь следующим сообщением текст пуша для рассылки всем пользователям.", { reply_markup: buildSofiaPushComposeKeyboard() });
+    });
+    bot.command("cancel_push", async (ctx) => {
+        if (!isSofiaOperator(ctx)) {
+            return;
+        }
+        const fromId = ctx.from?.id;
+        if (!fromId) {
+            return;
+        }
+        sofiaAwaitingPushText.delete(fromId);
+        await ctx.reply("Режим ввода текста пуша отменен.");
+    });
     bot.command("broadcast_whatsnew", async (ctx) => {
         if (!isSofiaOperator(ctx)) {
             return;
@@ -969,6 +1057,19 @@ async function main() {
             reply_markup: buildBackKeyboard(locale),
         });
     });
+    bot.callbackQuery("sofia_push:compose", async (ctx) => {
+        await rememberUserProfile(ctx);
+        await ctx.answerCallbackQuery();
+        if (!isSofiaOperator(ctx)) {
+            return;
+        }
+        const fromId = ctx.from?.id;
+        if (!fromId) {
+            return;
+        }
+        sofiaAwaitingPushText.add(fromId);
+        await ctx.reply("Отправь текст пуша следующим сообщением. Команда для отмены: /cancel_push");
+    });
     bot.callbackQuery(/^plan:(single|week|month|year)$/, async (ctx) => {
         await rememberUserProfile(ctx);
         await ctx.answerCallbackQuery();
@@ -1017,9 +1118,38 @@ async function main() {
     });
     bot.on("message:text", async (ctx) => {
         await rememberUserProfile(ctx);
-        const userId = ctx.from?.id;
-        if (userId) {
-            const state = getUserState(userId);
+        const fromId = ctx.from?.id;
+        if (fromId && sofiaAwaitingPushText.has(fromId) && isSofiaOperator(ctx)) {
+            const pushText = ctx.message.text.trim();
+            if (!pushText) {
+                await ctx.reply("Текст пуша пустой. Отправь непустое сообщение или /cancel_push.");
+                return;
+            }
+            sofiaAwaitingPushText.delete(fromId);
+            const users = await (0, db_1.listUsersForBroadcast)();
+            if (users.length === 0) {
+                await ctx.reply("В таблице users пока нет получателей.");
+                return;
+            }
+            await ctx.reply(`Начинаю пуш-рассылку. Получателей: ${users.length}.`);
+            let sent = 0;
+            let failed = 0;
+            for (const user of users) {
+                try {
+                    await ctx.api.sendMessage(user.telegramUserId, pushText);
+                    sent += 1;
+                }
+                catch (error) {
+                    failed += 1;
+                    console.error(`Push broadcast failed for user_id=${user.telegramUserId}`, error);
+                }
+                await delay(45);
+            }
+            await ctx.reply(`Пуш-рассылка завершена.\nОтправлено: ${sent}\nОшибок: ${failed}\nВсего: ${users.length}`);
+            return;
+        }
+        if (fromId) {
+            const state = getUserState(fromId);
             if (!state.locale) {
                 await sendLanguagePicker(ctx);
                 return;
