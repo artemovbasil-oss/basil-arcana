@@ -49,6 +49,15 @@ String cardImageUrl(
   }
   if (deckId == DeckType.crowley ||
       (deckId == DeckType.all && normalizedId.startsWith('ac_'))) {
+    if (normalizedId == 'ac_00_fool') {
+      return '$base/cards/ac/ac-joker.webp';
+    }
+    if (normalizedId == 'ac_08_strength') {
+      return '$base/cards/ac/ac-power.webp';
+    }
+    if (normalizedId == 'ac_12_hanged_man') {
+      return '$base/cards/ac/ac-punishment.webp';
+    }
     final slug = crowleySlugFromCardId(normalizedId) ?? normalizedId;
     return '$base/cards/ac/ac-$slug.webp';
   }

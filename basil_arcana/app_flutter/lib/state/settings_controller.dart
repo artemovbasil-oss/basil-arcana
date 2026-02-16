@@ -53,6 +53,8 @@ class SettingsController extends StateNotifier<SettingsState> {
     final deckType = state.deckType;
     await ref.read(localeProvider.notifier).setLocale(language.locale);
     await ref.read(deckProvider.notifier).setDeck(deckType);
+    ref.invalidate(cardsProvider);
+    ref.invalidate(cardsAllProvider);
     state = state.copyWith(
       initialLanguage: language,
       initialDeckType: deckType,
