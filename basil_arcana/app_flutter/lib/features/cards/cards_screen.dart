@@ -343,47 +343,55 @@ class _CardTile extends StatelessWidget {
           ),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.fromLTRB(12, 12, 12, 14),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Align(
-                alignment: Alignment.topLeft,
-                child: _DrawnBadge(
-                  label: drawnLabel,
-                  isEmpty: drawnCount == 0,
-                ),
-              ),
-              const SizedBox(height: 10),
               Expanded(
-                child: Align(
-                  alignment: Alignment.topCenter,
-                  child: AspectRatio(
-                    aspectRatio: cardAspectRatio,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(9),
-                        border: Border.all(
-                          color: colorScheme.outlineVariant.withOpacity(0.6),
-                        ),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(2),
-                        child: CardAssetImage(
-                          cardId: card.id,
-                          imageUrl: card.imageUrl,
-                          width: double.infinity,
-                          height: double.infinity,
-                          borderRadius: BorderRadius.circular(7),
-                          fit: BoxFit.contain,
-                          showGlow: false,
+                child: Stack(
+                  children: [
+                    Positioned.fill(
+                      top: 18,
+                      child: Align(
+                        alignment: Alignment.topCenter,
+                        child: AspectRatio(
+                          aspectRatio: cardAspectRatio,
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(11),
+                              border: Border.all(
+                                color:
+                                    colorScheme.outlineVariant.withOpacity(0.7),
+                              ),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(2),
+                              child: CardAssetImage(
+                                cardId: card.id,
+                                imageUrl: card.imageUrl,
+                                width: double.infinity,
+                                height: double.infinity,
+                                borderRadius: BorderRadius.circular(9),
+                                fit: BoxFit.cover,
+                                showGlow: false,
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
+                    Positioned(
+                      left: 14,
+                      top: 0,
+                      child: _DrawnBadge(
+                        label: drawnLabel,
+                        isEmpty: drawnCount == 0,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
               Text(
                 card.name,
                 maxLines: 2,
@@ -410,12 +418,12 @@ class _DrawnBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
       decoration: BoxDecoration(
         color: colorScheme.primary.withOpacity(isEmpty ? 0.08 : 0.14),
         borderRadius: BorderRadius.circular(999),
         border: Border.all(
-          color: colorScheme.primary.withOpacity(isEmpty ? 0.2 : 0.4),
+          color: colorScheme.primary.withOpacity(isEmpty ? 0.23 : 0.45),
         ),
       ),
       child: Text(
