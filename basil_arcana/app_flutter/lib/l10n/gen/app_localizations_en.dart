@@ -132,6 +132,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deckLenormand => 'Lenormand deck';
 
   @override
+  String get deckCrowley => 'Aleister Crowley deck';
+
+  @override
   String get deckAllName => 'All decks';
 
   @override
@@ -151,6 +154,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deckLenormandName => 'Lenormand';
+
+  @override
+  String get deckCrowleyName => 'Crowley';
 
   @override
   String get deckDebugLogLabel => 'Debug: log Wands asset path';

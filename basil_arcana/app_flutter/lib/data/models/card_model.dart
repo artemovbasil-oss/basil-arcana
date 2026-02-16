@@ -339,6 +339,9 @@ DeckType _deckIdFromCardId(String id) {
   if (normalized.startsWith('lenormand_')) {
     return DeckType.lenormand;
   }
+  if (normalized.startsWith('ac_')) {
+    return DeckType.crowley;
+  }
   if (normalized.startsWith('wands_')) {
     return DeckType.wands;
   }

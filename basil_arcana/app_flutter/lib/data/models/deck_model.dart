@@ -1,4 +1,4 @@
-enum DeckType { all, major, wands, swords, pentacles, cups, lenormand }
+enum DeckType { all, major, wands, swords, pentacles, cups, lenormand, crowley }
 
 const Map<String, String> _cardIdAliases = {
   'major_10_wheel_of_fortune': 'major_10_wheel',
@@ -140,6 +140,31 @@ const List<String> lenormandCardIds = [
   'lenormand_36_cross',
 ];
 
+const List<String> crowleyCardIds = [
+  'ac_00_fool',
+  'ac_01_magician',
+  'ac_02_high_priestess',
+  'ac_03_empress',
+  'ac_04_emperor',
+  'ac_05_hierophant',
+  'ac_06_lovers',
+  'ac_07_chariot',
+  'ac_08_strength',
+  'ac_09_hermit',
+  'ac_10_wheel_of_fortune',
+  'ac_11_justice',
+  'ac_12_hanged_man',
+  'ac_13_death',
+  'ac_14_temperance',
+  'ac_15_devil',
+  'ac_16_tower',
+  'ac_17_star',
+  'ac_18_moon',
+  'ac_19_sun',
+  'ac_20_judgement',
+  'ac_21_world',
+];
+
 const Map<DeckType, String> deckStorageValues = {
   DeckType.all: 'all',
   DeckType.major: 'major',
@@ -148,6 +173,7 @@ const Map<DeckType, String> deckStorageValues = {
   DeckType.pentacles: 'pentacles',
   DeckType.cups: 'cups',
   DeckType.lenormand: 'lenormand',
+  DeckType.crowley: 'crowley',
 };
 
 String canonicalCardId(String rawId) {
@@ -187,15 +213,51 @@ DeckType? deckIdFromString(String? value) {
       return DeckType.all;
     case 'lenormand':
       return DeckType.lenormand;
+    case 'crowley':
+    case 'ac':
+      return DeckType.crowley;
   }
   return null;
 }
 
 DeckType normalizePrimaryDeckSelection(DeckType deckType) {
-  if (deckType == DeckType.lenormand) {
-    return DeckType.lenormand;
+  if (deckType == DeckType.lenormand || deckType == DeckType.crowley) {
+    return deckType;
   }
   return DeckType.all;
+}
+
+bool isRiderWaiteDeck(DeckType deckType) {
+  return deckType == DeckType.major ||
+      deckType == DeckType.wands ||
+      deckType == DeckType.swords ||
+      deckType == DeckType.pentacles ||
+      deckType == DeckType.cups;
+}
+
+bool matchesPrimaryDeckSelection({
+  required DeckType selectedDeck,
+  required DeckType cardDeck,
+}) {
+  if (selectedDeck == DeckType.lenormand) {
+    return cardDeck == DeckType.lenormand;
+  }
+  if (selectedDeck == DeckType.crowley) {
+    return cardDeck == DeckType.crowley;
+  }
+  return isRiderWaiteDeck(cardDeck);
+}
+
+String? crowleySlugFromCardId(String rawId) {
+  final normalizedId = canonicalCardId(rawId);
+  if (!normalizedId.startsWith('ac_')) {
+    return null;
+  }
+  final parts = normalizedId.split('_');
+  if (parts.length < 3) {
+    return null;
+  }
+  return parts.sublist(2).join('-');
 }
 
 String? lenormandSlugFromCardId(String rawId) {

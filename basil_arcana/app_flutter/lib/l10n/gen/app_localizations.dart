@@ -322,6 +322,12 @@ abstract class AppLocalizations {
   /// **'Lenormand deck'**
   String get deckLenormand;
 
+  /// No description provided for @deckCrowley.
+  ///
+  /// In en, this message translates to:
+  /// **'Aleister Crowley deck'**
+  String get deckCrowley;
+
   /// No description provided for @deckAllName.
   ///
   /// In en, this message translates to:
@@ -363,6 +369,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Lenormand'**
   String get deckLenormandName;
+
+  /// No description provided for @deckCrowleyName.
+  ///
+  /// In en, this message translates to:
+  /// **'Crowley'**
+  String get deckCrowleyName;
 
   /// No description provided for @deckDebugLogLabel.
   ///

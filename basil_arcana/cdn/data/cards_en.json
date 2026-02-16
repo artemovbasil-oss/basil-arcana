@@ -2708,5 +2708,577 @@
     },
     "detailedDescription": "Cross signals a serious lesson, duty, and inner maturity test. Cross highlights a practical factor in the situation now. In the upside, it works like this: In light, it supports a clear and timely decision. Shadow risk to watch: In shadow, it can trigger overreaction or a context miss. Practical next move: Read it in sequence with neighboring cards before acting.",
     "imageUrl": "cards/lenormand/ln_cross.webp"
+  },
+  "ac_00_fool": {
+    "title": "The Fool",
+    "deck": "crowley",
+    "keywords": [
+      "beginnings",
+      "freedom",
+      "trust",
+      "Crowley",
+      "archetype"
+    ],
+    "meaning": {
+      "general": "A fresh start and a leap of faith. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy.",
+      "light": "Playful optimism and a willingness to explore. At its best, this card supports a mature strategy and deliberate action.",
+      "shadow": "Naivety, rash risks, or ignoring the obvious. In shadow, extremes, control patterns, or emotional swings become louder.",
+      "advice": "Begin, but carry a small plan with your hope. Keep your attention on the symbol and turn the insight into one concrete step today."
+    },
+    "fact": "The Fool in the Crowley deck is read through archetype, rhythm, and symbolic composition details.",
+    "stats": {
+      "luck": 50,
+      "power": 55,
+      "love": 50,
+      "clarity": 55
+    },
+    "detailedDescription": "A fresh start and a leap of faith. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Playful optimism and a willingness to explore. At its best, this card supports a mature strategy and deliberate action. Naivety, rash risks, or ignoring the obvious. In shadow, extremes, control patterns, or emotional swings become louder. Begin, but carry a small plan with your hope. Keep your attention on the symbol and turn the insight into one concrete step today.",
+    "imageUrl": "cards/ac/ac-joker.webp"
+  },
+  "ac_01_magician": {
+    "title": "The Magician",
+    "deck": "crowley",
+    "keywords": [
+      "will",
+      "skill",
+      "manifestation",
+      "Crowley",
+      "archetype"
+    ],
+    "meaning": {
+      "general": "Focused will and the tools to make ideas real. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy.",
+      "light": "Confidence, skill, and aligned action. At its best, this card supports a mature strategy and deliberate action.",
+      "shadow": "Manipulation or scattered energy. In shadow, extremes, control patterns, or emotional swings become louder.",
+      "advice": "Pick one aim and commit your resources. Keep your attention on the symbol and turn the insight into one concrete step today."
+    },
+    "fact": "The Magician in the Crowley deck is read through archetype, rhythm, and symbolic composition details.",
+    "stats": {
+      "luck": 50,
+      "power": 55,
+      "love": 50,
+      "clarity": 55
+    },
+    "detailedDescription": "Focused will and the tools to make ideas real. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Confidence, skill, and aligned action. At its best, this card supports a mature strategy and deliberate action. Manipulation or scattered energy. In shadow, extremes, control patterns, or emotional swings become louder. Pick one aim and commit your resources. Keep your attention on the symbol and turn the insight into one concrete step today.",
+    "imageUrl": "cards/ac/ac-magician.webp"
+  },
+  "ac_02_high_priestess": {
+    "title": "The High Priestess",
+    "deck": "crowley",
+    "keywords": [
+      "intuition",
+      "mystery",
+      "inner voice",
+      "Crowley",
+      "archetype"
+    ],
+    "meaning": {
+      "general": "Quiet knowledge and the pull of intuition. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy.",
+      "light": "Trusting subtle signals and inner truth. At its best, this card supports a mature strategy and deliberate action.",
+      "shadow": "Withholding, secrecy, or ignoring feelings. In shadow, extremes, control patterns, or emotional swings become louder.",
+      "advice": "Listen before you speak or act. Keep your attention on the symbol and turn the insight into one concrete step today."
+    },
+    "fact": "The High Priestess in the Crowley deck is read through archetype, rhythm, and symbolic composition details.",
+    "stats": {
+      "luck": 50,
+      "power": 55,
+      "love": 50,
+      "clarity": 55
+    },
+    "detailedDescription": "Quiet knowledge and the pull of intuition. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Trusting subtle signals and inner truth. At its best, this card supports a mature strategy and deliberate action. Withholding, secrecy, or ignoring feelings. In shadow, extremes, control patterns, or emotional swings become louder. Listen before you speak or act. Keep your attention on the symbol and turn the insight into one concrete step today.",
+    "imageUrl": "cards/ac/ac-high-priestess.webp"
+  },
+  "ac_03_empress": {
+    "title": "The Empress",
+    "deck": "crowley",
+    "keywords": [
+      "nurture",
+      "abundance",
+      "creation",
+      "Crowley",
+      "archetype"
+    ],
+    "meaning": {
+      "general": "Abundance, care, and embodied creativity. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy.",
+      "light": "Warmth, growth, and fertile ideas. At its best, this card supports a mature strategy and deliberate action.",
+      "shadow": "Overgiving or being smothered by comfort. In shadow, extremes, control patterns, or emotional swings become louder.",
+      "advice": "Feed what you want to grow. Keep your attention on the symbol and turn the insight into one concrete step today."
+    },
+    "fact": "The Empress in the Crowley deck is read through archetype, rhythm, and symbolic composition details.",
+    "stats": {
+      "luck": 50,
+      "power": 55,
+      "love": 50,
+      "clarity": 55
+    },
+    "detailedDescription": "Abundance, care, and embodied creativity. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Warmth, growth, and fertile ideas. At its best, this card supports a mature strategy and deliberate action. Overgiving or being smothered by comfort. In shadow, extremes, control patterns, or emotional swings become louder. Feed what you want to grow. Keep your attention on the symbol and turn the insight into one concrete step today.",
+    "imageUrl": "cards/ac/ac-empress.webp"
+  },
+  "ac_04_emperor": {
+    "title": "The Emperor",
+    "deck": "crowley",
+    "keywords": [
+      "structure",
+      "authority",
+      "stability",
+      "Crowley",
+      "archetype"
+    ],
+    "meaning": {
+      "general": "Order, structure, and responsible leadership. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy.",
+      "light": "Clear boundaries and steady authority. At its best, this card supports a mature strategy and deliberate action.",
+      "shadow": "Rigidity, control, or fear of change. In shadow, extremes, control patterns, or emotional swings become louder.",
+      "advice": "Lead with firmness and fairness. Keep your attention on the symbol and turn the insight into one concrete step today."
+    },
+    "fact": "The Emperor in the Crowley deck is read through archetype, rhythm, and symbolic composition details.",
+    "stats": {
+      "luck": 50,
+      "power": 55,
+      "love": 50,
+      "clarity": 55
+    },
+    "detailedDescription": "Order, structure, and responsible leadership. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Clear boundaries and steady authority. At its best, this card supports a mature strategy and deliberate action. Rigidity, control, or fear of change. In shadow, extremes, control patterns, or emotional swings become louder. Lead with firmness and fairness. Keep your attention on the symbol and turn the insight into one concrete step today.",
+    "imageUrl": "cards/ac/ac-emperor.webp"
+  },
+  "ac_05_hierophant": {
+    "title": "The Hierophant",
+    "deck": "crowley",
+    "keywords": [
+      "tradition",
+      "beliefs",
+      "guidance",
+      "Crowley",
+      "archetype"
+    ],
+    "meaning": {
+      "general": "Shared values, tradition, and learning from elders. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy.",
+      "light": "Mentorship, ritual, and steady teachings. At its best, this card supports a mature strategy and deliberate action.",
+      "shadow": "Dogma, conformity, or resisting growth. In shadow, extremes, control patterns, or emotional swings become louder.",
+      "advice": "Honor the lesson, then make it your own. Keep your attention on the symbol and turn the insight into one concrete step today."
+    },
+    "fact": "The Hierophant in the Crowley deck is read through archetype, rhythm, and symbolic composition details.",
+    "stats": {
+      "luck": 50,
+      "power": 55,
+      "love": 50,
+      "clarity": 55
+    },
+    "detailedDescription": "Shared values, tradition, and learning from elders. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Mentorship, ritual, and steady teachings. At its best, this card supports a mature strategy and deliberate action. Dogma, conformity, or resisting growth. In shadow, extremes, control patterns, or emotional swings become louder. Honor the lesson, then make it your own. Keep your attention on the symbol and turn the insight into one concrete step today.",
+    "imageUrl": "cards/ac/ac-hierophant.webp"
+  },
+  "ac_06_lovers": {
+    "title": "The Lovers",
+    "deck": "crowley",
+    "keywords": [
+      "alignment",
+      "choice",
+      "union",
+      "Crowley",
+      "archetype"
+    ],
+    "meaning": {
+      "general": "Alignment of values before commitment. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy.",
+      "light": "Mutual choice, harmony, and honest connection. At its best, this card supports a mature strategy and deliberate action.",
+      "shadow": "Indecision, temptation, or values out of sync. In shadow, extremes, control patterns, or emotional swings become louder.",
+      "advice": "Choose what truly matches your heart. Keep your attention on the symbol and turn the insight into one concrete step today."
+    },
+    "fact": "The Lovers in the Crowley deck is read through archetype, rhythm, and symbolic composition details.",
+    "stats": {
+      "luck": 50,
+      "power": 55,
+      "love": 50,
+      "clarity": 55
+    },
+    "detailedDescription": "Alignment of values before commitment. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Mutual choice, harmony, and honest connection. At its best, this card supports a mature strategy and deliberate action. Indecision, temptation, or values out of sync. In shadow, extremes, control patterns, or emotional swings become louder. Choose what truly matches your heart. Keep your attention on the symbol and turn the insight into one concrete step today.",
+    "imageUrl": "cards/ac/ac-lovers.webp"
+  },
+  "ac_07_chariot": {
+    "title": "The Chariot",
+    "deck": "crowley",
+    "keywords": [
+      "willpower",
+      "direction",
+      "victory",
+      "Crowley",
+      "archetype"
+    ],
+    "meaning": {
+      "general": "Discipline and will guiding opposing forces. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy.",
+      "light": "Momentum, confidence, and steady drive. At its best, this card supports a mature strategy and deliberate action.",
+      "shadow": "Aggression, scattered focus, or forcing outcomes. In shadow, extremes, control patterns, or emotional swings become louder.",
+      "advice": "Hold the reins and steer with purpose. Keep your attention on the symbol and turn the insight into one concrete step today."
+    },
+    "fact": "The Chariot in the Crowley deck is read through archetype, rhythm, and symbolic composition details.",
+    "stats": {
+      "luck": 50,
+      "power": 55,
+      "love": 50,
+      "clarity": 55
+    },
+    "detailedDescription": "Discipline and will guiding opposing forces. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Momentum, confidence, and steady drive. At its best, this card supports a mature strategy and deliberate action. Aggression, scattered focus, or forcing outcomes. In shadow, extremes, control patterns, or emotional swings become louder. Hold the reins and steer with purpose. Keep your attention on the symbol and turn the insight into one concrete step today.",
+    "imageUrl": "cards/ac/ac-chariot.webp"
+  },
+  "ac_08_strength": {
+    "title": "Strength",
+    "deck": "crowley",
+    "keywords": [
+      "courage",
+      "patience",
+      "compassion",
+      "Crowley",
+      "archetype"
+    ],
+    "meaning": {
+      "general": "Gentle power and steady inner courage. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy.",
+      "light": "Calm resilience and compassionate control. At its best, this card supports a mature strategy and deliberate action.",
+      "shadow": "Self-doubt, suppressed anger, or forcing calm. In shadow, extremes, control patterns, or emotional swings become louder.",
+      "advice": "Lead with patience, not pressure. Keep your attention on the symbol and turn the insight into one concrete step today."
+    },
+    "fact": "Strength in the Crowley deck is read through archetype, rhythm, and symbolic composition details.",
+    "stats": {
+      "luck": 50,
+      "power": 55,
+      "love": 50,
+      "clarity": 55
+    },
+    "detailedDescription": "Gentle power and steady inner courage. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Calm resilience and compassionate control. At its best, this card supports a mature strategy and deliberate action. Self-doubt, suppressed anger, or forcing calm. In shadow, extremes, control patterns, or emotional swings become louder. Lead with patience, not pressure. Keep your attention on the symbol and turn the insight into one concrete step today.",
+    "imageUrl": "cards/ac/ac-power.webp"
+  },
+  "ac_09_hermit": {
+    "title": "The Hermit",
+    "deck": "crowley",
+    "keywords": [
+      "solitude",
+      "wisdom",
+      "guidance",
+      "Crowley",
+      "archetype"
+    ],
+    "meaning": {
+      "general": "Withdrawal to find inner guidance. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy.",
+      "light": "Reflection, clarity, and honest self-study. At its best, this card supports a mature strategy and deliberate action.",
+      "shadow": "Isolation, avoidance, or withdrawing too long. In shadow, extremes, control patterns, or emotional swings become louder.",
+      "advice": "Step back to see the path clearly. Keep your attention on the symbol and turn the insight into one concrete step today."
+    },
+    "fact": "The Hermit in the Crowley deck is read through archetype, rhythm, and symbolic composition details.",
+    "stats": {
+      "luck": 50,
+      "power": 55,
+      "love": 50,
+      "clarity": 55
+    },
+    "detailedDescription": "Withdrawal to find inner guidance. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Reflection, clarity, and honest self-study. At its best, this card supports a mature strategy and deliberate action. Isolation, avoidance, or withdrawing too long. In shadow, extremes, control patterns, or emotional swings become louder. Step back to see the path clearly. Keep your attention on the symbol and turn the insight into one concrete step today.",
+    "imageUrl": "cards/ac/ac-hermit.webp"
+  },
+  "ac_10_wheel_of_fortune": {
+    "title": "Wheel of Fortune",
+    "deck": "crowley",
+    "keywords": [
+      "cycles",
+      "change",
+      "fate",
+      "Crowley",
+      "archetype"
+    ],
+    "meaning": {
+      "general": "A turning cycle and shifting circumstances. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy.",
+      "light": "Positive momentum and welcome change. At its best, this card supports a mature strategy and deliberate action.",
+      "shadow": "Feeling stuck in a loop or resisting the turn. In shadow, extremes, control patterns, or emotional swings become louder.",
+      "advice": "Move with the change instead of fighting it. Keep your attention on the symbol and turn the insight into one concrete step today."
+    },
+    "fact": "Wheel of Fortune in the Crowley deck is read through archetype, rhythm, and symbolic composition details.",
+    "stats": {
+      "luck": 50,
+      "power": 55,
+      "love": 50,
+      "clarity": 55
+    },
+    "detailedDescription": "A turning cycle and shifting circumstances. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Positive momentum and welcome change. At its best, this card supports a mature strategy and deliberate action. Feeling stuck in a loop or resisting the turn. In shadow, extremes, control patterns, or emotional swings become louder. Move with the change instead of fighting it. Keep your attention on the symbol and turn the insight into one concrete step today.",
+    "imageUrl": "cards/ac/ac-wheel-of-fortune.webp"
+  },
+  "ac_11_justice": {
+    "title": "Justice",
+    "deck": "crowley",
+    "keywords": [
+      "truth",
+      "balance",
+      "accountability",
+      "Crowley",
+      "archetype"
+    ],
+    "meaning": {
+      "general": "Clarity, fairness, and consequences. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy.",
+      "light": "Honesty, integrity, and balanced judgment. At its best, this card supports a mature strategy and deliberate action.",
+      "shadow": "Bias, denial, or fear of truth. In shadow, extremes, control patterns, or emotional swings become louder.",
+      "advice": "Tell the truth and accept what it brings. Keep your attention on the symbol and turn the insight into one concrete step today."
+    },
+    "fact": "Justice in the Crowley deck is read through archetype, rhythm, and symbolic composition details.",
+    "stats": {
+      "luck": 50,
+      "power": 55,
+      "love": 50,
+      "clarity": 55
+    },
+    "detailedDescription": "Clarity, fairness, and consequences. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Honesty, integrity, and balanced judgment. At its best, this card supports a mature strategy and deliberate action. Bias, denial, or fear of truth. In shadow, extremes, control patterns, or emotional swings become louder. Tell the truth and accept what it brings. Keep your attention on the symbol and turn the insight into one concrete step today.",
+    "imageUrl": "cards/ac/ac-justice.webp"
+  },
+  "ac_12_hanged_man": {
+    "title": "The Hanged Man",
+    "deck": "crowley",
+    "keywords": [
+      "pause",
+      "surrender",
+      "perspective",
+      "Crowley",
+      "archetype"
+    ],
+    "meaning": {
+      "general": "A pause that reveals a new view. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy.",
+      "light": "Letting go to gain insight. At its best, this card supports a mature strategy and deliberate action.",
+      "shadow": "Stalling, martyrdom, or fear of change. In shadow, extremes, control patterns, or emotional swings become louder.",
+      "advice": "Release control and see what shifts. Keep your attention on the symbol and turn the insight into one concrete step today."
+    },
+    "fact": "The Hanged Man in the Crowley deck is read through archetype, rhythm, and symbolic composition details.",
+    "stats": {
+      "luck": 50,
+      "power": 55,
+      "love": 50,
+      "clarity": 55
+    },
+    "detailedDescription": "A pause that reveals a new view. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Letting go to gain insight. At its best, this card supports a mature strategy and deliberate action. Stalling, martyrdom, or fear of change. In shadow, extremes, control patterns, or emotional swings become louder. Release control and see what shifts. Keep your attention on the symbol and turn the insight into one concrete step today.",
+    "imageUrl": "cards/ac/ac-punishment.webp"
+  },
+  "ac_13_death": {
+    "title": "Death",
+    "deck": "crowley",
+    "keywords": [
+      "ending",
+      "transformation",
+      "renewal",
+      "Crowley",
+      "archetype"
+    ],
+    "meaning": {
+      "general": "An ending that clears the way forward. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy.",
+      "light": "Release, renewal, and true transformation. At its best, this card supports a mature strategy and deliberate action.",
+      "shadow": "Clinging to the past or fearing change. In shadow, extremes, control patterns, or emotional swings become louder.",
+      "advice": "Let the old fall away so the new can rise. Keep your attention on the symbol and turn the insight into one concrete step today."
+    },
+    "fact": "Death in the Crowley deck is read through archetype, rhythm, and symbolic composition details.",
+    "stats": {
+      "luck": 50,
+      "power": 55,
+      "love": 50,
+      "clarity": 55
+    },
+    "detailedDescription": "An ending that clears the way forward. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Release, renewal, and true transformation. At its best, this card supports a mature strategy and deliberate action. Clinging to the past or fearing change. In shadow, extremes, control patterns, or emotional swings become louder. Let the old fall away so the new can rise. Keep your attention on the symbol and turn the insight into one concrete step today.",
+    "imageUrl": "cards/ac/ac-death.webp"
+  },
+  "ac_14_temperance": {
+    "title": "Temperance",
+    "deck": "crowley",
+    "keywords": [
+      "balance",
+      "healing",
+      "integration",
+      "Crowley",
+      "archetype"
+    ],
+    "meaning": {
+      "general": "Blending extremes into harmony. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy.",
+      "light": "Patience, healing, and steady integration. At its best, this card supports a mature strategy and deliberate action.",
+      "shadow": "Imbalance, excess, or forcing a mix. In shadow, extremes, control patterns, or emotional swings become louder.",
+      "advice": "Go slowly and let the blend settle. Keep your attention on the symbol and turn the insight into one concrete step today."
+    },
+    "fact": "Temperance in the Crowley deck is read through archetype, rhythm, and symbolic composition details.",
+    "stats": {
+      "luck": 50,
+      "power": 55,
+      "love": 50,
+      "clarity": 55
+    },
+    "detailedDescription": "Blending extremes into harmony. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Patience, healing, and steady integration. At its best, this card supports a mature strategy and deliberate action. Imbalance, excess, or forcing a mix. In shadow, extremes, control patterns, or emotional swings become louder. Go slowly and let the blend settle. Keep your attention on the symbol and turn the insight into one concrete step today.",
+    "imageUrl": "cards/ac/ac-temperance.webp"
+  },
+  "ac_15_devil": {
+    "title": "The Devil",
+    "deck": "crowley",
+    "keywords": [
+      "attachment",
+      "temptation",
+      "control",
+      "Crowley",
+      "archetype"
+    ],
+    "meaning": {
+      "general": "Attachments that feel like control. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy.",
+      "light": "Awareness of what binds you. At its best, this card supports a mature strategy and deliberate action.",
+      "shadow": "Addiction, fear, or giving away power. In shadow, extremes, control patterns, or emotional swings become louder.",
+      "advice": "Name the chain, then loosen it. Keep your attention on the symbol and turn the insight into one concrete step today."
+    },
+    "fact": "The Devil in the Crowley deck is read through archetype, rhythm, and symbolic composition details.",
+    "stats": {
+      "luck": 50,
+      "power": 55,
+      "love": 50,
+      "clarity": 55
+    },
+    "detailedDescription": "Attachments that feel like control. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Awareness of what binds you. At its best, this card supports a mature strategy and deliberate action. Addiction, fear, or giving away power. In shadow, extremes, control patterns, or emotional swings become louder. Name the chain, then loosen it. Keep your attention on the symbol and turn the insight into one concrete step today.",
+    "imageUrl": "cards/ac/ac-devil.webp"
+  },
+  "ac_16_tower": {
+    "title": "The Tower",
+    "deck": "crowley",
+    "keywords": [
+      "upheaval",
+      "truth",
+      "release",
+      "Crowley",
+      "archetype"
+    ],
+    "meaning": {
+      "general": "A sudden shake that reveals truth. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy.",
+      "light": "Breakthrough, liberation, and clarity. At its best, this card supports a mature strategy and deliberate action.",
+      "shadow": "Chaos, resistance, or fear of collapse. In shadow, extremes, control patterns, or emotional swings become louder.",
+      "advice": "Let the false fall so the real can stand. Keep your attention on the symbol and turn the insight into one concrete step today."
+    },
+    "fact": "The Tower in the Crowley deck is read through archetype, rhythm, and symbolic composition details.",
+    "stats": {
+      "luck": 50,
+      "power": 55,
+      "love": 50,
+      "clarity": 55
+    },
+    "detailedDescription": "A sudden shake that reveals truth. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Breakthrough, liberation, and clarity. At its best, this card supports a mature strategy and deliberate action. Chaos, resistance, or fear of collapse. In shadow, extremes, control patterns, or emotional swings become louder. Let the false fall so the real can stand. Keep your attention on the symbol and turn the insight into one concrete step today.",
+    "imageUrl": "cards/ac/ac-tower.webp"
+  },
+  "ac_17_star": {
+    "title": "The Star",
+    "deck": "crowley",
+    "keywords": [
+      "hope",
+      "healing",
+      "renewal",
+      "Crowley",
+      "archetype"
+    ],
+    "meaning": {
+      "general": "A quiet promise of renewal. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy.",
+      "light": "Hope, calm faith, and healing. At its best, this card supports a mature strategy and deliberate action.",
+      "shadow": "Doubt, discouragement, or losing faith. In shadow, extremes, control patterns, or emotional swings become louder.",
+      "advice": "Keep the signal alive, even if it is small. Keep your attention on the symbol and turn the insight into one concrete step today."
+    },
+    "fact": "The Star in the Crowley deck is read through archetype, rhythm, and symbolic composition details.",
+    "stats": {
+      "luck": 50,
+      "power": 55,
+      "love": 50,
+      "clarity": 55
+    },
+    "detailedDescription": "A quiet promise of renewal. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Hope, calm faith, and healing. At its best, this card supports a mature strategy and deliberate action. Doubt, discouragement, or losing faith. In shadow, extremes, control patterns, or emotional swings become louder. Keep the signal alive, even if it is small. Keep your attention on the symbol and turn the insight into one concrete step today.",
+    "imageUrl": "cards/ac/ac-star.webp"
+  },
+  "ac_18_moon": {
+    "title": "The Moon",
+    "deck": "crowley",
+    "keywords": [
+      "mystery",
+      "dreams",
+      "uncertainty",
+      "Crowley",
+      "archetype"
+    ],
+    "meaning": {
+      "general": "The fog of intuition and the unseen. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy.",
+      "light": "Imagination, empathy, and subtle guidance. At its best, this card supports a mature strategy and deliberate action.",
+      "shadow": "Confusion, fear, or illusion. In shadow, extremes, control patterns, or emotional swings become louder.",
+      "advice": "Move slowly and verify what you feel. Keep your attention on the symbol and turn the insight into one concrete step today."
+    },
+    "fact": "The Moon in the Crowley deck is read through archetype, rhythm, and symbolic composition details.",
+    "stats": {
+      "luck": 50,
+      "power": 55,
+      "love": 50,
+      "clarity": 55
+    },
+    "detailedDescription": "The fog of intuition and the unseen. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Imagination, empathy, and subtle guidance. At its best, this card supports a mature strategy and deliberate action. Confusion, fear, or illusion. In shadow, extremes, control patterns, or emotional swings become louder. Move slowly and verify what you feel. Keep your attention on the symbol and turn the insight into one concrete step today.",
+    "imageUrl": "cards/ac/ac-moon.webp"
+  },
+  "ac_19_sun": {
+    "title": "The Sun",
+    "deck": "crowley",
+    "keywords": [
+      "joy",
+      "clarity",
+      "success",
+      "Crowley",
+      "archetype"
+    ],
+    "meaning": {
+      "general": "Warmth, visibility, and clear success. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy.",
+      "light": "Joy, vitality, and honest celebration. At its best, this card supports a mature strategy and deliberate action.",
+      "shadow": "Overexposure, ego, or burnout. In shadow, extremes, control patterns, or emotional swings become louder.",
+      "advice": "Let your light be seen and shared. Keep your attention on the symbol and turn the insight into one concrete step today."
+    },
+    "fact": "The Sun in the Crowley deck is read through archetype, rhythm, and symbolic composition details.",
+    "stats": {
+      "luck": 50,
+      "power": 55,
+      "love": 50,
+      "clarity": 55
+    },
+    "detailedDescription": "Warmth, visibility, and clear success. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Joy, vitality, and honest celebration. At its best, this card supports a mature strategy and deliberate action. Overexposure, ego, or burnout. In shadow, extremes, control patterns, or emotional swings become louder. Let your light be seen and shared. Keep your attention on the symbol and turn the insight into one concrete step today.",
+    "imageUrl": "cards/ac/ac-sun.webp"
+  },
+  "ac_20_judgement": {
+    "title": "Judgement",
+    "deck": "crowley",
+    "keywords": [
+      "awakening",
+      "reckoning",
+      "purpose",
+      "Crowley",
+      "archetype"
+    ],
+    "meaning": {
+      "general": "A call to rise and be accountable. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy.",
+      "light": "Renewal, forgiveness, and clear purpose. At its best, this card supports a mature strategy and deliberate action.",
+      "shadow": "Harsh self-judgment or refusing the call. In shadow, extremes, control patterns, or emotional swings become louder.",
+      "advice": "Answer honestly and step into the next chapter. Keep your attention on the symbol and turn the insight into one concrete step today."
+    },
+    "fact": "Judgement in the Crowley deck is read through archetype, rhythm, and symbolic composition details.",
+    "stats": {
+      "luck": 50,
+      "power": 55,
+      "love": 50,
+      "clarity": 55
+    },
+    "detailedDescription": "A call to rise and be accountable. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Renewal, forgiveness, and clear purpose. At its best, this card supports a mature strategy and deliberate action. Harsh self-judgment or refusing the call. In shadow, extremes, control patterns, or emotional swings become louder. Answer honestly and step into the next chapter. Keep your attention on the symbol and turn the insight into one concrete step today.",
+    "imageUrl": "cards/ac/ac-judgement.webp"
+  },
+  "ac_21_world": {
+    "title": "The World",
+    "deck": "crowley",
+    "keywords": [
+      "completion",
+      "wholeness",
+      "integration",
+      "Crowley",
+      "archetype"
+    ],
+    "meaning": {
+      "general": "Completion and a sense of wholeness. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy.",
+      "light": "Integration, reward, and earned closure. At its best, this card supports a mature strategy and deliberate action.",
+      "shadow": "Delays in finishing or fearing the next cycle. In shadow, extremes, control patterns, or emotional swings become louder.",
+      "advice": "Honor what is complete and open the next door. Keep your attention on the symbol and turn the insight into one concrete step today."
+    },
+    "fact": "The World in the Crowley deck is read through archetype, rhythm, and symbolic composition details.",
+    "stats": {
+      "luck": 50,
+      "power": 55,
+      "love": 50,
+      "clarity": 55
+    },
+    "detailedDescription": "Completion and a sense of wholeness. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Integration, reward, and earned closure. At its best, this card supports a mature strategy and deliberate action. Delays in finishing or fearing the next cycle. In shadow, extremes, control patterns, or emotional swings become louder. Honor what is complete and open the next door. Keep your attention on the symbol and turn the insight into one concrete step today.",
+    "imageUrl": "cards/ac/ac-world.webp"
   }
 }

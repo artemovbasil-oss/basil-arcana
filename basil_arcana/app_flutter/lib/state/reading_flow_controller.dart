@@ -252,9 +252,14 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
 
   List<CardModel> drawCards(int count, List<CardModel> deck) {
     final selectedDeck = ref.read(deckProvider);
-    final sourceDeck = selectedDeck == DeckType.lenormand
-        ? deck.where((card) => card.deckId == DeckType.lenormand).toList()
-        : deck.where((card) => card.deckId != DeckType.lenormand).toList();
+    final sourceDeck = deck
+        .where(
+          (card) => matchesPrimaryDeckSelection(
+            selectedDeck: selectedDeck,
+            cardDeck: card.deckId,
+          ),
+        )
+        .toList();
     final effectiveDeck = sourceDeck.isNotEmpty ? sourceDeck : deck;
     final rng = Random();
     final shuffled = [...effectiveDeck]..shuffle(rng);

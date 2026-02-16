@@ -338,6 +338,7 @@ List<CardModel> _parseCards({required String raw, required DeckType deckId}) {
     DeckType.pentacles: buildDeckCards(pentaclesCardIds),
     DeckType.cups: buildDeckCards(cupsCardIds),
     DeckType.lenormand: buildDeckCards(lenormandCardIds),
+    DeckType.crowley: buildDeckCards(crowleyCardIds),
   };
 
   return _getActiveDeckCards(deckId, deckRegistry);

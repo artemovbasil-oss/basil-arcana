@@ -30,6 +30,7 @@ class _CardsScreenState extends ConsumerState<CardsScreen> {
     DeckType.pentacles: GlobalKey(),
     DeckType.cups: GlobalKey(),
     DeckType.lenormand: GlobalKey(),
+    DeckType.crowley: GlobalKey(),
   };
 
   @override
@@ -235,6 +236,7 @@ class _CardsScreenState extends ConsumerState<CardsScreen> {
       DeckType.pentacles: l10n.deckPentaclesName,
       DeckType.cups: l10n.deckCupsName,
       DeckType.lenormand: l10n.deckLenormandName,
+      DeckType.crowley: l10n.deckCrowleyName,
     };
     final order = [
       DeckType.major,
@@ -243,11 +245,13 @@ class _CardsScreenState extends ConsumerState<CardsScreen> {
       DeckType.pentacles,
       DeckType.cups,
       DeckType.lenormand,
+      DeckType.crowley,
     ];
-    if (selectedDeck == DeckType.lenormand) {
+    if (selectedDeck == DeckType.lenormand ||
+        selectedDeck == DeckType.crowley) {
       order
-        ..remove(DeckType.lenormand)
-        ..insert(0, DeckType.lenormand);
+        ..remove(selectedDeck)
+        ..insert(0, selectedDeck);
     }
     return [
       for (final deck in order)

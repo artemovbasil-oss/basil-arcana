@@ -881,12 +881,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     if (cards.isEmpty) {
       return null;
     }
-    final filtered = cards.where((card) {
-      if (deckId == DeckType.lenormand) {
-        return card.deckId == DeckType.lenormand;
-      }
-      return card.deckId != DeckType.lenormand;
-    }).toList();
+    final filtered = cards
+        .where(
+          (card) => matchesPrimaryDeckSelection(
+            selectedDeck: deckId,
+            cardDeck: card.deckId,
+          ),
+        )
+        .toList();
     final source = filtered.isEmpty ? cards : filtered;
     final now = DateTime.now().toUtc();
     final dayKey = DateTime.utc(now.year, now.month, now.day)
@@ -1404,6 +1406,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   String _deckHint(AppLocalizations l10n, DeckType deckId) {
     return switch (deckId) {
       DeckType.lenormand => '${l10n.deckLabel}: ${l10n.deckLenormandName}',
+      DeckType.crowley => '${l10n.deckLabel}: ${l10n.deckCrowleyName}',
       _ => '${l10n.deckLabel}: ${l10n.deckTarotRiderWaite}',
     };
   }

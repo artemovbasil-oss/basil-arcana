@@ -70,6 +70,30 @@ void main() {
       );
     }
   });
+
+  test('crowley deck contains 22 cards per locale', () {
+    const files = [
+      '../cdn/data/cards_en.json',
+      '../cdn/data/cards_ru.json',
+      '../cdn/data/cards_kz.json',
+    ];
+
+    for (final file in files) {
+      final contents = File(file).readAsStringSync();
+      final data = jsonDecode(contents);
+      final entries = _coerceEntries(data);
+      final crowley = entries.where((entry) {
+        final deck = entry['deck'] as String?;
+        final id = entry['id'] as String? ?? '';
+        return deck == 'crowley' || id.startsWith('ac_');
+      });
+      expect(
+        crowley.length,
+        22,
+        reason: 'Expected 22 crowley cards in $file.',
+      );
+    }
+  });
 }
 
 List<Map<String, dynamic>> _coerceEntries(Object? payload) {

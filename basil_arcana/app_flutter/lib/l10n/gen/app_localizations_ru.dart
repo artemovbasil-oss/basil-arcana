@@ -133,6 +133,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get deckLenormand => 'Колода Ленорман';
 
   @override
+  String get deckCrowley => 'Колода Алистера Кроули';
+
+  @override
   String get deckAllName => 'Все колоды';
 
   @override
@@ -152,6 +155,9 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get deckLenormandName => 'Ленорман';
+
+  @override
+  String get deckCrowleyName => 'Кроули';
 
   @override
   String get deckDebugLogLabel => 'Debug: вывести путь для Жезлов';

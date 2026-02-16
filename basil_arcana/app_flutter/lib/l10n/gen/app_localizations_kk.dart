@@ -134,6 +134,9 @@ class AppLocalizationsKk extends AppLocalizations {
   String get deckLenormand => 'Ленорман колодасы';
 
   @override
+  String get deckCrowley => 'Алистер Кроули колодасы';
+
+  @override
   String get deckAllName => 'Барлық топтамалар';
 
   @override
@@ -153,6 +156,9 @@ class AppLocalizationsKk extends AppLocalizations {
 
   @override
   String get deckLenormandName => 'Ленорман';
+
+  @override
+  String get deckCrowleyName => 'Кроули';
 
   @override
   String get deckDebugLogLabel => 'Debug: Таяқтар жолын шығару';

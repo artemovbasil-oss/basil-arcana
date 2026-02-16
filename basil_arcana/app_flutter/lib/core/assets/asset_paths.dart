@@ -8,6 +8,9 @@ String deckCoverImageUrl([DeckType deckId = DeckType.all]) {
   if (deckId == DeckType.lenormand) {
     return '$base/deck/lenormand.webp';
   }
+  if (deckId == DeckType.crowley) {
+    return '$base/deck/ac-deck.webp';
+  }
   return '$base/deck/new-deck.webp';
 }
 
@@ -43,6 +46,11 @@ String cardImageUrl(
     final fileName =
         lenormandImageFileStemFromCardId(normalizedId) ?? normalizedId;
     return '$base/cards/lenormand/$fileName.webp';
+  }
+  if (deckId == DeckType.crowley ||
+      (deckId == DeckType.all && normalizedId.startsWith('ac_'))) {
+    final slug = crowleySlugFromCardId(normalizedId) ?? normalizedId;
+    return '$base/cards/ac/ac-$slug.webp';
   }
   switch (normalizedId) {
     case 'major_10_wheel':
@@ -84,6 +92,7 @@ String deckPreviewImageUrl(DeckType deckId) {
     DeckType.pentacles => pentaclesCardIds.first,
     DeckType.cups => cupsCardIds.first,
     DeckType.lenormand => lenormandCardIds.first,
+    DeckType.crowley => crowleyCardIds.first,
     DeckType.all => majorCardIds.first,
   };
   return cardImageUrl(previewId, deckId: deckId);
@@ -96,9 +105,9 @@ String deckCoverAssetPath(DeckType deckId) {
     case DeckType.pentacles:
     case DeckType.cups:
     case DeckType.lenormand:
+    case DeckType.crowley:
     case DeckType.major:
     case DeckType.all:
-    default:
       return deckPreviewImageUrl(deckId);
   }
 }

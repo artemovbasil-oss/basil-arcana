@@ -188,6 +188,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 settingsController.updateDeck(value);
               },
             ),
+            _DeckOption(
+              label: l10n.deckCrowley,
+              deckType: DeckType.crowley,
+              previewUrl: _previewImageUrl(cards, DeckType.crowley),
+              groupValue: settingsState.deckType,
+              onSelected: (value) {
+                settingsController.updateDeck(value);
+              },
+            ),
             const SizedBox(height: 20),
             Text(
               l10n.settingsPromoTitle,
@@ -848,6 +857,8 @@ String? _previewImageUrl(List<CardModel> cards, DeckType deckId) {
       previewId = cupsCardIds.first;
     case DeckType.lenormand:
       previewId = lenormandCardIds.first;
+    case DeckType.crowley:
+      previewId = crowleyCardIds.first;
     case DeckType.major:
     case DeckType.all:
       previewId = majorCardIds.first;

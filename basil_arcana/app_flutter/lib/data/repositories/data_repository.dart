@@ -449,6 +449,13 @@ List<CardModel> _parseCards({required String raw, required DeckType deckId}) {
             canonicalData[id] as Map<String, dynamic>,
           ))
       .toList();
+  final crowleyCards = crowleyCardIds
+      .where(canonicalData.containsKey)
+      .map((id) => CardModel.fromLocalizedEntry(
+            id,
+            canonicalData[id] as Map<String, dynamic>,
+          ))
+      .toList();
   final deckRegistry = <DeckType, List<CardModel>>{
     DeckType.major: majorCards,
     DeckType.wands: wandsCards,
@@ -456,6 +463,7 @@ List<CardModel> _parseCards({required String raw, required DeckType deckId}) {
     DeckType.pentacles: pentaclesCards,
     DeckType.cups: cupsCards,
     DeckType.lenormand: lenormandCards,
+    DeckType.crowley: crowleyCards,
   };
   return getActiveDeckCards(deckId, deckRegistry);
 }
