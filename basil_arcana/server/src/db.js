@@ -928,7 +928,7 @@ async function getUserVisitStreak({ telegramUserId }) {
 
   const dayValues = rows
     .map((row) => {
-      const raw = row.reading_date;
+      const raw = row.activity_date;
       if (!raw) {
         return null;
       }

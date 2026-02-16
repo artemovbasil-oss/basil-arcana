@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -882,8 +883,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     }).toList();
     final source = filtered.isEmpty ? cards : filtered;
     final now = DateTime.now().toUtc();
-    final seed = now.year * 10000 + now.month * 100 + now.day;
-    final index = seed % source.length;
+    final dayKey = DateTime.utc(now.year, now.month, now.day)
+            .millisecondsSinceEpoch ~/
+        Duration.millisecondsPerDay;
+    final index = Random(dayKey).nextInt(source.length);
     return source[index];
   }
 
