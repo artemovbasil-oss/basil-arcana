@@ -87,6 +87,7 @@ const STRINGS: Record<
       launchApp: string;
       buy: string;
       about: string;
+      language: string;
       back: string;
       subscriptions: string;
     };
@@ -126,6 +127,7 @@ const STRINGS: Record<
       launchApp: "🚀 Запустить мини‑приложение",
       buy: "💳 Купить разбор/подписку",
       about: "✨ Чем мы можем быть полезны",
+      language: "🌐 Сменить язык",
       back: "⬅️ В меню",
       subscriptions: "📦 Мои активные подписки",
     },
@@ -138,7 +140,7 @@ const STRINGS: Record<
     },
     launchUnavailable: "🚀 Временно недоступно",
     aboutText:
-      "✨ Чем мы можем быть полезны\n\nВ приложении The Real Magic:\n• Расклады на 1, 3 и 5 карт под твой запрос.\n• Глубокий анализ в разрезе карьеры и отношений.\n• Персональные подсказки и понятные шаги по ситуации.\n• Мини‑приложение с атмосферой и интерактивными картами.\n\n🔮 Наш таролог и астролог София\n• Детально разбирает расклады и натальные карты.\n• Помогает дойти до практичного решения без воды.",
+      "✨ Чем мы можем быть полезны\n\nЕсли ты в ситуации неопределенности, мы поможем перейти к ясному плану действий.\n\nЧто получаешь:\n• Точный разбор запроса на 1, 3 или 5 карт.\n• Конкретные шаги по отношениям, карьере и личным решениям.\n• Приоритетный детальный разбор от Софии (таролог + астролог).\n\nПочему это работает:\n• Без общих фраз, только прикладные выводы.\n• Понятный формат: что происходит, почему, что делать дальше.\n• Можно начать с мини‑приложения или сразу перейти к платному разбору.",
     professionalTitle: "🔮 Детальный разбор с Софией",
     professionalDescription:
       "Оформи доступ к детальному разбору раскладов и натальных карт нашим тарологом/астрологом Софией.",
@@ -197,6 +199,7 @@ const STRINGS: Record<
       launchApp: "🚀 Launch app",
       buy: "💳 Buy reading/subscription",
       about: "✨ How we can help",
+      language: "🌐 Change language",
       back: "⬅️ Back to menu",
       subscriptions: "📦 My active subscriptions",
     },
@@ -209,7 +212,7 @@ const STRINGS: Record<
     },
     launchUnavailable: "🚀 Temporarily unavailable",
     aboutText:
-      "✨ How we can help\n\nInside Basil’s Arcana:\n• Spreads with 1, 3, and 5 cards for your exact question.\n• Deep analysis focused on career and relationships.\n• Personalized guidance with clear next steps.\n• Atmospheric mini app with interactive cards.\n\n🔮 Our tarot reader and astrologer Sofia\n• Provides detailed interpretation of spreads and natal charts.\n• Helps turn insight into practical decisions.",
+      "✨ How we can help\n\nIf you are stuck or unsure, we help you turn uncertainty into a clear action plan.\n\nWhat you get:\n• Precise readings for your exact question (1, 3, or 5 cards).\n• Practical next steps for relationships, career, and personal decisions.\n• Priority deep interpretation by Sofia (tarot reader + astrologer).\n\nWhy users choose us:\n• No vague wording, only actionable conclusions.\n• Clear structure: what is happening, why, what to do next.\n• You can start in the mini app or go straight to a paid deep reading.",
     professionalTitle: "🔮 Detailed reading with Sofia",
     professionalDescription:
       "Get detailed spread and natal-chart interpretation from our tarot reader/astrologer Sofia.",
@@ -269,6 +272,7 @@ const STRINGS: Record<
       launchApp: "🚀 Мини‑қосымшаны ашу",
       buy: "💳 Талдау/жазылым сатып алу",
       about: "✨ Қалай көмектесе аламыз",
+      language: "🌐 Тілді өзгерту",
       back: "⬅️ Мәзірге",
       subscriptions: "📦 Белсенді жазылымдарым",
     },
@@ -281,7 +285,7 @@ const STRINGS: Record<
     },
     launchUnavailable: "🚀 Уақытша қолжетімсіз",
     aboutText:
-      "✨ Қалай көмектесе аламыз\n\nBasil’s Arcana ішінде:\n• Сұрағыңа сай 1, 3 және 5 карталық раскладтар.\n• Мансап пен қарым‑қатынас бағыты бойынша терең талдау.\n• Нақты келесі қадамдары бар жеке кеңес.\n• Атмосферасы бар интерактивті мини‑қосымша.\n\n🔮 Біздің таролог және астролог София\n• Расклад пен натал картаны егжей‑тегжейлі талдайды.\n• Инсайтты нақты шешімге айналдыруға көмектеседі.",
+      "✨ Қалай көмектесе аламыз\n\nЕгер шешім қабылдау қиын болса, біз белгісіздікті нақты әрекет жоспарына айналдырамыз.\n\nНе аласыз:\n• Сұрағыңызға дәл расклад (1, 3 немесе 5 карта).\n• Қарым‑қатынас, мансап және жеке шешімдерге арналған нақты қадамдар.\n• Софиядан (таролог + астролог) терең кәсіби талдау.\n\nНеге тиімді:\n• Жалпы сөздерсіз, тек қолданбалы қорытынды.\n• Түсінікті формат: не болып жатыр, неге, әрі қарай не істеу керек.\n• Мини‑қосымшадан бастауға немесе бірден терең талдауға өтуге болады.",
     professionalTitle: "🔮 Софиямен терең талдау",
     professionalDescription:
       "Раскладтар мен натал карталар бойынша кәсіби талдауды таролог/астролог Софиядан алыңыз.",
@@ -501,6 +505,7 @@ function buildMainMenuKeyboard(locale: SupportedLocale, hasActiveSubs: boolean):
   if (hasActiveSubs) {
     keyboard.row().text(labels.subscriptions, "menu:subscriptions");
   }
+  keyboard.row().text(labels.language, "menu:language");
   return keyboard;
 }
 
@@ -521,6 +526,17 @@ function buildSubscriptionKeyboard(locale: SupportedLocale): InlineKeyboard {
 
 function buildBackKeyboard(locale: SupportedLocale): InlineKeyboard {
   return new InlineKeyboard().text(STRINGS[locale].menuButtons.back, "menu:home");
+}
+
+function buildAboutKeyboard(locale: SupportedLocale): InlineKeyboard {
+  const labels = STRINGS[locale].menuButtons;
+  const keyboard = new InlineKeyboard().text(labels.buy, "menu:buy");
+  if (config.webAppUrl) {
+    keyboard
+      .row()
+      .webApp(labels.launchApp, buildLocalizedWebAppUrl(config.webAppUrl, locale));
+  }
+  return keyboard.row().text(labels.back, "menu:home");
 }
 
 function buildSofiaDeepLink(message: string): string {
@@ -599,7 +615,7 @@ async function sendAbout(ctx: Context): Promise<void> {
   const locale = getLocale(ctx);
   const strings = STRINGS[locale];
   await ctx.reply(`${strings.aboutText}\n\n${strings.sofiaContactCard}`, {
-    reply_markup: buildBackKeyboard(locale),
+    reply_markup: buildAboutKeyboard(locale),
   });
 }
 
@@ -996,12 +1012,12 @@ async function main(): Promise<void> {
     await rememberUserProfile(ctx);
     const userId = ctx.from?.id;
     if (!userId) {
-      await sendLauncherMessage(ctx);
+      await sendAbout(ctx);
       return;
     }
     const state = getUserState(userId);
     const payload = parseStartPayload(ctx);
-    state.pendingStartPayload = payload;
+    state.pendingStartPayload = payload ?? "about";
     await trackFunnelEvent(ctx, "start", { source: payload ?? "direct" });
 
     if (!state.locale) {
@@ -1014,7 +1030,12 @@ async function main(): Promise<void> {
       await sendPlans(ctx, { ignoreDebounce: true, source: "start_payload_plans" });
       return;
     }
-    await sendMainMenu(ctx);
+    await sendAbout(ctx);
+  });
+
+  bot.command("lang", async (ctx) => {
+    await rememberUserProfile(ctx);
+    await sendLanguagePicker(ctx);
   });
 
   bot.command("help", async (ctx) => {
@@ -1193,6 +1214,10 @@ async function main(): Promise<void> {
       await sendPlans(ctx, { ignoreDebounce: true, source: "lang_after_start_payload_plans" });
       return;
     }
+    if (pending === "about") {
+      await sendAbout(ctx);
+      return;
+    }
     await sendMainMenu(ctx);
   });
 
@@ -1217,6 +1242,12 @@ async function main(): Promise<void> {
     await rememberUserProfile(ctx);
     await ctx.answerCallbackQuery();
     await sendAbout(ctx);
+  });
+
+  bot.callbackQuery("menu:language", async (ctx) => {
+    await rememberUserProfile(ctx);
+    await ctx.answerCallbackQuery();
+    await sendLanguagePicker(ctx);
   });
 
   bot.callbackQuery("menu:subscriptions", async (ctx) => {
