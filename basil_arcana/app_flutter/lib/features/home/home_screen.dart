@@ -47,7 +47,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   _SofiaConsentState _sofiaConsentState = _SofiaConsentState.undecided;
   bool _sendingConsent = false;
   bool _hasQueryHistory = false;
-  bool _loadingStreak = false;
+  bool _loadingStreak = true;
   HomeStreakStats _streakStats = HomeStreakStats.empty;
   String? _dailyCardInterpretation;
   String? _dailyCardInterpretationCardId;
@@ -77,8 +77,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _showOnboardingIfNeeded();
     });
-    _loadQueryHistoryAvailability();
     _loadStreakStats();
+    _loadQueryHistoryAvailability();
     _readingFlowSubscription = ref.listenManual<ReadingFlowState>(
       readingFlowControllerProvider,
       (prev, next) {
@@ -116,9 +116,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   }
 
   Future<void> _loadStreakStats() async {
-    setState(() {
-      _loadingStreak = true;
-    });
+    if (!_loadingStreak) {
+      setState(() {
+        _loadingStreak = true;
+      });
+    }
     try {
       final streak =
           await ref.read(homeInsightsRepositoryProvider).fetchStreakStats();
@@ -768,9 +770,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         Expanded(
                           child: _SecondaryFeatureCard(
                             emoji: '🔥',
-                            title: streakCopy
-                                .tileTitle(_streakStats.currentStreakDays),
-                            subtitle: streakCopy.tileSubtitle,
+                            title: _loadingStreak
+                                ? streakCopy.tileLoadingTitle
+                                : streakCopy
+                                    .tileTitle(_streakStats.currentStreakDays),
+                            subtitle: _loadingStreak
+                                ? streakCopy.tileLoadingSubtitle
+                                : streakCopy.tileSubtitle,
                             onTap: () => _showStreakModal(
                               copy: streakCopy,
                               topCards: topCards,
@@ -974,6 +980,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         child: _StatPill(
                           label: copy.currentStreakLabel,
                           value: '${_streakStats.currentStreakDays}',
+                          loading: _loadingStreak,
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -981,6 +988,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         child: _StatPill(
                           label: copy.bestStreakLabel,
                           value: '${_streakStats.longestStreakDays}',
+                          loading: _loadingStreak,
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -990,6 +998,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                           value: _streakStats.awarenessPercent,
                           locked: _streakStats.awarenessLocked,
                           shimmer: _titleShimmerController,
+                          loading: _loadingStreak,
                         ),
                       ),
                     ],
@@ -1055,50 +1064,55 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                 ),
                           ),
                           const SizedBox(height: 8),
-                          FutureBuilder<String>(
-                            future: requestFuture,
-                            initialData:
-                                hasCache ? _streakInterpretation : null,
-                            builder: (context, snapshot) {
-                              final hasValue = snapshot.hasData &&
-                                  (snapshot.data?.trim().isNotEmpty ?? false);
-                              if (snapshot.connectionState ==
-                                      ConnectionState.waiting &&
-                                  !hasValue) {
-                                return _HomeMagicLoadingCard(
-                                  label: copy.streakInsightPending,
-                                );
-                              }
-                              final resolved = hasValue
-                                  ? snapshot.data!.trim()
-                                  : copy.streakInsightFallback;
-                              if (_streakInterpretationCacheKey !=
-                                      streakCacheKey ||
-                                  _streakInterpretation != resolved) {
-                                WidgetsBinding.instance
-                                    .addPostFrameCallback((_) {
-                                  if (!mounted) {
-                                    return;
-                                  }
-                                  setState(() {
-                                    _streakInterpretationCacheKey =
-                                        streakCacheKey;
-                                    _streakInterpretation = resolved;
+                          if (_loadingStreak)
+                            _HomeMagicLoadingCard(
+                              label: copy.streakLoadingSubtitle,
+                            )
+                          else
+                            FutureBuilder<String>(
+                              future: requestFuture,
+                              initialData:
+                                  hasCache ? _streakInterpretation : null,
+                              builder: (context, snapshot) {
+                                final hasValue = snapshot.hasData &&
+                                    (snapshot.data?.trim().isNotEmpty ?? false);
+                                if (snapshot.connectionState ==
+                                        ConnectionState.waiting &&
+                                    !hasValue) {
+                                  return _HomeMagicLoadingCard(
+                                    label: copy.streakInsightPending,
+                                  );
+                                }
+                                final resolved = hasValue
+                                    ? snapshot.data!.trim()
+                                    : copy.streakInsightFallback;
+                                if (_streakInterpretationCacheKey !=
+                                        streakCacheKey ||
+                                    _streakInterpretation != resolved) {
+                                  WidgetsBinding.instance
+                                      .addPostFrameCallback((_) {
+                                    if (!mounted) {
+                                      return;
+                                    }
+                                    setState(() {
+                                      _streakInterpretationCacheKey =
+                                          streakCacheKey;
+                                      _streakInterpretation = resolved;
+                                    });
                                   });
-                                });
-                              }
-                              return Text(
-                                resolved,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyMedium
-                                    ?.copyWith(
-                                      color: colorScheme.onSurface
-                                          .withValues(alpha: 0.9),
-                                    ),
-                              );
-                            },
-                          ),
+                                }
+                                return Text(
+                                  resolved,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(
+                                        color: colorScheme.onSurface
+                                            .withValues(alpha: 0.9),
+                                      ),
+                                );
+                              },
+                            ),
                         ],
                       ),
                     ),
@@ -1591,6 +1605,8 @@ class _TopCardStat {
 
 class _HomeStreakCopy {
   const _HomeStreakCopy({
+    required this.tileLoadingTitle,
+    required this.tileLoadingSubtitle,
     required this.tileSubtitle,
     required this.modalTitle,
     required this.currentStreakLabel,
@@ -1612,11 +1628,14 @@ class _HomeStreakCopy {
     required this.dailyCardQuestionPrefix,
     required this.streakInsightTitle,
     required this.streakInsightPending,
+    required this.streakLoadingSubtitle,
     required this.streakInsightFallback,
     required this.lastActivePrefix,
     required this.closeLabel,
   });
 
+  final String tileLoadingTitle;
+  final String tileLoadingSubtitle;
   final String tileSubtitle;
   final String modalTitle;
   final String currentStreakLabel;
@@ -1638,6 +1657,7 @@ class _HomeStreakCopy {
   final String dailyCardQuestionPrefix;
   final String streakInsightTitle;
   final String streakInsightPending;
+  final String streakLoadingSubtitle;
   final String streakInsightFallback;
   final String lastActivePrefix;
   final String closeLabel;
@@ -1663,6 +1683,8 @@ class _HomeStreakCopy {
     final code = Localizations.localeOf(context).languageCode;
     if (code == 'ru') {
       return const _HomeStreakCopy(
+        tileLoadingTitle: '🔥 ...',
+        tileLoadingSubtitle: 'Загружаем streak...',
         tileSubtitle: 'Серия и статистика',
         modalTitle: 'Твой streak',
         currentStreakLabel: 'Сейчас',
@@ -1685,6 +1707,7 @@ class _HomeStreakCopy {
             'Какой следующий шаг мне сделать сегодня, учитывая карту',
         streakInsightTitle: 'Что это значит',
         streakInsightPending: 'Собираем короткий смысл по твоей статистике…',
+        streakLoadingSubtitle: 'Подтягиваем актуальный streak...',
         streakInsightFallback:
             'Статистика показывает темп твоей практики: регулярность и повторяемость усиливают точность интерпретаций.',
         lastActivePrefix: 'Последняя активность',
@@ -1693,6 +1716,8 @@ class _HomeStreakCopy {
     }
     if (code == 'kk') {
       return const _HomeStreakCopy(
+        tileLoadingTitle: '🔥 ...',
+        tileLoadingSubtitle: 'Streak жүктелуде...',
         tileSubtitle: 'Серия мен статистика',
         modalTitle: 'Сенің streak',
         currentStreakLabel: 'Қазір',
@@ -1716,6 +1741,7 @@ class _HomeStreakCopy {
         streakInsightTitle: 'Бұл нені білдіреді',
         streakInsightPending:
             'Статистикаңыз бойынша қысқа түсіндірме дайындап жатырмыз…',
+        streakLoadingSubtitle: 'Өзекті streak жүктелуде...',
         streakInsightFallback:
             'Бұл статистика тәжірибе ырғағын көрсетеді: тұрақты қайталау интерпретация дәлдігін арттырады.',
         lastActivePrefix: 'Соңғы белсенділік',
@@ -1723,6 +1749,8 @@ class _HomeStreakCopy {
       );
     }
     return const _HomeStreakCopy(
+      tileLoadingTitle: '🔥 ...',
+      tileLoadingSubtitle: 'Loading streak...',
       tileSubtitle: 'Streak and stats',
       modalTitle: 'Your streak',
       currentStreakLabel: 'Current',
@@ -1745,6 +1773,7 @@ class _HomeStreakCopy {
           'What next step should I take today based on the card',
       streakInsightTitle: 'What this means',
       streakInsightPending: 'Building a short insight from your stats...',
+      streakLoadingSubtitle: 'Loading latest streak...',
       streakInsightFallback:
           'Your stats reflect practice rhythm: consistency and repetition improve interpretation quality over time.',
       lastActivePrefix: 'Last activity',
@@ -1871,10 +1900,12 @@ class _StatPill extends StatelessWidget {
   const _StatPill({
     required this.label,
     required this.value,
+    this.loading = false,
   });
 
   final String label;
   final String value;
+  final bool loading;
 
   @override
   Widget build(BuildContext context) {
@@ -1898,12 +1929,19 @@ class _StatPill extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            value,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
-          ),
+          if (loading)
+            const SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          else
+            Text(
+              value,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+            ),
           const SizedBox(height: 2),
           Text(
             label,
@@ -1923,12 +1961,14 @@ class _AwarenessPill extends StatelessWidget {
     required this.value,
     required this.locked,
     required this.shimmer,
+    this.loading = false,
   });
 
   final String label;
   final int value;
   final bool locked;
   final Animation<double> shimmer;
+  final bool loading;
 
   @override
   Widget build(BuildContext context) {
@@ -1957,7 +1997,13 @@ class _AwarenessPill extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (locked && percent == 100)
+          if (loading)
+            const SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          else if (locked && percent == 100)
             _ShimmerTitle(
               text: '$percent%',
               animation: shimmer,
