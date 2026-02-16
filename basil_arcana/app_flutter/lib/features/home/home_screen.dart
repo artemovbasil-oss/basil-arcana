@@ -889,6 +889,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           ),
         )
         .toList();
+    final strictDeck = deckId == DeckType.lenormand || deckId == DeckType.crowley;
+    if (strictDeck && filtered.isEmpty) {
+      return null;
+    }
     final source = filtered.isEmpty ? cards : filtered;
     final now = DateTime.now().toUtc();
     final dayKey = DateTime.utc(now.year, now.month, now.day)

@@ -14,6 +14,7 @@ import '../data/repositories/spreads_repository.dart';
 import '../data/repositories/readings_repository.dart';
 import '../data/repositories/sofia_consent_repository.dart';
 import '../data/repositories/user_dashboard_repository.dart';
+import '../data/models/card_model.dart';
 import '../data/models/deck_model.dart';
 import 'energy_controller.dart';
 import 'reading_flow_controller.dart';
@@ -177,7 +178,26 @@ final cardsProvider = FutureProvider((ref) async {
 final cardsAllProvider = FutureProvider((ref) async {
   final locale = ref.watch(localeProvider);
   final repo = ref.watch(cardsRepositoryProvider);
-  return repo.fetchCards(locale: locale, deckId: DeckType.all);
+  final allCards = await repo.fetchCards(locale: locale, deckId: DeckType.all);
+  final byId = <String, CardModel>{for (final card in allCards) card.id: card};
+
+  if (!allCards.any((card) => card.deckId == DeckType.lenormand)) {
+    final lenormandCards =
+        await repo.fetchCards(locale: locale, deckId: DeckType.lenormand);
+    for (final card in lenormandCards) {
+      byId.putIfAbsent(card.id, () => card);
+    }
+  }
+
+  if (!allCards.any((card) => card.deckId == DeckType.crowley)) {
+    final crowleyCards =
+        await repo.fetchCards(locale: locale, deckId: DeckType.crowley);
+    for (final card in crowleyCards) {
+      byId.putIfAbsent(card.id, () => card);
+    }
+  }
+
+  return byId.values.toList(growable: false);
 });
 
 final spreadsProvider = FutureProvider((ref) async {

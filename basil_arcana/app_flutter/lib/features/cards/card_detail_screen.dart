@@ -32,8 +32,10 @@ class CardDetailScreen extends ConsumerWidget {
         videoIndex == null || videoIndex.isEmpty ? null : videoIndex;
     final resolvedCardId = card?.id ?? cardId;
     final cardsAsync = ref.watch(cardsAllProvider);
+    final selectedCardsAsync = ref.watch(cardsProvider);
     final resolvedCard = _resolveCard(
       cardsAsync.asData?.value,
+      selectedCardsAsync.asData?.value,
       resolvedCardId,
       card,
     );
@@ -353,7 +355,8 @@ class CardDetailScreen extends ConsumerWidget {
 }
 
 CardModel? _resolveCard(
-  List<CardModel>? cards,
+  List<CardModel>? cardsAll,
+  List<CardModel>? selectedDeckCards,
   String? cardId,
   CardModel? fallback,
 ) {
@@ -361,12 +364,18 @@ CardModel? _resolveCard(
     return fallback;
   }
   final canonicalId = canonicalCardId(cardId);
-  if (cards == null || cards.isEmpty) {
-    return fallback;
+  if (cardsAll != null && cardsAll.isNotEmpty) {
+    for (final card in cardsAll) {
+      if (card.id == canonicalId) {
+        return card;
+      }
+    }
   }
-  for (final card in cards) {
-    if (card.id == canonicalId) {
-      return card;
+  if (selectedDeckCards != null && selectedDeckCards.isNotEmpty) {
+    for (final card in selectedDeckCards) {
+      if (card.id == canonicalId) {
+        return card;
+      }
     }
   }
   return fallback;

@@ -12,6 +12,7 @@ import '../../core/widgets/app_top_bar.dart';
 import '../../core/navigation/app_route_config.dart';
 import '../../core/telegram/telegram_user_profile.dart';
 import '../../core/utils/date_format.dart';
+import '../../core/assets/asset_paths.dart';
 import '../../data/models/app_enums.dart';
 import '../../data/models/card_model.dart';
 import '../../data/models/deck_model.dart';
@@ -869,5 +870,5 @@ String? _previewImageUrl(List<CardModel> cards, DeckType deckId) {
       return card.imageUrl;
     }
   }
-  return cards.first.imageUrl;
+  return cardImageUrl(previewId, deckId: deckId);
 }
