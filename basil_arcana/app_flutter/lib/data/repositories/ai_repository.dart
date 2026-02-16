@@ -1350,6 +1350,10 @@ class AiRepository {
         drawnCards.every(
           (drawn) => canonicalCardId(drawn.cardId).startsWith('lenormand_'),
         );
+    final isCrowleyReading = drawnCards.isNotEmpty &&
+        drawnCards.every(
+          (drawn) => canonicalCardId(drawn.cardId).startsWith('ac_'),
+        );
 
     if (normalizedLanguage == 'ru') {
       final depthLine = mode == ReadingMode.deep ||
@@ -1362,13 +1366,20 @@ class AiRepository {
       final lenormandLine = isLenormandReading
           ? 'Это расклад Ленорман: трактуй карты последовательно, где каждая следующая карта уточняет и модифицирует предыдущую. Покажи цепочку смысла шаг за шагом и избегай мистификации.'
           : '';
+      final crowleyLine = isCrowleyReading
+          ? 'Это расклад Таро Кроули: усили каббалистический и эзотерический слой трактовки, работай через символы, архетипы, внутреннюю алхимию и духовную трансформацию. Практические шаги делай вторичными и мягкими, как внутренние ориентиры.'
+          : '';
+      final closingLine = isCrowleyReading
+          ? 'Избегай общих фраз и повторов. В конце дай 1-2 мягких внутренних ориентира или духовных фокуса по этому запросу.'
+          : 'Избегай общих фраз и повторов. В конце дай 1-2 конкретных шага, что делать дальше именно по этому запросу.';
       return '''
 Фокус запроса пользователя: "$focus".
 Ответ должен быть адресным и персональным: напрямую свяжи выводы с вопросом пользователя, позициями расклада ($positions) и картами ($cardNames).
 $depthLine
 $premiumDepthLine
 $lenormandLine
-Избегай общих фраз и повторов. В конце дай 1-2 конкретных шага, что делать дальше именно по этому запросу.''';
+$crowleyLine
+$closingLine''';
     }
 
     if (normalizedLanguage == 'kk' || normalizedLanguage == 'kz') {
@@ -1382,13 +1393,20 @@ $lenormandLine
       final lenormandLine = isLenormandReading
           ? 'Бұл Ленорман жайылмасы: карталарды тізбектей түсіндір, әр келесі карта алдыңғы мағынаны нақтылап, өзгертіп отырады. Мағына тізбегін қадамдап көрсет.'
           : '';
+      final crowleyLine = isCrowleyReading
+          ? 'Бұл Кроули колодасының жайылмасы: каббалистік және эзотерикалық қабатты күшейт, символдар мен архетиптер арқылы, ішкі алхимия мен рухани трансформацияны аш.'
+          : '';
+      final closingLine = isCrowleyReading
+          ? 'Жалпылама, шаблон тіркестерден қаш. Соңында осы сұраққа сай 1-2 ішкі рухани бағдар бер.'
+          : 'Жалпылама, шаблон тіркестерден қаш. Соңында осы сұраққа сай 1-2 нақты қадам ұсын.';
       return '''
 Пайдаланушы сұрағының фокусы: "$focus".
 Жауап жеке әрі нысаналы болсын: қорытындыны сұрақпен, жайылма позицияларымен ($positions) және карталармен ($cardNames) тікелей байланыстыр.
 $depthLine
 $premiumDepthLine
 $lenormandLine
-Жалпылама, шаблон тіркестерден қаш. Соңында осы сұраққа сай 1-2 нақты қадам ұсын.''';
+$crowleyLine
+$closingLine''';
     }
 
     final depthLine = mode == ReadingMode.deep ||
@@ -1401,13 +1419,20 @@ $lenormandLine
     final lenormandLine = isLenormandReading
         ? 'This is a Lenormand reading: interpret cards in sequence so each next card modifies and sharpens the previous one. Explicitly show the chain of meaning step by step and keep the tone concrete.'
         : '';
+    final crowleyLine = isCrowleyReading
+        ? 'This is a Crowley Tarot reading: emphasize cabbalistic and esoteric symbolism, archetypal layers, inner alchemy, and spiritual transformation. Keep practical to-do steps secondary and frame guidance as inner alignment.'
+        : '';
+    final closingLine = isCrowleyReading
+        ? 'Avoid generic filler and repetition. Finish with 1-2 inner alignment focuses tailored to this question.'
+        : 'Avoid generic filler and repetition. Finish with 1-2 concrete next steps tailored to this question.';
     return '''
 User focus: "$focus".
 Make the reading specific and personal: tie conclusions directly to the question, spread positions ($positions), and drawn cards ($cardNames).
 $depthLine
 $premiumDepthLine
 $lenormandLine
-Avoid generic filler and repetition. Finish with 1-2 concrete next steps tailored to this question.''';
+$crowleyLine
+$closingLine''';
   }
 
   void _logTelegramInitDataDebug({

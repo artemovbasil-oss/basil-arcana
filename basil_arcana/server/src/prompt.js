@@ -1,3 +1,26 @@
+function hasCrowleyCards(cards) {
+  if (!Array.isArray(cards) || cards.length === 0) {
+    return false;
+  }
+  return cards.some((card) => {
+    const rawDeck =
+      typeof card?.deck === 'string'
+        ? card.deck
+        : typeof card?.deckId === 'string'
+          ? card.deckId
+          : '';
+    const deck = rawDeck.trim().toLowerCase();
+    const rawCardId =
+      typeof card?.cardId === 'string'
+        ? card.cardId
+        : typeof card?.id === 'string'
+          ? card.id
+          : '';
+    const cardId = rawCardId.trim().toLowerCase();
+    return deck === 'crowley' || cardId.startsWith('ac_');
+  });
+}
+
 function buildPromptMessages(payload, mode = 'deep') {
   const { question, spread, cards, language, fastReading, responseConstraints } =
     payload;
@@ -9,12 +32,15 @@ function buildPromptMessages(payload, mode = 'deep') {
   const isFast = mode === 'fast';
   const isLifeAreas = mode === 'life_areas';
   const isDetails = mode === 'details_relationships_career';
+  const isCrowleyReading = hasCrowleyCards(cards);
 
   const system = [
     'You are an insightful tarot reader for Basil\'s Arcana.',
-    isDetails
-      ? 'Tone: calm, warm, encouraging, gentle, non-deterministic.'
-      : 'Tone: calm, reflective, grounded, practical, non-deterministic.',
+    isCrowleyReading
+      ? 'Tone: calm, reflective, mystical, symbolic, and spiritual; non-deterministic.'
+      : isDetails
+        ? 'Tone: calm, warm, encouraging, gentle, non-deterministic.'
+        : 'Tone: calm, reflective, grounded, practical, non-deterministic.',
     'Avoid absolute predictions and avoid the word "will". Use "may", "could", "suggests", "likely".',
     'Do not give medical, legal, or financial directives.',
     'Reference the user question explicitly and tailor every section to it.',
@@ -35,6 +61,12 @@ function buildPromptMessages(payload, mode = 'deep') {
       : null,
     isDetails
       ? 'Details mode: focus only on Relationships and Career. Keep the tone friendly and warm, avoid negativity, and avoid overly concrete claims.'
+      : null,
+    isCrowleyReading
+      ? 'Crowley deck mode: emphasize cabbalistic and esoteric symbolism, archetypal dynamics, and inner spiritual process. Use terms like archetype, alchemy, shadow integration, higher/lower self, path, initiation, symbol, and inner transformation when relevant.'
+      : null,
+    isCrowleyReading
+      ? 'In Crowley deck mode, prioritize mystical interpretation over practical checklists. Keep action guidance as inner alignment practices (attention, contemplation, intention, ritualized focus), not rigid external instructions.'
       : null,
     'Output strict JSON only with keys: tldr, sections, why, action, fullText.',
     'Each section must have: positionId, title, text.',
@@ -64,9 +96,12 @@ function buildPromptMessages(payload, mode = 'deep') {
 
 function buildDetailsPrompt(payload) {
   const { question, spread, cards, locale } = payload;
+  const isCrowleyReading = hasCrowleyCards(cards);
   const system = [
     'You are an insightful tarot reader for Basil\'s Arcana.',
-    'Tone: strict but caring grandmother oracle. Warm, grounded, wise, and gently encouraging.',
+    isCrowleyReading
+      ? 'Tone: wise mystical oracle. Warm, symbol-rich, contemplative, spiritually focused, and gently encouraging.'
+      : 'Tone: strict but caring grandmother oracle. Warm, grounded, wise, and gently encouraging.',
     'Avoid negative framing.',
     'Avoid absolute predictions and avoid the word "will". Use "may", "could", "suggests", "likely".',
     'Do not give medical, legal, or financial directives.',
@@ -77,8 +112,13 @@ function buildDetailsPrompt(payload) {
     '3) Career (1-2 short paragraphs).',
     '4) Grounded advice (1 short paragraph).',
     'If there are three cards, explain the interaction between Left, Center, and Right, and state that the Center card is the main influence.',
+    isCrowleyReading
+      ? 'For Crowley deck readings, use cabbalistic and esoteric framing: symbolic correspondences, inner alchemy, and spiritual integration. Keep practical advice secondary to inner orientation.'
+      : null,
     `Respond in the requested locale (${locale || 'infer from the question'}).`,
-  ].join(' ');
+  ]
+    .filter((line) => line != null)
+    .join(' ');
 
   const user = {
     question,
