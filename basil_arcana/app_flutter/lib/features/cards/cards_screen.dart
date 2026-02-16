@@ -355,13 +355,34 @@ class _CardTile extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               Expanded(
-                child: Center(
-                  child: CardAssetImage(
-                    cardId: card.id,
-                    imageUrl: card.imageUrl,
-                    width: double.infinity,
-                    height: double.infinity,
-                    fit: BoxFit.contain,
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: colorScheme.surface.withOpacity(0.28),
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(
+                      color: colorScheme.outlineVariant.withOpacity(0.45),
+                    ),
+                  ),
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: colorScheme.surface.withOpacity(0.42),
+                      borderRadius: BorderRadius.circular(13),
+                      border: Border.all(
+                        color: colorScheme.outlineVariant.withOpacity(0.35),
+                      ),
+                    ),
+                    child: CardAssetImage(
+                      cardId: card.id,
+                      imageUrl: card.imageUrl,
+                      width: double.infinity,
+                      height: double.infinity,
+                      borderRadius: BorderRadius.circular(9),
+                      fit: BoxFit.contain,
+                      showGlow: false,
+                    ),
                   ),
                 ),
               ),
