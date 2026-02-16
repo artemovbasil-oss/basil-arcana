@@ -12,9 +12,7 @@ import '../../core/widgets/app_top_bar.dart';
 import '../../core/navigation/app_route_config.dart';
 import '../../core/telegram/telegram_user_profile.dart';
 import '../../core/utils/date_format.dart';
-import '../../core/assets/asset_paths.dart';
 import '../../data/models/app_enums.dart';
-import '../../data/models/card_model.dart';
 import '../../data/models/deck_model.dart';
 import '../../data/repositories/sofia_consent_repository.dart';
 import '../../data/repositories/user_dashboard_repository.dart';
@@ -65,8 +63,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final settingsState = ref.watch(settingsControllerProvider);
     final energyState = ref.watch(energyProvider);
     final settingsController = ref.read(settingsControllerProvider.notifier);
-    final cards =
-        ref.watch(cardsAllProvider).asData?.value ?? const <CardModel>[];
     final telegramProfile = readTelegramUserProfile();
     final displayProfile = _dashboard?.profile;
     final userInitials = _resolveInitials(displayProfile, telegramProfile);
@@ -174,7 +170,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             _DeckOption(
               label: l10n.deckTarotRiderWaite,
               deckType: DeckType.all,
-              previewUrl: _previewImageUrl(cards, DeckType.all),
               groupValue: settingsState.deckType,
               onSelected: (value) {
                 settingsController.updateDeck(value);
@@ -183,7 +178,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             _DeckOption(
               label: l10n.deckLenormand,
               deckType: DeckType.lenormand,
-              previewUrl: _previewImageUrl(cards, DeckType.lenormand),
               groupValue: settingsState.deckType,
               onSelected: (value) {
                 settingsController.updateDeck(value);
@@ -192,7 +186,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             _DeckOption(
               label: l10n.deckCrowley,
               deckType: DeckType.crowley,
-              previewUrl: _previewImageUrl(cards, DeckType.crowley),
               groupValue: settingsState.deckType,
               onSelected: (value) {
                 settingsController.updateDeck(value);
@@ -316,8 +309,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 leading: const Icon(Icons.bug_report_outlined),
                 title: Text(l10n.deckDebugLogLabel),
                 onTap: () {
-                  final path = _previewImageUrl(cards, DeckType.wands) ?? '—';
-                  debugPrint('Wands sample image: $path');
+                  debugPrint('Selected deck: ${settingsState.deckType.name}');
                 },
               ),
             ],
@@ -717,14 +709,12 @@ class _DeckOption extends StatelessWidget {
   const _DeckOption({
     required this.label,
     required this.deckType,
-    required this.previewUrl,
     required this.groupValue,
     required this.onSelected,
   });
 
   final String label;
   final DeckType deckType;
-  final String? previewUrl;
   final DeckType groupValue;
   final ValueChanged<DeckType> onSelected;
 
@@ -743,7 +733,6 @@ class _DeckOption extends StatelessWidget {
           }
         },
         title: Text(label),
-        secondary: _DeckPreviewThumbnail(imageUrl: previewUrl),
       ),
     );
   }
@@ -780,95 +769,4 @@ class _LanguageOption extends StatelessWidget {
       ),
     );
   }
-}
-
-class _DeckPreviewThumbnail extends StatelessWidget {
-  const _DeckPreviewThumbnail({required this.imageUrl});
-
-  final String? imageUrl;
-
-  @override
-  Widget build(BuildContext context) {
-    const width = 36.0;
-    const height = 54.0;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(6),
-      child: imageUrl == null || imageUrl!.isEmpty
-          ? Container(
-              width: width,
-              height: height,
-              color: Theme.of(context).colorScheme.surfaceVariant,
-              alignment: Alignment.center,
-              child: const Icon(
-                Icons.image_not_supported_outlined,
-                size: 16,
-              ),
-            )
-          : Image.network(
-              imageUrl!,
-              width: width,
-              height: height,
-              fit: BoxFit.cover,
-              loadingBuilder: (context, child, loadingProgress) {
-                if (loadingProgress == null) {
-                  return child;
-                }
-                return const SizedBox(
-                  width: width,
-                  height: height,
-                  child: Center(
-                    child: SizedBox(
-                      width: 12,
-                      height: 12,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                  ),
-                );
-              },
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  width: width,
-                  height: height,
-                  color: Theme.of(context).colorScheme.surfaceVariant,
-                  alignment: Alignment.center,
-                  child: const Icon(
-                    Icons.image_not_supported_outlined,
-                    size: 16,
-                  ),
-                );
-              },
-            ),
-    );
-  }
-}
-
-String? _previewImageUrl(List<CardModel> cards, DeckType deckId) {
-  if (cards.isEmpty) {
-    return null;
-  }
-  String previewId;
-  switch (deckId) {
-    case DeckType.wands:
-      previewId = wandsCardIds.first;
-    case DeckType.swords:
-      previewId = swordsCardIds.first;
-    case DeckType.pentacles:
-      previewId = pentaclesCardIds.first;
-    case DeckType.cups:
-      previewId = cupsCardIds.first;
-    case DeckType.lenormand:
-      previewId = lenormandCardIds.first;
-    case DeckType.crowley:
-      previewId = crowleyCardIds.first;
-    case DeckType.major:
-    case DeckType.all:
-      previewId = majorCardIds.first;
-  }
-  final normalizedId = canonicalCardId(previewId);
-  for (final card in cards) {
-    if (card.id == normalizedId) {
-      return card.imageUrl;
-    }
-  }
-  return cardImageUrl(previewId, deckId: deckId);
 }

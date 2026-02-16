@@ -43,7 +43,7 @@ class _CardsScreenState extends ConsumerState<CardsScreen> {
   Widget build(BuildContext context) {
     final cardsAsync = ref.watch(cardsAllProvider);
     final selectedDeck = ref.watch(deckProvider);
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
     final statsRepository = ref.watch(cardStatsRepositoryProvider);
     return Scaffold(
       appBar: buildTopBar(
@@ -361,6 +361,7 @@ class _CardTile extends StatelessWidget {
                     imageUrl: card.imageUrl,
                     width: double.infinity,
                     height: double.infinity,
+                    fit: BoxFit.contain,
                   ),
                 ),
               ),
