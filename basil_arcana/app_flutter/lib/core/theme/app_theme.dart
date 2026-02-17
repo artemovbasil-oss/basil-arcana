@@ -135,12 +135,12 @@ _ThemePalette _paletteForFlavor(AppThemeFlavor flavor) {
   switch (flavor) {
     case AppThemeFlavor.crowley:
       return const _ThemePalette(
-        primary: Color(0xFF9A8D77),
-        accent: Color(0xFFD2B98A),
-        background: Color(0xFF181818),
-        surface: Color(0xFF212121),
-        surfaceVariant: Color(0xFF2A2A2A),
-        outlineVariant: Color(0xFF484848),
+        primary: Color(0xFF8895A6),
+        accent: Color(0xFFD9B45F),
+        background: Color(0xFF11151C),
+        surface: Color(0xFF1A2029),
+        surfaceVariant: Color(0xFF252D39),
+        outlineVariant: Color(0xFF434E5D),
       );
     case AppThemeFlavor.lenormand:
       return const _ThemePalette(

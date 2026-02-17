@@ -769,7 +769,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       children: [
                         Expanded(
                           child: _SecondaryFeatureCard(
-                            assetIconPath: 'assets/icon/home_streak.svg',
+                            icon: Icons.bolt_rounded,
                             pulseBadge: !_loadingStreak &&
                                 _streakStats.currentStreakDays > 1,
                             flickerIcon: !_loadingStreak &&
@@ -982,7 +982,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         majorWeight += weight;
       }
 
-      final element = _elementByCardId(normalizedId);
+      final element = _bucketByDeck(
+        cardId: normalizedId,
+        selectedDeck: selectedDeck,
+      );
       if (element != null) {
         suitWeights[element] = (suitWeights[element] ?? 0) + weight;
       }
@@ -1017,9 +1020,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         sortedElements.isNotEmpty ? sortedElements.first.key : null;
     final supportElement =
         sortedElements.length > 1 ? sortedElements[1].key : null;
-    final majorPercent = totalTarotWeight <= 0
-        ? 0
-        : ((majorWeight / totalTarotWeight) * 100).round().clamp(0, 100);
+    final majorPercent = selectedDeck == DeckType.lenormand ||
+            selectedDeck == DeckType.crowley
+        ? _concentrationPercent(suitWeights)
+        : totalTarotWeight <= 0
+            ? 0
+            : ((majorWeight / totalTarotWeight) * 100).round().clamp(0, 100);
 
     final majorPool = frequencyWeighted.entries
         .where((entry) => _isMajorArcana(entry.key))
@@ -1062,6 +1068,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     }
 
     return _EnergyProfileData(
+      deckType: selectedDeck,
       sampledCardsCount: cardsWindow.length,
       elementPercents: elementPercents,
       dominantElement: dominantElement,
@@ -1111,7 +1118,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       if (_isMajorArcana(normalizedId)) {
         majorWeight += weight;
       }
-      final element = _elementByCardId(normalizedId);
+      final element = _bucketByDeck(
+        cardId: normalizedId,
+        selectedDeck: selectedDeck,
+      );
       if (element != null) {
         suitWeights[element] = (suitWeights[element] ?? 0) + weight;
       }
@@ -1140,9 +1150,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     final supportElement =
         sortedElements.length > 1 ? sortedElements[1].key : null;
 
-    final majorPercent = totalTarotWeight <= 0
-        ? 0
-        : ((majorWeight / totalTarotWeight) * 100).round().clamp(0, 100);
+    final majorPercent = selectedDeck == DeckType.lenormand ||
+            selectedDeck == DeckType.crowley
+        ? _concentrationPercent(suitWeights)
+        : totalTarotWeight <= 0
+            ? 0
+            : ((majorWeight / totalTarotWeight) * 100).round().clamp(0, 100);
 
     final majorPool = frequency.entries
         .where((entry) => _isMajorArcana(entry.key))
@@ -1186,6 +1199,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     }
 
     return _EnergyProfileData(
+      deckType: selectedDeck,
       sampledCardsCount: sampledCardsCount,
       elementPercents: elementPercents,
       dominantElement: dominantElement,
@@ -1219,6 +1233,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     return cardId.startsWith('major_') || cardId.startsWith('ac_');
   }
 
+  _ElementKind? _bucketByDeck({
+    required String cardId,
+    required DeckType selectedDeck,
+  }) {
+    if (selectedDeck == DeckType.lenormand) {
+      return _lenormandBucket(cardId);
+    }
+    if (selectedDeck == DeckType.crowley) {
+      return _crowleyBucket(cardId);
+    }
+    return _elementByCardId(cardId);
+  }
+
   _ElementKind? _elementByCardId(String cardId) {
     if (cardId.startsWith('wands_')) {
       return _ElementKind.wands;
@@ -1233,6 +1260,66 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       return _ElementKind.pentacles;
     }
     return null;
+  }
+
+  _ElementKind? _crowleyBucket(String cardId) {
+    if (!cardId.startsWith('ac_')) {
+      return null;
+    }
+    final parts = cardId.split('_');
+    if (parts.length < 3) {
+      return null;
+    }
+    final number = int.tryParse(parts[1]);
+    if (number == null) {
+      return null;
+    }
+    if (number <= 5) {
+      return _ElementKind.wands;
+    }
+    if (number <= 11) {
+      return _ElementKind.cups;
+    }
+    if (number <= 17) {
+      return _ElementKind.swords;
+    }
+    return _ElementKind.pentacles;
+  }
+
+  _ElementKind? _lenormandBucket(String cardId) {
+    if (!cardId.startsWith('lenormand_')) {
+      return null;
+    }
+    final parts = cardId.split('_');
+    if (parts.length < 3) {
+      return null;
+    }
+    final number = int.tryParse(parts[1]);
+    if (number == null) {
+      return null;
+    }
+    const movement = <int>{1, 2, 3, 9, 12, 17, 22, 27};
+    const bonds = <int>{13, 16, 18, 24, 25, 28, 29};
+    const material = <int>{4, 5, 14, 15, 19, 20, 30, 33, 34, 35};
+    if (movement.contains(number)) {
+      return _ElementKind.wands;
+    }
+    if (bonds.contains(number)) {
+      return _ElementKind.cups;
+    }
+    if (material.contains(number)) {
+      return _ElementKind.pentacles;
+    }
+    return _ElementKind.swords;
+  }
+
+  int _concentrationPercent(Map<_ElementKind, double> weights) {
+    final total = weights.values.fold<double>(0, (sum, value) => sum + value);
+    if (total <= 0) {
+      return 0;
+    }
+    final peak = weights.values.fold<double>(0, max);
+    return ((peak / total) * 100).round().clamp(0, 100);
   }
 
   Future<void> _showStreakModal({
@@ -1869,6 +1956,7 @@ class _RepeatedCardSignal {
 
 class _EnergyProfileData {
   const _EnergyProfileData({
+    required this.deckType,
     required this.sampledCardsCount,
     required this.elementPercents,
     required this.dominantElement,
@@ -1878,6 +1966,7 @@ class _EnergyProfileData {
     required this.repeatedSignals,
   });
 
+  final DeckType deckType;
   final int sampledCardsCount;
   final Map<_ElementKind, int> elementPercents;
   final _ElementKind? dominantElement;
@@ -1889,7 +1978,8 @@ class _EnergyProfileData {
   bool get hasCards => sampledCardsCount > 0;
 
   const _EnergyProfileData.empty()
-      : sampledCardsCount = 0,
+      : deckType = DeckType.all,
+        sampledCardsCount = 0,
         elementPercents = const {},
         dominantElement = null,
         supportElement = null,
@@ -1903,10 +1993,15 @@ class _EnergyProfileCopy {
     required this.title,
     required this.subtitle,
     required this.emptyState,
-    required this.elementsTitle,
-    required this.destinyTitle,
-    required this.destinyLow,
-    required this.destinyHigh,
+    required this.elementsTitleRider,
+    required this.elementsTitleLenormand,
+    required this.elementsTitleCrowley,
+    required this.destinyTitleRider,
+    required this.destinyTitleAlt,
+    required this.destinyLowRider,
+    required this.destinyHighRider,
+    required this.destinyLowAlt,
+    required this.destinyHighAlt,
     required this.archetypeTitle,
     required this.archetypeFallback,
     required this.repeatsTitle,
@@ -1916,6 +2011,14 @@ class _EnergyProfileCopy {
     required this.elementEmotion,
     required this.elementMind,
     required this.elementMatter,
+    required this.lenormandMovement,
+    required this.lenormandRelations,
+    required this.lenormandChallenges,
+    required this.lenormandMaterial,
+    required this.crowleyImpulse,
+    required this.crowleyChoice,
+    required this.crowleyTransformation,
+    required this.crowleyIntegration,
     required this.phaseSummaryFallback,
     required this.archetypeDescriptionFallback,
   });
@@ -1923,10 +2026,15 @@ class _EnergyProfileCopy {
   final String title;
   final String subtitle;
   final String emptyState;
-  final String elementsTitle;
-  final String destinyTitle;
-  final String destinyLow;
-  final String destinyHigh;
+  final String elementsTitleRider;
+  final String elementsTitleLenormand;
+  final String elementsTitleCrowley;
+  final String destinyTitleRider;
+  final String destinyTitleAlt;
+  final String destinyLowRider;
+  final String destinyHighRider;
+  final String destinyLowAlt;
+  final String destinyHighAlt;
   final String archetypeTitle;
   final String archetypeFallback;
   final String repeatsTitle;
@@ -1936,10 +2044,67 @@ class _EnergyProfileCopy {
   final String elementEmotion;
   final String elementMind;
   final String elementMatter;
+  final String lenormandMovement;
+  final String lenormandRelations;
+  final String lenormandChallenges;
+  final String lenormandMaterial;
+  final String crowleyImpulse;
+  final String crowleyChoice;
+  final String crowleyTransformation;
+  final String crowleyIntegration;
   final String phaseSummaryFallback;
   final String archetypeDescriptionFallback;
 
-  String elementLabel(_ElementKind kind) {
+  String circleTitle(DeckType deckType) {
+    if (deckType == DeckType.lenormand) {
+      return elementsTitleLenormand;
+    }
+    if (deckType == DeckType.crowley) {
+      return elementsTitleCrowley;
+    }
+    return elementsTitleRider;
+  }
+
+  String destinyTitle(DeckType deckType) {
+    if (deckType == DeckType.lenormand || deckType == DeckType.crowley) {
+      return destinyTitleAlt;
+    }
+    return destinyTitleRider;
+  }
+
+  String destinySummary(DeckType deckType, int percent) {
+    final high = percent >= 38;
+    if (deckType == DeckType.lenormand || deckType == DeckType.crowley) {
+      return high ? destinyHighAlt : destinyLowAlt;
+    }
+    return high ? destinyHighRider : destinyLowRider;
+  }
+
+  String elementLabel(DeckType deckType, _ElementKind kind) {
+    if (deckType == DeckType.lenormand) {
+      switch (kind) {
+        case _ElementKind.wands:
+          return lenormandMovement;
+        case _ElementKind.cups:
+          return lenormandRelations;
+        case _ElementKind.swords:
+          return lenormandChallenges;
+        case _ElementKind.pentacles:
+          return lenormandMaterial;
+      }
+    }
+    if (deckType == DeckType.crowley) {
+      switch (kind) {
+        case _ElementKind.wands:
+          return crowleyImpulse;
+        case _ElementKind.cups:
+          return crowleyChoice;
+        case _ElementKind.swords:
+          return crowleyTransformation;
+        case _ElementKind.pentacles:
+          return crowleyIntegration;
+      }
+    }
     switch (kind) {
       case _ElementKind.wands:
         return elementAction;
@@ -1953,13 +2118,14 @@ class _EnergyProfileCopy {
   }
 
   String phaseSummary({
+    required DeckType deckType,
     required _ElementKind? dominant,
     required _ElementKind? support,
   }) {
     if (dominant == null) {
       return phaseSummaryFallback;
     }
-    final dominantLabel = elementLabel(dominant).toLowerCase();
+    final dominantLabel = elementLabel(deckType, dominant).toLowerCase();
     if (support == null) {
       if (title.startsWith('Твой')) {
         return 'Сейчас доминирует $dominantLabel. Это твой основной вектор периода.';
@@ -1969,7 +2135,7 @@ class _EnergyProfileCopy {
       }
       return 'Your pattern is led by $dominantLabel right now.';
     }
-    final supportLabel = elementLabel(support).toLowerCase();
+    final supportLabel = elementLabel(deckType, support).toLowerCase();
     if (title.startsWith('Твой')) {
       return 'Ты в фазе, где $dominantLabel ведёт, а $supportLabel поддерживает движение.';
     }
@@ -2007,10 +2173,15 @@ class _EnergyProfileCopy {
         subtitle: 'Аналитика по последним раскладам',
         emptyState:
             'Пока мало данных. Сделай несколько раскладов, и профиль начнет заполняться.',
-        elementsTitle: 'Круг стихий',
-        destinyTitle: 'Уровень судьбоносности',
-        destinyLow: 'Фоновая фаза: многое в твоих руках',
-        destinyHigh: 'Период судьбоносных сдвигов',
+        elementsTitleRider: 'Круг стихий',
+        elementsTitleLenormand: 'Круг сюжетов',
+        elementsTitleCrowley: 'Круг арканических фаз',
+        destinyTitleRider: 'Уровень судьбоносности',
+        destinyTitleAlt: 'Интенсивность паттерна',
+        destinyLowRider: 'Фоновая фаза: многое в твоих руках',
+        destinyHighRider: 'Период судьбоносных сдвигов',
+        destinyLowAlt: 'Паттерн мягкий и распределенный',
+        destinyHighAlt: 'Паттерн концентрированный и сильный',
         archetypeTitle: 'Доминирующий архетип',
         archetypeFallback: 'Архетип пока формируется',
         repeatsTitle: 'Повторяющиеся сигналы (30 дней)',
@@ -2020,6 +2191,14 @@ class _EnergyProfileCopy {
         elementEmotion: 'Кубки',
         elementMind: 'Мечи',
         elementMatter: 'Пентакли',
+        lenormandMovement: 'Движение',
+        lenormandRelations: 'Связи',
+        lenormandChallenges: 'Испытания',
+        lenormandMaterial: 'Ресурсы',
+        crowleyImpulse: 'Импульс',
+        crowleyChoice: 'Выбор',
+        crowleyTransformation: 'Трансформация',
+        crowleyIntegration: 'Интеграция',
         phaseSummaryFallback:
             'Профиль еще набирает статистику, поэтому вывод пока нейтральный.',
         archetypeDescriptionFallback:
@@ -2032,10 +2211,15 @@ class _EnergyProfileCopy {
         subtitle: 'Соңғы раскладтар аналитикасы',
         emptyState:
             'Дерек әлі аз. Бірнеше расклад жасаңыз, профиль біртіндеп толады.',
-        elementsTitle: 'Стихиялар шеңбері',
-        destinyTitle: 'Тағдырлық кезең деңгейі',
-        destinyLow: 'Фондық фаза: бәрі өз қолыңда',
-        destinyHigh: 'Тағдырлық өзгеріс кезеңі',
+        elementsTitleRider: 'Стихиялар шеңбері',
+        elementsTitleLenormand: 'Сюжеттер шеңбері',
+        elementsTitleCrowley: 'Аркан фазалары шеңбері',
+        destinyTitleRider: 'Тағдырлық кезең деңгейі',
+        destinyTitleAlt: 'Паттерн қарқындылығы',
+        destinyLowRider: 'Фондық фаза: бәрі өз қолыңда',
+        destinyHighRider: 'Тағдырлық өзгеріс кезеңі',
+        destinyLowAlt: 'Паттерн жұмсақ әрі таралған',
+        destinyHighAlt: 'Паттерн шоғырланған әрі күшті',
         archetypeTitle: 'Басым архетип',
         archetypeFallback: 'Архетип әлі қалыптасып жатыр',
         repeatsTitle: 'Қайталанатын сигналдар (30 күн)',
@@ -2045,6 +2229,14 @@ class _EnergyProfileCopy {
         elementEmotion: 'Кубоктар',
         elementMind: 'Қылыштар',
         elementMatter: 'Пентакльдер',
+        lenormandMovement: 'Қозғалыс',
+        lenormandRelations: 'Байланыстар',
+        lenormandChallenges: 'Сынақтар',
+        lenormandMaterial: 'Ресурстар',
+        crowleyImpulse: 'Импульс',
+        crowleyChoice: 'Таңдау',
+        crowleyTransformation: 'Трансформация',
+        crowleyIntegration: 'Интеграция',
         phaseSummaryFallback:
             'Профиль әлі статистика жинап жатыр, сондықтан қорытынды бейтарап.',
         archetypeDescriptionFallback:
@@ -2056,10 +2248,15 @@ class _EnergyProfileCopy {
       subtitle: 'Analytics from recent readings',
       emptyState:
           'Not enough data yet. Complete a few readings and this profile will fill in.',
-      elementsTitle: 'Element wheel',
-      destinyTitle: 'Fate intensity',
-      destinyLow: 'Background phase: you hold the steering wheel',
-      destinyHigh: 'Destiny-shaping phase',
+      elementsTitleRider: 'Element wheel',
+      elementsTitleLenormand: 'Story wheel',
+      elementsTitleCrowley: 'Arcana phase wheel',
+      destinyTitleRider: 'Fate intensity',
+      destinyTitleAlt: 'Pattern intensity',
+      destinyLowRider: 'Background phase: you hold the steering wheel',
+      destinyHighRider: 'Destiny-shaping phase',
+      destinyLowAlt: 'Pattern is distributed and soft',
+      destinyHighAlt: 'Pattern is concentrated and intense',
       archetypeTitle: 'Dominant archetype',
       archetypeFallback: 'Archetype is forming',
       repeatsTitle: 'Recurring signals (30 days)',
@@ -2069,6 +2266,14 @@ class _EnergyProfileCopy {
       elementEmotion: 'Cups',
       elementMind: 'Swords',
       elementMatter: 'Pentacles',
+      lenormandMovement: 'Movement',
+      lenormandRelations: 'Connections',
+      lenormandChallenges: 'Challenges',
+      lenormandMaterial: 'Resources',
+      crowleyImpulse: 'Impulse',
+      crowleyChoice: 'Choice',
+      crowleyTransformation: 'Transformation',
+      crowleyIntegration: 'Integration',
       phaseSummaryFallback:
           'The profile is still collecting signal, so the summary stays neutral for now.',
       archetypeDescriptionFallback:
@@ -2515,26 +2720,48 @@ class _EnergyProfileCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final isCrowley = profile.deckType == DeckType.crowley;
+    final isLenormand = profile.deckType == DeckType.lenormand;
+    final palette = isCrowley
+        ? const [
+            Color(0xFFD9B45F),
+            Color(0xFF9DAABA),
+            Color(0xFF7D8898),
+            Color(0xFFB8A37A),
+          ]
+        : isLenormand
+            ? const [
+                Color(0xFF73C3FF),
+                Color(0xFFF39AC8),
+                Color(0xFFC5B8FF),
+                Color(0xFF8EE0B8),
+              ]
+            : const [
+                Color(0xFFFF8A5B),
+                Color(0xFF63B8FF),
+                Color(0xFFECEAF9),
+                Color(0xFFE3C26A),
+              ];
     final slices = [
       _EnergySlice(
-        label: copy.elementLabel(_ElementKind.wands),
+        label: copy.elementLabel(profile.deckType, _ElementKind.wands),
         percent: profile.elementPercents[_ElementKind.wands] ?? 0,
-        color: const Color(0xFFFF8A5B),
+        color: palette[0],
       ),
       _EnergySlice(
-        label: copy.elementLabel(_ElementKind.cups),
+        label: copy.elementLabel(profile.deckType, _ElementKind.cups),
         percent: profile.elementPercents[_ElementKind.cups] ?? 0,
-        color: const Color(0xFF63B8FF),
+        color: palette[1],
       ),
       _EnergySlice(
-        label: copy.elementLabel(_ElementKind.swords),
+        label: copy.elementLabel(profile.deckType, _ElementKind.swords),
         percent: profile.elementPercents[_ElementKind.swords] ?? 0,
-        color: const Color(0xFFECEAF9),
+        color: palette[2],
       ),
       _EnergySlice(
-        label: copy.elementLabel(_ElementKind.pentacles),
+        label: copy.elementLabel(profile.deckType, _ElementKind.pentacles),
         percent: profile.elementPercents[_ElementKind.pentacles] ?? 0,
-        color: const Color(0xFFE3C26A),
+        color: palette[3],
       ),
     ];
     return Container(
@@ -2579,7 +2806,7 @@ class _EnergyProfileCard extends StatelessWidget {
                   ),
             ),
           ] else ...[
-            _EnergySectionTitle(text: copy.elementsTitle),
+            _EnergySectionTitle(text: copy.circleTitle(profile.deckType)),
             const SizedBox(height: 8),
             Row(
               children: [
@@ -2605,6 +2832,7 @@ class _EnergyProfileCard extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               copy.phaseSummary(
+                deckType: profile.deckType,
                 dominant: profile.dominantElement,
                 support: profile.supportElement,
               ),
@@ -2613,14 +2841,15 @@ class _EnergyProfileCard extends StatelessWidget {
                   ),
             ),
             const SizedBox(height: 14),
-            _EnergySectionTitle(text: copy.destinyTitle),
+            _EnergySectionTitle(text: copy.destinyTitle(profile.deckType)),
             const SizedBox(height: 8),
             _FateIntensityBar(value: profile.majorArcanaPercent),
             const SizedBox(height: 6),
             Text(
-              profile.majorArcanaPercent >= 38
-                  ? copy.destinyHigh
-                  : copy.destinyLow,
+              copy.destinySummary(
+                profile.deckType,
+                profile.majorArcanaPercent,
+              ),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: colorScheme.onSurface.withValues(alpha: 0.84),
                   ),
@@ -3399,18 +3628,10 @@ class _IconCircleBadgeState extends State<_IconCircleBadge>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 1800),
-  )..repeat(reverse: true);
+    duration: const Duration(milliseconds: 1150),
+  )..repeat();
   late final Animation<double> _pulse =
       Tween<double>(begin: 0.14, end: 0.42).animate(
-    CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-  );
-  late final Animation<double> _flickerOpacity =
-      Tween<double>(begin: 0.82, end: 1.0).animate(
-    CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-  );
-  late final Animation<double> _flickerScale =
-      Tween<double>(begin: 0.96, end: 1.07).animate(
     CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
   );
 
@@ -3424,9 +3645,23 @@ class _IconCircleBadgeState extends State<_IconCircleBadge>
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return AnimatedBuilder(
-      animation: _pulse,
+      animation: _controller,
       builder: (context, child) {
+        final t = _controller.value;
+        final flickerWaveA = sin(t * pi * 2 * 8);
+        final flickerWaveB = sin(t * pi * 2 * 27);
+        final glitchCut = flickerWaveB > 0.72 || flickerWaveB < -0.94;
+        final electricOpacity =
+            (0.62 + (flickerWaveA.abs() * 0.38)) * (glitchCut ? 0.28 : 1.0);
+        final electricScale = 0.96 +
+            (0.09 * sin(t * pi * 2 * 11).abs()) * (glitchCut ? 0.2 : 1.0);
         final glowAlpha = widget.pulse ? _pulse.value : 0.0;
+        final electricGlow = Color.lerp(
+              colorScheme.primary,
+              const Color(0xFF92D5FF),
+              0.55,
+            ) ??
+            colorScheme.primary;
         return Container(
           width: widget.size,
           height: widget.size,
@@ -3440,18 +3675,25 @@ class _IconCircleBadgeState extends State<_IconCircleBadge>
             boxShadow: widget.pulse
                 ? [
                     BoxShadow(
-                      color: colorScheme.primary.withValues(alpha: glowAlpha),
-                      blurRadius: 12,
-                      spreadRadius: 1,
+                      color: electricGlow.withValues(alpha: glowAlpha),
+                      blurRadius: 14,
+                      spreadRadius: 1.5,
+                    ),
+                    BoxShadow(
+                      color: colorScheme.primary.withValues(
+                        alpha: (glowAlpha * 0.72).clamp(0, 1),
+                      ),
+                      blurRadius: 20,
+                      spreadRadius: 0.2,
                     ),
                   ]
                 : null,
           ),
           child: widget.flickerChild
               ? Opacity(
-                  opacity: _flickerOpacity.value,
+                  opacity: electricOpacity.clamp(0.2, 1.0),
                   child: Transform.scale(
-                    scale: _flickerScale.value,
+                    scale: electricScale,
                     child: child,
                   ),
                 )
