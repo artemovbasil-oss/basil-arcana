@@ -14,6 +14,7 @@
         "hive_flutter",
         "http",
         "intl",
+        "phosphor_flutter",
         "shared_preferences",
         "url_launcher",
         "uuid",
@@ -112,6 +113,13 @@
         "shared_preferences_platform_interface",
         "shared_preferences_web",
         "shared_preferences_windows"
+      ]
+    },
+    {
+      "name": "phosphor_flutter",
+      "version": "2.1.0",
+      "dependencies": [
+        "flutter"
       ]
     },
     {

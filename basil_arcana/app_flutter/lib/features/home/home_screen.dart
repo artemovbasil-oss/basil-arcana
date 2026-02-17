@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../../core/config/app_version.dart';
 import '../../core/navigation/app_route_config.dart';
@@ -713,7 +714,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       children: [
                         Expanded(
                           child: _FeatureSquareCard(
-                            icon: Icons.auto_awesome_rounded,
+                            icon:
+                                PhosphorIcons.sparkle(PhosphorIconsStyle.light),
                             title: featureCopy.natalTitle,
                             onTap: () {
                               Navigator.push(
@@ -730,7 +732,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         const SizedBox(width: 10),
                         Expanded(
                           child: _FeatureSquareCard(
-                            icon: Icons.favorite_rounded,
+                            icon: PhosphorIcons.heartStraight(
+                                PhosphorIconsStyle.light),
                             title: featureCopy.compatibilityTitle,
                             onTap: () {
                               Navigator.push(
@@ -748,7 +751,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         const SizedBox(width: 10),
                         Expanded(
                           child: _FeatureSquareCard(
-                            icon: Icons.style_rounded,
+                            icon: PhosphorIcons.cards(PhosphorIconsStyle.light),
                             iconColor: Color(0xFFD0B06A),
                             title: featureCopy.libraryTitle,
                             onTap: () {
@@ -770,7 +773,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       children: [
                         Expanded(
                           child: _SecondaryFeatureCard(
-                            icon: Icons.local_fire_department_rounded,
+                            icon: PhosphorIcons.fireSimple(
+                                PhosphorIconsStyle.light),
                             title: _loadingStreak
                                 ? streakCopy.tileLoadingTitle
                                 : streakCopy
@@ -787,7 +791,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         const SizedBox(width: 10),
                         Expanded(
                           child: _SecondaryFeatureCard(
-                            icon: Icons.nightlight_round,
+                            icon: PhosphorIcons.moonStars(
+                                PhosphorIconsStyle.light),
                             iconColor: Color(0xFFD0B06A),
                             title: streakCopy.dailyCardTileTitle,
                             subtitle:
@@ -1885,7 +1890,7 @@ class _SecondaryFeatureCard extends StatelessWidget {
               height: 30,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: colorScheme.primary.withValues(alpha: 0.14),
+                color: colorScheme.surface.withValues(alpha: 0.42),
                 border: Border.all(
                   color: colorScheme.primary.withValues(alpha: 0.35),
                 ),
@@ -1893,7 +1898,8 @@ class _SecondaryFeatureCard extends StatelessWidget {
               child: Icon(
                 icon,
                 size: 18,
-                color: iconColor ?? colorScheme.primary,
+                color:
+                    iconColor ?? colorScheme.onSurface.withValues(alpha: 0.92),
               ),
             ),
             const SizedBox(width: 8),
@@ -2558,7 +2564,7 @@ class _FeatureSquareCard extends StatelessWidget {
               height: 36,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: colorScheme.primary.withValues(alpha: 0.16),
+                color: colorScheme.surface.withValues(alpha: 0.42),
                 border: Border.all(
                   color: colorScheme.primary.withValues(alpha: 0.45),
                 ),
@@ -2566,7 +2572,8 @@ class _FeatureSquareCard extends StatelessWidget {
               child: Icon(
                 icon,
                 size: 20,
-                color: iconColor ?? colorScheme.primary,
+                color:
+                    iconColor ?? colorScheme.onSurface.withValues(alpha: 0.92),
               ),
             ),
             const SizedBox(height: 6),
