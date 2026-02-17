@@ -1,11 +1,11 @@
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../../core/config/app_version.dart';
 import '../../core/navigation/app_route_config.dart';
@@ -714,7 +714,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       children: [
                         Expanded(
                           child: _FeatureSquareCard(
-                            icon: PhosphorIconsLight.sparkle,
+                            icon: CupertinoIcons.sparkles,
                             title: featureCopy.natalTitle,
                             onTap: () {
                               Navigator.push(
@@ -731,7 +731,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         const SizedBox(width: 10),
                         Expanded(
                           child: _FeatureSquareCard(
-                            icon: PhosphorIconsLight.heartStraight,
+                            icon: CupertinoIcons.heart_fill,
                             title: featureCopy.compatibilityTitle,
                             onTap: () {
                               Navigator.push(
@@ -749,7 +749,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         const SizedBox(width: 10),
                         Expanded(
                           child: _FeatureSquareCard(
-                            icon: PhosphorIconsLight.cards,
+                            icon: CupertinoIcons.book_fill,
                             iconColor: Color(0xFFD0B06A),
                             title: featureCopy.libraryTitle,
                             onTap: () {
@@ -771,7 +771,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       children: [
                         Expanded(
                           child: _SecondaryFeatureCard(
-                            icon: PhosphorIconsLight.fireSimple,
+                            icon: CupertinoIcons.flame_fill,
                             title: _loadingStreak
                                 ? streakCopy.tileLoadingTitle
                                 : streakCopy
@@ -788,7 +788,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         const SizedBox(width: 10),
                         Expanded(
                           child: _SecondaryFeatureCard(
-                            icon: PhosphorIconsLight.moonStars,
+                            icon: CupertinoIcons.moon_stars_fill,
                             iconColor: Color(0xFFD0B06A),
                             title: streakCopy.dailyCardTileTitle,
                             subtitle:
