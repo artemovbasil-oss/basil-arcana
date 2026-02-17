@@ -29,9 +29,10 @@ class SelfAnalysisReportCtaSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final hasHelper = helper.trim().isNotEmpty;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
@@ -55,12 +56,12 @@ class SelfAnalysisReportCtaSection extends StatelessWidget {
                   color: colorScheme.onSurface.withValues(alpha: 0.8),
                 ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           AppPrimaryButton(
             label: isLoading ? '...' : (isFree ? freeLabel : paidLabel),
             onPressed: (isEnabled && !isLoading) ? onPressed : null,
           ),
-          if (isLoading) ...[
+          if (isLoading && hasHelper) ...[
             const SizedBox(height: 8),
             Row(
               children: [
@@ -78,7 +79,7 @@ class SelfAnalysisReportCtaSection extends StatelessWidget {
                 ),
               ],
             ),
-          ] else ...[
+          ] else if (hasHelper) ...[
             const SizedBox(height: 8),
             Text(
               helper,

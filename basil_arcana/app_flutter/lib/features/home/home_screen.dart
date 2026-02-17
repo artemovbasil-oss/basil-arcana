@@ -1739,7 +1739,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       Expanded(
                         child: _StatPill(
                           label: copy.currentStreakLabel,
-                          value: '${_streakStats.currentStreakDays}',
+                          value: copy.daysCountLabel(
+                            _streakStats.currentStreakDays,
+                          ),
+                          tone: _StatPillTone.green,
                           loading: _loadingStreak,
                         ),
                       ),
@@ -1747,7 +1750,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       Expanded(
                         child: _StatPill(
                           label: copy.bestStreakLabel,
-                          value: '${_streakStats.longestStreakDays}',
+                          value: copy.daysCountLabel(
+                            _streakStats.longestStreakDays,
+                          ),
+                          tone: _StatPillTone.blue,
                           loading: _loadingStreak,
                         ),
                       ),
@@ -1778,7 +1784,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     body: copy.reportSectionBody,
                     paidLabel: copy.reportPaidCta,
                     freeLabel: copy.reportFreeCta,
-                    helper: copy.reportHelper,
+                    helper: '',
                     isFree: _isReportFreeByEntitlements(),
                     isLoading:
                         _reportFlowInFlight || _loadingReportEntitlements,
@@ -2739,6 +2745,11 @@ class _HomeStreakCopy {
     return '$normalizedDays ${dayUnit(normalizedDays)}';
   }
 
+  String daysCountLabel(int days) {
+    final normalizedDays = days < 0 ? 0 : days;
+    return '$normalizedDays ${dayUnit(normalizedDays)}';
+  }
+
   String lastActiveLabel(DateTime date) {
     final day = date.day.toString().padLeft(2, '0');
     final month = date.month.toString().padLeft(2, '0');
@@ -2752,9 +2763,9 @@ class _HomeStreakCopy {
       return const _HomeStreakCopy(
         tileLoadingTitle: '...',
         tileLoadingSubtitle: 'Загружаем streak...',
-        tileSubtitle: 'Серия и статистика',
-        modalTitle: 'Твой streak',
-        currentStreakLabel: 'Сейчас',
+        tileSubtitle: 'Ритм и статистика',
+        modalTitle: 'Твой ритм',
+        currentStreakLabel: 'В потоке',
         bestStreakLabel: 'Рекорд',
         awarenessLabel: 'Осознанность',
         dailyCardTileTitle: 'Карта дня',
@@ -2772,7 +2783,7 @@ class _HomeStreakCopy {
         streakLoadingSubtitle: 'Подтягиваем актуальный streak...',
         reportSectionTitle: 'Личный отчет',
         reportSectionBody:
-            'Коуч-отчет по твоим раскладам за 30 дней: паттерны, баланс, мягкие рекомендации.',
+            'Личный коуч-отчёт на основе твоих раскладов за 30 дней.',
         reportPaidCta: 'Получить отчет (PDF) — 200 ⭐',
         reportFreeCta: 'Получить отчет (PDF) — бесплатно',
         reportHelper: 'На основе истории раскладов за 30 дней',
@@ -3030,11 +3041,13 @@ class _StatPill extends StatelessWidget {
   const _StatPill({
     required this.label,
     required this.value,
+    required this.tone,
     this.loading = false,
   });
 
   final String label;
   final String value;
+  final _StatPillTone tone;
   final bool loading;
 
   @override
@@ -3047,13 +3060,10 @@ class _StatPill extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            colorScheme.primary.withValues(alpha: 0.24),
-            colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-          ],
+          colors: tone.gradient(colorScheme),
         ),
         border: Border.all(
-          color: colorScheme.primary.withValues(alpha: 0.45),
+          color: tone.border(colorScheme),
         ),
       ),
       child: Column(
@@ -3116,13 +3126,13 @@ class _AwarenessPill extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            colorScheme.primary.withValues(alpha: locked ? 0.3 : 0.24),
-            colorScheme.surfaceContainerHighest.withValues(
-              alpha: locked ? 0.38 : 0.3,
-            ),
+            const Color(0xFF77B8FF).withValues(alpha: locked ? 0.3 : 0.24),
+            const Color(0xFFA9D5FF).withValues(alpha: locked ? 0.34 : 0.28),
           ],
         ),
-        border: Border.all(color: colorScheme.primary.withValues(alpha: 0.5)),
+        border: Border.all(
+          color: const Color(0xFF7DBBFF).withValues(alpha: 0.5),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -3176,23 +3186,23 @@ class _EnergyProfileCard extends StatelessWidget {
     final isLenormand = profile.deckType == DeckType.lenormand;
     final palette = isCrowley
         ? const [
-            Color(0xFFD9B45F),
-            Color(0xFF9DAABA),
-            Color(0xFF7D8898),
-            Color(0xFFB8A37A),
+            Color(0xFFC8B47C),
+            Color(0xFF9DABC0),
+            Color(0xFF8E98A9),
+            Color(0xFFB3A07A),
           ]
         : isLenormand
             ? const [
-                Color(0xFF73C3FF),
-                Color(0xFFF39AC8),
-                Color(0xFFC5B8FF),
-                Color(0xFF8EE0B8),
+                Color(0xFF7ABAE2),
+                Color(0xFFC7A9C9),
+                Color(0xFFA9ADCD),
+                Color(0xFF8EBAA6),
               ]
             : const [
-                Color(0xFFFF8A5B),
-                Color(0xFF63B8FF),
-                Color(0xFFECEAF9),
-                Color(0xFFE3C26A),
+                Color(0xFFE28E67),
+                Color(0xFF77B7DA),
+                Color(0xFFD6D7E5),
+                Color(0xFFD0B46D),
               ];
     final slices = [
       _EnergySlice(
@@ -3520,24 +3530,57 @@ class _EnergyDonutChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    return SizedBox(
-      width: 126,
-      height: 126,
-      child: CustomPaint(
-        painter: _DonutChartPainter(
-          slices: slices,
-          trackColor: colorScheme.surface.withValues(alpha: 0.45),
-        ),
-        child: Center(
-          child: Text(
-            centerLabel,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(begin: 0, end: 1),
+      duration: const Duration(milliseconds: 900),
+      curve: Curves.easeOutCubic,
+      builder: (context, progress, _) {
+        return SizedBox(
+          width: 126,
+          height: 126,
+          child: CustomPaint(
+            painter: _DonutChartPainter(
+              slices: slices,
+              trackColor: colorScheme.surface.withValues(alpha: 0.45),
+              progress: progress,
+            ),
+            child: Center(
+              child: Text(
+                centerLabel,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
+  }
+}
+
+enum _StatPillTone {
+  green,
+  blue;
+
+  List<Color> gradient(ColorScheme colorScheme) {
+    return switch (this) {
+      _StatPillTone.green => [
+          const Color(0xFF7ED6B4).withValues(alpha: 0.22),
+          const Color(0xFF5EAE95).withValues(alpha: 0.18),
+        ],
+      _StatPillTone.blue => [
+          const Color(0xFF7EBEFF).withValues(alpha: 0.22),
+          const Color(0xFF6E9FD6).withValues(alpha: 0.18),
+        ],
+    };
+  }
+
+  Color border(ColorScheme colorScheme) {
+    return switch (this) {
+      _StatPillTone.green => const Color(0xFF79D0AF).withValues(alpha: 0.45),
+      _StatPillTone.blue => const Color(0xFF75B6F2).withValues(alpha: 0.45),
+    };
   }
 }
 
@@ -3553,14 +3596,33 @@ class _EnergySlice {
   final Color color;
 }
 
+Color _mixColor(Color a, Color b, double t) {
+  return Color.fromARGB(
+    lerpDouble(a.a, b.a, t)!.round(),
+    lerpDouble(a.r, b.r, t)!.round(),
+    lerpDouble(a.g, b.g, t)!.round(),
+    lerpDouble(a.b, b.b, t)!.round(),
+  );
+}
+
+Color _soften(Color color, {double amount = 0.22}) {
+  return _mixColor(color, Colors.white, amount.clamp(0.0, 1.0));
+}
+
+Color _deepen(Color color, {double amount = 0.14}) {
+  return _mixColor(color, Colors.black, amount.clamp(0.0, 1.0));
+}
+
 class _DonutChartPainter extends CustomPainter {
   const _DonutChartPainter({
     required this.slices,
     required this.trackColor,
+    required this.progress,
   });
 
   final List<_EnergySlice> slices;
   final Color trackColor;
+  final double progress;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -3576,24 +3638,42 @@ class _DonutChartPainter extends CustomPainter {
     canvas.drawArc(rect, 0, pi * 2, false, trackPaint);
 
     var start = -pi / 2;
+    final safeProgress = progress.clamp(0.0, 1.0);
     for (final slice in slices) {
       if (slice.percent <= 0) {
         continue;
       }
-      final sweep = (slice.percent / 100) * pi * 2;
+      final fullSweep = (slice.percent / 100) * pi * 2;
+      final sweep = fullSweep * safeProgress;
+      if (sweep <= 0.001) {
+        start += fullSweep;
+        continue;
+      }
+      final base = slice.color;
       final paint = Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = stroke
         ..strokeCap = StrokeCap.round
-        ..color = slice.color;
-      canvas.drawArc(rect, start, max(0, sweep - 0.04), false, paint);
-      start += sweep;
+        ..shader = SweepGradient(
+          startAngle: start,
+          endAngle: start + sweep,
+          colors: [
+            _soften(base),
+            base,
+            _deepen(base),
+          ],
+          stops: const [0.0, 0.6, 1.0],
+        ).createShader(rect);
+      canvas.drawArc(rect, start, max(0, sweep - 0.035), false, paint);
+      start += fullSweep;
     }
   }
 
   @override
   bool shouldRepaint(covariant _DonutChartPainter oldDelegate) {
-    return oldDelegate.slices != slices || oldDelegate.trackColor != trackColor;
+    return oldDelegate.slices != slices ||
+        oldDelegate.trackColor != trackColor ||
+        oldDelegate.progress != progress;
   }
 }
 
