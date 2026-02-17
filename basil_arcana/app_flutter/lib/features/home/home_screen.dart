@@ -1,7 +1,6 @@
 import 'dart:math';
 import 'dart:ui';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
@@ -714,7 +713,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       children: [
                         Expanded(
                           child: _FeatureSquareCard(
-                            icon: CupertinoIcons.sparkles,
+                            icon: Icons.auto_awesome_rounded,
                             title: featureCopy.natalTitle,
                             onTap: () {
                               Navigator.push(
@@ -731,7 +730,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         const SizedBox(width: 10),
                         Expanded(
                           child: _FeatureSquareCard(
-                            icon: CupertinoIcons.heart_fill,
+                            icon: Icons.favorite_rounded,
                             title: featureCopy.compatibilityTitle,
                             onTap: () {
                               Navigator.push(
@@ -749,7 +748,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         const SizedBox(width: 10),
                         Expanded(
                           child: _FeatureSquareCard(
-                            icon: CupertinoIcons.book_fill,
+                            icon: Icons.style_rounded,
                             iconColor: Color(0xFFD0B06A),
                             title: featureCopy.libraryTitle,
                             onTap: () {
@@ -771,7 +770,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       children: [
                         Expanded(
                           child: _SecondaryFeatureCard(
-                            icon: CupertinoIcons.flame_fill,
+                            icon: Icons.local_fire_department_rounded,
                             title: _loadingStreak
                                 ? streakCopy.tileLoadingTitle
                                 : streakCopy
@@ -788,7 +787,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         const SizedBox(width: 10),
                         Expanded(
                           child: _SecondaryFeatureCard(
-                            icon: CupertinoIcons.moon_stars_fill,
+                            icon: Icons.nightlight_round,
                             iconColor: Color(0xFFD0B06A),
                             title: streakCopy.dailyCardTileTitle,
                             subtitle:
