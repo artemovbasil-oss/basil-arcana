@@ -36,6 +36,20 @@
         "inLanguage": ["ru", "en", "kk"],
         "publisher": { "@type": "Organization", "name": "BasilArcana" }
       }
+    
+      (function initBreadcrumbs(){
+        const home = document.querySelector('.breadcrumb-home');
+        const current = document.querySelector('.breadcrumb-current');
+        if (!home || !current) return;
+        const lang = new URLSearchParams(window.location.search).get('lang') || window.localStorage.getItem('basilarcana_lang') || 'ru';
+        const labels = { ru: 'Главная', kz: 'Басты бет', en: 'Home' };
+        home.textContent = labels[lang] || labels.ru;
+        const title = (document.querySelector('h1')?.textContent || document.title || '').replace(/s*·s*BasilArcanas*$/i, '').trim();
+        current.textContent = title;
+        const url = new URL('./index.html', window.location.href);
+        if (lang && lang !== 'ru') url.searchParams.set('lang', lang);
+        home.href = url.pathname + url.search;
+      })();
     </script>
     <style>
       :root { --text:#f3f3f8; --text-soft:#bbb8ca; --accent-soft:#e3d2ff; --card:rgba(255,255,255,.06); --card-border:rgba(184,137,255,.32); }
@@ -59,11 +73,23 @@
       .bottom-cta{background:linear-gradient(135deg,#f5ebff,#c084ff 52%,#a45cf8);color:#10091c;border:1px solid rgba(255,255,255,.35);border-radius:12px;padding:.65rem .8rem;margin-bottom:.4rem;display:flex;gap:.5rem;align-items:center;justify-content:space-between;font-weight:700;font-size:.88rem;}
       .bottom-cta-links{display:inline-flex;align-items:center;gap:.65rem;flex-wrap:wrap;font-weight:800;} .bottom-cta a{color:#10091c;text-decoration:none;border-bottom:1px solid rgba(16,9,28,.4);} .bottom-cta-sep{opacity:.6;}
       @media (max-width:960px){.bottom-cta{flex-direction:column;align-items:flex-start;} .article{padding:1.25rem;} .lang-btn{padding:.4rem .68rem;}}
+    
+      .breadcrumbs{display:flex;align-items:center;gap:.5rem;margin:.15rem 0 .9rem;color:var(--text-soft);font-size:.84rem;line-height:1.3;}
+      .breadcrumbs a{color:var(--accent-soft);text-decoration:none;border-bottom:1px solid rgba(227,210,255,.35);}
+      .breadcrumb-sep{opacity:.55;}
+      .breadcrumb-current{opacity:.9;}
+          .article a{color:var(--accent-soft);text-decoration:none;border-bottom:1px solid rgba(227,210,255,.4);}
+      .article a:hover{color:#fff;border-bottom-color:rgba(255,255,255,.55);}
     </style>
   </head>
   <body>
     <main class="wrap">
       <header class="topbar"><a class="logo" href="./index.html" data-i18n="topLine" data-link="home">Магический плюс вайб</a><div class="langs" role="group" aria-label="Language switcher"><button class="lang-btn" data-lang="ru" aria-pressed="true">RU</button><button class="lang-btn" data-lang="kz" aria-pressed="false">KZ</button><button class="lang-btn" data-lang="en" aria-pressed="false">EN</button></div></header>
+      <nav class="breadcrumbs" aria-label="Breadcrumbs">
+        <a class="breadcrumb-home" href="./index.html">Главная</a>
+        <span class="breadcrumb-sep">/</span>
+        <span class="breadcrumb-current" aria-current="page"></span>
+      </nav>
       <article class="article"><h1>Колода Райдера-Уэйта-Смит (RWS): большая статья о структуре и чтении</h1><p class="lead">RWS это наиболее практичная «базовая операционная система» Таро для обучения и профессиональной практики. Именно на ней построено большинство современных школ и учебных материалов.</p><h2>Почему RWS стала стандартом</h2><p>Колода Райдера-Уэйта-Смит сделала ключевой шаг: младшие арканы получили сюжетные сцены. Благодаря этому начинающий практик быстрее связывает карту с жизненной ситуацией и действием.</p><ul><li>Сценические изображения ускоряют понимание без потери глубины.</li><li>Для RWS существует крупнейшая база учебных источников и сравнений.</li><li>Система хорошо переносится на тематические современные колоды.</li></ul><h2>Архитектура колоды: что важно знать</h2><ul><li><strong>Старшие арканы:</strong> большие этапы, выборы, кризисы и переходы.</li><li><strong>Младшие арканы:</strong> повседневные процессы, поведение, темп развития.</li><li><strong>Придворные карты:</strong> роли, стили реакции, динамика людей в системе отношений.</li></ul><p>В RWS логика чтения хорошо поддерживает вопрос «что делать дальше», а не только «что это значит».</p><h2>Сильные стороны RWS в реальной практике</h2><ul><li>Высокая скорость первичной трактовки.</li><li>Стабильность в коротких раскладах 1-3-5 карт.</li><li>Удобная база для клиентской консультации с понятным языком.</li><li>Легко калибруется через дневник и проверку фактических исходов.</li></ul><h2>Ограничения, о которых важно помнить</h2><ul><li>Популярность рождает «заученные клише», если не работать с контекстом.</li><li>Некоторые интерпретации из интернета слишком категоричны и пугающи.</li><li>Без проверки временем можно путать архетип и буквальный прогноз.</li></ul><h2>Практический протокол чтения RWS</h2><p>Чтобы избежать расплывчатости, используйте последовательность:</p><ul><li><strong>1.</strong> Сформулируйте вопрос в зоне влияния и сроке до 7-30 дней.</li><li><strong>2.</strong> Прочитайте карту как сцену: кто действует, что меняется, где конфликт.</li><li><strong>3.</strong> Добавьте уровень действия: какой шаг наиболее уместен сейчас.</li><li><strong>4.</strong> Проверьте расклад через факты через 24-72 часа.</li></ul><h2>RWS и другие системы</h2><p>Когда база RWS устойчива, можно расширяться: глубину символизма добавляет <a href="./academy-crowley-thoth-deck.html" data-link="crowley">Таро Тота</a>, а событийность и сроки усиливает <a href="./academy-lenormand-deck-guide.html" data-link="leno">Ленорман</a>.</p><h2>Кому подойдет RWS в первую очередь</h2><ul><li>Новичкам, которым нужна понятная и структурная точка входа.</li><li>Практикам, делающим акцент на прикладных решениях.</li><li>Тем, кто хочет совмещать интуицию с воспроизводимой методикой.</li></ul><h2>Итог</h2><p>Если нужна колода, которая быстро дает рабочий язык и при этом масштабируется до сложной практики, RWS остается самым надежным выбором. Для старта ее удобно сочетать с гайдом <a href="./academy-how-to-choose-deck.html" data-link="choose">как выбрать свою колоду</a>.</p></article>
       <nav class="site-links" aria-label="Внутренние ссылки">
         <a href="./news.html" data-i18n="navNews" data-link="news">Новости</a>
@@ -74,8 +100,19 @@
       <footer class="footer" data-i18n="footer">BasilArcana · RU / KZ / EN · Telegram-first experience</footer>
       <section class="bottom-cta"><span data-i18n="devCta">Разработка ботов и приложений на заказ под ключ — напишите нам</span><div class="bottom-cta-links"><a href="mailto:basiluxd@gmail.com">basiluxd@gmail.com</a><span class="bottom-cta-sep">•</span><a href="https://t.me/uxd_ink" target="_blank" rel="noreferrer">@uxd_ink</a></div></section>
     </main>
+    <script src="./academy-translations.js"></script>
     <script>
       const LANG_STORAGE_KEY = "basilarcana_lang";
+      const articleNode = document.querySelector(".article");
+      const defaultArticleHtml = articleNode ? articleNode.innerHTML : "";
+
+      function applyArticleLanguage(lang) {
+        if (!articleNode) return;
+        const pageName = window.location.pathname.split("/").pop() || "";
+        const pageTranslations = window.ACADEMY_ARTICLE_TRANSLATIONS?.[pageName];
+        const translated = pageTranslations?.[lang];
+        articleNode.innerHTML = translated || defaultArticleHtml;
+      }
       const ui = {
         ru: { topLine:"Магический плюс вайб", navNews:"Новости", navTarot:"Карты Таро", navLenormand:"Колода Ленорман", navAcademy:"Академия Таро", footer:"BasilArcana · RU / KZ / EN · Telegram-first experience", devCta:"Разработка ботов и приложений на заказ под ключ — напишите нам" },
         kz: { topLine:"Магия плюс vibe", navNews:"Жаңалықтар", navTarot:"Таро карталары", navLenormand:"Ленорман колодасы", navAcademy:"Таро академиясы", footer:"BasilArcana · RU / KZ / EN · Telegram-first experience", devCta:"Тапсырыс бойынша bot және app толық әзірлеу — бізге жазыңыз" },
@@ -85,6 +122,7 @@
       function applyLang(lang){
         const resolved = ui[lang] ? lang : "ru";
         const pack = ui[resolved];
+        applyArticleLanguage(resolved);
         document.documentElement.lang = resolved === "kz" ? "kk" : resolved;
         document.querySelectorAll("[data-i18n]").forEach((node)=>{ const key = node.dataset.i18n; if(pack[key]) node.textContent = pack[key]; });
         document.querySelectorAll(".lang-btn").forEach((btn)=>btn.setAttribute("aria-pressed", String(btn.dataset.lang === resolved)));
@@ -96,6 +134,19 @@
         if(resolved === "ru") url.searchParams.delete("lang"); else url.searchParams.set("lang", resolved);
         window.history.replaceState({}, "", url.toString());
         window.localStorage.setItem(LANG_STORAGE_KEY, resolved);
+        const breadcrumbHome = document.querySelector(".breadcrumb-home");
+        if (breadcrumbHome) {
+          const labels = { ru: "Главная", kz: "Басты бет", en: "Home" };
+          breadcrumbHome.textContent = labels[resolved] || labels.ru;
+          const homeUrl = new URL("./index.html", window.location.href);
+          if (resolved && resolved !== "ru") homeUrl.searchParams.set("lang", resolved);
+          breadcrumbHome.setAttribute("href", homeUrl.pathname + homeUrl.search);
+        }
+        const breadcrumbCurrent = document.querySelector(".breadcrumb-current");
+        if (breadcrumbCurrent) {
+          const titleNode = document.querySelector("h1");
+          if (titleNode) breadcrumbCurrent.textContent = titleNode.textContent;
+        }
       }
       document.querySelectorAll(".lang-btn").forEach((btn)=>btn.addEventListener("click",()=>applyLang(btn.dataset.lang)));
       const initialLang = new URLSearchParams(window.location.search).get("lang");

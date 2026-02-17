@@ -23,6 +23,20 @@
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
     <script type="application/ld+json">
       {"@context":"https://schema.org","@type":"NewsArticle","headline":"Запуск премиального расклада на пять карт за 1 звезду","datePublished":"2026-02-14","dateModified":"2026-02-14","author":{"@type":"Organization","name":"BasilArcana"},"publisher":{"@type":"Organization","name":"BasilArcana"},"mainEntityOfPage":"https://www.basilarcana.com/news-premium-five-cards.html"}
+    
+      (function initBreadcrumbs(){
+        const home = document.querySelector('.breadcrumb-home');
+        const current = document.querySelector('.breadcrumb-current');
+        if (!home || !current) return;
+        const lang = new URLSearchParams(window.location.search).get('lang') || window.localStorage.getItem('basilarcana_lang') || 'ru';
+        const labels = { ru: 'Главная', kz: 'Басты бет', en: 'Home' };
+        home.textContent = labels[lang] || labels.ru;
+        const title = (document.querySelector('h1')?.textContent || document.title || '').replace(/s*·s*BasilArcanas*$/i, '').trim();
+        current.textContent = title;
+        const url = new URL('./index.html', window.location.href);
+        if (lang && lang !== 'ru') url.searchParams.set('lang', lang);
+        home.href = url.pathname + url.search;
+      })();
     </script>
     <style>
       :root { --text:#f3f3f8; --text-soft:#bbb8ca; --accent-soft:#e3d2ff; --card:rgba(255,255,255,0.06); --card-border:rgba(184,137,255,0.32); }
@@ -55,6 +69,11 @@
       .footer{border-top:1px solid rgba(184,137,255,.3);margin:0 0 .5rem;padding:.58rem 0 .15rem;color:var(--text-soft);font-size:.82rem;}
       .bottom-cta{background:linear-gradient(135deg,#f5ebff,#c084ff 52%,#a45cf8);color:#10091c;border:1px solid rgba(255,255,255,.35);border-radius:12px;padding:.65rem .8rem;margin-bottom:.4rem;display:flex;gap:.5rem;align-items:center;justify-content:space-between;font-weight:700;font-size:.88rem;} .bottom-cta-links{display:inline-flex;align-items:center;gap:.65rem;flex-wrap:wrap;font-weight:800;} .bottom-cta a{color:#10091c;text-decoration:none;border-bottom:1px solid rgba(16,9,28,.4);} .bottom-cta-sep{opacity:.6;}
       @media (max-width:960px){.bottom-cta{flex-direction:column;align-items:flex-start;} .sofia-panel{grid-template-columns:1fr;}}
+    
+      .breadcrumbs{display:flex;align-items:center;gap:.5rem;margin:.15rem 0 .9rem;color:var(--text-soft);font-size:.84rem;line-height:1.3;}
+      .breadcrumbs a{color:var(--accent-soft);text-decoration:none;border-bottom:1px solid rgba(227,210,255,.35);}
+      .breadcrumb-sep{opacity:.55;}
+      .breadcrumb-current{opacity:.9;}
     </style>
   </head>
   <body>
@@ -68,6 +87,11 @@
           <button class="lang-btn" data-lang="en" aria-pressed="false">EN</button>
         </div>
       </header>
+      <nav class="breadcrumbs" aria-label="Breadcrumbs">
+        <a class="breadcrumb-home" href="./index.html">Главная</a>
+        <span class="breadcrumb-sep">/</span>
+        <span class="breadcrumb-current" aria-current="page"></span>
+      </nav>
       <article class="article">
         <h1 data-i18n="title"></h1>
         <p class="meta" data-i18n="meta"></p>

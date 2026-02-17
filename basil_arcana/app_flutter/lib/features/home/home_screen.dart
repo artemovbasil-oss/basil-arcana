@@ -714,8 +714,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       children: [
                         Expanded(
                           child: _FeatureSquareCard(
-                            icon:
-                                PhosphorIcons.sparkle(PhosphorIconsStyle.light),
+                            icon: PhosphorIconsLight.sparkle,
                             title: featureCopy.natalTitle,
                             onTap: () {
                               Navigator.push(
@@ -732,8 +731,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         const SizedBox(width: 10),
                         Expanded(
                           child: _FeatureSquareCard(
-                            icon: PhosphorIcons.heartStraight(
-                                PhosphorIconsStyle.light),
+                            icon: PhosphorIconsLight.heartStraight,
                             title: featureCopy.compatibilityTitle,
                             onTap: () {
                               Navigator.push(
@@ -751,7 +749,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         const SizedBox(width: 10),
                         Expanded(
                           child: _FeatureSquareCard(
-                            icon: PhosphorIcons.cards(PhosphorIconsStyle.light),
+                            icon: PhosphorIconsLight.cards,
                             iconColor: Color(0xFFD0B06A),
                             title: featureCopy.libraryTitle,
                             onTap: () {
@@ -773,8 +771,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       children: [
                         Expanded(
                           child: _SecondaryFeatureCard(
-                            icon: PhosphorIcons.fireSimple(
-                                PhosphorIconsStyle.light),
+                            icon: PhosphorIconsLight.fireSimple,
                             title: _loadingStreak
                                 ? streakCopy.tileLoadingTitle
                                 : streakCopy
@@ -791,8 +788,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         const SizedBox(width: 10),
                         Expanded(
                           child: _SecondaryFeatureCard(
-                            icon: PhosphorIcons.moonStars(
-                                PhosphorIconsStyle.light),
+                            icon: PhosphorIconsLight.moonStars,
                             iconColor: Color(0xFFD0B06A),
                             title: streakCopy.dailyCardTileTitle,
                             subtitle:

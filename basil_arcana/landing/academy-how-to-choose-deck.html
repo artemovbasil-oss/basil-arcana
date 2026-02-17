@@ -36,6 +36,20 @@
         "inLanguage": ["ru", "en", "kk"],
         "publisher": { "@type": "Organization", "name": "BasilArcana" }
       }
+    
+      (function initBreadcrumbs(){
+        const home = document.querySelector('.breadcrumb-home');
+        const current = document.querySelector('.breadcrumb-current');
+        if (!home || !current) return;
+        const lang = new URLSearchParams(window.location.search).get('lang') || window.localStorage.getItem('basilarcana_lang') || 'ru';
+        const labels = { ru: 'Главная', kz: 'Басты бет', en: 'Home' };
+        home.textContent = labels[lang] || labels.ru;
+        const title = (document.querySelector('h1')?.textContent || document.title || '').replace(/s*·s*BasilArcanas*$/i, '').trim();
+        current.textContent = title;
+        const url = new URL('./index.html', window.location.href);
+        if (lang && lang !== 'ru') url.searchParams.set('lang', lang);
+        home.href = url.pathname + url.search;
+      })();
     </script>
     <style>
       :root { --text:#f3f3f8; --text-soft:#bbb8ca; --accent-soft:#e3d2ff; --card:rgba(255,255,255,.06); --card-border:rgba(184,137,255,.32); }
@@ -59,11 +73,23 @@
       .bottom-cta{background:linear-gradient(135deg,#f5ebff,#c084ff 52%,#a45cf8);color:#10091c;border:1px solid rgba(255,255,255,.35);border-radius:12px;padding:.65rem .8rem;margin-bottom:.4rem;display:flex;gap:.5rem;align-items:center;justify-content:space-between;font-weight:700;font-size:.88rem;}
       .bottom-cta-links{display:inline-flex;align-items:center;gap:.65rem;flex-wrap:wrap;font-weight:800;} .bottom-cta a{color:#10091c;text-decoration:none;border-bottom:1px solid rgba(16,9,28,.4);} .bottom-cta-sep{opacity:.6;}
       @media (max-width:960px){.bottom-cta{flex-direction:column;align-items:flex-start;} .article{padding:1.25rem;} .lang-btn{padding:.4rem .68rem;}}
+    
+      .breadcrumbs{display:flex;align-items:center;gap:.5rem;margin:.15rem 0 .9rem;color:var(--text-soft);font-size:.84rem;line-height:1.3;}
+      .breadcrumbs a{color:var(--accent-soft);text-decoration:none;border-bottom:1px solid rgba(227,210,255,.35);}
+      .breadcrumb-sep{opacity:.55;}
+      .breadcrumb-current{opacity:.9;}
+          .article a{color:var(--accent-soft);text-decoration:none;border-bottom:1px solid rgba(227,210,255,.4);}
+      .article a:hover{color:#fff;border-bottom-color:rgba(255,255,255,.55);}
     </style>
   </head>
   <body>
     <main class="wrap">
       <header class="topbar"><a class="logo" href="./index.html" data-i18n="topLine" data-link="home">Магический плюс вайб</a><div class="langs" role="group" aria-label="Language switcher"><button class="lang-btn" data-lang="ru" aria-pressed="true">RU</button><button class="lang-btn" data-lang="kz" aria-pressed="false">KZ</button><button class="lang-btn" data-lang="en" aria-pressed="false">EN</button></div></header>
+      <nav class="breadcrumbs" aria-label="Breadcrumbs">
+        <a class="breadcrumb-home" href="./index.html">Главная</a>
+        <span class="breadcrumb-sep">/</span>
+        <span class="breadcrumb-current" aria-current="page"></span>
+      </nav>
       <article class="article"><h1>Как выбрать свою колоду Таро: подробный практический гид</h1><p class="lead">Правильная колода не обязана быть «самой красивой» или «самой популярной». Она должна делать чтение ясным, устойчивым и честным для вас.</p><h2>Шаг 1. Определите цель: обучение, практика, клиенты</h2><p>Выбор зависит от роли колоды в вашей жизни. Для обучения важнее четкая символика и предсказуемая структура. Для клиентской практики важны читабельность, уважительный визуальный язык и скорость интерпретации.</p><ul><li><strong>Для первого года практики:</strong> берите колоды с понятными сценами и классическими ассоциациями.</li><li><strong>Для глубокой психологии:</strong> ищите колоды с богатой символикой и многослойными образами.</li><li><strong>Для повседневных запросов:</strong> выбирайте колоды, где легко считываются действия и контекст.</li></ul><h2>Шаг 2. Оцените язык символов и визуальную нагрузку</h2><p>У одних колод прямой нарратив, у других почти чистый эзотерический код. Если вы часто «зависаете» над картой и не можете назвать даже первичный смысл за 20–30 секунд, колода пока слишком сложная.</p><ul><li>Проверьте 5 случайных карт: можете ли вы дать базовую трактовку без справочника.</li><li>Посмотрите, комфортны ли цвета, лица, сюжет, телесность и общая эмоциональная температура.</li><li>Убедитесь, что вас не раздражают повторяющиеся визуальные элементы.</li></ul><h2>Шаг 3. Сравните базовые системы: RWS, Тот, Ленорман</h2><p><a href="./academy-rider-waite-smith-deck.html" data-link="rws">RWS</a> обычно проще для старта: сценические младшие арканы и огромная обучающая база. <a href="./academy-crowley-thoth-deck.html" data-link="crowley">Тот Кроули</a> чаще выбирают для сложной символической аналитики. <a href="./academy-lenormand-deck-guide.html" data-link="leno">Ленорман</a> силен в бытовых и событийных раскладах с акцентом на связки карт.</p><h2>Шаг 4. Проверьте эргономику и качество печати</h2><ul><li>Размер: удобно ли тасовать и держать в руке.</li><li>Контраст: читабельны ли детали при разном освещении.</li><li>Плотность картона и покрытие: насколько устойчивы карты к ежедневной работе.</li><li>Стабильность тиража: нет ли разницы оттенков, сдвигов печати, дефектов кромки.</li></ul><h2>Шаг 5. Сделайте тест 14 дней перед окончательным выбором</h2><p>Лучший способ выбрать колоду, а не фантазию о колоде, это короткий рабочий спринт. Каждый день задавайте один практический вопрос, тяните 1-3 карты и фиксируйте точность через сутки.</p><ul><li>День 1-7: фокус на бытовых вопросах и решениях.</li><li>День 8-14: фокус на эмоциях, отношениях и личных границах.</li><li>Оцените по шкале 1-10: скорость понимания, глубина, применимость советов.</li></ul><h2>Частые ошибки при выборе</h2><ul><li>Покупка «потому что красиво», без проверки удобства чтения.</li><li>Смена колоды каждую неделю без формирования личного словаря значений.</li><li>Сравнение себя с продвинутыми практиками вместо собственного темпа.</li><li>Ожидание магического совпадения вместо тренировочного процесса.</li></ul><h2>Итог</h2><p>Ваша колода это рабочий инструмент, а не экзамен на «правильность». Начните с понятной базы, закрепите ритм и только затем расширяйте парк колод под конкретные задачи. Для уверенного старта также полезно прочитать <a href="./academy-tarot-basics.html" data-link="basics">гайд для начинающих</a>.</p></article>
       <nav class="site-links" aria-label="Внутренние ссылки">
         <a href="./news.html" data-i18n="navNews" data-link="news">Новости</a>
@@ -74,8 +100,19 @@
       <footer class="footer" data-i18n="footer">BasilArcana · RU / KZ / EN · Telegram-first experience</footer>
       <section class="bottom-cta"><span data-i18n="devCta">Разработка ботов и приложений на заказ под ключ — напишите нам</span><div class="bottom-cta-links"><a href="mailto:basiluxd@gmail.com">basiluxd@gmail.com</a><span class="bottom-cta-sep">•</span><a href="https://t.me/uxd_ink" target="_blank" rel="noreferrer">@uxd_ink</a></div></section>
     </main>
+    <script src="./academy-translations.js"></script>
     <script>
       const LANG_STORAGE_KEY = "basilarcana_lang";
+      const articleNode = document.querySelector(".article");
+      const defaultArticleHtml = articleNode ? articleNode.innerHTML : "";
+
+      function applyArticleLanguage(lang) {
+        if (!articleNode) return;
+        const pageName = window.location.pathname.split("/").pop() || "";
+        const pageTranslations = window.ACADEMY_ARTICLE_TRANSLATIONS?.[pageName];
+        const translated = pageTranslations?.[lang];
+        articleNode.innerHTML = translated || defaultArticleHtml;
+      }
       const ui = {
         ru: { topLine:"Магический плюс вайб", navNews:"Новости", navTarot:"Карты Таро", navLenormand:"Колода Ленорман", navAcademy:"Академия Таро", footer:"BasilArcana · RU / KZ / EN · Telegram-first experience", devCta:"Разработка ботов и приложений на заказ под ключ — напишите нам" },
         kz: { topLine:"Магия плюс vibe", navNews:"Жаңалықтар", navTarot:"Таро карталары", navLenormand:"Ленорман колодасы", navAcademy:"Таро академиясы", footer:"BasilArcana · RU / KZ / EN · Telegram-first experience", devCta:"Тапсырыс бойынша bot және app толық әзірлеу — бізге жазыңыз" },
@@ -85,6 +122,7 @@
       function applyLang(lang){
         const resolved = ui[lang] ? lang : "ru";
         const pack = ui[resolved];
+        applyArticleLanguage(resolved);
         document.documentElement.lang = resolved === "kz" ? "kk" : resolved;
         document.querySelectorAll("[data-i18n]").forEach((node)=>{ const key = node.dataset.i18n; if(pack[key]) node.textContent = pack[key]; });
         document.querySelectorAll(".lang-btn").forEach((btn)=>btn.setAttribute("aria-pressed", String(btn.dataset.lang === resolved)));
@@ -96,6 +134,19 @@
         if(resolved === "ru") url.searchParams.delete("lang"); else url.searchParams.set("lang", resolved);
         window.history.replaceState({}, "", url.toString());
         window.localStorage.setItem(LANG_STORAGE_KEY, resolved);
+        const breadcrumbHome = document.querySelector(".breadcrumb-home");
+        if (breadcrumbHome) {
+          const labels = { ru: "Главная", kz: "Басты бет", en: "Home" };
+          breadcrumbHome.textContent = labels[resolved] || labels.ru;
+          const homeUrl = new URL("./index.html", window.location.href);
+          if (resolved && resolved !== "ru") homeUrl.searchParams.set("lang", resolved);
+          breadcrumbHome.setAttribute("href", homeUrl.pathname + homeUrl.search);
+        }
+        const breadcrumbCurrent = document.querySelector(".breadcrumb-current");
+        if (breadcrumbCurrent) {
+          const titleNode = document.querySelector("h1");
+          if (titleNode) breadcrumbCurrent.textContent = titleNode.textContent;
+        }
       }
       document.querySelectorAll(".lang-btn").forEach((btn)=>btn.addEventListener("click",()=>applyLang(btn.dataset.lang)));
       const initialLang = new URLSearchParams(window.location.search).get("lang");
