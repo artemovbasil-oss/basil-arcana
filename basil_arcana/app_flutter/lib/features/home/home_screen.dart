@@ -713,7 +713,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       children: [
                         Expanded(
                           child: _FeatureSquareCard(
-                            icon: Icons.auto_awesome_rounded,
+                            icon: Icons.star,
                             title: featureCopy.natalTitle,
                             onTap: () {
                               Navigator.push(
@@ -730,7 +730,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         const SizedBox(width: 10),
                         Expanded(
                           child: _FeatureSquareCard(
-                            icon: Icons.favorite_rounded,
+                            icon: Icons.favorite,
                             title: featureCopy.compatibilityTitle,
                             onTap: () {
                               Navigator.push(
@@ -748,7 +748,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         const SizedBox(width: 10),
                         Expanded(
                           child: _FeatureSquareCard(
-                            icon: Icons.style_rounded,
+                            icon: Icons.library_books,
                             iconColor: Color(0xFFD0B06A),
                             title: featureCopy.libraryTitle,
                             onTap: () {
@@ -770,7 +770,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       children: [
                         Expanded(
                           child: _SecondaryFeatureCard(
-                            icon: Icons.local_fire_department_rounded,
+                            icon: Icons.whatshot,
                             title: _loadingStreak
                                 ? streakCopy.tileLoadingTitle
                                 : streakCopy
@@ -787,7 +787,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         const SizedBox(width: 10),
                         Expanded(
                           child: _SecondaryFeatureCard(
-                            icon: Icons.nightlight_round,
+                            icon: Icons.today,
                             iconColor: Color(0xFFD0B06A),
                             title: streakCopy.dailyCardTileTitle,
                             subtitle:
