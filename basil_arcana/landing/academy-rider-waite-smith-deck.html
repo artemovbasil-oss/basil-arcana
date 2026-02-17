@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Колода Райдера-Уэйта-Смит (RWS): большая статья о структуре и чтении · BasilArcana</title>
+    <meta name="description" content="Большая статья о колоде Райдера-Уэйта-Смит (RWS): история, логика символов, плюсы для новичков, ограничения и методика практики." />
+    <meta name="keywords" content="колода райдера уэйта смит, rws, rider waite smith, классическое таро, академия таро" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="theme-color" content="#111218" />
+    <link rel="canonical" href="https://www.basilarcana.com/academy-rider-waite-smith-deck.html" />
+    <link rel="alternate" hreflang="ru" href="https://www.basilarcana.com/academy-rider-waite-smith-deck.html?lang=ru" />
+    <link rel="alternate" hreflang="kk" href="https://www.basilarcana.com/academy-rider-waite-smith-deck.html?lang=kz" />
+    <link rel="alternate" hreflang="en" href="https://www.basilarcana.com/academy-rider-waite-smith-deck.html?lang=en" />
+    <link rel="alternate" hreflang="x-default" href="https://www.basilarcana.com/academy-rider-waite-smith-deck.html" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="BasilArcana" />
+    <meta property="og:title" content="Колода Райдера-Уэйта-Смит (RWS): большая статья" />
+    <meta property="og:description" content="Подробный разбор RWS: почему это базовый стандарт обучения и практики в Таро." />
+    <meta property="og:url" content="https://www.basilarcana.com/academy-rider-waite-smith-deck.html" />
+    <meta property="og:image" content="https://cdn.basilarcana.com/sofia/sofia.webp" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Колода Райдера-Уэйта-Смит (RWS): большая статья" />
+    <meta name="twitter:description" content="История, структура и практический протокол чтения RWS для стабильных раскладов." />
+    <meta name="twitter:image" content="https://cdn.basilarcana.com/sofia/sofia.webp" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "Колода Райдера-Уэйта-Смит (RWS): большая статья",
+        "description": "Большая статья о колоде Райдера-Уэйта-Смит.",
+        "url": "https://www.basilarcana.com/academy-rider-waite-smith-deck.html",
+        "inLanguage": ["ru", "en", "kk"],
+        "publisher": { "@type": "Organization", "name": "BasilArcana" }
+      }
+    </script>
+    <style>
+      :root { --text:#f3f3f8; --text-soft:#bbb8ca; --accent-soft:#e3d2ff; --card:rgba(255,255,255,.06); --card-border:rgba(184,137,255,.32); }
+      *{box-sizing:border-box;} html,body{margin:0;min-height:100%;}
+      body{font-family:"Manrope",sans-serif;color:var(--text);background:radial-gradient(circle at 15% 20%, rgba(184,137,255,0.12), transparent 40%),linear-gradient(150deg,#14151b,#1a1b24 55%,#15161d);} 
+      .wrap{width:min(1120px,calc(100% - 2rem));margin:0 auto;padding:1.05rem 0 1.6rem;}
+      .topbar{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:0 0 .75rem;}
+      .logo{font-family:"Space Grotesk",sans-serif;font-weight:600;letter-spacing:.02em;font-size:clamp(.95rem,1.35vw,1.2rem);color:var(--accent-soft);text-decoration:none;}
+      .langs{display:inline-flex;gap:.45rem;background:rgba(255,255,255,.08);border:1px solid var(--card-border);border-radius:999px;padding:.28rem;}
+      .lang-btn{border:0;background:transparent;color:var(--text-soft);border-radius:999px;font:inherit;font-weight:600;letter-spacing:.03em;padding:.46rem .82rem;cursor:pointer;}
+      .lang-btn[aria-pressed="true"]{color:#100d17;background:linear-gradient(135deg,#b889ff,#e3d2ff);}
+      .article{border:1px solid var(--card-border);border-radius:20px;background:var(--card);padding:1.85rem 1.95rem 2rem;}
+      h1{margin:0 0 .85rem;font-family:"Space Grotesk",sans-serif;font-size:clamp(1.55rem,3vw,2.5rem);line-height:1.15;}
+      .article p{margin:.78rem 0;color:var(--text-soft);line-height:1.7;font-size:1.02rem;max-width:72ch;}
+      .article h2{margin:1.35rem 0 .35rem;font-family:"Space Grotesk",sans-serif;font-size:1.08rem;line-height:1.35;color:var(--text);}
+      .article ul{margin:.35rem 0 .9rem;padding-left:1.15rem;max-width:72ch;}
+      .article li{margin:.42rem 0;color:var(--text-soft);line-height:1.62;}
+      .site-links{display:flex;flex-wrap:wrap;gap:.75rem 1.05rem;margin:1.35rem 0 .65rem;padding:.66rem .72rem;border:1px solid var(--card-border);border-radius:12px;background:rgba(255,255,255,.06);} 
+      .site-links a{color:var(--accent-soft);text-decoration:none;border-bottom:1px solid rgba(227,210,255,.38);font-size:.88rem;font-weight:700;}
+      .footer{border-top:1px solid rgba(184,137,255,.3);margin:0 0 .5rem;padding:.58rem 0 .15rem;color:var(--text-soft);font-size:.82rem;}
+      .bottom-cta{background:linear-gradient(135deg,#f5ebff,#c084ff 52%,#a45cf8);color:#10091c;border:1px solid rgba(255,255,255,.35);border-radius:12px;padding:.65rem .8rem;margin-bottom:.4rem;display:flex;gap:.5rem;align-items:center;justify-content:space-between;font-weight:700;font-size:.88rem;}
+      .bottom-cta-links{display:inline-flex;align-items:center;gap:.65rem;flex-wrap:wrap;font-weight:800;} .bottom-cta a{color:#10091c;text-decoration:none;border-bottom:1px solid rgba(16,9,28,.4);} .bottom-cta-sep{opacity:.6;}
+      @media (max-width:960px){.bottom-cta{flex-direction:column;align-items:flex-start;} .article{padding:1.25rem;} .lang-btn{padding:.4rem .68rem;}}
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <header class="topbar"><a class="logo" href="./index.html" data-i18n="topLine" data-link="home">Магический плюс вайб</a><div class="langs" role="group" aria-label="Language switcher"><button class="lang-btn" data-lang="ru" aria-pressed="true">RU</button><button class="lang-btn" data-lang="kz" aria-pressed="false">KZ</button><button class="lang-btn" data-lang="en" aria-pressed="false">EN</button></div></header>
+      <article class="article"><h1>Колода Райдера-Уэйта-Смит (RWS): большая статья о структуре и чтении</h1><p class="lead">RWS это наиболее практичная «базовая операционная система» Таро для обучения и профессиональной практики. Именно на ней построено большинство современных школ и учебных материалов.</p><h2>Почему RWS стала стандартом</h2><p>Колода Райдера-Уэйта-Смит сделала ключевой шаг: младшие арканы получили сюжетные сцены. Благодаря этому начинающий практик быстрее связывает карту с жизненной ситуацией и действием.</p><ul><li>Сценические изображения ускоряют понимание без потери глубины.</li><li>Для RWS существует крупнейшая база учебных источников и сравнений.</li><li>Система хорошо переносится на тематические современные колоды.</li></ul><h2>Архитектура колоды: что важно знать</h2><ul><li><strong>Старшие арканы:</strong> большие этапы, выборы, кризисы и переходы.</li><li><strong>Младшие арканы:</strong> повседневные процессы, поведение, темп развития.</li><li><strong>Придворные карты:</strong> роли, стили реакции, динамика людей в системе отношений.</li></ul><p>В RWS логика чтения хорошо поддерживает вопрос «что делать дальше», а не только «что это значит».</p><h2>Сильные стороны RWS в реальной практике</h2><ul><li>Высокая скорость первичной трактовки.</li><li>Стабильность в коротких раскладах 1-3-5 карт.</li><li>Удобная база для клиентской консультации с понятным языком.</li><li>Легко калибруется через дневник и проверку фактических исходов.</li></ul><h2>Ограничения, о которых важно помнить</h2><ul><li>Популярность рождает «заученные клише», если не работать с контекстом.</li><li>Некоторые интерпретации из интернета слишком категоричны и пугающи.</li><li>Без проверки временем можно путать архетип и буквальный прогноз.</li></ul><h2>Практический протокол чтения RWS</h2><p>Чтобы избежать расплывчатости, используйте последовательность:</p><ul><li><strong>1.</strong> Сформулируйте вопрос в зоне влияния и сроке до 7-30 дней.</li><li><strong>2.</strong> Прочитайте карту как сцену: кто действует, что меняется, где конфликт.</li><li><strong>3.</strong> Добавьте уровень действия: какой шаг наиболее уместен сейчас.</li><li><strong>4.</strong> Проверьте расклад через факты через 24-72 часа.</li></ul><h2>RWS и другие системы</h2><p>Когда база RWS устойчива, можно расширяться: глубину символизма добавляет <a href="./academy-crowley-thoth-deck.html" data-link="crowley">Таро Тота</a>, а событийность и сроки усиливает <a href="./academy-lenormand-deck-guide.html" data-link="leno">Ленорман</a>.</p><h2>Кому подойдет RWS в первую очередь</h2><ul><li>Новичкам, которым нужна понятная и структурная точка входа.</li><li>Практикам, делающим акцент на прикладных решениях.</li><li>Тем, кто хочет совмещать интуицию с воспроизводимой методикой.</li></ul><h2>Итог</h2><p>Если нужна колода, которая быстро дает рабочий язык и при этом масштабируется до сложной практики, RWS остается самым надежным выбором. Для старта ее удобно сочетать с гайдом <a href="./academy-how-to-choose-deck.html" data-link="choose">как выбрать свою колоду</a>.</p></article>
+      <nav class="site-links" aria-label="Внутренние ссылки">
+        <a href="./news.html" data-i18n="navNews" data-link="news">Новости</a>
+        <a href="./tarot-values.html" data-i18n="navTarot" data-link="tarot">Карты Таро</a>
+        <a href="./lenormand-values.html" data-i18n="navLenormand" data-link="lenormand">Колода Ленорман</a>
+        <a href="./academy.html" data-i18n="navAcademy" data-link="academy">Академия Таро</a>
+      </nav>
+      <footer class="footer" data-i18n="footer">BasilArcana · RU / KZ / EN · Telegram-first experience</footer>
+      <section class="bottom-cta"><span data-i18n="devCta">Разработка ботов и приложений на заказ под ключ — напишите нам</span><div class="bottom-cta-links"><a href="mailto:basiluxd@gmail.com">basiluxd@gmail.com</a><span class="bottom-cta-sep">•</span><a href="https://t.me/uxd_ink" target="_blank" rel="noreferrer">@uxd_ink</a></div></section>
+    </main>
+    <script>
+      const LANG_STORAGE_KEY = "basilarcana_lang";
+      const ui = {
+        ru: { topLine:"Магический плюс вайб", navNews:"Новости", navTarot:"Карты Таро", navLenormand:"Колода Ленорман", navAcademy:"Академия Таро", footer:"BasilArcana · RU / KZ / EN · Telegram-first experience", devCta:"Разработка ботов и приложений на заказ под ключ — напишите нам" },
+        kz: { topLine:"Магия плюс vibe", navNews:"Жаңалықтар", navTarot:"Таро карталары", navLenormand:"Ленорман колодасы", navAcademy:"Таро академиясы", footer:"BasilArcana · RU / KZ / EN · Telegram-first experience", devCta:"Тапсырыс бойынша bot және app толық әзірлеу — бізге жазыңыз" },
+        en: { topLine:"Magic plus vibe", navNews:"News", navTarot:"Tarot cards", navLenormand:"Lenormand deck", navAcademy:"Tarot Academy", footer:"BasilArcana · RU / KZ / EN · Telegram-first experience", devCta:"Turnkey custom bot and app development — write to us" }
+      };
+      function withLang(path, lang){ const url = new URL(path, window.location.href); if(lang && lang !== "ru") url.searchParams.set("lang", lang); return url.pathname + url.search; }
+      function applyLang(lang){
+        const resolved = ui[lang] ? lang : "ru";
+        const pack = ui[resolved];
+        document.documentElement.lang = resolved === "kz" ? "kk" : resolved;
+        document.querySelectorAll("[data-i18n]").forEach((node)=>{ const key = node.dataset.i18n; if(pack[key]) node.textContent = pack[key]; });
+        document.querySelectorAll(".lang-btn").forEach((btn)=>btn.setAttribute("aria-pressed", String(btn.dataset.lang === resolved)));
+        const links = { home:"./index.html", news:"./news.html", tarot:"./tarot-values.html", lenormand:"./lenormand-values.html", academy:"./academy.html", crowley:"./academy-crowley-thoth-deck.html", leno:"./academy-lenormand-deck-guide.html", choose:"./academy-how-to-choose-deck.html" };
+        Object.entries(links).forEach(([key,path]) => {
+          document.querySelectorAll("[data-link=\"" + key + "\"]").forEach((node)=>node.setAttribute("href", withLang(path, resolved)));
+        });
+        const url = new URL(window.location.href);
+        if(resolved === "ru") url.searchParams.delete("lang"); else url.searchParams.set("lang", resolved);
+        window.history.replaceState({}, "", url.toString());
+        window.localStorage.setItem(LANG_STORAGE_KEY, resolved);
+      }
+      document.querySelectorAll(".lang-btn").forEach((btn)=>btn.addEventListener("click",()=>applyLang(btn.dataset.lang)));
+      const initialLang = new URLSearchParams(window.location.search).get("lang");
+      const storedLang = window.localStorage.getItem(LANG_STORAGE_KEY);
+      applyLang(initialLang || storedLang || "ru");
+    </script>
+  </body>
+</html>

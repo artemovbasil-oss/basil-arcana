@@ -28,8 +28,9 @@ function contentTypeFor(filePath) {
 
 const server = createServer(async (req, res) => {
   try {
-    const path = req.url === "/" ? "/index.html" : req.url || "/index.html";
-    const safePath = path.includes("..") ? "/index.html" : path;
+    const requestUrl = new URL(req.url || "/", "http://localhost");
+    const requestPath = requestUrl.pathname === "/" ? "/index.html" : requestUrl.pathname;
+    const safePath = requestPath.includes("..") ? "/index.html" : requestPath;
     const fullPath = join(__dirname, safePath);
     const body = await readFile(fullPath);
     res.writeHead(200, {
