@@ -52,8 +52,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   HomeStreakStats _streakStats = HomeStreakStats.empty;
   String? _dailyCardInterpretation;
   String? _dailyCardInterpretationCardId;
-  String? _streakInterpretation;
-  String? _streakInterpretationCacheKey;
   bool _didRequestOnboarding = false;
   late final AnimationController _fieldGlowController;
   late final AnimationController _titleShimmerController;
@@ -786,6 +784,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                             onTap: () => _showStreakModal(
                               copy: streakCopy,
                               topCards: topCards,
+                              cards: cards,
+                              selectedDeck: deckId,
                             ),
                           ),
                         ),
@@ -909,33 +909,214 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     return source[index];
   }
 
+  _EnergyProfileData _buildEnergyProfile({
+    required List<CardModel> cards,
+    required List<_TopCardStat> topCards,
+    required DeckType selectedDeck,
+  }) {
+    final readings = ref.read(readingsRepositoryProvider).getReadings();
+    final cardById = <String, CardModel>{
+      for (final card in cards) canonicalCardId(card.id): card,
+    };
+    final now = DateTime.now();
+    final sampled = <_ProfileEntry>[];
+
+    for (final reading in readings) {
+      final ageDays = now.difference(reading.createdAt).inDays;
+      if (ageDays > 90) {
+        continue;
+      }
+      for (final drawn in reading.drawnCards) {
+        final normalizedId = canonicalCardId(drawn.cardId);
+        if (!_matchesProfileDeck(normalizedId, selectedDeck)) {
+          continue;
+        }
+        sampled.add(
+          _ProfileEntry(
+            cardId: normalizedId,
+            cardName: drawn.cardName.trim(),
+            createdAt: reading.createdAt,
+          ),
+        );
+      }
+    }
+
+    sampled.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    final cardsWindow = sampled.take(30).toList();
+    if (cardsWindow.isEmpty) {
+      return const _EnergyProfileData.empty();
+    }
+
+    final suitWeights = <_ElementKind, double>{
+      _ElementKind.wands: 0,
+      _ElementKind.cups: 0,
+      _ElementKind.swords: 0,
+      _ElementKind.pentacles: 0,
+    };
+    final frequencyWeighted = <String, double>{};
+    final frequencyNames = <String, String>{};
+    final monthlyRepeats = <String, int>{};
+
+    double majorWeight = 0;
+    double totalTarotWeight = 0;
+
+    for (final entry in cardsWindow) {
+      final ageDays = now.difference(entry.createdAt).inDays;
+      final weight = ageDays <= 7
+          ? 1.5
+          : ageDays <= 30
+              ? 1.0
+              : 0.5;
+      final normalizedId = entry.cardId;
+
+      if (_isTarotCard(normalizedId)) {
+        totalTarotWeight += weight;
+      }
+      if (_isMajorArcana(normalizedId)) {
+        majorWeight += weight;
+      }
+
+      final element = _elementByCardId(normalizedId);
+      if (element != null) {
+        suitWeights[element] = (suitWeights[element] ?? 0) + weight;
+      }
+
+      final resolvedName = entry.cardName.isNotEmpty
+          ? entry.cardName
+          : cardById[normalizedId]?.name ?? normalizedId;
+      frequencyNames[normalizedId] = resolvedName;
+      frequencyWeighted[normalizedId] =
+          (frequencyWeighted[normalizedId] ?? 0) + weight;
+
+      if (ageDays <= 30) {
+        monthlyRepeats[normalizedId] = (monthlyRepeats[normalizedId] ?? 0) + 1;
+      }
+    }
+
+    final totalElementsWeight = suitWeights.values.fold<double>(
+      0,
+      (sum, value) => sum + value,
+    );
+    final elementPercents = <_ElementKind, int>{};
+    for (final entry in suitWeights.entries) {
+      final percent = totalElementsWeight <= 0
+          ? 0
+          : ((entry.value / totalElementsWeight) * 100).round();
+      elementPercents[entry.key] = percent.clamp(0, 100);
+    }
+
+    final sortedElements = elementPercents.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+    final dominantElement =
+        sortedElements.isNotEmpty ? sortedElements.first.key : null;
+    final supportElement =
+        sortedElements.length > 1 ? sortedElements[1].key : null;
+    final majorPercent = totalTarotWeight <= 0
+        ? 0
+        : ((majorWeight / totalTarotWeight) * 100).round().clamp(0, 100);
+
+    final majorPool = frequencyWeighted.entries
+        .where((entry) => _isMajorArcana(entry.key))
+        .toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+    final allPool = frequencyWeighted.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+
+    final dominantArchetypeId = majorPool.isNotEmpty
+        ? majorPool.first.key
+        : allPool.isNotEmpty
+            ? allPool.first.key
+            : null;
+    final dominantArchetypeName = dominantArchetypeId == null
+        ? null
+        : frequencyNames[dominantArchetypeId] ?? dominantArchetypeId;
+
+    final repeatedSignals = monthlyRepeats.entries
+        .where((entry) => entry.value >= 3)
+        .toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+    final signalList = <_RepeatedCardSignal>[
+      for (final entry in repeatedSignals)
+        _RepeatedCardSignal(
+          cardName: frequencyNames[entry.key] ?? entry.key,
+          count30d: entry.value,
+        ),
+    ];
+    if (signalList.isEmpty) {
+      for (final card in topCards) {
+        if (card.count >= 3) {
+          signalList.add(
+            _RepeatedCardSignal(
+              cardName: card.name,
+              count30d: card.count,
+            ),
+          );
+        }
+      }
+    }
+
+    return _EnergyProfileData(
+      sampledCardsCount: cardsWindow.length,
+      elementPercents: elementPercents,
+      dominantElement: dominantElement,
+      supportElement: supportElement,
+      majorArcanaPercent: majorPercent,
+      dominantArchetype: dominantArchetypeName,
+      repeatedSignals: signalList,
+    );
+  }
+
+  bool _matchesProfileDeck(String cardId, DeckType selectedDeck) {
+    if (selectedDeck == DeckType.crowley) {
+      return cardId.startsWith('ac_');
+    }
+    if (selectedDeck == DeckType.lenormand) {
+      return cardId.startsWith('lenormand_');
+    }
+    return _isTarotCard(cardId);
+  }
+
+  bool _isTarotCard(String cardId) {
+    return cardId.startsWith('major_') ||
+        cardId.startsWith('ac_') ||
+        cardId.startsWith('wands_') ||
+        cardId.startsWith('cups_') ||
+        cardId.startsWith('swords_') ||
+        cardId.startsWith('pentacles_');
+  }
+
+  bool _isMajorArcana(String cardId) {
+    return cardId.startsWith('major_') || cardId.startsWith('ac_');
+  }
+
+  _ElementKind? _elementByCardId(String cardId) {
+    if (cardId.startsWith('wands_')) {
+      return _ElementKind.wands;
+    }
+    if (cardId.startsWith('cups_')) {
+      return _ElementKind.cups;
+    }
+    if (cardId.startsWith('swords_')) {
+      return _ElementKind.swords;
+    }
+    if (cardId.startsWith('pentacles_')) {
+      return _ElementKind.pentacles;
+    }
+    return null;
+  }
+
   Future<void> _showStreakModal({
     required _HomeStreakCopy copy,
     required List<_TopCardStat> topCards,
+    required List<CardModel> cards,
+    required DeckType selectedDeck,
   }) async {
-    final locale = Localizations.localeOf(context).languageCode;
-    final streakCacheKey = [
-      locale,
-      _streakStats.currentStreakDays,
-      _streakStats.longestStreakDays,
-      _streakStats.awarenessPercent,
-      topCards.map((card) => '${card.name}:${card.count}').join('|'),
-    ].join(':');
-    final hasCache = _streakInterpretationCacheKey == streakCacheKey &&
-        (_streakInterpretation?.trim().isNotEmpty ?? false);
-    final requestFuture = hasCache
-        ? null
-        : ref.read(homeInsightsRepositoryProvider).fetchStreakInterpretation(
-            stats: _streakStats,
-            locale: locale,
-            topCards: [
-              for (final card in topCards)
-                {
-                  'name': card.name,
-                  'count': card.count,
-                },
-            ],
-          );
+    final energyCopy = _EnergyProfileCopy.resolve(context);
+    final profile = _buildEnergyProfile(
+      cards: cards,
+      topCards: topCards,
+      selectedDeck: selectedDeck,
+    );
 
     final colorScheme = Theme.of(context).colorScheme;
     await showModalBottomSheet<void>(
@@ -1026,106 +1207,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                           ),
                     ),
                   const SizedBox(height: 14),
-                  Text(
-                    copy.topCardsTitle,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
-                  ),
-                  const SizedBox(height: 8),
                   Expanded(
                     child: SingleChildScrollView(
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (topCards.isEmpty)
-                            Text(
-                              copy.topCardsEmpty,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.copyWith(
-                                    color: colorScheme.onSurface
-                                        .withValues(alpha: 0.7),
-                                  ),
-                            )
-                          else
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                for (var i = 0; i < topCards.length; i++) ...[
-                                  Expanded(
-                                    child: _MiniTopCardTile(
-                                      rank: i + 1,
-                                      stat: topCards[i],
-                                      hitsLabel: copy.hitsLabel,
-                                    ),
-                                  ),
-                                  if (i != topCards.length - 1)
-                                    const SizedBox(width: 10),
-                                ],
-                              ],
-                            ),
-                          const SizedBox(height: 12),
-                          Text(
-                            copy.streakInsightTitle,
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleSmall
-                                ?.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                ),
-                          ),
-                          const SizedBox(height: 8),
                           if (_loadingStreak)
                             _HomeMagicLoadingCard(
                               label: copy.streakLoadingSubtitle,
                             )
                           else
-                            FutureBuilder<String>(
-                              future: requestFuture,
-                              initialData:
-                                  hasCache ? _streakInterpretation : null,
-                              builder: (context, snapshot) {
-                                final hasValue = snapshot.hasData &&
-                                    (snapshot.data?.trim().isNotEmpty ?? false);
-                                if (snapshot.connectionState ==
-                                        ConnectionState.waiting &&
-                                    !hasValue) {
-                                  return _HomeMagicLoadingCard(
-                                    label: copy.streakInsightPending,
-                                  );
-                                }
-                                final resolved = hasValue
-                                    ? snapshot.data!.trim()
-                                    : copy.streakInsightFallback;
-                                if (_streakInterpretationCacheKey !=
-                                        streakCacheKey ||
-                                    _streakInterpretation != resolved) {
-                                  WidgetsBinding.instance
-                                      .addPostFrameCallback((_) {
-                                    if (!mounted) {
-                                      return;
-                                    }
-                                    setState(() {
-                                      _streakInterpretationCacheKey =
-                                          streakCacheKey;
-                                      _streakInterpretation = resolved;
-                                    });
-                                  });
-                                }
-                                return Text(
-                                  resolved,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium
-                                      ?.copyWith(
-                                        color: colorScheme.onSurface
-                                            .withValues(alpha: 0.9),
-                                      ),
-                                );
-                              },
+                            _EnergyProfileCard(
+                              copy: energyCopy,
+                              profile: profile,
+                              streakDays: _streakStats.currentStreakDays,
                             ),
+                          const SizedBox(height: 12),
                         ],
                       ),
                     ),
@@ -1617,6 +1713,240 @@ class _TopCardStat {
   final String imageUrl;
 }
 
+enum _ElementKind { wands, cups, swords, pentacles }
+
+class _ProfileEntry {
+  const _ProfileEntry({
+    required this.cardId,
+    required this.cardName,
+    required this.createdAt,
+  });
+
+  final String cardId;
+  final String cardName;
+  final DateTime createdAt;
+}
+
+class _RepeatedCardSignal {
+  const _RepeatedCardSignal({
+    required this.cardName,
+    required this.count30d,
+  });
+
+  final String cardName;
+  final int count30d;
+}
+
+class _EnergyProfileData {
+  const _EnergyProfileData({
+    required this.sampledCardsCount,
+    required this.elementPercents,
+    required this.dominantElement,
+    required this.supportElement,
+    required this.majorArcanaPercent,
+    required this.dominantArchetype,
+    required this.repeatedSignals,
+  });
+
+  final int sampledCardsCount;
+  final Map<_ElementKind, int> elementPercents;
+  final _ElementKind? dominantElement;
+  final _ElementKind? supportElement;
+  final int majorArcanaPercent;
+  final String? dominantArchetype;
+  final List<_RepeatedCardSignal> repeatedSignals;
+
+  bool get hasCards => sampledCardsCount > 0;
+
+  const _EnergyProfileData.empty()
+      : sampledCardsCount = 0,
+        elementPercents = const {},
+        dominantElement = null,
+        supportElement = null,
+        majorArcanaPercent = 0,
+        dominantArchetype = null,
+        repeatedSignals = const [];
+}
+
+class _EnergyProfileCopy {
+  const _EnergyProfileCopy({
+    required this.title,
+    required this.subtitle,
+    required this.emptyState,
+    required this.elementsTitle,
+    required this.destinyTitle,
+    required this.destinyLow,
+    required this.destinyHigh,
+    required this.archetypeTitle,
+    required this.archetypeFallback,
+    required this.repeatsTitle,
+    required this.repeatsFallback,
+    required this.sampleWindowLabel,
+    required this.elementAction,
+    required this.elementEmotion,
+    required this.elementMind,
+    required this.elementMatter,
+    required this.phaseSummaryFallback,
+    required this.archetypeDescriptionFallback,
+  });
+
+  final String title;
+  final String subtitle;
+  final String emptyState;
+  final String elementsTitle;
+  final String destinyTitle;
+  final String destinyLow;
+  final String destinyHigh;
+  final String archetypeTitle;
+  final String archetypeFallback;
+  final String repeatsTitle;
+  final String repeatsFallback;
+  final String sampleWindowLabel;
+  final String elementAction;
+  final String elementEmotion;
+  final String elementMind;
+  final String elementMatter;
+  final String phaseSummaryFallback;
+  final String archetypeDescriptionFallback;
+
+  String elementLabel(_ElementKind kind) {
+    switch (kind) {
+      case _ElementKind.wands:
+        return elementAction;
+      case _ElementKind.cups:
+        return elementEmotion;
+      case _ElementKind.swords:
+        return elementMind;
+      case _ElementKind.pentacles:
+        return elementMatter;
+    }
+  }
+
+  String phaseSummary({
+    required _ElementKind? dominant,
+    required _ElementKind? support,
+  }) {
+    if (dominant == null) {
+      return phaseSummaryFallback;
+    }
+    final dominantLabel = elementLabel(dominant).toLowerCase();
+    if (support == null) {
+      if (title.startsWith('Твой')) {
+        return 'Сейчас доминирует $dominantLabel. Это твой основной вектор периода.';
+      }
+      if (title.startsWith('Сенің')) {
+        return 'Қазір $dominantLabel басым. Осы кезеңнің негізгі бағыты осы.';
+      }
+      return 'Your pattern is led by $dominantLabel right now.';
+    }
+    final supportLabel = elementLabel(support).toLowerCase();
+    if (title.startsWith('Твой')) {
+      return 'Ты в фазе, где $dominantLabel ведёт, а $supportLabel поддерживает движение.';
+    }
+    if (title.startsWith('Сенің')) {
+      return '$dominantLabel алда, ал $supportLabel оны қолдап тұр.';
+    }
+    return 'You are in a phase where $dominantLabel leads and $supportLabel supports it.';
+  }
+
+  String archetypeDescription(String cardName) {
+    if (title.startsWith('Твой')) {
+      return 'Ведущий архетип сейчас: $cardName. Используй его как ориентир для решений ближайших дней.';
+    }
+    if (title.startsWith('Сенің')) {
+      return 'Қазір жетекші архетип: $cardName. Жақын күндердегі шешімдерде осыны бағдар етіңіз.';
+    }
+    return 'Your current leading archetype is $cardName. Use it as a compass for near-term decisions.';
+  }
+
+  String localeHint(int streakDays) {
+    if (title.startsWith('Твой')) {
+      return 'Серия $streakDays дней усиливает точность профиля.';
+    }
+    if (title.startsWith('Сенің')) {
+      return '$streakDays күндік серия профиль дәлдігін арттырады.';
+    }
+    return '$streakDays-day streak improves profile precision.';
+  }
+
+  static _EnergyProfileCopy resolve(BuildContext context) {
+    final code = Localizations.localeOf(context).languageCode;
+    if (code == 'ru') {
+      return const _EnergyProfileCopy(
+        title: 'Твой текущий энергетический паттерн',
+        subtitle: 'Аналитика по последним раскладам',
+        emptyState:
+            'Пока мало данных. Сделай несколько раскладов, и профиль начнет заполняться.',
+        elementsTitle: 'Круг стихий',
+        destinyTitle: 'Уровень судьбоносности',
+        destinyLow: 'Фоновая фаза: многое в твоих руках',
+        destinyHigh: 'Период судьбоносных сдвигов',
+        archetypeTitle: 'Доминирующий архетип',
+        archetypeFallback: 'Архетип пока формируется',
+        repeatsTitle: 'Повторяющиеся сигналы (30 дней)',
+        repeatsFallback: 'Явных повторов пока нет.',
+        sampleWindowLabel: 'На основе последних 30 карт',
+        elementAction: 'Жезлы',
+        elementEmotion: 'Кубки',
+        elementMind: 'Мечи',
+        elementMatter: 'Пентакли',
+        phaseSummaryFallback:
+            'Профиль еще набирает статистику, поэтому вывод пока нейтральный.',
+        archetypeDescriptionFallback:
+            'Когда накопится больше раскладов, здесь появится твой ведущий архетип периода.',
+      );
+    }
+    if (code == 'kk') {
+      return const _EnergyProfileCopy(
+        title: 'Сенің ағымдағы энергия паттернің',
+        subtitle: 'Соңғы раскладтар аналитикасы',
+        emptyState:
+            'Дерек әлі аз. Бірнеше расклад жасаңыз, профиль біртіндеп толады.',
+        elementsTitle: 'Стихиялар шеңбері',
+        destinyTitle: 'Тағдырлық кезең деңгейі',
+        destinyLow: 'Фондық фаза: бәрі өз қолыңда',
+        destinyHigh: 'Тағдырлық өзгеріс кезеңі',
+        archetypeTitle: 'Басым архетип',
+        archetypeFallback: 'Архетип әлі қалыптасып жатыр',
+        repeatsTitle: 'Қайталанатын сигналдар (30 күн)',
+        repeatsFallback: 'Айқын қайталанулар әзірге жоқ.',
+        sampleWindowLabel: 'Соңғы 30 карта негізінде',
+        elementAction: 'Таяқтар',
+        elementEmotion: 'Кубоктар',
+        elementMind: 'Қылыштар',
+        elementMatter: 'Пентакльдер',
+        phaseSummaryFallback:
+            'Профиль әлі статистика жинап жатыр, сондықтан қорытынды бейтарап.',
+        archetypeDescriptionFallback:
+            'Көбірек расклад болғанда осы жерде жетекші архетип көрсетіледі.',
+      );
+    }
+    return const _EnergyProfileCopy(
+      title: 'Your current energy pattern',
+      subtitle: 'Analytics from recent readings',
+      emptyState:
+          'Not enough data yet. Complete a few readings and this profile will fill in.',
+      elementsTitle: 'Element wheel',
+      destinyTitle: 'Fate intensity',
+      destinyLow: 'Background phase: you hold the steering wheel',
+      destinyHigh: 'Destiny-shaping phase',
+      archetypeTitle: 'Dominant archetype',
+      archetypeFallback: 'Archetype is forming',
+      repeatsTitle: 'Recurring signals (30 days)',
+      repeatsFallback: 'No strong repeats yet.',
+      sampleWindowLabel: 'Based on your latest 30 cards',
+      elementAction: 'Wands',
+      elementEmotion: 'Cups',
+      elementMind: 'Swords',
+      elementMatter: 'Pentacles',
+      phaseSummaryFallback:
+          'The profile is still collecting signal, so the summary stays neutral for now.',
+      archetypeDescriptionFallback:
+          'As more readings accumulate, your leading archetype will appear here.',
+    );
+  }
+}
+
 class _HomeStreakCopy {
   const _HomeStreakCopy({
     required this.tileLoadingTitle,
@@ -1626,9 +1956,6 @@ class _HomeStreakCopy {
     required this.currentStreakLabel,
     required this.bestStreakLabel,
     required this.awarenessLabel,
-    required this.topCardsTitle,
-    required this.topCardsEmpty,
-    required this.hitsLabel,
     required this.dailyCardTileTitle,
     required this.dailyCardModalTitle,
     required this.dailyCardFallback,
@@ -1640,10 +1967,7 @@ class _HomeStreakCopy {
     required this.dailyCardPrimaryCta,
     required this.dailyCardSecondaryCta,
     required this.dailyCardQuestionPrefix,
-    required this.streakInsightTitle,
-    required this.streakInsightPending,
     required this.streakLoadingSubtitle,
-    required this.streakInsightFallback,
     required this.lastActivePrefix,
     required this.closeLabel,
     required this.dayUnit,
@@ -1656,9 +1980,6 @@ class _HomeStreakCopy {
   final String currentStreakLabel;
   final String bestStreakLabel;
   final String awarenessLabel;
-  final String topCardsTitle;
-  final String topCardsEmpty;
-  final String hitsLabel;
   final String dailyCardTileTitle;
   final String dailyCardModalTitle;
   final String dailyCardFallback;
@@ -1670,10 +1991,7 @@ class _HomeStreakCopy {
   final String dailyCardPrimaryCta;
   final String dailyCardSecondaryCta;
   final String dailyCardQuestionPrefix;
-  final String streakInsightTitle;
-  final String streakInsightPending;
   final String streakLoadingSubtitle;
-  final String streakInsightFallback;
   final String lastActivePrefix;
   final String closeLabel;
   final String Function(int) dayUnit;
@@ -1709,9 +2027,6 @@ class _HomeStreakCopy {
         currentStreakLabel: 'Сейчас',
         bestStreakLabel: 'Рекорд',
         awarenessLabel: 'Осознанность',
-        topCardsTitle: 'Топ карт',
-        topCardsEmpty: 'Пока нет статистики по картам.',
-        hitsLabel: 'Выпадала',
         dailyCardTileTitle: 'Карта дня',
         dailyCardModalTitle: 'Карта дня',
         dailyCardFallback: 'Подбираем карту...',
@@ -1724,11 +2039,7 @@ class _HomeStreakCopy {
         dailyCardSecondaryCta: 'Личная консультация Софии',
         dailyCardQuestionPrefix:
             'Какой следующий шаг мне сделать сегодня, учитывая карту',
-        streakInsightTitle: 'Что это значит',
-        streakInsightPending: 'Собираем короткий смысл по твоей статистике…',
         streakLoadingSubtitle: 'Подтягиваем актуальный streak...',
-        streakInsightFallback:
-            'Статистика показывает темп твоей практики: регулярность и повторяемость усиливают точность интерпретаций.',
         lastActivePrefix: 'Последняя активность',
         closeLabel: 'Закрыть',
         dayUnit: _ruDayUnit,
@@ -1743,9 +2054,6 @@ class _HomeStreakCopy {
         currentStreakLabel: 'Қазір',
         bestStreakLabel: 'Рекорд',
         awarenessLabel: 'Саналылық',
-        topCardsTitle: 'Топ карталар',
-        topCardsEmpty: 'Карта статистикасы әзірге жоқ.',
-        hitsLabel: 'Түскен саны',
         dailyCardTileTitle: 'Күн картасы',
         dailyCardModalTitle: 'Күн картасы',
         dailyCardFallback: 'Карта таңдалып жатыр...',
@@ -1758,12 +2066,7 @@ class _HomeStreakCopy {
         dailyCardSecondaryCta: 'Софиямен жеке консультация',
         dailyCardQuestionPrefix:
             'Осы картаға сүйеніп, бүгін мен қандай келесі қадам жасауым керек',
-        streakInsightTitle: 'Бұл нені білдіреді',
-        streakInsightPending:
-            'Статистикаңыз бойынша қысқа түсіндірме дайындап жатырмыз…',
         streakLoadingSubtitle: 'Өзекті streak жүктелуде...',
-        streakInsightFallback:
-            'Бұл статистика тәжірибе ырғағын көрсетеді: тұрақты қайталау интерпретация дәлдігін арттырады.',
         lastActivePrefix: 'Соңғы белсенділік',
         closeLabel: 'Жабу',
         dayUnit: _kkDayUnit,
@@ -1777,9 +2080,6 @@ class _HomeStreakCopy {
       currentStreakLabel: 'Current',
       bestStreakLabel: 'Best',
       awarenessLabel: 'Awareness',
-      topCardsTitle: 'Top cards',
-      topCardsEmpty: 'No card stats yet.',
-      hitsLabel: 'Drawn',
       dailyCardTileTitle: 'Daily card',
       dailyCardModalTitle: 'Daily card',
       dailyCardFallback: 'Selecting card...',
@@ -1792,11 +2092,7 @@ class _HomeStreakCopy {
       dailyCardSecondaryCta: 'Personal consultation with Sofia',
       dailyCardQuestionPrefix:
           'What next step should I take today based on the card',
-      streakInsightTitle: 'What this means',
-      streakInsightPending: 'Building a short insight from your stats...',
       streakLoadingSubtitle: 'Loading latest streak...',
-      streakInsightFallback:
-          'Your stats reflect practice rhythm: consistency and repetition improve interpretation quality over time.',
       lastActivePrefix: 'Last activity',
       closeLabel: 'Close',
       dayUnit: _enDayUnit,
@@ -2075,75 +2371,418 @@ class _AwarenessPill extends StatelessWidget {
   }
 }
 
-class _MiniTopCardTile extends StatelessWidget {
-  const _MiniTopCardTile({
-    required this.rank,
-    required this.stat,
-    required this.hitsLabel,
+class _EnergyProfileCard extends StatelessWidget {
+  const _EnergyProfileCard({
+    required this.copy,
+    required this.profile,
+    required this.streakDays,
   });
 
-  final int rank;
-  final _TopCardStat stat;
-  final String hitsLabel;
+  final _EnergyProfileCopy copy;
+  final _EnergyProfileData profile;
+  final int streakDays;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final slices = [
+      _EnergySlice(
+        label: copy.elementLabel(_ElementKind.wands),
+        percent: profile.elementPercents[_ElementKind.wands] ?? 0,
+        color: const Color(0xFFFF8A5B),
+      ),
+      _EnergySlice(
+        label: copy.elementLabel(_ElementKind.cups),
+        percent: profile.elementPercents[_ElementKind.cups] ?? 0,
+        color: const Color(0xFF63B8FF),
+      ),
+      _EnergySlice(
+        label: copy.elementLabel(_ElementKind.swords),
+        percent: profile.elementPercents[_ElementKind.swords] ?? 0,
+        color: const Color(0xFFECEAF9),
+      ),
+      _EnergySlice(
+        label: copy.elementLabel(_ElementKind.pentacles),
+        percent: profile.elementPercents[_ElementKind.pentacles] ?? 0,
+        color: const Color(0xFFE3C26A),
+      ),
+    ];
     return Container(
-      padding: const EdgeInsets.all(8),
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        color: colorScheme.surfaceVariant.withValues(alpha: 0.2),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: colorScheme.primary.withValues(alpha: 0.38),
+        ),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            colorScheme.surfaceContainerHighest.withValues(alpha: 0.42),
+            colorScheme.primary.withValues(alpha: 0.12),
+          ],
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '#$rank',
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: colorScheme.primary,
-                  fontWeight: FontWeight.w700,
+            copy.title,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
                 ),
           ),
-          const SizedBox(height: 6),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: AspectRatio(
-              aspectRatio: 0.68,
-              child: stat.imageUrl.trim().isNotEmpty
-                  ? Image.network(
-                      stat.imageUrl,
-                      fit: BoxFit.contain,
-                      errorBuilder: (_, __, ___) => Container(
-                        color: colorScheme.surfaceContainerHighest
-                            .withValues(alpha: 0.35),
-                      ),
-                    )
-                  : Container(
-                      color: colorScheme.surfaceContainerHighest
-                          .withValues(alpha: 0.35),
+          const SizedBox(height: 4),
+          Text(
+            '${copy.subtitle} · ${copy.sampleWindowLabel}',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurface.withValues(alpha: 0.72),
+                ),
+          ),
+          const SizedBox(height: 12),
+          if (!profile.hasCards) ...[
+            Text(
+              copy.emptyState,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.onSurface.withValues(alpha: 0.82),
+                  ),
+            ),
+          ] else ...[
+            _EnergySectionTitle(text: copy.elementsTitle),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                _EnergyDonutChart(
+                  slices: slices,
+                  centerLabel: '${profile.sampledCardsCount}',
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    children: [
+                      for (final slice in slices)
+                        _EnergyLegendRow(
+                          color: slice.color,
+                          label: slice.label,
+                          percent: slice.percent,
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              copy.phaseSummary(
+                dominant: profile.dominantElement,
+                support: profile.supportElement,
+              ),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurface.withValues(alpha: 0.86),
+                  ),
+            ),
+            const SizedBox(height: 14),
+            _EnergySectionTitle(text: copy.destinyTitle),
+            const SizedBox(height: 8),
+            _FateIntensityBar(value: profile.majorArcanaPercent),
+            const SizedBox(height: 6),
+            Text(
+              profile.majorArcanaPercent >= 38
+                  ? copy.destinyHigh
+                  : copy.destinyLow,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurface.withValues(alpha: 0.84),
+                  ),
+            ),
+            const SizedBox(height: 14),
+            _EnergySectionTitle(text: copy.archetypeTitle),
+            const SizedBox(height: 8),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+              decoration: BoxDecoration(
+                color: colorScheme.surface.withValues(alpha: 0.38),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: colorScheme.primary.withValues(alpha: 0.3),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    profile.dominantArchetype ?? copy.archetypeFallback,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    profile.dominantArchetype == null
+                        ? copy.archetypeDescriptionFallback
+                        : copy.archetypeDescription(profile.dominantArchetype!),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurface.withValues(alpha: 0.82),
+                        ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 14),
+            _EnergySectionTitle(text: copy.repeatsTitle),
+            const SizedBox(height: 8),
+            if (profile.repeatedSignals.isEmpty)
+              Text(
+                copy.repeatsFallback,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurface.withValues(alpha: 0.78),
                     ),
+              )
+            else
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final signal in profile.repeatedSignals.take(4))
+                    _SignalChip(
+                      label: signal.cardName,
+                      value: signal.count30d,
+                    ),
+                ],
+              ),
+            if (streakDays > 1) ...[
+              const SizedBox(height: 10),
+              Text(
+                copy.localeHint(streakDays),
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: colorScheme.primary.withValues(alpha: 0.88),
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+            ],
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _EnergySectionTitle extends StatelessWidget {
+  const _EnergySectionTitle({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+    );
+  }
+}
+
+class _EnergyLegendRow extends StatelessWidget {
+  const _EnergyLegendRow({
+    required this.color,
+    required this.label,
+    required this.percent,
+  });
+
+  final Color color;
+  final String label;
+  final int percent;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3),
+      child: Row(
+        children: [
+          Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: color,
             ),
           ),
-          const SizedBox(height: 6),
-          Text(
-            stat.name,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
+          const SizedBox(width: 7),
+          Expanded(
+            child: Text(
+              label,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurface.withValues(alpha: 0.82),
+                  ),
+            ),
           ),
-          const SizedBox(height: 2),
           Text(
-            '$hitsLabel: ${stat.count}',
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: colorScheme.onSurface.withValues(alpha: 0.68),
+            '$percent%',
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
                 ),
           ),
         ],
       ),
     );
+  }
+}
+
+class _FateIntensityBar extends StatelessWidget {
+  const _FateIntensityBar({required this.value});
+
+  final int value;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final clamped = value.clamp(0, 100).toDouble();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(999),
+          child: LinearProgressIndicator(
+            minHeight: 11,
+            value: clamped / 100,
+            backgroundColor: colorScheme.surface.withValues(alpha: 0.42),
+            valueColor: AlwaysStoppedAnimation<Color>(
+              clamped >= 38 ? const Color(0xFFB26AFF) : colorScheme.primary,
+            ),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          '$value%',
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+        ),
+      ],
+    );
+  }
+}
+
+class _SignalChip extends StatelessWidget {
+  const _SignalChip({
+    required this.label,
+    required this.value,
+  });
+
+  final String label;
+  final int value;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: colorScheme.surface.withValues(alpha: 0.45),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: colorScheme.primary.withValues(alpha: 0.32),
+        ),
+      ),
+      child: Text(
+        '$label · ${value}x',
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+      ),
+    );
+  }
+}
+
+class _EnergyDonutChart extends StatelessWidget {
+  const _EnergyDonutChart({
+    required this.slices,
+    required this.centerLabel,
+  });
+
+  final List<_EnergySlice> slices;
+  final String centerLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return SizedBox(
+      width: 126,
+      height: 126,
+      child: CustomPaint(
+        painter: _DonutChartPainter(
+          slices: slices,
+          trackColor: colorScheme.surface.withValues(alpha: 0.45),
+        ),
+        child: Center(
+          child: Text(
+            centerLabel,
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _EnergySlice {
+  const _EnergySlice({
+    required this.label,
+    required this.percent,
+    required this.color,
+  });
+
+  final String label;
+  final int percent;
+  final Color color;
+}
+
+class _DonutChartPainter extends CustomPainter {
+  const _DonutChartPainter({
+    required this.slices,
+    required this.trackColor,
+  });
+
+  final List<_EnergySlice> slices;
+  final Color trackColor;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = size.center(Offset.zero);
+    final stroke = size.width * 0.13;
+    final radius = (size.width - stroke) / 2;
+    final rect = Rect.fromCircle(center: center, radius: radius);
+    final trackPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = stroke
+      ..strokeCap = StrokeCap.round
+      ..color = trackColor;
+    canvas.drawArc(rect, 0, pi * 2, false, trackPaint);
+
+    var start = -pi / 2;
+    for (final slice in slices) {
+      if (slice.percent <= 0) {
+        continue;
+      }
+      final sweep = (slice.percent / 100) * pi * 2;
+      final paint = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = stroke
+        ..strokeCap = StrokeCap.round
+        ..color = slice.color;
+      canvas.drawArc(rect, start, max(0, sweep - 0.04), false, paint);
+      start += sweep;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _DonutChartPainter oldDelegate) {
+    return oldDelegate.slices != slices || oldDelegate.trackColor != trackColor;
   }
 }
 
