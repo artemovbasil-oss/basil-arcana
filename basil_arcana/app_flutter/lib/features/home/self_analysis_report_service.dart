@@ -322,7 +322,9 @@ class SelfAnalysisReportService {
           pw.SizedBox(height: 18),
           _sectionBlock(
             theme: pdfTheme,
-            title: locale == 'ru' ? '1. Краткий вывод' : '1. Executive summary',
+            title: locale == 'ru'
+                ? '◆ 1. Краткий вывод'
+                : '◆ 1. Executive summary',
             body: [
               _p(
                 theme: pdfTheme,
@@ -337,8 +339,8 @@ class SelfAnalysisReportService {
           _sectionBlock(
             theme: pdfTheme,
             title: locale == 'ru'
-                ? '2. Баланс мастей и поведенческий профиль'
-                : '2. Suit balance and behavioral profile',
+                ? '◉ 2. Баланс мастей и поведенческий профиль'
+                : '◉ 2. Suit balance and behavioral profile',
             body: [
               ...suitOrder.map((key) {
                 final percent = dataset.suitPercents[key] ?? 0;
@@ -366,6 +368,12 @@ class SelfAnalysisReportService {
                 theme: pdfTheme,
                 text: _vectorInterpretation(dataset, locale),
               ),
+              pw.SizedBox(height: 8),
+              _chartsBlock(
+                theme: pdfTheme,
+                dataset: dataset,
+                locale: locale,
+              ),
             ],
           ),
           pw.NewPage(),
@@ -382,8 +390,8 @@ class SelfAnalysisReportService {
           _sectionBlock(
             theme: pdfTheme,
             title: locale == 'ru'
-                ? '3. Индекс значимости периода'
-                : '3. Period significance index',
+                ? '◉ 3. Индекс значимости периода'
+                : '◉ 3. Period significance index',
             body: [
               _p(
                 theme: pdfTheme,
@@ -403,8 +411,8 @@ class SelfAnalysisReportService {
           _sectionBlock(
             theme: pdfTheme,
             title: locale == 'ru'
-                ? '4. Зоны перегруза и компенсации'
-                : '4. Overload and compensation zones',
+                ? '◉ 4. Зоны перегруза и компенсации'
+                : '◉ 4. Overload and compensation zones',
             body: [
               if (imbalanceLines.isEmpty)
                 _p(
@@ -437,8 +445,9 @@ class SelfAnalysisReportService {
           pw.SizedBox(height: 12),
           _sectionBlock(
             theme: pdfTheme,
-            title:
-                locale == 'ru' ? '5. Топ повторов' : '5. Top recurring cards',
+            title: locale == 'ru'
+                ? '◉ 5. Топ повторов'
+                : '◉ 5. Top recurring cards',
             body: [
               if (sortedRecurring.isEmpty)
                 _p(
@@ -502,8 +511,8 @@ class SelfAnalysisReportService {
           _sectionBlock(
             theme: pdfTheme,
             title: locale == 'ru'
-                ? '6. Вопросы для самоанализа'
-                : '6. Reflection questions',
+                ? '◉ 6. Вопросы для самоанализа'
+                : '◉ 6. Reflection questions',
             body: [
               _bullet(
                 theme: pdfTheme,
@@ -539,8 +548,8 @@ class SelfAnalysisReportService {
           _sectionBlock(
             theme: pdfTheme,
             title: locale == 'ru'
-                ? '7. Что усилить уже сейчас'
-                : '7. What to reinforce now',
+                ? '◉ 7. Что усилить уже сейчас'
+                : '◉ 7. What to reinforce now',
             body: strengths
                 .map((e) => _bullet(theme: pdfTheme, text: e))
                 .toList(),
@@ -549,8 +558,8 @@ class SelfAnalysisReportService {
           _sectionBlock(
             theme: pdfTheme,
             title: locale == 'ru'
-                ? '8. Что снизить, чтобы не выгорать'
-                : '8. What to reduce to avoid burnout',
+                ? '◉ 8. Что снизить, чтобы не выгорать'
+                : '◉ 8. What to reduce to avoid burnout',
             body: frictions
                 .map((e) => _bullet(theme: pdfTheme, text: e))
                 .toList(),
@@ -558,8 +567,9 @@ class SelfAnalysisReportService {
           pw.SizedBox(height: 10),
           _sectionBlock(
             theme: pdfTheme,
-            title:
-                locale == 'ru' ? '9. Роадмап на 30 дней' : '9. 30-day roadmap',
+            title: locale == 'ru'
+                ? '◉ 9. Роадмап на 30 дней'
+                : '◉ 9. 30-day roadmap',
             body: [
               _roadmapTable(theme: pdfTheme, locale: locale),
               pw.SizedBox(height: 8),
@@ -570,17 +580,97 @@ class SelfAnalysisReportService {
           _reportHeader(
             theme: pdfTheme,
             title: locale == 'ru'
-                ? 'Итог и рабочий шаблон'
-                : 'Final synthesis and template',
-            subtitle:
-                locale == 'ru' ? 'Закрепление результатов' : 'Consolidation',
+                ? 'Итог и чеклист действий'
+                : 'Final conclusions and action checklist',
+            subtitle: locale == 'ru'
+                ? 'Короткий план внедрения на ближайшие 7 дней'
+                : 'Short implementation plan for the next 7 days',
+          ),
+          pw.SizedBox(height: 12),
+          _sectionBlock(
+            theme: pdfTheme,
+            title:
+                locale == 'ru' ? '◉ Вывод по периоду' : '◉ Period conclusion',
+            body: [
+              _p(
+                theme: pdfTheme,
+                text: summary,
+              ),
+              _p(
+                theme: pdfTheme,
+                text: locale == 'ru'
+                    ? 'Ключевая задача периода: перевести инсайты в управляемый ритм действий, без резких перегрузок.'
+                    : 'Key task of the period: convert insights into a manageable action rhythm without overload spikes.',
+              ),
+            ],
+          ),
+          pw.SizedBox(height: 10),
+          _sectionBlock(
+            theme: pdfTheme,
+            title: locale == 'ru'
+                ? '◉ Чеклист рекомендаций к действию'
+                : '◉ Action checklist',
+            body: [
+              _checkboxLine(
+                theme: pdfTheme,
+                text: locale == 'ru'
+                    ? 'Определить 2 главных приоритета недели и зафиксировать их в календаре.'
+                    : 'Define 2 top weekly priorities and schedule them in calendar.',
+              ),
+              _checkboxLine(
+                theme: pdfTheme,
+                text: locale == 'ru'
+                    ? 'Закрыть 1 зависшую задачу в первые 48 часов.'
+                    : 'Close 1 stalled task within the first 48 hours.',
+              ),
+              _checkboxLine(
+                theme: pdfTheme,
+                text: locale == 'ru'
+                    ? 'Делать 10-минутный вечерний review каждый день.'
+                    : 'Run a 10-minute evening review every day.',
+              ),
+              _checkboxLine(
+                theme: pdfTheme,
+                text: locale == 'ru'
+                    ? 'Снизить число параллельных задач минимум на 20%.'
+                    : 'Reduce parallel tasks by at least 20%.',
+              ),
+              _checkboxLine(
+                theme: pdfTheme,
+                text: locale == 'ru'
+                    ? 'Финализировать 1 решение, которое давно откладывалось.'
+                    : 'Finalize 1 long-delayed decision.',
+              ),
+            ],
+          ),
+          pw.SizedBox(height: 14),
+          _sectionBlock(
+            theme: pdfTheme,
+            title: locale == 'ru' ? '◉ Важно' : '◉ Important',
+            body: [
+              _p(
+                theme: pdfTheme,
+                text: locale == 'ru'
+                    ? 'Отчёт является инструментом саморефлексии и поддержки принятия решений. Он не заменяет медицинскую, психотерапевтическую или юридическую консультацию.'
+                    : 'This report is a self-reflection and decision-support tool. It does not replace medical, psychotherapeutic, or legal advice.',
+              ),
+            ],
+          ),
+          pw.NewPage(),
+          _reportHeader(
+            theme: pdfTheme,
+            title:
+                locale == 'ru' ? 'Блок саморефлексии' : 'Self-reflection block',
+            subtitle: locale == 'ru'
+                ? 'Рабочий шаблон weekly-review'
+                : 'Weekly-review working template',
           ),
           pw.SizedBox(height: 12),
           _sectionBlock(
             theme: pdfTheme,
             title: locale == 'ru'
-                ? '10. Короткий weekly-review'
-                : '10. Weekly review template',
+                ? '◉ Шаблон weekly-review'
+                : '◉ Weekly review template',
             body: [
               _bullet(
                 theme: pdfTheme,
@@ -605,19 +695,6 @@ class SelfAnalysisReportService {
               ),
               _lineInput(theme: pdfTheme),
               _lineInput(theme: pdfTheme),
-            ],
-          ),
-          pw.SizedBox(height: 14),
-          _sectionBlock(
-            theme: pdfTheme,
-            title: locale == 'ru' ? 'Важно' : 'Important',
-            body: [
-              _p(
-                theme: pdfTheme,
-                text: locale == 'ru'
-                    ? 'Отчёт является инструментом саморефлексии и поддержки принятия решений. Он не заменяет медицинскую, психотерапевтическую или юридическую консультацию.'
-                    : 'This report is a self-reflection and decision-support tool. It does not replace medical, psychotherapeutic, or legal advice.',
-              ),
             ],
           ),
         ],
@@ -653,7 +730,7 @@ class SelfAnalysisReportService {
       padding: const pw.EdgeInsets.fromLTRB(16, 14, 16, 14),
       decoration: pw.BoxDecoration(
         borderRadius: pw.BorderRadius.circular(12),
-        color: PdfColor.fromHex('EEF1F7'),
+        color: PdfColor.fromHex('DCE4F5'),
       ),
       child: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -662,8 +739,8 @@ class SelfAnalysisReportService {
             title,
             style: pw.TextStyle(
               font: theme.bold,
-              fontSize: 20,
-              color: PdfColor.fromHex('2B3140'),
+              fontSize: 22,
+              color: PdfColor.fromHex('1F2433'),
             ),
           ),
           pw.SizedBox(height: 4),
@@ -671,8 +748,8 @@ class SelfAnalysisReportService {
             subtitle,
             style: pw.TextStyle(
               font: theme.regular,
-              fontSize: 11,
-              color: PdfColor.fromHex('5C6478'),
+              fontSize: 11.2,
+              color: PdfColor.fromHex('30384E'),
             ),
           ),
         ],
@@ -728,8 +805,8 @@ class SelfAnalysisReportService {
       padding: const pw.EdgeInsets.fromLTRB(12, 10, 12, 10),
       decoration: pw.BoxDecoration(
         borderRadius: pw.BorderRadius.circular(10),
-        color: PdfColor.fromHex('F8F9FC'),
-        border: pw.Border.all(color: PdfColor.fromHex('E1E6EF'), width: 0.8),
+        color: PdfColor.fromHex('F2F5FB'),
+        border: pw.Border.all(color: PdfColor.fromHex('C7D1E3'), width: 0.9),
       ),
       child: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -738,8 +815,8 @@ class SelfAnalysisReportService {
             title,
             style: pw.TextStyle(
               font: theme.bold,
-              fontSize: 13,
-              color: PdfColor.fromHex('394158'),
+              fontSize: 14,
+              color: PdfColor.fromHex('1F2B44'),
             ),
           ),
           pw.SizedBox(height: 7),
@@ -777,7 +854,7 @@ class SelfAnalysisReportService {
         pw.Padding(
           padding: const pw.EdgeInsets.only(top: 2),
           child: pw.Text(
-            '- ',
+            '✓ ',
             style: pw.TextStyle(
               font: theme.bold,
               fontSize: 10.8,
@@ -814,20 +891,163 @@ class SelfAnalysisReportService {
     required int percent,
     required PdfColor color,
   }) {
-    final clamped = percent.clamp(0, 100);
-    return pw.Container(
-      height: 8,
-      decoration: pw.BoxDecoration(
-        borderRadius: pw.BorderRadius.circular(99),
-        color: PdfColor.fromHex('E5E9F1'),
+    final clamped = percent.clamp(0, 100) / 100;
+    return pw.ClipRRect(
+      horizontalRadius: 99,
+      verticalRadius: 99,
+      child: pw.LinearProgressIndicator(
+        value: clamped,
+        minHeight: 8,
+        valueColor: color,
+        backgroundColor: PdfColor.fromHex('E2E7F1'),
       ),
+    );
+  }
+
+  static pw.Widget _chartsBlock({
+    required _PdfTheme theme,
+    required SelfAnalysisDataset dataset,
+    required String locale,
+  }) {
+    final pieData = <MapEntry<String, double>>[
+      MapEntry('action', (dataset.suitPercents['action'] ?? 0).toDouble()),
+      MapEntry('emotion', (dataset.suitPercents['emotion'] ?? 0).toDouble()),
+      MapEntry('mind', (dataset.suitPercents['mind'] ?? 0).toDouble()),
+      MapEntry('ground', (dataset.suitPercents['ground'] ?? 0).toDouble()),
+    ].where((e) => e.value > 0).toList();
+    return pw.Container(
+      padding: const pw.EdgeInsets.all(10),
+      decoration: pw.BoxDecoration(
+        borderRadius: pw.BorderRadius.circular(8),
+        color: PdfColor.fromHex('FFFFFF'),
+        border: pw.Border.all(color: PdfColor.fromHex('D5DDEA'), width: 0.8),
+      ),
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Text(
+            locale == 'ru' ? 'Мини-диаграммы профиля' : 'Profile mini-charts',
+            style: pw.TextStyle(
+              font: theme.bold,
+              fontSize: 11.5,
+              color: PdfColor.fromHex('24304A'),
+            ),
+          ),
+          pw.SizedBox(height: 8),
+          pw.Row(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Expanded(
+                child: pw.SizedBox(
+                  height: 120,
+                  child: pw.Chart(
+                    grid: pw.PieGrid(),
+                    datasets: [
+                      for (final item in pieData)
+                        pw.PieDataSet(
+                          legend:
+                              '${_dominantName(item.key, locale)} ${item.value.round()}%',
+                          value: item.value <= 0 ? 1 : item.value,
+                          color: _suitColor(item.key),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+              pw.SizedBox(width: 12),
+              pw.Expanded(
+                child: pw.SizedBox(
+                  height: 120,
+                  child: pw.Chart(
+                    grid: pw.CartesianGrid(
+                      xAxis: pw.FixedAxis<int>(<int>[1, 2, 3, 4]),
+                      yAxis: pw.FixedAxis<int>(<int>[0, 25, 50, 75, 100]),
+                    ),
+                    datasets: [
+                      pw.BarDataSet(
+                        axis: pw.Axis.vertical,
+                        width: 8,
+                        color: PdfColor.fromHex('7E8FB7'),
+                        data: [
+                          pw.PointChartValue(
+                            1,
+                            (dataset.suitPercents['action'] ?? 0).toDouble(),
+                          ),
+                          pw.PointChartValue(
+                            2,
+                            (dataset.suitPercents['emotion'] ?? 0).toDouble(),
+                          ),
+                          pw.PointChartValue(
+                            3,
+                            (dataset.suitPercents['mind'] ?? 0).toDouble(),
+                          ),
+                          pw.PointChartValue(
+                            4,
+                            (dataset.suitPercents['ground'] ?? 0).toDouble(),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          pw.SizedBox(height: 6),
+          ...pieData.map((item) {
+            return pw.Padding(
+              padding: const pw.EdgeInsets.only(bottom: 2),
+              child: pw.Row(
+                children: [
+                  pw.Container(
+                    width: 7,
+                    height: 7,
+                    decoration: pw.BoxDecoration(
+                      color: _suitColor(item.key),
+                      shape: pw.BoxShape.circle,
+                    ),
+                  ),
+                  pw.SizedBox(width: 5),
+                  pw.Text(
+                    '${_dominantName(item.key, locale)}: ${item.value.round()}%',
+                    style: pw.TextStyle(font: theme.regular, fontSize: 9.5),
+                  ),
+                ],
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  static pw.Widget _checkboxLine({
+    required _PdfTheme theme,
+    required String text,
+  }) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.only(bottom: 6),
       child: pw.Row(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
           pw.Container(
-            width: clamped * 2.4,
+            width: 10,
+            height: 10,
+            margin: const pw.EdgeInsets.only(top: 2),
             decoration: pw.BoxDecoration(
-              borderRadius: pw.BorderRadius.circular(99),
-              color: color,
+              border:
+                  pw.Border.all(color: PdfColor.fromHex('7181A6'), width: 1),
+            ),
+          ),
+          pw.SizedBox(width: 6),
+          pw.Expanded(
+            child: pw.Text(
+              text,
+              style: pw.TextStyle(
+                font: theme.regular,
+                fontSize: 10.4,
+                lineSpacing: 1.25,
+              ),
             ),
           ),
         ],
@@ -998,7 +1218,7 @@ class SelfAnalysisReportService {
         'Stay with steady routines and gentle reflection this week.';
   }
 
-  String _dominantName(String suit, String locale) {
+  static String _dominantName(String suit, String locale) {
     const ru = {
       'action': 'действие',
       'emotion': 'эмоциональную переработку',
