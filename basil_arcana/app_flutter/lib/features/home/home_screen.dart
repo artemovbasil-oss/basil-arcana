@@ -774,6 +774,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                             assetIconPath: 'assets/icon/home_streak.svg',
                             pulseBadge: !_loadingStreak &&
                                 _streakStats.currentStreakDays > 1,
+                            flickerIcon: !_loadingStreak &&
+                                _streakStats.currentStreakDays > 1,
                             title: _loadingStreak
                                 ? streakCopy.tileLoadingTitle
                                 : streakCopy
@@ -1855,6 +1857,7 @@ class _SecondaryFeatureCard extends StatelessWidget {
     this.icon,
     this.assetIconPath,
     this.pulseBadge = false,
+    this.flickerIcon = false,
     required this.title,
     required this.subtitle,
     required this.onTap,
@@ -1863,6 +1866,7 @@ class _SecondaryFeatureCard extends StatelessWidget {
   final IconData? icon;
   final String? assetIconPath;
   final bool pulseBadge;
+  final bool flickerIcon;
   final String title;
   final String subtitle;
   final VoidCallback? onTap;
@@ -1887,6 +1891,7 @@ class _SecondaryFeatureCard extends StatelessWidget {
             _IconCircleBadge(
               size: 30,
               pulse: pulseBadge,
+              flickerChild: flickerIcon,
               child: Transform.translate(
                 offset: const Offset(0, 0),
                 child: assetIconPath != null
@@ -2609,11 +2614,13 @@ class _IconCircleBadge extends StatefulWidget {
     required this.size,
     required this.child,
     this.pulse = false,
+    this.flickerChild = false,
   });
 
   final double size;
   final Widget child;
   final bool pulse;
+  final bool flickerChild;
 
   @override
   State<_IconCircleBadge> createState() => _IconCircleBadgeState();
@@ -2626,7 +2633,15 @@ class _IconCircleBadgeState extends State<_IconCircleBadge>
     duration: const Duration(milliseconds: 1800),
   )..repeat(reverse: true);
   late final Animation<double> _pulse =
-      Tween<double>(begin: 0.06, end: 0.22).animate(
+      Tween<double>(begin: 0.14, end: 0.42).animate(
+    CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+  );
+  late final Animation<double> _flickerOpacity =
+      Tween<double>(begin: 0.82, end: 1.0).animate(
+    CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+  );
+  late final Animation<double> _flickerScale =
+      Tween<double>(begin: 0.96, end: 1.07).animate(
     CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
   );
 
@@ -2663,7 +2678,15 @@ class _IconCircleBadgeState extends State<_IconCircleBadge>
                   ]
                 : null,
           ),
-          child: child,
+          child: widget.flickerChild
+              ? Opacity(
+                  opacity: _flickerOpacity.value,
+                  child: Transform.scale(
+                    scale: _flickerScale.value,
+                    child: child,
+                  ),
+                )
+              : child,
         );
       },
       child: widget.child,
