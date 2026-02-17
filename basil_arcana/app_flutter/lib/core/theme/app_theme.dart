@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 
 enum AppThemeFlavor {
-  defaultTheme,
+  rider,
+  lenormand,
   crowley,
 }
 
-ThemeData buildAppTheme({AppThemeFlavor flavor = AppThemeFlavor.defaultTheme}) {
+ThemeData buildAppTheme({AppThemeFlavor flavor = AppThemeFlavor.rider}) {
   final palette = _paletteForFlavor(flavor);
 
   final colorScheme = ColorScheme.fromSeed(
@@ -13,8 +14,10 @@ ThemeData buildAppTheme({AppThemeFlavor flavor = AppThemeFlavor.defaultTheme}) {
     brightness: Brightness.dark,
   ).copyWith(
     primary: palette.primary,
+    secondary: palette.accent,
     onPrimary: Colors.white,
     onPrimaryContainer: Colors.white,
+    onSecondary: Colors.black,
     background: palette.background,
     surface: palette.surface,
     surfaceVariant: palette.surfaceVariant,
@@ -36,7 +39,7 @@ ThemeData buildAppTheme({AppThemeFlavor flavor = AppThemeFlavor.defaultTheme}) {
       color: palette.surface,
       surfaceTintColor: Colors.transparent,
       elevation: 3,
-      shadowColor: palette.primary.withOpacity(0.2),
+      shadowColor: palette.accent.withOpacity(0.18),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
     ),
     inputDecorationTheme: InputDecorationTheme(
@@ -55,7 +58,7 @@ ThemeData buildAppTheme({AppThemeFlavor flavor = AppThemeFlavor.defaultTheme}) {
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(20),
         borderSide:
-            BorderSide(color: palette.primary.withOpacity(0.9), width: 1.5),
+            BorderSide(color: palette.accent.withOpacity(0.85), width: 1.5),
       ),
     ),
     chipTheme: ChipThemeData(
@@ -72,7 +75,7 @@ ThemeData buildAppTheme({AppThemeFlavor flavor = AppThemeFlavor.defaultTheme}) {
         backgroundColor: palette.primary,
         foregroundColor: Colors.white,
         elevation: 8,
-        shadowColor: palette.primary.withOpacity(0.4),
+        shadowColor: palette.accent.withOpacity(0.35),
         shape: const StadiumBorder(),
         textStyle: const TextStyle(fontWeight: FontWeight.w600),
       ),
@@ -80,15 +83,15 @@ ThemeData buildAppTheme({AppThemeFlavor flavor = AppThemeFlavor.defaultTheme}) {
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         minimumSize: const Size.fromHeight(54),
-        foregroundColor: palette.primary,
-        side: BorderSide(color: palette.primary.withOpacity(0.7)),
+        foregroundColor: palette.accent,
+        side: BorderSide(color: palette.accent.withOpacity(0.7)),
         shape: const StadiumBorder(),
         textStyle: const TextStyle(fontWeight: FontWeight.w600),
       ),
     ),
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
-        foregroundColor: palette.primary,
+        foregroundColor: palette.accent,
         minimumSize: const Size.fromHeight(54),
         shape: const StadiumBorder(),
       ),
@@ -113,6 +116,7 @@ ThemeData buildAppTheme({AppThemeFlavor flavor = AppThemeFlavor.defaultTheme}) {
 class _ThemePalette {
   const _ThemePalette({
     required this.primary,
+    required this.accent,
     required this.background,
     required this.surface,
     required this.surfaceVariant,
@@ -120,6 +124,7 @@ class _ThemePalette {
   });
 
   final Color primary;
+  final Color accent;
   final Color background;
   final Color surface;
   final Color surfaceVariant;
@@ -131,18 +136,29 @@ _ThemePalette _paletteForFlavor(AppThemeFlavor flavor) {
     case AppThemeFlavor.crowley:
       return const _ThemePalette(
         primary: Color(0xFF9A8D77),
+        accent: Color(0xFFD2B98A),
         background: Color(0xFF181818),
         surface: Color(0xFF212121),
         surfaceVariant: Color(0xFF2A2A2A),
         outlineVariant: Color(0xFF484848),
       );
-    case AppThemeFlavor.defaultTheme:
+    case AppThemeFlavor.lenormand:
       return const _ThemePalette(
         primary: Color(0xFF9B5CFF),
+        accent: Color(0xFFB888FF),
         background: Color(0xFF121212),
         surface: Color(0xFF1C1B1F),
         surfaceVariant: Color(0xFF27222F),
         outlineVariant: Color(0xFF3A3247),
+      );
+    case AppThemeFlavor.rider:
+      return const _ThemePalette(
+        primary: Color(0xFF8D7AD9),
+        accent: Color(0xFFD7B873),
+        background: Color(0xFF15131C),
+        surface: Color(0xFF211D2A),
+        surfaceVariant: Color(0xFF2A2535),
+        outlineVariant: Color(0xFF4A425B),
       );
   }
 }

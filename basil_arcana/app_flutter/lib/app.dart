@@ -19,9 +19,11 @@ class BasilArcanaApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final locale = ref.watch(localeProvider);
     final selectedDeck = ref.watch(deckProvider);
-    final appThemeFlavor = selectedDeck == DeckType.crowley
-        ? AppThemeFlavor.crowley
-        : AppThemeFlavor.defaultTheme;
+    final appThemeFlavor = switch (selectedDeck) {
+      DeckType.crowley => AppThemeFlavor.crowley,
+      DeckType.lenormand => AppThemeFlavor.lenormand,
+      _ => AppThemeFlavor.rider,
+    };
     return MaterialApp(
       onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
       theme: buildAppTheme(flavor: appThemeFlavor),

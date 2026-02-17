@@ -14,7 +14,7 @@ class SplashScreen extends StatefulWidget {
 }
 
 const String _deckSplashPosterUrl =
-    'https://basilarcana-assets.b-cdn.net/splash/splash.webp?v=20260216';
+    'https://basilarcana-assets.b-cdn.net/splash/splash-2.webp';
 
 class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
