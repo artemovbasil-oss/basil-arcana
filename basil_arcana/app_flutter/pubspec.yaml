@@ -37,6 +37,7 @@ flutter:
     - assets/deck/
     - assets/data/
     - assets/icon/
+    - assets/fonts/
 
 flutter_launcher_icons:
   android: true
