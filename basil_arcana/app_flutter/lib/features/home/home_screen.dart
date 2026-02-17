@@ -6,14 +6,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:intl/intl.dart';
+import 'package:printing/printing.dart';
 
 import '../../core/config/app_version.dart';
 import '../../core/navigation/app_route_config.dart';
+import '../../core/telegram/telegram_bridge.dart';
+import '../../core/telegram/telegram_user_profile.dart';
+import '../../core/telemetry/web_error_reporter.dart';
 import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/app_top_bar.dart';
 import '../../core/widgets/sofia_promo_card.dart';
 import '../../data/models/card_model.dart';
 import '../../data/models/deck_model.dart';
+import '../../data/repositories/energy_topup_repository.dart';
 import '../../data/repositories/home_insights_repository.dart';
 import '../../data/repositories/sofia_consent_repository.dart';
 import '../../state/providers.dart';
@@ -22,6 +28,8 @@ import '../cards/cards_screen.dart';
 import '../astro/compatibility_flow_screen.dart';
 import '../astro/natal_chart_flow_screen.dart';
 import '../history/query_history_screen.dart';
+import 'self_analysis_report_service.dart';
+import 'widgets/self_analysis_report_cta_section.dart';
 import '../settings/settings_screen.dart';
 import '../spread/spread_screen.dart';
 
@@ -52,6 +60,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   HomeStreakStats _streakStats = HomeStreakStats.empty;
   String? _dailyCardInterpretation;
   String? _dailyCardInterpretationCardId;
+  bool _reportFlowInFlight = false;
+  bool _loadingReportEntitlements = false;
+  bool _hasYearlyReportAccess = false;
   bool _didRequestOnboarding = false;
   late final AnimationController _fieldGlowController;
   late final AnimationController _titleShimmerController;
@@ -77,6 +88,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       _showOnboardingIfNeeded();
     });
     _loadStreakStats();
+    _loadReportEntitlements();
     _loadQueryHistoryAvailability();
     _readingFlowSubscription = ref.listenManual<ReadingFlowState>(
       readingFlowControllerProvider,
@@ -138,6 +150,332 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         _loadingStreak = false;
       });
     }
+  }
+
+  Future<void> _loadReportEntitlements() async {
+    if (_loadingReportEntitlements) {
+      return;
+    }
+    setState(() {
+      _loadingReportEntitlements = true;
+    });
+    try {
+      final dashboard =
+          await ref.read(userDashboardRepositoryProvider).fetchDashboard();
+      final hasYearly = dashboard.services.any((service) {
+        if (service.type != 'year_unlimited' && service.type != 'unlimited') {
+          return false;
+        }
+        if (service.status.isNotEmpty &&
+            service.status.toLowerCase() != 'active') {
+          return false;
+        }
+        final expiresAt = service.expiresAt;
+        return expiresAt == null || expiresAt.isAfter(DateTime.now());
+      });
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _hasYearlyReportAccess = hasYearly;
+        _loadingReportEntitlements = false;
+      });
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _loadingReportEntitlements = false;
+      });
+    }
+  }
+
+  bool _isReportFreeByEntitlements() {
+    final energy = ref.read(energyProvider);
+    final ent = UserEntitlements(
+      promoCodes: energy.promoCodeActive ? {'LUCY100'} : const {},
+      hasActiveYearlySubscription: _hasYearlyReportAccess,
+    );
+    return isReportFree(ent);
+  }
+
+  ({DateTime from, DateTime to}) _reportWindow() {
+    final to = DateTime.now();
+    final from = to.subtract(const Duration(days: 30));
+    return (from: from, to: to);
+  }
+
+  Future<void> _onGenerateReportTap({
+    required _HomeStreakCopy copy,
+    required DeckType selectedDeck,
+  }) async {
+    if (_reportFlowInFlight) {
+      return;
+    }
+    setState(() {
+      _reportFlowInFlight = true;
+    });
+    try {
+      final l10n = AppLocalizations.of(context);
+      final window = _reportWindow();
+      final readings = ref.read(readingsRepositoryProvider).getReadings();
+      final reportService = ref.read(selfAnalysisReportServiceProvider);
+      final samples = reportService.extractRecentSamples(
+        readings: readings,
+        fromDate: window.from,
+        toDate: window.to,
+        selectedDeck: selectedDeck,
+      );
+      if (samples.length < SelfAnalysisReportService.minCardsThreshold) {
+        await _showInsufficientDataDialog(copy);
+        return;
+      }
+
+      final isFree = _isReportFreeByEntitlements();
+      if (!isFree) {
+        final confirmed = await _showReportConfirmationDialog(copy);
+        if (!confirmed || !mounted) {
+          return;
+        }
+        final paid = await _purchaseSelfAnalysisReportAccess(l10n: l10n);
+        if (!paid || !mounted) {
+          return;
+        }
+      }
+
+      final userId =
+          readTelegramUserProfile()?.userId.toString() ?? 'telegram_unknown';
+      final locale = Localizations.localeOf(context).languageCode;
+      final report = await reportService.generateSelfAnalysisReport(
+        userId: userId,
+        fromDate: window.from,
+        toDate: window.to,
+        readings: readings,
+        selectedDeck: selectedDeck,
+        locale: locale,
+      );
+      if (!mounted) {
+        return;
+      }
+      await _showReportReadyDialog(copy: copy, report: report);
+    } catch (error) {
+      WebErrorReporter.instance
+          .report('SelfAnalysisReportFlowError: ${error.toString()}');
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(copy.reportGenerateFailed)),
+      );
+    } finally {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _reportFlowInFlight = false;
+      });
+    }
+  }
+
+  Future<void> _showInsufficientDataDialog(_HomeStreakCopy copy) async {
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: Text(copy.reportInsufficientTitle),
+          content: Text(copy.reportInsufficientBody),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: Text(copy.closeLabel),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<bool> _showReportConfirmationDialog(_HomeStreakCopy copy) async {
+    final accepted = await showModalBottomSheet<bool>(
+      context: context,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetContext) {
+        return SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(18, 16, 18, 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  copy.reportConfirmTitle,
+                  style: Theme.of(sheetContext).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  copy.reportConfirmBody,
+                  style: Theme.of(sheetContext).textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 14),
+                Row(
+                  children: [
+                    Expanded(
+                      child: AppPrimaryButton(
+                        label: copy.reportConfirmContinue,
+                        onPressed: () => Navigator.of(sheetContext).pop(true),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: AppGhostButton(
+                        label: copy.reportConfirmCancel,
+                        onPressed: () => Navigator.of(sheetContext).pop(false),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+    return accepted == true;
+  }
+
+  Future<bool> _purchaseSelfAnalysisReportAccess({
+    required AppLocalizations l10n,
+  }) async {
+    if (!TelegramBridge.isAvailable) {
+      if (!mounted) {
+        return false;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.energyTopUpOnlyInTelegram)),
+      );
+      return false;
+    }
+    try {
+      final topUpRepo = ref.read(energyTopUpRepositoryProvider);
+      final invoice =
+          await topUpRepo.createInvoice(EnergyPackId.selfAnalysisReport);
+      final status = await TelegramBridge.openInvoice(invoice.invoiceLink);
+      try {
+        await topUpRepo.confirmInvoiceResult(
+          payload: invoice.payload,
+          status: status,
+        );
+      } catch (_) {}
+      if (!mounted) {
+        return false;
+      }
+      switch (status) {
+        case 'paid':
+          return true;
+        case 'cancelled':
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.energyTopUpPaymentCancelled)),
+          );
+          return false;
+        case 'pending':
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.energyTopUpPaymentPending)),
+          );
+          return false;
+        case 'failed':
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.energyTopUpPaymentFailed)),
+          );
+          return false;
+        default:
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.energyTopUpServiceUnavailable)),
+          );
+          return false;
+      }
+    } on EnergyTopUpRepositoryException {
+      if (!mounted) {
+        return false;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.energyTopUpServiceUnavailable)),
+      );
+      return false;
+    } catch (_) {
+      if (!mounted) {
+        return false;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.energyTopUpServiceUnavailable)),
+      );
+      return false;
+    }
+  }
+
+  Future<void> _showReportReadyDialog({
+    required _HomeStreakCopy copy,
+    required SelfAnalysisReportResult report,
+  }) async {
+    final fileDate = DateFormat('yyyyMMdd').format(DateTime.now());
+    final fileName = 'self_analysis_report_$fileDate.pdf';
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+      ),
+      builder: (sheetContext) {
+        return SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(18, 16, 18, 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  copy.reportReadyTitle,
+                  style: Theme.of(sheetContext).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  report.summarySnippet,
+                  style: Theme.of(sheetContext).textTheme.bodySmall,
+                ),
+                const SizedBox(height: 14),
+                AppPrimaryButton(
+                  label: copy.reportOpenPdf,
+                  onPressed: () async {
+                    await Printing.layoutPdf(
+                      onLayout: (_) async => report.pdfBytes,
+                      name: fileName,
+                    );
+                  },
+                ),
+                const SizedBox(height: 8),
+                AppGhostButton(
+                  label: copy.reportSharePdf,
+                  onPressed: () async {
+                    await Printing.sharePdf(
+                      bytes: report.pdfBytes,
+                      filename: fileName,
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   _SofiaConsentState _readSofiaConsentState() {
@@ -1425,6 +1763,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                           ),
                     ),
                   const SizedBox(height: 14),
+                  SelfAnalysisReportCtaSection(
+                    title: copy.reportSectionTitle,
+                    body: copy.reportSectionBody,
+                    paidLabel: copy.reportPaidCta,
+                    freeLabel: copy.reportFreeCta,
+                    helper: copy.reportHelper,
+                    isFree: _isReportFreeByEntitlements(),
+                    isLoading:
+                        _reportFlowInFlight || _loadingReportEntitlements,
+                    isEnabled: !_loadingStreak,
+                    onPressed: () => _onGenerateReportTap(
+                      copy: copy,
+                      selectedDeck: selectedDeck,
+                    ),
+                  ),
+                  const SizedBox(height: 14),
                   Expanded(
                     child: SingleChildScrollView(
                       child: Column(
@@ -2304,6 +2658,21 @@ class _HomeStreakCopy {
     required this.dailyCardSecondaryCta,
     required this.dailyCardQuestionPrefix,
     required this.streakLoadingSubtitle,
+    required this.reportSectionTitle,
+    required this.reportSectionBody,
+    required this.reportPaidCta,
+    required this.reportFreeCta,
+    required this.reportHelper,
+    required this.reportInsufficientTitle,
+    required this.reportInsufficientBody,
+    required this.reportConfirmTitle,
+    required this.reportConfirmBody,
+    required this.reportConfirmContinue,
+    required this.reportConfirmCancel,
+    required this.reportReadyTitle,
+    required this.reportOpenPdf,
+    required this.reportSharePdf,
+    required this.reportGenerateFailed,
     required this.lastActivePrefix,
     required this.closeLabel,
     required this.dayUnit,
@@ -2328,6 +2697,21 @@ class _HomeStreakCopy {
   final String dailyCardSecondaryCta;
   final String dailyCardQuestionPrefix;
   final String streakLoadingSubtitle;
+  final String reportSectionTitle;
+  final String reportSectionBody;
+  final String reportPaidCta;
+  final String reportFreeCta;
+  final String reportHelper;
+  final String reportInsufficientTitle;
+  final String reportInsufficientBody;
+  final String reportConfirmTitle;
+  final String reportConfirmBody;
+  final String reportConfirmContinue;
+  final String reportConfirmCancel;
+  final String reportReadyTitle;
+  final String reportOpenPdf;
+  final String reportSharePdf;
+  final String reportGenerateFailed;
   final String lastActivePrefix;
   final String closeLabel;
   final String Function(int) dayUnit;
@@ -2376,6 +2760,25 @@ class _HomeStreakCopy {
         dailyCardQuestionPrefix:
             'Какой следующий шаг мне сделать сегодня, учитывая карту',
         streakLoadingSubtitle: 'Подтягиваем актуальный streak...',
+        reportSectionTitle: 'Личный отчет',
+        reportSectionBody:
+            'Коуч-отчет по твоим раскладам за 30 дней: паттерны, баланс, мягкие рекомендации.',
+        reportPaidCta: 'Получить отчет (PDF) — 200 ⭐',
+        reportFreeCta: 'Получить отчет (PDF) — бесплатно',
+        reportHelper: 'На основе истории раскладов за 30 дней',
+        reportInsufficientTitle: 'Недостаточно данных',
+        reportInsufficientBody:
+            'Нужно минимум 10 карт за последние 30 дней. Сделай ещё пару раскладов — и вернись сюда.',
+        reportConfirmTitle: 'Сформировать отчет?',
+        reportConfirmBody:
+            'Мы соберём PDF-отчёт по твоим раскладам за 30 дней. Стоимость — 200 ⭐.',
+        reportConfirmContinue: 'Продолжить',
+        reportConfirmCancel: 'Отмена',
+        reportReadyTitle: 'Отчет готов',
+        reportOpenPdf: 'Открыть PDF',
+        reportSharePdf: 'Поделиться',
+        reportGenerateFailed:
+            'Не получилось сформировать PDF после оплаты. Напиши в поддержку, мы поможем.',
         lastActivePrefix: 'Последняя активность',
         closeLabel: 'Закрыть',
         dayUnit: _ruDayUnit,
@@ -2403,6 +2806,25 @@ class _HomeStreakCopy {
         dailyCardQuestionPrefix:
             'Осы картаға сүйеніп, бүгін мен қандай келесі қадам жасауым керек',
         streakLoadingSubtitle: 'Өзекті streak жүктелуде...',
+        reportSectionTitle: 'Жеке есеп',
+        reportSectionBody:
+            'Соңғы 30 күндегі раскладтарың бойынша коуч-есеп: паттерндер, баланс, жұмсақ ұсыныстар.',
+        reportPaidCta: 'Есепті алу (PDF) — 200 ⭐',
+        reportFreeCta: 'Есепті алу (PDF) — тегін',
+        reportHelper: 'Соңғы 30 күндегі расклад тарихы негізінде',
+        reportInsufficientTitle: 'Дерек жеткіліксіз',
+        reportInsufficientBody:
+            'Соңғы 30 күнде кемінде 10 карта қажет. Тағы бірнеше расклад жасап, қайта оралыңыз.',
+        reportConfirmTitle: 'Есепті жасау керек пе?',
+        reportConfirmBody:
+            'Соңғы 30 күндегі раскладтарыңыз бойынша PDF-есеп жасаймыз. Бағасы — 200 ⭐.',
+        reportConfirmContinue: 'Жалғастыру',
+        reportConfirmCancel: 'Бас тарту',
+        reportReadyTitle: 'Есеп дайын',
+        reportOpenPdf: 'PDF ашу',
+        reportSharePdf: 'Бөлісу',
+        reportGenerateFailed:
+            'Төлемнен кейін PDF құрастыру мүмкін болмады. Қолдауға жазыңыз, көмектесеміз.',
         lastActivePrefix: 'Соңғы белсенділік',
         closeLabel: 'Жабу',
         dayUnit: _kkDayUnit,
@@ -2429,6 +2851,25 @@ class _HomeStreakCopy {
       dailyCardQuestionPrefix:
           'What next step should I take today based on the card',
       streakLoadingSubtitle: 'Loading latest streak...',
+      reportSectionTitle: 'Personal report',
+      reportSectionBody:
+          'Coach-style report based on your last 30 days of readings: patterns, balance, and gentle recommendations.',
+      reportPaidCta: 'Get report (PDF) — 200 ⭐',
+      reportFreeCta: 'Get report (PDF) — free',
+      reportHelper: 'Based on your reading history for the last 30 days',
+      reportInsufficientTitle: 'Not enough data',
+      reportInsufficientBody:
+          'You need at least 10 cards in the last 30 days. Do a few more readings and come back.',
+      reportConfirmTitle: 'Generate report?',
+      reportConfirmBody:
+          'We will build a PDF report from your last 30 days of readings. Price — 200 ⭐.',
+      reportConfirmContinue: 'Continue',
+      reportConfirmCancel: 'Cancel',
+      reportReadyTitle: 'Report is ready',
+      reportOpenPdf: 'Open PDF',
+      reportSharePdf: 'Share',
+      reportGenerateFailed:
+          'Could not generate PDF after payment. Please contact support and we will help.',
       lastActivePrefix: 'Last activity',
       closeLabel: 'Close',
       dayUnit: _enDayUnit,

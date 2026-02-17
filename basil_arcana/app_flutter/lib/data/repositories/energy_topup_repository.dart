@@ -11,7 +11,8 @@ enum EnergyPackId {
   weekUnlimited,
   monthUnlimited,
   yearUnlimited,
-  fiveCardsSingle
+  fiveCardsSingle,
+  selfAnalysisReport,
 }
 
 extension EnergyPackIdValue on EnergyPackId {
@@ -22,6 +23,7 @@ extension EnergyPackIdValue on EnergyPackId {
       EnergyPackId.monthUnlimited => 'month_unlimited',
       EnergyPackId.yearUnlimited => 'year_unlimited',
       EnergyPackId.fiveCardsSingle => 'five_cards_single',
+      EnergyPackId.selfAnalysisReport => 'self_analysis_report',
     };
   }
 }

@@ -37,6 +37,8 @@ String _packTitle(AppLocalizations l10n, EnergyPackId packId) {
       return normalized.isEmpty ? l10n.energyPackYearUnlimited : normalized;
     case EnergyPackId.fiveCardsSingle:
       return 'Premium five-card spread';
+    case EnergyPackId.selfAnalysisReport:
+      return 'Personal self-analysis report';
   }
 }
 

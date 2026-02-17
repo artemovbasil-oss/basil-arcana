@@ -16,6 +16,7 @@ import '../data/repositories/sofia_consent_repository.dart';
 import '../data/repositories/user_dashboard_repository.dart';
 import '../data/models/card_model.dart';
 import '../data/models/deck_model.dart';
+import '../features/home/self_analysis_report_service.dart';
 import 'energy_controller.dart';
 import 'reading_flow_controller.dart';
 
@@ -62,6 +63,12 @@ final homeInsightsRepositoryProvider = Provider<HomeInsightsRepository>((ref) {
 final userDashboardRepositoryProvider =
     Provider<UserDashboardRepository>((ref) {
   return UserDashboardRepository();
+});
+
+final selfAnalysisReportServiceProvider = Provider<SelfAnalysisReportService>((
+  ref,
+) {
+  return SelfAnalysisReportService();
 });
 
 final readingFlowControllerProvider =

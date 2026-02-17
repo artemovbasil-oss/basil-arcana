@@ -1,63 +1,56 @@
 Running `(cd /Users/basilart/.pub-cache/hosted/pub.dev/objective_c-9.3.0/; TMPDIR=/var/folders/0s/6j8dy8fj5pjgthjhcbnn23j40000gn/T/ PATH=/Users/basilart/.codex/tmp/arg0/codex-arg0hjh0LS:/opt/homebrew/Cellar/openjdk@17/17.0.18/libexec/openjdk.jdk/Contents/Home/bin:/opt/homebrew/Cellar/openjdk@17/17.0.18/libexec/openjdk.jdk/Contents/Home/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/pmk/env/global/bin:/Library/Apple/usr/bin:/usr/local/go/bin:/Applications/Codex.app/Contents/Resources HOME=/Users/basilart /opt/homebrew/share/flutter/bin/cache/dart-sdk/bin/dart --packages=/Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/package_config.json /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/objective_c/de310349bc9076cf1346d708eeebe4f4/hook.dill --config=/Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/objective_c/de310349bc9076cf1346d708eeebe4f4/input.json )`.
-INFO: 2026-02-16 09:37:46.630032: Running `/Library/Developer/CommandLineTools/usr/bin/clang --version`.
+INFO: 2026-02-17 10:12:58.135288: Running `/Library/Developer/CommandLineTools/usr/bin/clang --version`.
 
-INFO: 2026-02-16 09:37:46.775902: Running `/Library/Developer/CommandLineTools/usr/bin/clang --version`.
+INFO: 2026-02-17 10:12:58.369516: Running `/Library/Developer/CommandLineTools/usr/bin/clang --version`.
 
-INFO: 2026-02-16 09:37:46.790357: Running: /Library/Developer/CommandLineTools/usr/bin/clang -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -target arm64-apple-darwin -mmacos-version-min=13 -c /Users/basilart/.pub-cache/hosted/pub.dev/objective_c-9.3.0/src/include/dart_api_dl.c -fpic -I src -o /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/obj/src/include/dart_api_dl.c.o
+INFO: 2026-02-17 10:12:58.395735: Running: /Library/Developer/CommandLineTools/usr/bin/clang -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -target arm64-apple-darwin -mmacos-version-min=13 -c /Users/basilart/.pub-cache/hosted/pub.dev/objective_c-9.3.0/src/include/dart_api_dl.c -fpic -I src -o /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/obj/src/include/dart_api_dl.c.o
 
-INFO: 2026-02-16 09:37:46.790642: Running: /Library/Developer/CommandLineTools/usr/bin/clang -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -target arm64-apple-darwin -mmacos-version-min=13 -c /Users/basilart/.pub-cache/hosted/pub.dev/objective_c-9.3.0/src/objective_c.c -fpic -I src -o /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/obj/src/objective_c.c.o
+INFO: 2026-02-17 10:12:58.396112: Running: /Library/Developer/CommandLineTools/usr/bin/clang -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -target arm64-apple-darwin -mmacos-version-min=13 -c /Users/basilart/.pub-cache/hosted/pub.dev/objective_c-9.3.0/src/objective_c.c -fpic -I src -o /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/obj/src/objective_c.c.o
 
-INFO: 2026-02-16 09:37:46.790830: Running: /Library/Developer/CommandLineTools/usr/bin/clang -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -target arm64-apple-darwin -mmacos-version-min=13 -c /Users/basilart/.pub-cache/hosted/pub.dev/objective_c-9.3.0/test/util.c -fpic -I src -o /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/obj/test/util.c.o
+INFO: 2026-02-17 10:12:58.396450: Running: /Library/Developer/CommandLineTools/usr/bin/clang -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -target arm64-apple-darwin -mmacos-version-min=13 -x objective-c -fobjc-arc -c /Users/basilart/.pub-cache/hosted/pub.dev/objective_c-9.3.0/src/input_stream_adapter.m -fpic -I src -o /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/obj/src/input_stream_adapter.m.o
 
-INFO: 2026-02-16 09:37:46.790936: Running: /Library/Developer/CommandLineTools/usr/bin/clang -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -target arm64-apple-darwin -mmacos-version-min=13 -x objective-c -fobjc-arc -c /Users/basilart/.pub-cache/hosted/pub.dev/objective_c-9.3.0/src/input_stream_adapter.m -fpic -I src -o /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/obj/src/input_stream_adapter.m.o
+INFO: 2026-02-17 10:12:58.396728: Running: /Library/Developer/CommandLineTools/usr/bin/clang -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -target arm64-apple-darwin -mmacos-version-min=13 -x objective-c -fobjc-arc -c /Users/basilart/.pub-cache/hosted/pub.dev/objective_c-9.3.0/src/observer.m -fpic -I src -o /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/obj/src/observer.m.o
 
-INFO: 2026-02-16 09:37:46.791039: Running: /Library/Developer/CommandLineTools/usr/bin/clang -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -target arm64-apple-darwin -mmacos-version-min=13 -x objective-c -fobjc-arc -c /Users/basilart/.pub-cache/hosted/pub.dev/objective_c-9.3.0/src/objective_c.m -fpic -I src -o /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/obj/src/objective_c.m.o
+.m.o
 
-INFO: 2026-02-16 09:37:46.791218: Running: /Library/Developer/CommandLineTools/usr/bin/clang -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -target arm64-apple-darwin -mmacos-version-min=13 -x objective-c -fobjc-arc -c /Users/basilart/.pub-cache/hosted/pub.dev/objective_c-9.3.0/src/observer.m -fpic -I src -o /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/obj/src/observer.m.o
+INFO: 2026-02-17 10:12:58.396848: Running: /Library/Developer/CommandLineTools/usr/bin/clang -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -target arm64-apple-darwin -mmacos-version-min=13 -x objective-c -fobjc-arc -c /Users/basilart/.pub-cache/hosted/pub.dev/objective_c-9.3.0/src/ns_number.m -fpic -I src -o /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/obj/src/ns_number.m.o
 
-INFO: 2026-02-16 09:37:46.791438: Running: /Library/Developer/CommandLineTools/usr/bin/clang -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -target arm64-apple-darwin -mmacos-version-min=13 -x objective-c -fobjc-arc -c /Users/basilart/.pub-cache/hosted/pub.dev/objective_c-9.3.0/src/protocol.m -fpic -I src -o /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/obj/src/protocol.m.o
+INFO: 2026-02-17 10:12:58.396953: Running: /Library/Developer/CommandLineTools/usr/bin/clang -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -target arm64-apple-darwin -mmacos-version-min=13 -x objective-c -fobjc-arc -c /Users/basilart/.pub-cache/hosted/pub.dev/objective_c-9.3.0/src/protocol.m -fpic -I src -o /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/obj/src/protocol.m.o
 
+INFO: 2026-02-17 10:12:58.397210: Running: /Library/Developer/CommandLineTools/usr/bin/clang -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -target arm64-apple-darwin -mmacos-version-min=13 -x objective-c -fobjc-arc -c /Users/basilart/.pub-cache/hosted/pub.dev/objective_c-9.3.0/src/objective_c_bindings_generated.m -fpic -I src -o /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/obj/src/objective_c_bindings_generated.m.o
 
+INFO: 2026-02-17 10:12:58.537434: 
+INFO: 2026-02-17 10:12:58.537443: 
+INFO: 2026-02-17 10:12:58.537452: Generated /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/obj/src/include/dart_api_dl.c.o
 
-INFO: 2026-02-16 09:37:46.791535: Running: /Library/Developer/CommandLineTools/usr/bin/clang -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -target arm64-apple-darwin -mmacos-version-min=13 -x objective-c -fobjc-arc -c /Users/basilart/.pub-cache/hosted/pub.dev/objective_c-9.3.0/src/objective_c_bindings_generated.m -fpic -I src -o /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/obj/src/objective_c_bindings_generated.m.o
+INFO: 2026-02-17 10:12:58.540137: 
+INFO: 2026-02-17 10:12:58.540196: 
 
-INFO: 2026-02-16 09:37:46.885023: 
-INFO: 2026-02-16 09:37:46.885035: 
-INFO: 2026-02-16 09:37:46.885044: Generated /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/obj/src/objective_c.c.o
+INFO: 2026-02-17 10:12:58.540232: Generated /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/obj/src/observer.m.o
 
-dl.c.o
+INFO: 2026-02-17 10:12:58.546706: 
+INFO: 2026-02-17 10:12:58.546735: 
+INFO: 2026-02-17 10:12:58.546745: Generated /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/obj/src/protocol.m.o
 
-INFO: 2026-02-16 09:37:46.891941: 
-INFO: 2026-02-16 09:37:46.891972: 
-INFO: 2026-02-16 09:37:46.891982: Generated /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/obj/test/util.c.o
+INFO: 2026-02-17 10:12:58.812178: 
+INFO: 2026-02-17 10:12:58.812228: 
+INFO: 2026-02-17 10:12:58.812249: Generated /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/obj/src/ns_number.m.o
 
-INFO: 2026-02-16 09:37:46.895168: 
-INFO: 2026-02-16 09:37:46.895198: 
-INFO: 2026-02-16 09:37:46.895208: Generated /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/obj/src/observer.m.o
+INFO: 2026-02-17 10:12:58.822155: 
+INFO: 2026-02-17 10:12:58.822196: 
+INFO: 2026-02-17 10:12:58.822206: Generated /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/obj/src/objective_c.m.o
 
-INFO: 2026-02-16 09:37:46.898367: 
-INFO: 2026-02-16 09:37:46.898388: 
-INFO: 2026-02-16 09:37:46.898398: Generated /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/obj/src/protocol.m.o
+INFO: 2026-02-17 10:12:58.823668: 
+INFO: 2026-02-17 10:12:58.823687: 
+INFO: 2026-02-17 10:12:58.823697: Generated /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/obj/src/input_stream_adapter.m.o
 
-INFO: 2026-02-16 09:37:47.129458: 
-INFO: 2026-02-16 09:37:47.129518: 
-INFO: 2026-02-16 09:37:47.129531: Generated /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/obj/src/ns_number.m.o
+INFO: 2026-02-17 10:12:58.840379: 
+INFO: 2026-02-17 10:12:58.840402: 
+INFO: 2026-02-17 10:12:58.840413: Generated /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/obj/src/objective_c_bindings_generated.m.o
 
-INFO: 2026-02-16 09:37:47.134820: 
-INFO: 2026-02-16 09:37:47.134845: 
-INFO: 2026-02-16 09:37:47.134855: Generated /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/obj/src/objective_c.m.o
+INFO: 2026-02-17 10:12:58.840730: Running: /Library/Developer/CommandLineTools/usr/bin/clang -shared -Wl,-encryptable -undefined dynamic_lookup -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -target arm64-apple-darwin -mmacos-version-min=13 /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/obj/src/include/dart_api_dl.c.o /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/obj/src/objective_c.c.o /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/obj/test/util.c.o /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/obj/src/input_stream_adapter.m.o /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/obj/src/objective_c.m.o /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/obj/src/observer.m.o /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/obj/src/ns_number.m.o /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/obj/src/protocol.m.o /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/obj/src/objective_c_bindings_generated.m.o -o /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/objective_c.dylib
 
-INFO: 2026-02-16 09:37:47.137943: 
-INFO: 2026-02-16 09:37:47.137965: 
-INFO: 2026-02-16 09:37:47.137977: Generated /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/obj/src/input_stream_adapter.m.o
-
-INFO: 2026-02-16 09:37:47.153003: 
-INFO: 2026-02-16 09:37:47.153032: 
-INFO: 2026-02-16 09:37:47.153042: Generated /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/obj/src/objective_c_bindings_generated.m.o
-
-INFO: 2026-02-16 09:37:47.153426: Running: /Library/Developer/CommandLineTools/usr/bin/clang -shared -Wl,-encryptable -undefined dynamic_lookup -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -target arm64-apple-darwin -mmacos-version-min=13 /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/obj/src/include/dart_api_dl.c.o /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/obj/src/objective_c.c.o /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/obj/test/util.c.o /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/obj/src/input_stream_adapter.m.o /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/obj/src/objective_c.m.o /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/obj/src/observer.m.o /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/obj/src/ns_number.m.o /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/obj/src/protocol.m.o /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/obj/src/objective_c_bindings_generated.m.o -o /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/objective_c.dylib
-
-INFO: 2026-02-16 09:37:47.279469: 
-INFO: 2026-02-16 09:37:47.279508: 
-INFO: 2026-02-16 09:37:47.279519: Generated /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/objective_c.dylib
+INFO: 2026-02-17 10:12:59.044138: 
+INFO: 2026-02-17 10:12:59.044192: 
+INFO: 2026-02-17 10:12:59.044205: Generated /Users/basilart/basil_arcana/basil_arcana/app_flutter/.dart_tool/hooks_runner/shared/objective_c/build/de310349bc/objective_c.dylib
 
