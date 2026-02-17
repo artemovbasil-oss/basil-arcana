@@ -461,22 +461,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   style: Theme.of(sheetContext).textTheme.bodySmall,
                 ),
                 const SizedBox(height: 14),
-                AppPrimaryButton(
-                  label: copy.reportOpenPdf,
-                  onPressed: () async {
-                    await openPdfFile(
-                      bytes: report.pdfBytes,
-                      fileName: fileName,
-                    );
-                  },
-                ),
-                const SizedBox(height: 8),
-                AppGhostButton(
-                  label: copy.reportSharePdf,
-                  onPressed: () async {
-                    await sharePdfFile(
-                      bytes: report.pdfBytes,
-                      fileName: fileName,
+                Builder(
+                  builder: (_) {
+                    final lang =
+                        Localizations.localeOf(sheetContext).languageCode;
+                    final exportLabel = lang == 'ru'
+                        ? 'Скачать / поделиться PDF'
+                        : lang == 'kk'
+                            ? 'PDF жүктеу / бөлісу'
+                            : 'Download / share PDF';
+                    return AppPrimaryButton(
+                      label: exportLabel,
+                      onPressed: () async {
+                        await exportPdfFile(
+                          bytes: report.pdfBytes,
+                          fileName: fileName,
+                        );
+                      },
                     );
                   },
                 ),

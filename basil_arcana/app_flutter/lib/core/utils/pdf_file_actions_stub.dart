@@ -2,17 +2,7 @@ import 'dart:typed_data';
 
 import 'package:printing/printing.dart';
 
-Future<void> openPdfFile({
-  required Uint8List bytes,
-  required String fileName,
-}) async {
-  await Printing.layoutPdf(
-    onLayout: (_) async => bytes,
-    name: fileName,
-  );
-}
-
-Future<void> sharePdfFile({
+Future<void> exportPdfFile({
   required Uint8List bytes,
   required String fileName,
 }) async {
@@ -20,4 +10,18 @@ Future<void> sharePdfFile({
     bytes: bytes,
     filename: fileName,
   );
+}
+
+Future<void> openPdfFile({
+  required Uint8List bytes,
+  required String fileName,
+}) async {
+  await exportPdfFile(bytes: bytes, fileName: fileName);
+}
+
+Future<void> sharePdfFile({
+  required Uint8List bytes,
+  required String fileName,
+}) async {
+  await exportPdfFile(bytes: bytes, fileName: fileName);
 }

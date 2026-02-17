@@ -333,6 +333,7 @@ class SelfAnalysisReportService {
               _p(theme: pdfTheme, text: summary),
             ],
           ),
+          _asciiArt(theme: pdfTheme, variant: 1),
           pw.SizedBox(height: 12),
           _sectionBlock(
             theme: pdfTheme,
@@ -368,6 +369,7 @@ class SelfAnalysisReportService {
               ),
             ],
           ),
+          _asciiArt(theme: pdfTheme, variant: 2),
           _reportHeader(
             theme: pdfTheme,
             title: locale == 'ru'
@@ -453,53 +455,51 @@ class SelfAnalysisReportService {
             )
           else
             pw.Table(
-                  border: pw.TableBorder.all(
-                    color: PdfColor.fromHex('D4D9E3'),
-                    width: 0.6,
-                  ),
-                  columnWidths: const {
-                    0: pw.FlexColumnWidth(5),
-                    1: pw.FlexColumnWidth(1.5),
-                    2: pw.FlexColumnWidth(5),
-                  },
+              border: pw.TableBorder.all(
+                color: PdfColor.fromHex('D4D9E3'),
+                width: 0.6,
+              ),
+              columnWidths: const {
+                0: pw.FlexColumnWidth(5),
+                1: pw.FlexColumnWidth(1.5),
+                2: pw.FlexColumnWidth(5),
+              },
+              children: [
+                pw.TableRow(
                   children: [
-                    pw.TableRow(
-                      decoration: pw.BoxDecoration(
-                        color: PdfColor.fromHex('EEF1F7'),
-                      ),
-                      children: [
-                        _tableCell(
-                          theme: pdfTheme,
-                          text: locale == 'ru' ? 'Карта' : 'Card',
-                          bold: true,
-                        ),
-                        _tableCell(
-                          theme: pdfTheme,
-                          text: locale == 'ru' ? 'Частота' : 'Count',
-                          bold: true,
-                        ),
-                        _tableCell(
-                          theme: pdfTheme,
-                          text: locale == 'ru' ? 'Комментарий' : 'Comment',
-                          bold: true,
-                        ),
-                      ],
+                    _tableCell(
+                      theme: pdfTheme,
+                      text: locale == 'ru' ? 'Карта' : 'Card',
+                      bold: true,
                     ),
-                    ...sortedRecurring.map((entry) {
-                      final name = _humanizeCardName(entry.key);
-                      final comment = locale == 'ru'
-                          ? 'Повтор темы: "$name". Проверь, какие решения ты откладываешь в похожих ситуациях.'
-                          : 'Recurring theme "$name". Check which decisions are postponed in similar contexts.';
-                      return pw.TableRow(
-                        children: [
-                          _tableCell(theme: pdfTheme, text: name),
-                          _tableCell(theme: pdfTheme, text: '${entry.value}x'),
-                          _tableCell(theme: pdfTheme, text: comment),
-                        ],
-                      );
-                    }),
+                    _tableCell(
+                      theme: pdfTheme,
+                      text: locale == 'ru' ? 'Частота' : 'Count',
+                      bold: true,
+                    ),
+                    _tableCell(
+                      theme: pdfTheme,
+                      text: locale == 'ru' ? 'Комментарий' : 'Comment',
+                      bold: true,
+                    ),
                   ],
                 ),
+                ...sortedRecurring.map((entry) {
+                  final name = _humanizeCardName(entry.key);
+                  final comment = locale == 'ru'
+                      ? 'Повтор темы: "$name". Проверь, какие решения ты откладываешь в похожих ситуациях.'
+                      : 'Recurring theme "$name". Check which decisions are postponed in similar contexts.';
+                  return pw.TableRow(
+                    children: [
+                      _tableCell(theme: pdfTheme, text: name),
+                      _tableCell(theme: pdfTheme, text: '${entry.value}x'),
+                      _tableCell(theme: pdfTheme, text: comment),
+                    ],
+                  );
+                }),
+              ],
+            ),
+          _asciiArt(theme: pdfTheme, variant: 3),
           pw.SizedBox(height: 10),
           _sectionBlock(
             theme: pdfTheme,
@@ -559,15 +559,15 @@ class SelfAnalysisReportService {
           pw.SizedBox(height: 10),
           _sectionBlock(
             theme: pdfTheme,
-            title: locale == 'ru'
-                ? '9. Роадмап на 30 дней'
-                : '9. 30-day roadmap',
+            title:
+                locale == 'ru' ? '9. Роадмап на 30 дней' : '9. 30-day roadmap',
             body: [
               _roadmapTable(theme: pdfTheme, locale: locale),
               pw.SizedBox(height: 8),
               _bullet(theme: pdfTheme, text: journalPrompt),
             ],
           ),
+          _asciiArt(theme: pdfTheme, variant: 4),
           _reportHeader(
             theme: pdfTheme,
             title: locale == 'ru'
@@ -580,8 +580,7 @@ class SelfAnalysisReportService {
           pw.SizedBox(height: 12),
           _sectionBlock(
             theme: pdfTheme,
-            title:
-                locale == 'ru' ? 'Вывод по периоду' : 'Period conclusion',
+            title: locale == 'ru' ? 'Вывод по периоду' : 'Period conclusion',
             body: [
               _p(
                 theme: pdfTheme,
@@ -704,9 +703,12 @@ class SelfAnalysisReportService {
       final regularData =
           await rootBundle.load('assets/fonts/NotoSans-Regular.ttf');
       final boldData = await rootBundle.load('assets/fonts/NotoSans-Bold.ttf');
+      final monoData =
+          await rootBundle.load('assets/fonts/NotoSansMono-Regular.ttf');
       return _PdfTheme(
         regular: pw.Font.ttf(regularData),
         bold: pw.Font.ttf(boldData),
+        mono: pw.Font.ttf(monoData),
       );
     })();
   }
@@ -716,34 +718,29 @@ class SelfAnalysisReportService {
     required String title,
     required String subtitle,
   }) {
-    return pw.Container(
-      padding: const pw.EdgeInsets.fromLTRB(16, 14, 16, 14),
-      decoration: pw.BoxDecoration(
-        borderRadius: pw.BorderRadius.circular(12),
-        color: PdfColor.fromHex('DCE4F5'),
-      ),
-      child: pw.Column(
-        crossAxisAlignment: pw.CrossAxisAlignment.start,
-        children: [
-          pw.Text(
-            title,
-            style: pw.TextStyle(
-              font: theme.bold,
-              fontSize: 22,
-              color: PdfColor.fromHex('1F2433'),
-            ),
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.Text(
+          title,
+          style: pw.TextStyle(
+            font: theme.bold,
+            fontSize: 23,
+            color: PdfColors.black,
           ),
-          pw.SizedBox(height: 4),
-          pw.Text(
-            subtitle,
-            style: pw.TextStyle(
-              font: theme.regular,
-              fontSize: 11.2,
-              color: PdfColor.fromHex('30384E'),
-            ),
+        ),
+        pw.SizedBox(height: 3),
+        pw.Text(
+          subtitle,
+          style: pw.TextStyle(
+            font: theme.regular,
+            fontSize: 11,
+            color: PdfColors.black,
           ),
-        ],
-      ),
+        ),
+        pw.SizedBox(height: 6),
+        pw.Container(height: 1, color: PdfColors.black),
+      ],
     );
   }
 
@@ -753,12 +750,8 @@ class SelfAnalysisReportService {
     required String value,
   }) {
     return pw.Expanded(
-      child: pw.Container(
-        padding: const pw.EdgeInsets.all(10),
-        decoration: pw.BoxDecoration(
-          borderRadius: pw.BorderRadius.circular(10),
-          border: pw.Border.all(color: PdfColor.fromHex('D4D9E3'), width: 0.8),
-        ),
+      child: pw.Padding(
+        padding: const pw.EdgeInsets.only(right: 8),
         child: pw.Column(
           crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: [
@@ -766,19 +759,21 @@ class SelfAnalysisReportService {
               label,
               style: pw.TextStyle(
                 font: theme.regular,
-                fontSize: 10,
-                color: PdfColor.fromHex('667086'),
+                fontSize: 9.8,
+                color: PdfColors.black,
               ),
             ),
-            pw.SizedBox(height: 4),
+            pw.SizedBox(height: 2),
             pw.Text(
               value,
               style: pw.TextStyle(
                 font: theme.bold,
-                fontSize: 14,
-                color: PdfColor.fromHex('2D3446'),
+                fontSize: 15,
+                color: PdfColors.black,
               ),
             ),
+            pw.SizedBox(height: 3),
+            pw.Container(height: 0.8, color: PdfColors.black),
           ],
         ),
       ),
@@ -790,44 +785,38 @@ class SelfAnalysisReportService {
     required String title,
     required List<pw.Widget> body,
   }) {
-    return pw.Container(
-      width: double.infinity,
-      padding: const pw.EdgeInsets.fromLTRB(12, 10, 12, 10),
-      decoration: pw.BoxDecoration(
-        borderRadius: pw.BorderRadius.circular(10),
-        color: PdfColor.fromHex('F2F5FB'),
-        border: pw.Border.all(color: PdfColor.fromHex('C7D1E3'), width: 0.9),
-      ),
-      child: pw.Column(
-        crossAxisAlignment: pw.CrossAxisAlignment.start,
-        children: [
-          pw.Row(
-            children: [
-              pw.Container(
-                width: 7,
-                height: 7,
-                decoration: pw.BoxDecoration(
-                  color: PdfColor.fromHex('6E7FA7'),
-                  shape: pw.BoxShape.circle,
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.Row(
+          children: [
+            pw.Container(
+              width: 6,
+              height: 6,
+              decoration: const pw.BoxDecoration(
+                color: PdfColors.black,
+                shape: pw.BoxShape.circle,
+              ),
+            ),
+            pw.SizedBox(width: 6),
+            pw.Expanded(
+              child: pw.Text(
+                title,
+                style: pw.TextStyle(
+                  font: theme.bold,
+                  fontSize: 14,
+                  color: PdfColors.black,
                 ),
               ),
-              pw.SizedBox(width: 6),
-              pw.Expanded(
-                child: pw.Text(
-                  title,
-                  style: pw.TextStyle(
-                    font: theme.bold,
-                    fontSize: 14,
-                    color: PdfColor.fromHex('1F2B44'),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          pw.SizedBox(height: 7),
-          ...body,
-        ],
-      ),
+            ),
+          ],
+        ),
+        pw.SizedBox(height: 4),
+        pw.Container(height: 0.8, color: PdfColors.black),
+        pw.SizedBox(height: 6),
+        ...body,
+        pw.SizedBox(height: 6),
+      ],
     );
   }
 
@@ -843,7 +832,7 @@ class SelfAnalysisReportService {
           font: theme.regular,
           fontSize: 10.8,
           lineSpacing: 1.35,
-          color: PdfColor.fromHex('343B4C'),
+          color: PdfColors.black,
         ),
       ),
     );
@@ -929,10 +918,8 @@ class SelfAnalysisReportService {
           pw.Container(
             width: 7,
             height: 7,
-            decoration: pw.BoxDecoration(
-              color: PdfColor.fromHex('6E7FA7'),
-              shape: pw.BoxShape.circle,
-            ),
+            decoration: const pw.BoxDecoration(
+                color: PdfColors.black, shape: pw.BoxShape.circle),
           ),
           pw.SizedBox(width: 6),
           pw.Text(
@@ -940,10 +927,62 @@ class SelfAnalysisReportService {
             style: pw.TextStyle(
               font: theme.bold,
               fontSize: 14,
-              color: PdfColor.fromHex('1F2B44'),
+              color: PdfColors.black,
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  static pw.Widget _asciiArt({
+    required _PdfTheme theme,
+    required int variant,
+  }) {
+    const a1 = r'''
+      .       *       .
+   *     .-""""-.      *
+        /  .--.  \
+   .   |  ( () )  |   .
+        \  '--'  /
+   *     '-.__.-'     .
+''';
+    const a2 = r'''
+        *      .      *
+    .      /\      .
+         .'  '.
+   *    /  /\  \     *
+       /__/  \__\
+    .     moon      .
+''';
+    const a3 = r'''
+    .  *   .    *   .
+      \   | |   /
+   *   '. |_| .'   *
+        _/___\_
+     .  \___/  .
+    *    | |    *
+''';
+    const a4 = r'''
+      *        .       *
+   .      _.._      .
+        .'_  _'.
+   *    / /\/\ \    *
+       | |    | |
+        \ \__/ /
+   .     '.__.'     .
+''';
+    final art = switch (variant) { 1 => a1, 2 => a2, 3 => a3, _ => a4 };
+    return pw.Center(
+      child: pw.Text(
+        art.trim(),
+        textAlign: pw.TextAlign.center,
+        style: pw.TextStyle(
+          font: theme.mono,
+          fontSize: 7.5,
+          color: PdfColor.fromInt(0xFF666666),
+          lineSpacing: 1.1,
+        ),
       ),
     );
   }
@@ -985,15 +1024,15 @@ class SelfAnalysisReportService {
   static PdfColor _suitColor(String suit) {
     switch (suit) {
       case 'action':
-        return PdfColor.fromHex('FF8F5A');
+        return PdfColor.fromHex('111111');
       case 'emotion':
-        return PdfColor.fromHex('5FB5FF');
+        return PdfColor.fromHex('333333');
       case 'mind':
-        return PdfColor.fromHex('8E96AD');
+        return PdfColor.fromHex('555555');
       case 'ground':
-        return PdfColor.fromHex('E7C867');
+        return PdfColor.fromHex('777777');
       default:
-        return PdfColor.fromHex('95A0B8');
+        return PdfColor.fromHex('999999');
     }
   }
 
@@ -1301,8 +1340,10 @@ class _PdfTheme {
   const _PdfTheme({
     required this.regular,
     required this.bold,
+    required this.mono,
   });
 
   final pw.Font regular;
   final pw.Font bold;
+  final pw.Font mono;
 }

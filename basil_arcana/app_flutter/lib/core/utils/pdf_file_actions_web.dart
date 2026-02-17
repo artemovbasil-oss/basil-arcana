@@ -31,12 +31,17 @@ Future<void> openPdfFile({
   required Uint8List bytes,
   required String fileName,
 }) async {
-  final url = _createPdfObjectUrl(bytes);
-  _scheduleRevoke(url);
-  _triggerDownload(url: url, fileName: fileName);
+  await exportPdfFile(bytes: bytes, fileName: fileName);
 }
 
 Future<void> sharePdfFile({
+  required Uint8List bytes,
+  required String fileName,
+}) async {
+  await exportPdfFile(bytes: bytes, fileName: fileName);
+}
+
+Future<void> exportPdfFile({
   required Uint8List bytes,
   required String fileName,
 }) async {
