@@ -169,20 +169,68 @@ class SelfAnalysisReportService {
     );
   }
 
+  int countDeckCardsInStats({
+    required Map<String, int> allTimeStats,
+    required DeckType selectedDeck,
+  }) {
+    var total = 0;
+    for (final entry in allTimeStats.entries) {
+      final cardId = canonicalCardId(entry.key);
+      if (!_matchesDeck(cardId, selectedDeck)) {
+        continue;
+      }
+      total += max(0, entry.value);
+    }
+    return total;
+  }
+
+  List<ReportCardSample> extractSamplesFromStats({
+    required Map<String, int> allTimeStats,
+    required DeckType selectedDeck,
+    int maxSamples = 400,
+  }) {
+    final out = <ReportCardSample>[];
+    final sorted = allTimeStats.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+    for (final entry in sorted) {
+      final cardId = canonicalCardId(entry.key);
+      if (!_matchesDeck(cardId, selectedDeck)) {
+        continue;
+      }
+      final count = max(0, entry.value);
+      for (var i = 0; i < count; i++) {
+        out.add(ReportCardSample(id: cardId, name: cardId));
+        if (out.length >= maxSamples) {
+          return out;
+        }
+      }
+    }
+    return out;
+  }
+
   Future<SelfAnalysisReportResult> generateSelfAnalysisReport({
     required String userId,
     required DateTime fromDate,
     required DateTime toDate,
     required List<ReadingModel> readings,
+    Map<String, int>? fallbackAllTimeStats,
     required DeckType selectedDeck,
     required String locale,
   }) async {
-    final samples = extractRecentSamples(
+    final baseSamples = extractRecentSamples(
       readings: readings,
       fromDate: fromDate,
       toDate: toDate,
       selectedDeck: selectedDeck,
     );
+    final samples = <ReportCardSample>[...baseSamples];
+    if (samples.length < minCardsThreshold && fallbackAllTimeStats != null) {
+      final fallback = extractSamplesFromStats(
+        allTimeStats: fallbackAllTimeStats,
+        selectedDeck: selectedDeck,
+      );
+      samples.addAll(fallback);
+    }
     final dataset = buildDataset(samples: samples);
     final summary = _buildSummary(dataset, locale);
     final meta = SelfAnalysisReportMeta(

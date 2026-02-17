@@ -219,6 +219,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       final l10n = AppLocalizations.of(context);
       final window = _reportWindow();
       final readings = ref.read(readingsRepositoryProvider).getReadings();
+      final allTimeStats = ref.read(cardStatsRepositoryProvider).getAllCounts();
       final reportService = ref.read(selfAnalysisReportServiceProvider);
       final samples = reportService.extractRecentSamples(
         readings: readings,
@@ -226,7 +227,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         toDate: window.to,
         selectedDeck: selectedDeck,
       );
-      if (samples.length < SelfAnalysisReportService.minCardsThreshold) {
+      final statsCount = reportService.countDeckCardsInStats(
+        allTimeStats: allTimeStats,
+        selectedDeck: selectedDeck,
+      );
+      final effectiveCount = max(samples.length, statsCount);
+      if (effectiveCount < SelfAnalysisReportService.minCardsThreshold) {
         await _showInsufficientDataDialog(copy);
         return;
       }
@@ -251,6 +257,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         fromDate: window.from,
         toDate: window.to,
         readings: readings,
+        fallbackAllTimeStats: allTimeStats,
         selectedDeck: selectedDeck,
         locale: locale,
       );
@@ -1109,8 +1116,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                           child: _SecondaryFeatureCard(
                             assetIconPath:
                                 'assets/icon/home_streak_electric.svg',
-                            pulseBadge: !_loadingStreak &&
-                                _streakStats.currentStreakDays > 1,
+                            pulseBadge: false,
                             flickerIcon: !_loadingStreak &&
                                 _streakStats.currentStreakDays > 1,
                             title: _loadingStreak
@@ -4070,12 +4076,8 @@ class _IconCircleBadgeState extends State<_IconCircleBadge>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 1150),
+    duration: const Duration(milliseconds: 3200),
   )..repeat();
-  late final Animation<double> _pulse =
-      Tween<double>(begin: 0.14, end: 0.42).animate(
-    CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-  );
 
   @override
   void dispose() {
@@ -4090,20 +4092,9 @@ class _IconCircleBadgeState extends State<_IconCircleBadge>
       animation: _controller,
       builder: (context, child) {
         final t = _controller.value;
-        final flickerWaveA = sin(t * pi * 2 * 8);
-        final flickerWaveB = sin(t * pi * 2 * 27);
-        final glitchCut = flickerWaveB > 0.72 || flickerWaveB < -0.94;
-        final electricOpacity =
-            (0.62 + (flickerWaveA.abs() * 0.38)) * (glitchCut ? 0.28 : 1.0);
-        final electricScale = 0.96 +
-            (0.09 * sin(t * pi * 2 * 11).abs()) * (glitchCut ? 0.2 : 1.0);
-        final glowAlpha = widget.pulse ? _pulse.value : 0.0;
-        final electricGlow = Color.lerp(
-              colorScheme.primary,
-              const Color(0xFF92D5FF),
-              0.55,
-            ) ??
-            colorScheme.primary;
+        final lampPhase = _lampPhase(t);
+        final electricOpacity = lampPhase.opacity;
+        final electricScale = lampPhase.scale;
         return Container(
           width: widget.size,
           height: widget.size,
@@ -4114,22 +4105,6 @@ class _IconCircleBadgeState extends State<_IconCircleBadge>
             border: Border.all(
               color: colorScheme.primary.withValues(alpha: 0.35),
             ),
-            boxShadow: widget.pulse
-                ? [
-                    BoxShadow(
-                      color: electricGlow.withValues(alpha: glowAlpha),
-                      blurRadius: 14,
-                      spreadRadius: 1.5,
-                    ),
-                    BoxShadow(
-                      color: colorScheme.primary.withValues(
-                        alpha: (glowAlpha * 0.72).clamp(0, 1),
-                      ),
-                      blurRadius: 20,
-                      spreadRadius: 0.2,
-                    ),
-                  ]
-                : null,
           ),
           child: widget.flickerChild
               ? Opacity(
@@ -4144,6 +4119,28 @@ class _IconCircleBadgeState extends State<_IconCircleBadge>
       },
       child: widget.child,
     );
+  }
+
+  ({double opacity, double scale}) _lampPhase(double t) {
+    if (t < 0.46) {
+      return (opacity: 0.98, scale: 1.0);
+    }
+    if (t < 0.62) {
+      final f = (t - 0.46) / 0.16;
+      final blink = sin(f * pi * 2 * 9);
+      final off = blink > 0.55 || blink < -0.85;
+      return (opacity: off ? 0.22 : 0.9, scale: off ? 0.94 : 1.03);
+    }
+    if (t < 0.82) {
+      return (opacity: 0.96, scale: 1.0);
+    }
+    if (t < 0.93) {
+      final f = (t - 0.82) / 0.11;
+      final blink = sin(f * pi * 2 * 13);
+      final off = blink > 0.42 || blink < -0.92;
+      return (opacity: off ? 0.18 : 0.88, scale: off ? 0.92 : 1.02);
+    }
+    return (opacity: 0.97, scale: 1.0);
   }
 }
 
