@@ -191,6 +191,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   }
 
   bool _isReportFreeByEntitlements() {
+    if (_streakStats.awarenessLocked) {
+      return true;
+    }
     final energy = ref.read(energyProvider);
     final ent = UserEntitlements(
       promoCodes: energy.promoCodeActive ? {'LUCY100'} : const {},

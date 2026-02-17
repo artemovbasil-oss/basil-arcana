@@ -247,6 +247,9 @@ const STARS_PACK_YEAR_XTR = Math.min(
 const STARS_PACK_FIVE_CARDS_SINGLE_XTR = Number(
   process.env.STARS_PACK_FIVE_CARDS_SINGLE_XTR || 1
 );
+const STARS_PACK_SELF_ANALYSIS_REPORT_XTR = Number(
+  process.env.STARS_PACK_SELF_ANALYSIS_REPORT_XTR || 200
+);
 
 const ENERGY_STARS_PACKS = {
   full: { energyAmount: 100, starsAmount: STARS_PACK_FULL_XTR, grantType: 'energy' },
@@ -257,7 +260,12 @@ const ENERGY_STARS_PACKS = {
     energyAmount: 0,
     starsAmount: STARS_PACK_FIVE_CARDS_SINGLE_XTR,
     grantType: 'five_cards_single'
-  }
+  },
+  self_analysis_report: {
+    energyAmount: 0,
+    starsAmount: STARS_PACK_SELF_ANALYSIS_REPORT_XTR,
+    grantType: 'self_analysis_report'
+  },
 };
 
 function normalizeConsentDecision(value) {
@@ -852,6 +860,8 @@ app.post('/api/payments/stars/invoice', telegramAuthMiddleware, async (req, res)
       :
     pack.grantType === 'unlimited_year'
       ? 'Unlimited energy for 1 year'
+      : pack.grantType === 'self_analysis_report'
+      ? 'Personal PDF report (30 days)'
       : pack.grantType === 'five_cards_single'
       ? 'Premium five-card reading'
       : 'Top up to 100%';
@@ -863,6 +873,8 @@ app.post('/api/payments/stars/invoice', telegramAuthMiddleware, async (req, res)
       :
     pack.grantType === 'unlimited_year'
       ? 'Unlock unlimited oracle energy for 365 days'
+      : pack.grantType === 'self_analysis_report'
+      ? 'Generate your personal 30-day PDF self-analysis report'
       : pack.grantType === 'five_cards_single'
       ? 'Unlock one premium five-card spread'
       : 'Restore oracle energy to 100%';
@@ -870,6 +882,16 @@ app.post('/api/payments/stars/invoice', telegramAuthMiddleware, async (req, res)
   try {
     await upsertTelegramUserFromRequest(req);
     await tryClaimReferralForRequest(req);
+    if (pack.grantType === 'self_analysis_report') {
+      const streak = await getUserVisitStreak({ telegramUserId: userId });
+      if (streak?.awarenessLocked === true) {
+        return res.status(409).json({
+          error: 'report_already_included',
+          reason: 'active_year_access',
+          requestId: req.requestId
+        });
+      }
+    }
     const result = await createTelegramInvoiceLink({
       title,
       description,
