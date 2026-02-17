@@ -713,7 +713,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       children: [
                         Expanded(
                           child: _FeatureSquareCard(
-                            emoji: '🧝‍♀️',
+                            icon: Icons.auto_awesome_rounded,
                             title: featureCopy.natalTitle,
                             onTap: () {
                               Navigator.push(
@@ -730,7 +730,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         const SizedBox(width: 10),
                         Expanded(
                           child: _FeatureSquareCard(
-                            emoji: '❤️',
+                            icon: Icons.favorite_rounded,
                             title: featureCopy.compatibilityTitle,
                             onTap: () {
                               Navigator.push(
@@ -748,7 +748,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         const SizedBox(width: 10),
                         Expanded(
                           child: _FeatureSquareCard(
-                            emoji: '🃏',
+                            icon: Icons.style_rounded,
+                            iconColor: Color(0xFFD0B06A),
                             title: featureCopy.libraryTitle,
                             onTap: () {
                               Navigator.push(
@@ -769,7 +770,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       children: [
                         Expanded(
                           child: _SecondaryFeatureCard(
-                            emoji: '🔥',
+                            icon: Icons.local_fire_department_rounded,
                             title: _loadingStreak
                                 ? streakCopy.tileLoadingTitle
                                 : streakCopy
@@ -786,7 +787,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         const SizedBox(width: 10),
                         Expanded(
                           child: _SecondaryFeatureCard(
-                            emoji: '🗓️',
+                            icon: Icons.nightlight_round,
+                            iconColor: Color(0xFFD0B06A),
                             title: streakCopy.dailyCardTileTitle,
                             subtitle:
                                 dailyCard?.name ?? streakCopy.dailyCardFallback,
@@ -889,15 +891,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           ),
         )
         .toList();
-    final strictDeck = deckId == DeckType.lenormand || deckId == DeckType.crowley;
+    final strictDeck =
+        deckId == DeckType.lenormand || deckId == DeckType.crowley;
     if (strictDeck && filtered.isEmpty) {
       return null;
     }
     final source = filtered.isEmpty ? cards : filtered;
     final now = DateTime.now().toUtc();
-    final dayKey = DateTime.utc(now.year, now.month, now.day)
-            .millisecondsSinceEpoch ~/
-        Duration.millisecondsPerDay;
+    final dayKey =
+        DateTime.utc(now.year, now.month, now.day).millisecondsSinceEpoch ~/
+            Duration.millisecondsPerDay;
     final index = Random(dayKey).nextInt(source.length);
     return source[index];
   }
@@ -1639,6 +1642,7 @@ class _HomeStreakCopy {
     required this.streakInsightFallback,
     required this.lastActivePrefix,
     required this.closeLabel,
+    required this.dayUnit,
   });
 
   final String tileLoadingTitle;
@@ -1668,6 +1672,7 @@ class _HomeStreakCopy {
   final String streakInsightFallback;
   final String lastActivePrefix;
   final String closeLabel;
+  final String Function(int) dayUnit;
 
   String dailyCardQuestion(String cardName) {
     final name = cardName.trim();
@@ -1677,7 +1682,10 @@ class _HomeStreakCopy {
     return '$dailyCardQuestionPrefix "$name"?';
   }
 
-  String tileTitle(int days) => '🔥 ${days < 1 ? 1 : days}';
+  String tileTitle(int days) {
+    final normalizedDays = days < 1 ? 1 : days;
+    return '$normalizedDays ${dayUnit(normalizedDays)}';
+  }
 
   String lastActiveLabel(DateTime date) {
     final day = date.day.toString().padLeft(2, '0');
@@ -1690,7 +1698,7 @@ class _HomeStreakCopy {
     final code = Localizations.localeOf(context).languageCode;
     if (code == 'ru') {
       return const _HomeStreakCopy(
-        tileLoadingTitle: '🔥 ...',
+        tileLoadingTitle: '...',
         tileLoadingSubtitle: 'Загружаем streak...',
         tileSubtitle: 'Серия и статистика',
         modalTitle: 'Твой streak',
@@ -1719,11 +1727,12 @@ class _HomeStreakCopy {
             'Статистика показывает темп твоей практики: регулярность и повторяемость усиливают точность интерпретаций.',
         lastActivePrefix: 'Последняя активность',
         closeLabel: 'Закрыть',
+        dayUnit: _ruDayUnit,
       );
     }
     if (code == 'kk') {
       return const _HomeStreakCopy(
-        tileLoadingTitle: '🔥 ...',
+        tileLoadingTitle: '...',
         tileLoadingSubtitle: 'Streak жүктелуде...',
         tileSubtitle: 'Серия мен статистика',
         modalTitle: 'Сенің streak',
@@ -1753,10 +1762,11 @@ class _HomeStreakCopy {
             'Бұл статистика тәжірибе ырғағын көрсетеді: тұрақты қайталау интерпретация дәлдігін арттырады.',
         lastActivePrefix: 'Соңғы белсенділік',
         closeLabel: 'Жабу',
+        dayUnit: _kkDayUnit,
       );
     }
     return const _HomeStreakCopy(
-      tileLoadingTitle: '🔥 ...',
+      tileLoadingTitle: '...',
       tileLoadingSubtitle: 'Loading streak...',
       tileSubtitle: 'Streak and stats',
       modalTitle: 'Your streak',
@@ -1785,6 +1795,7 @@ class _HomeStreakCopy {
           'Your stats reflect practice rhythm: consistency and repetition improve interpretation quality over time.',
       lastActivePrefix: 'Last activity',
       closeLabel: 'Close',
+      dayUnit: _enDayUnit,
     );
   }
 }
@@ -1839,16 +1850,18 @@ class _DailyCardConversionBlock extends StatelessWidget {
 
 class _SecondaryFeatureCard extends StatelessWidget {
   const _SecondaryFeatureCard({
-    required this.emoji,
+    required this.icon,
     required this.title,
     required this.subtitle,
     required this.onTap,
+    this.iconColor,
   });
 
-  final String emoji;
+  final IconData icon;
   final String title;
   final String subtitle;
   final VoidCallback? onTap;
+  final Color? iconColor;
 
   @override
   Widget build(BuildContext context) {
@@ -1867,9 +1880,21 @@ class _SecondaryFeatureCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Text(
-              emoji,
-              style: Theme.of(context).textTheme.titleMedium,
+            Container(
+              width: 30,
+              height: 30,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: colorScheme.primary.withValues(alpha: 0.14),
+                border: Border.all(
+                  color: colorScheme.primary.withValues(alpha: 0.35),
+                ),
+              ),
+              child: Icon(
+                icon,
+                size: 18,
+                color: iconColor ?? colorScheme.primary,
+              ),
             ),
             const SizedBox(width: 8),
             Expanded(
@@ -2493,14 +2518,16 @@ class _RecentQueriesChip extends StatelessWidget {
 
 class _FeatureSquareCard extends StatelessWidget {
   const _FeatureSquareCard({
-    required this.emoji,
+    required this.icon,
     required this.title,
     required this.onTap,
+    this.iconColor,
   });
 
-  final String emoji;
+  final IconData icon;
   final String title;
   final VoidCallback onTap;
+  final Color? iconColor;
 
   @override
   Widget build(BuildContext context) {
@@ -2526,9 +2553,21 @@ class _FeatureSquareCard extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Text(
-              emoji,
-              style: Theme.of(context).textTheme.headlineSmall,
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: colorScheme.primary.withValues(alpha: 0.16),
+                border: Border.all(
+                  color: colorScheme.primary.withValues(alpha: 0.45),
+                ),
+              ),
+              child: Icon(
+                icon,
+                size: 20,
+                color: iconColor ?? colorScheme.primary,
+              ),
             ),
             const SizedBox(height: 6),
             Text(
@@ -2546,6 +2585,29 @@ class _FeatureSquareCard extends StatelessWidget {
       ),
     );
   }
+}
+
+String _ruDayUnit(int days) {
+  final mod100 = days % 100;
+  if (mod100 >= 11 && mod100 <= 14) {
+    return 'дней';
+  }
+  final mod10 = days % 10;
+  if (mod10 == 1) {
+    return 'день';
+  }
+  if (mod10 >= 2 && mod10 <= 4) {
+    return 'дня';
+  }
+  return 'дней';
+}
+
+String _kkDayUnit(int days) {
+  return 'күн';
+}
+
+String _enDayUnit(int days) {
+  return days == 1 ? 'day' : 'days';
 }
 
 class _HomeFeatureCopy {
