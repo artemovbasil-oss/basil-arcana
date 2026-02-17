@@ -769,7 +769,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       children: [
                         Expanded(
                           child: _SecondaryFeatureCard(
-                            icon: Icons.bolt_rounded,
+                            assetIconPath:
+                                'assets/icon/home_streak_electric.svg',
                             pulseBadge: !_loadingStreak &&
                                 _streakStats.currentStreakDays > 1,
                             flickerIcon: !_loadingStreak &&
