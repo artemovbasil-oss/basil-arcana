@@ -322,9 +322,7 @@ class SelfAnalysisReportService {
           pw.SizedBox(height: 18),
           _sectionBlock(
             theme: pdfTheme,
-            title: locale == 'ru'
-                ? '◆ 1. Краткий вывод'
-                : '◆ 1. Executive summary',
+            title: locale == 'ru' ? '1. Краткий вывод' : '1. Executive summary',
             body: [
               _p(
                 theme: pdfTheme,
@@ -339,8 +337,8 @@ class SelfAnalysisReportService {
           _sectionBlock(
             theme: pdfTheme,
             title: locale == 'ru'
-                ? '◉ 2. Баланс мастей и поведенческий профиль'
-                : '◉ 2. Suit balance and behavioral profile',
+                ? '2. Баланс мастей и поведенческий профиль'
+                : '2. Suit balance and behavioral profile',
             body: [
               ...suitOrder.map((key) {
                 final percent = dataset.suitPercents[key] ?? 0;
@@ -368,15 +366,8 @@ class SelfAnalysisReportService {
                 theme: pdfTheme,
                 text: _vectorInterpretation(dataset, locale),
               ),
-              pw.SizedBox(height: 8),
-              _chartsBlock(
-                theme: pdfTheme,
-                dataset: dataset,
-                locale: locale,
-              ),
             ],
           ),
-          pw.NewPage(),
           _reportHeader(
             theme: pdfTheme,
             title: locale == 'ru'
@@ -390,8 +381,8 @@ class SelfAnalysisReportService {
           _sectionBlock(
             theme: pdfTheme,
             title: locale == 'ru'
-                ? '◉ 3. Индекс значимости периода'
-                : '◉ 3. Period significance index',
+                ? '3. Индекс значимости периода'
+                : '3. Period significance index',
             body: [
               _p(
                 theme: pdfTheme,
@@ -411,8 +402,8 @@ class SelfAnalysisReportService {
           _sectionBlock(
             theme: pdfTheme,
             title: locale == 'ru'
-                ? '◉ 4. Зоны перегруза и компенсации'
-                : '◉ 4. Overload and compensation zones',
+                ? '4. Зоны перегруза и компенсации'
+                : '4. Overload and compensation zones',
             body: [
               if (imbalanceLines.isEmpty)
                 _p(
@@ -432,7 +423,6 @@ class SelfAnalysisReportService {
               ),
             ],
           ),
-          pw.NewPage(),
           _reportHeader(
             theme: pdfTheme,
             title: locale == 'ru'
@@ -443,21 +433,26 @@ class SelfAnalysisReportService {
                 : 'Repeated signals from your spreads',
           ),
           pw.SizedBox(height: 12),
-          _sectionBlock(
+          _sectionTitleOnly(
             theme: pdfTheme,
-            title: locale == 'ru'
-                ? '◉ 5. Топ повторов'
-                : '◉ 5. Top recurring cards',
-            body: [
-              if (sortedRecurring.isEmpty)
+            title:
+                locale == 'ru' ? '5. Топ повторов' : '5. Top recurring cards',
+          ),
+          if (sortedRecurring.isEmpty)
+            _sectionBlock(
+              theme: pdfTheme,
+              title: locale == 'ru' ? 'Комментарий' : 'Comment',
+              body: [
                 _p(
                   theme: pdfTheme,
                   text: locale == 'ru'
                       ? 'Выраженных повторов не обнаружено. Это обычно означает высокую вариативность запросов.'
                       : 'No strong recurring cards detected, which often indicates high query diversity.',
-                )
-              else
-                pw.Table(
+                ),
+              ],
+            )
+          else
+            pw.Table(
                   border: pw.TableBorder.all(
                     color: PdfColor.fromHex('D4D9E3'),
                     width: 0.6,
@@ -505,14 +500,12 @@ class SelfAnalysisReportService {
                     }),
                   ],
                 ),
-            ],
-          ),
           pw.SizedBox(height: 10),
           _sectionBlock(
             theme: pdfTheme,
             title: locale == 'ru'
-                ? '◉ 6. Вопросы для самоанализа'
-                : '◉ 6. Reflection questions',
+                ? '6. Вопросы для самоанализа'
+                : '6. Reflection questions',
             body: [
               _bullet(
                 theme: pdfTheme,
@@ -534,7 +527,6 @@ class SelfAnalysisReportService {
               ),
             ],
           ),
-          pw.NewPage(),
           _reportHeader(
             theme: pdfTheme,
             title: locale == 'ru'
@@ -548,8 +540,8 @@ class SelfAnalysisReportService {
           _sectionBlock(
             theme: pdfTheme,
             title: locale == 'ru'
-                ? '◉ 7. Что усилить уже сейчас'
-                : '◉ 7. What to reinforce now',
+                ? '7. Что усилить уже сейчас'
+                : '7. What to reinforce now',
             body: strengths
                 .map((e) => _bullet(theme: pdfTheme, text: e))
                 .toList(),
@@ -558,8 +550,8 @@ class SelfAnalysisReportService {
           _sectionBlock(
             theme: pdfTheme,
             title: locale == 'ru'
-                ? '◉ 8. Что снизить, чтобы не выгорать'
-                : '◉ 8. What to reduce to avoid burnout',
+                ? '8. Что снизить, чтобы не выгорать'
+                : '8. What to reduce to avoid burnout',
             body: frictions
                 .map((e) => _bullet(theme: pdfTheme, text: e))
                 .toList(),
@@ -568,15 +560,14 @@ class SelfAnalysisReportService {
           _sectionBlock(
             theme: pdfTheme,
             title: locale == 'ru'
-                ? '◉ 9. Роадмап на 30 дней'
-                : '◉ 9. 30-day roadmap',
+                ? '9. Роадмап на 30 дней'
+                : '9. 30-day roadmap',
             body: [
               _roadmapTable(theme: pdfTheme, locale: locale),
               pw.SizedBox(height: 8),
               _bullet(theme: pdfTheme, text: journalPrompt),
             ],
           ),
-          pw.NewPage(),
           _reportHeader(
             theme: pdfTheme,
             title: locale == 'ru'
@@ -590,7 +581,7 @@ class SelfAnalysisReportService {
           _sectionBlock(
             theme: pdfTheme,
             title:
-                locale == 'ru' ? '◉ Вывод по периоду' : '◉ Period conclusion',
+                locale == 'ru' ? 'Вывод по периоду' : 'Period conclusion',
             body: [
               _p(
                 theme: pdfTheme,
@@ -608,8 +599,8 @@ class SelfAnalysisReportService {
           _sectionBlock(
             theme: pdfTheme,
             title: locale == 'ru'
-                ? '◉ Чеклист рекомендаций к действию'
-                : '◉ Action checklist',
+                ? 'Чеклист рекомендаций к действию'
+                : 'Action checklist',
             body: [
               _checkboxLine(
                 theme: pdfTheme,
@@ -646,7 +637,7 @@ class SelfAnalysisReportService {
           pw.SizedBox(height: 14),
           _sectionBlock(
             theme: pdfTheme,
-            title: locale == 'ru' ? '◉ Важно' : '◉ Important',
+            title: locale == 'ru' ? 'Важно' : 'Important',
             body: [
               _p(
                 theme: pdfTheme,
@@ -656,7 +647,6 @@ class SelfAnalysisReportService {
               ),
             ],
           ),
-          pw.NewPage(),
           _reportHeader(
             theme: pdfTheme,
             title:
@@ -669,8 +659,8 @@ class SelfAnalysisReportService {
           _sectionBlock(
             theme: pdfTheme,
             title: locale == 'ru'
-                ? '◉ Шаблон weekly-review'
-                : '◉ Weekly review template',
+                ? 'Шаблон weekly-review'
+                : 'Weekly review template',
             body: [
               _bullet(
                 theme: pdfTheme,
@@ -811,13 +801,28 @@ class SelfAnalysisReportService {
       child: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
-          pw.Text(
-            title,
-            style: pw.TextStyle(
-              font: theme.bold,
-              fontSize: 14,
-              color: PdfColor.fromHex('1F2B44'),
-            ),
+          pw.Row(
+            children: [
+              pw.Container(
+                width: 7,
+                height: 7,
+                decoration: pw.BoxDecoration(
+                  color: PdfColor.fromHex('6E7FA7'),
+                  shape: pw.BoxShape.circle,
+                ),
+              ),
+              pw.SizedBox(width: 6),
+              pw.Expanded(
+                child: pw.Text(
+                  title,
+                  style: pw.TextStyle(
+                    font: theme.bold,
+                    fontSize: 14,
+                    color: PdfColor.fromHex('1F2B44'),
+                  ),
+                ),
+              ),
+            ],
           ),
           pw.SizedBox(height: 7),
           ...body,
@@ -854,7 +859,7 @@ class SelfAnalysisReportService {
         pw.Padding(
           padding: const pw.EdgeInsets.only(top: 2),
           child: pw.Text(
-            '✓ ',
+            '- ',
             style: pw.TextStyle(
               font: theme.bold,
               fontSize: 10.8,
@@ -891,131 +896,53 @@ class SelfAnalysisReportService {
     required int percent,
     required PdfColor color,
   }) {
-    final clamped = percent.clamp(0, 100) / 100;
-    return pw.ClipRRect(
-      horizontalRadius: 99,
-      verticalRadius: 99,
-      child: pw.LinearProgressIndicator(
-        value: clamped,
-        minHeight: 8,
-        valueColor: color,
-        backgroundColor: PdfColor.fromHex('E2E7F1'),
+    final filled = percent.clamp(0, 100).toInt();
+    final empty = max(0, 100 - filled);
+    return pw.Container(
+      height: 8,
+      color: PdfColor.fromHex('E2E7F1'),
+      child: pw.Row(
+        children: [
+          if (filled > 0)
+            pw.Expanded(
+              flex: filled,
+              child: pw.Container(color: color),
+            ),
+          if (empty > 0)
+            pw.Expanded(
+              flex: empty,
+              child: pw.SizedBox(),
+            ),
+        ],
       ),
     );
   }
 
-  static pw.Widget _chartsBlock({
+  static pw.Widget _sectionTitleOnly({
     required _PdfTheme theme,
-    required SelfAnalysisDataset dataset,
-    required String locale,
+    required String title,
   }) {
-    final pieData = <MapEntry<String, double>>[
-      MapEntry('action', (dataset.suitPercents['action'] ?? 0).toDouble()),
-      MapEntry('emotion', (dataset.suitPercents['emotion'] ?? 0).toDouble()),
-      MapEntry('mind', (dataset.suitPercents['mind'] ?? 0).toDouble()),
-      MapEntry('ground', (dataset.suitPercents['ground'] ?? 0).toDouble()),
-    ].where((e) => e.value > 0).toList();
-    return pw.Container(
-      padding: const pw.EdgeInsets.all(10),
-      decoration: pw.BoxDecoration(
-        borderRadius: pw.BorderRadius.circular(8),
-        color: PdfColor.fromHex('FFFFFF'),
-        border: pw.Border.all(color: PdfColor.fromHex('D5DDEA'), width: 0.8),
-      ),
-      child: pw.Column(
-        crossAxisAlignment: pw.CrossAxisAlignment.start,
+    return pw.Padding(
+      padding: const pw.EdgeInsets.only(bottom: 8),
+      child: pw.Row(
         children: [
-          pw.Text(
-            locale == 'ru' ? 'Мини-диаграммы профиля' : 'Profile mini-charts',
-            style: pw.TextStyle(
-              font: theme.bold,
-              fontSize: 11.5,
-              color: PdfColor.fromHex('24304A'),
+          pw.Container(
+            width: 7,
+            height: 7,
+            decoration: pw.BoxDecoration(
+              color: PdfColor.fromHex('6E7FA7'),
+              shape: pw.BoxShape.circle,
             ),
           ),
-          pw.SizedBox(height: 8),
-          pw.Row(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              pw.Expanded(
-                child: pw.SizedBox(
-                  height: 120,
-                  child: pw.Chart(
-                    grid: pw.PieGrid(),
-                    datasets: [
-                      for (final item in pieData)
-                        pw.PieDataSet(
-                          legend:
-                              '${_dominantName(item.key, locale)} ${item.value.round()}%',
-                          value: item.value <= 0 ? 1 : item.value,
-                          color: _suitColor(item.key),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-              pw.SizedBox(width: 12),
-              pw.Expanded(
-                child: pw.SizedBox(
-                  height: 120,
-                  child: pw.Chart(
-                    grid: pw.CartesianGrid(
-                      xAxis: pw.FixedAxis<int>(<int>[1, 2, 3, 4]),
-                      yAxis: pw.FixedAxis<int>(<int>[0, 25, 50, 75, 100]),
-                    ),
-                    datasets: [
-                      pw.BarDataSet(
-                        axis: pw.Axis.vertical,
-                        width: 8,
-                        color: PdfColor.fromHex('7E8FB7'),
-                        data: [
-                          pw.PointChartValue(
-                            1,
-                            (dataset.suitPercents['action'] ?? 0).toDouble(),
-                          ),
-                          pw.PointChartValue(
-                            2,
-                            (dataset.suitPercents['emotion'] ?? 0).toDouble(),
-                          ),
-                          pw.PointChartValue(
-                            3,
-                            (dataset.suitPercents['mind'] ?? 0).toDouble(),
-                          ),
-                          pw.PointChartValue(
-                            4,
-                            (dataset.suitPercents['ground'] ?? 0).toDouble(),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+          pw.SizedBox(width: 6),
+          pw.Text(
+            title,
+            style: pw.TextStyle(
+              font: theme.bold,
+              fontSize: 14,
+              color: PdfColor.fromHex('1F2B44'),
+            ),
           ),
-          pw.SizedBox(height: 6),
-          ...pieData.map((item) {
-            return pw.Padding(
-              padding: const pw.EdgeInsets.only(bottom: 2),
-              child: pw.Row(
-                children: [
-                  pw.Container(
-                    width: 7,
-                    height: 7,
-                    decoration: pw.BoxDecoration(
-                      color: _suitColor(item.key),
-                      shape: pw.BoxShape.circle,
-                    ),
-                  ),
-                  pw.SizedBox(width: 5),
-                  pw.Text(
-                    '${_dominantName(item.key, locale)}: ${item.value.round()}%',
-                    style: pw.TextStyle(font: theme.regular, fontSize: 9.5),
-                  ),
-                ],
-              ),
-            );
-          }),
         ],
       ),
     );
