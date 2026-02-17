@@ -715,6 +715,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         Expanded(
                           child: _FeatureSquareCard(
                             assetIconPath: 'assets/icon/home_natal.svg',
+                            iconOffsetY: 1.5,
                             title: featureCopy.natalTitle,
                             onTap: () {
                               Navigator.push(
@@ -771,6 +772,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         Expanded(
                           child: _SecondaryFeatureCard(
                             assetIconPath: 'assets/icon/home_streak.svg',
+                            pulseBadge: !_loadingStreak &&
+                                _streakStats.currentStreakDays > 1,
                             title: _loadingStreak
                                 ? streakCopy.tileLoadingTitle
                                 : streakCopy
@@ -1851,6 +1854,7 @@ class _SecondaryFeatureCard extends StatelessWidget {
   const _SecondaryFeatureCard({
     this.icon,
     this.assetIconPath,
+    this.pulseBadge = false,
     required this.title,
     required this.subtitle,
     required this.onTap,
@@ -1858,6 +1862,7 @@ class _SecondaryFeatureCard extends StatelessWidget {
 
   final IconData? icon;
   final String? assetIconPath;
+  final bool pulseBadge;
   final String title;
   final String subtitle;
   final VoidCallback? onTap;
@@ -1879,32 +1884,27 @@ class _SecondaryFeatureCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Container(
-              width: 30,
-              height: 30,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: colorScheme.surface.withValues(alpha: 0.42),
-                border: Border.all(
-                  color: colorScheme.primary.withValues(alpha: 0.35),
-                ),
-              ),
-              child: assetIconPath != null
-                  ? SvgPicture.asset(
-                      assetIconPath!,
-                      width: 18,
-                      height: 18,
-                      colorFilter: const ColorFilter.mode(
-                        Color(0xFFF4EEFF),
-                        BlendMode.srcIn,
+            _IconCircleBadge(
+              size: 30,
+              pulse: pulseBadge,
+              child: Transform.translate(
+                offset: const Offset(0, 0),
+                child: assetIconPath != null
+                    ? SvgPicture.asset(
+                        assetIconPath!,
+                        width: 18,
+                        height: 18,
+                        colorFilter: const ColorFilter.mode(
+                          Color(0xFFF4EEFF),
+                          BlendMode.srcIn,
+                        ),
+                      )
+                    : Icon(
+                        icon,
+                        size: 20,
+                        color: const Color(0xFFF4EEFF),
                       ),
-                    )
-                  : Icon(
-                      icon,
-                      size: 20,
-                      color: const Color(0xFFF4EEFF),
-                    ),
+              ),
             ),
             const SizedBox(width: 8),
             Expanded(
@@ -2530,12 +2530,14 @@ class _FeatureSquareCard extends StatelessWidget {
   const _FeatureSquareCard({
     this.icon,
     this.assetIconPath,
+    this.iconOffsetY = 0,
     required this.title,
     required this.onTap,
   }) : assert(icon != null || assetIconPath != null);
 
   final IconData? icon;
   final String? assetIconPath;
+  final double iconOffsetY;
   final String title;
   final VoidCallback onTap;
 
@@ -2563,32 +2565,26 @@ class _FeatureSquareCard extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Container(
-              width: 36,
-              height: 36,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: colorScheme.surface.withValues(alpha: 0.42),
-                border: Border.all(
-                  color: colorScheme.primary.withValues(alpha: 0.45),
-                ),
-              ),
-              child: assetIconPath != null
-                  ? SvgPicture.asset(
-                      assetIconPath!,
-                      width: 20,
-                      height: 20,
-                      colorFilter: const ColorFilter.mode(
-                        Color(0xFFF4EEFF),
-                        BlendMode.srcIn,
+            _IconCircleBadge(
+              size: 36,
+              child: Transform.translate(
+                offset: Offset(0, iconOffsetY),
+                child: assetIconPath != null
+                    ? SvgPicture.asset(
+                        assetIconPath!,
+                        width: 20,
+                        height: 20,
+                        colorFilter: const ColorFilter.mode(
+                          Color(0xFFF4EEFF),
+                          BlendMode.srcIn,
+                        ),
+                      )
+                    : Icon(
+                        icon,
+                        size: 22,
+                        color: const Color(0xFFF4EEFF),
                       ),
-                    )
-                  : Icon(
-                      icon,
-                      size: 22,
-                      color: const Color(0xFFF4EEFF),
-                    ),
+              ),
             ),
             const SizedBox(height: 6),
             Text(
@@ -2604,6 +2600,73 @@ class _FeatureSquareCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _IconCircleBadge extends StatefulWidget {
+  const _IconCircleBadge({
+    required this.size,
+    required this.child,
+    this.pulse = false,
+  });
+
+  final double size;
+  final Widget child;
+  final bool pulse;
+
+  @override
+  State<_IconCircleBadge> createState() => _IconCircleBadgeState();
+}
+
+class _IconCircleBadgeState extends State<_IconCircleBadge>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1800),
+  )..repeat(reverse: true);
+  late final Animation<double> _pulse =
+      Tween<double>(begin: 0.06, end: 0.22).animate(
+    CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+  );
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return AnimatedBuilder(
+      animation: _pulse,
+      builder: (context, child) {
+        final glowAlpha = widget.pulse ? _pulse.value : 0.0;
+        return Container(
+          width: widget.size,
+          height: widget.size,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: colorScheme.surface.withValues(alpha: 0.42),
+            border: Border.all(
+              color: colorScheme.primary.withValues(alpha: 0.35),
+            ),
+            boxShadow: widget.pulse
+                ? [
+                    BoxShadow(
+                      color: colorScheme.primary.withValues(alpha: glowAlpha),
+                      blurRadius: 12,
+                      spreadRadius: 1,
+                    ),
+                  ]
+                : null,
+          ),
+          child: child,
+        );
+      },
+      child: widget.child,
     );
   }
 }
