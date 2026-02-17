@@ -713,7 +713,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       children: [
                         Expanded(
                           child: _FeatureSquareCard(
-                            icon: Icons.star,
+                            icon: Icons.history,
                             title: featureCopy.natalTitle,
                             onTap: () {
                               Navigator.push(
@@ -730,7 +730,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         const SizedBox(width: 10),
                         Expanded(
                           child: _FeatureSquareCard(
-                            icon: Icons.favorite,
+                            icon: Icons.close,
                             title: featureCopy.compatibilityTitle,
                             onTap: () {
                               Navigator.push(
@@ -748,7 +748,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         const SizedBox(width: 10),
                         Expanded(
                           child: _FeatureSquareCard(
-                            icon: Icons.library_books,
+                            icon: Icons.arrow_forward,
                             iconColor: Color(0xFFD0B06A),
                             title: featureCopy.libraryTitle,
                             onTap: () {
@@ -770,7 +770,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       children: [
                         Expanded(
                           child: _SecondaryFeatureCard(
-                            icon: Icons.whatshot,
+                            icon: Icons.history,
                             title: _loadingStreak
                                 ? streakCopy.tileLoadingTitle
                                 : streakCopy
@@ -787,7 +787,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         const SizedBox(width: 10),
                         Expanded(
                           child: _SecondaryFeatureCard(
-                            icon: Icons.today,
+                            icon: Icons.arrow_forward,
                             iconColor: Color(0xFFD0B06A),
                             title: streakCopy.dailyCardTileTitle,
                             subtitle:
@@ -1883,6 +1883,7 @@ class _SecondaryFeatureCard extends StatelessWidget {
             Container(
               width: 30,
               height: 30,
+              alignment: Alignment.center,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: colorScheme.surface.withValues(alpha: 0.42),
@@ -1892,9 +1893,8 @@ class _SecondaryFeatureCard extends StatelessWidget {
               ),
               child: Icon(
                 icon,
-                size: 18,
-                color:
-                    iconColor ?? colorScheme.onSurface.withValues(alpha: 0.92),
+                size: 20,
+                color: iconColor ?? const Color(0xFFF4EEFF),
               ),
             ),
             const SizedBox(width: 8),
@@ -2557,6 +2557,7 @@ class _FeatureSquareCard extends StatelessWidget {
             Container(
               width: 36,
               height: 36,
+              alignment: Alignment.center,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: colorScheme.surface.withValues(alpha: 0.42),
@@ -2566,9 +2567,8 @@ class _FeatureSquareCard extends StatelessWidget {
               ),
               child: Icon(
                 icon,
-                size: 20,
-                color:
-                    iconColor ?? colorScheme.onSurface.withValues(alpha: 0.92),
+                size: 22,
+                color: iconColor ?? const Color(0xFFF4EEFF),
               ),
             ),
             const SizedBox(height: 6),
