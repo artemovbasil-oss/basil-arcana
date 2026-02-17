@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../core/config/app_version.dart';
 import '../../core/navigation/app_route_config.dart';
@@ -713,7 +714,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       children: [
                         Expanded(
                           child: _FeatureSquareCard(
-                            icon: Icons.auto_awesome,
+                            assetIconPath: 'assets/icon/home_natal.svg',
                             title: featureCopy.natalTitle,
                             onTap: () {
                               Navigator.push(
@@ -730,7 +731,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         const SizedBox(width: 10),
                         Expanded(
                           child: _FeatureSquareCard(
-                            icon: Icons.favorite,
+                            assetIconPath: 'assets/icon/home_compatibility.svg',
                             title: featureCopy.compatibilityTitle,
                             onTap: () {
                               Navigator.push(
@@ -748,8 +749,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         const SizedBox(width: 10),
                         Expanded(
                           child: _FeatureSquareCard(
-                            icon: Icons.style,
-                            iconColor: Color(0xFFD0B06A),
+                            assetIconPath: 'assets/icon/home_library.svg',
                             title: featureCopy.libraryTitle,
                             onTap: () {
                               Navigator.push(
@@ -770,7 +770,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       children: [
                         Expanded(
                           child: _SecondaryFeatureCard(
-                            icon: Icons.local_fire_department,
+                            assetIconPath: 'assets/icon/home_streak.svg',
                             title: _loadingStreak
                                 ? streakCopy.tileLoadingTitle
                                 : streakCopy
@@ -787,8 +787,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         const SizedBox(width: 10),
                         Expanded(
                           child: _SecondaryFeatureCard(
-                            icon: Icons.event,
-                            iconColor: Color(0xFFD0B06A),
+                            assetIconPath: 'assets/icon/home_daily.svg',
                             title: streakCopy.dailyCardTileTitle,
                             subtitle:
                                 dailyCard?.name ?? streakCopy.dailyCardFallback,
@@ -1850,18 +1849,18 @@ class _DailyCardConversionBlock extends StatelessWidget {
 
 class _SecondaryFeatureCard extends StatelessWidget {
   const _SecondaryFeatureCard({
-    required this.icon,
+    this.icon,
+    this.assetIconPath,
     required this.title,
     required this.subtitle,
     required this.onTap,
-    this.iconColor,
-  });
+  }) : assert(icon != null || assetIconPath != null);
 
-  final IconData icon;
+  final IconData? icon;
+  final String? assetIconPath;
   final String title;
   final String subtitle;
   final VoidCallback? onTap;
-  final Color? iconColor;
 
   @override
   Widget build(BuildContext context) {
@@ -1891,11 +1890,21 @@ class _SecondaryFeatureCard extends StatelessWidget {
                   color: colorScheme.primary.withValues(alpha: 0.35),
                 ),
               ),
-              child: Icon(
-                icon,
-                size: 20,
-                color: iconColor ?? const Color(0xFFF4EEFF),
-              ),
+              child: assetIconPath != null
+                  ? SvgPicture.asset(
+                      assetIconPath!,
+                      width: 18,
+                      height: 18,
+                      colorFilter: const ColorFilter.mode(
+                        Color(0xFFF4EEFF),
+                        BlendMode.srcIn,
+                      ),
+                    )
+                  : Icon(
+                      icon,
+                      size: 20,
+                      color: const Color(0xFFF4EEFF),
+                    ),
             ),
             const SizedBox(width: 8),
             Expanded(
@@ -2519,16 +2528,16 @@ class _RecentQueriesChip extends StatelessWidget {
 
 class _FeatureSquareCard extends StatelessWidget {
   const _FeatureSquareCard({
-    required this.icon,
+    this.icon,
+    this.assetIconPath,
     required this.title,
     required this.onTap,
-    this.iconColor,
-  });
+  }) : assert(icon != null || assetIconPath != null);
 
-  final IconData icon;
+  final IconData? icon;
+  final String? assetIconPath;
   final String title;
   final VoidCallback onTap;
-  final Color? iconColor;
 
   @override
   Widget build(BuildContext context) {
@@ -2565,11 +2574,21 @@ class _FeatureSquareCard extends StatelessWidget {
                   color: colorScheme.primary.withValues(alpha: 0.45),
                 ),
               ),
-              child: Icon(
-                icon,
-                size: 22,
-                color: iconColor ?? const Color(0xFFF4EEFF),
-              ),
+              child: assetIconPath != null
+                  ? SvgPicture.asset(
+                      assetIconPath!,
+                      width: 20,
+                      height: 20,
+                      colorFilter: const ColorFilter.mode(
+                        Color(0xFFF4EEFF),
+                        BlendMode.srcIn,
+                      ),
+                    )
+                  : Icon(
+                      icon,
+                      size: 22,
+                      color: const Color(0xFFF4EEFF),
+                    ),
             ),
             const SizedBox(height: 6),
             Text(
