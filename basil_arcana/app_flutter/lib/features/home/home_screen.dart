@@ -915,6 +915,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     required DeckType selectedDeck,
   }) {
     final readings = ref.read(readingsRepositoryProvider).getReadings();
+    final allTimeStats = ref.read(cardStatsRepositoryProvider).getAllCounts();
     final cardById = <String, CardModel>{
       for (final card in cards) canonicalCardId(card.id): card,
     };
@@ -944,7 +945,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     sampled.sort((a, b) => b.createdAt.compareTo(a.createdAt));
     final cardsWindow = sampled.take(30).toList();
     if (cardsWindow.isEmpty) {
-      return const _EnergyProfileData.empty();
+      return _buildEnergyProfileFromAllTimeStats(
+        allTimeStats: allTimeStats,
+        cardById: cardById,
+        topCards: topCards,
+        selectedDeck: selectedDeck,
+      );
     }
 
     final suitWeights = <_ElementKind, double>{
@@ -1063,6 +1069,130 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       majorArcanaPercent: majorPercent,
       dominantArchetype: dominantArchetypeName,
       repeatedSignals: signalList,
+    );
+  }
+
+  _EnergyProfileData _buildEnergyProfileFromAllTimeStats({
+    required Map<String, int> allTimeStats,
+    required Map<String, CardModel> cardById,
+    required List<_TopCardStat> topCards,
+    required DeckType selectedDeck,
+  }) {
+    final suitWeights = <_ElementKind, double>{
+      _ElementKind.wands: 0,
+      _ElementKind.cups: 0,
+      _ElementKind.swords: 0,
+      _ElementKind.pentacles: 0,
+    };
+    final frequency = <String, double>{};
+    final names = <String, String>{};
+
+    var majorWeight = 0.0;
+    var totalTarotWeight = 0.0;
+    var sampledCardsCount = 0;
+
+    for (final entry in allTimeStats.entries) {
+      final normalizedId = canonicalCardId(entry.key);
+      if (!_matchesProfileDeck(normalizedId, selectedDeck)) {
+        continue;
+      }
+      final count = entry.value;
+      if (count <= 0) {
+        continue;
+      }
+      final weight = count.toDouble();
+      sampledCardsCount += count;
+      frequency[normalizedId] = (frequency[normalizedId] ?? 0) + weight;
+      names[normalizedId] = cardById[normalizedId]?.name ?? normalizedId;
+
+      if (_isTarotCard(normalizedId)) {
+        totalTarotWeight += weight;
+      }
+      if (_isMajorArcana(normalizedId)) {
+        majorWeight += weight;
+      }
+      final element = _elementByCardId(normalizedId);
+      if (element != null) {
+        suitWeights[element] = (suitWeights[element] ?? 0) + weight;
+      }
+    }
+
+    if (sampledCardsCount == 0) {
+      return const _EnergyProfileData.empty();
+    }
+
+    final totalElementsWeight = suitWeights.values.fold<double>(
+      0,
+      (sum, value) => sum + value,
+    );
+    final elementPercents = <_ElementKind, int>{};
+    for (final entry in suitWeights.entries) {
+      final percent = totalElementsWeight <= 0
+          ? 0
+          : ((entry.value / totalElementsWeight) * 100).round();
+      elementPercents[entry.key] = percent.clamp(0, 100);
+    }
+
+    final sortedElements = elementPercents.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+    final dominantElement =
+        sortedElements.isNotEmpty ? sortedElements.first.key : null;
+    final supportElement =
+        sortedElements.length > 1 ? sortedElements[1].key : null;
+
+    final majorPercent = totalTarotWeight <= 0
+        ? 0
+        : ((majorWeight / totalTarotWeight) * 100).round().clamp(0, 100);
+
+    final majorPool = frequency.entries
+        .where((entry) => _isMajorArcana(entry.key))
+        .toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+    final allPool = frequency.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+
+    final dominantArchetypeId = majorPool.isNotEmpty
+        ? majorPool.first.key
+        : allPool.isNotEmpty
+            ? allPool.first.key
+            : null;
+    final dominantArchetypeName = dominantArchetypeId == null
+        ? null
+        : names[dominantArchetypeId] ?? dominantArchetypeId;
+
+    final repeatedSignals = <_RepeatedCardSignal>[
+      for (final entry in allTimeStats.entries)
+        if (entry.value >= 3 &&
+            _matchesProfileDeck(canonicalCardId(entry.key), selectedDeck))
+          _RepeatedCardSignal(
+            cardName: names[canonicalCardId(entry.key)] ??
+                cardById[canonicalCardId(entry.key)]?.name ??
+                entry.key,
+            count30d: entry.value,
+          ),
+    ]..sort((a, b) => b.count30d.compareTo(a.count30d));
+
+    if (repeatedSignals.isEmpty) {
+      for (final card in topCards) {
+        if (card.count >= 3) {
+          repeatedSignals.add(
+            _RepeatedCardSignal(
+              cardName: card.name,
+              count30d: card.count,
+            ),
+          );
+        }
+      }
+    }
+
+    return _EnergyProfileData(
+      sampledCardsCount: sampledCardsCount,
+      elementPercents: elementPercents,
+      dominantElement: dominantElement,
+      supportElement: supportElement,
+      majorArcanaPercent: majorPercent,
+      dominantArchetype: dominantArchetypeName,
+      repeatedSignals: repeatedSignals,
     );
   }
 
