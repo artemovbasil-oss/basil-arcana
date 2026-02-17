@@ -485,7 +485,7 @@ class SelfAnalysisReportService {
                   ],
                 ),
                 ...sortedRecurring.map((entry) {
-                  final name = _humanizeCardName(entry.key);
+                      final name = _humanizeCardName(entry.key, locale);
                   final comment = locale == 'ru'
                       ? 'Повтор темы: "$name". Проверь, какие решения ты откладываешь в похожих ситуациях.'
                       : 'Recurring theme "$name". Check which decisions are postponed in similar contexts.';
@@ -940,48 +940,54 @@ class SelfAnalysisReportService {
     required int variant,
   }) {
     const a1 = r'''
-      .       *       .
-   *     .-""""-.      *
-        /  .--.  \
-   .   |  ( () )  |   .
-        \  '--'  /
-   *     '-.__.-'     .
+*    .        *         .        *        .       *
+    .      .       *        .       *         .
+       _.._            .          _.._
+    .-'_  _'-.      *          .-'_  _'-.
+     / /\/\ \ \   .            / /\/\ \ \
+     \ \__/ / /       .        \ \__/ / /
+  *   '.__.'      *        .     '.__.'      *
+ .        *          .         *          .   
 ''';
     const a2 = r'''
-        *      .      *
-    .      /\      .
-         .'  '.
-   *    /  /\  \     *
-       /__/  \__\
-    .     moon      .
+ .       *         .         *         .       *
+      .      /\            .       /\       .
+   *      .-'  '-.   *         .-'  '-.       *
+         /  /\ /\  \         /  /\ /\  \
+    .   /__/  V  \__\   .   /__/  V  \__\   .
+         \  \    /  /         \  \    /  /
+  *       '._\  /_.'      *    '._\  /_.'    
 ''';
     const a3 = r'''
-    .  *   .    *   .
-      \   | |   /
-   *   '. |_| .'   *
-        _/___\_
-     .  \___/  .
-    *    | |    *
+*   .      *       .      *       .      *    .
+      /\             /\            /\         
+   . /  \   .    .  /  \   .   .  /  \   .
+    /_/\_\      *  /_/\_\        /_/\_\
+    \    /   .      \    /   .    \    /    *
+ *   \__/      .  *  \__/      .    \__/   .
 ''';
     const a4 = r'''
-      *        .       *
-   .      _.._      .
-        .'_  _'.
-   *    / /\/\ \    *
-       | |    | |
-        \ \__/ /
-   .     '.__.'     .
+ .     *         .         *         .       *
+      _..._            .          _..._      
+   .-'     '-.   *          .  .-'     '-.   
+   \  .-.-.  /        .        \  .-.-.  /   
+    | | | | |    *            * | | | | |    
+    \  '-'  /   .               \  '-'  /    
+ *   '-...-'          .      *   '-...-'     
 ''';
     final art = switch (variant) { 1 => a1, 2 => a2, 3 => a3, _ => a4 };
-    return pw.Center(
-      child: pw.Text(
-        art.trim(),
-        textAlign: pw.TextAlign.center,
-        style: pw.TextStyle(
-          font: theme.mono,
-          fontSize: 7.5,
-          color: PdfColor.fromInt(0xFF666666),
-          lineSpacing: 1.1,
+    return pw.Padding(
+      padding: const pw.EdgeInsets.symmetric(vertical: 14),
+      child: pw.Center(
+        child: pw.Text(
+          art.trim(),
+          textAlign: pw.TextAlign.center,
+          style: pw.TextStyle(
+            font: theme.mono,
+            fontSize: 7.1,
+            color: PdfColor.fromInt(0xFF666666),
+            lineSpacing: 1.1,
+          ),
         ),
       ),
     );
@@ -1128,27 +1134,80 @@ class SelfAnalysisReportService {
     );
   }
 
-  String _humanizeCardName(String raw) {
+  String _humanizeCardName(String raw, String locale) {
     final normalized = raw.trim();
     if (normalized.isEmpty) {
       return raw;
     }
+    final parts = normalized.split('_');
+    if (parts.length >= 3) {
+      final kind = parts.first;
+      final name = _titleCase(parts.sublist(2).join(' ').trim());
+      if (kind == 'wands' ||
+          kind == 'cups' ||
+          kind == 'swords' ||
+          kind == 'pentacles') {
+        if (locale == 'ru') {
+          final suitRu = switch (kind) {
+            'wands' => 'Жезлов',
+            'cups' => 'Кубков',
+            'swords' => 'Мечей',
+            _ => 'Пентаклей',
+          };
+          return '${_rankRu(name)} $suitRu';
+        }
+        final suit = switch (kind) {
+          'wands' => 'Wands',
+          'cups' => 'Cups',
+          'swords' => 'Swords',
+          _ => 'Pentacles',
+        };
+        if (name.isNotEmpty) {
+          return '$name of $suit';
+        }
+      }
+      if (kind == 'major' || kind == 'ac' || kind == 'lenormand') {
+        if (name.isNotEmpty) {
+          return name;
+        }
+      }
+    }
     if (normalized.contains('_')) {
-      final pretty = normalized
-          .replaceAll('major_', '')
-          .replaceAll('wands_', '')
-          .replaceAll('cups_', '')
-          .replaceAll('swords_', '')
-          .replaceAll('pentacles_', '')
-          .replaceAll('lenormand_', '')
-          .replaceAll('ac_', '')
-          .replaceAll('_', ' ')
-          .trim();
-      if (pretty.isNotEmpty) {
-        return pretty;
+      final fallback = _titleCase(normalized.replaceAll('_', ' ').trim());
+      if (fallback.isNotEmpty) {
+        return fallback;
       }
     }
     return normalized;
+  }
+
+  String _titleCase(String value) {
+    final words =
+        value.split(RegExp(r'\s+')).where((w) => w.trim().isNotEmpty).map((w) {
+      final lower = w.toLowerCase();
+      return lower[0].toUpperCase() + lower.substring(1);
+    }).toList();
+    return words.join(' ');
+  }
+
+  String _rankRu(String rank) {
+    const map = {
+      'Ace': 'Туз',
+      'Two': 'Двойка',
+      'Three': 'Тройка',
+      'Four': 'Четверка',
+      'Five': 'Пятерка',
+      'Six': 'Шестерка',
+      'Seven': 'Семерка',
+      'Eight': 'Восьмерка',
+      'Nine': 'Девятка',
+      'Ten': 'Десятка',
+      'Page': 'Паж',
+      'Knight': 'Рыцарь',
+      'Queen': 'Королева',
+      'King': 'Король',
+    };
+    return map[rank] ?? rank;
   }
 
   String _majorArcanaInterpretationRu(int share) {
