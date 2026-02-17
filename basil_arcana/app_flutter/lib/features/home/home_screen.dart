@@ -7,13 +7,13 @@ import 'package:hive/hive.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
-import 'package:printing/printing.dart';
 
 import '../../core/config/app_version.dart';
 import '../../core/navigation/app_route_config.dart';
 import '../../core/telegram/telegram_bridge.dart';
 import '../../core/telegram/telegram_user_profile.dart';
 import '../../core/telemetry/web_error_reporter.dart';
+import '../../core/utils/pdf_file_actions.dart';
 import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/app_top_bar.dart';
 import '../../core/widgets/sofia_promo_card.dart';
@@ -464,9 +464,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 AppPrimaryButton(
                   label: copy.reportOpenPdf,
                   onPressed: () async {
-                    await Printing.layoutPdf(
-                      onLayout: (_) async => report.pdfBytes,
-                      name: fileName,
+                    await openPdfFile(
+                      bytes: report.pdfBytes,
+                      fileName: fileName,
                     );
                   },
                 ),
@@ -474,9 +474,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 AppGhostButton(
                   label: copy.reportSharePdf,
                   onPressed: () async {
-                    await Printing.sharePdf(
+                    await sharePdfFile(
                       bytes: report.pdfBytes,
-                      filename: fileName,
+                      fileName: fileName,
                     );
                   },
                 ),
