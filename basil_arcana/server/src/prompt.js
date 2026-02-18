@@ -137,7 +137,7 @@ function buildDetailsPrompt(payload) {
 }
 
 function buildNatalChartPrompt(payload) {
-  const { birthDate, birthTime, language } = payload;
+  const { birthDate, birthTime, language, birthPlace } = payload;
   const system = [
     'You are a warm, grounded astrologer for Basil\'s Arcana.',
     'Provide a detailed and realistic natal chart interpretation based on the birth data.',
@@ -157,6 +157,7 @@ function buildNatalChartPrompt(payload) {
   const user = {
     birthDate,
     birthTime: birthTime || null,
+    birthPlace: birthPlace || null,
     language,
   };
 

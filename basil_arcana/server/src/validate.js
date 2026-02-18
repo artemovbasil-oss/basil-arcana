@@ -140,12 +140,18 @@ function validateNatalChartRequest(body) {
     return 'Request body must be an object';
   }
 
-  const { birthDate, birthTime, language } = body;
+  const { birthDate, birthTime, language, birthPlace } = body;
   if (!isNonEmptyString(birthDate)) {
     return 'birthDate is required';
   }
   if (birthTime != null && typeof birthTime !== 'string') {
     return 'birthTime must be a string';
+  }
+  if (!birthPlace || typeof birthPlace !== 'object') {
+    return 'birthPlace is required';
+  }
+  if (!isNonEmptyString(birthPlace.placeId)) {
+    return 'birthPlace.placeId is required';
   }
   if (!isNonEmptyString(language)) {
     return 'language is required';

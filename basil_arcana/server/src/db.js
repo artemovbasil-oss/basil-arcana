@@ -988,6 +988,112 @@ async function getUserVisitStreak({ telegramUserId }) {
   };
 }
 
+function normalizePlaceQuery(value) {
+  if (typeof value !== 'string') {
+    return '';
+  }
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/ё/g, 'е')
+    .replace(/[^\p{L}\p{N}\s\-']/gu, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+async function searchGeoPlaces({
+  query,
+  limit = 20,
+  countryCodes = null
+}) {
+  const normalizedQuery = normalizePlaceQuery(query);
+  if (!normalizedQuery || normalizedQuery.length < 2) {
+    return [];
+  }
+  const safeLimit = Math.min(50, Math.max(1, Number(limit) || 20));
+  const prefixPattern = `${normalizedQuery}%`;
+  const infixPattern = `%${normalizedQuery}%`;
+  const normalizedCountries = Array.isArray(countryCodes)
+    ? countryCodes
+        .map((code) =>
+          typeof code === 'string' ? code.trim().toUpperCase() : ''
+        )
+        .filter((code) => /^[A-Z]{2}$/.test(code))
+    : [];
+
+  const values = [normalizedQuery, prefixPattern, infixPattern, safeLimit];
+  const countryFilterSql = normalizedCountries.length
+    ? `AND p.country_code = ANY($5::text[])`
+    : '';
+  if (normalizedCountries.length) {
+    values.push(normalizedCountries);
+  }
+
+  try {
+    const { rows } = await getDb().query(
+      `
+      SELECT
+        p.place_id,
+        p.city_name,
+        p.admin1_name,
+        p.country_code,
+        p.country_name,
+        p.latitude,
+        p.longitude,
+        p.timezone,
+        p.population,
+        MAX(similarity(a.alias_normalized, $1)) AS score,
+        BOOL_OR(a.alias_normalized LIKE $2) AS has_prefix,
+        BOOL_OR(a.alias_normalized = $1) AS is_exact
+      FROM geo_place_aliases a
+      JOIN geo_places p ON p.place_id = a.place_id
+      WHERE (
+        a.alias_normalized % $1
+        OR a.alias_normalized LIKE $2
+        OR a.alias_normalized LIKE $3
+      )
+      ${countryFilterSql}
+      GROUP BY
+        p.place_id,
+        p.city_name,
+        p.admin1_name,
+        p.country_code,
+        p.country_name,
+        p.latitude,
+        p.longitude,
+        p.timezone,
+        p.population
+      ORDER BY
+        is_exact DESC,
+        has_prefix DESC,
+        score DESC,
+        p.population DESC
+      LIMIT $4;
+      `,
+      values
+    );
+
+    return rows.map((row) => ({
+      placeId: String(row.place_id),
+      cityName: String(row.city_name || ''),
+      admin1Name: String(row.admin1_name || ''),
+      countryCode: String(row.country_code || ''),
+      countryName: String(row.country_name || ''),
+      latitude: Number(row.latitude),
+      longitude: Number(row.longitude),
+      timezone: String(row.timezone || ''),
+      population: Number(row.population || 0),
+    }));
+  } catch (error) {
+    const code = error?.code || '';
+    if (code === '42P01') {
+      // Geo tables not initialized yet.
+      return [];
+    }
+    throw error;
+  }
+}
+
 module.exports = {
   initDb,
   hasDb,
@@ -1003,5 +1109,6 @@ module.exports = {
   listRecentUserQueries,
   clearUserQueryHistory,
   recordUserDailyActivity,
-  getUserVisitStreak
+  getUserVisitStreak,
+  searchGeoPlaces
 };

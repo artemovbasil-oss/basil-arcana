@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -24,10 +26,15 @@ class MoreFeaturesScreen extends ConsumerStatefulWidget {
 class _MoreFeaturesScreenState extends ConsumerState<MoreFeaturesScreen> {
   final TextEditingController _birthDateController = TextEditingController();
   final TextEditingController _birthTimeController = TextEditingController();
+  final TextEditingController _birthPlaceController = TextEditingController();
   bool _showNatalForm = false;
   bool _isLoading = false;
+  bool _isPlaceLoading = false;
   String? _resultText;
   String? _errorText;
+  BirthPlaceSuggestion? _selectedBirthPlace;
+  List<BirthPlaceSuggestion> _placeSuggestions = const [];
+  Timer? _placeSearchDebounce;
 
   static const bool _enableDebugLogs = !kReleaseMode;
   static final DateFormat _birthDateFormat = DateFormat('yyyy-MM-dd');
@@ -36,6 +43,8 @@ class _MoreFeaturesScreenState extends ConsumerState<MoreFeaturesScreen> {
   void dispose() {
     _birthDateController.dispose();
     _birthTimeController.dispose();
+    _birthPlaceController.dispose();
+    _placeSearchDebounce?.cancel();
     super.dispose();
   }
 
@@ -105,11 +114,19 @@ class _MoreFeaturesScreenState extends ConsumerState<MoreFeaturesScreen> {
   }
 
   Future<void> _handleNatalChart() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
     final birthDate = _birthDateController.text.trim();
     if (birthDate.isEmpty) {
       setState(() {
         _errorText = l10n.natalChartBirthDateError;
+      });
+      return;
+    }
+
+    final birthPlace = _selectedBirthPlace;
+    if (birthPlace == null) {
+      setState(() {
+        _errorText = _birthPlaceRequiredLabel();
       });
       return;
     }
@@ -135,6 +152,7 @@ class _MoreFeaturesScreenState extends ConsumerState<MoreFeaturesScreen> {
       final result = await ref.read(aiRepositoryProvider).generateNatalChart(
             birthDate: birthDate,
             birthTime: birthTime.isEmpty ? null : birthTime,
+            birthPlace: birthPlace,
             languageCode: languageCode,
           );
       if (!mounted) {
@@ -161,6 +179,118 @@ class _MoreFeaturesScreenState extends ConsumerState<MoreFeaturesScreen> {
         _isLoading = false;
       });
     }
+  }
+
+  void _onBirthPlaceQueryChanged(String value) {
+    setState(() {
+      _selectedBirthPlace = null;
+      _errorText = null;
+    });
+    _placeSearchDebounce?.cancel();
+    final query = value.trim();
+    if (query.length < 2) {
+      setState(() {
+        _isPlaceLoading = false;
+        _placeSuggestions = const [];
+      });
+      return;
+    }
+    _placeSearchDebounce = Timer(const Duration(milliseconds: 280), () async {
+      await _searchBirthPlaces(query);
+    });
+  }
+
+  Future<void> _searchBirthPlaces(String query) async {
+    final locale = Localizations.localeOf(context).languageCode;
+    setState(() {
+      _isPlaceLoading = true;
+      _errorText = null;
+    });
+    try {
+      final items = await ref.read(aiRepositoryProvider).searchBirthPlaces(
+            query: query,
+            locale: locale,
+            limit: 20,
+          );
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _isPlaceLoading = false;
+        _placeSuggestions = items;
+      });
+    } on AiRepositoryException {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _isPlaceLoading = false;
+        _placeSuggestions = const [];
+      });
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _isPlaceLoading = false;
+        _placeSuggestions = const [];
+      });
+    }
+  }
+
+  void _selectBirthPlace(BirthPlaceSuggestion place) {
+    FocusScope.of(context).unfocus();
+    setState(() {
+      _selectedBirthPlace = place;
+      _birthPlaceController.text = place.displayName;
+      _placeSuggestions = const [];
+      _isPlaceLoading = false;
+      _errorText = null;
+    });
+  }
+
+  String _birthPlaceLabel() {
+    final code = Localizations.localeOf(context).languageCode;
+    if (code == 'ru') {
+      return 'Место рождения';
+    }
+    if (code == 'kk') {
+      return 'Туған жері';
+    }
+    return 'Birth place';
+  }
+
+  String _birthPlaceHint() {
+    final code = Localizations.localeOf(context).languageCode;
+    if (code == 'ru') {
+      return 'Введите город и выберите из списка';
+    }
+    if (code == 'kk') {
+      return 'Қаланы енгізіп, тізімнен таңдаңыз';
+    }
+    return 'Type city and select from the list';
+  }
+
+  String _birthPlaceRequiredLabel() {
+    final code = Localizations.localeOf(context).languageCode;
+    if (code == 'ru') {
+      return 'Выберите место рождения из списка.';
+    }
+    if (code == 'kk') {
+      return 'Туған жерді тізімнен таңдаңыз.';
+    }
+    return 'Select birth place from the list.';
+  }
+
+  String _birthPlaceLoadingLabel() {
+    final code = Localizations.localeOf(context).languageCode;
+    if (code == 'ru') {
+      return 'Ищем города…';
+    }
+    if (code == 'kk') {
+      return 'Қалалар ізделуде…';
+    }
+    return 'Searching cities…';
   }
 
   void _logDebug(String message, [Object? error]) {
@@ -201,7 +331,7 @@ class _MoreFeaturesScreenState extends ConsumerState<MoreFeaturesScreen> {
     if (!mounted) {
       return;
     }
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
     messenger.hideCurrentSnackBar();
     messenger.showSnackBar(
@@ -219,7 +349,7 @@ class _MoreFeaturesScreenState extends ConsumerState<MoreFeaturesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     final resultText = _resultText;
     final cleanedResult =
@@ -282,6 +412,53 @@ class _MoreFeaturesScreenState extends ConsumerState<MoreFeaturesScreen> {
                     ),
                     onTap: _pickBirthTime,
                   ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _birthPlaceController,
+                    decoration: InputDecoration(
+                      labelText: _birthPlaceLabel(),
+                      hintText: _birthPlaceHint(),
+                      suffixIcon: _selectedBirthPlace != null
+                          ? const Icon(Icons.check_circle, color: Colors.green)
+                          : const Icon(Icons.location_on_outlined),
+                    ),
+                    onChanged: _onBirthPlaceQueryChanged,
+                  ),
+                  if (_isPlaceLoading) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      _birthPlaceLoadingLabel(),
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
+                  if (_placeSuggestions.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Container(
+                      constraints: const BoxConstraints(maxHeight: 220),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Theme.of(context).colorScheme.outlineVariant,
+                        ),
+                      ),
+                      child: ListView.separated(
+                        shrinkWrap: true,
+                        itemCount: _placeSuggestions.length,
+                        separatorBuilder: (_, __) => const Divider(height: 1),
+                        itemBuilder: (context, index) {
+                          final place = _placeSuggestions[index];
+                          return ListTile(
+                            dense: true,
+                            title: Text(place.displayName),
+                            subtitle: place.timezone.isNotEmpty
+                                ? Text(place.timezone)
+                                : null,
+                            onTap: () => _selectBirthPlace(place),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 16),
                   SizedBox(
                     width: double.infinity,
@@ -387,13 +564,13 @@ class _FeatureCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         gradient: LinearGradient(
           colors: [
-            colorScheme.surface.withOpacity(0.96),
-            colorScheme.primary.withOpacity(0.18),
+            colorScheme.surface.withValues(alpha: 0.96),
+            colorScheme.primary.withValues(alpha: 0.18),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        border: Border.all(color: colorScheme.primary.withOpacity(0.35)),
+        border: Border.all(color: colorScheme.primary.withValues(alpha: 0.35)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(18),

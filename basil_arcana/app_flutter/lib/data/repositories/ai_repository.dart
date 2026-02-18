@@ -75,11 +75,187 @@ class _TelegramAuthState {
   int get initDataLength => initData.length;
 }
 
+class BirthPlaceSuggestion {
+  const BirthPlaceSuggestion({
+    required this.placeId,
+    required this.cityName,
+    required this.admin1Name,
+    required this.countryCode,
+    required this.countryName,
+    required this.latitude,
+    required this.longitude,
+    required this.timezone,
+    required this.population,
+    required this.displayName,
+  });
+
+  final String placeId;
+  final String cityName;
+  final String admin1Name;
+  final String countryCode;
+  final String countryName;
+  final double latitude;
+  final double longitude;
+  final String timezone;
+  final int population;
+  final String displayName;
+
+  Map<String, dynamic> toJson() {
+    return {
+      'placeId': placeId,
+      'cityName': cityName,
+      'admin1Name': admin1Name,
+      'countryCode': countryCode,
+      'countryName': countryName,
+      'latitude': latitude,
+      'longitude': longitude,
+      'timezone': timezone,
+      'population': population,
+      'displayName': displayName,
+    };
+  }
+
+  factory BirthPlaceSuggestion.fromJson(Map<String, dynamic> json) {
+    double toDouble(Object? value) {
+      if (value is num) {
+        return value.toDouble();
+      }
+      if (value is String) {
+        return double.tryParse(value) ?? 0;
+      }
+      return 0;
+    }
+
+    int toInt(Object? value) {
+      if (value is num) {
+        return value.toInt();
+      }
+      if (value is String) {
+        return int.tryParse(value) ?? 0;
+      }
+      return 0;
+    }
+
+    final cityName = (json['cityName'] as String? ?? '').trim();
+    final admin1Name = (json['admin1Name'] as String? ?? '').trim();
+    final countryName = (json['countryName'] as String? ?? '').trim();
+    final fallbackDisplayName = [cityName, admin1Name, countryName]
+        .where((x) => x.isNotEmpty)
+        .join(', ');
+    return BirthPlaceSuggestion(
+      placeId: (json['placeId'] as String? ?? '').trim(),
+      cityName: cityName,
+      admin1Name: admin1Name,
+      countryCode: (json['countryCode'] as String? ?? '').trim(),
+      countryName: countryName,
+      latitude: toDouble(json['latitude']),
+      longitude: toDouble(json['longitude']),
+      timezone: (json['timezone'] as String? ?? '').trim(),
+      population: toInt(json['population']),
+      displayName: (json['displayName'] as String? ?? '').trim().isNotEmpty
+          ? (json['displayName'] as String).trim()
+          : fallbackDisplayName,
+    );
+  }
+}
+
 class AiRepository {
   bool get isApiConfigured => apiBaseUrl.trim().isNotEmpty;
 
   http.Client _wrapClient(http.Client client) {
     return TelegramApiClient(client);
+  }
+
+  Future<List<BirthPlaceSuggestion>> searchBirthPlaces({
+    required String query,
+    required String locale,
+    int limit = 20,
+    http.Client? client,
+    Duration timeout = const Duration(seconds: 8),
+  }) async {
+    if (!isApiConfigured) {
+      throw const AiRepositoryException(
+        AiErrorType.misconfigured,
+        message: 'Missing API_BASE_URL',
+      );
+    }
+    final normalizedQuery = query.trim();
+    if (normalizedQuery.length < 2) {
+      return const [];
+    }
+    final safeLimit = limit.clamp(1, 50);
+    final uri = Uri.parse(apiBaseUrl).replace(
+      path: '/api/geo/places',
+      queryParameters: {
+        'q': normalizedQuery,
+        'limit': '$safeLimit',
+        'locale': locale,
+      },
+    );
+    final requestId = const Uuid().v4();
+    final baseClient = client ?? http.Client();
+    final httpClient = _wrapClient(baseClient);
+    http.Response response;
+    try {
+      response = await httpClient.get(
+        uri,
+        headers: {
+          'x-request-id': requestId,
+        },
+      ).timeout(timeout);
+    } on TimeoutException {
+      throw const AiRepositoryException(AiErrorType.timeout);
+    } on Exception catch (error) {
+      if (isSocketException(error) || error is http.ClientException) {
+        throw const AiRepositoryException(AiErrorType.noInternet);
+      }
+      rethrow;
+    } finally {
+      if (client == null) {
+        httpClient.close();
+      }
+    }
+
+    if (response.statusCode == 401 || response.statusCode == 403) {
+      throw const AiRepositoryException(AiErrorType.unauthorized);
+    }
+    if (response.statusCode >= 500) {
+      throw AiRepositoryException(
+        AiErrorType.serverError,
+        statusCode: response.statusCode,
+      );
+    }
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw AiRepositoryException(
+        AiErrorType.badResponse,
+        statusCode: response.statusCode,
+      );
+    }
+
+    try {
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      final items = data['items'];
+      if (items is! List) {
+        return const [];
+      }
+      final result = <BirthPlaceSuggestion>[];
+      for (final item in items) {
+        if (item is! Map<String, dynamic>) {
+          continue;
+        }
+        final parsed = BirthPlaceSuggestion.fromJson(item);
+        if (parsed.placeId.isEmpty || parsed.displayName.isEmpty) {
+          continue;
+        }
+        result.add(parsed);
+      }
+      return result;
+    } catch (error) {
+      throw AiRepositoryException(
+        AiErrorType.badResponse,
+        message: error.toString(),
+      );
+    }
   }
 
   Future<_TelegramAuthState> _getTelegramAuthState({
@@ -620,6 +796,7 @@ class AiRepository {
   Future<String> generateNatalChart({
     required String birthDate,
     String? birthTime,
+    required BirthPlaceSuggestion birthPlace,
     required String languageCode,
     String? requestIdOverride,
     http.Client? client,
@@ -656,6 +833,7 @@ class AiRepository {
     final payload = {
       'birthDate': birthDate,
       'language': languageCode,
+      'birthPlace': birthPlace.toJson(),
       if (birthTime != null && birthTime.trim().isNotEmpty)
         'birthTime': birthTime,
     };

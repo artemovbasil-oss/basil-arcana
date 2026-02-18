@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -24,9 +26,15 @@ class _NatalChartFlowScreenState extends ConsumerState<NatalChartFlowScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _timeController = TextEditingController();
+  final TextEditingController _placeController = TextEditingController();
 
   int _step = 0;
   bool _isSubmitting = false;
+  bool _isPlaceLoading = false;
+  String? _placeError;
+  BirthPlaceSuggestion? _selectedBirthPlace;
+  List<BirthPlaceSuggestion> _placeSuggestions = const [];
+  Timer? _placeSearchDebounce;
   static final DateFormat _dateFormat = DateFormat('yyyy-MM-dd');
 
   @override
@@ -34,6 +42,8 @@ class _NatalChartFlowScreenState extends ConsumerState<NatalChartFlowScreen> {
     _nameController.dispose();
     _dateController.dispose();
     _timeController.dispose();
+    _placeController.dispose();
+    _placeSearchDebounce?.cancel();
     super.dispose();
   }
 
@@ -77,7 +87,7 @@ class _NatalChartFlowScreenState extends ConsumerState<NatalChartFlowScreen> {
     if (_step == 1 && _dateController.text.trim().isEmpty) {
       return;
     }
-    if (_step == 2) {
+    if (_step == 3) {
       await _submit();
       return;
     }
@@ -93,7 +103,11 @@ class _NatalChartFlowScreenState extends ConsumerState<NatalChartFlowScreen> {
     final name = _nameController.text.trim();
     final birthDate = _dateController.text.trim();
     final birthTime = _timeController.text.trim();
-    if (name.isEmpty || birthDate.isEmpty || birthTime.isEmpty) {
+    final birthPlace = _selectedBirthPlace;
+    if (name.isEmpty ||
+        birthDate.isEmpty ||
+        birthTime.isEmpty ||
+        birthPlace == null) {
       return;
     }
 
@@ -121,6 +135,7 @@ class _NatalChartFlowScreenState extends ConsumerState<NatalChartFlowScreen> {
       summary = await ref.read(aiRepositoryProvider).generateNatalChart(
             birthDate: birthDate,
             birthTime: birthTime,
+            birthPlace: birthPlace,
             languageCode: localeCode,
           );
     } on AiRepositoryException {
@@ -145,6 +160,7 @@ class _NatalChartFlowScreenState extends ConsumerState<NatalChartFlowScreen> {
           highlights: [
             copy.highlightDate(birthDate),
             copy.highlightTime(birthTime),
+            copy.highlightPlace(birthPlace.displayName),
             copy.highlightAdvice,
           ],
           action: copy.randomAction(name),
@@ -159,6 +175,77 @@ class _NatalChartFlowScreenState extends ConsumerState<NatalChartFlowScreen> {
     }
     setState(() {
       _isSubmitting = false;
+    });
+  }
+
+  void _onPlaceQueryChanged(String value) {
+    setState(() {
+      _selectedBirthPlace = null;
+      _placeError = null;
+    });
+    _placeSearchDebounce?.cancel();
+    final query = value.trim();
+    if (query.length < 2) {
+      setState(() {
+        _isPlaceLoading = false;
+        _placeSuggestions = const [];
+      });
+      return;
+    }
+    _placeSearchDebounce = Timer(const Duration(milliseconds: 280), () async {
+      await _searchPlaces(query);
+    });
+  }
+
+  Future<void> _searchPlaces(String query) async {
+    final copy = _NatalCopy.resolve(context);
+    final localeCode = Localizations.localeOf(context).languageCode;
+    setState(() {
+      _isPlaceLoading = true;
+      _placeError = null;
+    });
+    try {
+      final items = await ref.read(aiRepositoryProvider).searchBirthPlaces(
+            query: query,
+            locale: localeCode,
+            limit: 20,
+          );
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _isPlaceLoading = false;
+        _placeSuggestions = items;
+      });
+    } on AiRepositoryException {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _isPlaceLoading = false;
+        _placeSuggestions = const [];
+        _placeError = copy.placeSearchError;
+      });
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _isPlaceLoading = false;
+        _placeSuggestions = const [];
+        _placeError = copy.placeSearchError;
+      });
+    }
+  }
+
+  void _selectBirthPlace(BirthPlaceSuggestion place) {
+    FocusScope.of(context).unfocus();
+    setState(() {
+      _selectedBirthPlace = place;
+      _placeController.text = place.displayName;
+      _placeSuggestions = const [];
+      _placeError = null;
+      _isPlaceLoading = false;
     });
   }
 
@@ -178,7 +265,8 @@ class _NatalChartFlowScreenState extends ConsumerState<NatalChartFlowScreen> {
     final canContinue = switch (_step) {
       0 => _nameController.text.trim().isNotEmpty,
       1 => _dateController.text.trim().isNotEmpty,
-      _ => _timeController.text.trim().isNotEmpty && !_isSubmitting,
+      2 => _timeController.text.trim().isNotEmpty,
+      _ => _selectedBirthPlace != null && !_isSubmitting,
     };
 
     return Scaffold(
@@ -203,7 +291,7 @@ class _NatalChartFlowScreenState extends ConsumerState<NatalChartFlowScreen> {
               Text(copy.screenTitle,
                   style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 14),
-              _StepProgress(total: 3, current: _step),
+              _StepProgress(total: 4, current: _step),
               const SizedBox(height: 20),
               if (_step == 0)
                 _InputField(
@@ -230,6 +318,62 @@ class _NatalChartFlowScreenState extends ConsumerState<NatalChartFlowScreen> {
                   suffixIcon: const Icon(Icons.schedule),
                   onTap: _pickTime,
                 ),
+              if (_step == 3) ...[
+                _InputField(
+                  controller: _placeController,
+                  label: copy.placeLabel,
+                  hint: copy.placeHint,
+                  suffixIcon: _selectedBirthPlace != null
+                      ? const Icon(Icons.check_circle, color: Colors.green)
+                      : const Icon(Icons.location_on_outlined),
+                  onChanged: _onPlaceQueryChanged,
+                ),
+                const SizedBox(height: 10),
+                if (_isPlaceLoading)
+                  Text(
+                    copy.placeLoadingLabel,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                if (_placeError != null && _placeError!.trim().isNotEmpty)
+                  Text(
+                    _placeError!,
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodySmall
+                        ?.copyWith(color: Theme.of(context).colorScheme.error),
+                  ),
+                if (_placeSuggestions.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Container(
+                    constraints: const BoxConstraints(maxHeight: 220),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.outlineVariant,
+                      ),
+                    ),
+                    child: ListView.separated(
+                      shrinkWrap: true,
+                      itemCount: _placeSuggestions.length,
+                      separatorBuilder: (_, __) => Divider(
+                        height: 1,
+                        color: Theme.of(context).dividerColor,
+                      ),
+                      itemBuilder: (context, index) {
+                        final place = _placeSuggestions[index];
+                        return ListTile(
+                          dense: true,
+                          title: Text(place.displayName),
+                          subtitle: place.timezone.isNotEmpty
+                              ? Text(place.timezone)
+                              : null,
+                          onTap: () => _selectBirthPlace(place),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ],
               if (_isSubmitting) ...[
                 const SizedBox(height: 14),
                 _MagicLoadingCard(
@@ -265,7 +409,7 @@ class _NatalChartFlowScreenState extends ConsumerState<NatalChartFlowScreen> {
                   ],
                   Expanded(
                     child: AppPrimaryButton(
-                      label: _step == 2 ? copy.generateButton : copy.nextButton,
+                      label: _step == 3 ? copy.generateButton : copy.nextButton,
                       onPressed: canContinue ? _next : null,
                     ),
                   ),
@@ -341,6 +485,10 @@ class _NatalCopy {
     required this.dateHint,
     required this.timeLabel,
     required this.timeHint,
+    required this.placeLabel,
+    required this.placeHint,
+    required this.placeLoadingLabel,
+    required this.placeSearchError,
     required this.loadingLabel,
     required this.backButton,
     required this.nextButton,
@@ -357,6 +505,10 @@ class _NatalCopy {
   final String dateHint;
   final String timeLabel;
   final String timeHint;
+  final String placeLabel;
+  final String placeHint;
+  final String placeLoadingLabel;
+  final String placeSearchError;
   final String loadingLabel;
   final String backButton;
   final String nextButton;
@@ -394,6 +546,16 @@ class _NatalCopy {
       return 'Туған уақыты: $time';
     }
     return 'Birth time: $time';
+  }
+
+  String highlightPlace(String place) {
+    if (screenTitle == 'Натальная карта') {
+      return 'Место рождения: $place';
+    }
+    if (screenTitle == 'Наталдық карта') {
+      return 'Туған жері: $place';
+    }
+    return 'Birth place: $place';
   }
 
   String tarotQuestion(String name) {
@@ -450,6 +612,10 @@ class _NatalCopy {
         dateHint: 'ГГГГ-ММ-ДД',
         timeLabel: 'Время рождения',
         timeHint: 'ЧЧ:ММ',
+        placeLabel: 'Место рождения',
+        placeHint: 'Введите город и выберите из списка',
+        placeLoadingLabel: 'Ищем города…',
+        placeSearchError: 'Не удалось загрузить справочник городов.',
         loadingLabel: 'Создаем натальную карту…',
         backButton: 'Назад',
         nextButton: 'Далее',
@@ -470,6 +636,10 @@ class _NatalCopy {
         dateHint: 'ЖЖЖЖ-АА-КК',
         timeLabel: 'Туған уақыты',
         timeHint: 'СС:ММ',
+        placeLabel: 'Туған жері',
+        placeHint: 'Қаланы енгізіп, тізімнен таңдаңыз',
+        placeLoadingLabel: 'Қалалар ізделуде…',
+        placeSearchError: 'Қалалар анықтамалығын жүктеу мүмкін болмады.',
         loadingLabel: 'Наталдық карта жасалуда…',
         backButton: 'Артқа',
         nextButton: 'Келесі',
@@ -489,6 +659,10 @@ class _NatalCopy {
       dateHint: 'YYYY-MM-DD',
       timeLabel: 'Time of birth',
       timeHint: 'HH:MM',
+      placeLabel: 'Birth place',
+      placeHint: 'Type city and select from the list',
+      placeLoadingLabel: 'Searching cities…',
+      placeSearchError: 'Could not load city directory.',
       loadingLabel: 'Creating your natal chart…',
       backButton: 'Back',
       nextButton: 'Next',

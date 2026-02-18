@@ -53,7 +53,8 @@ const {
   listRecentUserQueries,
   clearUserQueryHistory,
   recordUserDailyActivity,
-  getUserVisitStreak
+  getUserVisitStreak,
+  searchGeoPlaces
 } = require('./src/db');
 
 const app = express();
@@ -250,6 +251,18 @@ const STARS_PACK_FIVE_CARDS_SINGLE_XTR = Number(
 const STARS_PACK_SELF_ANALYSIS_REPORT_XTR = Number(
   process.env.STARS_PACK_SELF_ANALYSIS_REPORT_XTR || 200
 );
+const DEFAULT_GEO_COUNTRIES = [
+  'RU',
+  'KZ',
+  'BY',
+  'KG',
+  'UZ',
+  'TJ',
+  'TM',
+  'AM',
+  'AZ',
+  'MD'
+];
 
 const ENERGY_STARS_PACKS = {
   full: { energyAmount: 100, starsAmount: STARS_PACK_FULL_XTR, grantType: 'energy' },
@@ -643,6 +656,69 @@ app.get('/api/reading/availability', (req, res) => {
     available,
     requestId: req.requestId
   });
+});
+
+app.get('/api/geo/places', async (req, res) => {
+  if (!hasDb()) {
+    return res.status(503).json({
+      error: 'storage_unavailable',
+      reason: 'database_not_configured',
+      requestId: req.requestId
+    });
+  }
+  const query = typeof req.query?.q === 'string' ? req.query.q.trim() : '';
+  if (query.length < 2) {
+    return res.status(400).json({
+      error: 'invalid_query',
+      reason: 'q must be at least 2 chars',
+      requestId: req.requestId
+    });
+  }
+  const limitRaw = Number(req.query?.limit);
+  const limit = Number.isFinite(limitRaw) ? limitRaw : 20;
+  const countriesRaw =
+    typeof req.query?.countries === 'string' ? req.query.countries : '';
+  const countries = countriesRaw
+    ? countriesRaw
+        .split(',')
+        .map((code) => code.trim().toUpperCase())
+        .filter((code) => /^[A-Z]{2}$/.test(code))
+    : DEFAULT_GEO_COUNTRIES;
+  try {
+    const places = await searchGeoPlaces({
+      query,
+      limit,
+      countryCodes: countries
+    });
+    const items = places.map((place) => {
+      const locationParts = [place.cityName];
+      if (place.admin1Name) {
+        locationParts.push(place.admin1Name);
+      }
+      locationParts.push(place.countryName || place.countryCode);
+      return {
+        ...place,
+        displayName: locationParts.filter(Boolean).join(', ')
+      };
+    });
+    return res.json({
+      ok: true,
+      items,
+      requestId: req.requestId
+    });
+  } catch (error) {
+    console.error(
+      JSON.stringify({
+        event: 'geo_places_search_error',
+        requestId: req.requestId,
+        message: error?.message ? String(error.message).slice(0, 300) : 'unknown'
+      })
+    );
+    return res.status(500).json({
+      error: 'internal_error',
+      requestId: req.requestId
+    });
+  }
 });
 
 app.get('/api/history/queries', telegramAuthMiddleware, async (req, res) => {
@@ -1869,7 +1945,7 @@ app.post('/api/natal-chart/generate_web', async (req, res) => {
       await logUserQuery({
         telegramUserId,
         queryType: 'natal_chart',
-        question: `Natal chart: ${payload?.birthDate || ''}`,
+        question: `Natal chart: ${payload?.birthDate || ''} ${payload?.birthPlace?.displayName || payload?.birthPlace?.placeId || ''}`.trim(),
         locale: normalizeLocale(payload?.language)
       });
     }
