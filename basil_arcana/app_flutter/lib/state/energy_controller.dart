@@ -86,7 +86,7 @@ class EnergyController extends StateNotifier<EnergyState> {
   }
 
   static const double maxEnergy = 100;
-  static const double recoveryPerSecond = maxEnergy / 1800;
+  static const double recoveryPerSecond = maxEnergy / 2700;
   static const double lowThreshold = 15;
   static const double nearEmptyThreshold = 6;
   static const String valueStorageKey = 'oracle_energy_value';
