@@ -1,0 +1,5 @@
+# GeoNames download cache and generated reference datasets
+tools/.cache/
+server/data/geo_test/
+server/data/geo_cis/
+
