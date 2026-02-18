@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -27,6 +28,7 @@ class ConfigService {
     'APP_VERSION',
     defaultValue: '',
   );
+  static const Duration _configLoadTimeout = Duration(seconds: 4);
 
   String _apiBaseUrl = _apiBaseUrlEnv;
   String _assetsBaseUrl = _normalizeBaseUrl(
@@ -89,7 +91,7 @@ class ConfigService {
           'Cache-Control': 'no-store',
           'Pragma': 'no-cache',
         },
-      );
+      ).timeout(_configLoadTimeout);
       if (response.statusCode < 200 || response.statusCode >= 300) {
         _lastError = 'Config load failed (${response.statusCode})';
         WebErrorReporter.instance.report(_lastError!);
@@ -121,6 +123,10 @@ class ConfigService {
           runtimeAppVersion.trim().isNotEmpty) {
         _appVersion = runtimeAppVersion.trim();
       }
+    } on TimeoutException catch (_) {
+      _lastError = 'Config load failed: timeout after '
+          '${_configLoadTimeout.inSeconds}s';
+      WebErrorReporter.instance.report(_lastError!);
     } catch (error) {
       _lastError = 'Config load failed: ${error.toString()}';
       WebErrorReporter.instance.report(_lastError!);

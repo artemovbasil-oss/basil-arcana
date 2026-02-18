@@ -95,6 +95,15 @@ class AiRepository {
     );
   }
 
+  Future<_TelegramAuthState> _getTelegramAuthStateWithWarmup() async {
+    var authState = await _getTelegramAuthState();
+    if (!kIsWeb || !authState.isTelegram || authState.hasInitData) {
+      return authState;
+    }
+    authState = await _getTelegramAuthState(forceRefresh: true);
+    return authState;
+  }
+
   Future<bool> isBackendAvailable({
     http.Client? client,
     Duration timeout = _availabilityTimeout,
@@ -105,7 +114,7 @@ class AiRepository {
         message: 'Missing API_BASE_URL',
       );
     }
-    final telegramAuth = await _getTelegramAuthState();
+    final telegramAuth = await _getTelegramAuthStateWithWarmup();
     if (kIsWeb && telegramAuth.isTelegram && !telegramAuth.hasInitData) {
       debugPrint(
         '[AiRepository] Telegram initData empty; check web bridge timing.',
@@ -236,7 +245,7 @@ class AiRepository {
       );
     }
 
-    final telegramAuth = await _getTelegramAuthState();
+    var telegramAuth = await _getTelegramAuthStateWithWarmup();
     if (kIsWeb && telegramAuth.isTelegram && !telegramAuth.hasInitData) {
       debugPrint(
         '[AiRepository] Telegram initData empty; check web bridge timing.',
@@ -318,45 +327,68 @@ class AiRepository {
       if (fastReading != null) 'fastReading': fastReading,
     };
 
-    final headers = {
-      'Content-Type': 'application/json',
-      'x-request-id': requestId,
-      if (telegramAuth.hasInitData)
-        'X-Telegram-InitData': telegramAuth.initData,
-    };
-    if (useTelegramWeb && kDebugMode) {
-      _logTelegramInitDataDebug(
-        endpoint: endpoint,
-        initData: telegramAuth.initData,
-      );
-    }
-    final requestPayload = useTelegramWeb
-        ? {
-            if (telegramAuth.hasInitData) 'initData': telegramAuth.initData,
-            'payload': payload,
-          }
-        : {
-            ...payload,
-            if (telegramAuth.hasInitData) 'initData': telegramAuth.initData,
-          };
-
     final baseClient = client ?? http.Client();
     final httpClient = _wrapClient(baseClient);
     http.Response response;
     try {
-      _logStart(
-        uri,
-        requestId: requestId,
-        startTimestamp: startTimestamp,
-        timeout: timeout,
-      );
-      response = await httpClient
-          .post(
-            uri,
-            headers: headers,
-            body: jsonEncode(requestPayload),
-          )
-          .timeout(timeout);
+      Future<http.Response> sendGenerateRequest(
+        _TelegramAuthState authState, {
+        required bool isRetry,
+      }) async {
+        final headers = {
+          'Content-Type': 'application/json',
+          'x-request-id': requestId,
+          if (authState.hasInitData) 'X-Telegram-InitData': authState.initData,
+        };
+        if (useTelegramWeb && kDebugMode) {
+          _logTelegramInitDataDebug(
+            endpoint: endpoint,
+            initData: authState.initData,
+          );
+        }
+        final requestPayload = useTelegramWeb
+            ? {
+                if (authState.hasInitData) 'initData': authState.initData,
+                'payload': payload,
+              }
+            : {
+                ...payload,
+                if (authState.hasInitData) 'initData': authState.initData,
+              };
+        _logStart(
+          uri,
+          requestId: requestId,
+          startTimestamp: startTimestamp,
+          timeout: timeout,
+        );
+        if (isRetry && kDebugMode) {
+          debugPrint(
+            '[AiRepository] retrying generateReading with refreshed initData '
+            'requestId=$requestId',
+          );
+        }
+        return httpClient
+            .post(
+              uri,
+              headers: headers,
+              body: jsonEncode(requestPayload),
+            )
+            .timeout(timeout);
+      }
+
+      response = await sendGenerateRequest(telegramAuth, isRetry: false);
+      if (useTelegramWeb &&
+          (response.statusCode == 401 || response.statusCode == 403)) {
+        final refreshedTelegramAuth =
+            await _getTelegramAuthState(forceRefresh: true);
+        final shouldRetryWithFreshInitData =
+            refreshedTelegramAuth.hasInitData &&
+                refreshedTelegramAuth.initData != telegramAuth.initData;
+        if (shouldRetryWithFreshInitData) {
+          telegramAuth = refreshedTelegramAuth;
+          response = await sendGenerateRequest(telegramAuth, isRetry: true);
+        }
+      }
     } on TimeoutException catch (error) {
       _logFailure(
         uri,

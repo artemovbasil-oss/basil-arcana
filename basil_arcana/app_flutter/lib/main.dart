@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -26,7 +27,9 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   _installGlobalErrorHandlers();
   try {
-    await AppConfig.init();
+    await AppConfig.init().timeout(const Duration(seconds: 5), onTimeout: () {
+      debugPrint('[Startup] AppConfig.init timeout; continuing with defaults.');
+    });
     await HiveStorage.init();
     await CardCacheCleanup.clearPersistedCardCaches();
     final settingsBox = Hive.box<String>('settings');
@@ -35,17 +38,15 @@ Future<void> main() async {
             ? AppConfig.appVersion
             : readWebBuildVersion())
         .trim();
-    final resolvedAppVersion = runtimeBuildVersion.isNotEmpty
-        ? runtimeBuildVersion
-        : appVersion;
+    final resolvedAppVersion =
+        runtimeBuildVersion.isNotEmpty ? runtimeBuildVersion : appVersion;
     debugPrint(
       '[Startup] APP_VERSION=$resolvedAppVersion '
       'locale=$languageCode '
       'cardDataSource=local',
     );
     logRuntimeDiagnostics(
-      appVersion:
-          resolvedAppVersion.isEmpty ? 'unknown' : resolvedAppVersion,
+      appVersion: resolvedAppVersion.isEmpty ? 'unknown' : resolvedAppVersion,
       locale: languageCode,
       cardDataSource: 'local',
       apiBaseUrl: AppConfig.apiBaseUrl,
@@ -99,8 +100,7 @@ Future<void> _runApiAvailabilitySelfCheck() async {
   }
   final uri = Uri.parse(baseUrl).replace(path: '/api/reading/availability');
   try {
-    final response =
-        await http.get(uri).timeout(const Duration(seconds: 6));
+    final response = await http.get(uri).timeout(const Duration(seconds: 6));
     final preview = response.body.length > 200
         ? response.body.substring(0, 200)
         : response.body;
