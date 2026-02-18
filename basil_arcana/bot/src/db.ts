@@ -34,6 +34,14 @@ export interface RecentUserQueryRow {
   createdAt: number | null;
 }
 
+export interface OracleQueryRow {
+  telegramUserId: number;
+  queryType: string;
+  question: string;
+  locale: string | null;
+  createdAt: number | null;
+}
+
 export interface BroadcastUserRow {
   telegramUserId: number;
   locale: DbLocale | null;
@@ -441,6 +449,37 @@ export async function listRecentUserQueriesForUser(
     locale: (row.locale as string | null) ?? null,
     createdAt: toMillis((row.created_at as Date | null) ?? null),
   }));
+}
+
+export async function listRecentOracleQueries(
+  limit = 20,
+  offset = 0,
+): Promise<{ rows: OracleQueryRow[]; hasMore: boolean }> {
+  const db = requirePool();
+  const safeLimit = Math.max(1, Math.min(100, Number(limit) || 20));
+  const safeOffset = Math.max(0, Number(offset) || 0);
+  const { rows } = await db.query(
+    `
+    SELECT telegram_user_id, query_type, question, locale, created_at
+    FROM user_query_history
+    ORDER BY created_at DESC, id DESC
+    OFFSET $1
+    LIMIT $2;
+    `,
+    [safeOffset, safeLimit + 1],
+  );
+  const hasMore = rows.length > safeLimit;
+  const sliced = hasMore ? rows.slice(0, safeLimit) : rows;
+  return {
+    rows: sliced.map((row) => ({
+      telegramUserId: Number(row.telegram_user_id),
+      queryType: String(row.query_type ?? ""),
+      question: String(row.question ?? ""),
+      locale: (row.locale as string | null) ?? null,
+      createdAt: toMillis((row.created_at as Date | null) ?? null),
+    })),
+    hasMore,
+  };
 }
 
 export async function listUsersForBroadcast(): Promise<BroadcastUserRow[]> {

@@ -9,6 +9,8 @@ const TELEGRAM_STARS_CURRENCY = "XTR";
 const PURCHASE_CODE_LENGTH = 6;
 const DAY_MS = 24 * 60 * 60 * 1000;
 const MINI_APP_VERSION_TAG = "20260214-novideo";
+const SOFIA_ORACLE_QUERIES_PAGE_SIZE = 20;
+const SOFIA_ORACLE_QUERIES_MAX_ALL = 2000;
 const PLANS = {
     single: {
         id: "single",
@@ -733,6 +735,42 @@ function formatQueryTypeForSofia(queryType) {
     }
     return queryType;
 }
+function formatDateTimeForSofia(timestampMs) {
+    if (!timestampMs) {
+        return "-";
+    }
+    return new Intl.DateTimeFormat("ru-RU", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+    }).format(new Date(timestampMs));
+}
+function truncateText(value, maxLength) {
+    const normalized = value.replace(/\s+/g, " ").trim();
+    if (normalized.length <= maxLength) {
+        return normalized;
+    }
+    return `${normalized.slice(0, maxLength - 1)}…`;
+}
+function buildSofiaOracleQueriesKeyboard(offset, hasMore) {
+    const keyboard = new grammy_1.InlineKeyboard();
+    if (hasMore) {
+        keyboard.text("➡️ Еще 20", `sofia_queries:next:${offset}`);
+        keyboard.row().text("📚 Показать все", `sofia_queries:all:${offset}`);
+    }
+    keyboard.row().text("⏹ Остановить", "sofia_queries:stop:0");
+    return keyboard;
+}
+function buildOracleQueryRowText(row, index) {
+    const dateTime = formatDateTimeForSofia(row.createdAt);
+    const type = formatQueryTypeForSofia(row.queryType);
+    const question = truncateText(row.question || "-", 320);
+    const locale = row.locale ?? "-";
+    return `${index}. ${dateTime} • user_id=${row.telegramUserId} • ${type} • ${locale}\n${question}`;
+}
 function newsMessageForLocale(locale) {
     if (locale === "en") {
         return [
@@ -771,6 +809,52 @@ function supportedLocaleFromDb(value) {
 }
 function delay(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
+}
+async function sendSofiaOracleQueriesPage(ctx, offset) {
+    const safeOffset = Math.max(0, offset);
+    const page = await (0, db_1.listRecentOracleQueries)(SOFIA_ORACLE_QUERIES_PAGE_SIZE, safeOffset);
+    if (page.rows.length === 0) {
+        if (safeOffset === 0) {
+            await ctx.reply("Запросов к оракулу пока нет.");
+            return;
+        }
+        await ctx.reply("Больше записей нет.");
+        return;
+    }
+    const startIndex = safeOffset + 1;
+    const lines = page.rows.map((row, index) => buildOracleQueryRowText(row, startIndex + index));
+    await replyTextChunks(ctx, [
+        `Запросы к оракулу (показаны ${startIndex}-${startIndex + page.rows.length - 1}):`,
+        "",
+        ...lines,
+    ]);
+    await ctx.reply("Действия:", {
+        reply_markup: buildSofiaOracleQueriesKeyboard(safeOffset + page.rows.length, page.hasMore),
+    });
+}
+async function sendAllSofiaOracleQueries(ctx, offset) {
+    let currentOffset = Math.max(0, offset);
+    let sent = 0;
+    while (sent < SOFIA_ORACLE_QUERIES_MAX_ALL) {
+        const page = await (0, db_1.listRecentOracleQueries)(SOFIA_ORACLE_QUERIES_PAGE_SIZE, currentOffset);
+        if (page.rows.length === 0) {
+            break;
+        }
+        const startIndex = currentOffset + 1;
+        const lines = page.rows.map((row, index) => buildOracleQueryRowText(row, startIndex + index));
+        await replyTextChunks(ctx, lines);
+        currentOffset += page.rows.length;
+        sent += page.rows.length;
+        if (!page.hasMore) {
+            break;
+        }
+        await delay(40);
+    }
+    if (sent >= SOFIA_ORACLE_QUERIES_MAX_ALL) {
+        await ctx.reply(`Показано ${sent} запросов. Достигнут безопасный лимит. Продолжить: /oracle_queries`);
+        return;
+    }
+    await ctx.reply(`Готово. Показано ${sent} запросов.`);
 }
 function isGetUpdatesConflictError(error) {
     if (!error || typeof error !== "object") {
@@ -847,7 +931,7 @@ async function main() {
         for (const row of active) {
             chunks.push(formatStateForSofia(row));
         }
-        await ctx.reply(`Активные подписки (${active.length}):\n\n${chunks.join("\n\n----------------\n\n")}\n\nКоманда закрытия: /sub_done <user_id>\nИстория запросов: /queries <user_id> [limit]`);
+        await ctx.reply(`Активные подписки (${active.length}):\n\n${chunks.join("\n\n----------------\n\n")}\n\nКоманда закрытия: /sub_done <user_id>\nИстория запросов пользователя: /queries <user_id> [limit]\nВсе запросы к оракулу: /oracle_queries`);
     });
     bot.command("sub_done", async (ctx) => {
         if (!isSofiaOperator(ctx)) {
@@ -907,6 +991,12 @@ async function main() {
             return `${index + 1}. ${date} • ${type}\n${question}`;
         });
         await ctx.reply(`Недавние запросы user_id=${userId} (${rows.length}):\n\n${lines.join("\n\n")}`);
+    });
+    bot.command("oracle_queries", async (ctx) => {
+        if (!isSofiaOperator(ctx)) {
+            return;
+        }
+        await sendSofiaOracleQueriesPage(ctx, 0);
     });
     bot.command("users_today", async (ctx) => {
         if (!isSofiaOperator(ctx)) {
@@ -1069,6 +1159,30 @@ async function main() {
         }
         sofiaAwaitingPushText.add(fromId);
         await ctx.reply("Отправь текст пуша следующим сообщением. Команда для отмены: /cancel_push");
+    });
+    bot.callbackQuery(/^sofia_queries:(next|all|stop):(\d+)$/, async (ctx) => {
+        await ctx.answerCallbackQuery();
+        if (!isSofiaOperator(ctx)) {
+            return;
+        }
+        const action = ctx.match[1];
+        const offset = Number(ctx.match[2]) || 0;
+        if (action === "stop") {
+            try {
+                await ctx.editMessageReplyMarkup();
+            }
+            catch (_) {
+                // ignore edit failures (message could be too old or already edited)
+            }
+            await ctx.reply("Остановлено.");
+            return;
+        }
+        if (action === "all") {
+            await ctx.reply("Показываю все запросы в хронологическом порядке…");
+            await sendAllSofiaOracleQueries(ctx, offset);
+            return;
+        }
+        await sendSofiaOracleQueriesPage(ctx, offset);
     });
     bot.callbackQuery(/^plan:(single|week|month|year)$/, async (ctx) => {
         await rememberUserProfile(ctx);

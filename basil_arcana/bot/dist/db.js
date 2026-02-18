@@ -11,6 +11,7 @@ exports.insertPayment = insertPayment;
 exports.listActiveSubscriptions = listActiveSubscriptions;
 exports.completeConsultation = completeConsultation;
 exports.listRecentUserQueriesForUser = listRecentUserQueriesForUser;
+exports.listRecentOracleQueries = listRecentOracleQueries;
 exports.listUsersForBroadcast = listUsersForBroadcast;
 exports.listUsersForSofia = listUsersForSofia;
 exports.listUsersCreatedTodayForSofia = listUsersCreatedTodayForSofia;
@@ -315,6 +316,30 @@ async function listRecentUserQueriesForUser(telegramUserId, limit = 10) {
         locale: row.locale ?? null,
         createdAt: toMillis(row.created_at ?? null),
     }));
+}
+async function listRecentOracleQueries(limit = 20, offset = 0) {
+    const db = requirePool();
+    const safeLimit = Math.max(1, Math.min(100, Number(limit) || 20));
+    const safeOffset = Math.max(0, Number(offset) || 0);
+    const { rows } = await db.query(`
+    SELECT telegram_user_id, query_type, question, locale, created_at
+    FROM user_query_history
+    ORDER BY created_at DESC, id DESC
+    OFFSET $1
+    LIMIT $2;
+    `, [safeOffset, safeLimit + 1]);
+    const hasMore = rows.length > safeLimit;
+    const sliced = hasMore ? rows.slice(0, safeLimit) : rows;
+    return {
+        rows: sliced.map((row) => ({
+            telegramUserId: Number(row.telegram_user_id),
+            queryType: String(row.query_type ?? ""),
+            question: String(row.question ?? ""),
+            locale: row.locale ?? null,
+            createdAt: toMillis(row.created_at ?? null),
+        })),
+        hasMore,
+    };
 }
 async function listUsersForBroadcast() {
     const db = requirePool();
