@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -21,6 +23,8 @@ class AstroResultScreen extends ConsumerWidget {
     required this.action,
     required this.sofiaPrefill,
     this.tarotQuestion,
+    this.showBirthChartVisual = false,
+    this.birthChartSeed,
     super.key,
   });
 
@@ -31,6 +35,8 @@ class AstroResultScreen extends ConsumerWidget {
   final String action;
   final String sofiaPrefill;
   final String? tarotQuestion;
+  final bool showBirthChartVisual;
+  final String? birthChartSeed;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -76,6 +82,18 @@ class AstroResultScreen extends ConsumerWidget {
                       ],
                     ),
                   ),
+                  if (showBirthChartVisual) ...[
+                    const SizedBox(height: 14),
+                    ChatBubble(
+                      isUser: false,
+                      avatarEmoji: '🪄',
+                      child: _BirthChartVisualCard(
+                        title: copy.birthChartTitle,
+                        seed: birthChartSeed ??
+                            '$userPrompt|$summary|${highlights.join("|")}',
+                      ),
+                    ),
+                  ],
                   if (highlights.isNotEmpty) ...[
                     const SizedBox(height: 14),
                     ChatBubble(
@@ -251,6 +269,7 @@ class _AstroResultCopy {
     required this.referralTitle,
     required this.referralBody,
     required this.referralButton,
+    required this.birthChartTitle,
     required this.tarotCtaButton,
     required this.referralCopied,
     required this.referralShareMessage,
@@ -262,6 +281,7 @@ class _AstroResultCopy {
   final String referralTitle;
   final String referralBody;
   final String referralButton;
+  final String birthChartTitle;
   final String tarotCtaButton;
   final String referralCopied;
   final String referralShareMessage;
@@ -277,6 +297,7 @@ class _AstroResultCopy {
         referralBody:
             'Поделись персональной ссылкой с друзьями и получай 20 бесплатных премиум-раскладов на 5 карт, 20 тестов на совместимость и 20 натальных карт за каждого нового пользователя.',
         referralButton: 'Поделиться ссылкой',
+        birthChartTitle: 'Ваша карта рождения',
         tarotCtaButton: 'Сделать расклад Таро',
         referralCopied:
             'Реферальная ссылка скопирована. Отправь ее в Telegram.',
@@ -293,6 +314,7 @@ class _AstroResultCopy {
         referralBody:
             'Жеке сілтемеңді достарыңмен бөліс және әр жаңа қолданушы үшін 5 карталық 20 премиум жайылма, 20 үйлесімділік тесті және 20 наталдық карта ал.',
         referralButton: 'Сілтемемен бөлісу',
+        birthChartTitle: 'Туу картаңыз',
         tarotCtaButton: 'Таро расклад жасау',
         referralCopied: 'Реферал сілтеме көшірілді. Оны Telegram-да жібер.',
         referralShareMessage:
@@ -307,10 +329,182 @@ class _AstroResultCopy {
       referralBody:
           'Share your personal link with friends and get 20 free premium five-card readings, 20 compatibility tests, and 20 natal charts for every new user who joins.',
       referralButton: 'Share link',
+      birthChartTitle: 'Your birth map',
       tarotCtaButton: 'Do a Tarot spread',
       referralCopied: 'Referral link copied. Send it in Telegram.',
       referralShareMessage:
           'Try Basil Arcana: stylish Tarot readings, compatibility checks, and natal charts right in Telegram.',
     );
+  }
+}
+
+class _BirthChartVisualCard extends StatelessWidget {
+  const _BirthChartVisualCard({
+    required this.title,
+    required this.seed,
+  });
+
+  final String title;
+  final String seed;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            colorScheme.primary.withValues(alpha: 0.14),
+            colorScheme.surfaceContainerHighest.withValues(alpha: 0.22),
+          ],
+        ),
+        border: Border.all(color: colorScheme.primary.withValues(alpha: 0.35)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+          ),
+          const SizedBox(height: 10),
+          AspectRatio(
+            aspectRatio: 1,
+            child: CustomPaint(
+              painter: _BirthChartPainter(
+                seed: seed,
+                primary: colorScheme.primary,
+                accent: colorScheme.secondary,
+                lineColor: colorScheme.onSurface.withValues(alpha: 0.65),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BirthChartPainter extends CustomPainter {
+  _BirthChartPainter({
+    required this.seed,
+    required this.primary,
+    required this.accent,
+    required this.lineColor,
+  });
+
+  final String seed;
+  final Color primary;
+  final Color accent;
+  final Color lineColor;
+
+  static const int _houses = 12;
+  static const int _pointsCount = 10;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = math.min(size.width, size.height) / 2;
+
+    final bgPaint = Paint()
+      ..shader = RadialGradient(
+        colors: [
+          primary.withValues(alpha: 0.16),
+          accent.withValues(alpha: 0.05),
+          Colors.transparent,
+        ],
+      ).createShader(Rect.fromCircle(center: center, radius: radius));
+    canvas.drawCircle(center, radius, bgPaint);
+
+    final ringPaint = Paint()
+      ..color = lineColor.withValues(alpha: 0.7)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.2;
+    canvas.drawCircle(center, radius * 0.92, ringPaint);
+    canvas.drawCircle(center, radius * 0.72, ringPaint);
+    canvas.drawCircle(center, radius * 0.48, ringPaint);
+
+    final housePaint = Paint()
+      ..color = lineColor.withValues(alpha: 0.45)
+      ..strokeWidth = 1;
+    for (var i = 0; i < _houses; i++) {
+      final angle = (2 * math.pi / _houses) * i - math.pi / 2;
+      final p1 =
+          center + Offset(math.cos(angle), math.sin(angle)) * (radius * 0.48);
+      final p2 =
+          center + Offset(math.cos(angle), math.sin(angle)) * (radius * 0.92);
+      canvas.drawLine(p1, p2, housePaint);
+    }
+
+    final angles = _seededAngles(seed, _pointsCount);
+    final nodePaint = Paint()..style = PaintingStyle.fill;
+    final lineBetweenNodes = Paint()
+      ..color = accent.withValues(alpha: 0.45)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.4;
+
+    Offset? first;
+    Offset? prev;
+    for (var i = 0; i < angles.length; i++) {
+      final a = angles[i];
+      final orbitScale = 0.53 + (i % 3) * 0.12;
+      final pos =
+          center + Offset(math.cos(a), math.sin(a)) * (radius * orbitScale);
+      if (first == null) {
+        first = pos;
+      }
+      if (prev != null && i.isEven) {
+        canvas.drawLine(prev, pos, lineBetweenNodes);
+      }
+      prev = pos;
+      nodePaint.color = i.isEven
+          ? primary.withValues(alpha: 0.95)
+          : accent.withValues(alpha: 0.9);
+      canvas.drawCircle(pos, 4.2, nodePaint);
+      canvas.drawCircle(
+        pos,
+        8,
+        Paint()
+          ..color = nodePaint.color.withValues(alpha: 0.18)
+          ..style = PaintingStyle.fill,
+      );
+    }
+    if (first != null && prev != null) {
+      canvas.drawLine(
+          prev,
+          first,
+          lineBetweenNodes
+            ..color = lineBetweenNodes.color.withValues(alpha: 0.2));
+    }
+  }
+
+  List<double> _seededAngles(String seed, int count) {
+    var hash = 2166136261;
+    for (final code in seed.codeUnits) {
+      hash ^= code;
+      hash = (hash * 16777619) & 0x7fffffff;
+    }
+    final rand = math.Random(hash);
+    final values = <double>[];
+    for (var i = 0; i < count; i++) {
+      values.add((rand.nextDouble() * 2 * math.pi));
+    }
+    values.sort();
+    return values;
+  }
+
+  @override
+  bool shouldRepaint(covariant _BirthChartPainter oldDelegate) {
+    return oldDelegate.seed != seed ||
+        oldDelegate.primary != primary ||
+        oldDelegate.accent != accent ||
+        oldDelegate.lineColor != lineColor;
   }
 }

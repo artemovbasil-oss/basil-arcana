@@ -157,6 +157,8 @@ class _NatalChartFlowScreenState extends ConsumerState<NatalChartFlowScreen> {
           userPrompt: copy.userPrompt(name),
           title: copy.resultTitle,
           summary: summary,
+          showBirthChartVisual: true,
+          birthChartSeed: '$name|$birthDate|$birthTime|${birthPlace.placeId}',
           highlights: [
             copy.highlightDate(birthDate),
             copy.highlightTime(birthTime),
