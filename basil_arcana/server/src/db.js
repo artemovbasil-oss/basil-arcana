@@ -1001,6 +1001,24 @@ function normalizePlaceQuery(value) {
     .trim();
 }
 
+function transliterateCyrillicToLatin(value) {
+  if (typeof value !== 'string') {
+    return '';
+  }
+  const map = {
+    а: 'a', ә: 'a', б: 'b', в: 'v', г: 'g', ғ: 'g', д: 'd', е: 'e', ё: 'e',
+    ж: 'zh', з: 'z', и: 'i', й: 'i', к: 'k', қ: 'k', л: 'l', м: 'm', н: 'n',
+    ң: 'n', о: 'o', ө: 'o', п: 'p', р: 'r', с: 's', т: 't', у: 'u', ұ: 'u',
+    ү: 'u', ф: 'f', х: 'h', һ: 'h', ц: 'ts', ч: 'ch', ш: 'sh', щ: 'shch',
+    ъ: '', ы: 'y', і: 'i', ь: '', э: 'e', ю: 'yu', я: 'ya'
+  };
+  let out = '';
+  for (const ch of value.toLowerCase()) {
+    out += Object.prototype.hasOwnProperty.call(map, ch) ? map[ch] : ch;
+  }
+  return out.replace(/\s+/g, ' ').trim();
+}
+
 async function searchGeoPlaces({
   query,
   limit = 20,
@@ -1010,9 +1028,18 @@ async function searchGeoPlaces({
   if (!normalizedQuery || normalizedQuery.length < 2) {
     return [];
   }
+  const transliteratedQuery = transliterateCyrillicToLatin(normalizedQuery);
+  const secondaryQuery =
+    transliteratedQuery &&
+    transliteratedQuery !== normalizedQuery &&
+    transliteratedQuery.length >= 2
+      ? transliteratedQuery
+      : normalizedQuery;
   const safeLimit = Math.min(50, Math.max(1, Number(limit) || 20));
   const prefixPattern = `${normalizedQuery}%`;
   const infixPattern = `%${normalizedQuery}%`;
+  const prefixPatternAlt = `${secondaryQuery}%`;
+  const infixPatternAlt = `%${secondaryQuery}%`;
   const normalizedCountries = Array.isArray(countryCodes)
     ? countryCodes
         .map((code) =>
@@ -1021,9 +1048,17 @@ async function searchGeoPlaces({
         .filter((code) => /^[A-Z]{2}$/.test(code))
     : [];
 
-  const values = [normalizedQuery, prefixPattern, infixPattern, safeLimit];
+  const values = [
+    normalizedQuery,
+    prefixPattern,
+    infixPattern,
+    secondaryQuery,
+    prefixPatternAlt,
+    infixPatternAlt,
+    safeLimit
+  ];
   const countryFilterSql = normalizedCountries.length
-    ? `AND p.country_code = ANY($5::text[])`
+    ? `AND p.country_code = ANY($8::text[])`
     : '';
   if (normalizedCountries.length) {
     values.push(normalizedCountries);
@@ -1042,15 +1077,17 @@ async function searchGeoPlaces({
         p.longitude,
         p.timezone,
         p.population,
-        MAX(similarity(a.alias_normalized, $1)) AS score,
-        BOOL_OR(a.alias_normalized LIKE $2) AS has_prefix,
-        BOOL_OR(a.alias_normalized = $1) AS is_exact
+        BOOL_OR(a.alias_normalized LIKE $2 OR a.alias_normalized LIKE $5) AS has_prefix,
+        BOOL_OR(a.alias_normalized = $1 OR a.alias_normalized = $4) AS is_exact
       FROM geo_place_aliases a
       JOIN geo_places p ON p.place_id = a.place_id
       WHERE (
-        a.alias_normalized % $1
+        a.alias_normalized = $1
+        OR a.alias_normalized = $4
         OR a.alias_normalized LIKE $2
         OR a.alias_normalized LIKE $3
+        OR a.alias_normalized LIKE $5
+        OR a.alias_normalized LIKE $6
       )
       ${countryFilterSql}
       GROUP BY
@@ -1066,9 +1103,8 @@ async function searchGeoPlaces({
       ORDER BY
         is_exact DESC,
         has_prefix DESC,
-        score DESC,
         p.population DESC
-      LIMIT $4;
+      LIMIT $7;
       `,
       values
     );
