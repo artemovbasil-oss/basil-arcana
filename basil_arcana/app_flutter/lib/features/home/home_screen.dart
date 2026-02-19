@@ -1693,124 +1693,156 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (context) {
+        const reportCtaReservedSpace = 196.0;
         return FractionallySizedBox(
           heightFactor: 0.95,
           child: SafeArea(
             top: false,
             child: Padding(
               padding: const EdgeInsets.fromLTRB(18, 14, 18, 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Stack(
                 children: [
-                  Center(
-                    child: Container(
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color:
-                            colorScheme.outlineVariant.withValues(alpha: 0.8),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: Text(
-                          copy.modalTitle,
-                          style:
-                              Theme.of(context).textTheme.titleLarge?.copyWith(
+                      Center(
+                        child: Container(
+                          width: 40,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: colorScheme.outlineVariant
+                                .withValues(alpha: 0.8),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              copy.modalTitle,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleLarge
+                                  ?.copyWith(
                                     fontWeight: FontWeight.w700,
                                   ),
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        icon: const Icon(Icons.close),
-                        tooltip: copy.closeLabel,
-                        visualDensity: VisualDensity.compact,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _StatPill(
-                          label: copy.currentStreakLabel,
-                          value: copy.daysCountLabel(
-                            _streakStats.currentStreakDays,
-                          ),
-                          tone: _StatPillTone.green,
-                          loading: _loadingStreak,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: _StatPill(
-                          label: copy.bestStreakLabel,
-                          value: copy.daysCountLabel(
-                            _streakStats.longestStreakDays,
-                          ),
-                          tone: _StatPillTone.blue,
-                          loading: _loadingStreak,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: _AwarenessPill(
-                          label: copy.awarenessLabel,
-                          value: _streakStats.awarenessPercent,
-                          locked: _streakStats.awarenessLocked,
-                          shimmer: _titleShimmerController,
-                          loading: _loadingStreak,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  if (!_loadingStreak && _streakStats.lastActiveAt != null)
-                    Text(
-                      copy.lastActiveLabel(_streakStats.lastActiveAt!),
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color:
-                                colorScheme.onSurface.withValues(alpha: 0.68),
-                          ),
-                    ),
-                  const SizedBox(height: 14),
-                  SelfAnalysisReportCtaSection(
-                    title: copy.reportSectionTitle,
-                    body: copy.reportSectionBody,
-                    paidLabel: copy.reportPaidCta,
-                    freeLabel: copy.reportFreeCta,
-                    helper: '',
-                    isFree: _isReportFreeByEntitlements(),
-                    isLoading:
-                        _reportFlowInFlight || _loadingReportEntitlements,
-                    isEnabled: !_loadingStreak,
-                    onPressed: () => _onGenerateReportTap(
-                      copy: copy,
-                      selectedDeck: selectedDeck,
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          if (_loadingStreak)
-                            _HomeMagicLoadingCard(
-                              label: copy.streakLoadingSubtitle,
-                            )
-                          else
-                            _EnergyProfileCard(
-                              copy: energyCopy,
-                              profile: profile,
-                              streakDays: _streakStats.currentStreakDays,
                             ),
-                          const SizedBox(height: 12),
+                          ),
+                          IconButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            icon: const Icon(Icons.close),
+                            tooltip: copy.closeLabel,
+                            visualDensity: VisualDensity.compact,
+                          ),
                         ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _StatPill(
+                              label: copy.currentStreakLabel,
+                              value: copy.daysCountLabel(
+                                _streakStats.currentStreakDays,
+                              ),
+                              tone: _StatPillTone.green,
+                              loading: _loadingStreak,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: _StatPill(
+                              label: copy.bestStreakLabel,
+                              value: copy.daysCountLabel(
+                                _streakStats.longestStreakDays,
+                              ),
+                              tone: _StatPillTone.blue,
+                              loading: _loadingStreak,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: _AwarenessPill(
+                              label: copy.awarenessLabel,
+                              value: _streakStats.awarenessPercent,
+                              locked: _streakStats.awarenessLocked,
+                              shimmer: _titleShimmerController,
+                              loading: _loadingStreak,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      if (!_loadingStreak && _streakStats.lastActiveAt != null)
+                        Text(
+                          copy.lastActiveLabel(_streakStats.lastActiveAt!),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: colorScheme.onSurface
+                                        .withValues(alpha: 0.68),
+                                  ),
+                        ),
+                      const SizedBox(height: 14),
+                      Expanded(
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.only(
+                              bottom: reportCtaReservedSpace),
+                          child: Column(
+                            children: [
+                              if (_loadingStreak)
+                                _HomeMagicLoadingCard(
+                                  label: copy.streakLoadingSubtitle,
+                                )
+                              else
+                                _EnergyProfileCard(
+                                  copy: energyCopy,
+                                  profile: profile,
+                                  streakDays: _streakStats.currentStreakDays,
+                                ),
+                              const SizedBox(height: 12),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: Container(
+                      padding: const EdgeInsets.only(top: 20),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            colorScheme.surface.withValues(alpha: 0.0),
+                            colorScheme.surface.withValues(alpha: 0.82),
+                            colorScheme.surface,
+                          ],
+                          stops: const [0.0, 0.45, 1.0],
+                        ),
+                      ),
+                      child: SafeArea(
+                        top: false,
+                        child: SelfAnalysisReportCtaSection(
+                          title: copy.reportSectionTitle,
+                          body: copy.reportSectionBody,
+                          paidLabel: copy.reportPaidCta,
+                          freeLabel: copy.reportFreeCta,
+                          helper: '',
+                          isFree: _isReportFreeByEntitlements(),
+                          isLoading:
+                              _reportFlowInFlight || _loadingReportEntitlements,
+                          isEnabled: !_loadingStreak,
+                          onPressed: () => _onGenerateReportTap(
+                            copy: copy,
+                            selectedDeck: selectedDeck,
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -3633,18 +3665,25 @@ class _DonutChartPainter extends CustomPainter {
     final trackPaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = stroke
-      ..strokeCap = StrokeCap.round
+      ..strokeCap = StrokeCap.butt
       ..color = trackColor;
     canvas.drawArc(rect, 0, pi * 2, false, trackPaint);
 
     var start = -pi / 2;
     final safeProgress = progress.clamp(0.0, 1.0);
+    final visibleSweep = safeProgress * pi * 2;
+    final separatorPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = max(1.4, stroke * 0.09)
+      ..strokeCap = StrokeCap.round
+      ..color = Colors.white.withValues(alpha: 0.62);
     for (final slice in slices) {
       if (slice.percent <= 0) {
         continue;
       }
       final fullSweep = (slice.percent / 100) * pi * 2;
       final sweep = fullSweep * safeProgress;
+      final drawSweep = max(0, sweep - 0.03);
       if (sweep <= 0.001) {
         start += fullSweep;
         continue;
@@ -3653,18 +3692,28 @@ class _DonutChartPainter extends CustomPainter {
       final paint = Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = stroke
-        ..strokeCap = StrokeCap.round
+        ..strokeCap = StrokeCap.butt
         ..shader = SweepGradient(
           startAngle: start,
-          endAngle: start + sweep,
+          endAngle: start + drawSweep,
           colors: [
-            _soften(base),
+            _soften(base, amount: 0.06),
             base,
-            _deepen(base),
+            _deepen(base, amount: 0.28),
           ],
-          stops: const [0.0, 0.6, 1.0],
+          stops: const [0.0, 0.52, 1.0],
         ).createShader(rect);
-      canvas.drawArc(rect, start, max(0, sweep - 0.035), false, paint);
+      canvas.drawArc(rect, start, drawSweep, false, paint);
+      final boundaryAngle = start + fullSweep;
+      if (safeProgress > 0.9 && boundaryAngle <= (-pi / 2) + visibleSweep) {
+        canvas.drawArc(
+          rect,
+          boundaryAngle - 0.009,
+          0.018,
+          false,
+          separatorPaint,
+        );
+      }
       start += fullSweep;
     }
   }
