@@ -201,6 +201,7 @@ class CardMedia extends StatefulWidget {
     this.showGlow = true,
     this.enableVideo = false,
     this.autoPlayOnce = false,
+    this.loopVideo = false,
     this.playLabel,
   });
 
@@ -214,6 +215,7 @@ class CardMedia extends StatefulWidget {
   final bool showGlow;
   final bool enableVideo;
   final bool autoPlayOnce;
+  final bool loopVideo;
   final String? playLabel;
 
   @override
@@ -242,7 +244,8 @@ class _CardMediaState extends State<CardMedia> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.cardId != widget.cardId ||
         oldWidget.videoUrl != widget.videoUrl ||
-        oldWidget.enableVideo != widget.enableVideo) {
+        oldWidget.enableVideo != widget.enableVideo ||
+        oldWidget.loopVideo != widget.loopVideo) {
       _disposeController();
       _setupController();
     }
@@ -296,7 +299,7 @@ class _CardMediaState extends State<CardMedia> {
     }
     final isEnded = controller.value.position >=
         (duration - const Duration(milliseconds: 40));
-    if (isEnded && !controller.value.isPlaying) {
+    if (!widget.loopVideo && isEnded && !controller.value.isPlaying) {
       if (mounted && _showVideo) {
         setState(() {
           _showVideo = false;
@@ -331,7 +334,7 @@ class _CardMediaState extends State<CardMedia> {
     }
     _controllerCache[cacheKey]?.refCount++;
     controller
-      ..setLooping(false)
+      ..setLooping(widget.loopVideo)
       ..setVolume(0.0);
     try {
       if (!controller.value.isInitialized) {
