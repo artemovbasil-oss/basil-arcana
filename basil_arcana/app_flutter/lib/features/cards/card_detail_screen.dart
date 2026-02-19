@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:video_player/video_player.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
 import '../../core/config/assets_config.dart';
@@ -28,8 +29,6 @@ class CardDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _CardDetailScreenState extends ConsumerState<CardDetailScreen> {
-  bool _videoPlaying = false;
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -181,9 +180,9 @@ class _CardDetailScreenState extends ConsumerState<CardDetailScreen> {
                                       videoUrl: mediaAssets.videoUrl,
                                       width: double.infinity,
                                       height: double.infinity,
-                                      enableVideo: _videoPlaying && hasVideo,
-                                      autoPlayOnce: _videoPlaying && hasVideo,
-                                      loopVideo: _videoPlaying && hasVideo,
+                                      enableVideo: false,
+                                      autoPlayOnce: false,
+                                      loopVideo: false,
                                       playLabel: l10n.videoTapToPlay,
                                       fit: BoxFit.cover,
                                     ),
@@ -193,11 +192,16 @@ class _CardDetailScreenState extends ConsumerState<CardDetailScreen> {
                                       top: 14,
                                       right: 14,
                                       child: _VideoToggleButton(
-                                        isPlaying: _videoPlaying,
                                         onPressed: () {
-                                          setState(() {
-                                            _videoPlaying = !_videoPlaying;
-                                          });
+                                          final videoUrl = mediaAssets.videoUrl;
+                                          if (videoUrl == null ||
+                                              videoUrl.trim().isEmpty) {
+                                            return;
+                                          }
+                                          _showVideoOverlay(
+                                            videoUrl: videoUrl,
+                                            title: resolvedCard.name,
+                                          );
                                         },
                                       ),
                                     ),
@@ -358,6 +362,20 @@ class _CardDetailScreenState extends ConsumerState<CardDetailScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Future<void> _showVideoOverlay({
+    required String videoUrl,
+    required String title,
+  }) async {
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) => _CardVideoOverlay(
+        videoUrl: videoUrl,
+        title: title,
       ),
     );
   }
@@ -560,11 +578,9 @@ class _CardOverlaySummary extends StatelessWidget {
 
 class _VideoToggleButton extends StatelessWidget {
   const _VideoToggleButton({
-    required this.isPlaying,
     required this.onPressed,
   });
 
-  final bool isPlaying;
   final VoidCallback onPressed;
 
   @override
@@ -575,11 +591,6 @@ class _VideoToggleButton extends StatelessWidget {
       'ru' => 'Видео',
       'kk' => 'Видео',
       _ => 'Video',
-    };
-    final stopLabel = switch (locale) {
-      'ru' => 'Стоп',
-      'kk' => 'Тоқтату',
-      _ => 'Stop',
     };
     return Material(
       color: Colors.transparent,
@@ -599,13 +610,13 @@ class _VideoToggleButton extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               SvgPicture.string(
-                _videoToggleIconSvg(isPlaying, colorScheme.onSurface),
+                _videoToggleIconSvg(colorScheme.onSurface),
                 width: 14,
                 height: 14,
               ),
               const SizedBox(width: 4),
               Text(
-                isPlaying ? stopLabel : videoLabel,
+                videoLabel,
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
@@ -618,19 +629,149 @@ class _VideoToggleButton extends StatelessWidget {
   }
 }
 
-String _videoToggleIconSvg(bool isPlaying, Color color) {
+String _videoToggleIconSvg(Color color) {
   final stroke =
       '#${color.toARGB32().toRadixString(16).substring(2).toUpperCase()}';
-  if (isPlaying) {
-    return '''
-<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect x="6.5" y="6.5" width="11" height="11" rx="1.8" stroke="$stroke" stroke-width="2"/>
-</svg>
-''';
-  }
   return '''
 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M8 6.8L17.2 12L8 17.2V6.8Z" stroke="$stroke" stroke-width="2" stroke-linejoin="round"/>
 </svg>
 ''';
+}
+
+class _CardVideoOverlay extends StatefulWidget {
+  const _CardVideoOverlay({
+    required this.videoUrl,
+    required this.title,
+  });
+
+  final String videoUrl;
+  final String title;
+
+  @override
+  State<_CardVideoOverlay> createState() => _CardVideoOverlayState();
+}
+
+class _CardVideoOverlayState extends State<_CardVideoOverlay> {
+  VideoPlayerController? _controller;
+  Object? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _init();
+  }
+
+  Future<void> _init() async {
+    final controller = VideoPlayerController.networkUrl(
+      Uri.parse(widget.videoUrl),
+      videoPlayerOptions: VideoPlayerOptions(
+        mixWithOthers: true,
+        allowBackgroundPlayback: false,
+      ),
+    );
+    try {
+      await controller.initialize();
+      await controller.setLooping(true);
+      await controller.setVolume(0.0);
+      await controller.play();
+      if (!mounted) {
+        controller.dispose();
+        return;
+      }
+      setState(() {
+        _controller = controller;
+      });
+    } catch (error) {
+      await controller.dispose();
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _error = error;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Dialog(
+      backgroundColor: Colors.black.withValues(alpha: 0.9),
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(22),
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: _buildBody(context),
+            ),
+            Positioned(
+              top: 10,
+              left: 12,
+              right: 56,
+              child: Text(
+                widget.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      color: Colors.white.withValues(alpha: 0.92),
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+            ),
+            Positioned(
+              top: 6,
+              right: 6,
+              child: IconButton(
+                onPressed: () => Navigator.of(context).pop(),
+                icon: Icon(
+                  Icons.close_rounded,
+                  color: colorScheme.onSurface,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBody(BuildContext context) {
+    if (_error != null) {
+      final locale = Localizations.localeOf(context).languageCode;
+      final errorText = switch (locale) {
+        'ru' => 'Не удалось воспроизвести видео',
+        'kk' => 'Бейне ойнатылмады',
+        _ => 'Could not play video',
+      };
+      return Center(
+        child: Text(
+          errorText,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Colors.white.withValues(alpha: 0.9),
+              ),
+        ),
+      );
+    }
+    final controller = _controller;
+    if (controller == null || !controller.value.isInitialized) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    return Center(
+      child: AspectRatio(
+        aspectRatio: controller.value.aspectRatio > 0
+            ? controller.value.aspectRatio
+            : 2 / 3,
+        child: VideoPlayer(controller),
+      ),
+    );
+  }
 }
