@@ -21,6 +21,8 @@ class CardMediaAssets {
 }
 
 class CardMediaResolver {
+  static const String _videoCdnBaseUrl = 'https://basilarcana-assets.b-cdn.net';
+
   const CardMediaResolver({
     this.deckId = DeckType.major,
     this.availableVideoFiles,
@@ -52,8 +54,10 @@ class CardMediaResolver {
         );
     final hasExplicitVideo =
         videoUrlOverride != null || _hasExplicitVideo(card);
-    final directVideoUrl = videoUrlOverride ??
-        cardVideoUrl(fallbackCard, AssetsConfig.assetsBaseUrl);
+    final directVideoUrl = _normalizeVideoUrl(
+      videoUrlOverride ??
+          cardVideoUrl(fallbackCard, AssetsConfig.assetsBaseUrl),
+    );
     String? resolvedVideo =
         directVideoUrl ?? _videoUrlFromCardId(cardId, availableVideoFiles);
     resolvedVideo ??= _videoUrlFromCardId(cardId, null);
@@ -84,7 +88,20 @@ class CardMediaResolver {
     if (fileName == null || fileName.isEmpty) {
       return null;
     }
-    return '${AssetsConfig.assetsBaseUrl}/video/$fileName';
+    return '$_videoCdnBaseUrl/video/$fileName';
+  }
+
+  String? _normalizeVideoUrl(String? rawUrl) {
+    if (rawUrl == null || rawUrl.trim().isEmpty) {
+      return null;
+    }
+    final fileName = normalizeVideoFileName(
+      rawUrl.split('/').last.split('?').first,
+    );
+    if (fileName.isEmpty || !fileName.endsWith('.mp4')) {
+      return null;
+    }
+    return '$_videoCdnBaseUrl/video/$fileName';
   }
 
   bool _hasExplicitVideo(CardModel? card) {
@@ -280,13 +297,11 @@ class _CardMediaState extends State<CardMedia> {
       return;
     }
     if (widget.autoPlayOnce) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (_autoPlayAttempted) {
-          return;
-        }
-        _autoPlayAttempted = true;
-        _playOnce();
-      });
+      if (_autoPlayAttempted) {
+        return;
+      }
+      _autoPlayAttempted = true;
+      Future<void>.microtask(_playOnce);
     }
   }
 
