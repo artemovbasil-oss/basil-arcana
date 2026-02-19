@@ -3683,7 +3683,7 @@ class _DonutChartPainter extends CustomPainter {
       }
       final fullSweep = (slice.percent / 100) * pi * 2;
       final sweep = fullSweep * safeProgress;
-      final drawSweep = max(0, sweep - 0.03);
+      final drawSweep = max(0.0, sweep - 0.03);
       if (sweep <= 0.001) {
         start += fullSweep;
         continue;
