@@ -612,7 +612,7 @@ class _FiveCardsPremiumCopy {
         body:
             'Этот расклад открывает глубинный слой истории: пять позиций показывают скрытые причины, баланс сил и лучший вектор действий.',
         scope:
-            'Для владельцев безлимитной подписки на 1 год и пользователей с промокодом LUCY100 доступ открыт. Разовый доступ: 1⭐ за расклад.',
+            'Входит в безлимитную подписку на 1 год. Разовый доступ: 1⭐ за расклад.',
         buyButton: 'Купить доступ',
         premiumTag: 'Премиум',
       );
@@ -623,7 +623,7 @@ class _FiveCardsPremiumCopy {
         body:
             'Бұл формат жағдайды терең ашады: бес позиция жасырын себептерді, күштердің тепе-теңдігін және ең дәл келесі қадамды көрсетеді.',
         scope:
-            '1 жылдық шексіз жазылымы бар немесе LUCY100 промокодын енгізгендерге ашық. Бір реттік кіру: 1⭐.',
+            '1 жылдық шексіз жазылымға кіреді. Бір реттік кіру: 1⭐.',
         buyButton: 'Қолжетімділікті сатып алу',
         premiumTag: 'Премиум',
       );
@@ -633,7 +633,7 @@ class _FiveCardsPremiumCopy {
       body:
           'This spread opens a deeper layer of your story: five positions reveal hidden causes, the balance of forces, and your most practical next move.',
       scope:
-          'Included in the 1-year unlimited plan and available to users with promo code LUCY100. Single access costs 1⭐ per spread.',
+          'Included in the 1-year unlimited plan. Single access costs 1⭐ per spread.',
       buyButton: 'Buy access',
       premiumTag: 'Premium',
     );

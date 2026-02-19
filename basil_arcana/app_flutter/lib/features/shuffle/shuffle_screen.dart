@@ -29,11 +29,12 @@ class ShuffleScreen extends ConsumerStatefulWidget {
 }
 
 class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late final AnimationController _controller;
   late final AnimationController _fallController;
   late final AnimationController _glowController;
   late final AnimationController _backgroundController;
+  ProviderSubscription<ReadingFlowState>? _readingFlowSubscription;
   Timer? _ctaTimer;
   bool _showCta = false;
   bool _hasTriggeredFall = false;
@@ -96,29 +97,33 @@ class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
         });
       }
     });
-    ref.listen<ReadingFlowState>(readingFlowControllerProvider, (prev, next) {
-      if (!_hasTriggeredFall &&
-          (prev?.drawnCards.isEmpty ?? true) &&
-          next.drawnCards.isNotEmpty) {
-        _hasTriggeredFall = true;
-        _controller.stop();
-        _fallController.forward(from: 0);
-      }
-      if (!_hasTriggeredBackground && next.drawnCards.isNotEmpty) {
-        _hasTriggeredBackground = true;
-        _backgroundController.repeat(reverse: true);
-      }
-      if ((prev?.drawnCards.isEmpty ?? true) && next.drawnCards.isNotEmpty) {
-        _navigateToResultIfNeeded();
-      }
-      if (next.aiResult != null && prev?.aiResult == null) {
-        _navigateToResultIfNeeded();
-      }
-    });
+    _readingFlowSubscription = ref.listenManual<ReadingFlowState>(
+      readingFlowControllerProvider,
+      (prev, next) {
+        if (!_hasTriggeredFall &&
+            (prev?.drawnCards.isEmpty ?? true) &&
+            next.drawnCards.isNotEmpty) {
+          _hasTriggeredFall = true;
+          _controller.stop();
+          _fallController.forward(from: 0);
+        }
+        if (!_hasTriggeredBackground && next.drawnCards.isNotEmpty) {
+          _hasTriggeredBackground = true;
+          _backgroundController.repeat(reverse: true);
+        }
+        if ((prev?.drawnCards.isEmpty ?? true) && next.drawnCards.isNotEmpty) {
+          _navigateToResultIfNeeded();
+        }
+        if (next.aiResult != null && prev?.aiResult == null) {
+          _navigateToResultIfNeeded();
+        }
+      },
+    );
   }
 
   @override
   void dispose() {
+    _readingFlowSubscription?.close();
     _controller.dispose();
     _fallController.dispose();
     _glowController.dispose();

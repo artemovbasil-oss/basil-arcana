@@ -45,6 +45,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
   final ScrollController _scrollController = ScrollController();
   final List<_ChatItem> _items = [];
   final List<_ChatItem> _basilQueue = [];
+  ProviderSubscription<ReadingFlowState>? _readingFlowSubscription;
   Timer? _typingTimer;
   bool _sequenceComplete = false;
   bool _initialized = false;
@@ -55,6 +56,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
 
   @override
   void dispose() {
+    _readingFlowSubscription?.close();
     _typingTimer?.cancel();
     _scrollController.dispose();
     super.dispose();
@@ -63,28 +65,31 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
   @override
   void initState() {
     super.initState();
-    ref.listen<ReadingFlowState>(readingFlowControllerProvider, (prev, next) {
-      if (prev?.detailsStatus != next.detailsStatus ||
-          prev?.showDetailsCta != next.showDetailsCta) {
-        _maybeScrollToBottom();
-      }
-      final errorMessage = next.errorMessage;
-      if (errorMessage != null && errorMessage != prev?.errorMessage) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (!mounted) {
-            return;
-          }
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(errorMessage)),
-          );
-        });
-      }
-      if (prev?.aiResult != null &&
-          next.aiResult != null &&
-          prev?.aiResult?.fullText != next.aiResult?.fullText) {
-        _replaceReadingMessages(next);
-      }
-    });
+    _readingFlowSubscription = ref.listenManual<ReadingFlowState>(
+      readingFlowControllerProvider,
+      (prev, next) {
+        if (prev?.detailsStatus != next.detailsStatus ||
+            prev?.showDetailsCta != next.showDetailsCta) {
+          _maybeScrollToBottom();
+        }
+        final errorMessage = next.errorMessage;
+        if (errorMessage != null && errorMessage != prev?.errorMessage) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) {
+              return;
+            }
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(errorMessage)),
+            );
+          });
+        }
+        if (prev?.aiResult != null &&
+            next.aiResult != null &&
+            prev?.aiResult?.fullText != next.aiResult?.fullText) {
+          _replaceReadingMessages(next);
+        }
+      },
+    );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _jumpToTop();
     });

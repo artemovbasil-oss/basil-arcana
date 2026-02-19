@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import '../config/app_config.dart';
@@ -50,15 +49,15 @@ class HiveStorage {
   }
 
   static void _registerAdapters() {
-    _registerAdapterIfNeeded(CardMeaningAdapter());
-    _registerAdapterIfNeeded(DrawnCardModelAdapter());
-    _registerAdapterIfNeeded(AiSectionModelAdapter());
-    _registerAdapterIfNeeded(ReadingModelAdapter());
+    _registerAdapterIfNeeded<CardMeaning>(CardMeaningAdapter());
+    _registerAdapterIfNeeded<DrawnCardModel>(DrawnCardModelAdapter());
+    _registerAdapterIfNeeded<AiSectionModel>(AiSectionModelAdapter());
+    _registerAdapterIfNeeded<ReadingModel>(ReadingModelAdapter());
   }
 
-  static void _registerAdapterIfNeeded(TypeAdapter<dynamic> adapter) {
+  static void _registerAdapterIfNeeded<T>(TypeAdapter<T> adapter) {
     if (!Hive.isAdapterRegistered(adapter.typeId)) {
-      Hive.registerAdapter(adapter);
+      Hive.registerAdapter<T>(adapter);
     }
   }
 

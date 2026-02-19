@@ -3,3 +3,6 @@ tools/.cache/
 server/data/geo_test/
 server/data/geo_cis/
 
+# Flutter build artifacts (must not be committed)
+app_flutter/.dart_tool/
+app_flutter/build/
