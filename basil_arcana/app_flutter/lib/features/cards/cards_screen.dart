@@ -330,7 +330,7 @@ class _CardTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    const cardAspectRatio = 0.585;
+    const cardAspectRatio = 0.64;
     return InkWell(
       borderRadius: BorderRadius.circular(20),
       onTap: onTap,
@@ -343,52 +343,48 @@ class _CardTile extends StatelessWidget {
           ),
         ),
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(12, 12, 12, 14),
+          padding: const EdgeInsets.all(12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              _DrawnBadge(
+                label: drawnLabel,
+                isEmpty: drawnCount == 0,
+              ),
+              const SizedBox(height: 8),
               Expanded(
-                child: Stack(
-                  children: [
-                    Positioned.fill(
-                      top: 18,
-                      child: Align(
-                        alignment: Alignment.topCenter,
-                        child: AspectRatio(
-                          aspectRatio: cardAspectRatio,
-                          child: DecoratedBox(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(11),
-                              border: Border.all(
-                                color:
-                                    colorScheme.outlineVariant.withOpacity(0.7),
-                              ),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(2),
-                              child: CardAssetImage(
-                                cardId: card.id,
-                                imageUrl: card.imageUrl,
-                                width: double.infinity,
-                                height: double.infinity,
-                                borderRadius: BorderRadius.circular(9),
-                                fit: BoxFit.cover,
-                                showGlow: false,
-                              ),
+                child: Align(
+                  alignment: Alignment.topLeft,
+                  child: AspectRatio(
+                    aspectRatio: cardAspectRatio,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(11),
+                        border: Border.all(
+                          color: colorScheme.outlineVariant.withOpacity(0.7),
+                        ),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(2),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(9),
+                          child: Transform.scale(
+                            scaleY: 1.06,
+                            alignment: Alignment.center,
+                            child: CardAssetImage(
+                              cardId: card.id,
+                              imageUrl: card.imageUrl,
+                              width: double.infinity,
+                              height: double.infinity,
+                              borderRadius: BorderRadius.circular(9),
+                              fit: BoxFit.cover,
+                              showGlow: false,
                             ),
                           ),
                         ),
                       ),
                     ),
-                    Positioned(
-                      left: 14,
-                      top: 0,
-                      child: _DrawnBadge(
-                        label: drawnLabel,
-                        isEmpty: drawnCount == 0,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
               const SizedBox(height: 10),
@@ -418,7 +414,7 @@ class _DrawnBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
         color: colorScheme.primary.withOpacity(isEmpty ? 0.08 : 0.14),
         borderRadius: BorderRadius.circular(999),
