@@ -64,6 +64,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   bool _loadingReportEntitlements = false;
   bool _hasYearlyReportAccess = false;
   bool _didRequestOnboarding = false;
+  final ValueNotifier<int> _streakModalRefreshTick = ValueNotifier<int>(0);
   late final AnimationController _fieldGlowController;
   late final AnimationController _titleShimmerController;
 
@@ -131,6 +132,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       setState(() {
         _loadingStreak = true;
       });
+      _refreshOpenStreakModal();
     }
     try {
       final streak =
@@ -142,6 +144,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         _streakStats = streak;
         _loadingStreak = false;
       });
+      _refreshOpenStreakModal();
     } catch (_) {
       if (!mounted) {
         return;
@@ -149,6 +152,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       setState(() {
         _loadingStreak = false;
       });
+      _refreshOpenStreakModal();
     }
   }
 
@@ -159,6 +163,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     setState(() {
       _loadingReportEntitlements = true;
     });
+    _refreshOpenStreakModal();
     try {
       final dashboard =
           await ref.read(userDashboardRepositoryProvider).fetchDashboard();
@@ -180,6 +185,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         _hasYearlyReportAccess = hasYearly;
         _loadingReportEntitlements = false;
       });
+      _refreshOpenStreakModal();
     } catch (_) {
       if (!mounted) {
         return;
@@ -187,6 +193,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       setState(() {
         _loadingReportEntitlements = false;
       });
+      _refreshOpenStreakModal();
     }
   }
 
@@ -218,6 +225,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     setState(() {
       _reportFlowInFlight = true;
     });
+    _refreshOpenStreakModal();
     try {
       final l10n = AppLocalizations.of(context);
       final window = _reportWindow();
@@ -284,6 +292,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       setState(() {
         _reportFlowInFlight = false;
       });
+      _refreshOpenStreakModal();
     }
   }
 
@@ -771,12 +780,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   @override
   void dispose() {
     _readingFlowSubscription?.close();
+    _streakModalRefreshTick.dispose();
     _fieldGlowController.dispose();
     _titleShimmerController.dispose();
     _controller.dispose();
     _focusNode.dispose();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  void _refreshOpenStreakModal() {
+    _streakModalRefreshTick.value++;
   }
 
   void _applyExample(String example) {
@@ -1693,163 +1707,169 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (context) {
-        const reportCtaReservedSpace = 196.0;
-        return FractionallySizedBox(
-          heightFactor: 0.95,
-          child: SafeArea(
-            top: false,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(18, 14, 18, 20),
-              child: Stack(
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+        const reportCtaReservedSpace = 176.0;
+        return ValueListenableBuilder<int>(
+          valueListenable: _streakModalRefreshTick,
+          builder: (context, _, __) {
+            return FractionallySizedBox(
+              heightFactor: 0.95,
+              child: SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(18, 14, 18, 20),
+                  child: Stack(
                     children: [
-                      Center(
-                        child: Container(
-                          width: 40,
-                          height: 4,
-                          decoration: BoxDecoration(
-                            color: colorScheme.outlineVariant
-                                .withValues(alpha: 0.8),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(
-                            child: Text(
-                              copy.modalTitle,
+                          Center(
+                            child: Container(
+                              width: 40,
+                              height: 4,
+                              decoration: BoxDecoration(
+                                color: colorScheme.outlineVariant
+                                    .withValues(alpha: 0.8),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  copy.modalTitle,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleLarge
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                ),
+                              ),
+                              IconButton(
+                                onPressed: () => Navigator.of(context).pop(),
+                                icon: const Icon(Icons.close),
+                                tooltip: copy.closeLabel,
+                                visualDensity: VisualDensity.compact,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _StatPill(
+                                  label: copy.currentStreakLabel,
+                                  value: copy.daysCountLabel(
+                                    _streakStats.currentStreakDays,
+                                  ),
+                                  tone: _StatPillTone.green,
+                                  loading: _loadingStreak,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: _StatPill(
+                                  label: copy.bestStreakLabel,
+                                  value: copy.daysCountLabel(
+                                    _streakStats.longestStreakDays,
+                                  ),
+                                  tone: _StatPillTone.blue,
+                                  loading: _loadingStreak,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: _AwarenessPill(
+                                  label: copy.awarenessLabel,
+                                  value: _streakStats.awarenessPercent,
+                                  locked: _streakStats.awarenessLocked,
+                                  shimmer: _titleShimmerController,
+                                  loading: _loadingStreak,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          if (!_loadingStreak &&
+                              _streakStats.lastActiveAt != null)
+                            Text(
+                              copy.lastActiveLabel(_streakStats.lastActiveAt!),
                               style: Theme.of(context)
                                   .textTheme
-                                  .titleLarge
+                                  .bodySmall
                                   ?.copyWith(
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                            ),
-                          ),
-                          IconButton(
-                            onPressed: () => Navigator.of(context).pop(),
-                            icon: const Icon(Icons.close),
-                            tooltip: copy.closeLabel,
-                            visualDensity: VisualDensity.compact,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _StatPill(
-                              label: copy.currentStreakLabel,
-                              value: copy.daysCountLabel(
-                                _streakStats.currentStreakDays,
-                              ),
-                              tone: _StatPillTone.green,
-                              loading: _loadingStreak,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: _StatPill(
-                              label: copy.bestStreakLabel,
-                              value: copy.daysCountLabel(
-                                _streakStats.longestStreakDays,
-                              ),
-                              tone: _StatPillTone.blue,
-                              loading: _loadingStreak,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: _AwarenessPill(
-                              label: copy.awarenessLabel,
-                              value: _streakStats.awarenessPercent,
-                              locked: _streakStats.awarenessLocked,
-                              shimmer: _titleShimmerController,
-                              loading: _loadingStreak,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      if (!_loadingStreak && _streakStats.lastActiveAt != null)
-                        Text(
-                          copy.lastActiveLabel(_streakStats.lastActiveAt!),
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
                                     color: colorScheme.onSurface
                                         .withValues(alpha: 0.68),
                                   ),
-                        ),
-                      const SizedBox(height: 14),
-                      Expanded(
-                        child: SingleChildScrollView(
-                          padding: const EdgeInsets.only(
-                              bottom: reportCtaReservedSpace),
-                          child: Column(
-                            children: [
-                              if (_loadingStreak)
-                                _HomeMagicLoadingCard(
-                                  label: copy.streakLoadingSubtitle,
-                                )
-                              else
-                                _EnergyProfileCard(
-                                  copy: energyCopy,
-                                  profile: profile,
-                                  streakDays: _streakStats.currentStreakDays,
-                                ),
-                              const SizedBox(height: 12),
-                            ],
+                            ),
+                          const SizedBox(height: 14),
+                          Expanded(
+                            child: ListView(
+                              primary: false,
+                              physics: const ClampingScrollPhysics(),
+                              padding: const EdgeInsets.only(
+                                bottom: reportCtaReservedSpace,
+                              ),
+                              children: [
+                                if (_loadingStreak)
+                                  _HomeMagicLoadingCard(
+                                    label: copy.streakLoadingSubtitle,
+                                  )
+                                else
+                                  _EnergyProfileCard(
+                                    copy: energyCopy,
+                                    profile: profile,
+                                    streakDays: _streakStats.currentStreakDays,
+                                  ),
+                                const SizedBox(height: 12),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        child: Container(
+                          padding: const EdgeInsets.only(top: 8),
+                          decoration: BoxDecoration(
+                            color: colorScheme.surface,
+                            border: Border(
+                              top: BorderSide(
+                                color: colorScheme.outlineVariant
+                                    .withValues(alpha: 0.32),
+                              ),
+                            ),
+                          ),
+                          child: SafeArea(
+                            top: false,
+                            child: SelfAnalysisReportCtaSection(
+                              title: copy.reportSectionTitle,
+                              body: copy.reportSectionBody,
+                              paidLabel: copy.reportPaidCta,
+                              freeLabel: copy.reportFreeCta,
+                              helper: '',
+                              isFree: _isReportFreeByEntitlements(),
+                              isLoading: _reportFlowInFlight ||
+                                  _loadingReportEntitlements,
+                              isEnabled: !_loadingStreak,
+                              onPressed: () => _onGenerateReportTap(
+                                copy: copy,
+                                selectedDeck: selectedDeck,
+                              ),
+                            ),
                           ),
                         ),
                       ),
                     ],
                   ),
-                  Positioned(
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    child: Container(
-                      padding: const EdgeInsets.only(top: 20),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            colorScheme.surface.withValues(alpha: 0.0),
-                            colorScheme.surface.withValues(alpha: 0.82),
-                            colorScheme.surface,
-                          ],
-                          stops: const [0.0, 0.45, 1.0],
-                        ),
-                      ),
-                      child: SafeArea(
-                        top: false,
-                        child: SelfAnalysisReportCtaSection(
-                          title: copy.reportSectionTitle,
-                          body: copy.reportSectionBody,
-                          paidLabel: copy.reportPaidCta,
-                          freeLabel: copy.reportFreeCta,
-                          helper: '',
-                          isFree: _isReportFreeByEntitlements(),
-                          isLoading:
-                              _reportFlowInFlight || _loadingReportEntitlements,
-                          isEnabled: !_loadingStreak,
-                          onPressed: () => _onGenerateReportTap(
-                            copy: copy,
-                            selectedDeck: selectedDeck,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
-          ),
+            );
+          },
         );
       },
     );
@@ -3628,23 +3648,6 @@ class _EnergySlice {
   final Color color;
 }
 
-Color _mixColor(Color a, Color b, double t) {
-  return Color.fromARGB(
-    lerpDouble(a.a, b.a, t)!.round(),
-    lerpDouble(a.r, b.r, t)!.round(),
-    lerpDouble(a.g, b.g, t)!.round(),
-    lerpDouble(a.b, b.b, t)!.round(),
-  );
-}
-
-Color _soften(Color color, {double amount = 0.22}) {
-  return _mixColor(color, Colors.white, amount.clamp(0.0, 1.0));
-}
-
-Color _deepen(Color color, {double amount = 0.14}) {
-  return _mixColor(color, Colors.black, amount.clamp(0.0, 1.0));
-}
-
 class _DonutChartPainter extends CustomPainter {
   const _DonutChartPainter({
     required this.slices,
@@ -3671,49 +3674,23 @@ class _DonutChartPainter extends CustomPainter {
 
     var start = -pi / 2;
     final safeProgress = progress.clamp(0.0, 1.0);
-    final visibleSweep = safeProgress * pi * 2;
-    final separatorPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = max(1.4, stroke * 0.09)
-      ..strokeCap = StrokeCap.round
-      ..color = Colors.white.withValues(alpha: 0.62);
     for (final slice in slices) {
       if (slice.percent <= 0) {
         continue;
       }
       final fullSweep = (slice.percent / 100) * pi * 2;
       final sweep = fullSweep * safeProgress;
-      final drawSweep = max(0.0, sweep - 0.03);
+      final drawSweep = max(0.0, sweep - 0.025);
       if (sweep <= 0.001) {
         start += fullSweep;
         continue;
       }
-      final base = slice.color;
       final paint = Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = stroke
         ..strokeCap = StrokeCap.butt
-        ..shader = SweepGradient(
-          startAngle: start,
-          endAngle: start + drawSweep,
-          colors: [
-            _soften(base, amount: 0.06),
-            base,
-            _deepen(base, amount: 0.28),
-          ],
-          stops: const [0.0, 0.52, 1.0],
-        ).createShader(rect);
+        ..color = slice.color;
       canvas.drawArc(rect, start, drawSweep, false, paint);
-      final boundaryAngle = start + fullSweep;
-      if (safeProgress > 0.9 && boundaryAngle <= (-pi / 2) + visibleSweep) {
-        canvas.drawArc(
-          rect,
-          boundaryAngle - 0.009,
-          0.018,
-          false,
-          separatorPaint,
-        );
-      }
       start += fullSweep;
     }
   }
