@@ -56,13 +56,15 @@ class CardMediaResolver {
         cardVideoUrl(fallbackCard, AssetsConfig.assetsBaseUrl);
     String? resolvedVideo =
         directVideoUrl ?? _videoUrlFromCardId(cardId, availableVideoFiles);
+    resolvedVideo ??= _videoUrlFromCardId(cardId, null);
     if (resolvedVideo != null &&
         availableVideoFiles != null &&
         availableVideoFiles!.isNotEmpty &&
         !hasExplicitVideo) {
-      final fileName = resolvedVideo.split('/').last.toLowerCase();
+      final fileName =
+          resolvedVideo.split('/').last.split('?').first.toLowerCase();
       if (!availableVideoFiles!.contains(fileName)) {
-        resolvedVideo = null;
+        resolvedVideo = _videoUrlFromCardId(cardId, null);
       }
     }
     return CardMediaAssets(

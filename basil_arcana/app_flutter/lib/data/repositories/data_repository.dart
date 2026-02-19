@@ -399,7 +399,10 @@ Set<String> _parseVideoIndex(String raw) {
     files = const [];
   }
   return files
-      .map(normalizeVideoFileName)
+      .map((file) {
+        final rawName = file.split('/').last.split('?').first;
+        return normalizeVideoFileName(rawName);
+      })
       .map((file) => file.toLowerCase())
       .toSet();
 }

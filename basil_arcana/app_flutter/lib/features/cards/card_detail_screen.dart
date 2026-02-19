@@ -598,10 +598,10 @@ class _VideoToggleButton extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                isPlaying ? Icons.stop_rounded : Icons.play_arrow_rounded,
-                size: 14,
-                color: colorScheme.onSurface,
+              SvgPicture.string(
+                _videoToggleIconSvg(isPlaying, colorScheme.onSurface),
+                width: 14,
+                height: 14,
               ),
               const SizedBox(width: 4),
               Text(
@@ -616,4 +616,21 @@ class _VideoToggleButton extends StatelessWidget {
       ),
     );
   }
+}
+
+String _videoToggleIconSvg(bool isPlaying, Color color) {
+  final stroke =
+      '#${color.toARGB32().toRadixString(16).substring(2).toUpperCase()}';
+  if (isPlaying) {
+    return '''
+<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect x="6.5" y="6.5" width="11" height="11" rx="1.8" stroke="$stroke" stroke-width="2"/>
+</svg>
+''';
+  }
+  return '''
+<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M8 6.8L17.2 12L8 17.2V6.8Z" stroke="$stroke" stroke-width="2" stroke-linejoin="round"/>
+</svg>
+''';
 }
