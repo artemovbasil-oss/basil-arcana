@@ -1425,11 +1425,11 @@ class _ResultLoadingShimmerState extends State<_ResultLoadingShimmer>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1800),
+      duration: const Duration(milliseconds: 3000),
     )..repeat(reverse: true);
     _revealController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1100),
+      duration: const Duration(milliseconds: 1850),
     )..forward();
   }
 
@@ -1456,22 +1456,22 @@ class _ResultLoadingShimmerState extends State<_ResultLoadingShimmer>
     } else if (!_controller.isAnimating) {
       _controller.repeat(reverse: true);
     }
-    final base = colorScheme.surfaceContainerHighest.withOpacity(0.3);
-    final glow = colorScheme.primary.withOpacity(0.18);
+    final base = colorScheme.surfaceContainerHighest.withOpacity(0.2);
+    final glow = colorScheme.primary.withOpacity(0.08);
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
       children: [
-        ChatBubbleReveal(
-          child: OracleTypingBubble(
-            label: l10n.resultDeepTypingLabel,
-          ),
-        ),
-        const SizedBox(height: 14),
         _LoadingCardsRow(
           reveal: _revealController,
           drawnCards: widget.drawnCards,
           expectedCardsCount: widget.expectedCardsCount,
           deckCoverUrl: widget.deckCoverUrl,
+        ),
+        const SizedBox(height: 14),
+        ChatBubbleReveal(
+          child: OracleTypingBubble(
+            label: l10n.resultDeepTypingLabel,
+          ),
         ),
         const SizedBox(height: 14),
         _ShimmerBlock(
@@ -1530,7 +1530,7 @@ class _ShimmerBlock extends StatelessWidget {
     return AnimatedBuilder(
       animation: animation,
       builder: (context, child) {
-        final t = Curves.easeInOutSine.transform(animation.value);
+        final t = Curves.easeInOut.transform(animation.value);
         final x = t * 2 - 1;
         return Container(
           height: height,
@@ -1541,10 +1541,10 @@ class _ShimmerBlock extends StatelessWidget {
               end: Alignment(0.15 + x, 0.2),
               colors: [
                 baseColor,
-                glowColor.withOpacity(0.8),
-                baseColor.withOpacity(0.95),
+                glowColor.withOpacity(0.52),
+                baseColor.withOpacity(0.88),
               ],
-              stops: const [0.2, 0.5, 0.86],
+              stops: const [0.26, 0.52, 0.86],
             ),
             border: Border.all(
               color: Theme.of(context)
@@ -1554,9 +1554,9 @@ class _ShimmerBlock extends StatelessWidget {
             ),
             boxShadow: [
               BoxShadow(
-                color: glowColor.withOpacity(0.55),
-                blurRadius: 22,
-                spreadRadius: 0.5,
+                color: glowColor.withOpacity(0.26),
+                blurRadius: 12,
+                spreadRadius: 0.2,
               ),
             ],
           ),
@@ -1587,59 +1587,82 @@ class _LoadingCardsRow extends StatelessWidget {
     final items = List<Widget>.generate(slots, (index) {
       final showRealCard = index < drawnCards.length && index < shownCount;
       final intervalStart = (index * 0.12).clamp(0.0, 0.8);
-      final intervalEnd = (intervalStart + 0.28).clamp(0.28, 1.0);
+      final intervalEnd = (intervalStart + 0.42).clamp(0.42, 1.0);
       final fade = CurvedAnimation(
         parent: reveal,
-        curve: Interval(intervalStart, intervalEnd, curve: Curves.easeOutCubic),
+        curve:
+            Interval(intervalStart, intervalEnd, curve: Curves.easeInOutCubic),
       );
       final item = AnimatedBuilder(
         animation: fade,
         builder: (context, _) {
           final t = fade.value;
+          final cardName = showRealCard ? drawnCards[index].cardName : '';
           return Opacity(
             opacity: t,
             child: Transform.translate(
-              offset: Offset(0, (1 - t) * 10),
+              offset: Offset(0, (1 - t) * 14),
               child: Transform.scale(
-                scale: 0.94 + (0.06 * t),
-                child: showRealCard
-                    ? CardAssetImage(
-                        cardId: drawnCards[index].cardId,
-                        width: 56,
-                        height: 90,
-                        showGlow: false,
-                        borderRadius: BorderRadius.circular(10),
-                      )
-                    : Container(
-                        width: 56,
-                        height: 90,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: colorScheme.outlineVariant.withOpacity(0.38),
-                          ),
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: ColorFiltered(
-                            colorFilter: ColorFilter.mode(
-                              colorScheme.surface.withOpacity(0.2),
-                              BlendMode.srcATop,
+                scale: 0.9 + (0.1 * t),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    showRealCard
+                        ? CardAssetImage(
+                            cardId: drawnCards[index].cardId,
+                            width: 56,
+                            height: 90,
+                            showGlow: false,
+                            borderRadius: BorderRadius.circular(10),
+                          )
+                        : Container(
+                            width: 56,
+                            height: 90,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: colorScheme.outlineVariant
+                                    .withOpacity(0.38),
+                              ),
                             ),
-                            child: Image.network(
-                              deckCoverUrl,
-                              fit: BoxFit.cover,
-                              filterQuality: FilterQuality.medium,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Container(
-                                  color: colorScheme.surfaceContainerHighest
-                                      .withOpacity(0.45),
-                                );
-                              },
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: ColorFiltered(
+                                colorFilter: ColorFilter.mode(
+                                  colorScheme.surface.withOpacity(0.2),
+                                  BlendMode.srcATop,
+                                ),
+                                child: Image.network(
+                                  deckCoverUrl,
+                                  fit: BoxFit.cover,
+                                  filterQuality: FilterQuality.medium,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Container(
+                                      color: colorScheme.surfaceContainerHighest
+                                          .withOpacity(0.45),
+                                    );
+                                  },
+                                ),
+                              ),
                             ),
                           ),
-                        ),
+                    const SizedBox(height: 4),
+                    SizedBox(
+                      width: 56,
+                      child: Text(
+                        cardName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              fontSize: 8.5,
+                              height: 1.0,
+                              color: colorScheme.onSurface.withOpacity(0.58),
+                            ),
                       ),
+                    ),
+                  ],
+                ),
               ),
             ),
           );
