@@ -1003,8 +1003,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     final disabledColor = Color.lerp(primaryColor, colorScheme.surface, 0.45)!;
     final screenHeight = MediaQuery.of(context).size.height;
     final isCompactScreen = screenHeight < 760;
-    final questionMinLines = isCompactScreen ? 3 : 5;
-    final questionMaxLines = isCompactScreen ? 4 : 6;
+    final questionMinLines = isCompactScreen ? 2 : 3;
+    final questionMaxLines = isCompactScreen ? 6 : 8;
 
     return Scaffold(
       appBar: buildEnergyTopBar(
@@ -1117,78 +1117,100 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                           ),
                           child: Stack(
                             children: [
-                              TextField(
-                                controller: _controller,
-                                focusNode: _focusNode,
-                                maxLines: questionMaxLines,
-                                minLines: questionMinLines,
-                                decoration: InputDecoration(
-                                  hintText: l10n.homeQuestionPlaceholder,
-                                  hintStyle: Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium
-                                      ?.copyWith(
-                                        color: colorScheme.onSurface
-                                            .withValues(alpha: 0.45),
-                                      ),
-                                  border: InputBorder.none,
-                                  contentPadding: EdgeInsets.fromLTRB(
-                                    16,
-                                    16,
-                                    48,
-                                    isCompactScreen ? 34 : 40,
-                                  ),
-                                  alignLabelWithHint: true,
-                                ),
-                                onChanged: (value) {
-                                  ref
-                                      .read(
-                                        readingFlowControllerProvider.notifier,
-                                      )
-                                      .setQuestion(value);
-                                  setState(() {});
-                                },
-                              ),
-                              Positioned(
-                                left: 14,
-                                bottom: 12,
-                                child: Text(
-                                  deckHint,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .labelSmall
-                                      ?.copyWith(
-                                        color: colorScheme.onSurface
-                                            .withValues(alpha: 0.62),
-                                        fontWeight: FontWeight.w400,
-                                      ),
-                                ),
-                              ),
-                              if (hasQuestion)
-                                Positioned(
-                                  right: 10,
-                                  bottom: 10,
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
+                              Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Stack(
                                     children: [
-                                      _InlineIconButton(
-                                        icon: Icons.close,
-                                        tooltip: l10n.homeClearQuestionTooltip,
-                                        onTap: _clearQuestion,
+                                      TextField(
+                                        controller: _controller,
+                                        focusNode: _focusNode,
+                                        maxLines: questionMaxLines,
+                                        minLines: questionMinLines,
+                                        decoration: InputDecoration(
+                                          hintText:
+                                              l10n.homeQuestionPlaceholder,
+                                          hintStyle: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium
+                                              ?.copyWith(
+                                                color: colorScheme.onSurface
+                                                    .withValues(alpha: 0.45),
+                                              ),
+                                          border: InputBorder.none,
+                                          contentPadding:
+                                              const EdgeInsets.fromLTRB(
+                                            16,
+                                            16,
+                                            108,
+                                            12,
+                                          ),
+                                          alignLabelWithHint: true,
+                                        ),
+                                        onChanged: (value) {
+                                          ref
+                                              .read(
+                                                readingFlowControllerProvider
+                                                    .notifier,
+                                              )
+                                              .setQuestion(value);
+                                          setState(() {});
+                                        },
                                       ),
-                                      const SizedBox(width: 8),
-                                      _InlineIconButton(
-                                        icon: Icons.arrow_forward,
-                                        tooltip: l10n.homeContinueButton,
-                                        onTap: () =>
-                                            _handlePrimaryAction(hasQuestion),
-                                        backgroundColor: colorScheme.primary
-                                            .withValues(alpha: 0.2),
-                                        iconColor: colorScheme.primary,
-                                      ),
+                                      if (hasQuestion)
+                                        Positioned(
+                                          right: 10,
+                                          bottom: 8,
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              _InlineIconButton(
+                                                icon: Icons.close,
+                                                tooltip: l10n
+                                                    .homeClearQuestionTooltip,
+                                                onTap: _clearQuestion,
+                                              ),
+                                              const SizedBox(width: 8),
+                                              _InlineIconButton(
+                                                icon: Icons.arrow_forward,
+                                                tooltip:
+                                                    l10n.homeContinueButton,
+                                                onTap: () =>
+                                                    _handlePrimaryAction(
+                                                  hasQuestion,
+                                                ),
+                                                backgroundColor: colorScheme
+                                                    .primary
+                                                    .withValues(alpha: 0.2),
+                                                iconColor: colorScheme.primary,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
                                     ],
                                   ),
-                                ),
+                                  Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                      16,
+                                      0,
+                                      16,
+                                      12,
+                                    ),
+                                    child: Text(
+                                      deckHint,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelSmall
+                                          ?.copyWith(
+                                            color: colorScheme.onSurface
+                                                .withValues(alpha: 0.62),
+                                            fontWeight: FontWeight.w400,
+                                          ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ],
                           ),
                         );
@@ -2363,6 +2385,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       }
       return;
     }
+    final normalizedQuestion = _controller.text.trim();
+    final flow = ref.read(readingFlowControllerProvider.notifier);
+    flow.reset();
+    flow.setQuestion(normalizedQuestion);
     Navigator.push(
       context,
       MaterialPageRoute(

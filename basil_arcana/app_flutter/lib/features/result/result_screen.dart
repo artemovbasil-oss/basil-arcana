@@ -57,6 +57,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
 
   @override
   void dispose() {
+    ref.read(readingFlowControllerProvider.notifier).reset();
     _readingFlowSubscription?.close();
     _typingTimer?.cancel();
     _scrollController.dispose();
