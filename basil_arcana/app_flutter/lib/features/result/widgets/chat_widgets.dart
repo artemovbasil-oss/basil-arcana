@@ -42,61 +42,77 @@ class ChatBubble extends StatelessWidget {
     required this.isUser,
     required this.child,
     required this.avatarEmoji,
+    this.fullWidth = false,
+    this.showAvatar = true,
   });
 
   final bool isUser;
   final Widget child;
   final String avatarEmoji;
+  final bool fullWidth;
+  final bool showAvatar;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final bubble = ConstrainedBox(
-      constraints: BoxConstraints(
-        maxWidth: MediaQuery.of(context).size.width * 0.78,
-      ),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: isUser
-            ? BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    colorScheme.primary.withOpacity(0.95),
-                    colorScheme.primary.withOpacity(0.7),
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: colorScheme.primary.withOpacity(0.35),
-                    blurRadius: 18,
-                    offset: const Offset(0, 8),
-                  ),
+    final bubbleContent = Container(
+      padding: const EdgeInsets.all(16),
+      decoration: isUser
+          ? BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  colorScheme.primary.withOpacity(0.95),
+                  colorScheme.primary.withOpacity(0.7),
                 ],
-              )
-            : BoxDecoration(
-                color: colorScheme.surface,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: colorScheme.primary.withOpacity(0.3)),
-                boxShadow: [
+              ),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: colorScheme.primary.withOpacity(0.35),
+                  blurRadius: 18,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            )
+          : BoxDecoration(
+              color: fullWidth
+                  ? colorScheme.surfaceContainerHighest.withOpacity(0.28)
+                  : colorScheme.surface,
+              borderRadius: BorderRadius.circular(16),
+              border: fullWidth
+                  ? null
+                  : Border.all(color: colorScheme.primary.withOpacity(0.3)),
+              boxShadow: [
+                if (!fullWidth)
                   BoxShadow(
                     color: colorScheme.primary.withOpacity(0.16),
                     blurRadius: 22,
                     offset: const Offset(0, 8),
                   ),
-                ],
-              ),
-        child: DefaultTextStyle.merge(
-          style: isUser
-              ? Theme.of(context)
-                  .textTheme
-                  .bodyMedium
-                  ?.copyWith(color: colorScheme.onPrimary)
-              : Theme.of(context).textTheme.bodyMedium,
-          child: child,
-        ),
+              ],
+            ),
+      child: DefaultTextStyle.merge(
+        style: isUser
+            ? Theme.of(context)
+                .textTheme
+                .bodyMedium
+                ?.copyWith(color: colorScheme.onPrimary)
+            : Theme.of(context).textTheme.bodyMedium,
+        child: child,
       ),
     );
+    final bubble = fullWidth
+        ? SizedBox(width: double.infinity, child: bubbleContent)
+        : ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: MediaQuery.of(context).size.width * 0.78,
+            ),
+            child: bubbleContent,
+          );
+
+    if (!showAvatar) {
+      return bubble;
+    }
 
     final avatar = AvatarCircle(
       emoji: avatarEmoji,
@@ -131,6 +147,8 @@ class TypingIndicatorBubble extends StatelessWidget {
     return ChatBubble(
       isUser: false,
       avatarEmoji: '🪄',
+      fullWidth: true,
+      showAvatar: false,
       child: const _TypingDots(),
     );
   }
@@ -153,6 +171,8 @@ class OracleTypingBubble extends StatelessWidget {
     return ChatBubble(
       isUser: false,
       avatarEmoji: '🪄',
+      fullWidth: true,
+      showAvatar: false,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

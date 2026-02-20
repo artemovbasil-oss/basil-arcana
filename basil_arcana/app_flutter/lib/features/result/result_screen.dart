@@ -127,11 +127,24 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
 
     if (aiResult == null) {
       if (state.isLoading) {
-        return OracleWaitingScreen(
-          onCancel: () {
-            ref.read(readingFlowControllerProvider.notifier).cancelGeneration();
-            Navigator.pop(context);
-          },
+        return Scaffold(
+          appBar: buildEnergyTopBar(
+            context,
+            showBack: true,
+            onBack: handleBack,
+            onSettings: () {
+              Navigator.pushNamed(
+                context,
+                SettingsScreen.routeName,
+                arguments: const AppRouteConfig(showBackButton: true),
+              );
+            },
+          ),
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          body: SafeArea(
+            top: false,
+            child: const _ResultLoadingShimmer(),
+          ),
         );
       }
 
@@ -180,6 +193,8 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                 child: ChatBubble(
                   isUser: false,
                   avatarEmoji: '🪄',
+                  fullWidth: true,
+                  showAvatar: false,
                   child: Text(statusText),
                 ),
               ),
@@ -270,7 +285,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
             Positioned.fill(
               child: ListView(
                 controller: _scrollController,
-                padding: EdgeInsets.fromLTRB(20, 16, 20, listBottomPadding),
+                padding: EdgeInsets.fromLTRB(16, 16, 16, listBottomPadding),
                 children: [
                   for (final item in _items) ...[
                     _buildChatItem(item, state),
@@ -283,6 +298,8 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                       child: ChatBubble(
                         isUser: false,
                         avatarEmoji: '🪄',
+                        fullWidth: true,
+                        showAvatar: false,
                         child: _DeepPromptBubble(
                           isActionable: state.showDetailsCta &&
                               state.detailsStatus == DetailsStatus.idle,
@@ -333,6 +350,8 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                       child: ChatBubble(
                         isUser: false,
                         avatarEmoji: '🪄',
+                        fullWidth: true,
+                        showAvatar: false,
                         child: _DetailsCardThumbnails(
                           spread: spread,
                           spreadType: state.spreadType,
@@ -379,6 +398,8 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                       child: ChatBubble(
                         isUser: false,
                         avatarEmoji: '🪄',
+                        fullWidth: true,
+                        showAvatar: false,
                         child: _DeepErrorBubble(
                           message: state.detailsError ??
                               AppLocalizations.of(context)!
@@ -641,6 +662,10 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                         cardId: drawn.cardId,
                         cardName: drawn.cardName,
                         keywords: drawn.keywords,
+                        showContainer: false,
+                        overlayHeaderOnImage: true,
+                        showKeywords: false,
+                        padding: EdgeInsets.zero,
                         onCardTap: () {
                           Navigator.push(
                             context,
@@ -678,6 +703,10 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                       cardId: drawn.cardId,
                       cardName: drawn.cardName,
                       keywords: drawn.keywords,
+                      showContainer: false,
+                      overlayHeaderOnImage: true,
+                      showKeywords: false,
+                      padding: EdgeInsets.zero,
                       onCardTap: () {
                         Navigator.push(
                           context,
@@ -884,6 +913,8 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
           child: ChatBubble(
             isUser: false,
             avatarEmoji: '🪄',
+            fullWidth: true,
+            showAvatar: false,
             child: item.child ?? const SizedBox.shrink(),
           ),
         );
@@ -1358,6 +1389,118 @@ class _StatusPill extends StatelessWidget {
   }
 }
 
+class _ResultLoadingShimmer extends StatefulWidget {
+  const _ResultLoadingShimmer();
+
+  @override
+  State<_ResultLoadingShimmer> createState() => _ResultLoadingShimmerState();
+}
+
+class _ResultLoadingShimmerState extends State<_ResultLoadingShimmer>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1250),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final base = colorScheme.surfaceContainerHighest.withOpacity(0.34);
+    final glow = colorScheme.surface.withOpacity(0.88);
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
+      children: [
+        _ShimmerBlock(
+          animation: _controller,
+          baseColor: base,
+          glowColor: glow,
+          height: 62,
+          borderRadius: 16,
+        ),
+        const SizedBox(height: 14),
+        _ShimmerBlock(
+          animation: _controller,
+          baseColor: base,
+          glowColor: glow,
+          height: 320,
+          borderRadius: 16,
+        ),
+        const SizedBox(height: 14),
+        _ShimmerBlock(
+          animation: _controller,
+          baseColor: base,
+          glowColor: glow,
+          height: 150,
+          borderRadius: 16,
+        ),
+        const SizedBox(height: 14),
+        _ShimmerBlock(
+          animation: _controller,
+          baseColor: base,
+          glowColor: glow,
+          height: 190,
+          borderRadius: 16,
+        ),
+      ],
+    );
+  }
+}
+
+class _ShimmerBlock extends StatelessWidget {
+  const _ShimmerBlock({
+    required this.animation,
+    required this.baseColor,
+    required this.glowColor,
+    required this.height,
+    required this.borderRadius,
+  });
+
+  final Animation<double> animation;
+  final Color baseColor;
+  final Color glowColor;
+  final double height;
+  final double borderRadius;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, child) {
+        final x = animation.value * 2 - 1;
+        return Container(
+          height: height,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(borderRadius),
+            gradient: LinearGradient(
+              begin: Alignment(-1.3 + x, 0),
+              end: Alignment(-0.1 + x, 0),
+              colors: [
+                baseColor,
+                glowColor,
+                baseColor,
+              ],
+              stops: const [0.2, 0.45, 0.8],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
 class _ActionBar extends StatelessWidget {
   const _ActionBar({
     required this.showExtra,
@@ -1579,7 +1722,6 @@ class _PremiumReadingCard extends StatelessWidget {
             ),
           ],
         ),
-        border: Border.all(color: colorScheme.primary.withOpacity(0.26)),
         boxShadow: [
           BoxShadow(
             color: colorScheme.primary.withOpacity(0.08),
@@ -1624,7 +1766,6 @@ class _LenormandSequenceCard extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(18),
         color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
-        border: Border.all(color: colorScheme.primary.withOpacity(0.22)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1641,6 +1782,10 @@ class _LenormandSequenceCard extends StatelessWidget {
             cardId: card.cardId,
             cardName: card.cardName,
             keywords: card.keywords,
+            showContainer: false,
+            overlayHeaderOnImage: true,
+            showKeywords: false,
+            padding: EdgeInsets.zero,
             onCardTap: onCardTap,
           ),
           const SizedBox(height: 10),

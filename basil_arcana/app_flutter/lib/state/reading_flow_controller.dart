@@ -8,7 +8,6 @@ import 'package:uuid/uuid.dart';
 
 import '../core/config/diagnostics.dart';
 import '../core/telegram/telegram_env.dart';
-import '../core/utils/local_reading_builder.dart';
 import '../data/models/ai_result_model.dart';
 import '../data/models/card_model.dart';
 import '../data/models/deck_model.dart';
@@ -154,7 +153,6 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
   ReadingFlowController(this.ref) : super(ReadingFlowState.initial());
 
   final Ref ref;
-  final LocalReadingBuilder _localReadingBuilder = const LocalReadingBuilder();
   http.Client? _activeClient;
   int _requestCounter = 0;
   int _activeRequestId = 0;
@@ -397,18 +395,11 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
     required SpreadModel spread,
     required List<DrawnCardModel> drawnCards,
   }) async {
-    final localResult = _localReadingBuilder.build(
-      question: state.question,
-      spread: spread,
-      spreadType: state.spreadType ?? SpreadType.one,
-      drawnCards: drawnCards,
-    );
-
     state = state.copyWith(
-      aiResult: localResult,
+      aiResult: null,
       isLoading: true,
       aiUsed: false,
-      showDetailsCta: true,
+      showDetailsCta: false,
       requiresTelegram: false,
       clearError: true,
     );

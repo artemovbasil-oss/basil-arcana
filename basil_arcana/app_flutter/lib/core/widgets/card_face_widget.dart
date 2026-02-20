@@ -14,6 +14,10 @@ class CardFaceWidget extends ConsumerWidget {
   final List<String> keywords;
   final String? cardId;
   final VoidCallback? onCardTap;
+  final bool showContainer;
+  final bool overlayHeaderOnImage;
+  final bool showKeywords;
+  final EdgeInsetsGeometry padding;
 
   const CardFaceWidget({
     super.key,
@@ -21,6 +25,10 @@ class CardFaceWidget extends ConsumerWidget {
     required this.keywords,
     this.cardId,
     this.onCardTap,
+    this.showContainer = true,
+    this.overlayHeaderOnImage = false,
+    this.showKeywords = true,
+    this.padding = const EdgeInsets.all(16),
   });
 
   @override
@@ -43,55 +51,103 @@ class CardFaceWidget extends ConsumerWidget {
     final videoIndex = ref.watch(videoIndexProvider).asData?.value;
     final availableVideos =
         videoIndex == null || videoIndex.isEmpty ? null : videoIndex;
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: colorScheme.outlineVariant),
-        color: colorScheme.primary.withOpacity(0.05),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (cardId != null) ...[
-            LayoutBuilder(
-              builder: (context, constraints) {
-                final cardWidth = constraints.maxWidth;
-                final cardHeight = cardWidth * 1.5;
-                final mediaAssets = CardMediaResolver(
-                  deckId: deckId,
-                  availableVideoFiles: availableVideos,
-                ).resolve(
-                  resolvedCard?.id ?? canonicalCardId(cardId!),
-                  card: resolvedCard,
-                  imageUrlOverride: resolvedCard?.imageUrl,
-                  videoUrlOverride: resolvedCard?.videoUrl,
-                );
-                final image = CardMedia(
-                  cardId: resolvedCard?.id ?? canonicalCardId(cardId!),
-                  imageUrl: mediaAssets.imageUrl,
-                  videoUrl: mediaAssets.videoUrl,
-                  enableVideo: true,
-                  autoPlayOnce: true,
-                  playLabel: l10n.videoTapToPlay,
-                  width: cardWidth,
-                  height: cardHeight,
-                  borderRadius: BorderRadius.circular(8),
-                  fit: BoxFit.cover,
-                );
-                return Material(
-                  color: Colors.transparent,
-                  child: image,
-                );
-              },
-            ),
-            const SizedBox(height: 16),
-          ],
+    final content = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (cardId != null) ...[
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final cardWidth = constraints.maxWidth;
+              final cardHeight = cardWidth * 1.5;
+              final mediaAssets = CardMediaResolver(
+                deckId: deckId,
+                availableVideoFiles: availableVideos,
+              ).resolve(
+                resolvedCard?.id ?? canonicalCardId(cardId!),
+                card: resolvedCard,
+                imageUrlOverride: resolvedCard?.imageUrl,
+                videoUrlOverride: resolvedCard?.videoUrl,
+              );
+              final image = CardMedia(
+                cardId: resolvedCard?.id ?? canonicalCardId(cardId!),
+                imageUrl: mediaAssets.imageUrl,
+                videoUrl: mediaAssets.videoUrl,
+                enableVideo: true,
+                autoPlayOnce: true,
+                playLabel: l10n.videoTapToPlay,
+                width: cardWidth,
+                height: cardHeight,
+                borderRadius: BorderRadius.circular(
+                  overlayHeaderOnImage ? 14 : 8,
+                ),
+                fit: BoxFit.cover,
+              );
+              return Stack(
+                children: [
+                  Material(
+                    color: Colors.transparent,
+                    child: image,
+                  ),
+                  if (overlayHeaderOnImage)
+                    Positioned(
+                      left: 10,
+                      right: 10,
+                      bottom: 10,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Expanded(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color:
+                                    colorScheme.surface.withValues(alpha: 0.84),
+                                borderRadius: BorderRadius.circular(999),
+                                border: Border.all(
+                                  color: colorScheme.outlineVariant
+                                      .withValues(alpha: 0.7),
+                                ),
+                              ),
+                              child: Text(
+                                cardName,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelSmall
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                              ),
+                            ),
+                          ),
+                          if (onCardTap != null) ...[
+                            const SizedBox(width: 8),
+                            _OverlayChipButton(
+                              label: l10n.cardsDetailTitle,
+                              onPressed: onCardTap!,
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
+          if (!overlayHeaderOnImage) const SizedBox(height: 16),
+        ],
+        if (!overlayHeaderOnImage || cardId == null) ...[
           Text(
             cardName,
             style: AppTextStyles.title(context),
           ),
           const SizedBox(height: 8),
+        ],
+        if (showKeywords)
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
@@ -112,17 +168,69 @@ class CardFaceWidget extends ConsumerWidget {
               ],
             ),
           ),
-          if (onCardTap != null) ...[
-            const SizedBox(height: 12),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: AppSmallButton(
-                onPressed: onCardTap,
-                label: l10n.cardsDetailTitle,
-              ),
+        if (onCardTap != null && !overlayHeaderOnImage) ...[
+          const SizedBox(height: 12),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: AppSmallButton(
+              onPressed: onCardTap,
+              label: l10n.cardsDetailTitle,
             ),
-          ],
+          ),
         ],
+      ],
+    );
+    if (!showContainer) {
+      return Padding(
+        padding: padding,
+        child: content,
+      );
+    }
+    return Container(
+      padding: padding,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: colorScheme.outlineVariant),
+        color: colorScheme.primary.withOpacity(0.05),
+      ),
+      child: content,
+    );
+  }
+}
+
+class _OverlayChipButton extends StatelessWidget {
+  const _OverlayChipButton({
+    required this.label,
+    required this.onPressed,
+  });
+
+  final String label;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(999),
+        onTap: onPressed,
+        child: Ink(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(
+            color: colorScheme.surface.withValues(alpha: 0.84),
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(
+              color: colorScheme.outlineVariant.withValues(alpha: 0.7),
+            ),
+          ),
+          child: Text(
+            label,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+          ),
+        ),
       ),
     );
   }
