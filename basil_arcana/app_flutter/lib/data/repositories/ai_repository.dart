@@ -515,9 +515,6 @@ class AiRepository {
         final headers = {
           'Content-Type': 'application/json',
           'x-request-id': requestId,
-          'Cache-Control': 'no-store, no-cache, max-age=0, must-revalidate',
-          'Pragma': 'no-cache',
-          'Expires': '0',
           if (authState.hasInitData) 'X-Telegram-InitData': authState.initData,
         };
         if (useTelegramWeb && kDebugMode) {
