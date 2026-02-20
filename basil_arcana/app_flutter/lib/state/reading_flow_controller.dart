@@ -153,6 +153,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
   ReadingFlowController(this.ref) : super(ReadingFlowState.initial());
 
   final Ref ref;
+  static const int _maxGenerateAttempts = 2;
   http.Client? _activeClient;
   int _requestCounter = 0;
   int _activeRequestId = 0;
@@ -337,8 +338,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
         spread: spread,
         drawnCards: drawnCards,
         errorType: AiErrorType.serverError,
-        errorMessage:
-            'AI temporarily unavailable — showing base interpretation',
+        errorMessage: _fallbackErrorMessage(AiErrorType.serverError),
         logLabel: 'generating->done(local-fallback:top-level)',
       );
     }
@@ -347,6 +347,70 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
   AppLocalizations _l10n() {
     final locale = ref.read(localeProvider);
     return lookupAppLocalizations(locale);
+  }
+
+  String _fallbackErrorMessage(
+    AiErrorType type, {
+    int? statusCode,
+  }) {
+    final l10n = _l10n();
+    if (type == AiErrorType.serverError && statusCode != null) {
+      return l10n.resultStatusServerUnavailableWithStatus(statusCode);
+    }
+    return switch (type) {
+      AiErrorType.timeout => l10n.resultStatusTimeout,
+      AiErrorType.noInternet => l10n.resultStatusNoInternet,
+      AiErrorType.unauthorized => l10n.resultStatusUnauthorized,
+      AiErrorType.rateLimited => l10n.resultStatusTooManyAttempts,
+      AiErrorType.misconfigured => l10n.resultStatusMissingApiBaseUrl,
+      AiErrorType.badResponse => l10n.resultStatusInterpretationUnavailable,
+      AiErrorType.serverError => l10n.resultStatusServerUnavailable,
+    };
+  }
+
+  bool _isRetryableGenerateError(AiErrorType type) {
+    return type == AiErrorType.timeout ||
+        type == AiErrorType.serverError ||
+        type == AiErrorType.badResponse;
+  }
+
+  bool _isLikelyLanguageMismatch({
+    required AiResultModel result,
+    required String languageCode,
+  }) {
+    final code = languageCode.toLowerCase();
+    final sample = [
+      result.tldr,
+      result.why,
+      result.action,
+      result.fullText,
+      ...result.sections.map((section) => section.text),
+    ].join(' ');
+    if (sample.trim().isEmpty) {
+      return false;
+    }
+    final latin = RegExp(r'[A-Za-z]').allMatches(sample).length;
+    final cyrillic =
+        RegExp(r'[А-Яа-яЁёӘәҒғҚқҢңӨөҰұҮүІі]').allMatches(sample).length;
+    if (code == 'en') {
+      return latin > 12 && cyrillic > latin;
+    }
+    if (code == 'ru' || code == 'kk') {
+      return cyrillic > 12 && latin > cyrillic;
+    }
+    return false;
+  }
+
+  Duration _timeoutForGenerateAttempt({
+    required SpreadModel spread,
+    required List<DrawnCardModel> drawnCards,
+    required int attempt,
+  }) {
+    final spreadCardCount = spread.cardsCount ?? spread.positions.length;
+    final isFiveCardSpread = spreadCardCount >= 5 || drawnCards.length >= 5;
+    final base = isFiveCardSpread ? 28 : 20;
+    final extra = attempt > 0 ? 4 : 0;
+    return Duration(seconds: base + extra);
   }
 
   String _messageForError(AiRepositoryException error, AppLocalizations l10n) {
@@ -412,34 +476,55 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
     try {
       final aiRepository = ref.read(aiRepositoryProvider);
       final locale = ref.read(localeProvider);
-      final result = await aiRepository.generateReading(
-        question: state.question,
-        spread: spread,
-        drawnCards: drawnCards,
-        languageCode: locale.languageCode,
-        mode: ReadingMode.fast,
-        client: client,
-        timeout: const Duration(seconds: 20),
-      );
+      AiResultModel? result;
+      AiRepositoryException? lastError;
+      for (var attempt = 0; attempt < _maxGenerateAttempts; attempt++) {
+        try {
+          result = await aiRepository.generateReading(
+            question: state.question,
+            spread: spread,
+            drawnCards: drawnCards,
+            languageCode: locale.languageCode,
+            mode: ReadingMode.fast,
+            client: client,
+            timeout: _timeoutForGenerateAttempt(
+              spread: spread,
+              drawnCards: drawnCards,
+              attempt: attempt,
+            ),
+          );
+          if (!_hasDisplayableResult(result)) {
+            throw const AiRepositoryException(AiErrorType.badResponse);
+          }
+          if (_isLikelyLanguageMismatch(
+            result: result,
+            languageCode: locale.languageCode,
+          )) {
+            if (attempt + 1 < _maxGenerateAttempts) {
+              continue;
+            }
+            throw const AiRepositoryException(
+              AiErrorType.badResponse,
+              message: 'language_mismatch',
+            );
+          }
+          break;
+        } on AiRepositoryException catch (error) {
+          lastError = error;
+          final canRetry = attempt + 1 < _maxGenerateAttempts &&
+              _isRetryableGenerateError(error.type);
+          if (!canRetry) {
+            rethrow;
+          }
+          await Future<void>.delayed(
+              Duration(milliseconds: 450 * (attempt + 1)));
+        }
+      }
       if (_activeRequestId != requestId) {
         return;
       }
-      if (!_hasDisplayableResult(result)) {
-        if (kDebugMode) {
-          debugPrint(
-            '[ReadingFlow] generateReading invalid payload '
-            'status=200 bodyPreview="<parsed-empty-payload>"',
-          );
-        }
-        await _forceSafeFallback(
-          spread: spread,
-          drawnCards: drawnCards,
-          errorType: AiErrorType.badResponse,
-          errorMessage:
-              'AI temporarily unavailable — showing base interpretation',
-          logLabel: 'generating->done(local-fallback:invalid-response)',
-        );
-        return;
+      if (result == null) {
+        throw lastError ?? const AiRepositoryException(AiErrorType.serverError);
       }
       state = state.copyWith(
         aiResult: result,
@@ -464,8 +549,10 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
         drawnCards: drawnCards,
         errorType: error.type,
         errorStatusCode: error.statusCode,
-        errorMessage:
-            'AI temporarily unavailable — showing base interpretation',
+        errorMessage: _fallbackErrorMessage(
+          error.type,
+          statusCode: error.statusCode,
+        ),
         logLabel: 'generating->done(local-fallback:error)',
       );
     } catch (error) {
@@ -485,8 +572,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
         spread: spread,
         drawnCards: drawnCards,
         errorType: AiErrorType.serverError,
-        errorMessage:
-            'AI temporarily unavailable — showing base interpretation',
+        errorMessage: _fallbackErrorMessage(AiErrorType.serverError),
         logLabel: 'generating->done(local-fallback:unknown)',
       );
     } finally {
@@ -495,8 +581,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
           spread: spread,
           drawnCards: drawnCards,
           errorType: AiErrorType.serverError,
-          errorMessage:
-              'AI temporarily unavailable — showing base interpretation',
+          errorMessage: _fallbackErrorMessage(AiErrorType.serverError),
           logLabel: 'generating->done(local-fallback:safety-net)',
         );
       }

@@ -732,12 +732,7 @@ class AiRepository {
     required String body,
     required String requestId,
   }) {
-    dynamic decoded;
-    try {
-      decoded = jsonDecode(body);
-    } catch (error) {
-      throw FormatException('Invalid JSON: $error');
-    }
+    final decoded = _decodeJsonResponse(body);
 
     if (decoded is! Map<String, dynamic>) {
       throw const FormatException('Response root must be an object.');
@@ -789,8 +784,76 @@ class AiRepository {
       if (candidate is Map<String, dynamic>) {
         return candidate;
       }
+      if (candidate is String && candidate.trim().isNotEmpty) {
+        final decodedCandidate = _decodeJsonResponse(candidate, silent: true);
+        if (decodedCandidate is Map<String, dynamic>) {
+          return decodedCandidate;
+        }
+      }
     }
     return root;
+  }
+
+  dynamic _decodeJsonResponse(String body, {bool silent = false}) {
+    try {
+      return jsonDecode(body);
+    } catch (_) {
+      final fenced = RegExp(
+        r'```(?:json)?\s*([\s\S]*?)\s*```',
+        caseSensitive: false,
+      ).firstMatch(body);
+      final extracted = fenced?.group(1)?.trim() ?? _extractJsonObject(body);
+      if (extracted != null && extracted.isNotEmpty) {
+        try {
+          return jsonDecode(extracted);
+        } catch (_) {
+          if (!silent) {
+            throw const FormatException('Invalid JSON in extracted payload.');
+          }
+        }
+      }
+      if (!silent) {
+        throw const FormatException('Invalid JSON response.');
+      }
+      return null;
+    }
+  }
+
+  String? _extractJsonObject(String source) {
+    final start = source.indexOf('{');
+    if (start < 0) {
+      return null;
+    }
+    var depth = 0;
+    var inString = false;
+    var escaped = false;
+    for (var i = start; i < source.length; i++) {
+      final char = source[i];
+      if (escaped) {
+        escaped = false;
+        continue;
+      }
+      if (char == '\\') {
+        escaped = true;
+        continue;
+      }
+      if (char == '"') {
+        inString = !inString;
+        continue;
+      }
+      if (inString) {
+        continue;
+      }
+      if (char == '{') {
+        depth++;
+      } else if (char == '}') {
+        depth--;
+        if (depth == 0) {
+          return source.substring(start, i + 1);
+        }
+      }
+    }
+    return null;
   }
 
   Future<String> generateNatalChart({
