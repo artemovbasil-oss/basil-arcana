@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
@@ -1419,22 +1420,22 @@ class _ResultLoadingShimmer extends StatefulWidget {
 }
 
 class _ResultLoadingShimmerState extends State<_ResultLoadingShimmer>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
+    with TickerProviderStateMixin {
   late final AnimationController _revealController;
   late final AnimationController _questionTypingController;
+  late final AnimationController _questionDotsController;
+  bool _sequenceStarted = false;
+  bool _questionTypingDone = false;
+  bool _showCardsBubble = false;
+  bool _showOracleBubble = false;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 3000),
-    )..repeat(reverse: true);
     _revealController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1850),
-    )..forward();
+    );
     final localeCode =
         WidgetsBinding.instance.platformDispatcher.locale.languageCode;
     final fullText = _loadingQuestionText(
@@ -1444,59 +1445,105 @@ class _ResultLoadingShimmerState extends State<_ResultLoadingShimmer>
     _questionTypingController = AnimationController(
       vsync: this,
       duration: Duration(
-        milliseconds: (1150 + fullText.length * 22).clamp(1150, 5200),
+        milliseconds: (1450 + fullText.length * 30).clamp(1450, 6200),
       ),
-    )..forward();
+    );
+    _questionDotsController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_sequenceStarted) {
+      return;
+    }
+    _sequenceStarted = true;
+    if (MediaQuery.of(context).disableAnimations) {
+      _questionTypingController.value = 1.0;
+      _questionDotsController.value = 1.0;
+      _revealController.value = 1.0;
+      _questionTypingDone = true;
+      _showCardsBubble = true;
+      _showOracleBubble = true;
+      return;
+    }
+    unawaited(_runLoadingSequence());
+  }
+
+  Future<void> _runLoadingSequence() async {
+    await _questionTypingController.forward();
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _questionTypingDone = true;
+    });
+    await _questionDotsController.forward(from: 0);
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _showCardsBubble = true;
+    });
+    await _revealController.forward(from: 0);
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _showOracleBubble = true;
+    });
   }
 
   @override
   void dispose() {
-    _controller.dispose();
     _revealController.dispose();
     _questionTypingController.dispose();
+    _questionDotsController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final disableAnimations = MediaQuery.of(context).disableAnimations;
-    if (disableAnimations) {
-      _controller.stop();
-      if (_controller.value != 0.0) {
-        _controller.value = 0.0;
-      }
-      if (_revealController.value != 1.0) {
-        _revealController.value = 1.0;
-      }
-      if (_questionTypingController.value != 1.0) {
-        _questionTypingController.value = 1.0;
-      }
-    } else if (!_controller.isAnimating) {
-      _controller.repeat(reverse: true);
-    }
     final localeCode = Localizations.localeOf(context).languageCode;
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
       children: [
         _QuestionTypingBubble(
           typing: _questionTypingController,
+          oneShotDots: _questionDotsController,
+          showDots: _questionTypingDone && !_showCardsBubble,
           localeCode: localeCode,
           question: widget.question,
         ),
-        const SizedBox(height: 14),
-        _LoadingCardsRow(
-          reveal: _revealController,
-          drawnCards: widget.drawnCards,
-          expectedCardsCount: widget.expectedCardsCount,
-          deckCoverUrl: widget.deckCoverUrl,
-        ),
-        const SizedBox(height: 14),
-        ChatBubbleReveal(
-          child: OracleTypingBubble(
-            label: l10n.resultDeepTypingLabel,
+        if (_showCardsBubble) ...[
+          const SizedBox(height: 14),
+          ChatBubbleReveal(
+            child: ChatBubble(
+              isUser: false,
+              avatarEmoji: '🪄',
+              fullWidth: true,
+              showAvatar: false,
+              child: _LoadingCardsRow(
+                reveal: _revealController,
+                drawnCards: widget.drawnCards,
+                expectedCardsCount: widget.expectedCardsCount,
+                deckCoverUrl: widget.deckCoverUrl,
+              ),
+            ),
           ),
-        ),
+        ],
+        if (_showOracleBubble) ...[
+          const SizedBox(height: 14),
+          ChatBubbleReveal(
+            child: OracleTypingBubble(
+              label: l10n.resultDeepTypingLabel,
+            ),
+          ),
+        ],
       ],
     );
   }
@@ -1525,11 +1572,15 @@ String _loadingQuestionText({
 class _QuestionTypingBubble extends StatelessWidget {
   const _QuestionTypingBubble({
     required this.typing,
+    required this.oneShotDots,
+    required this.showDots,
     required this.localeCode,
     required this.question,
   });
 
   final Animation<double> typing;
+  final Animation<double> oneShotDots;
+  final bool showDots;
   final String localeCode;
   final String question;
 
@@ -1540,12 +1591,27 @@ class _QuestionTypingBubble extends StatelessWidget {
       question: question,
     );
     return AnimatedBuilder(
-      animation: typing,
+      animation: Listenable.merge([typing, oneShotDots]),
       builder: (context, _) {
         final t = Curves.easeOut.transform(typing.value);
         final visible = (fullText.length * t).round().clamp(1, fullText.length);
         final partial = fullText.substring(0, visible);
-        return OracleTypingBubble(label: partial);
+        return ChatBubble(
+          isUser: false,
+          avatarEmoji: '🪄',
+          fullWidth: true,
+          showAvatar: false,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(child: Text(partial)),
+              if (showDots) ...[
+                const SizedBox(width: 6),
+                _OneShotDots(progress: oneShotDots.value),
+              ],
+            ],
+          ),
+        );
       },
     );
   }
@@ -1660,17 +1726,48 @@ class _LoadingCardsRow extends StatelessWidget {
     });
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(8, 8, 8, 10),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(14),
-        color: colorScheme.surfaceContainerHighest.withOpacity(0.18),
-        border: Border.all(color: colorScheme.outlineVariant.withOpacity(0.28)),
-      ),
+      padding: const EdgeInsets.fromLTRB(0, 4, 0, 2),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: items,
       ),
     );
+  }
+}
+
+class _OneShotDots extends StatelessWidget {
+  const _OneShotDots({required this.progress});
+
+  final double progress;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme.onSurface;
+    final t = Curves.easeInOut.transform(progress);
+    double pulse(double center) {
+      final distance = (t - center).abs();
+      return (1.0 - (distance * 4)).clamp(0.0, 1.0);
+    }
+
+    final p0 = 0.2 + 0.8 * pulse(0.2);
+    final p1 = 0.2 + 0.8 * pulse(0.5);
+    final p2 = 0.2 + 0.8 * pulse(0.8);
+    return SvgPicture.string(
+      '''
+<svg viewBox="0 0 34 6" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="3" cy="3" r="2.3" fill="${_hex(color)}" fill-opacity="${p0.toStringAsFixed(2)}"/>
+  <circle cx="17" cy="3" r="2.3" fill="${_hex(color)}" fill-opacity="${p1.toStringAsFixed(2)}"/>
+  <circle cx="31" cy="3" r="2.3" fill="${_hex(color)}" fill-opacity="${p2.toStringAsFixed(2)}"/>
+</svg>
+''',
+      width: 34,
+      height: 6,
+    );
+  }
+
+  String _hex(Color color) {
+    final rgb = color.toARGB32() & 0x00FFFFFF;
+    return '#${rgb.toRadixString(16).padLeft(6, '0')}';
   }
 }
 
