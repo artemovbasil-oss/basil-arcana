@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
@@ -19,6 +21,7 @@ import '../../core/widgets/app_top_bar.dart';
 import '../../core/widgets/sofia_promo_card.dart';
 import '../../data/models/card_model.dart';
 import '../../data/models/deck_model.dart';
+import '../../data/models/reading_model.dart';
 import '../../data/repositories/energy_topup_repository.dart';
 import '../../data/repositories/home_insights_repository.dart';
 import '../../data/repositories/sofia_consent_repository.dart';
@@ -65,6 +68,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   bool _hasYearlyReportAccess = false;
   bool _didRequestOnboarding = false;
   final ValueNotifier<int> _streakModalRefreshTick = ValueNotifier<int>(0);
+  ValueListenable<Box<ReadingModel>>? _readingsListenable;
+  VoidCallback? _readingsListener;
+  ValueListenable<Box<int>>? _cardStatsListenable;
+  VoidCallback? _cardStatsListener;
+  Timer? _streakReloadDebounce;
   late final AnimationController _fieldGlowController;
   late final AnimationController _titleShimmerController;
 
@@ -91,6 +99,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     _loadStreakStats();
     _loadReportEntitlements();
     _loadQueryHistoryAvailability();
+    _attachLiveStatsListeners();
     _readingFlowSubscription = ref.listenManual<ReadingFlowState>(
       readingFlowControllerProvider,
       (prev, next) {
@@ -105,6 +114,44 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         setState(() {});
       },
     );
+  }
+
+  void _attachLiveStatsListeners() {
+    _readingsListenable = ref.read(readingsRepositoryProvider).listenable();
+    _readingsListener = _handleLocalStatsChanged;
+    _readingsListenable?.addListener(_readingsListener!);
+
+    _cardStatsListenable = ref.read(cardStatsRepositoryProvider).listenable();
+    _cardStatsListener = _handleLocalStatsChanged;
+    _cardStatsListenable?.addListener(_cardStatsListener!);
+  }
+
+  void _detachLiveStatsListeners() {
+    if (_readingsListenable != null && _readingsListener != null) {
+      _readingsListenable!.removeListener(_readingsListener!);
+    }
+    if (_cardStatsListenable != null && _cardStatsListener != null) {
+      _cardStatsListenable!.removeListener(_cardStatsListener!);
+    }
+    _readingsListenable = null;
+    _readingsListener = null;
+    _cardStatsListenable = null;
+    _cardStatsListener = null;
+  }
+
+  void _handleLocalStatsChanged() {
+    if (!mounted) {
+      return;
+    }
+    setState(() {});
+    _refreshOpenStreakModal();
+    _streakReloadDebounce?.cancel();
+    _streakReloadDebounce = Timer(const Duration(milliseconds: 450), () {
+      if (!mounted) {
+        return;
+      }
+      _loadStreakStats();
+    });
   }
 
   Future<void> _loadQueryHistoryAvailability() async {
@@ -779,6 +826,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
   @override
   void dispose() {
+    _detachLiveStatsListeners();
+    _streakReloadDebounce?.cancel();
     _readingFlowSubscription?.close();
     _streakModalRefreshTick.dispose();
     _fieldGlowController.dispose();
@@ -842,7 +891,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     final deckHint = _deckHint(l10n, deckId);
     final cards = cardsAsync.maybeWhen(
         data: (list) => list, orElse: () => const <CardModel>[]);
-    final topCards = _topCards(cards);
     final dailyCard = _resolveDailyCard(cards, deckId);
 
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
@@ -1146,7 +1194,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                 : streakCopy.tileSubtitle,
                             onTap: () => _showStreakModal(
                               copy: streakCopy,
-                              topCards: topCards,
                               cards: cards,
                               selectedDeck: deckId,
                             ),
@@ -1687,16 +1734,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
   Future<void> _showStreakModal({
     required _HomeStreakCopy copy,
-    required List<_TopCardStat> topCards,
     required List<CardModel> cards,
     required DeckType selectedDeck,
   }) async {
     final energyCopy = _EnergyProfileCopy.resolve(context);
-    final profile = _buildEnergyProfile(
-      cards: cards,
-      topCards: topCards,
-      selectedDeck: selectedDeck,
-    );
 
     final colorScheme = Theme.of(context).colorScheme;
     await showModalBottomSheet<void>(
@@ -1711,6 +1752,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         return ValueListenableBuilder<int>(
           valueListenable: _streakModalRefreshTick,
           builder: (context, _, __) {
+            final liveTopCards = _topCards(cards);
+            final profile = _buildEnergyProfile(
+              cards: cards,
+              topCards: liveTopCards,
+              selectedDeck: selectedDeck,
+            );
             return FractionallySizedBox(
               heightFactor: 0.95,
               child: SafeArea(
