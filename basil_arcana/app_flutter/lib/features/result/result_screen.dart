@@ -1456,8 +1456,6 @@ class _ResultLoadingShimmerState extends State<_ResultLoadingShimmer>
     } else if (!_controller.isAnimating) {
       _controller.repeat(reverse: true);
     }
-    final base = colorScheme.surfaceContainerHighest.withOpacity(0.2);
-    final glow = colorScheme.primary.withOpacity(0.08);
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
       children: [
@@ -1473,95 +1471,7 @@ class _ResultLoadingShimmerState extends State<_ResultLoadingShimmer>
             label: l10n.resultDeepTypingLabel,
           ),
         ),
-        const SizedBox(height: 14),
-        _ShimmerBlock(
-          animation: _controller,
-          baseColor: base,
-          glowColor: glow,
-          height: 92,
-          borderRadius: 18,
-        ),
-        const SizedBox(height: 14),
-        _ShimmerBlock(
-          animation: _controller,
-          baseColor: base,
-          glowColor: glow,
-          height: 264,
-          borderRadius: 20,
-        ),
-        const SizedBox(height: 14),
-        _ShimmerBlock(
-          animation: _controller,
-          baseColor: base,
-          glowColor: glow,
-          height: 132,
-          borderRadius: 18,
-        ),
-        const SizedBox(height: 14),
-        _ShimmerBlock(
-          animation: _controller,
-          baseColor: base,
-          glowColor: glow,
-          height: 170,
-          borderRadius: 18,
-        ),
       ],
-    );
-  }
-}
-
-class _ShimmerBlock extends StatelessWidget {
-  const _ShimmerBlock({
-    required this.animation,
-    required this.baseColor,
-    required this.glowColor,
-    required this.height,
-    required this.borderRadius,
-  });
-
-  final Animation<double> animation;
-  final Color baseColor;
-  final Color glowColor;
-  final double height;
-  final double borderRadius;
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: animation,
-      builder: (context, child) {
-        final t = Curves.easeInOut.transform(animation.value);
-        final x = t * 2 - 1;
-        return Container(
-          height: height,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(borderRadius),
-            gradient: LinearGradient(
-              begin: Alignment(-1.45 + x, -0.2),
-              end: Alignment(0.15 + x, 0.2),
-              colors: [
-                baseColor,
-                glowColor.withOpacity(0.52),
-                baseColor.withOpacity(0.88),
-              ],
-              stops: const [0.26, 0.52, 0.86],
-            ),
-            border: Border.all(
-              color: Theme.of(context)
-                  .colorScheme
-                  .outlineVariant
-                  .withOpacity(0.35),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: glowColor.withOpacity(0.26),
-                blurRadius: 12,
-                spreadRadius: 0.2,
-              ),
-            ],
-          ),
-        );
-      },
     );
   }
 }
