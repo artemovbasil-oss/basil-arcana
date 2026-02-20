@@ -130,6 +130,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
     if (aiResult == null) {
       if (state.isLoading) {
         final selectedDeck = ref.watch(deckProvider);
+        final energy = ref.watch(energyProvider);
         final deckCoverUrl = deckCoverImageUrl(selectedDeck);
         final expectedCardsCount = state.spreadType?.cardCount ??
             state.spread?.cardsCount ??
@@ -156,6 +157,8 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
               expectedCardsCount: expectedCardsCount,
               deckCoverUrl: deckCoverUrl,
               question: state.question,
+              isUnlimitedUser: energy.isUnlimited,
+              readingEnergyCost: EnergyAction.reading.cost.round(),
             ),
           ),
         );
@@ -1408,12 +1411,16 @@ class _ResultLoadingShimmer extends StatefulWidget {
     required this.expectedCardsCount,
     required this.deckCoverUrl,
     required this.question,
+    required this.isUnlimitedUser,
+    required this.readingEnergyCost,
   });
 
   final List<DrawnCardModel> drawnCards;
   final int expectedCardsCount;
   final String deckCoverUrl;
   final String question;
+  final bool isUnlimitedUser;
+  final int readingEnergyCost;
 
   @override
   State<_ResultLoadingShimmer> createState() => _ResultLoadingShimmerState();
@@ -1424,9 +1431,13 @@ class _ResultLoadingShimmerState extends State<_ResultLoadingShimmer>
   late final AnimationController _revealController;
   late final AnimationController _questionTypingController;
   late final AnimationController _questionDotsController;
+  late final AnimationController _subscriptionTypingController;
+  late final AnimationController _subscriptionDotsController;
   bool _sequenceStarted = false;
   bool _questionTypingDone = false;
+  bool _subscriptionTypingDone = false;
   bool _showCardsBubble = false;
+  bool _showSubscriptionBubble = false;
   bool _showOracleBubble = false;
 
   @override
@@ -1452,6 +1463,21 @@ class _ResultLoadingShimmerState extends State<_ResultLoadingShimmer>
       vsync: this,
       duration: const Duration(milliseconds: 900),
     );
+    final subscriptionText = _subscriptionLoaderText(
+      localeCode: localeCode,
+      isUnlimitedUser: widget.isUnlimitedUser,
+      readingEnergyCost: widget.readingEnergyCost,
+    );
+    _subscriptionTypingController = AnimationController(
+      vsync: this,
+      duration: Duration(
+        milliseconds: (1500 + subscriptionText.length * 33).clamp(1500, 6200),
+      ),
+    );
+    _subscriptionDotsController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    );
   }
 
   @override
@@ -1465,8 +1491,12 @@ class _ResultLoadingShimmerState extends State<_ResultLoadingShimmer>
       _questionTypingController.value = 1.0;
       _questionDotsController.value = 1.0;
       _revealController.value = 1.0;
+      _subscriptionTypingController.value = 1.0;
+      _subscriptionDotsController.value = 1.0;
       _questionTypingDone = true;
+      _subscriptionTypingDone = true;
       _showCardsBubble = true;
+      _showSubscriptionBubble = true;
       _showOracleBubble = true;
       return;
     }
@@ -1493,6 +1523,20 @@ class _ResultLoadingShimmerState extends State<_ResultLoadingShimmer>
       return;
     }
     setState(() {
+      _showSubscriptionBubble = true;
+    });
+    await _subscriptionTypingController.forward();
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _subscriptionTypingDone = true;
+    });
+    await _subscriptionDotsController.forward(from: 0);
+    if (!mounted) {
+      return;
+    }
+    setState(() {
       _showOracleBubble = true;
     });
   }
@@ -1502,6 +1546,8 @@ class _ResultLoadingShimmerState extends State<_ResultLoadingShimmer>
     _revealController.dispose();
     _questionTypingController.dispose();
     _questionDotsController.dispose();
+    _subscriptionTypingController.dispose();
+    _subscriptionDotsController.dispose();
     super.dispose();
   }
 
@@ -1536,6 +1582,17 @@ class _ResultLoadingShimmerState extends State<_ResultLoadingShimmer>
             ),
           ),
         ],
+        if (_showSubscriptionBubble) ...[
+          const SizedBox(height: 14),
+          _SubscriptionTypingBubble(
+            typing: _subscriptionTypingController,
+            oneShotDots: _subscriptionDotsController,
+            showDots: _subscriptionTypingDone && !_showOracleBubble,
+            localeCode: localeCode,
+            isUnlimitedUser: widget.isUnlimitedUser,
+            readingEnergyCost: widget.readingEnergyCost,
+          ),
+        ],
         if (_showOracleBubble) ...[
           const SizedBox(height: 14),
           ChatBubbleReveal(
@@ -1567,6 +1624,29 @@ String _loadingQuestionText({
           ? 'Жағдайды талдап жатырмыз'
           : 'Reading your situation';
   return '$prefix — «$safeQuestion»';
+}
+
+String _subscriptionLoaderText({
+  required String localeCode,
+  required bool isUnlimitedUser,
+  required int readingEnergyCost,
+}) {
+  if (isUnlimitedUser) {
+    if (localeCode == 'ru') {
+      return 'Спасибо за подписку, для тебя отчет бесплатно';
+    }
+    if (localeCode == 'kk') {
+      return 'Жазылым үшін рақмет, сен үшін есеп тегін';
+    }
+    return 'Thanks for your subscription, this reading is free for you';
+  }
+  if (localeCode == 'ru') {
+    return 'Этот расклад стоит $readingEnergyCost энергии. Если зайдет, в следующий раз можно взять подписку и получать такие разборы без лимита.';
+  }
+  if (localeCode == 'kk') {
+    return 'Бұл жайылма $readingEnergyCost энергия тұрады. Ұнаса, келесі жолы жазылым алып, осындай талдауларды лимитсіз алуға болады.';
+  }
+  return 'This reading costs $readingEnergyCost energy. If you like it, next time you can get a subscription for unlimited readings.';
 }
 
 class _QuestionTypingBubble extends StatelessWidget {
@@ -1608,6 +1688,60 @@ class _QuestionTypingBubble extends StatelessWidget {
               if (showDots) ...[
                 const SizedBox(width: 6),
                 _OneShotDots(progress: oneShotDots.value),
+              ],
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _SubscriptionTypingBubble extends StatelessWidget {
+  const _SubscriptionTypingBubble({
+    required this.typing,
+    required this.oneShotDots,
+    required this.showDots,
+    required this.localeCode,
+    required this.isUnlimitedUser,
+    required this.readingEnergyCost,
+  });
+
+  final Animation<double> typing;
+  final Animation<double> oneShotDots;
+  final bool showDots;
+  final String localeCode;
+  final bool isUnlimitedUser;
+  final int readingEnergyCost;
+
+  @override
+  Widget build(BuildContext context) {
+    final fullText = _subscriptionLoaderText(
+      localeCode: localeCode,
+      isUnlimitedUser: isUnlimitedUser,
+      readingEnergyCost: readingEnergyCost,
+    );
+    return AnimatedBuilder(
+      animation: Listenable.merge([typing, oneShotDots]),
+      builder: (context, _) {
+        final t = Curves.easeOut.transform(typing.value);
+        final visible = (fullText.length * t).round().clamp(1, fullText.length);
+        final partial = fullText.substring(0, visible);
+        return ChatBubble(
+          isUser: false,
+          avatarEmoji: '🪄',
+          fullWidth: true,
+          showAvatar: false,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: Text(partial)),
+              if (showDots) ...[
+                const SizedBox(width: 6),
+                Padding(
+                  padding: const EdgeInsets.only(top: 3),
+                  child: _OneShotDots(progress: oneShotDots.value),
+                ),
               ],
             ],
           ),

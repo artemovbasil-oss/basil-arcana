@@ -153,7 +153,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
   ReadingFlowController(this.ref) : super(ReadingFlowState.initial());
 
   final Ref ref;
-  static const int _maxGenerateAttempts = 2;
+  static const int _maxGenerateAttempts = 3;
   http.Client? _activeClient;
   int _requestCounter = 0;
   int _activeRequestId = 0;
@@ -408,8 +408,8 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
   }) {
     final spreadCardCount = spread.cardsCount ?? spread.positions.length;
     final isFiveCardSpread = spreadCardCount >= 5 || drawnCards.length >= 5;
-    final base = isFiveCardSpread ? 18 : 15;
-    final extra = attempt > 0 ? 3 : 0;
+    final base = isFiveCardSpread ? 20 : 16;
+    final extra = attempt <= 0 ? 0 : (attempt * 4);
     return Duration(seconds: base + extra);
   }
 
@@ -486,6 +486,7 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
             drawnCards: drawnCards,
             languageCode: locale.languageCode,
             mode: ReadingMode.fast,
+            compactPrompt: attempt > 0,
             client: client,
             timeout: _timeoutForGenerateAttempt(
               spread: spread,

@@ -398,6 +398,7 @@ class AiRepository {
     required List<DrawnCardModel> drawnCards,
     required String languageCode,
     required ReadingMode mode,
+    bool compactPrompt = false,
     String? requestIdOverride,
     Map<String, dynamic>? fastReading,
     http.Client? client,
@@ -459,6 +460,7 @@ class AiRepository {
       mode: mode,
       spread: spread,
       drawnCards: drawnCards,
+      compactPrompt: compactPrompt,
     );
     final responseConstraints = mode == ReadingMode.fast
         ? isFiveCardSpread
@@ -1621,6 +1623,7 @@ class AiRepository {
     required ReadingMode mode,
     required SpreadModel spread,
     required List<DrawnCardModel> drawnCards,
+    bool compactPrompt = false,
   }) {
     final normalizedLanguage = languageCode.trim().toLowerCase();
     final focus = question.trim().isEmpty
@@ -1650,6 +1653,43 @@ class AiRepository {
         drawnCards.every(
           (drawn) => canonicalCardId(drawn.cardId).startsWith('ac_'),
         );
+
+    if (compactPrompt) {
+      if (normalizedLanguage == 'ru') {
+        final deckHint = isLenormandReading
+            ? 'Формат Ленорман: трактуй карты строго по цепочке.'
+            : isCrowleyReading
+                ? 'Формат Кроули: добавь архетипический и внутренний слой.'
+                : '';
+        return '''
+Фокус: "$focus".
+Дай краткий, точный и персональный разбор, привяжи вывод к позициям ($positions) и картам ($cardNames).
+$deckHint
+Без воды и повторов. В конце 1-2 конкретных шага.''';
+      }
+      if (normalizedLanguage == 'kk' || normalizedLanguage == 'kz') {
+        final deckHint = isLenormandReading
+            ? 'Ленорман форматы: карталарды тізбекпен түсіндір.'
+            : isCrowleyReading
+                ? 'Кроули форматы: архетиптік және ішкі қабатты қос.'
+                : '';
+        return '''
+Фокус: "$focus".
+Қысқа, дәл және жеке талдау бер; қорытындыны позициялармен ($positions) және карталармен ($cardNames) тікелей байланыстыр.
+$deckHint
+Артық сөзсіз. Соңында 1-2 нақты қадам бер.''';
+      }
+      final deckHint = isLenormandReading
+          ? 'Lenormand mode: interpret in strict card sequence.'
+          : isCrowleyReading
+              ? 'Crowley mode: include archetypal and inner-symbolic layer.'
+              : '';
+      return '''
+Focus: "$focus".
+Provide a concise, specific, personal reading tied to positions ($positions) and cards ($cardNames).
+$deckHint
+No filler. Finish with 1-2 concrete next steps.''';
+    }
 
     if (normalizedLanguage == 'ru') {
       final depthLine = mode == ReadingMode.deep ||
