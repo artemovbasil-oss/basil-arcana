@@ -523,6 +523,15 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
       if (_activeRequestId != requestId) {
         return;
       }
+      if (!state.isLoading) {
+        if (kDebugMode) {
+          debugPrint(
+            '[ReadingFlow] dropping late generateReading success '
+            'requestId=$requestId because loading already finished',
+          );
+        }
+        return;
+      }
       if (result == null) {
         throw lastError ?? const AiRepositoryException(AiErrorType.serverError);
       }

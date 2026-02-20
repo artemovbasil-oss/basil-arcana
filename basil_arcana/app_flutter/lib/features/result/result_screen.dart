@@ -85,7 +85,8 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
         }
         if (prev?.aiResult != null &&
             next.aiResult != null &&
-            prev?.aiResult?.fullText != next.aiResult?.fullText) {
+            prev?.aiResult?.fullText != next.aiResult?.fullText &&
+            !(prev?.aiUsed == false && next.aiUsed == true)) {
           _replaceReadingMessages(next);
         }
       },
@@ -127,6 +128,12 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
 
     if (aiResult == null) {
       if (state.isLoading) {
+        final selectedDeck = ref.watch(deckProvider);
+        final deckCoverUrl = deckCoverImageUrl(selectedDeck);
+        final expectedCardsCount = state.spreadType?.cardCount ??
+            state.spread?.cardsCount ??
+            state.spread?.positions.length ??
+            state.drawnCards.length;
         return Scaffold(
           appBar: buildEnergyTopBar(
             context,
@@ -143,7 +150,11 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
           backgroundColor: Theme.of(context).colorScheme.surface,
           body: SafeArea(
             top: false,
-            child: const _ResultLoadingShimmer(),
+            child: _ResultLoadingShimmer(
+              drawnCards: state.drawnCards,
+              expectedCardsCount: expectedCardsCount,
+              deckCoverUrl: deckCoverUrl,
+            ),
           ),
         );
       }
@@ -1390,7 +1401,15 @@ class _StatusPill extends StatelessWidget {
 }
 
 class _ResultLoadingShimmer extends StatefulWidget {
-  const _ResultLoadingShimmer();
+  const _ResultLoadingShimmer({
+    required this.drawnCards,
+    required this.expectedCardsCount,
+    required this.deckCoverUrl,
+  });
+
+  final List<DrawnCardModel> drawnCards;
+  final int expectedCardsCount;
+  final String deckCoverUrl;
 
   @override
   State<_ResultLoadingShimmer> createState() => _ResultLoadingShimmerState();
@@ -1399,19 +1418,25 @@ class _ResultLoadingShimmer extends StatefulWidget {
 class _ResultLoadingShimmerState extends State<_ResultLoadingShimmer>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
+  late final AnimationController _revealController;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1250),
-    )..repeat();
+      duration: const Duration(milliseconds: 1800),
+    )..repeat(reverse: true);
+    _revealController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1100),
+    )..forward();
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    _revealController.dispose();
     super.dispose();
   }
 
@@ -1425,8 +1450,11 @@ class _ResultLoadingShimmerState extends State<_ResultLoadingShimmer>
       if (_controller.value != 0.0) {
         _controller.value = 0.0;
       }
+      if (_revealController.value != 1.0) {
+        _revealController.value = 1.0;
+      }
     } else if (!_controller.isAnimating) {
-      _controller.repeat();
+      _controller.repeat(reverse: true);
     }
     final base = colorScheme.surfaceContainerHighest.withOpacity(0.3);
     final glow = colorScheme.primary.withOpacity(0.18);
@@ -1437,6 +1465,13 @@ class _ResultLoadingShimmerState extends State<_ResultLoadingShimmer>
           child: OracleTypingBubble(
             label: l10n.resultDeepTypingLabel,
           ),
+        ),
+        const SizedBox(height: 14),
+        _LoadingCardsRow(
+          reveal: _revealController,
+          drawnCards: widget.drawnCards,
+          expectedCardsCount: widget.expectedCardsCount,
+          deckCoverUrl: widget.deckCoverUrl,
         ),
         const SizedBox(height: 14),
         _ShimmerBlock(
@@ -1495,7 +1530,8 @@ class _ShimmerBlock extends StatelessWidget {
     return AnimatedBuilder(
       animation: animation,
       builder: (context, child) {
-        final x = animation.value * 2 - 1;
+        final t = Curves.easeInOutSine.transform(animation.value);
+        final x = t * 2 - 1;
         return Container(
           height: height,
           decoration: BoxDecoration(
@@ -1505,10 +1541,10 @@ class _ShimmerBlock extends StatelessWidget {
               end: Alignment(0.15 + x, 0.2),
               colors: [
                 baseColor,
-                glowColor,
-                baseColor.withOpacity(0.92),
+                glowColor.withOpacity(0.8),
+                baseColor.withOpacity(0.95),
               ],
-              stops: const [0.16, 0.46, 0.84],
+              stops: const [0.2, 0.5, 0.86],
             ),
             border: Border.all(
               color: Theme.of(context)
@@ -1526,6 +1562,106 @@ class _ShimmerBlock extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class _LoadingCardsRow extends StatelessWidget {
+  const _LoadingCardsRow({
+    required this.reveal,
+    required this.drawnCards,
+    required this.expectedCardsCount,
+    required this.deckCoverUrl,
+  });
+
+  final Animation<double> reveal;
+  final List<DrawnCardModel> drawnCards;
+  final int expectedCardsCount;
+  final String deckCoverUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final slots = 5;
+    final shownCount = expectedCardsCount.clamp(1, slots);
+    final items = List<Widget>.generate(slots, (index) {
+      final showRealCard = index < drawnCards.length && index < shownCount;
+      final intervalStart = (index * 0.12).clamp(0.0, 0.8);
+      final intervalEnd = (intervalStart + 0.28).clamp(0.28, 1.0);
+      final fade = CurvedAnimation(
+        parent: reveal,
+        curve: Interval(intervalStart, intervalEnd, curve: Curves.easeOutCubic),
+      );
+      final item = AnimatedBuilder(
+        animation: fade,
+        builder: (context, _) {
+          final t = fade.value;
+          return Opacity(
+            opacity: t,
+            child: Transform.translate(
+              offset: Offset(0, (1 - t) * 10),
+              child: Transform.scale(
+                scale: 0.94 + (0.06 * t),
+                child: showRealCard
+                    ? CardAssetImage(
+                        cardId: drawnCards[index].cardId,
+                        width: 56,
+                        height: 90,
+                        showGlow: false,
+                        borderRadius: BorderRadius.circular(10),
+                      )
+                    : Container(
+                        width: 56,
+                        height: 90,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: colorScheme.outlineVariant.withOpacity(0.38),
+                          ),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: ColorFiltered(
+                            colorFilter: ColorFilter.mode(
+                              colorScheme.surface.withOpacity(0.2),
+                              BlendMode.srcATop,
+                            ),
+                            child: Image.network(
+                              deckCoverUrl,
+                              fit: BoxFit.cover,
+                              filterQuality: FilterQuality.medium,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  color: colorScheme.surfaceContainerHighest
+                                      .withOpacity(0.45),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      ),
+              ),
+            ),
+          );
+        },
+      );
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        child: item,
+      );
+    });
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(8, 8, 8, 10),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14),
+        color: colorScheme.surfaceContainerHighest.withOpacity(0.18),
+        border: Border.all(color: colorScheme.outlineVariant.withOpacity(0.28)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: items,
+      ),
     );
   }
 }

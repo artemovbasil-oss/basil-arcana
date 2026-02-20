@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/app_buttons.dart';
@@ -168,6 +169,7 @@ class OracleTypingBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final normalizedLabel = label.replaceAll(RegExp(r'[.…]+$'), '').trimRight();
     return ChatBubble(
       isUser: false,
       avatarEmoji: '🪄',
@@ -179,7 +181,7 @@ class OracleTypingBubble extends StatelessWidget {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Flexible(child: Text(label)),
+              Flexible(child: Text(normalizedLabel)),
               const SizedBox(width: 6),
               const _TypingEllipsis(),
             ],
@@ -279,17 +281,37 @@ class _TypingEllipsisState extends State<_TypingEllipsis>
 
   @override
   Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme.onSurface;
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
-        final index = (_controller.value * 3).floor() % 3;
-        final dots = '.' * (index + 1);
-        return Text(
-          dots,
-          style: Theme.of(context).textTheme.bodyMedium,
+        final progress = Curves.easeInOut.transform(_controller.value);
+        final p0 = 0.24 + 0.76 * _pulse(progress, 0.05);
+        final p1 = 0.24 + 0.76 * _pulse(progress, 0.33);
+        final p2 = 0.24 + 0.76 * _pulse(progress, 0.61);
+        return SvgPicture.string(
+          '''
+<svg viewBox="0 0 34 6" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="3" cy="3" r="2.3" fill="${_hex(color)}" fill-opacity="${p0.toStringAsFixed(2)}"/>
+  <circle cx="17" cy="3" r="2.3" fill="${_hex(color)}" fill-opacity="${p1.toStringAsFixed(2)}"/>
+  <circle cx="31" cy="3" r="2.3" fill="${_hex(color)}" fill-opacity="${p2.toStringAsFixed(2)}"/>
+</svg>
+''',
+          width: 34,
+          height: 6,
         );
       },
     );
+  }
+
+  double _pulse(double t, double shift) {
+    final phase = ((t + shift) % 1.0) * pi * 2;
+    return (sin(phase) + 1) * 0.5;
+  }
+
+  String _hex(Color color) {
+    final rgb = color.toARGB32() & 0x00FFFFFF;
+    return '#${rgb.toRadixString(16).padLeft(6, '0')}';
   }
 }
 
