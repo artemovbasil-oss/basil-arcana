@@ -143,7 +143,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     if (!mounted) {
       return;
     }
-    setState(() {});
+    final localSnapshot = _buildLocalStreakStatsSnapshot(base: _streakStats);
+    setState(() {
+      _streakStats = localSnapshot;
+      _loadingStreak = false;
+    });
     _refreshOpenStreakModal();
     _streakReloadDebounce?.cancel();
     _streakReloadDebounce = Timer(const Duration(milliseconds: 450), () {
@@ -187,8 +191,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       if (!mounted) {
         return;
       }
+      final localSnapshot = _buildLocalStreakStatsSnapshot(base: _streakStats);
+      final merged = _mergeStreakStats(
+        remote: streak,
+        local: localSnapshot,
+      );
       setState(() {
-        _streakStats = streak;
+        _streakStats = merged;
         _loadingStreak = false;
       });
       _refreshOpenStreakModal();
@@ -201,6 +210,102 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       });
       _refreshOpenStreakModal();
     }
+  }
+
+  HomeStreakStats _buildLocalStreakStatsSnapshot({
+    required HomeStreakStats base,
+  }) {
+    final readings = ref.read(readingsRepositoryProvider).getReadings();
+    if (readings.isEmpty) {
+      return HomeStreakStats(
+        currentStreakDays: 0,
+        longestStreakDays: 0,
+        activeDays: 0,
+        awarenessPercent: base.awarenessPercent,
+        awarenessLocked: base.awarenessLocked,
+        lastActiveAt: null,
+      );
+    }
+
+    final uniqueDays = readings
+        .map((reading) {
+          final local = reading.createdAt.toLocal();
+          return DateTime(local.year, local.month, local.day);
+        })
+        .toSet()
+        .toList()
+      ..sort((a, b) => b.compareTo(a));
+
+    var currentStreak = 0;
+    if (uniqueDays.isNotEmpty) {
+      currentStreak = 1;
+      var cursor = uniqueDays.first;
+      for (var i = 1; i < uniqueDays.length; i++) {
+        final day = uniqueDays[i];
+        final diff = cursor.difference(day).inDays;
+        if (diff == 1) {
+          currentStreak += 1;
+          cursor = day;
+          continue;
+        }
+        if (diff > 1) {
+          break;
+        }
+      }
+    }
+
+    final ascending = [...uniqueDays]..sort((a, b) => a.compareTo(b));
+    var longestStreak = 0;
+    var run = 0;
+    DateTime? prev;
+    for (final day in ascending) {
+      if (prev == null) {
+        run = 1;
+      } else {
+        final diff = day.difference(prev).inDays;
+        if (diff == 1) {
+          run += 1;
+        } else if (diff > 1) {
+          run = 1;
+        }
+      }
+      longestStreak = max(longestStreak, run);
+      prev = day;
+    }
+
+    final latestCreatedAt = readings.first.createdAt.toLocal();
+    return HomeStreakStats(
+      currentStreakDays: currentStreak,
+      longestStreakDays: longestStreak,
+      activeDays: uniqueDays.length,
+      awarenessPercent: base.awarenessPercent,
+      awarenessLocked: base.awarenessLocked,
+      lastActiveAt: latestCreatedAt,
+    );
+  }
+
+  HomeStreakStats _mergeStreakStats({
+    required HomeStreakStats remote,
+    required HomeStreakStats local,
+  }) {
+    return HomeStreakStats(
+      currentStreakDays: max(remote.currentStreakDays, local.currentStreakDays),
+      longestStreakDays: max(remote.longestStreakDays, local.longestStreakDays),
+      activeDays: max(remote.activeDays, local.activeDays),
+      awarenessPercent: remote.awarenessPercent,
+      awarenessLocked: remote.awarenessLocked,
+      lastActiveAt: _latestDate(remote.lastActiveAt, local.lastActiveAt),
+    );
+  }
+
+  DateTime? _latestDate(DateTime? first, DateTime? second) {
+    if (first == null) {
+      return second;
+    }
+    if (second == null) {
+      return first;
+    }
+    return second.isAfter(first) ? second : first;
   }
 
   Future<void> _loadReportEntitlements() async {
@@ -1401,8 +1506,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       }
 
       final resolvedName = entry.cardName.isNotEmpty
-          ? entry.cardName
-          : cardById[normalizedId]?.name ?? normalizedId;
+          ? _resolveProfileCardName(
+              normalizedCardId: normalizedId,
+              rawName: entry.cardName,
+              cardById: cardById,
+            )
+          : _resolveProfileCardName(
+              normalizedCardId: normalizedId,
+              rawName: normalizedId,
+              cardById: cardById,
+            );
       frequencyNames[normalizedId] = resolvedName;
       frequencyWeighted[normalizedId] =
           (frequencyWeighted[normalizedId] ?? 0) + weight;
@@ -1520,7 +1633,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       final weight = count.toDouble();
       sampledCardsCount += count;
       frequency[normalizedId] = (frequency[normalizedId] ?? 0) + weight;
-      names[normalizedId] = cardById[normalizedId]?.name ?? normalizedId;
+      names[normalizedId] = _resolveProfileCardName(
+        normalizedCardId: normalizedId,
+        rawName: entry.key,
+        cardById: cardById,
+      );
 
       if (_isTarotCard(normalizedId)) {
         totalTarotWeight += weight;
@@ -1589,8 +1706,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             _matchesProfileDeck(canonicalCardId(entry.key), selectedDeck))
           _RepeatedCardSignal(
             cardName: names[canonicalCardId(entry.key)] ??
-                cardById[canonicalCardId(entry.key)]?.name ??
-                entry.key,
+                _resolveProfileCardName(
+                  normalizedCardId: canonicalCardId(entry.key),
+                  rawName: entry.key,
+                  cardById: cardById,
+                ),
             count30d: entry.value,
           ),
     ]..sort((a, b) => b.count30d.compareTo(a.count30d));
@@ -1628,6 +1748,61 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       return cardId.startsWith('lenormand_');
     }
     return _isTarotCard(cardId);
+  }
+
+  String _resolveProfileCardName({
+    required String normalizedCardId,
+    required String rawName,
+    required Map<String, CardModel> cardById,
+  }) {
+    final catalogName = cardById[normalizedCardId]?.name.trim() ?? '';
+    if (catalogName.isNotEmpty) {
+      return catalogName;
+    }
+    final trimmed = rawName.trim();
+    if (trimmed.isEmpty) {
+      return normalizedCardId;
+    }
+    final lower = trimmed.toLowerCase();
+    final looksLikeAsset = lower.endsWith('.png') ||
+        lower.endsWith('.jpg') ||
+        lower.endsWith('.jpeg') ||
+        lower.endsWith('.webp') ||
+        lower.endsWith('.gif') ||
+        lower.endsWith('.avif') ||
+        lower.endsWith('.mp4') ||
+        lower.contains('/') ||
+        lower.contains('\\');
+    final looksLikeCardId = lower.startsWith('major_') ||
+        lower.startsWith('ac_') ||
+        lower.startsWith('wands_') ||
+        lower.startsWith('cups_') ||
+        lower.startsWith('swords_') ||
+        lower.startsWith('pentacles_') ||
+        lower.startsWith('lenormand_');
+    if (looksLikeAsset || looksLikeCardId) {
+      final withoutExt = trimmed.replaceFirst(
+          RegExp(r'\.(png|jpe?g|webp|gif|avif|mp4)$', caseSensitive: false),
+          '');
+      final tokens = withoutExt
+          .split(RegExp(r'[_\-\s]+'))
+          .where((part) => part.trim().isNotEmpty)
+          .toList();
+      if (tokens.isNotEmpty) {
+        return tokens
+            .map((token) {
+              final value = token.trim();
+              if (value.isEmpty) {
+                return '';
+              }
+              final lowerValue = value.toLowerCase();
+              return '${lowerValue[0].toUpperCase()}${lowerValue.substring(1)}';
+            })
+            .where((part) => part.isNotEmpty)
+            .join(' ');
+      }
+    }
+    return trimmed;
   }
 
   bool _isTarotCard(String cardId) {

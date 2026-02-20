@@ -36,8 +36,11 @@ class HomeInsightsRepository {
   static const Duration _timeout = Duration(seconds: 15);
 
   Future<HomeStreakStats> fetchStreakStats() async {
-    final uri =
-        Uri.parse(ApiConfig.apiBaseUrl).replace(path: '/api/user/streak');
+    final rid = DateTime.now().microsecondsSinceEpoch.toString();
+    final uri = Uri.parse(ApiConfig.apiBaseUrl).replace(
+      path: '/api/user/streak',
+      queryParameters: {'rid': rid},
+    );
     final client = TelegramApiClient(http.Client());
     try {
       final response = await client.get(uri).timeout(_timeout);
