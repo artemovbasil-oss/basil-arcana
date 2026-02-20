@@ -472,7 +472,7 @@ class _CardTile extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                     ),
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: 10),
             ],
           ),
         ),
