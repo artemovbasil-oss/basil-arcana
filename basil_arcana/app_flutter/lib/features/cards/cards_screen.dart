@@ -347,7 +347,7 @@ class _DeckGlassChip extends StatelessWidget {
           child: InkWell(
             onTap: onTap,
             child: Ink(
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 11),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(999),
                 border: Border.all(
@@ -358,7 +358,7 @@ class _DeckGlassChip extends StatelessWidget {
               ),
               child: Text(
                 label,
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
                       color: isActive
                           ? colorScheme.onPrimaryContainer
                           : colorScheme.onSurface,
@@ -381,10 +381,10 @@ class _PinnedDeckChipsDelegate extends SliverPersistentHeaderDelegate {
   final Widget child;
 
   @override
-  double get minExtent => 78;
+  double get minExtent => 68;
 
   @override
-  double get maxExtent => 78;
+  double get maxExtent => 68;
 
   @override
   Widget build(
@@ -472,6 +472,7 @@ class _CardTile extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                     ),
               ),
+              const SizedBox(height: 6),
             ],
           ),
         ),
