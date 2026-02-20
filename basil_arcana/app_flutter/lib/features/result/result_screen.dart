@@ -154,6 +154,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
               drawnCards: state.drawnCards,
               expectedCardsCount: expectedCardsCount,
               deckCoverUrl: deckCoverUrl,
+              question: state.question,
             ),
           ),
         );
@@ -1405,11 +1406,13 @@ class _ResultLoadingShimmer extends StatefulWidget {
     required this.drawnCards,
     required this.expectedCardsCount,
     required this.deckCoverUrl,
+    required this.question,
   });
 
   final List<DrawnCardModel> drawnCards;
   final int expectedCardsCount;
   final String deckCoverUrl;
+  final String question;
 
   @override
   State<_ResultLoadingShimmer> createState() => _ResultLoadingShimmerState();
@@ -1419,6 +1422,7 @@ class _ResultLoadingShimmerState extends State<_ResultLoadingShimmer>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final AnimationController _revealController;
+  late final AnimationController _questionTypingController;
 
   @override
   void initState() {
@@ -1431,18 +1435,30 @@ class _ResultLoadingShimmerState extends State<_ResultLoadingShimmer>
       vsync: this,
       duration: const Duration(milliseconds: 1850),
     )..forward();
+    final localeCode =
+        WidgetsBinding.instance.platformDispatcher.locale.languageCode;
+    final fullText = _loadingQuestionText(
+      localeCode: localeCode,
+      question: widget.question,
+    );
+    _questionTypingController = AnimationController(
+      vsync: this,
+      duration: Duration(
+        milliseconds: (1150 + fullText.length * 22).clamp(1150, 5200),
+      ),
+    )..forward();
   }
 
   @override
   void dispose() {
     _controller.dispose();
     _revealController.dispose();
+    _questionTypingController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context)!;
     final disableAnimations = MediaQuery.of(context).disableAnimations;
     if (disableAnimations) {
@@ -1453,12 +1469,22 @@ class _ResultLoadingShimmerState extends State<_ResultLoadingShimmer>
       if (_revealController.value != 1.0) {
         _revealController.value = 1.0;
       }
+      if (_questionTypingController.value != 1.0) {
+        _questionTypingController.value = 1.0;
+      }
     } else if (!_controller.isAnimating) {
       _controller.repeat(reverse: true);
     }
+    final localeCode = Localizations.localeOf(context).languageCode;
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
       children: [
+        _QuestionTypingBubble(
+          typing: _questionTypingController,
+          localeCode: localeCode,
+          question: widget.question,
+        ),
+        const SizedBox(height: 14),
         _LoadingCardsRow(
           reveal: _revealController,
           drawnCards: widget.drawnCards,
@@ -1472,6 +1498,55 @@ class _ResultLoadingShimmerState extends State<_ResultLoadingShimmer>
           ),
         ),
       ],
+    );
+  }
+}
+
+String _loadingQuestionText({
+  required String localeCode,
+  required String question,
+}) {
+  final trimmed = question.trim().replaceAll(RegExp(r'\s+'), ' ');
+  final safeQuestion = trimmed.isEmpty
+      ? (localeCode == 'ru'
+          ? 'ваш запрос'
+          : localeCode == 'kk'
+              ? 'сұрағыңыз'
+              : 'your question')
+      : trimmed;
+  final prefix = localeCode == 'ru'
+      ? 'Разбираем ситуацию'
+      : localeCode == 'kk'
+          ? 'Жағдайды талдап жатырмыз'
+          : 'Reading your situation';
+  return '$prefix — «$safeQuestion»';
+}
+
+class _QuestionTypingBubble extends StatelessWidget {
+  const _QuestionTypingBubble({
+    required this.typing,
+    required this.localeCode,
+    required this.question,
+  });
+
+  final Animation<double> typing;
+  final String localeCode;
+  final String question;
+
+  @override
+  Widget build(BuildContext context) {
+    final fullText = _loadingQuestionText(
+      localeCode: localeCode,
+      question: question,
+    );
+    return AnimatedBuilder(
+      animation: typing,
+      builder: (context, _) {
+        final t = Curves.easeOut.transform(typing.value);
+        final visible = (fullText.length * t).round().clamp(1, fullText.length);
+        final partial = fullText.substring(0, visible);
+        return OracleTypingBubble(label: partial);
+      },
     );
   }
 }
