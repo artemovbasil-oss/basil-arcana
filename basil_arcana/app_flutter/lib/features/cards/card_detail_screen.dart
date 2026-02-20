@@ -617,7 +617,6 @@ class _CardOverlaySummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final summary = generalMeaning.isNotEmpty ? generalMeaning : '—';
     return Column(
@@ -634,16 +633,16 @@ class _CardOverlaySummary extends StatelessWidget {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: colorScheme.surface.withValues(alpha: 0.2),
+                      color: Colors.black.withValues(alpha: 0.44),
                       borderRadius: BorderRadius.circular(999),
                       border: Border.all(
-                        color: colorScheme.outline.withValues(alpha: 0.45),
+                        color: Colors.white.withValues(alpha: 0.28),
                       ),
                     ),
                     child: Text(
                       keyword,
                       style: AppTextStyles.caption(context).copyWith(
-                        color: Colors.white.withValues(alpha: 0.92),
+                        color: Colors.white.withValues(alpha: 0.96),
                         fontSize: 12,
                       ),
                     ),
@@ -656,10 +655,10 @@ class _CardOverlaySummary extends StatelessWidget {
           width: double.infinity,
           padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
           decoration: BoxDecoration(
-            color: Colors.black.withValues(alpha: 0.38),
+            color: Colors.black.withValues(alpha: 0.52),
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
-              color: Colors.white.withValues(alpha: 0.16),
+              color: Colors.white.withValues(alpha: 0.24),
             ),
           ),
           child: Text(
@@ -667,7 +666,7 @@ class _CardOverlaySummary extends StatelessWidget {
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
             style: textTheme.bodySmall?.copyWith(
-              color: Colors.white.withValues(alpha: 0.96),
+              color: Colors.white.withValues(alpha: 0.98),
               height: 1.28,
             ),
           ),
