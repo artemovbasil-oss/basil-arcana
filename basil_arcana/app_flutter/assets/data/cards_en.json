@@ -2733,7 +2733,7 @@
       "clarity": 55
     },
     "detailedDescription": "A fresh start and a leap of faith. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Playful optimism and a willingness to explore. At its best, this card supports a mature strategy and deliberate action. Naivety, rash risks, or ignoring the obvious. In shadow, extremes, control patterns, or emotional swings become louder. Begin, but carry a small plan with your hope. Keep your attention on the symbol and turn the insight into one concrete step today.",
-    "imageUrl": "cards/ac/ac-joker.webp"
+    "imageUrl": "cards/ac/ac_joker.webp"
   },
   "ac_01_magician": {
     "title": "The Magician",
@@ -2759,7 +2759,7 @@
       "clarity": 55
     },
     "detailedDescription": "Focused will and the tools to make ideas real. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Confidence, skill, and aligned action. At its best, this card supports a mature strategy and deliberate action. Manipulation or scattered energy. In shadow, extremes, control patterns, or emotional swings become louder. Pick one aim and commit your resources. Keep your attention on the symbol and turn the insight into one concrete step today.",
-    "imageUrl": "cards/ac/ac-magician.webp"
+    "imageUrl": "cards/ac/ac_magician.webp"
   },
   "ac_02_high_priestess": {
     "title": "The High Priestess",
@@ -2785,7 +2785,7 @@
       "clarity": 55
     },
     "detailedDescription": "Quiet knowledge and the pull of intuition. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Trusting subtle signals and inner truth. At its best, this card supports a mature strategy and deliberate action. Withholding, secrecy, or ignoring feelings. In shadow, extremes, control patterns, or emotional swings become louder. Listen before you speak or act. Keep your attention on the symbol and turn the insight into one concrete step today.",
-    "imageUrl": "cards/ac/ac-high-priestess.webp"
+    "imageUrl": "cards/ac/ac_high_priestess.webp"
   },
   "ac_03_empress": {
     "title": "The Empress",
@@ -2811,7 +2811,7 @@
       "clarity": 55
     },
     "detailedDescription": "Abundance, care, and embodied creativity. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Warmth, growth, and fertile ideas. At its best, this card supports a mature strategy and deliberate action. Overgiving or being smothered by comfort. In shadow, extremes, control patterns, or emotional swings become louder. Feed what you want to grow. Keep your attention on the symbol and turn the insight into one concrete step today.",
-    "imageUrl": "cards/ac/ac-empress.webp"
+    "imageUrl": "cards/ac/ac_empress.webp"
   },
   "ac_04_emperor": {
     "title": "The Emperor",
@@ -2837,7 +2837,7 @@
       "clarity": 55
     },
     "detailedDescription": "Order, structure, and responsible leadership. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Clear boundaries and steady authority. At its best, this card supports a mature strategy and deliberate action. Rigidity, control, or fear of change. In shadow, extremes, control patterns, or emotional swings become louder. Lead with firmness and fairness. Keep your attention on the symbol and turn the insight into one concrete step today.",
-    "imageUrl": "cards/ac/ac-emperor.webp"
+    "imageUrl": "cards/ac/ac_emperor.webp"
   },
   "ac_05_hierophant": {
     "title": "The Hierophant",
@@ -2863,7 +2863,7 @@
       "clarity": 55
     },
     "detailedDescription": "Shared values, tradition, and learning from elders. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Mentorship, ritual, and steady teachings. At its best, this card supports a mature strategy and deliberate action. Dogma, conformity, or resisting growth. In shadow, extremes, control patterns, or emotional swings become louder. Honor the lesson, then make it your own. Keep your attention on the symbol and turn the insight into one concrete step today.",
-    "imageUrl": "cards/ac/ac-hierophant.webp"
+    "imageUrl": "cards/ac/ac_hierophant.webp"
   },
   "ac_06_lovers": {
     "title": "The Lovers",
@@ -2889,7 +2889,7 @@
       "clarity": 55
     },
     "detailedDescription": "Alignment of values before commitment. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Mutual choice, harmony, and honest connection. At its best, this card supports a mature strategy and deliberate action. Indecision, temptation, or values out of sync. In shadow, extremes, control patterns, or emotional swings become louder. Choose what truly matches your heart. Keep your attention on the symbol and turn the insight into one concrete step today.",
-    "imageUrl": "cards/ac/ac-lovers.webp"
+    "imageUrl": "cards/ac/ac_lovers.webp"
   },
   "ac_07_chariot": {
     "title": "The Chariot",
@@ -2915,7 +2915,7 @@
       "clarity": 55
     },
     "detailedDescription": "Discipline and will guiding opposing forces. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Momentum, confidence, and steady drive. At its best, this card supports a mature strategy and deliberate action. Aggression, scattered focus, or forcing outcomes. In shadow, extremes, control patterns, or emotional swings become louder. Hold the reins and steer with purpose. Keep your attention on the symbol and turn the insight into one concrete step today.",
-    "imageUrl": "cards/ac/ac-chariot.webp"
+    "imageUrl": "cards/ac/ac_chariot.webp"
   },
   "ac_08_strength": {
     "title": "Strength",
@@ -2941,7 +2941,7 @@
       "clarity": 55
     },
     "detailedDescription": "Gentle power and steady inner courage. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Calm resilience and compassionate control. At its best, this card supports a mature strategy and deliberate action. Self-doubt, suppressed anger, or forcing calm. In shadow, extremes, control patterns, or emotional swings become louder. Lead with patience, not pressure. Keep your attention on the symbol and turn the insight into one concrete step today.",
-    "imageUrl": "cards/ac/ac-power.webp"
+    "imageUrl": "cards/ac/ac_power.webp"
   },
   "ac_09_hermit": {
     "title": "The Hermit",
@@ -2967,7 +2967,7 @@
       "clarity": 55
     },
     "detailedDescription": "Withdrawal to find inner guidance. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Reflection, clarity, and honest self-study. At its best, this card supports a mature strategy and deliberate action. Isolation, avoidance, or withdrawing too long. In shadow, extremes, control patterns, or emotional swings become louder. Step back to see the path clearly. Keep your attention on the symbol and turn the insight into one concrete step today.",
-    "imageUrl": "cards/ac/ac-hermit.webp"
+    "imageUrl": "cards/ac/ac_hermit.webp"
   },
   "ac_10_wheel_of_fortune": {
     "title": "Wheel of Fortune",
@@ -2993,7 +2993,7 @@
       "clarity": 55
     },
     "detailedDescription": "A turning cycle and shifting circumstances. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Positive momentum and welcome change. At its best, this card supports a mature strategy and deliberate action. Feeling stuck in a loop or resisting the turn. In shadow, extremes, control patterns, or emotional swings become louder. Move with the change instead of fighting it. Keep your attention on the symbol and turn the insight into one concrete step today.",
-    "imageUrl": "cards/ac/ac-wheel-of-fortune.webp"
+    "imageUrl": "cards/ac/ac_wheel.webp"
   },
   "ac_11_justice": {
     "title": "Justice",
@@ -3019,7 +3019,7 @@
       "clarity": 55
     },
     "detailedDescription": "Clarity, fairness, and consequences. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Honesty, integrity, and balanced judgment. At its best, this card supports a mature strategy and deliberate action. Bias, denial, or fear of truth. In shadow, extremes, control patterns, or emotional swings become louder. Tell the truth and accept what it brings. Keep your attention on the symbol and turn the insight into one concrete step today.",
-    "imageUrl": "cards/ac/ac-justice.webp"
+    "imageUrl": "cards/ac/ac_justice.webp"
   },
   "ac_12_hanged_man": {
     "title": "The Hanged Man",
@@ -3045,7 +3045,7 @@
       "clarity": 55
     },
     "detailedDescription": "A pause that reveals a new view. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Letting go to gain insight. At its best, this card supports a mature strategy and deliberate action. Stalling, martyrdom, or fear of change. In shadow, extremes, control patterns, or emotional swings become louder. Release control and see what shifts. Keep your attention on the symbol and turn the insight into one concrete step today.",
-    "imageUrl": "cards/ac/ac-punishment.webp"
+    "imageUrl": "cards/ac/ac_punishment.webp"
   },
   "ac_13_death": {
     "title": "Death",
@@ -3071,7 +3071,7 @@
       "clarity": 55
     },
     "detailedDescription": "An ending that clears the way forward. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Release, renewal, and true transformation. At its best, this card supports a mature strategy and deliberate action. Clinging to the past or fearing change. In shadow, extremes, control patterns, or emotional swings become louder. Let the old fall away so the new can rise. Keep your attention on the symbol and turn the insight into one concrete step today.",
-    "imageUrl": "cards/ac/ac-death.webp"
+    "imageUrl": "cards/ac/ac_death.webp"
   },
   "ac_14_temperance": {
     "title": "Temperance",
@@ -3097,7 +3097,7 @@
       "clarity": 55
     },
     "detailedDescription": "Blending extremes into harmony. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Patience, healing, and steady integration. At its best, this card supports a mature strategy and deliberate action. Imbalance, excess, or forcing a mix. In shadow, extremes, control patterns, or emotional swings become louder. Go slowly and let the blend settle. Keep your attention on the symbol and turn the insight into one concrete step today.",
-    "imageUrl": "cards/ac/ac-temperance.webp"
+    "imageUrl": "cards/ac/ac_temperance.webp"
   },
   "ac_15_devil": {
     "title": "The Devil",
@@ -3123,7 +3123,7 @@
       "clarity": 55
     },
     "detailedDescription": "Attachments that feel like control. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Awareness of what binds you. At its best, this card supports a mature strategy and deliberate action. Addiction, fear, or giving away power. In shadow, extremes, control patterns, or emotional swings become louder. Name the chain, then loosen it. Keep your attention on the symbol and turn the insight into one concrete step today.",
-    "imageUrl": "cards/ac/ac-devil.webp"
+    "imageUrl": "cards/ac/ac_devil.webp"
   },
   "ac_16_tower": {
     "title": "The Tower",
@@ -3149,7 +3149,7 @@
       "clarity": 55
     },
     "detailedDescription": "A sudden shake that reveals truth. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Breakthrough, liberation, and clarity. At its best, this card supports a mature strategy and deliberate action. Chaos, resistance, or fear of collapse. In shadow, extremes, control patterns, or emotional swings become louder. Let the false fall so the real can stand. Keep your attention on the symbol and turn the insight into one concrete step today.",
-    "imageUrl": "cards/ac/ac-tower.webp"
+    "imageUrl": "cards/ac/ac_tower.webp"
   },
   "ac_17_star": {
     "title": "The Star",
@@ -3175,7 +3175,7 @@
       "clarity": 55
     },
     "detailedDescription": "A quiet promise of renewal. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Hope, calm faith, and healing. At its best, this card supports a mature strategy and deliberate action. Doubt, discouragement, or losing faith. In shadow, extremes, control patterns, or emotional swings become louder. Keep the signal alive, even if it is small. Keep your attention on the symbol and turn the insight into one concrete step today.",
-    "imageUrl": "cards/ac/ac-star.webp"
+    "imageUrl": "cards/ac/ac_star.webp"
   },
   "ac_18_moon": {
     "title": "The Moon",
@@ -3201,7 +3201,7 @@
       "clarity": 55
     },
     "detailedDescription": "The fog of intuition and the unseen. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Imagination, empathy, and subtle guidance. At its best, this card supports a mature strategy and deliberate action. Confusion, fear, or illusion. In shadow, extremes, control patterns, or emotional swings become louder. Move slowly and verify what you feel. Keep your attention on the symbol and turn the insight into one concrete step today.",
-    "imageUrl": "cards/ac/ac-moon.webp"
+    "imageUrl": "cards/ac/ac_moon.webp"
   },
   "ac_19_sun": {
     "title": "The Sun",
@@ -3227,7 +3227,7 @@
       "clarity": 55
     },
     "detailedDescription": "Warmth, visibility, and clear success. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Joy, vitality, and honest celebration. At its best, this card supports a mature strategy and deliberate action. Overexposure, ego, or burnout. In shadow, extremes, control patterns, or emotional swings become louder. Let your light be seen and shared. Keep your attention on the symbol and turn the insight into one concrete step today.",
-    "imageUrl": "cards/ac/ac-sun.webp"
+    "imageUrl": "cards/ac/ac_sun.webp"
   },
   "ac_20_judgement": {
     "title": "Judgement",
@@ -3253,7 +3253,7 @@
       "clarity": 55
     },
     "detailedDescription": "A call to rise and be accountable. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Renewal, forgiveness, and clear purpose. At its best, this card supports a mature strategy and deliberate action. Harsh self-judgment or refusing the call. In shadow, extremes, control patterns, or emotional swings become louder. Answer honestly and step into the next chapter. Keep your attention on the symbol and turn the insight into one concrete step today.",
-    "imageUrl": "cards/ac/ac-judgement.webp"
+    "imageUrl": "cards/ac/ac_judgement.webp"
   },
   "ac_21_world": {
     "title": "The World",
@@ -3279,6 +3279,1462 @@
       "clarity": 55
     },
     "detailedDescription": "Completion and a sense of wholeness. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Integration, reward, and earned closure. At its best, this card supports a mature strategy and deliberate action. Delays in finishing or fearing the next cycle. In shadow, extremes, control patterns, or emotional swings become louder. Honor what is complete and open the next door. Keep your attention on the symbol and turn the insight into one concrete step today.",
-    "imageUrl": "cards/ac/ac-world.webp"
+    "imageUrl": "cards/ac/ac_world.webp"
+  },
+  "ac_wands_ace": {
+    "title": "Ace of Wands",
+    "deck": "crowley",
+    "keywords": [
+      "wands",
+      "ace",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Ace of Wands in the Crowley deck channels pure ignition of the suit current through the axis of will, fire, and creative thrust.",
+      "light": "In light, the card opens bold initiative and inspired execution while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can flip into haste, ego heat, and burnout, especially when force outruns awareness.",
+      "advice": "Ignite the intent and anchor it in one concrete move today."
+    },
+    "fact": "Ace of Wands in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 56,
+      "power": 82,
+      "love": 50,
+      "clarity": 64
+    },
+    "detailedDescription": "Ace of Wands in the Crowley deck channels pure ignition of the suit current through the axis of will, fire, and creative thrust. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card opens bold initiative and inspired execution while keeping intention coherent and usable. In shadow, the card can flip into haste, ego heat, and burnout, especially when force outruns awareness. Practical move: Ignite the intent and anchor it in one concrete move today.",
+    "imageUrl": "cards/ac/ac_wands_ace.webp"
+  },
+  "ac_wands_two": {
+    "title": "Two of Wands",
+    "deck": "crowley",
+    "keywords": [
+      "wands",
+      "two",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Two of Wands in the Crowley deck channels polarity and directional choice through the axis of will, fire, and creative thrust.",
+      "light": "In light, the card opens bold initiative and inspired execution while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can flip into haste, ego heat, and burnout, especially when force outruns awareness.",
+      "advice": "Choose one direction and cut parallel noise."
+    },
+    "fact": "Two of Wands in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 52,
+      "power": 78,
+      "love": 46,
+      "clarity": 60
+    },
+    "detailedDescription": "Two of Wands in the Crowley deck channels polarity and directional choice through the axis of will, fire, and creative thrust. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card opens bold initiative and inspired execution while keeping intention coherent and usable. In shadow, the card can flip into haste, ego heat, and burnout, especially when force outruns awareness. Practical move: Choose one direction and cut parallel noise.",
+    "imageUrl": "cards/ac/ac_wands_two.webp"
+  },
+  "ac_wands_three": {
+    "title": "Three of Wands",
+    "deck": "crowley",
+    "keywords": [
+      "wands",
+      "three",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Three of Wands in the Crowley deck channels expansion and first visible growth through the axis of will, fire, and creative thrust.",
+      "light": "In light, the card opens bold initiative and inspired execution while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can flip into haste, ego heat, and burnout, especially when force outruns awareness.",
+      "advice": "Expand through allies and test your vision in reality."
+    },
+    "fact": "Three of Wands in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 54,
+      "power": 80,
+      "love": 48,
+      "clarity": 60
+    },
+    "detailedDescription": "Three of Wands in the Crowley deck channels expansion and first visible growth through the axis of will, fire, and creative thrust. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card opens bold initiative and inspired execution while keeping intention coherent and usable. In shadow, the card can flip into haste, ego heat, and burnout, especially when force outruns awareness. Practical move: Expand through allies and test your vision in reality.",
+    "imageUrl": "cards/ac/ac_wands_three.webp"
+  },
+  "ac_wands_four": {
+    "title": "Four of Wands",
+    "deck": "crowley",
+    "keywords": [
+      "wands",
+      "four",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Four of Wands in the Crowley deck channels stabilization of form and structure through the axis of will, fire, and creative thrust.",
+      "light": "In light, the card opens bold initiative and inspired execution while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can flip into haste, ego heat, and burnout, especially when force outruns awareness.",
+      "advice": "Protect stability without turning it into a cage."
+    },
+    "fact": "Four of Wands in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 54,
+      "power": 76,
+      "love": 48,
+      "clarity": 60
+    },
+    "detailedDescription": "Four of Wands in the Crowley deck channels stabilization of form and structure through the axis of will, fire, and creative thrust. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card opens bold initiative and inspired execution while keeping intention coherent and usable. In shadow, the card can flip into haste, ego heat, and burnout, especially when force outruns awareness. Practical move: Protect stability without turning it into a cage.",
+    "imageUrl": "cards/ac/ac_wands_four.webp"
+  },
+  "ac_wands_five": {
+    "title": "Five of Wands",
+    "deck": "crowley",
+    "keywords": [
+      "wands",
+      "five",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Five of Wands in the Crowley deck channels friction, ordeal, and recalibration through the axis of will, fire, and creative thrust.",
+      "light": "In light, the card opens bold initiative and inspired execution while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can flip into haste, ego heat, and burnout, especially when force outruns awareness.",
+      "advice": "Treat tension as alchemical heat for growth."
+    },
+    "fact": "Five of Wands in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 48,
+      "power": 78,
+      "love": 42,
+      "clarity": 60
+    },
+    "detailedDescription": "Five of Wands in the Crowley deck channels friction, ordeal, and recalibration through the axis of will, fire, and creative thrust. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card opens bold initiative and inspired execution while keeping intention coherent and usable. In shadow, the card can flip into haste, ego heat, and burnout, especially when force outruns awareness. Practical move: Treat tension as alchemical heat for growth.",
+    "imageUrl": "cards/ac/ac_wands_five.webp"
+  },
+  "ac_wands_six": {
+    "title": "Six of Wands",
+    "deck": "crowley",
+    "keywords": [
+      "wands",
+      "six",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Six of Wands in the Crowley deck channels harmonization and flow recovery through the axis of will, fire, and creative thrust.",
+      "light": "In light, the card opens bold initiative and inspired execution while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can flip into haste, ego heat, and burnout, especially when force outruns awareness.",
+      "advice": "Lock in progress through gratitude and repeatable practice."
+    },
+    "fact": "Six of Wands in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 56,
+      "power": 78,
+      "love": 50,
+      "clarity": 60
+    },
+    "detailedDescription": "Six of Wands in the Crowley deck channels harmonization and flow recovery through the axis of will, fire, and creative thrust. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card opens bold initiative and inspired execution while keeping intention coherent and usable. In shadow, the card can flip into haste, ego heat, and burnout, especially when force outruns awareness. Practical move: Lock in progress through gratitude and repeatable practice.",
+    "imageUrl": "cards/ac/ac_wands_six.webp"
+  },
+  "ac_wands_seven": {
+    "title": "Seven of Wands",
+    "deck": "crowley",
+    "keywords": [
+      "wands",
+      "seven",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Seven of Wands in the Crowley deck channels a will-test over distance through the axis of will, fire, and creative thrust.",
+      "light": "In light, the card opens bold initiative and inspired execution while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can flip into haste, ego heat, and burnout, especially when force outruns awareness.",
+      "advice": "Hold your boundary and keep your center under pressure."
+    },
+    "fact": "Seven of Wands in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 50,
+      "power": 78,
+      "love": 44,
+      "clarity": 62
+    },
+    "detailedDescription": "Seven of Wands in the Crowley deck channels a will-test over distance through the axis of will, fire, and creative thrust. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card opens bold initiative and inspired execution while keeping intention coherent and usable. In shadow, the card can flip into haste, ego heat, and burnout, especially when force outruns awareness. Practical move: Hold your boundary and keep your center under pressure.",
+    "imageUrl": "cards/ac/ac_wands_seven.webp"
+  },
+  "ac_wands_eight": {
+    "title": "Eight of Wands",
+    "deck": "crowley",
+    "keywords": [
+      "wands",
+      "eight",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Eight of Wands in the Crowley deck channels acceleration and controlled momentum through the axis of will, fire, and creative thrust.",
+      "light": "In light, the card opens bold initiative and inspired execution while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can flip into haste, ego heat, and burnout, especially when force outruns awareness.",
+      "advice": "Ride the momentum while the channel is open."
+    },
+    "fact": "Eight of Wands in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 50,
+      "power": 80,
+      "love": 44,
+      "clarity": 62
+    },
+    "detailedDescription": "Eight of Wands in the Crowley deck channels acceleration and controlled momentum through the axis of will, fire, and creative thrust. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card opens bold initiative and inspired execution while keeping intention coherent and usable. In shadow, the card can flip into haste, ego heat, and burnout, especially when force outruns awareness. Practical move: Ride the momentum while the channel is open.",
+    "imageUrl": "cards/ac/ac_wands_eight.webp"
+  },
+  "ac_wands_nine": {
+    "title": "Nine of Wands",
+    "deck": "crowley",
+    "keywords": [
+      "wands",
+      "nine",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Nine of Wands in the Crowley deck channels mature focus and resource protection through the axis of will, fire, and creative thrust.",
+      "light": "In light, the card opens bold initiative and inspired execution while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can flip into haste, ego heat, and burnout, especially when force outruns awareness.",
+      "advice": "Conserve energy and act with precision."
+    },
+    "fact": "Nine of Wands in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 54,
+      "power": 78,
+      "love": 48,
+      "clarity": 62
+    },
+    "detailedDescription": "Nine of Wands in the Crowley deck channels mature focus and resource protection through the axis of will, fire, and creative thrust. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card opens bold initiative and inspired execution while keeping intention coherent and usable. In shadow, the card can flip into haste, ego heat, and burnout, especially when force outruns awareness. Practical move: Conserve energy and act with precision.",
+    "imageUrl": "cards/ac/ac_wands_nine.webp"
+  },
+  "ac_wands_ten": {
+    "title": "Ten of Wands",
+    "deck": "crowley",
+    "keywords": [
+      "wands",
+      "ten",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Ten of Wands in the Crowley deck channels peak load and cycle completion through the axis of will, fire, and creative thrust.",
+      "light": "In light, the card opens bold initiative and inspired execution while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can flip into haste, ego heat, and burnout, especially when force outruns awareness.",
+      "advice": "Delegate excess weight and clear space for a new cycle."
+    },
+    "fact": "Ten of Wands in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 51,
+      "power": 77,
+      "love": 45,
+      "clarity": 59
+    },
+    "detailedDescription": "Ten of Wands in the Crowley deck channels peak load and cycle completion through the axis of will, fire, and creative thrust. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card opens bold initiative and inspired execution while keeping intention coherent and usable. In shadow, the card can flip into haste, ego heat, and burnout, especially when force outruns awareness. Practical move: Delegate excess weight and clear space for a new cycle.",
+    "imageUrl": "cards/ac/ac_wands_ten.webp"
+  },
+  "ac_wands_page": {
+    "title": "Page of Wands",
+    "deck": "crowley",
+    "keywords": [
+      "wands",
+      "page",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Page of Wands in the Crowley deck channels a messenger of a new tonal shift through the axis of will, fire, and creative thrust.",
+      "light": "In light, the card opens bold initiative and inspired execution while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can flip into haste, ego heat, and burnout, especially when force outruns awareness.",
+      "advice": "Track signs and learn from each signal."
+    },
+    "fact": "Page of Wands in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 52,
+      "power": 78,
+      "love": 46,
+      "clarity": 60
+    },
+    "detailedDescription": "Page of Wands in the Crowley deck channels a messenger of a new tonal shift through the axis of will, fire, and creative thrust. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card opens bold initiative and inspired execution while keeping intention coherent and usable. In shadow, the card can flip into haste, ego heat, and burnout, especially when force outruns awareness. Practical move: Track signs and learn from each signal.",
+    "imageUrl": "cards/ac/ac_wands_page.webp"
+  },
+  "ac_wands_knight": {
+    "title": "Knight of Wands",
+    "deck": "crowley",
+    "keywords": [
+      "wands",
+      "knight",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Knight of Wands in the Crowley deck channels a forceful charge into action through the axis of will, fire, and creative thrust.",
+      "light": "In light, the card opens bold initiative and inspired execution while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can flip into haste, ego heat, and burnout, especially when force outruns awareness.",
+      "advice": "Aim your force at one target; do not fight blindly."
+    },
+    "fact": "Knight of Wands in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 53,
+      "power": 81,
+      "love": 46,
+      "clarity": 59
+    },
+    "detailedDescription": "Knight of Wands in the Crowley deck channels a forceful charge into action through the axis of will, fire, and creative thrust. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card opens bold initiative and inspired execution while keeping intention coherent and usable. In shadow, the card can flip into haste, ego heat, and burnout, especially when force outruns awareness. Practical move: Aim your force at one target; do not fight blindly.",
+    "imageUrl": "cards/ac/ac_wands_knight.webp"
+  },
+  "ac_wands_queen": {
+    "title": "Queen of Wands",
+    "deck": "crowley",
+    "keywords": [
+      "wands",
+      "queen",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Queen of Wands in the Crowley deck channels magnetic receptivity and inner sovereignty through the axis of will, fire, and creative thrust.",
+      "light": "In light, the card opens bold initiative and inspired execution while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can flip into haste, ego heat, and burnout, especially when force outruns awareness.",
+      "advice": "Increase magnetism through inner stillness and exact choice."
+    },
+    "fact": "Queen of Wands in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 53,
+      "power": 76,
+      "love": 50,
+      "clarity": 60
+    },
+    "detailedDescription": "Queen of Wands in the Crowley deck channels magnetic receptivity and inner sovereignty through the axis of will, fire, and creative thrust. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card opens bold initiative and inspired execution while keeping intention coherent and usable. In shadow, the card can flip into haste, ego heat, and burnout, especially when force outruns awareness. Practical move: Increase magnetism through inner stillness and exact choice.",
+    "imageUrl": "cards/ac/ac_wands_queen.webp"
+  },
+  "ac_wands_king": {
+    "title": "King of Wands",
+    "deck": "crowley",
+    "keywords": [
+      "wands",
+      "king",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "King of Wands in the Crowley deck channels mastery, command, and strategic closure through the axis of will, fire, and creative thrust.",
+      "light": "In light, the card opens bold initiative and inspired execution while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can flip into haste, ego heat, and burnout, especially when force outruns awareness.",
+      "advice": "Lead with calm strategy; mastery beats intensity spikes."
+    },
+    "fact": "King of Wands in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 54,
+      "power": 80,
+      "love": 48,
+      "clarity": 60
+    },
+    "detailedDescription": "King of Wands in the Crowley deck channels mastery, command, and strategic closure through the axis of will, fire, and creative thrust. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card opens bold initiative and inspired execution while keeping intention coherent and usable. In shadow, the card can flip into haste, ego heat, and burnout, especially when force outruns awareness. Practical move: Lead with calm strategy; mastery beats intensity spikes.",
+    "imageUrl": "cards/ac/ac_wands_king.webp"
+  },
+  "ac_cups_ace": {
+    "title": "Ace of Cups",
+    "deck": "crowley",
+    "keywords": [
+      "cups",
+      "ace",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Ace of Cups in the Crowley deck channels pure ignition of the suit current through the axis of emotion, devotion, and psychic receptivity.",
+      "light": "In light, the card deepens empathy and relational intelligence while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can sink into projection, sentimentality, and emotional loops, especially when force outruns awareness.",
+      "advice": "Ignite the intent and anchor it in one concrete move today."
+    },
+    "fact": "Ace of Cups in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 59,
+      "power": 56,
+      "love": 78,
+      "clarity": 62
+    },
+    "detailedDescription": "Ace of Cups in the Crowley deck channels pure ignition of the suit current through the axis of emotion, devotion, and psychic receptivity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card deepens empathy and relational intelligence while keeping intention coherent and usable. In shadow, the card can sink into projection, sentimentality, and emotional loops, especially when force outruns awareness. Practical move: Ignite the intent and anchor it in one concrete move today.",
+    "imageUrl": "cards/ac/ac_cups_ace.webp"
+  },
+  "ac_cups_two": {
+    "title": "Two of Cups",
+    "deck": "crowley",
+    "keywords": [
+      "cups",
+      "two",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Two of Cups in the Crowley deck channels polarity and directional choice through the axis of emotion, devotion, and psychic receptivity.",
+      "light": "In light, the card deepens empathy and relational intelligence while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can sink into projection, sentimentality, and emotional loops, especially when force outruns awareness.",
+      "advice": "Choose one direction and cut parallel noise."
+    },
+    "fact": "Two of Cups in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 55,
+      "power": 52,
+      "love": 74,
+      "clarity": 58
+    },
+    "detailedDescription": "Two of Cups in the Crowley deck channels polarity and directional choice through the axis of emotion, devotion, and psychic receptivity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card deepens empathy and relational intelligence while keeping intention coherent and usable. In shadow, the card can sink into projection, sentimentality, and emotional loops, especially when force outruns awareness. Practical move: Choose one direction and cut parallel noise.",
+    "imageUrl": "cards/ac/ac_cups_two.webp"
+  },
+  "ac_cups_three": {
+    "title": "Three of Cups",
+    "deck": "crowley",
+    "keywords": [
+      "cups",
+      "three",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Three of Cups in the Crowley deck channels expansion and first visible growth through the axis of emotion, devotion, and psychic receptivity.",
+      "light": "In light, the card deepens empathy and relational intelligence while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can sink into projection, sentimentality, and emotional loops, especially when force outruns awareness.",
+      "advice": "Expand through allies and test your vision in reality."
+    },
+    "fact": "Three of Cups in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 57,
+      "power": 54,
+      "love": 76,
+      "clarity": 58
+    },
+    "detailedDescription": "Three of Cups in the Crowley deck channels expansion and first visible growth through the axis of emotion, devotion, and psychic receptivity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card deepens empathy and relational intelligence while keeping intention coherent and usable. In shadow, the card can sink into projection, sentimentality, and emotional loops, especially when force outruns awareness. Practical move: Expand through allies and test your vision in reality.",
+    "imageUrl": "cards/ac/ac_cups_three.webp"
+  },
+  "ac_cups_four": {
+    "title": "Four of Cups",
+    "deck": "crowley",
+    "keywords": [
+      "cups",
+      "four",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Four of Cups in the Crowley deck channels stabilization of form and structure through the axis of emotion, devotion, and psychic receptivity.",
+      "light": "In light, the card deepens empathy and relational intelligence while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can sink into projection, sentimentality, and emotional loops, especially when force outruns awareness.",
+      "advice": "Protect stability without turning it into a cage."
+    },
+    "fact": "Four of Cups in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 57,
+      "power": 50,
+      "love": 76,
+      "clarity": 58
+    },
+    "detailedDescription": "Four of Cups in the Crowley deck channels stabilization of form and structure through the axis of emotion, devotion, and psychic receptivity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card deepens empathy and relational intelligence while keeping intention coherent and usable. In shadow, the card can sink into projection, sentimentality, and emotional loops, especially when force outruns awareness. Practical move: Protect stability without turning it into a cage.",
+    "imageUrl": "cards/ac/ac_cups_four.webp"
+  },
+  "ac_cups_five": {
+    "title": "Five of Cups",
+    "deck": "crowley",
+    "keywords": [
+      "cups",
+      "five",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Five of Cups in the Crowley deck channels friction, ordeal, and recalibration through the axis of emotion, devotion, and psychic receptivity.",
+      "light": "In light, the card deepens empathy and relational intelligence while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can sink into projection, sentimentality, and emotional loops, especially when force outruns awareness.",
+      "advice": "Treat tension as alchemical heat for growth."
+    },
+    "fact": "Five of Cups in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 51,
+      "power": 52,
+      "love": 70,
+      "clarity": 58
+    },
+    "detailedDescription": "Five of Cups in the Crowley deck channels friction, ordeal, and recalibration through the axis of emotion, devotion, and psychic receptivity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card deepens empathy and relational intelligence while keeping intention coherent and usable. In shadow, the card can sink into projection, sentimentality, and emotional loops, especially when force outruns awareness. Practical move: Treat tension as alchemical heat for growth.",
+    "imageUrl": "cards/ac/ac_cups_five.webp"
+  },
+  "ac_cups_six": {
+    "title": "Six of Cups",
+    "deck": "crowley",
+    "keywords": [
+      "cups",
+      "six",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Six of Cups in the Crowley deck channels harmonization and flow recovery through the axis of emotion, devotion, and psychic receptivity.",
+      "light": "In light, the card deepens empathy and relational intelligence while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can sink into projection, sentimentality, and emotional loops, especially when force outruns awareness.",
+      "advice": "Lock in progress through gratitude and repeatable practice."
+    },
+    "fact": "Six of Cups in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 59,
+      "power": 52,
+      "love": 78,
+      "clarity": 58
+    },
+    "detailedDescription": "Six of Cups in the Crowley deck channels harmonization and flow recovery through the axis of emotion, devotion, and psychic receptivity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card deepens empathy and relational intelligence while keeping intention coherent and usable. In shadow, the card can sink into projection, sentimentality, and emotional loops, especially when force outruns awareness. Practical move: Lock in progress through gratitude and repeatable practice.",
+    "imageUrl": "cards/ac/ac_cups_six.webp"
+  },
+  "ac_cups_seven": {
+    "title": "Seven of Cups",
+    "deck": "crowley",
+    "keywords": [
+      "cups",
+      "seven",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Seven of Cups in the Crowley deck channels a will-test over distance through the axis of emotion, devotion, and psychic receptivity.",
+      "light": "In light, the card deepens empathy and relational intelligence while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can sink into projection, sentimentality, and emotional loops, especially when force outruns awareness.",
+      "advice": "Hold your boundary and keep your center under pressure."
+    },
+    "fact": "Seven of Cups in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 53,
+      "power": 52,
+      "love": 72,
+      "clarity": 60
+    },
+    "detailedDescription": "Seven of Cups in the Crowley deck channels a will-test over distance through the axis of emotion, devotion, and psychic receptivity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card deepens empathy and relational intelligence while keeping intention coherent and usable. In shadow, the card can sink into projection, sentimentality, and emotional loops, especially when force outruns awareness. Practical move: Hold your boundary and keep your center under pressure.",
+    "imageUrl": "cards/ac/ac_cups_seven.webp"
+  },
+  "ac_cups_eight": {
+    "title": "Eight of Cups",
+    "deck": "crowley",
+    "keywords": [
+      "cups",
+      "eight",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Eight of Cups in the Crowley deck channels acceleration and controlled momentum through the axis of emotion, devotion, and psychic receptivity.",
+      "light": "In light, the card deepens empathy and relational intelligence while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can sink into projection, sentimentality, and emotional loops, especially when force outruns awareness.",
+      "advice": "Ride the momentum while the channel is open."
+    },
+    "fact": "Eight of Cups in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 53,
+      "power": 54,
+      "love": 72,
+      "clarity": 60
+    },
+    "detailedDescription": "Eight of Cups in the Crowley deck channels acceleration and controlled momentum through the axis of emotion, devotion, and psychic receptivity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card deepens empathy and relational intelligence while keeping intention coherent and usable. In shadow, the card can sink into projection, sentimentality, and emotional loops, especially when force outruns awareness. Practical move: Ride the momentum while the channel is open.",
+    "imageUrl": "cards/ac/ac_cups_eight.webp"
+  },
+  "ac_cups_nine": {
+    "title": "Nine of Cups",
+    "deck": "crowley",
+    "keywords": [
+      "cups",
+      "nine",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Nine of Cups in the Crowley deck channels mature focus and resource protection through the axis of emotion, devotion, and psychic receptivity.",
+      "light": "In light, the card deepens empathy and relational intelligence while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can sink into projection, sentimentality, and emotional loops, especially when force outruns awareness.",
+      "advice": "Conserve energy and act with precision."
+    },
+    "fact": "Nine of Cups in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 57,
+      "power": 52,
+      "love": 76,
+      "clarity": 60
+    },
+    "detailedDescription": "Nine of Cups in the Crowley deck channels mature focus and resource protection through the axis of emotion, devotion, and psychic receptivity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card deepens empathy and relational intelligence while keeping intention coherent and usable. In shadow, the card can sink into projection, sentimentality, and emotional loops, especially when force outruns awareness. Practical move: Conserve energy and act with precision.",
+    "imageUrl": "cards/ac/ac_cups_nine.webp"
+  },
+  "ac_cups_ten": {
+    "title": "Ten of Cups",
+    "deck": "crowley",
+    "keywords": [
+      "cups",
+      "ten",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Ten of Cups in the Crowley deck channels peak load and cycle completion through the axis of emotion, devotion, and psychic receptivity.",
+      "light": "In light, the card deepens empathy and relational intelligence while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can sink into projection, sentimentality, and emotional loops, especially when force outruns awareness.",
+      "advice": "Delegate excess weight and clear space for a new cycle."
+    },
+    "fact": "Ten of Cups in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 54,
+      "power": 51,
+      "love": 73,
+      "clarity": 57
+    },
+    "detailedDescription": "Ten of Cups in the Crowley deck channels peak load and cycle completion through the axis of emotion, devotion, and psychic receptivity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card deepens empathy and relational intelligence while keeping intention coherent and usable. In shadow, the card can sink into projection, sentimentality, and emotional loops, especially when force outruns awareness. Practical move: Delegate excess weight and clear space for a new cycle.",
+    "imageUrl": "cards/ac/ac_cups_ten.webp"
+  },
+  "ac_cups_page": {
+    "title": "Page of Cups",
+    "deck": "crowley",
+    "keywords": [
+      "cups",
+      "page",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Page of Cups in the Crowley deck channels a messenger of a new tonal shift through the axis of emotion, devotion, and psychic receptivity.",
+      "light": "In light, the card deepens empathy and relational intelligence while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can sink into projection, sentimentality, and emotional loops, especially when force outruns awareness.",
+      "advice": "Track signs and learn from each signal."
+    },
+    "fact": "Page of Cups in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 55,
+      "power": 52,
+      "love": 74,
+      "clarity": 58
+    },
+    "detailedDescription": "Page of Cups in the Crowley deck channels a messenger of a new tonal shift through the axis of emotion, devotion, and psychic receptivity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card deepens empathy and relational intelligence while keeping intention coherent and usable. In shadow, the card can sink into projection, sentimentality, and emotional loops, especially when force outruns awareness. Practical move: Track signs and learn from each signal.",
+    "imageUrl": "cards/ac/ac_cups_page.webp"
+  },
+  "ac_cups_knight": {
+    "title": "Knight of Cups",
+    "deck": "crowley",
+    "keywords": [
+      "cups",
+      "knight",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Knight of Cups in the Crowley deck channels a forceful charge into action through the axis of emotion, devotion, and psychic receptivity.",
+      "light": "In light, the card deepens empathy and relational intelligence while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can sink into projection, sentimentality, and emotional loops, especially when force outruns awareness.",
+      "advice": "Aim your force at one target; do not fight blindly."
+    },
+    "fact": "Knight of Cups in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 56,
+      "power": 55,
+      "love": 74,
+      "clarity": 57
+    },
+    "detailedDescription": "Knight of Cups in the Crowley deck channels a forceful charge into action through the axis of emotion, devotion, and psychic receptivity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card deepens empathy and relational intelligence while keeping intention coherent and usable. In shadow, the card can sink into projection, sentimentality, and emotional loops, especially when force outruns awareness. Practical move: Aim your force at one target; do not fight blindly.",
+    "imageUrl": "cards/ac/ac_cups_knight.webp"
+  },
+  "ac_cups_queen": {
+    "title": "Queen of Cups",
+    "deck": "crowley",
+    "keywords": [
+      "cups",
+      "queen",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Queen of Cups in the Crowley deck channels magnetic receptivity and inner sovereignty through the axis of emotion, devotion, and psychic receptivity.",
+      "light": "In light, the card deepens empathy and relational intelligence while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can sink into projection, sentimentality, and emotional loops, especially when force outruns awareness.",
+      "advice": "Increase magnetism through inner stillness and exact choice."
+    },
+    "fact": "Queen of Cups in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 56,
+      "power": 50,
+      "love": 78,
+      "clarity": 58
+    },
+    "detailedDescription": "Queen of Cups in the Crowley deck channels magnetic receptivity and inner sovereignty through the axis of emotion, devotion, and psychic receptivity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card deepens empathy and relational intelligence while keeping intention coherent and usable. In shadow, the card can sink into projection, sentimentality, and emotional loops, especially when force outruns awareness. Practical move: Increase magnetism through inner stillness and exact choice.",
+    "imageUrl": "cards/ac/ac_cups_queen.webp"
+  },
+  "ac_cups_king": {
+    "title": "King of Cups",
+    "deck": "crowley",
+    "keywords": [
+      "cups",
+      "king",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "King of Cups in the Crowley deck channels mastery, command, and strategic closure through the axis of emotion, devotion, and psychic receptivity.",
+      "light": "In light, the card deepens empathy and relational intelligence while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can sink into projection, sentimentality, and emotional loops, especially when force outruns awareness.",
+      "advice": "Lead with calm strategy; mastery beats intensity spikes."
+    },
+    "fact": "King of Cups in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 57,
+      "power": 54,
+      "love": 76,
+      "clarity": 58
+    },
+    "detailedDescription": "King of Cups in the Crowley deck channels mastery, command, and strategic closure through the axis of emotion, devotion, and psychic receptivity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card deepens empathy and relational intelligence while keeping intention coherent and usable. In shadow, the card can sink into projection, sentimentality, and emotional loops, especially when force outruns awareness. Practical move: Lead with calm strategy; mastery beats intensity spikes.",
+    "imageUrl": "cards/ac/ac_cups_king.webp"
+  },
+  "ac_swords_ace": {
+    "title": "Ace of Swords",
+    "deck": "crowley",
+    "keywords": [
+      "swords",
+      "ace",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Ace of Swords in the Crowley deck channels pure ignition of the suit current through the axis of mind, language, and cutting clarity.",
+      "light": "In light, the card clears signal and removes mental noise while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can harden into overcontrol, cynicism, or self-attack, especially when force outruns awareness.",
+      "advice": "Ignite the intent and anchor it in one concrete move today."
+    },
+    "fact": "Ace of Swords in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 52,
+      "power": 60,
+      "love": 50,
+      "clarity": 84
+    },
+    "detailedDescription": "Ace of Swords in the Crowley deck channels pure ignition of the suit current through the axis of mind, language, and cutting clarity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card clears signal and removes mental noise while keeping intention coherent and usable. In shadow, the card can harden into overcontrol, cynicism, or self-attack, especially when force outruns awareness. Practical move: Ignite the intent and anchor it in one concrete move today.",
+    "imageUrl": "cards/ac/ac_swords_ace.webp"
+  },
+  "ac_swords_two": {
+    "title": "Two of Swords",
+    "deck": "crowley",
+    "keywords": [
+      "swords",
+      "two",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Two of Swords in the Crowley deck channels polarity and directional choice through the axis of mind, language, and cutting clarity.",
+      "light": "In light, the card clears signal and removes mental noise while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can harden into overcontrol, cynicism, or self-attack, especially when force outruns awareness.",
+      "advice": "Choose one direction and cut parallel noise."
+    },
+    "fact": "Two of Swords in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 48,
+      "power": 56,
+      "love": 46,
+      "clarity": 80
+    },
+    "detailedDescription": "Two of Swords in the Crowley deck channels polarity and directional choice through the axis of mind, language, and cutting clarity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card clears signal and removes mental noise while keeping intention coherent and usable. In shadow, the card can harden into overcontrol, cynicism, or self-attack, especially when force outruns awareness. Practical move: Choose one direction and cut parallel noise.",
+    "imageUrl": "cards/ac/ac_swords_two.webp"
+  },
+  "ac_swords_three": {
+    "title": "Three of Swords",
+    "deck": "crowley",
+    "keywords": [
+      "swords",
+      "three",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Three of Swords in the Crowley deck channels expansion and first visible growth through the axis of mind, language, and cutting clarity.",
+      "light": "In light, the card clears signal and removes mental noise while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can harden into overcontrol, cynicism, or self-attack, especially when force outruns awareness.",
+      "advice": "Expand through allies and test your vision in reality."
+    },
+    "fact": "Three of Swords in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 50,
+      "power": 58,
+      "love": 48,
+      "clarity": 80
+    },
+    "detailedDescription": "Three of Swords in the Crowley deck channels expansion and first visible growth through the axis of mind, language, and cutting clarity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card clears signal and removes mental noise while keeping intention coherent and usable. In shadow, the card can harden into overcontrol, cynicism, or self-attack, especially when force outruns awareness. Practical move: Expand through allies and test your vision in reality.",
+    "imageUrl": "cards/ac/ac_swords_three.webp"
+  },
+  "ac_swords_four": {
+    "title": "Four of Swords",
+    "deck": "crowley",
+    "keywords": [
+      "swords",
+      "four",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Four of Swords in the Crowley deck channels stabilization of form and structure through the axis of mind, language, and cutting clarity.",
+      "light": "In light, the card clears signal and removes mental noise while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can harden into overcontrol, cynicism, or self-attack, especially when force outruns awareness.",
+      "advice": "Protect stability without turning it into a cage."
+    },
+    "fact": "Four of Swords in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 50,
+      "power": 54,
+      "love": 48,
+      "clarity": 80
+    },
+    "detailedDescription": "Four of Swords in the Crowley deck channels stabilization of form and structure through the axis of mind, language, and cutting clarity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card clears signal and removes mental noise while keeping intention coherent and usable. In shadow, the card can harden into overcontrol, cynicism, or self-attack, especially when force outruns awareness. Practical move: Protect stability without turning it into a cage.",
+    "imageUrl": "cards/ac/ac_swords_four.webp"
+  },
+  "ac_swords_five": {
+    "title": "Five of Swords",
+    "deck": "crowley",
+    "keywords": [
+      "swords",
+      "five",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Five of Swords in the Crowley deck channels friction, ordeal, and recalibration through the axis of mind, language, and cutting clarity.",
+      "light": "In light, the card clears signal and removes mental noise while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can harden into overcontrol, cynicism, or self-attack, especially when force outruns awareness.",
+      "advice": "Treat tension as alchemical heat for growth."
+    },
+    "fact": "Five of Swords in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 44,
+      "power": 56,
+      "love": 42,
+      "clarity": 80
+    },
+    "detailedDescription": "Five of Swords in the Crowley deck channels friction, ordeal, and recalibration through the axis of mind, language, and cutting clarity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card clears signal and removes mental noise while keeping intention coherent and usable. In shadow, the card can harden into overcontrol, cynicism, or self-attack, especially when force outruns awareness. Practical move: Treat tension as alchemical heat for growth.",
+    "imageUrl": "cards/ac/ac_swords_five.webp"
+  },
+  "ac_swords_six": {
+    "title": "Six of Swords",
+    "deck": "crowley",
+    "keywords": [
+      "swords",
+      "six",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Six of Swords in the Crowley deck channels harmonization and flow recovery through the axis of mind, language, and cutting clarity.",
+      "light": "In light, the card clears signal and removes mental noise while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can harden into overcontrol, cynicism, or self-attack, especially when force outruns awareness.",
+      "advice": "Lock in progress through gratitude and repeatable practice."
+    },
+    "fact": "Six of Swords in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 52,
+      "power": 56,
+      "love": 50,
+      "clarity": 80
+    },
+    "detailedDescription": "Six of Swords in the Crowley deck channels harmonization and flow recovery through the axis of mind, language, and cutting clarity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card clears signal and removes mental noise while keeping intention coherent and usable. In shadow, the card can harden into overcontrol, cynicism, or self-attack, especially when force outruns awareness. Practical move: Lock in progress through gratitude and repeatable practice.",
+    "imageUrl": "cards/ac/ac_swords_six.webp"
+  },
+  "ac_swords_seven": {
+    "title": "Seven of Swords",
+    "deck": "crowley",
+    "keywords": [
+      "swords",
+      "seven",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Seven of Swords in the Crowley deck channels a will-test over distance through the axis of mind, language, and cutting clarity.",
+      "light": "In light, the card clears signal and removes mental noise while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can harden into overcontrol, cynicism, or self-attack, especially when force outruns awareness.",
+      "advice": "Hold your boundary and keep your center under pressure."
+    },
+    "fact": "Seven of Swords in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 46,
+      "power": 56,
+      "love": 44,
+      "clarity": 82
+    },
+    "detailedDescription": "Seven of Swords in the Crowley deck channels a will-test over distance through the axis of mind, language, and cutting clarity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card clears signal and removes mental noise while keeping intention coherent and usable. In shadow, the card can harden into overcontrol, cynicism, or self-attack, especially when force outruns awareness. Practical move: Hold your boundary and keep your center under pressure.",
+    "imageUrl": "cards/ac/ac_swords_seven.webp"
+  },
+  "ac_swords_eight": {
+    "title": "Eight of Swords",
+    "deck": "crowley",
+    "keywords": [
+      "swords",
+      "eight",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Eight of Swords in the Crowley deck channels acceleration and controlled momentum through the axis of mind, language, and cutting clarity.",
+      "light": "In light, the card clears signal and removes mental noise while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can harden into overcontrol, cynicism, or self-attack, especially when force outruns awareness.",
+      "advice": "Ride the momentum while the channel is open."
+    },
+    "fact": "Eight of Swords in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 46,
+      "power": 58,
+      "love": 44,
+      "clarity": 82
+    },
+    "detailedDescription": "Eight of Swords in the Crowley deck channels acceleration and controlled momentum through the axis of mind, language, and cutting clarity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card clears signal and removes mental noise while keeping intention coherent and usable. In shadow, the card can harden into overcontrol, cynicism, or self-attack, especially when force outruns awareness. Practical move: Ride the momentum while the channel is open.",
+    "imageUrl": "cards/ac/ac_swords_eight.webp"
+  },
+  "ac_swords_nine": {
+    "title": "Nine of Swords",
+    "deck": "crowley",
+    "keywords": [
+      "swords",
+      "nine",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Nine of Swords in the Crowley deck channels mature focus and resource protection through the axis of mind, language, and cutting clarity.",
+      "light": "In light, the card clears signal and removes mental noise while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can harden into overcontrol, cynicism, or self-attack, especially when force outruns awareness.",
+      "advice": "Conserve energy and act with precision."
+    },
+    "fact": "Nine of Swords in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 50,
+      "power": 56,
+      "love": 48,
+      "clarity": 82
+    },
+    "detailedDescription": "Nine of Swords in the Crowley deck channels mature focus and resource protection through the axis of mind, language, and cutting clarity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card clears signal and removes mental noise while keeping intention coherent and usable. In shadow, the card can harden into overcontrol, cynicism, or self-attack, especially when force outruns awareness. Practical move: Conserve energy and act with precision.",
+    "imageUrl": "cards/ac/ac_swords_nine.webp"
+  },
+  "ac_swords_ten": {
+    "title": "Ten of Swords",
+    "deck": "crowley",
+    "keywords": [
+      "swords",
+      "ten",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Ten of Swords in the Crowley deck channels peak load and cycle completion through the axis of mind, language, and cutting clarity.",
+      "light": "In light, the card clears signal and removes mental noise while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can harden into overcontrol, cynicism, or self-attack, especially when force outruns awareness.",
+      "advice": "Delegate excess weight and clear space for a new cycle."
+    },
+    "fact": "Ten of Swords in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 47,
+      "power": 55,
+      "love": 45,
+      "clarity": 79
+    },
+    "detailedDescription": "Ten of Swords in the Crowley deck channels peak load and cycle completion through the axis of mind, language, and cutting clarity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card clears signal and removes mental noise while keeping intention coherent and usable. In shadow, the card can harden into overcontrol, cynicism, or self-attack, especially when force outruns awareness. Practical move: Delegate excess weight and clear space for a new cycle.",
+    "imageUrl": "cards/ac/ac_swords_ten.webp"
+  },
+  "ac_swords_page": {
+    "title": "Page of Swords",
+    "deck": "crowley",
+    "keywords": [
+      "swords",
+      "page",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Page of Swords in the Crowley deck channels a messenger of a new tonal shift through the axis of mind, language, and cutting clarity.",
+      "light": "In light, the card clears signal and removes mental noise while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can harden into overcontrol, cynicism, or self-attack, especially when force outruns awareness.",
+      "advice": "Track signs and learn from each signal."
+    },
+    "fact": "Page of Swords in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 48,
+      "power": 56,
+      "love": 46,
+      "clarity": 80
+    },
+    "detailedDescription": "Page of Swords in the Crowley deck channels a messenger of a new tonal shift through the axis of mind, language, and cutting clarity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card clears signal and removes mental noise while keeping intention coherent and usable. In shadow, the card can harden into overcontrol, cynicism, or self-attack, especially when force outruns awareness. Practical move: Track signs and learn from each signal.",
+    "imageUrl": "cards/ac/ac_swords_page.webp"
+  },
+  "ac_swords_knight": {
+    "title": "Knight of Swords",
+    "deck": "crowley",
+    "keywords": [
+      "swords",
+      "knight",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Knight of Swords in the Crowley deck channels a forceful charge into action through the axis of mind, language, and cutting clarity.",
+      "light": "In light, the card clears signal and removes mental noise while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can harden into overcontrol, cynicism, or self-attack, especially when force outruns awareness.",
+      "advice": "Aim your force at one target; do not fight blindly."
+    },
+    "fact": "Knight of Swords in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 49,
+      "power": 59,
+      "love": 46,
+      "clarity": 79
+    },
+    "detailedDescription": "Knight of Swords in the Crowley deck channels a forceful charge into action through the axis of mind, language, and cutting clarity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card clears signal and removes mental noise while keeping intention coherent and usable. In shadow, the card can harden into overcontrol, cynicism, or self-attack, especially when force outruns awareness. Practical move: Aim your force at one target; do not fight blindly.",
+    "imageUrl": "cards/ac/ac_swords_knight.webp"
+  },
+  "ac_swords_queen": {
+    "title": "Queen of Swords",
+    "deck": "crowley",
+    "keywords": [
+      "swords",
+      "queen",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Queen of Swords in the Crowley deck channels magnetic receptivity and inner sovereignty through the axis of mind, language, and cutting clarity.",
+      "light": "In light, the card clears signal and removes mental noise while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can harden into overcontrol, cynicism, or self-attack, especially when force outruns awareness.",
+      "advice": "Increase magnetism through inner stillness and exact choice."
+    },
+    "fact": "Queen of Swords in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 49,
+      "power": 54,
+      "love": 50,
+      "clarity": 80
+    },
+    "detailedDescription": "Queen of Swords in the Crowley deck channels magnetic receptivity and inner sovereignty through the axis of mind, language, and cutting clarity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card clears signal and removes mental noise while keeping intention coherent and usable. In shadow, the card can harden into overcontrol, cynicism, or self-attack, especially when force outruns awareness. Practical move: Increase magnetism through inner stillness and exact choice.",
+    "imageUrl": "cards/ac/ac_swords_queen.webp"
+  },
+  "ac_swords_king": {
+    "title": "King of Swords",
+    "deck": "crowley",
+    "keywords": [
+      "swords",
+      "king",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "King of Swords in the Crowley deck channels mastery, command, and strategic closure through the axis of mind, language, and cutting clarity.",
+      "light": "In light, the card clears signal and removes mental noise while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can harden into overcontrol, cynicism, or self-attack, especially when force outruns awareness.",
+      "advice": "Lead with calm strategy; mastery beats intensity spikes."
+    },
+    "fact": "King of Swords in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 50,
+      "power": 58,
+      "love": 48,
+      "clarity": 80
+    },
+    "detailedDescription": "King of Swords in the Crowley deck channels mastery, command, and strategic closure through the axis of mind, language, and cutting clarity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card clears signal and removes mental noise while keeping intention coherent and usable. In shadow, the card can harden into overcontrol, cynicism, or self-attack, especially when force outruns awareness. Practical move: Lead with calm strategy; mastery beats intensity spikes.",
+    "imageUrl": "cards/ac/ac_swords_king.webp"
+  },
+  "ac_pentacles_ace": {
+    "title": "Ace of Disks",
+    "deck": "crowley",
+    "keywords": [
+      "disks",
+      "ace",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Ace of Disks in the Crowley deck channels pure ignition of the suit current through the axis of matter, body, and ritual manifestation.",
+      "light": "In light, the card builds grounded structure and real-world outcomes while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can freeze into scarcity, inertia, and fear of change, especially when force outruns awareness.",
+      "advice": "Ignite the intent and anchor it in one concrete move today."
+    },
+    "fact": "Ace of Disks in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 76,
+      "power": 64,
+      "love": 56,
+      "clarity": 68
+    },
+    "detailedDescription": "Ace of Disks in the Crowley deck channels pure ignition of the suit current through the axis of matter, body, and ritual manifestation. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card builds grounded structure and real-world outcomes while keeping intention coherent and usable. In shadow, the card can freeze into scarcity, inertia, and fear of change, especially when force outruns awareness. Practical move: Ignite the intent and anchor it in one concrete move today.",
+    "imageUrl": "cards/ac/ac_pentacles_ace.webp"
+  },
+  "ac_pentacles_two": {
+    "title": "Two of Disks",
+    "deck": "crowley",
+    "keywords": [
+      "disks",
+      "two",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Two of Disks in the Crowley deck channels polarity and directional choice through the axis of matter, body, and ritual manifestation.",
+      "light": "In light, the card builds grounded structure and real-world outcomes while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can freeze into scarcity, inertia, and fear of change, especially when force outruns awareness.",
+      "advice": "Choose one direction and cut parallel noise."
+    },
+    "fact": "Two of Disks in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 72,
+      "power": 60,
+      "love": 52,
+      "clarity": 64
+    },
+    "detailedDescription": "Two of Disks in the Crowley deck channels polarity and directional choice through the axis of matter, body, and ritual manifestation. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card builds grounded structure and real-world outcomes while keeping intention coherent and usable. In shadow, the card can freeze into scarcity, inertia, and fear of change, especially when force outruns awareness. Practical move: Choose one direction and cut parallel noise.",
+    "imageUrl": "cards/ac/ac_pentacles_two.webp"
+  },
+  "ac_pentacles_three": {
+    "title": "Three of Disks",
+    "deck": "crowley",
+    "keywords": [
+      "disks",
+      "three",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Three of Disks in the Crowley deck channels expansion and first visible growth through the axis of matter, body, and ritual manifestation.",
+      "light": "In light, the card builds grounded structure and real-world outcomes while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can freeze into scarcity, inertia, and fear of change, especially when force outruns awareness.",
+      "advice": "Expand through allies and test your vision in reality."
+    },
+    "fact": "Three of Disks in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 74,
+      "power": 62,
+      "love": 54,
+      "clarity": 64
+    },
+    "detailedDescription": "Three of Disks in the Crowley deck channels expansion and first visible growth through the axis of matter, body, and ritual manifestation. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card builds grounded structure and real-world outcomes while keeping intention coherent and usable. In shadow, the card can freeze into scarcity, inertia, and fear of change, especially when force outruns awareness. Practical move: Expand through allies and test your vision in reality.",
+    "imageUrl": "cards/ac/ac_pentacles_three.webp"
+  },
+  "ac_pentacles_four": {
+    "title": "Four of Disks",
+    "deck": "crowley",
+    "keywords": [
+      "disks",
+      "four",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Four of Disks in the Crowley deck channels stabilization of form and structure through the axis of matter, body, and ritual manifestation.",
+      "light": "In light, the card builds grounded structure and real-world outcomes while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can freeze into scarcity, inertia, and fear of change, especially when force outruns awareness.",
+      "advice": "Protect stability without turning it into a cage."
+    },
+    "fact": "Four of Disks in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 74,
+      "power": 58,
+      "love": 54,
+      "clarity": 64
+    },
+    "detailedDescription": "Four of Disks in the Crowley deck channels stabilization of form and structure through the axis of matter, body, and ritual manifestation. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card builds grounded structure and real-world outcomes while keeping intention coherent and usable. In shadow, the card can freeze into scarcity, inertia, and fear of change, especially when force outruns awareness. Practical move: Protect stability without turning it into a cage.",
+    "imageUrl": "cards/ac/ac_pentacles_four.webp"
+  },
+  "ac_pentacles_five": {
+    "title": "Five of Disks",
+    "deck": "crowley",
+    "keywords": [
+      "disks",
+      "five",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Five of Disks in the Crowley deck channels friction, ordeal, and recalibration through the axis of matter, body, and ritual manifestation.",
+      "light": "In light, the card builds grounded structure and real-world outcomes while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can freeze into scarcity, inertia, and fear of change, especially when force outruns awareness.",
+      "advice": "Treat tension as alchemical heat for growth."
+    },
+    "fact": "Five of Disks in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 68,
+      "power": 60,
+      "love": 48,
+      "clarity": 64
+    },
+    "detailedDescription": "Five of Disks in the Crowley deck channels friction, ordeal, and recalibration through the axis of matter, body, and ritual manifestation. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card builds grounded structure and real-world outcomes while keeping intention coherent and usable. In shadow, the card can freeze into scarcity, inertia, and fear of change, especially when force outruns awareness. Practical move: Treat tension as alchemical heat for growth.",
+    "imageUrl": "cards/ac/ac_pentacles_five.webp"
+  },
+  "ac_pentacles_six": {
+    "title": "Six of Disks",
+    "deck": "crowley",
+    "keywords": [
+      "disks",
+      "six",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Six of Disks in the Crowley deck channels harmonization and flow recovery through the axis of matter, body, and ritual manifestation.",
+      "light": "In light, the card builds grounded structure and real-world outcomes while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can freeze into scarcity, inertia, and fear of change, especially when force outruns awareness.",
+      "advice": "Lock in progress through gratitude and repeatable practice."
+    },
+    "fact": "Six of Disks in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 76,
+      "power": 60,
+      "love": 56,
+      "clarity": 64
+    },
+    "detailedDescription": "Six of Disks in the Crowley deck channels harmonization and flow recovery through the axis of matter, body, and ritual manifestation. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card builds grounded structure and real-world outcomes while keeping intention coherent and usable. In shadow, the card can freeze into scarcity, inertia, and fear of change, especially when force outruns awareness. Practical move: Lock in progress through gratitude and repeatable practice.",
+    "imageUrl": "cards/ac/ac_pentacles_six.webp"
+  },
+  "ac_pentacles_seven": {
+    "title": "Seven of Disks",
+    "deck": "crowley",
+    "keywords": [
+      "disks",
+      "seven",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Seven of Disks in the Crowley deck channels a will-test over distance through the axis of matter, body, and ritual manifestation.",
+      "light": "In light, the card builds grounded structure and real-world outcomes while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can freeze into scarcity, inertia, and fear of change, especially when force outruns awareness.",
+      "advice": "Hold your boundary and keep your center under pressure."
+    },
+    "fact": "Seven of Disks in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 70,
+      "power": 60,
+      "love": 50,
+      "clarity": 66
+    },
+    "detailedDescription": "Seven of Disks in the Crowley deck channels a will-test over distance through the axis of matter, body, and ritual manifestation. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card builds grounded structure and real-world outcomes while keeping intention coherent and usable. In shadow, the card can freeze into scarcity, inertia, and fear of change, especially when force outruns awareness. Practical move: Hold your boundary and keep your center under pressure.",
+    "imageUrl": "cards/ac/ac_pentacles_seven.webp"
+  },
+  "ac_pentacles_eight": {
+    "title": "Eight of Disks",
+    "deck": "crowley",
+    "keywords": [
+      "disks",
+      "eight",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Eight of Disks in the Crowley deck channels acceleration and controlled momentum through the axis of matter, body, and ritual manifestation.",
+      "light": "In light, the card builds grounded structure and real-world outcomes while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can freeze into scarcity, inertia, and fear of change, especially when force outruns awareness.",
+      "advice": "Ride the momentum while the channel is open."
+    },
+    "fact": "Eight of Disks in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 70,
+      "power": 62,
+      "love": 50,
+      "clarity": 66
+    },
+    "detailedDescription": "Eight of Disks in the Crowley deck channels acceleration and controlled momentum through the axis of matter, body, and ritual manifestation. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card builds grounded structure and real-world outcomes while keeping intention coherent and usable. In shadow, the card can freeze into scarcity, inertia, and fear of change, especially when force outruns awareness. Practical move: Ride the momentum while the channel is open.",
+    "imageUrl": "cards/ac/ac_pentacles_eight.webp"
+  },
+  "ac_pentacles_nine": {
+    "title": "Nine of Disks",
+    "deck": "crowley",
+    "keywords": [
+      "disks",
+      "nine",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Nine of Disks in the Crowley deck channels mature focus and resource protection through the axis of matter, body, and ritual manifestation.",
+      "light": "In light, the card builds grounded structure and real-world outcomes while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can freeze into scarcity, inertia, and fear of change, especially when force outruns awareness.",
+      "advice": "Conserve energy and act with precision."
+    },
+    "fact": "Nine of Disks in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 74,
+      "power": 60,
+      "love": 54,
+      "clarity": 66
+    },
+    "detailedDescription": "Nine of Disks in the Crowley deck channels mature focus and resource protection through the axis of matter, body, and ritual manifestation. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card builds grounded structure and real-world outcomes while keeping intention coherent and usable. In shadow, the card can freeze into scarcity, inertia, and fear of change, especially when force outruns awareness. Practical move: Conserve energy and act with precision.",
+    "imageUrl": "cards/ac/ac_pentacles_nine.webp"
+  },
+  "ac_pentacles_ten": {
+    "title": "Ten of Disks",
+    "deck": "crowley",
+    "keywords": [
+      "disks",
+      "ten",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Ten of Disks in the Crowley deck channels peak load and cycle completion through the axis of matter, body, and ritual manifestation.",
+      "light": "In light, the card builds grounded structure and real-world outcomes while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can freeze into scarcity, inertia, and fear of change, especially when force outruns awareness.",
+      "advice": "Delegate excess weight and clear space for a new cycle."
+    },
+    "fact": "Ten of Disks in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 71,
+      "power": 59,
+      "love": 51,
+      "clarity": 63
+    },
+    "detailedDescription": "Ten of Disks in the Crowley deck channels peak load and cycle completion through the axis of matter, body, and ritual manifestation. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card builds grounded structure and real-world outcomes while keeping intention coherent and usable. In shadow, the card can freeze into scarcity, inertia, and fear of change, especially when force outruns awareness. Practical move: Delegate excess weight and clear space for a new cycle.",
+    "imageUrl": "cards/ac/ac_pentacles_ten.webp"
+  },
+  "ac_pentacles_page": {
+    "title": "Page of Disks",
+    "deck": "crowley",
+    "keywords": [
+      "disks",
+      "page",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Page of Disks in the Crowley deck channels a messenger of a new tonal shift through the axis of matter, body, and ritual manifestation.",
+      "light": "In light, the card builds grounded structure and real-world outcomes while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can freeze into scarcity, inertia, and fear of change, especially when force outruns awareness.",
+      "advice": "Track signs and learn from each signal."
+    },
+    "fact": "Page of Disks in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 72,
+      "power": 60,
+      "love": 52,
+      "clarity": 64
+    },
+    "detailedDescription": "Page of Disks in the Crowley deck channels a messenger of a new tonal shift through the axis of matter, body, and ritual manifestation. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card builds grounded structure and real-world outcomes while keeping intention coherent and usable. In shadow, the card can freeze into scarcity, inertia, and fear of change, especially when force outruns awareness. Practical move: Track signs and learn from each signal.",
+    "imageUrl": "cards/ac/ac_pentacles_page.webp"
+  },
+  "ac_pentacles_knight": {
+    "title": "Knight of Disks",
+    "deck": "crowley",
+    "keywords": [
+      "disks",
+      "knight",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Knight of Disks in the Crowley deck channels a forceful charge into action through the axis of matter, body, and ritual manifestation.",
+      "light": "In light, the card builds grounded structure and real-world outcomes while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can freeze into scarcity, inertia, and fear of change, especially when force outruns awareness.",
+      "advice": "Aim your force at one target; do not fight blindly."
+    },
+    "fact": "Knight of Disks in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 73,
+      "power": 63,
+      "love": 52,
+      "clarity": 63
+    },
+    "detailedDescription": "Knight of Disks in the Crowley deck channels a forceful charge into action through the axis of matter, body, and ritual manifestation. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card builds grounded structure and real-world outcomes while keeping intention coherent and usable. In shadow, the card can freeze into scarcity, inertia, and fear of change, especially when force outruns awareness. Practical move: Aim your force at one target; do not fight blindly.",
+    "imageUrl": "cards/ac/ac_pentacles_knight.webp"
+  },
+  "ac_pentacles_queen": {
+    "title": "Queen of Disks",
+    "deck": "crowley",
+    "keywords": [
+      "disks",
+      "queen",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "Queen of Disks in the Crowley deck channels magnetic receptivity and inner sovereignty through the axis of matter, body, and ritual manifestation.",
+      "light": "In light, the card builds grounded structure and real-world outcomes while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can freeze into scarcity, inertia, and fear of change, especially when force outruns awareness.",
+      "advice": "Increase magnetism through inner stillness and exact choice."
+    },
+    "fact": "Queen of Disks in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 73,
+      "power": 58,
+      "love": 56,
+      "clarity": 64
+    },
+    "detailedDescription": "Queen of Disks in the Crowley deck channels magnetic receptivity and inner sovereignty through the axis of matter, body, and ritual manifestation. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card builds grounded structure and real-world outcomes while keeping intention coherent and usable. In shadow, the card can freeze into scarcity, inertia, and fear of change, especially when force outruns awareness. Practical move: Increase magnetism through inner stillness and exact choice.",
+    "imageUrl": "cards/ac/ac_pentacles_queen.webp"
+  },
+  "ac_pentacles_king": {
+    "title": "King of Disks",
+    "deck": "crowley",
+    "keywords": [
+      "disks",
+      "king",
+      "will",
+      "Crowley",
+      "Thelema"
+    ],
+    "meaning": {
+      "general": "King of Disks in the Crowley deck channels mastery, command, and strategic closure through the axis of matter, body, and ritual manifestation.",
+      "light": "In light, the card builds grounded structure and real-world outcomes while keeping intention coherent and usable.",
+      "shadow": "In shadow, the card can freeze into scarcity, inertia, and fear of change, especially when force outruns awareness.",
+      "advice": "Lead with calm strategy; mastery beats intensity spikes."
+    },
+    "fact": "King of Disks in Crowley/Thoth is read through decans, Tree of Life correspondences, and practical Thelemic will.",
+    "stats": {
+      "luck": 74,
+      "power": 62,
+      "love": 54,
+      "clarity": 64
+    },
+    "detailedDescription": "King of Disks in the Crowley deck channels mastery, command, and strategic closure through the axis of matter, body, and ritual manifestation. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card builds grounded structure and real-world outcomes while keeping intention coherent and usable. In shadow, the card can freeze into scarcity, inertia, and fear of change, especially when force outruns awareness. Practical move: Lead with calm strategy; mastery beats intensity spikes.",
+    "imageUrl": "cards/ac/ac_pentacles_king.webp"
   }
 }

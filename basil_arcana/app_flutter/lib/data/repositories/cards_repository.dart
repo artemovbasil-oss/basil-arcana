@@ -15,7 +15,7 @@ import '../models/deck_model.dart';
 class CardsRepository {
   CardsRepository();
 
-  static const int _cacheVersion = 4;
+  static const int _cacheVersion = 5;
   static const String _cardsPrefix = 'cdn_cards_';
   final Map<String, DateTime> _lastFetchTimes = {};
   final Map<String, DateTime> _lastCacheTimes = {};

@@ -163,6 +163,62 @@ const List<String> crowleyCardIds = [
   'ac_19_sun',
   'ac_20_judgement',
   'ac_21_world',
+  'ac_wands_ace',
+  'ac_wands_two',
+  'ac_wands_three',
+  'ac_wands_four',
+  'ac_wands_five',
+  'ac_wands_six',
+  'ac_wands_seven',
+  'ac_wands_eight',
+  'ac_wands_nine',
+  'ac_wands_ten',
+  'ac_wands_page',
+  'ac_wands_knight',
+  'ac_wands_queen',
+  'ac_wands_king',
+  'ac_cups_ace',
+  'ac_cups_two',
+  'ac_cups_three',
+  'ac_cups_four',
+  'ac_cups_five',
+  'ac_cups_six',
+  'ac_cups_seven',
+  'ac_cups_eight',
+  'ac_cups_nine',
+  'ac_cups_ten',
+  'ac_cups_page',
+  'ac_cups_knight',
+  'ac_cups_queen',
+  'ac_cups_king',
+  'ac_swords_ace',
+  'ac_swords_two',
+  'ac_swords_three',
+  'ac_swords_four',
+  'ac_swords_five',
+  'ac_swords_six',
+  'ac_swords_seven',
+  'ac_swords_eight',
+  'ac_swords_nine',
+  'ac_swords_ten',
+  'ac_swords_page',
+  'ac_swords_knight',
+  'ac_swords_queen',
+  'ac_swords_king',
+  'ac_pentacles_ace',
+  'ac_pentacles_two',
+  'ac_pentacles_three',
+  'ac_pentacles_four',
+  'ac_pentacles_five',
+  'ac_pentacles_six',
+  'ac_pentacles_seven',
+  'ac_pentacles_eight',
+  'ac_pentacles_nine',
+  'ac_pentacles_ten',
+  'ac_pentacles_page',
+  'ac_pentacles_knight',
+  'ac_pentacles_queen',
+  'ac_pentacles_king',
 ];
 
 const Map<DeckType, String> deckStorageValues = {
@@ -257,7 +313,10 @@ String? crowleySlugFromCardId(String rawId) {
   if (parts.length < 3) {
     return null;
   }
-  return parts.sublist(2).join('-');
+  final hasMajorPrefix = RegExp(r'^\d+$').hasMatch(parts[1]);
+  return hasMajorPrefix
+      ? parts.sublist(2).join('_')
+      : parts.sublist(1).join('_');
 }
 
 String? lenormandSlugFromCardId(String rawId) {

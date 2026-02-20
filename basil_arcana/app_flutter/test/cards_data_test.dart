@@ -71,7 +71,7 @@ void main() {
     }
   });
 
-  test('crowley deck contains 22 cards per locale', () {
+  test('crowley deck contains 78 cards per locale', () {
     const files = [
       '../cdn/data/cards_en.json',
       '../cdn/data/cards_ru.json',
@@ -89,8 +89,8 @@ void main() {
       });
       expect(
         crowley.length,
-        22,
-        reason: 'Expected 22 crowley cards in $file.',
+        78,
+        reason: 'Expected 78 crowley cards in $file.',
       );
     }
   });
