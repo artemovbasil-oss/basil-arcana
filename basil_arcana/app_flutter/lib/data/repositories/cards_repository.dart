@@ -132,6 +132,13 @@ class CardsRepository {
         }
       }
     }
+    final shouldCompleteCrowley = deckId == DeckType.crowley ||
+        (deckId == DeckType.all &&
+            _countCrowleyCards(cards) > 0 &&
+            _countCrowleyCards(cards) < 78);
+    if (shouldCompleteCrowley && _countCrowleyCards(cards) < 78) {
+      cards = _completeCrowleyCards(cards, locale: locale, deckId: deckId);
+    }
 
     if (deckId == DeckType.lenormand && cards.isEmpty) {
       return _buildLenormandFallback(locale);
@@ -530,7 +537,7 @@ List<CardModel> _buildLenormandFallback(Locale locale) {
 
 List<CardModel> _buildCrowleyFallback(Locale locale) {
   final lang = locale.languageCode.toLowerCase();
-  return _crowleyDefs.map((def) {
+  final majors = _crowleyDefs.map((def) {
     final title = switch (lang) {
       'ru' => def.titleRu,
       'kk' => def.titleKk,
@@ -595,9 +602,96 @@ List<CardModel> _buildCrowleyFallback(Locale locale) {
       detailedDescription: '$general $light $shadow $advice',
       funFact: fact,
       stats: _crowleyFallbackStats(def.number),
-      imageUrl: 'https://basilarcana-assets.b-cdn.net/${def.imagePath}',
+      imageUrl: cardImageUrl(def.id, deckId: DeckType.crowley),
     );
-  }).toList(growable: false);
+  }).toList(growable: true);
+
+  for (var suitIndex = 0; suitIndex < _crowleyMinorSuits.length; suitIndex++) {
+    final suit = _crowleyMinorSuits[suitIndex];
+    for (var rankIndex = 0;
+        rankIndex < _crowleyMinorRanks.length;
+        rankIndex++) {
+      final rank = _crowleyMinorRanks[rankIndex];
+      final id = 'ac_${suit.id}_${rank.id}';
+      final title = switch (lang) {
+        'ru' => '${rank.titleRu} ${suit.titleRu}',
+        'kk' => '${suit.titleKk} ${rank.titleKk}',
+        _ => '${rank.titleEn} of ${suit.titleEn}',
+      };
+      final keywords = switch (lang) {
+        'ru' => <String>[suit.keywordRu, rank.keywordRu, 'Кроули', 'Телема'],
+        'kk' => <String>[suit.keywordKk, rank.keywordKk, 'Кроули', 'Телема'],
+        _ => <String>[suit.keywordEn, rank.keywordEn, 'Crowley', 'Thelema'],
+      };
+      final general = switch (lang) {
+        'ru' =>
+          '$title в Таро Кроули показывает рабочую формулу энергии масти и текущий ритм воли.',
+        'kk' =>
+          '$title Кроули таросында масть энергиясының жұмыс формуласын және ерік ырғағын ашады.',
+        _ =>
+          '$title in Crowley Tarot shows the active suit formula and the present rhythm of will.',
+      };
+      final light = switch (lang) {
+        'ru' =>
+          'В плюсе карта даёт точный вектор, ясную сборку ресурса и зрелое управление импульсом.',
+        'kk' =>
+          'Жарық қырында карта нақты вектор, ресурсты дұрыс жинау және импульсті жетілген басқару береді.',
+        _ =>
+          'In light, the card brings clear direction, coherent resource use, and mature impulse control.',
+      };
+      final shadow = switch (lang) {
+        'ru' =>
+          'В тени включаются крайности: перегрев, контроль, эмоциональная турбулентность или расфокус.',
+        'kk' =>
+          'Көлеңке қырында шектен шығу байқалады: қызып кету, бақылау, эмоциялық турбуленттік не шашыраңқылық.',
+        _ =>
+          'In shadow, extremes appear: overheating, control loops, emotional turbulence, or scattered focus.',
+      };
+      final advice = switch (lang) {
+        'ru' =>
+          'Сверь символ карты с вопросом и закрепи инсайт одним конкретным действием сегодня.',
+        'kk' =>
+          'Карта символын сұрақпен сәйкестендіріп, инсайтты бүгін бір нақты әрекетпен бекіт.',
+        _ =>
+          'Match the card symbol to your question and lock the insight with one concrete action today.',
+      };
+      final fact = switch (lang) {
+        'ru' =>
+          '$title в системе Кроули читается через декады, планетарные соответствия и телемическую практику воли.',
+        'kk' =>
+          '$title Кроули жүйесінде декадтар, планеталық сәйкестіктер және Телема ерік практикасы арқылы оқылады.',
+        _ =>
+          '$title in the Crowley system is read through decans, planetary correspondences, and practical Thelemic will.',
+      };
+      majors.add(
+        CardModel(
+          id: id,
+          deckId: DeckType.crowley,
+          name: title,
+          keywords: keywords,
+          meaning: CardMeaning(
+            general: general,
+            light: light,
+            shadow: shadow,
+            advice: advice,
+          ),
+          detailedDescription: '$general $light $shadow $advice',
+          funFact: fact,
+          stats: _crowleyMinorFallbackStats(
+            suitIndex: suitIndex,
+            rankIndex: rankIndex,
+          ),
+          imageUrl: cardImageUrl(id, deckId: DeckType.crowley),
+        ),
+      );
+    }
+  }
+
+  final byId = <String, CardModel>{for (final card in majors) card.id: card};
+  return crowleyCardIds
+      .where(byId.containsKey)
+      .map((id) => byId[id]!)
+      .toList(growable: false);
 }
 
 CardStats _crowleyFallbackStats(int cardNumber) {
@@ -609,6 +703,276 @@ CardStats _crowleyFallbackStats(int cardNumber) {
     clarity: 45 + ((base + 14) % 21),
   );
 }
+
+CardStats _crowleyMinorFallbackStats({
+  required int suitIndex,
+  required int rankIndex,
+}) {
+  final suitBase = <CardStats>[
+    const CardStats(luck: 53, power: 74, love: 46, clarity: 59), // wands
+    const CardStats(luck: 56, power: 51, love: 75, clarity: 57), // cups
+    const CardStats(luck: 49, power: 55, love: 47, clarity: 77), // swords
+    const CardStats(luck: 72, power: 58, love: 53, clarity: 63), // pentacles
+  ][suitIndex];
+  final rankShift = <(int, int, int, int)>[
+    (4, 6, 4, 6), // ace
+    (0, 2, 0, 2), // two
+    (2, 4, 2, 2), // three
+    (2, 0, 2, 2), // four
+    (-4, 2, -4, 2), // five
+    (4, 2, 4, 2), // six
+    (-2, 2, -2, 4), // seven
+    (-2, 4, -2, 4), // eight
+    (2, 2, 2, 4), // nine
+    (-1, 1, -1, 1), // ten
+    (0, 2, 0, 2), // page
+    (1, 5, 0, 1), // knight
+    (1, 0, 4, 2), // queen
+    (2, 4, 2, 2), // king
+  ][rankIndex];
+  int clamp(int value) => value.clamp(35, 92);
+  return CardStats(
+    luck: clamp(suitBase.luck + rankShift.$1),
+    power: clamp(suitBase.power + rankShift.$2),
+    love: clamp(suitBase.love + rankShift.$3),
+    clarity: clamp(suitBase.clarity + rankShift.$4),
+  );
+}
+
+List<CardModel> _completeCrowleyCards(
+  List<CardModel> cards, {
+  required Locale locale,
+  required DeckType deckId,
+}) {
+  final fallbackCrowley = _buildCrowleyFallback(locale);
+  final fallbackById = {for (final card in fallbackCrowley) card.id: card};
+  if (deckId == DeckType.crowley) {
+    return crowleyCardIds
+        .where(fallbackById.containsKey)
+        .map((id) => fallbackById[id]!)
+        .toList(growable: false);
+  }
+
+  final preserved =
+      cards.where((card) => card.deckId != DeckType.crowley).toList(
+            growable: true,
+          );
+  for (final id in crowleyCardIds) {
+    final card = fallbackById[id];
+    if (card != null) {
+      preserved.add(card);
+    }
+  }
+  return preserved;
+}
+
+class _CrowleyMinorSuitDef {
+  const _CrowleyMinorSuitDef({
+    required this.id,
+    required this.titleEn,
+    required this.titleRu,
+    required this.titleKk,
+    required this.keywordEn,
+    required this.keywordRu,
+    required this.keywordKk,
+  });
+
+  final String id;
+  final String titleEn;
+  final String titleRu;
+  final String titleKk;
+  final String keywordEn;
+  final String keywordRu;
+  final String keywordKk;
+}
+
+class _CrowleyMinorRankDef {
+  const _CrowleyMinorRankDef({
+    required this.id,
+    required this.titleEn,
+    required this.titleRu,
+    required this.titleKk,
+    required this.keywordEn,
+    required this.keywordRu,
+    required this.keywordKk,
+  });
+
+  final String id;
+  final String titleEn;
+  final String titleRu;
+  final String titleKk;
+  final String keywordEn;
+  final String keywordRu;
+  final String keywordKk;
+}
+
+const List<_CrowleyMinorSuitDef> _crowleyMinorSuits = [
+  _CrowleyMinorSuitDef(
+    id: 'wands',
+    titleEn: 'Wands',
+    titleRu: 'Жезлов',
+    titleKk: 'Таяқтар',
+    keywordEn: 'will',
+    keywordRu: 'воля',
+    keywordKk: 'ерік',
+  ),
+  _CrowleyMinorSuitDef(
+    id: 'cups',
+    titleEn: 'Cups',
+    titleRu: 'Кубков',
+    titleKk: 'Тостағандар',
+    keywordEn: 'emotion',
+    keywordRu: 'чувства',
+    keywordKk: 'сезім',
+  ),
+  _CrowleyMinorSuitDef(
+    id: 'swords',
+    titleEn: 'Swords',
+    titleRu: 'Мечей',
+    titleKk: 'Қылыштар',
+    keywordEn: 'mind',
+    keywordRu: 'разум',
+    keywordKk: 'ой',
+  ),
+  _CrowleyMinorSuitDef(
+    id: 'pentacles',
+    titleEn: 'Disks',
+    titleRu: 'Дисков',
+    titleKk: 'Дискілер',
+    keywordEn: 'matter',
+    keywordRu: 'материя',
+    keywordKk: 'материя',
+  ),
+];
+
+const List<_CrowleyMinorRankDef> _crowleyMinorRanks = [
+  _CrowleyMinorRankDef(
+    id: 'ace',
+    titleEn: 'Ace',
+    titleRu: 'Туз',
+    titleKk: 'Тузы',
+    keywordEn: 'ignition',
+    keywordRu: 'импульс',
+    keywordKk: 'импульс',
+  ),
+  _CrowleyMinorRankDef(
+    id: 'two',
+    titleEn: 'Two',
+    titleRu: 'Двойка',
+    titleKk: 'Екісі',
+    keywordEn: 'duality',
+    keywordRu: 'полярность',
+    keywordKk: 'екілік',
+  ),
+  _CrowleyMinorRankDef(
+    id: 'three',
+    titleEn: 'Three',
+    titleRu: 'Тройка',
+    titleKk: 'Үші',
+    keywordEn: 'expansion',
+    keywordRu: 'рост',
+    keywordKk: 'өсу',
+  ),
+  _CrowleyMinorRankDef(
+    id: 'four',
+    titleEn: 'Four',
+    titleRu: 'Четверка',
+    titleKk: 'Төрті',
+    keywordEn: 'structure',
+    keywordRu: 'структура',
+    keywordKk: 'құрылым',
+  ),
+  _CrowleyMinorRankDef(
+    id: 'five',
+    titleEn: 'Five',
+    titleRu: 'Пятерка',
+    titleKk: 'Бесі',
+    keywordEn: 'trial',
+    keywordRu: 'испытание',
+    keywordKk: 'сынақ',
+  ),
+  _CrowleyMinorRankDef(
+    id: 'six',
+    titleEn: 'Six',
+    titleRu: 'Шестерка',
+    titleKk: 'Алтысы',
+    keywordEn: 'harmony',
+    keywordRu: 'гармония',
+    keywordKk: 'үйлесім',
+  ),
+  _CrowleyMinorRankDef(
+    id: 'seven',
+    titleEn: 'Seven',
+    titleRu: 'Семерка',
+    titleKk: 'Жетісі',
+    keywordEn: 'threshold',
+    keywordRu: 'порог',
+    keywordKk: 'шек',
+  ),
+  _CrowleyMinorRankDef(
+    id: 'eight',
+    titleEn: 'Eight',
+    titleRu: 'Восьмерка',
+    titleKk: 'Сегізі',
+    keywordEn: 'velocity',
+    keywordRu: 'ускорение',
+    keywordKk: 'жылдамдық',
+  ),
+  _CrowleyMinorRankDef(
+    id: 'nine',
+    titleEn: 'Nine',
+    titleRu: 'Девятка',
+    titleKk: 'Тоғызы',
+    keywordEn: 'focus',
+    keywordRu: 'фокус',
+    keywordKk: 'фокус',
+  ),
+  _CrowleyMinorRankDef(
+    id: 'ten',
+    titleEn: 'Ten',
+    titleRu: 'Десятка',
+    titleKk: 'Оны',
+    keywordEn: 'completion',
+    keywordRu: 'завершение',
+    keywordKk: 'аяқталу',
+  ),
+  _CrowleyMinorRankDef(
+    id: 'page',
+    titleEn: 'Page',
+    titleRu: 'Паж',
+    titleKk: 'Пажы',
+    keywordEn: 'message',
+    keywordRu: 'вестник',
+    keywordKk: 'хабар',
+  ),
+  _CrowleyMinorRankDef(
+    id: 'knight',
+    titleEn: 'Knight',
+    titleRu: 'Рыцарь',
+    titleKk: 'Рыцары',
+    keywordEn: 'charge',
+    keywordRu: 'рывок',
+    keywordKk: 'серпін',
+  ),
+  _CrowleyMinorRankDef(
+    id: 'queen',
+    titleEn: 'Queen',
+    titleRu: 'Королева',
+    titleKk: 'Ханшайымы',
+    keywordEn: 'magnetism',
+    keywordRu: 'магнетизм',
+    keywordKk: 'тартылыс',
+  ),
+  _CrowleyMinorRankDef(
+    id: 'king',
+    titleEn: 'King',
+    titleRu: 'Король',
+    titleKk: 'Патшасы',
+    keywordEn: 'mastery',
+    keywordRu: 'мастерство',
+    keywordKk: 'шеберлік',
+  ),
+];
 
 class _CrowleyDef {
   const _CrowleyDef({
