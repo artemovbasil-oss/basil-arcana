@@ -1331,6 +1331,9 @@ if (RATE_LIMIT_MAX != null) {
 }
 
 app.post('/api/reading/generate', telegramAuthMiddleware, async (req, res) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
   if (!OPENAI_API_KEY) {
     return res.status(503).json({
       error: 'server_misconfig',
@@ -1404,6 +1407,9 @@ app.post('/api/reading/generate', telegramAuthMiddleware, async (req, res) => {
 });
 
 app.post('/api/reading/generate_web', telegramAuthMiddleware, async (req, res) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
   if (!OPENAI_API_KEY) {
     return res.status(503).json({
       error: 'server_misconfig',

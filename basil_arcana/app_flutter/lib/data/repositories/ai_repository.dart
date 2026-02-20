@@ -440,13 +440,14 @@ class AiRepository {
     final useTelegramWeb = kIsWeb && telegramAuth.isTelegram;
     final endpoint =
         useTelegramWeb ? '/api/reading/generate_web' : '/api/reading/generate';
+    final requestId = requestIdOverride ?? const Uuid().v4();
     final uri = Uri.parse(apiBaseUrl).replace(
       path: endpoint,
       queryParameters: {
         'mode': _modeParam(mode),
+        'rid': requestId,
       },
     );
-    final requestId = requestIdOverride ?? const Uuid().v4();
     final startTimestamp = DateTime.now().toIso8601String();
     final stopwatch = Stopwatch()..start();
     final totalCards = drawnCards.length;
@@ -514,6 +515,9 @@ class AiRepository {
         final headers = {
           'Content-Type': 'application/json',
           'x-request-id': requestId,
+          'Cache-Control': 'no-store, no-cache, max-age=0, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0',
           if (authState.hasInitData) 'X-Telegram-InitData': authState.initData,
         };
         if (useTelegramWeb && kDebugMode) {
@@ -681,6 +685,28 @@ class AiRepository {
       );
       throw AiRepositoryException(
         AiErrorType.badResponse,
+        statusCode: response.statusCode,
+        responseBody: response.body,
+      );
+    }
+
+    final responseRequestId = _extractRequestId(response.body);
+    if (responseRequestId != null && responseRequestId != requestId) {
+      if (kDebugMode) {
+        debugPrint(
+          '[AiRepository] requestId mismatch '
+          'sent=$requestId received=$responseRequestId',
+        );
+      }
+      _reportWebError(
+        AiErrorType.badResponse,
+        requestId: requestId,
+        statusCode: response.statusCode,
+        responseBody: response.body,
+      );
+      throw AiRepositoryException(
+        AiErrorType.badResponse,
+        message: 'Mismatched requestId in response',
         statusCode: response.statusCode,
         responseBody: response.body,
       );
