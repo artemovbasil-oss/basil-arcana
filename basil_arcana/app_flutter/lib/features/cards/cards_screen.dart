@@ -79,7 +79,7 @@ class _CardsScreenState extends ConsumerState<CardsScreen> {
                       pinned: true,
                       delegate: _PinnedDeckChipsDelegate(
                         child: Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                          padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
                           child: _DeckChips(
                             sections: sections,
                             currentDeck: selectedDeck,
@@ -115,7 +115,7 @@ class _CardsScreenState extends ConsumerState<CardsScreen> {
                             crossAxisCount: 2,
                             mainAxisSpacing: 16,
                             crossAxisSpacing: 16,
-                            childAspectRatio: 0.62,
+                            childAspectRatio: 0.66,
                           ),
                           delegate: SliverChildBuilderDelegate(
                             (context, index) {
@@ -300,47 +300,23 @@ class _DeckChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final activeDeck =
         currentDeck == DeckType.lenormand || currentDeck == DeckType.crowley
             ? currentDeck
             : DeckType.major;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(18),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-          decoration: BoxDecoration(
-            color: colorScheme.surface.withValues(alpha: 0.38),
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(
-              color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          for (var i = 0; i < sections.length; i++) ...[
+            _DeckGlassChip(
+              label: sections[i].label,
+              isActive: sections[i].deck == activeDeck,
+              onTap: () => onSelect(sections[i].deck),
             ),
-            boxShadow: [
-              BoxShadow(
-                color: colorScheme.primary.withValues(alpha: 0.08),
-                blurRadius: 16,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                for (var i = 0; i < sections.length; i++) ...[
-                  _DeckGlassChip(
-                    label: sections[i].label,
-                    isActive: sections[i].deck == activeDeck,
-                    onTap: () => onSelect(sections[i].deck),
-                  ),
-                  if (i != sections.length - 1) const SizedBox(width: 10),
-                ],
-              ],
-            ),
-          ),
-        ),
+            if (i != sections.length - 1) const SizedBox(width: 10),
+          ],
+        ],
       ),
     );
   }
@@ -360,32 +336,36 @@ class _DeckGlassChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(999),
-        onTap: onTap,
-        child: Ink(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
-          decoration: BoxDecoration(
-            color: isActive
-                ? colorScheme.primary.withValues(alpha: 0.32)
-                : Colors.black.withValues(alpha: 0.24),
-            borderRadius: BorderRadius.circular(999),
-            border: Border.all(
-              color: isActive
-                  ? colorScheme.primary.withValues(alpha: 0.62)
-                  : Colors.white.withValues(alpha: 0.2),
-            ),
-          ),
-          child: Text(
-            label,
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(999),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+        child: Material(
+          color: isActive
+              ? colorScheme.primary.withValues(alpha: 0.34)
+              : colorScheme.surface.withValues(alpha: 0.2),
+          child: InkWell(
+            onTap: onTap,
+            child: Ink(
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 11),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(999),
+                border: Border.all(
                   color: isActive
-                      ? colorScheme.onPrimaryContainer
-                      : colorScheme.onSurface,
-                  fontWeight: FontWeight.w700,
+                      ? colorScheme.primary.withValues(alpha: 0.7)
+                      : Colors.white.withValues(alpha: 0.26),
                 ),
+              ),
+              child: Text(
+                label,
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: isActive
+                          ? colorScheme.onPrimaryContainer
+                          : colorScheme.onSurface,
+                      fontWeight: FontWeight.w700,
+                    ),
+              ),
+            ),
           ),
         ),
       ),
@@ -401,10 +381,10 @@ class _PinnedDeckChipsDelegate extends SliverPersistentHeaderDelegate {
   final Widget child;
 
   @override
-  double get minExtent => 64;
+  double get minExtent => 78;
 
   @override
-  double get maxExtent => 64;
+  double get maxExtent => 78;
 
   @override
   Widget build(
@@ -440,62 +420,47 @@ class _CardTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    const cardAspectRatio = 0.64;
+    const imageAspectRatio = 0.68;
     return InkWell(
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(16),
       onTap: onTap,
       child: Ink(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          color: colorScheme.surfaceVariant.withOpacity(0.4),
+          borderRadius: BorderRadius.circular(16),
+          color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.2),
           border: Border.all(
-            color: colorScheme.outlineVariant.withOpacity(0.6),
+            color: colorScheme.outlineVariant.withValues(alpha: 0.5),
           ),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _DrawnBadge(
-                label: drawnLabel,
-                isEmpty: drawnCount == 0,
-              ),
-              const SizedBox(height: 8),
-              Expanded(
-                child: Align(
-                  alignment: Alignment.topLeft,
-                  child: AspectRatio(
-                    aspectRatio: cardAspectRatio,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(11),
-                        border: Border.all(
-                          color: colorScheme.outlineVariant.withOpacity(0.7),
-                        ),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(2),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(9),
-                          child: Transform.scale(
-                            scaleY: 1.06,
-                            alignment: Alignment.center,
-                            child: CardAssetImage(
-                              cardId: card.id,
-                              imageUrl: card.imageUrl,
-                              width: double.infinity,
-                              height: double.infinity,
-                              borderRadius: BorderRadius.circular(9),
-                              fit: BoxFit.cover,
-                              showGlow: false,
-                            ),
-                          ),
-                        ),
-                      ),
+              Stack(
+                children: [
+                  AspectRatio(
+                    aspectRatio: imageAspectRatio,
+                    child: CardAssetImage(
+                      cardId: card.id,
+                      imageUrl: card.imageUrl,
+                      width: double.infinity,
+                      height: double.infinity,
+                      borderRadius: BorderRadius.circular(12),
+                      fit: BoxFit.cover,
+                      showGlow: false,
                     ),
                   ),
-                ),
+                  Positioned(
+                    right: 8,
+                    bottom: 8,
+                    child: _DrawnBadge(
+                      label: drawnLabel,
+                      isEmpty: drawnCount == 0,
+                      smallRadius: true,
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 10),
               Text(
@@ -504,6 +469,7 @@ class _CardTile extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
                       color: colorScheme.onSurface,
+                      fontWeight: FontWeight.w600,
                     ),
               ),
             ],
@@ -515,28 +481,40 @@ class _CardTile extends StatelessWidget {
 }
 
 class _DrawnBadge extends StatelessWidget {
-  const _DrawnBadge({required this.label, required this.isEmpty});
+  const _DrawnBadge({
+    required this.label,
+    required this.isEmpty,
+    this.smallRadius = false,
+  });
 
   final String label;
   final bool isEmpty;
+  final bool smallRadius;
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: colorScheme.primary.withOpacity(isEmpty ? 0.08 : 0.14),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(
-          color: colorScheme.primary.withOpacity(isEmpty ? 0.23 : 0.45),
-        ),
-      ),
-      child: Text(
-        label,
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: colorScheme.onSurface.withOpacity(isEmpty ? 0.6 : 0.9),
+    final radius = smallRadius ? 10.0 : 999.0;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(radius),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: isEmpty ? 0.3 : 0.42),
+            borderRadius: BorderRadius.circular(radius),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: isEmpty ? 0.22 : 0.34),
             ),
+          ),
+          child: Text(
+            label,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: Colors.white.withValues(alpha: 0.96),
+                  fontWeight: FontWeight.w700,
+                ),
+          ),
+        ),
       ),
     );
   }
