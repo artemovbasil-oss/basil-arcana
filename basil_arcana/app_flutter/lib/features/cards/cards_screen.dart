@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
@@ -73,12 +75,16 @@ class _CardsScreenState extends ConsumerState<CardsScreen> {
                 return CustomScrollView(
                   controller: _scrollController,
                   slivers: [
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
-                        child: _DeckChips(
-                          sections: sections,
-                          onSelect: (deck) => _scrollToSection(deck),
+                    SliverPersistentHeader(
+                      pinned: true,
+                      delegate: _PinnedDeckChipsDelegate(
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                          child: _DeckChips(
+                            sections: sections,
+                            currentDeck: selectedDeck,
+                            onSelect: (deck) => _scrollToSection(deck),
+                          ),
                         ),
                       ),
                     ),
@@ -229,36 +235,41 @@ class _CardsScreenState extends ConsumerState<CardsScreen> {
   List<_DeckSection> _buildDeckSections(
       List<CardModel> cards, AppLocalizations l10n,
       {required DeckType selectedDeck}) {
+    final rwsCards = <CardModel>[
+      ...cards.where((card) => card.deckId == DeckType.major),
+      ...cards.where((card) => card.deckId == DeckType.wands),
+      ...cards.where((card) => card.deckId == DeckType.swords),
+      ...cards.where((card) => card.deckId == DeckType.pentacles),
+      ...cards.where((card) => card.deckId == DeckType.cups),
+    ];
     final labels = <DeckType, String>{
-      DeckType.major: l10n.deckMajorName,
-      DeckType.wands: l10n.deckWandsName,
-      DeckType.swords: l10n.deckSwordsName,
-      DeckType.pentacles: l10n.deckPentaclesName,
-      DeckType.cups: l10n.deckCupsName,
+      DeckType.major: 'RWS',
       DeckType.lenormand: l10n.deckLenormandName,
       DeckType.crowley: l10n.deckCrowleyName,
     };
-    final order = [
-      DeckType.major,
-      DeckType.wands,
-      DeckType.swords,
-      DeckType.pentacles,
-      DeckType.cups,
-      DeckType.lenormand,
-      DeckType.crowley,
-    ];
-    if (selectedDeck == DeckType.lenormand ||
-        selectedDeck == DeckType.crowley) {
+    final sectionsMap = <DeckType, List<CardModel>>{
+      DeckType.major: rwsCards,
+      DeckType.lenormand:
+          cards.where((card) => card.deckId == DeckType.lenormand).toList(),
+      DeckType.crowley:
+          cards.where((card) => card.deckId == DeckType.crowley).toList(),
+    };
+    final selectedTopDeck =
+        selectedDeck == DeckType.lenormand || selectedDeck == DeckType.crowley
+            ? selectedDeck
+            : DeckType.major;
+    final order = [DeckType.major, DeckType.lenormand, DeckType.crowley];
+    if (selectedTopDeck != DeckType.major) {
       order
-        ..remove(selectedDeck)
-        ..insert(0, selectedDeck);
+        ..remove(selectedTopDeck)
+        ..insert(0, selectedTopDeck);
     }
     return [
       for (final deck in order)
         _DeckSection(
           deck: deck,
           label: labels[deck] ?? '',
-          cards: cards.where((card) => card.deckId == deck).toList(),
+          cards: sectionsMap[deck] ?? const [],
         ),
     ].where((section) => section.cards.isNotEmpty).toList();
   }
@@ -279,38 +290,137 @@ class _DeckSection {
 class _DeckChips extends StatelessWidget {
   const _DeckChips({
     required this.sections,
+    required this.currentDeck,
     required this.onSelect,
   });
 
   final List<_DeckSection> sections;
+  final DeckType currentDeck;
   final ValueChanged<DeckType> onSelect;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: [
-          for (var i = 0; i < sections.length; i++) ...[
-            ActionChip(
-              label: Text(sections[i].label),
-              onPressed: () => onSelect(sections[i].deck),
-              backgroundColor: colorScheme.surfaceVariant.withOpacity(0.6),
-              shape: StadiumBorder(
-                side: BorderSide(
-                  color: colorScheme.outlineVariant.withOpacity(0.5),
-                ),
-              ),
-              labelStyle: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: colorScheme.onSurface,
-                  ),
+    final activeDeck =
+        currentDeck == DeckType.lenormand || currentDeck == DeckType.crowley
+            ? currentDeck
+            : DeckType.major;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(18),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          decoration: BoxDecoration(
+            color: colorScheme.surface.withValues(alpha: 0.38),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: colorScheme.outlineVariant.withValues(alpha: 0.5),
             ),
-            if (i != sections.length - 1) const SizedBox(width: 10),
-          ],
-        ],
+            boxShadow: [
+              BoxShadow(
+                color: colorScheme.primary.withValues(alpha: 0.08),
+                blurRadius: 16,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                for (var i = 0; i < sections.length; i++) ...[
+                  _DeckGlassChip(
+                    label: sections[i].label,
+                    isActive: sections[i].deck == activeDeck,
+                    onTap: () => onSelect(sections[i].deck),
+                  ),
+                  if (i != sections.length - 1) const SizedBox(width: 10),
+                ],
+              ],
+            ),
+          ),
+        ),
       ),
     );
+  }
+}
+
+class _DeckGlassChip extends StatelessWidget {
+  const _DeckGlassChip({
+    required this.label,
+    required this.isActive,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool isActive;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(999),
+        onTap: onTap,
+        child: Ink(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+          decoration: BoxDecoration(
+            color: isActive
+                ? colorScheme.primary.withValues(alpha: 0.32)
+                : Colors.black.withValues(alpha: 0.24),
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(
+              color: isActive
+                  ? colorScheme.primary.withValues(alpha: 0.62)
+                  : Colors.white.withValues(alpha: 0.2),
+            ),
+          ),
+          child: Text(
+            label,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: isActive
+                      ? colorScheme.onPrimaryContainer
+                      : colorScheme.onSurface,
+                  fontWeight: FontWeight.w700,
+                ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PinnedDeckChipsDelegate extends SliverPersistentHeaderDelegate {
+  const _PinnedDeckChipsDelegate({
+    required this.child,
+  });
+
+  final Widget child;
+
+  @override
+  double get minExtent => 64;
+
+  @override
+  double get maxExtent => 64;
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    return ColoredBox(
+      color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.92),
+      child: child,
+    );
+  }
+
+  @override
+  bool shouldRebuild(covariant _PinnedDeckChipsDelegate oldDelegate) {
+    return oldDelegate.child != child;
   }
 }
 

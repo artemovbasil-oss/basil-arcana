@@ -836,9 +836,9 @@ const List<_CrowleyMinorSuitDef> _crowleyMinorSuits = [
   ),
   _CrowleyMinorSuitDef(
     id: 'pentacles',
-    titleEn: 'Disks',
-    titleRu: 'Дисков',
-    titleKk: 'Дискілер',
+    titleEn: 'Pentacles',
+    titleRu: 'Пентаклей',
+    titleKk: 'Пентакльдер',
     keywordEn: 'matter',
     keywordRu: 'материя',
     keywordKk: 'материя',
