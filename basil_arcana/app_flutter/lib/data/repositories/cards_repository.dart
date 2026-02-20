@@ -116,6 +116,23 @@ class CardsRepository {
       }
     }
 
+    final crowleyMissing = deckId == DeckType.crowley
+        ? _countCrowleyCards(cards) < 78
+        : deckId == DeckType.all && _countCrowleyCards(cards) < 78;
+    if (crowleyMissing) {
+      final remoteRaw = await _tryLoadRemoteCards(
+        cacheKey: cacheKey,
+        locale: locale,
+      );
+      if (remoteRaw != null) {
+        final remoteCards = _parseCards(raw: remoteRaw, deckId: deckId);
+        final remoteCrowleyCount = _countCrowleyCards(remoteCards);
+        if (remoteCrowleyCount >= 78) {
+          cards = remoteCards;
+        }
+      }
+    }
+
     if (deckId == DeckType.lenormand && cards.isEmpty) {
       return _buildLenormandFallback(locale);
     }
@@ -263,8 +280,13 @@ bool _isLegacyCardsPayload(String raw) {
     if (decoded is! Map<String, dynamic> || decoded.isEmpty) {
       return true;
     }
+    var crowleyCount = 0;
     var richCards = 0;
-    for (final value in decoded.values) {
+    for (final entry in decoded.entries) {
+      if (canonicalCardId(entry.key).startsWith('ac_')) {
+        crowleyCount++;
+      }
+      final value = entry.value;
       if (value is! Map<String, dynamic>) {
         continue;
       }
@@ -280,6 +302,9 @@ bool _isLegacyCardsPayload(String raw) {
       }
     }
     final total = decoded.length;
+    if (crowleyCount < 78) {
+      return true;
+    }
     if (total < 70) {
       return true;
     }
@@ -287,6 +312,10 @@ bool _isLegacyCardsPayload(String raw) {
   } catch (_) {
     return true;
   }
+}
+
+int _countCrowleyCards(List<CardModel> cards) {
+  return cards.where((card) => card.deckId == DeckType.crowley).length;
 }
 
 bool _isValidCardEntry(Map<String, dynamic> card) {

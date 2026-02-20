@@ -9,7 +9,7 @@ String deckCoverImageUrl([DeckType deckId = DeckType.all]) {
     return '$base/deck/lenormand.webp';
   }
   if (deckId == DeckType.crowley) {
-    return '$base/deck/ac-deck.webp';
+    return '$base/cards/ac/ac_joker.webp';
   }
   return '$base/deck/new-deck.webp';
 }
