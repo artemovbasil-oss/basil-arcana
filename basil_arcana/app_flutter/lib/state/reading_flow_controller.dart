@@ -408,8 +408,8 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
   }) {
     final spreadCardCount = spread.cardsCount ?? spread.positions.length;
     final isFiveCardSpread = spreadCardCount >= 5 || drawnCards.length >= 5;
-    final base = isFiveCardSpread ? 28 : 20;
-    final extra = attempt > 0 ? 4 : 0;
+    final base = isFiveCardSpread ? 18 : 15;
+    final extra = attempt > 0 ? 3 : 0;
     return Duration(seconds: base + extra);
   }
 

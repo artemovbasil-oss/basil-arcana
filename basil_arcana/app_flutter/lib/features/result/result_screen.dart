@@ -4,7 +4,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
@@ -1429,143 +1428,106 @@ class _ResultLoadingShimmerState extends State<_ResultLoadingShimmer>
     } else if (!_controller.isAnimating) {
       _controller.repeat();
     }
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(22, 24, 22, 120),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(24),
-            gradient: LinearGradient(
-              colors: [
-                colorScheme.surfaceContainerHighest.withOpacity(0.48),
-                colorScheme.surfaceContainer.withOpacity(0.28),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            border: Border.all(
-              color: colorScheme.outlineVariant.withOpacity(0.42),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: colorScheme.primary.withOpacity(0.16),
-                blurRadius: 42,
-                spreadRadius: 2,
-              ),
-            ],
-          ),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 22, 16, 18),
-            child: AnimatedBuilder(
-              animation: _controller,
-              builder: (context, _) {
-                final t = disableAnimations ? 0.0 : _controller.value;
-                return Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _MysticEyeSvg(progress: t),
-                    const SizedBox(height: 14),
-                    Text(
-                      l10n.oracleWaitingTitle,
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            color: colorScheme.onSurface,
-                          ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      l10n.oracleWaitingSubtitle,
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: colorScheme.onSurface.withOpacity(0.76),
-                            height: 1.35,
-                          ),
-                    ),
-                  ],
-                );
-              },
-            ),
+    final base = colorScheme.surfaceContainerHighest.withOpacity(0.3);
+    final glow = colorScheme.primary.withOpacity(0.18);
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
+      children: [
+        ChatBubbleReveal(
+          child: OracleTypingBubble(
+            label: l10n.resultDeepTypingLabel,
           ),
         ),
-      ),
+        const SizedBox(height: 14),
+        _ShimmerBlock(
+          animation: _controller,
+          baseColor: base,
+          glowColor: glow,
+          height: 92,
+          borderRadius: 18,
+        ),
+        const SizedBox(height: 14),
+        _ShimmerBlock(
+          animation: _controller,
+          baseColor: base,
+          glowColor: glow,
+          height: 264,
+          borderRadius: 20,
+        ),
+        const SizedBox(height: 14),
+        _ShimmerBlock(
+          animation: _controller,
+          baseColor: base,
+          glowColor: glow,
+          height: 132,
+          borderRadius: 18,
+        ),
+        const SizedBox(height: 14),
+        _ShimmerBlock(
+          animation: _controller,
+          baseColor: base,
+          glowColor: glow,
+          height: 170,
+          borderRadius: 18,
+        ),
+      ],
     );
   }
 }
 
-class _MysticEyeSvg extends StatelessWidget {
-  const _MysticEyeSvg({required this.progress});
+class _ShimmerBlock extends StatelessWidget {
+  const _ShimmerBlock({
+    required this.animation,
+    required this.baseColor,
+    required this.glowColor,
+    required this.height,
+    required this.borderRadius,
+  });
 
-  final double progress;
+  final Animation<double> animation;
+  final Color baseColor;
+  final Color glowColor;
+  final double height;
+  final double borderRadius;
 
   @override
   Widget build(BuildContext context) {
-    final lookPhase = progress * pi * 2.0;
-    final eyePhase = progress * pi * 4.0;
-    final blinkA = pow(sin(progress * pi * 2.0), 16).toDouble();
-    final blinkB = pow(sin((progress + 0.37) * pi * 2.0), 20).toDouble();
-    final blink = (blinkA + blinkB).clamp(0.0, 1.0).toDouble();
-    final openness = (1.0 - (blink * 0.92)).clamp(0.08, 1.0).toDouble();
-    final pupilX = 72 + (sin(lookPhase) * 12) + (sin(eyePhase) * 3);
-    final pupilY = 42 + (sin(lookPhase * 0.7 + 0.9) * 4);
-    final irisRadius = 14 - (blink * 1.3);
-    final sparkle = 0.55 + (sin(progress * pi * 2.0 + 0.9) * 0.45);
-    return SvgPicture.string(
-      _buildMysticEyeSvg(
-        openness: openness,
-        pupilX: pupilX,
-        pupilY: pupilY,
-        irisRadius: irisRadius,
-        sparkleOpacity: sparkle.clamp(0.16, 0.9).toDouble(),
-      ),
-      width: 170,
-      height: 102,
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, child) {
+        final x = animation.value * 2 - 1;
+        return Container(
+          height: height,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(borderRadius),
+            gradient: LinearGradient(
+              begin: Alignment(-1.45 + x, -0.2),
+              end: Alignment(0.15 + x, 0.2),
+              colors: [
+                baseColor,
+                glowColor,
+                baseColor.withOpacity(0.92),
+              ],
+              stops: const [0.16, 0.46, 0.84],
+            ),
+            border: Border.all(
+              color: Theme.of(context)
+                  .colorScheme
+                  .outlineVariant
+                  .withOpacity(0.35),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: glowColor.withOpacity(0.55),
+                blurRadius: 22,
+                spreadRadius: 0.5,
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
-}
-
-String _buildMysticEyeSvg({
-  required double openness,
-  required double pupilX,
-  required double pupilY,
-  required double irisRadius,
-  required double sparkleOpacity,
-}) {
-  final top = 42 - (22 * openness);
-  final bottom = 42 + (22 * openness);
-  final eyelidAlpha = (1.0 - openness).clamp(0.0, 0.92);
-  return '''
-<svg viewBox="0 0 144 84" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <radialGradient id="bg" cx="50%" cy="45%" r="60%">
-      <stop offset="0%" stop-color="#A476FF" stop-opacity="0.34"/>
-      <stop offset="100%" stop-color="#A476FF" stop-opacity="0"/>
-    </radialGradient>
-    <linearGradient id="edge" x1="0%" y1="50%" x2="100%" y2="50%">
-      <stop offset="0%" stop-color="#7D60FF"/>
-      <stop offset="50%" stop-color="#B58BFF"/>
-      <stop offset="100%" stop-color="#7D60FF"/>
-    </linearGradient>
-    <linearGradient id="iris" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#F6D38F"/>
-      <stop offset="100%" stop-color="#BF7AFF"/>
-    </linearGradient>
-    <clipPath id="eyeClip">
-      <path d="M8 42 C24 ${top.toStringAsFixed(2)} 48 ${top.toStringAsFixed(2)} 72 42 C96 ${bottom.toStringAsFixed(2)} 120 ${bottom.toStringAsFixed(2)} 136 42 C120 ${bottom.toStringAsFixed(2)} 96 ${bottom.toStringAsFixed(2)} 72 42 C48 ${top.toStringAsFixed(2)} 24 ${top.toStringAsFixed(2)} 8 42 Z"/>
-    </clipPath>
-  </defs>
-  <ellipse cx="72" cy="42" rx="70" ry="36" fill="url(#bg)"/>
-  <path d="M8 42 C24 ${top.toStringAsFixed(2)} 48 ${top.toStringAsFixed(2)} 72 42 C96 ${bottom.toStringAsFixed(2)} 120 ${bottom.toStringAsFixed(2)} 136 42 C120 ${bottom.toStringAsFixed(2)} 96 ${bottom.toStringAsFixed(2)} 72 42 C48 ${top.toStringAsFixed(2)} 24 ${top.toStringAsFixed(2)} 8 42 Z" fill="#101628" fill-opacity="0.72" stroke="url(#edge)" stroke-width="2.2"/>
-  <g clip-path="url(#eyeClip)">
-    <circle cx="${pupilX.toStringAsFixed(2)}" cy="${pupilY.toStringAsFixed(2)}" r="${irisRadius.toStringAsFixed(2)}" fill="url(#iris)"/>
-    <circle cx="${pupilX.toStringAsFixed(2)}" cy="${pupilY.toStringAsFixed(2)}" r="${(irisRadius * 0.44).toStringAsFixed(2)}" fill="#11151F"/>
-    <circle cx="${(pupilX - 4).toStringAsFixed(2)}" cy="${(pupilY - 4).toStringAsFixed(2)}" r="2.6" fill="#FFFFFF" fill-opacity="${sparkleOpacity.toStringAsFixed(2)}"/>
-    <circle cx="${(pupilX + 5).toStringAsFixed(2)}" cy="${(pupilY + 3).toStringAsFixed(2)}" r="1.3" fill="#FFFFFF" fill-opacity="${(sparkleOpacity * 0.72).toStringAsFixed(2)}"/>
-  </g>
-  <path d="M8 42 C24 ${top.toStringAsFixed(2)} 48 ${top.toStringAsFixed(2)} 72 42 C96 ${bottom.toStringAsFixed(2)} 120 ${bottom.toStringAsFixed(2)} 136 42" fill="none" stroke="#D3B1FF" stroke-opacity="0.36" stroke-width="1"/>
-  <rect x="8" y="8" width="128" height="${(34 * eyelidAlpha).toStringAsFixed(2)}" rx="12" fill="#0D1220" fill-opacity="${(0.42 * eyelidAlpha).toStringAsFixed(2)}"/>
-</svg>
-''';
 }
 
 class _ActionBar extends StatelessWidget {

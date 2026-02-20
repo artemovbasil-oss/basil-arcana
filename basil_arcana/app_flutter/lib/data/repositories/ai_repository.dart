@@ -462,15 +462,15 @@ class AiRepository {
     final responseConstraints = mode == ReadingMode.fast
         ? isFiveCardSpread
             ? {
-                'tldrMaxChars': 260,
-                'sectionMaxChars': 520,
-                'whyMaxChars': 560,
-                'actionMaxChars': 280,
+                'tldrMaxChars': 210,
+                'sectionMaxChars': 320,
+                'whyMaxChars': 340,
+                'actionMaxChars': 210,
               }
             : {
-                'tldrMaxChars': 180,
-                'sectionMaxChars': 340,
-                'actionMaxChars': 220,
+                'tldrMaxChars': 150,
+                'sectionMaxChars': 260,
+                'actionMaxChars': 180,
               }
         : {
             'tldrMaxChars': 220,
