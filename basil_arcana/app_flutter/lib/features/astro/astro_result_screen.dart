@@ -324,6 +324,7 @@ class _AstroActionBar extends StatelessWidget {
                     ),
                   ),
                 ),
+                const SizedBox(height: 12),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
@@ -349,7 +350,6 @@ class _AstroActionBar extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 12),
               ],
             ),
           ),
