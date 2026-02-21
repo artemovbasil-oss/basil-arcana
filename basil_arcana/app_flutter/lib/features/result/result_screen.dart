@@ -1953,10 +1953,31 @@ class _ActionBar extends StatelessWidget {
               children: [
                 SizedBox(
                   width: double.infinity,
-                  child: AppGhostButton(
-                    label: newLabel,
-                    icon: Icons.auto_awesome,
+                  child: OutlinedButton(
                     onPressed: onNew,
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size.fromHeight(54),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      foregroundColor: colorScheme.primary,
+                      side: BorderSide(
+                        color: colorScheme.primary.withOpacity(0.8),
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      textStyle: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _ActionSvgIcon(
+                          kind: _ActionIconKind.newReading,
+                          color: colorScheme.primary,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(newLabel),
+                      ],
+                    ),
                   ),
                 ),
                 AnimatedSwitcher(
@@ -1978,10 +1999,31 @@ class _ActionBar extends StatelessWidget {
                           padding: const EdgeInsets.only(top: 12),
                           child: SizedBox(
                             width: double.infinity,
-                            child: AppPrimaryButton(
-                              label: moreLabel,
-                              icon: Icons.auto_awesome_outlined,
+                            child: ElevatedButton(
                               onPressed: onShare,
+                              style: ElevatedButton.styleFrom(
+                                minimumSize: const Size.fromHeight(54),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 14),
+                                backgroundColor: colorScheme.primary,
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(18),
+                                ),
+                                textStyle: const TextStyle(
+                                    fontWeight: FontWeight.w600),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const _ActionSvgIcon(
+                                    kind: _ActionIconKind.wantMore,
+                                    color: Colors.white,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(moreLabel),
+                                ],
+                              ),
                             ),
                           ),
                         )
@@ -1992,6 +2034,44 @@ class _ActionBar extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+enum _ActionIconKind { newReading, wantMore }
+
+class _ActionSvgIcon extends StatelessWidget {
+  const _ActionSvgIcon({
+    required this.kind,
+    required this.color,
+  });
+
+  final _ActionIconKind kind;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final svg = switch (kind) {
+      _ActionIconKind.newReading => '''
+<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  <rect x="4.2" y="6.2" width="10.4" height="13.2" rx="2.1" fill="none" stroke="#ffffff" stroke-width="1.8"/>
+  <rect x="9.4" y="4.4" width="10.4" height="13.2" rx="2.1" fill="none" stroke="#ffffff" stroke-width="1.8" opacity="0.9"/>
+  <path d="M18.2 2.6v3.6M16.4 4.4H20" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round"/>
+</svg>
+''',
+      _ActionIconKind.wantMore => '''
+<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  <path d="M12 3.2l1.2 3.2 3.2 1.2-3.2 1.2L12 12l-1.2-3.2-3.2-1.2 3.2-1.2L12 3.2z" fill="#ffffff"/>
+  <path d="M18.4 10.4l0.8 2.1 2.1 0.8-2.1 0.8-0.8 2.1-0.8-2.1-2.1-0.8 2.1-0.8 0.8-2.1z" fill="#ffffff" opacity="0.92"/>
+  <path d="M8.1 13.4l1.1 2.9 2.9 1.1-2.9 1.1-1.1 2.9-1.1-2.9-2.9-1.1 2.9-1.1 1.1-2.9z" fill="#ffffff" opacity="0.88"/>
+</svg>
+''',
+    };
+    return SvgPicture.string(
+      svg,
+      width: 20,
+      height: 20,
+      colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
     );
   }
 }
