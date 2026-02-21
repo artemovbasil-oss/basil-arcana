@@ -1903,6 +1903,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                     profile: profile,
                                     streakDays: _streakStats.currentStreakDays,
                                     activeDays: _streakStats.activeDays,
+                                    onAskOracle: (question) =>
+                                        _startReadingFromRhythmInsight(
+                                      question,
+                                    ),
                                   ),
                                 const SizedBox(height: 12),
                               ],
@@ -2235,6 +2239,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     );
   }
 
+  void _startReadingFromRhythmInsight(String question) {
+    final normalizedQuestion = question.trim();
+    if (normalizedQuestion.isEmpty) {
+      return;
+    }
+    _controller.text = normalizedQuestion;
+    final flow = ref.read(readingFlowControllerProvider.notifier);
+    flow.reset();
+    flow.setQuestion(normalizedQuestion);
+    Navigator.of(context).pop();
+    Future<void>.delayed(const Duration(milliseconds: 120), () {
+      if (!mounted) {
+        return;
+      }
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          settings: appRouteSettings(showBackButton: false),
+          builder: (_) => const SpreadScreen(),
+        ),
+      );
+    });
+  }
+
   String _deckHint(AppLocalizations l10n, DeckType deckId) {
     return switch (deckId) {
       DeckType.lenormand => '${l10n.deckLabel}: ${l10n.deckLenormandName}',
@@ -2521,9 +2549,11 @@ class _EnergyProfileCopy {
     required this.archetypeShortTitle,
     required this.patternDetailsTitle,
     required this.archetypeDetailsTitle,
-    required this.tapForDetailsHint,
     required this.repeatsPercentMeaningPrefix,
     required this.repeatsPercentMeaningSuffix,
+    required this.askOracleCta,
+    required this.patternPromptPrefix,
+    required this.archetypePromptPrefix,
   });
 
   final String title;
@@ -2561,9 +2591,11 @@ class _EnergyProfileCopy {
   final String archetypeShortTitle;
   final String patternDetailsTitle;
   final String archetypeDetailsTitle;
-  final String tapForDetailsHint;
   final String repeatsPercentMeaningPrefix;
   final String repeatsPercentMeaningSuffix;
+  final String askOracleCta;
+  final String patternPromptPrefix;
+  final String archetypePromptPrefix;
 
   String circleTitle(DeckType deckType) {
     if (deckType == DeckType.lenormand) {
@@ -2679,6 +2711,52 @@ class _EnergyProfileCopy {
     return '$repeatsPercentMeaningPrefix $percent%$repeatsPercentMeaningSuffix';
   }
 
+  List<String> patternDetailParagraphs({
+    required DeckType deckType,
+    required int percent,
+    required _ElementKind? dominant,
+    required _ElementKind? support,
+  }) {
+    return [
+      destinySummary(deckType, percent),
+      phaseSummary(
+        deckType: deckType,
+        dominant: dominant,
+        support: support,
+      ),
+    ];
+  }
+
+  List<String> archetypeDetailParagraphs(String? cardName) {
+    if (cardName == null) {
+      return [
+        archetypeDescriptionFallback,
+        phaseSummaryFallback,
+      ];
+    }
+    return [
+      archetypeDescription(cardName),
+      title.startsWith('Твой')
+          ? 'Архетип $cardName показывает стиль действий на ближайший цикл. Чем чаще он повторяется, тем точнее подсказывает твой следующий шаг.'
+          : title.startsWith('Сенің')
+              ? '$cardName архетипі жақын циклдегі әрекет стилін көрсетеді. Ол жиірек қайталанған сайын, келесі қадамды дәлірек көрсетеді.'
+              : '$cardName archetype reflects your current action style. The more often it repeats, the clearer your next move becomes.',
+    ];
+  }
+
+  String patternAskQuestion({
+    required DeckType deckType,
+    required int percent,
+  }) {
+    final patternName = destinyTitle(deckType);
+    return '$patternPromptPrefix $patternName $percent%';
+  }
+
+  String archetypeAskQuestion(String? cardName) {
+    final resolved = cardName ?? archetypeFallback;
+    return '$archetypePromptPrefix $resolved';
+  }
+
   static _EnergyProfileCopy resolve(BuildContext context) {
     final code = Localizations.localeOf(context).languageCode;
     if (code == 'ru') {
@@ -2721,10 +2799,14 @@ class _EnergyProfileCopy {
         archetypeShortTitle: 'Архетип',
         patternDetailsTitle: 'Интенсивность паттерна',
         archetypeDetailsTitle: 'Доминирующий архетип',
-        tapForDetailsHint: 'Нажми, чтобы прочитать разбор',
         repeatsPercentMeaningPrefix: 'Осознанность',
         repeatsPercentMeaningSuffix:
             ' — это индекс устойчивости сигнала: чем выше процент, тем чаще тема повторяется в твоей истории.',
+        askOracleCta: 'Спросить оракула',
+        patternPromptPrefix:
+            'Разбери мой текущий паттерн и дай следующий шаг. Фокус:',
+        archetypePromptPrefix:
+            'Разбери мой доминирующий архетип и дай практический совет. Архетип:',
       );
     }
     if (code == 'kk') {
@@ -2767,10 +2849,14 @@ class _EnergyProfileCopy {
         archetypeShortTitle: 'Архетип',
         patternDetailsTitle: 'Паттерн қарқындылығы',
         archetypeDetailsTitle: 'Басым архетип',
-        tapForDetailsHint: 'Толық түсіндірмені көру үшін басыңыз',
         repeatsPercentMeaningPrefix: 'Осознанность',
         repeatsPercentMeaningSuffix:
             ' — сигнал тұрақтылығының индексі: пайыз жоғары болған сайын тақырып тарихта жиі қайталанады.',
+        askOracleCta: 'Оракулдан сұрау',
+        patternPromptPrefix:
+            'Қазіргі паттернімді талдап, келесі қадам бер. Фокус:',
+        archetypePromptPrefix:
+            'Басым архетипімді талдап, практикалық кеңес бер. Архетип:',
       );
     }
     return const _EnergyProfileCopy(
@@ -2812,10 +2898,14 @@ class _EnergyProfileCopy {
       archetypeShortTitle: 'Archetype',
       patternDetailsTitle: 'Pattern intensity',
       archetypeDetailsTitle: 'Dominant archetype',
-      tapForDetailsHint: 'Tap to read full details',
       repeatsPercentMeaningPrefix: 'Awareness',
       repeatsPercentMeaningSuffix:
           ' is a stability index: the higher the percent, the more often this signal repeats in your history.',
+      askOracleCta: 'Ask Oracle',
+      patternPromptPrefix:
+          'Read my current pattern and suggest the next step. Focus:',
+      archetypePromptPrefix:
+          'Read my dominant archetype and give a practical next step. Archetype:',
     );
   }
 }
@@ -3341,12 +3431,14 @@ class _EnergyProfileCard extends StatelessWidget {
     required this.profile,
     required this.streakDays,
     required this.activeDays,
+    required this.onAskOracle,
   });
 
   final _EnergyProfileCopy copy;
   final _EnergyProfileData profile;
   final int streakDays;
   final int activeDays;
+  final ValueChanged<String> onAskOracle;
 
   @override
   Widget build(BuildContext context) {
@@ -3501,11 +3593,19 @@ class _EnergyProfileCard extends StatelessWidget {
                       context,
                       title: copy.patternDetailsTitle,
                       headline: '${profile.majorArcanaPercent}%',
-                      body: copy.destinySummary(
-                        profile.deckType,
-                        profile.majorArcanaPercent,
+                      paragraphs: copy.patternDetailParagraphs(
+                        deckType: profile.deckType,
+                        percent: profile.majorArcanaPercent,
+                        dominant: profile.dominantElement,
+                        support: profile.supportElement,
                       ),
-                      hint: copy.tapForDetailsHint,
+                      ctaLabel: copy.askOracleCta,
+                      onCtaTap: () => onAskOracle(
+                        copy.patternAskQuestion(
+                          deckType: profile.deckType,
+                          percent: profile.majorArcanaPercent,
+                        ),
+                      ),
                       accent: palette[0],
                     ),
                   ),
@@ -3524,12 +3624,15 @@ class _EnergyProfileCard extends StatelessWidget {
                       title: copy.archetypeDetailsTitle,
                       headline:
                           profile.dominantArchetype ?? copy.archetypeFallback,
-                      body: profile.dominantArchetype == null
-                          ? copy.archetypeDescriptionFallback
-                          : copy.archetypeDescription(
-                              profile.dominantArchetype!,
-                            ),
-                      hint: copy.tapForDetailsHint,
+                      paragraphs: copy.archetypeDetailParagraphs(
+                        profile.dominantArchetype,
+                      ),
+                      ctaLabel: copy.askOracleCta,
+                      onCtaTap: () => onAskOracle(
+                        copy.archetypeAskQuestion(
+                          profile.dominantArchetype,
+                        ),
+                      ),
                       accent: palette[1],
                     ),
                   ),
@@ -3608,8 +3711,9 @@ class _EnergyProfileCard extends StatelessWidget {
     BuildContext context, {
     required String title,
     required String headline,
-    required String body,
-    required String hint,
+    required List<String> paragraphs,
+    required String ctaLabel,
+    required VoidCallback onCtaTap,
     required Color accent,
   }) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -3620,22 +3724,35 @@ class _EnergyProfileCard extends StatelessWidget {
       builder: (context) {
         return SafeArea(
           top: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+          child: FractionallySizedBox(
+            heightFactor: 0.62,
             child: Container(
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(18, 14, 18, 16),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(24)),
                 color:
-                    colorScheme.surfaceContainerHighest.withValues(alpha: 0.95),
+                    colorScheme.surfaceContainerHighest.withValues(alpha: 0.96),
                 border: Border.all(
                   color: accent.withValues(alpha: 0.45),
                 ),
               ),
               child: Column(
-                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color:
+                            colorScheme.outlineVariant.withValues(alpha: 0.8),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
                   Text(
                     title,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -3650,19 +3767,55 @@ class _EnergyProfileCard extends StatelessWidget {
                           color: accent,
                         ),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    body,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.onSurface.withValues(alpha: 0.86),
-                        ),
+                  const SizedBox(height: 12),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          for (var i = 0; i < paragraphs.length; i++) ...[
+                            Text(
+                              paragraphs[i],
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
+                                    color: colorScheme.onSurface
+                                        .withValues(alpha: 0.86),
+                                    height: 1.4,
+                                  ),
+                            ),
+                            if (i != paragraphs.length - 1)
+                              const SizedBox(height: 10),
+                          ],
+                        ],
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 10),
-                  Text(
-                    hint,
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: colorScheme.onSurface.withValues(alpha: 0.6),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        onCtaTap();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size.fromHeight(46),
+                        backgroundColor: colorScheme.primary,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
                         ),
+                      ),
+                      child: Text(
+                        ctaLabel,
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                            ),
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -3702,8 +3855,7 @@ class _InsightMetricTile extends StatelessWidget {
         onTap: onTap,
         child: Container(
           width: double.infinity,
-          constraints: const BoxConstraints(minHeight: 132),
-          padding: const EdgeInsets.fromLTRB(12, 11, 12, 11),
+          padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(14),
             color: colorScheme.surface.withValues(alpha: 0.32),
@@ -3729,6 +3881,10 @@ class _InsightMetricTile extends StatelessWidget {
                     ),
                   ),
                   if (trend != null) _MiniTrendBubble(percent: trend),
+                  if (trend == null && onTap != null) ...[
+                    const SizedBox(width: 6),
+                    const _InsightTapPlusBadge(),
+                  ],
                 ],
               ),
               const SizedBox(height: 5),
@@ -3751,6 +3907,42 @@ class _InsightMetricTile extends StatelessWidget {
                     ),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _InsightTapPlusBadge extends StatelessWidget {
+  const _InsightTapPlusBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    const svg = '''
+<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+  <path d="M8 3.2v9.6M3.2 8h9.6" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round"/>
+</svg>
+''';
+    return Container(
+      width: 18,
+      height: 18,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: colorScheme.primary.withValues(alpha: 0.18),
+        border: Border.all(
+          color: colorScheme.primary.withValues(alpha: 0.45),
+        ),
+      ),
+      child: Center(
+        child: SvgPicture.string(
+          svg,
+          width: 10,
+          height: 10,
+          colorFilter: ColorFilter.mode(
+            colorScheme.primary.withValues(alpha: 0.95),
+            BlendMode.srcIn,
           ),
         ),
       ),
