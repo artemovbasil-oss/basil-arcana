@@ -43,6 +43,7 @@ class AstroResultScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final copy = _AstroResultCopy.resolve(context);
     final l10n = AppLocalizations.of(context);
+    final tarotPrompt = tarotQuestion?.trim() ?? '';
     return Scaffold(
       appBar: buildEnergyTopBar(
         context,
@@ -112,53 +113,21 @@ class AstroResultScreen extends ConsumerWidget {
             ),
             _AstroActionBar(
               newLabel: l10n.resultNewButton,
-              moreLabel: l10n.resultWantMoreButton,
+              tarotLabel: copy.tarotCtaButton,
               onNew: () {
                 Navigator.popUntil(context, (route) => route.isFirst);
               },
-              onMore: () async {
-                await showModalBottomSheet<void>(
-                  context: context,
-                  isScrollControlled: true,
-                  backgroundColor: Colors.transparent,
-                  builder: (sheetContext) {
-                    return SafeArea(
-                      top: false,
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
-                        child: Container(
-                          padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .surfaceContainerHighest
-                                .withValues(alpha: 0.96),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .outlineVariant
-                                  .withValues(alpha: 0.42),
-                            ),
-                          ),
-                          child: SofiaPromoCard(prefilledMessage: sofiaPrefill),
-                        ),
-                      ),
-                    );
-                  },
+              onTarot: () {
+                if (tarotPrompt.isNotEmpty) {
+                  ref
+                      .read(readingFlowControllerProvider.notifier)
+                      .setQuestion(tarotPrompt);
+                }
+                Navigator.popUntil(
+                  context,
+                  (route) => route.isFirst,
                 );
               },
-              onTarot: tarotQuestion != null && tarotQuestion!.trim().isNotEmpty
-                  ? () {
-                      ref
-                          .read(readingFlowControllerProvider.notifier)
-                          .setQuestion(tarotQuestion!.trim());
-                      Navigator.popUntil(
-                        context,
-                        (route) => route.isFirst,
-                      );
-                    }
-                  : null,
             ),
           ],
         ),
@@ -291,17 +260,15 @@ class _UserPromptCard extends StatelessWidget {
 class _AstroActionBar extends StatelessWidget {
   const _AstroActionBar({
     required this.newLabel,
-    required this.moreLabel,
     required this.onNew,
-    required this.onMore,
-    this.onTarot,
+    required this.tarotLabel,
+    required this.onTarot,
   });
 
   final String newLabel;
-  final String moreLabel;
+  final String tarotLabel;
   final VoidCallback onNew;
-  final VoidCallback onMore;
-  final VoidCallback? onTarot;
+  final VoidCallback onTarot;
 
   @override
   Widget build(BuildContext context) {
@@ -357,11 +324,10 @@ class _AstroActionBar extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 12),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: onMore,
+                    onPressed: onTarot,
                     style: ElevatedButton.styleFrom(
                       minimumSize: const Size.fromHeight(54),
                       backgroundColor: colorScheme.primary,
@@ -374,26 +340,15 @@ class _AstroActionBar extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const _AstroActionIcon(
-                          kind: _AstroActionIconKind.wantMore,
+                          kind: _AstroActionIconKind.tarot,
                           color: Colors.white,
                         ),
                         const SizedBox(width: 8),
-                        Text(moreLabel),
+                        Text(tarotLabel),
                       ],
                     ),
                   ),
                 ),
-                if (onTarot != null) ...[
-                  const SizedBox(height: 10),
-                  SizedBox(
-                    width: double.infinity,
-                    child: AppGhostButton(
-                      label: _AstroResultCopy.resolve(context).tarotCtaButton,
-                      icon: Icons.auto_awesome,
-                      onPressed: onTarot,
-                    ),
-                  ),
-                ],
               ],
             ),
           ),
@@ -403,7 +358,7 @@ class _AstroActionBar extends StatelessWidget {
   }
 }
 
-enum _AstroActionIconKind { newReading, wantMore }
+enum _AstroActionIconKind { newReading, tarot }
 
 class _AstroActionIcon extends StatelessWidget {
   const _AstroActionIcon({
@@ -424,11 +379,11 @@ class _AstroActionIcon extends StatelessWidget {
   <path d="M18.2 2.6v3.6M16.4 4.4H20" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round"/>
 </svg>
 ''',
-      _AstroActionIconKind.wantMore => '''
+      _AstroActionIconKind.tarot => '''
 <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-  <path d="M12 3.2l1.2 3.2 3.2 1.2-3.2 1.2L12 12l-1.2-3.2-3.2-1.2 3.2-1.2L12 3.2z" fill="#ffffff"/>
-  <path d="M18.4 10.4l0.8 2.1 2.1 0.8-2.1 0.8-0.8 2.1-0.8-2.1-2.1-0.8 2.1-0.8 0.8-2.1z" fill="#ffffff" opacity="0.92"/>
-  <path d="M8.1 13.4l1.1 2.9 2.9 1.1-2.9 1.1-1.1 2.9-1.1-2.9-2.9-1.1 2.9-1.1 1.1-2.9z" fill="#ffffff" opacity="0.88"/>
+  <path d="M12 3.4l1.3 3.1 3.1 1.3-3.1 1.3L12 12.2l-1.3-3.1-3.1-1.3 3.1-1.3L12 3.4z" fill="#ffffff"/>
+  <path d="M18 11.4l0.8 1.9 1.9 0.8-1.9 0.8-0.8 1.9-0.8-1.9-1.9-0.8 1.9-0.8 0.8-1.9z" fill="#ffffff" opacity="0.92"/>
+  <path d="M7.2 14.2l1 2.4 2.4 1-2.4 1-1 2.4-1-2.4-2.4-1 2.4-1 1-2.4z" fill="#ffffff" opacity="0.88"/>
 </svg>
 ''',
     };
@@ -636,6 +591,20 @@ class _BirthChartPainter extends CustomPainter {
 
   static const int _houses = 12;
   static const int _pointsCount = 10;
+  static const List<String> _houseLabels = <String>[
+    'I',
+    'II',
+    'III',
+    'IV',
+    'V',
+    'VI',
+    'VII',
+    'VIII',
+    'IX',
+    'X',
+    'XI',
+    'XII',
+  ];
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -659,6 +628,11 @@ class _BirthChartPainter extends CustomPainter {
     canvas.drawCircle(center, radius * 0.92, ringPaint);
     canvas.drawCircle(center, radius * 0.72, ringPaint);
     canvas.drawCircle(center, radius * 0.48, ringPaint);
+    canvas.drawCircle(
+      center,
+      radius * 0.98,
+      ringPaint..color = lineColor.withValues(alpha: 0.32),
+    );
 
     final housePaint = Paint()
       ..color = lineColor.withValues(alpha: 0.45)
@@ -670,9 +644,36 @@ class _BirthChartPainter extends CustomPainter {
       final p2 =
           center + Offset(math.cos(angle), math.sin(angle)) * (radius * 0.92);
       canvas.drawLine(p1, p2, housePaint);
+      final labelPoint =
+          center + Offset(math.cos(angle), math.sin(angle)) * (radius * 1.05);
+      _drawCircleLabel(
+        canvas,
+        text: _houseLabels[i],
+        center: labelPoint,
+        color: lineColor.withValues(alpha: 0.78),
+        fontSize: 9.2,
+        weight: FontWeight.w600,
+      );
     }
 
     final angles = _seededAngles(seed, _pointsCount);
+    final positions = <Offset>[];
+    for (var i = 0; i < angles.length; i++) {
+      final a = angles[i];
+      final orbitScale = 0.53 + (i % 3) * 0.12;
+      positions.add(
+        center + Offset(math.cos(a), math.sin(a)) * (radius * orbitScale),
+      );
+    }
+
+    _drawAspectLines(
+      canvas,
+      positions: positions,
+      angles: angles,
+    );
+
+    _drawAxisLabels(canvas, center, radius);
+
     final nodePaint = Paint()..style = PaintingStyle.fill;
     final lineBetweenNodes = Paint()
       ..color = accent.withValues(alpha: 0.45)
@@ -681,11 +682,8 @@ class _BirthChartPainter extends CustomPainter {
 
     Offset? first;
     Offset? prev;
-    for (var i = 0; i < angles.length; i++) {
-      final a = angles[i];
-      final orbitScale = 0.53 + (i % 3) * 0.12;
-      final pos =
-          center + Offset(math.cos(a), math.sin(a)) * (radius * orbitScale);
+    for (var i = 0; i < positions.length; i++) {
+      final pos = positions[i];
       if (first == null) {
         first = pos;
       }
@@ -712,6 +710,118 @@ class _BirthChartPainter extends CustomPainter {
           lineBetweenNodes
             ..color = lineBetweenNodes.color.withValues(alpha: 0.2));
     }
+  }
+
+  void _drawAxisLabels(Canvas canvas, Offset center, double radius) {
+    final axis = <(String, double)>[
+      ('MC', -math.pi / 2),
+      ('AC', 0),
+      ('IC', math.pi / 2),
+      ('DC', math.pi),
+    ];
+    for (final item in axis) {
+      final point = center +
+          Offset(math.cos(item.$2), math.sin(item.$2)) * (radius * 1.11);
+      _drawCircleLabel(
+        canvas,
+        text: item.$1,
+        center: point,
+        color: primary.withValues(alpha: 0.9),
+        fontSize: 9.8,
+        weight: FontWeight.w700,
+      );
+    }
+  }
+
+  void _drawAspectLines(
+    Canvas canvas, {
+    required List<Offset> positions,
+    required List<double> angles,
+  }) {
+    for (var i = 0; i < angles.length; i++) {
+      for (var j = i + 1; j < angles.length; j++) {
+        final delta = _angularDistance(angles[i], angles[j]);
+        if ((delta - (2 * math.pi / 3)).abs() < 0.16) {
+          final paint = Paint()
+            ..color = const Color(0xFF7BB9FF).withValues(alpha: 0.34)
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 1.2;
+          canvas.drawLine(positions[i], positions[j], paint);
+          continue;
+        }
+        if ((delta - (math.pi / 2)).abs() < 0.12) {
+          final paint = Paint()
+            ..color = const Color(0xFFFFA38D).withValues(alpha: 0.26)
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 1.1;
+          _drawDashedLine(canvas, positions[i], positions[j], paint);
+          continue;
+        }
+        if ((delta - math.pi).abs() < 0.11) {
+          final paint = Paint()
+            ..color = const Color(0xFFCF9FFF).withValues(alpha: 0.28)
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 1.0;
+          canvas.drawLine(positions[i], positions[j], paint);
+        }
+      }
+    }
+  }
+
+  double _angularDistance(double a, double b) {
+    final diff = (a - b).abs();
+    return math.min(diff, (2 * math.pi) - diff);
+  }
+
+  void _drawDashedLine(
+    Canvas canvas,
+    Offset from,
+    Offset to,
+    Paint paint,
+  ) {
+    const dash = 5.0;
+    const gap = 4.0;
+    final vector = to - from;
+    final length = vector.distance;
+    if (length <= 0) {
+      return;
+    }
+    final dir = Offset(vector.dx / length, vector.dy / length);
+    var drawn = 0.0;
+    while (drawn < length) {
+      final start = from + dir * drawn;
+      final end = from + dir * math.min(drawn + dash, length);
+      canvas.drawLine(start, end, paint);
+      drawn += dash + gap;
+    }
+  }
+
+  void _drawCircleLabel(
+    Canvas canvas, {
+    required String text,
+    required Offset center,
+    required Color color,
+    required double fontSize,
+    required FontWeight weight,
+  }) {
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: text,
+        style: TextStyle(
+          color: color,
+          fontSize: fontSize,
+          fontWeight: weight,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    textPainter.paint(
+      canvas,
+      Offset(
+        center.dx - textPainter.width / 2,
+        center.dy - textPainter.height / 2,
+      ),
+    );
   }
 
   List<double> _seededAngles(String seed, int count) {
