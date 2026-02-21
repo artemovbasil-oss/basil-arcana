@@ -2517,6 +2517,13 @@ class _EnergyProfileCopy {
     required this.crowleyIntegration,
     required this.phaseSummaryFallback,
     required this.archetypeDescriptionFallback,
+    required this.patternShortTitle,
+    required this.archetypeShortTitle,
+    required this.patternDetailsTitle,
+    required this.archetypeDetailsTitle,
+    required this.tapForDetailsHint,
+    required this.repeatsPercentMeaningPrefix,
+    required this.repeatsPercentMeaningSuffix,
   });
 
   final String title;
@@ -2550,6 +2557,13 @@ class _EnergyProfileCopy {
   final String crowleyIntegration;
   final String phaseSummaryFallback;
   final String archetypeDescriptionFallback;
+  final String patternShortTitle;
+  final String archetypeShortTitle;
+  final String patternDetailsTitle;
+  final String archetypeDetailsTitle;
+  final String tapForDetailsHint;
+  final String repeatsPercentMeaningPrefix;
+  final String repeatsPercentMeaningSuffix;
 
   String circleTitle(DeckType deckType) {
     if (deckType == DeckType.lenormand) {
@@ -2661,6 +2675,10 @@ class _EnergyProfileCopy {
     return '$streakDays-day streak improves profile precision.';
   }
 
+  String repeatsPercentMeaning(int percent) {
+    return '$repeatsPercentMeaningPrefix $percent%$repeatsPercentMeaningSuffix';
+  }
+
   static _EnergyProfileCopy resolve(BuildContext context) {
     final code = Localizations.localeOf(context).languageCode;
     if (code == 'ru') {
@@ -2699,6 +2717,14 @@ class _EnergyProfileCopy {
             'Профиль еще набирает статистику, поэтому вывод пока нейтральный.',
         archetypeDescriptionFallback:
             'Когда накопится больше раскладов, здесь появится твой ведущий архетип периода.',
+        patternShortTitle: 'Паттерн',
+        archetypeShortTitle: 'Архетип',
+        patternDetailsTitle: 'Интенсивность паттерна',
+        archetypeDetailsTitle: 'Доминирующий архетип',
+        tapForDetailsHint: 'Нажми, чтобы прочитать разбор',
+        repeatsPercentMeaningPrefix: 'Осознанность',
+        repeatsPercentMeaningSuffix:
+            ' — это индекс устойчивости сигнала: чем выше процент, тем чаще тема повторяется в твоей истории.',
       );
     }
     if (code == 'kk') {
@@ -2737,6 +2763,14 @@ class _EnergyProfileCopy {
             'Профиль әлі статистика жинап жатыр, сондықтан қорытынды бейтарап.',
         archetypeDescriptionFallback:
             'Көбірек расклад болғанда осы жерде жетекші архетип көрсетіледі.',
+        patternShortTitle: 'Паттерн',
+        archetypeShortTitle: 'Архетип',
+        patternDetailsTitle: 'Паттерн қарқындылығы',
+        archetypeDetailsTitle: 'Басым архетип',
+        tapForDetailsHint: 'Толық түсіндірмені көру үшін басыңыз',
+        repeatsPercentMeaningPrefix: 'Осознанность',
+        repeatsPercentMeaningSuffix:
+            ' — сигнал тұрақтылығының индексі: пайыз жоғары болған сайын тақырып тарихта жиі қайталанады.',
       );
     }
     return const _EnergyProfileCopy(
@@ -2774,6 +2808,14 @@ class _EnergyProfileCopy {
           'The profile is still collecting signal, so the summary stays neutral for now.',
       archetypeDescriptionFallback:
           'As more readings accumulate, your leading archetype will appear here.',
+      patternShortTitle: 'Pattern',
+      archetypeShortTitle: 'Archetype',
+      patternDetailsTitle: 'Pattern intensity',
+      archetypeDetailsTitle: 'Dominant archetype',
+      tapForDetailsHint: 'Tap to read full details',
+      repeatsPercentMeaningPrefix: 'Awareness',
+      repeatsPercentMeaningSuffix:
+          ' is a stability index: the higher the percent, the more often this signal repeats in your history.',
     );
   }
 }
@@ -3448,24 +3490,48 @@ class _EnergyProfileCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: _InsightMetricTile(
-                    title: copy.destinyTitle(profile.deckType),
+                    title: copy.patternShortTitle,
                     value: '${profile.majorArcanaPercent}%',
                     subtitle: copy.destinySummary(
                       profile.deckType,
                       profile.majorArcanaPercent,
                     ),
                     accent: palette[0],
+                    onTap: () => _showInsightDetails(
+                      context,
+                      title: copy.patternDetailsTitle,
+                      headline: '${profile.majorArcanaPercent}%',
+                      body: copy.destinySummary(
+                        profile.deckType,
+                        profile.majorArcanaPercent,
+                      ),
+                      hint: copy.tapForDetailsHint,
+                      accent: palette[0],
+                    ),
                   ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: _InsightMetricTile(
-                    title: copy.archetypeTitle,
+                    title: copy.archetypeShortTitle,
                     value: profile.dominantArchetype ?? copy.archetypeFallback,
                     subtitle: profile.dominantArchetype == null
                         ? copy.archetypeDescriptionFallback
                         : copy.archetypeDescription(profile.dominantArchetype!),
                     accent: palette[1],
+                    onTap: () => _showInsightDetails(
+                      context,
+                      title: copy.archetypeDetailsTitle,
+                      headline:
+                          profile.dominantArchetype ?? copy.archetypeFallback,
+                      body: profile.dominantArchetype == null
+                          ? copy.archetypeDescriptionFallback
+                          : copy.archetypeDescription(
+                              profile.dominantArchetype!,
+                            ),
+                      hint: copy.tapForDetailsHint,
+                      accent: palette[1],
+                    ),
                   ),
                 ),
               ],
@@ -3483,6 +3549,13 @@ class _EnergyProfileCard extends StatelessWidget {
               ),
               accent: palette[2],
               trailingTrend: cadencePercent,
+            ),
+            const SizedBox(height: 6),
+            Text(
+              copy.repeatsPercentMeaning(cadencePercent),
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: colorScheme.onSurface.withValues(alpha: 0.72),
+                  ),
             ),
             const SizedBox(height: 14),
             _EnergySectionTitle(text: _awardsTitle(context)),
@@ -3530,6 +3603,75 @@ class _EnergyProfileCard extends StatelessWidget {
     }
     return milestones;
   }
+
+  void _showInsightDetails(
+    BuildContext context, {
+    required String title,
+    required String headline,
+    required String body,
+    required String hint,
+    required Color accent,
+  }) {
+    final colorScheme = Theme.of(context).colorScheme;
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                color:
+                    colorScheme.surfaceContainerHighest.withValues(alpha: 0.95),
+                border: Border.all(
+                  color: accent.withValues(alpha: 0.45),
+                ),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    headline,
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.w900,
+                          color: accent,
+                        ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    body,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSurface.withValues(alpha: 0.86),
+                        ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    hint,
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: colorScheme.onSurface.withValues(alpha: 0.6),
+                        ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
 }
 
 class _InsightMetricTile extends StatelessWidget {
@@ -3539,6 +3681,7 @@ class _InsightMetricTile extends StatelessWidget {
     required this.subtitle,
     required this.accent,
     this.trailingTrend,
+    this.onTap,
   });
 
   final String title;
@@ -3546,58 +3689,70 @@ class _InsightMetricTile extends StatelessWidget {
   final String subtitle;
   final Color accent;
   final int? trailingTrend;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final trend = trailingTrend?.clamp(0, 100);
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(12, 11, 12, 11),
-      decoration: BoxDecoration(
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
         borderRadius: BorderRadius.circular(14),
-        color: colorScheme.surface.withValues(alpha: 0.32),
-        border: Border.all(
-          color: accent.withValues(alpha: 0.45),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+        onTap: onTap,
+        child: Container(
+          width: double.infinity,
+          constraints: const BoxConstraints(minHeight: 132),
+          padding: const EdgeInsets.fromLTRB(12, 11, 12, 11),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            color: colorScheme.surface.withValues(alpha: 0.32),
+            border: Border.all(
+              color: accent.withValues(alpha: 0.45),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: Text(
-                  title,
-                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: colorScheme.onSurface.withValues(alpha: 0.78),
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                            color:
+                                colorScheme.onSurface.withValues(alpha: 0.78),
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                  ),
+                  if (trend != null) _MiniTrendBubble(percent: trend),
+                ],
               ),
-              if (trend != null) _MiniTrendBubble(percent: trend),
+              const SizedBox(height: 5),
+              Text(
+                value,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: accent,
+                    ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                subtitle,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurface.withValues(alpha: 0.78),
+                    ),
+              ),
             ],
           ),
-          const SizedBox(height: 5),
-          Text(
-            value,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  color: accent,
-                ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            subtitle,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurface.withValues(alpha: 0.78),
-                ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -3612,6 +3767,17 @@ class _MiniTrendBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final isUp = percent >= 50;
+    final iconSvg = isUp
+        ? '''
+<svg viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg">
+  <path d="M6 2.2l2.6 2.6H7.1v4.5H4.9V4.8H3.4L6 2.2z" fill="#ffffff"/>
+</svg>
+'''
+        : '''
+<svg viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg">
+  <path d="M6 9.8L3.4 7.2h1.5V2.7h2.2v4.5h1.5L6 9.8z" fill="#ffffff"/>
+</svg>
+''';
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
       decoration: BoxDecoration(
@@ -3622,11 +3788,16 @@ class _MiniTrendBubble extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            isUp ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded,
-            size: 11,
-            color: isUp ? const Color(0xFF73DBA1) : const Color(0xFFFF9D8D),
+          SvgPicture.string(
+            iconSvg,
+            width: 11,
+            height: 11,
+            colorFilter: ColorFilter.mode(
+              isUp ? const Color(0xFF73DBA1) : const Color(0xFFFF9D8D),
+              BlendMode.srcIn,
+            ),
           ),
+          const SizedBox(width: 2),
           Text(
             '$percent%',
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
@@ -3661,17 +3832,28 @@ class _AchievementGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: [
-        for (final item in achievements)
-          _AchievementBadge(
-            days: item.days,
-            unlocked: streakDays >= item.days,
-            isMonthly: item.isMonthly,
-          ),
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const spacing = 8.0;
+        const columns = 3;
+        final totalSpacing = spacing * (columns - 1);
+        final itemWidth = (constraints.maxWidth - totalSpacing) / columns;
+        return Wrap(
+          spacing: spacing,
+          runSpacing: spacing,
+          children: [
+            for (final item in achievements)
+              SizedBox(
+                width: itemWidth,
+                child: _AchievementBadge(
+                  days: item.days,
+                  unlocked: streakDays >= item.days,
+                  isMonthly: item.isMonthly,
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
 }
@@ -3697,15 +3879,15 @@ class _AchievementBadge extends StatelessWidget {
         ? colorScheme.primary.withValues(alpha: 0.5)
         : colorScheme.outlineVariant.withValues(alpha: 0.35);
     return Container(
-      constraints: const BoxConstraints(minWidth: 92),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      height: 44,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: border),
       ),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           _AchievementIcon(unlocked: unlocked, monthly: isMonthly),
           const SizedBox(width: 6),
