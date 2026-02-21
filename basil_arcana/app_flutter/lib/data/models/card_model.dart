@@ -195,12 +195,13 @@ class CardModel {
   }
 
   factory CardModel.fromJson(Map<String, dynamic> json) {
+    final id = json['id'] as String;
     return CardModel(
-      id: json['id'] as String,
-      deckId: deckIdFromString(json['deck'] as String?) ??
-          _deckIdFromCardId(json['id'] as String),
+      id: id,
+      deckId:
+          deckIdFromString(json['deck'] as String?) ?? _deckIdFromCardId(id),
       name: json['name'] as String,
-      keywords: (json['keywords'] as List<dynamic>).cast<String>(),
+      keywords: _normalizeKeywords(json['keywords'], id: id),
       meaning: CardMeaning.fromJson(json['meaning'] as Map<String, dynamic>),
       detailedDescription: json['detailedDescription'] as String?,
       funFact: (json['fact'] as String?) ?? (json['funFact'] as String?),
@@ -277,28 +278,97 @@ String _stringFromJson(Object? value) {
 }
 
 List<String> _normalizeKeywords(Object? value, {required String id}) {
+  final raw = <String>[];
   if (value is List) {
-    return value
-        .whereType<String>()
-        .map((keyword) => keyword.trim())
-        .where((keyword) => keyword.isNotEmpty)
-        .toList();
-  }
-  if (value is String) {
+    raw.addAll(
+      value
+          .whereType<String>()
+          .map((keyword) => keyword.trim())
+          .where((keyword) => keyword.isNotEmpty),
+    );
+  } else if (value is String) {
     final trimmed = value.trim();
-    if (trimmed.isEmpty) {
-      return const [];
+    if (trimmed.isNotEmpty) {
+      raw.addAll(
+        trimmed
+            .split(RegExp(r'[;,]'))
+            .map((keyword) => keyword.trim())
+            .where((keyword) => keyword.isNotEmpty),
+      );
     }
-    return trimmed
-        .split(RegExp(r'[;,]'))
-        .map((keyword) => keyword.trim())
-        .where((keyword) => keyword.isNotEmpty)
-        .toList();
-  }
-  if (value != null) {
+  } else if (value != null) {
     _logCardParseWarning(id, 'Unexpected keywords type: ${value.runtimeType}');
   }
-  return const [];
+  if (raw.isEmpty) {
+    return const [];
+  }
+  final deck = _deckIdFromCardId(id);
+  final seen = <String>{};
+  final filtered = <String>[];
+  for (final keyword in raw) {
+    if (_isDeckOnlyKeyword(keyword, deck: deck)) {
+      continue;
+    }
+    final normalized = _normalizeKeywordToken(keyword);
+    if (normalized.isEmpty || seen.contains(normalized)) {
+      continue;
+    }
+    seen.add(normalized);
+    filtered.add(keyword);
+  }
+  return filtered;
+}
+
+String _normalizeKeywordToken(String input) {
+  return input
+      .trim()
+      .toLowerCase()
+      .replaceAll(RegExp('[«»"\'`]+'), '')
+      .replaceAll(RegExp(r'[\s_\-]+'), ' ')
+      .trim();
+}
+
+bool _isDeckOnlyKeyword(
+  String keyword, {
+  required DeckType deck,
+}) {
+  final normalized = _normalizeKeywordToken(keyword);
+  if (normalized.isEmpty) {
+    return true;
+  }
+  final common = <String>{
+    'deck',
+    'tarot',
+    'таро',
+    'колода',
+  };
+  if (common.contains(normalized)) {
+    return true;
+  }
+  final lenormand = <String>{
+    'lenormand',
+    'ленорман',
+    'ленорманд',
+    'lenormand deck',
+    'колода ленорман',
+    'карты ленорман',
+  };
+  final crowley = <String>{
+    'crowley',
+    'кроули',
+    'thelema',
+    'телема',
+    'crowley tarot',
+    'таро кроули',
+    'колода кроули',
+  };
+  if (deck == DeckType.lenormand && lenormand.contains(normalized)) {
+    return true;
+  }
+  if (deck == DeckType.crowley && crowley.contains(normalized)) {
+    return true;
+  }
+  return false;
 }
 
 void _logCardParseWarning(String id, String message) {
