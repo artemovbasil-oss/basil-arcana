@@ -13,7 +13,6 @@ import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/app_top_bar.dart';
 import '../../core/widgets/sofia_promo_card.dart';
 import '../../state/providers.dart';
-import '../result/widgets/chat_widgets.dart';
 import '../settings/settings_screen.dart';
 
 class AstroResultScreen extends ConsumerWidget {
@@ -64,62 +63,47 @@ class AstroResultScreen extends ConsumerWidget {
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
                 children: [
-                  ChatBubble(
-                    isUser: true,
-                    avatarEmoji: '🙂',
-                    child: Text(userPrompt),
-                  ),
+                  _UserPromptCard(text: userPrompt),
                   const SizedBox(height: 14),
-                  ChatBubble(
-                    isUser: false,
-                    avatarEmoji: '🪄',
+                  _AstroResultBlock(
                     child: _AstroSectionCard(
                       heading: l10n.resultSectionArcaneSnapshot,
+                      lead: title,
                       body: summary,
                     ),
                   ),
                   if (showBirthChartVisual) ...[
                     const SizedBox(height: 14),
-                    ChatBubble(
-                      isUser: false,
-                      avatarEmoji: '🪄',
+                    _AstroResultBlock(
                       child: _BirthChartVisualCard(
                         title: copy.birthChartTitle,
                         seed: birthChartSeed ??
                             '$userPrompt|$summary|${highlights.join("|")}',
                       ),
-                    ),
+                    )
                   ],
                   if (highlights.isNotEmpty) ...[
                     const SizedBox(height: 14),
-                    ChatBubble(
-                      isUser: false,
-                      avatarEmoji: '🪄',
+                    _AstroResultBlock(
                       child: _AstroSectionCard(
                         heading: l10n.resultSectionWhy,
                         bulletLines: highlights,
                       ),
-                    ),
+                    )
                   ],
                   const SizedBox(height: 14),
-                  ChatBubble(
-                    isUser: false,
-                    avatarEmoji: '🪄',
+                  _AstroResultBlock(
                     child: _AstroSectionCard(
                       heading: l10n.resultSectionAction,
                       body: action,
                     ),
                   ),
                   const SizedBox(height: 14),
-                  ChatBubble(
-                    isUser: false,
-                    avatarEmoji: '🪄',
+                  _AstroResultBlock(
                     child: SofiaPromoCard(prefilledMessage: sofiaPrefill),
                   ),
                   const SizedBox(height: 14),
-                  ChatBubble(
-                    isUser: false,
-                    avatarEmoji: '🪄',
+                  _AstroResultBlock(
                     child: _ReferralCard(copy: copy),
                   ),
                   const SizedBox(height: 110),
@@ -186,11 +170,13 @@ class AstroResultScreen extends ConsumerWidget {
 class _AstroSectionCard extends StatelessWidget {
   const _AstroSectionCard({
     required this.heading,
+    this.lead,
     this.body,
     this.bulletLines,
   });
 
   final String heading;
+  final String? lead;
   final String? body;
   final List<String>? bulletLines;
 
@@ -208,6 +194,15 @@ class _AstroSectionCard extends StatelessWidget {
               ),
         ),
         const SizedBox(height: 8),
+        if (lead != null && lead!.trim().isNotEmpty) ...[
+          Text(
+            lead!,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+          ),
+          const SizedBox(height: 8),
+        ],
         if (body != null && body!.trim().isNotEmpty) Text(body!),
         if (bulletLines != null)
           for (final line in bulletLines!) ...[
@@ -224,6 +219,71 @@ class _AstroSectionCard extends StatelessWidget {
             if (line != bulletLines!.last) const SizedBox(height: 6),
           ],
       ],
+    );
+  }
+}
+
+class _AstroResultBlock extends StatelessWidget {
+  const _AstroResultBlock({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(18),
+        color: colorScheme.surface.withValues(alpha: 0.46),
+        border: Border.all(
+          color: colorScheme.primary.withValues(alpha: 0.24),
+        ),
+      ),
+      child: child,
+    );
+  }
+}
+
+class _UserPromptCard extends StatelessWidget {
+  const _UserPromptCard({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Align(
+      alignment: Alignment.centerRight,
+      child: Container(
+        constraints:
+            BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.86),
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          gradient: LinearGradient(
+            colors: [
+              colorScheme.primary.withValues(alpha: 0.95),
+              colorScheme.primary.withValues(alpha: 0.7),
+            ],
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: colorScheme.primary.withValues(alpha: 0.3),
+              blurRadius: 18,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Text(
+          text,
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: colorScheme.onPrimary,
+                fontWeight: FontWeight.w500,
+              ),
+        ),
+      ),
     );
   }
 }
@@ -394,47 +454,38 @@ class _ReferralCard extends StatelessWidget {
         ? 'https://t.me/tarot_arkana_bot/app'
         : buildReferralLinkForUserId(profile.userId);
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        color: colorScheme.primary.withValues(alpha: 0.06),
-        border: Border.all(color: colorScheme.primary.withValues(alpha: 0.24)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            copy.referralTitle,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: colorScheme.primary,
-                  fontWeight: FontWeight.w700,
-                ),
-          ),
-          const SizedBox(height: 8),
-          Text(copy.referralBody),
-          const SizedBox(height: 12),
-          AppGhostButton(
-            label: copy.referralButton,
-            icon: Icons.ios_share,
-            onPressed: () async {
-              final textToCopy = '${copy.referralShareMessage}\n$referralLink';
-              await Clipboard.setData(ClipboardData(text: textToCopy));
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(copy.referralCopied)),
-                );
-              }
-              final shareUri = Uri.parse(
-                'https://t.me/share/url?url=${Uri.encodeComponent(referralLink)}'
-                '&text=${Uri.encodeComponent(copy.referralShareMessage)}',
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          copy.referralTitle,
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                color: colorScheme.primary,
+                fontWeight: FontWeight.w700,
+              ),
+        ),
+        const SizedBox(height: 8),
+        Text(copy.referralBody),
+        const SizedBox(height: 12),
+        AppGhostButton(
+          label: copy.referralButton,
+          icon: Icons.ios_share,
+          onPressed: () async {
+            final textToCopy = '${copy.referralShareMessage}\n$referralLink';
+            await Clipboard.setData(ClipboardData(text: textToCopy));
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(copy.referralCopied)),
               );
-              await launchUrl(shareUri, mode: LaunchMode.externalApplication);
-            },
-          ),
-        ],
-      ),
+            }
+            final shareUri = Uri.parse(
+              'https://t.me/share/url?url=${Uri.encodeComponent(referralLink)}'
+              '&text=${Uri.encodeComponent(copy.referralShareMessage)}',
+            );
+            await launchUrl(shareUri, mode: LaunchMode.externalApplication);
+          },
+        ),
+      ],
     );
   }
 }
