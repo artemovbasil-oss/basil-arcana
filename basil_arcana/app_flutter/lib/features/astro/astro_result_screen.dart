@@ -65,14 +65,6 @@ class AstroResultScreen extends ConsumerWidget {
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
                 children: [
                   _UserPromptCard(text: userPrompt),
-                  const SizedBox(height: 14),
-                  _AstroResultBlock(
-                    child: _AstroSectionCard(
-                      heading: l10n.resultSectionArcaneSnapshot,
-                      lead: title,
-                      body: summary,
-                    ),
-                  ),
                   if (showBirthChartVisual) ...[
                     const SizedBox(height: 14),
                     _AstroResultBlock(
@@ -83,6 +75,14 @@ class AstroResultScreen extends ConsumerWidget {
                       ),
                     )
                   ],
+                  const SizedBox(height: 14),
+                  _AstroResultBlock(
+                    child: _AstroSectionCard(
+                      heading: l10n.resultSectionArcaneSnapshot,
+                      lead: title,
+                      body: summary,
+                    ),
+                  ),
                   if (highlights.isNotEmpty) ...[
                     const SizedBox(height: 14),
                     _AstroResultBlock(
@@ -349,6 +349,7 @@ class _AstroActionBar extends StatelessWidget {
                     ),
                   ),
                 ),
+                const SizedBox(height: 12),
               ],
             ),
           ),
@@ -481,7 +482,7 @@ class _AstroResultCopy {
         referralBody:
             'Поделись персональной ссылкой с друзьями и получай 20 бесплатных премиум-раскладов на 5 карт, 20 тестов на совместимость и 20 натальных карт за каждого нового пользователя.',
         referralButton: 'Поделиться ссылкой',
-        birthChartTitle: 'Ваша карта рождения',
+        birthChartTitle: 'Твоя карта рождения',
         tarotCtaButton: 'Сделать расклад Таро',
         referralCopied:
             'Реферальная ссылка скопирована. Отправь ее в Telegram.',
@@ -536,7 +537,7 @@ class _BirthChartVisualCard extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         gradient: LinearGradient(
@@ -558,21 +559,74 @@ class _BirthChartVisualCard extends StatelessWidget {
                   fontWeight: FontWeight.w700,
                 ),
           ),
+          const SizedBox(height: 14),
+          TweenAnimationBuilder<double>(
+            tween: Tween<double>(begin: 0, end: 1),
+            duration: const Duration(milliseconds: 1200),
+            curve: Curves.easeOutCubic,
+            builder: (context, progress, _) {
+              return AspectRatio(
+                aspectRatio: 1,
+                child: Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: CustomPaint(
+                    painter: _BirthChartPainter(
+                      seed: seed,
+                      primary: colorScheme.primary,
+                      accent: colorScheme.secondary,
+                      lineColor: colorScheme.onSurface.withValues(alpha: 0.65),
+                      progress: progress,
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
           const SizedBox(height: 10),
-          AspectRatio(
-            aspectRatio: 1,
-            child: CustomPaint(
-              painter: _BirthChartPainter(
-                seed: seed,
-                primary: colorScheme.primary,
-                accent: colorScheme.secondary,
-                lineColor: colorScheme.onSurface.withValues(alpha: 0.65),
+          Wrap(
+            spacing: 10,
+            runSpacing: 8,
+            children: [
+              _AspectLegendChip(
+                color: const Color(0xFF7BB9FF),
+                label: _legendLabel(context, kind: _AspectKind.trine),
               ),
-            ),
+              _AspectLegendChip(
+                color: const Color(0xFFFFA38D),
+                label: _legendLabel(context, kind: _AspectKind.square),
+              ),
+              _AspectLegendChip(
+                color: const Color(0xFFCF9FFF),
+                label: _legendLabel(context, kind: _AspectKind.opposition),
+              ),
+            ],
           ),
         ],
       ),
     );
+  }
+
+  String _legendLabel(BuildContext context, {required _AspectKind kind}) {
+    final code = Localizations.localeOf(context).languageCode;
+    if (code == 'ru') {
+      return switch (kind) {
+        _AspectKind.trine => 'Тригон',
+        _AspectKind.square => 'Квадрат',
+        _AspectKind.opposition => 'Оппозиция',
+      };
+    }
+    if (code == 'kk') {
+      return switch (kind) {
+        _AspectKind.trine => 'Тригон',
+        _AspectKind.square => 'Квадрат',
+        _AspectKind.opposition => 'Оппозиция',
+      };
+    }
+    return switch (kind) {
+      _AspectKind.trine => 'Trine',
+      _AspectKind.square => 'Square',
+      _AspectKind.opposition => 'Opposition',
+    };
   }
 }
 
@@ -582,12 +636,14 @@ class _BirthChartPainter extends CustomPainter {
     required this.primary,
     required this.accent,
     required this.lineColor,
+    required this.progress,
   });
 
   final String seed;
   final Color primary;
   final Color accent;
   final Color lineColor;
+  final double progress;
 
   static const int _houses = 12;
   static const int _pointsCount = 10;
@@ -608,21 +664,22 @@ class _BirthChartPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    final t = Curves.easeOutCubic.transform(progress.clamp(0.0, 1.0));
     final center = Offset(size.width / 2, size.height / 2);
     final radius = math.min(size.width, size.height) / 2;
 
     final bgPaint = Paint()
       ..shader = RadialGradient(
         colors: [
-          primary.withValues(alpha: 0.16),
-          accent.withValues(alpha: 0.05),
+          primary.withValues(alpha: 0.16 * t),
+          accent.withValues(alpha: 0.05 * t),
           Colors.transparent,
         ],
       ).createShader(Rect.fromCircle(center: center, radius: radius));
     canvas.drawCircle(center, radius, bgPaint);
 
     final ringPaint = Paint()
-      ..color = lineColor.withValues(alpha: 0.7)
+      ..color = lineColor.withValues(alpha: 0.7 * t)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.2;
     canvas.drawCircle(center, radius * 0.92, ringPaint);
@@ -637,7 +694,8 @@ class _BirthChartPainter extends CustomPainter {
     final housePaint = Paint()
       ..color = lineColor.withValues(alpha: 0.45)
       ..strokeWidth = 1;
-    for (var i = 0; i < _houses; i++) {
+    final housesToDraw = math.max(1, (_houses * t).round());
+    for (var i = 0; i < housesToDraw; i++) {
       final angle = (2 * math.pi / _houses) * i - math.pi / 2;
       final p1 =
           center + Offset(math.cos(angle), math.sin(angle)) * (radius * 0.48);
@@ -645,13 +703,13 @@ class _BirthChartPainter extends CustomPainter {
           center + Offset(math.cos(angle), math.sin(angle)) * (radius * 0.92);
       canvas.drawLine(p1, p2, housePaint);
       final labelPoint =
-          center + Offset(math.cos(angle), math.sin(angle)) * (radius * 1.05);
+          center + Offset(math.cos(angle), math.sin(angle)) * (radius * 0.95);
       _drawCircleLabel(
         canvas,
         text: _houseLabels[i],
         center: labelPoint,
-        color: lineColor.withValues(alpha: 0.78),
-        fontSize: 9.2,
+        color: lineColor.withValues(alpha: 0.72 * t),
+        fontSize: 8.4,
         weight: FontWeight.w600,
       );
     }
@@ -670,9 +728,10 @@ class _BirthChartPainter extends CustomPainter {
       canvas,
       positions: positions,
       angles: angles,
+      progress: t,
     );
 
-    _drawAxisLabels(canvas, center, radius);
+    _drawAxisLabels(canvas, center, radius, t);
 
     final nodePaint = Paint()..style = PaintingStyle.fill;
     final lineBetweenNodes = Paint()
@@ -682,7 +741,8 @@ class _BirthChartPainter extends CustomPainter {
 
     Offset? first;
     Offset? prev;
-    for (var i = 0; i < positions.length; i++) {
+    final pointsToDraw = math.max(1, (positions.length * t).round());
+    for (var i = 0; i < pointsToDraw; i++) {
       final pos = positions[i];
       if (first == null) {
         first = pos;
@@ -692,8 +752,8 @@ class _BirthChartPainter extends CustomPainter {
       }
       prev = pos;
       nodePaint.color = i.isEven
-          ? primary.withValues(alpha: 0.95)
-          : accent.withValues(alpha: 0.9);
+          ? primary.withValues(alpha: 0.95 * t)
+          : accent.withValues(alpha: 0.9 * t);
       canvas.drawCircle(pos, 4.2, nodePaint);
       canvas.drawCircle(
         pos,
@@ -712,7 +772,7 @@ class _BirthChartPainter extends CustomPainter {
     }
   }
 
-  void _drawAxisLabels(Canvas canvas, Offset center, double radius) {
+  void _drawAxisLabels(Canvas canvas, Offset center, double radius, double t) {
     final axis = <(String, double)>[
       ('MC', -math.pi / 2),
       ('AC', 0),
@@ -721,13 +781,13 @@ class _BirthChartPainter extends CustomPainter {
     ];
     for (final item in axis) {
       final point = center +
-          Offset(math.cos(item.$2), math.sin(item.$2)) * (radius * 1.11);
+          Offset(math.cos(item.$2), math.sin(item.$2)) * (radius * 0.87);
       _drawCircleLabel(
         canvas,
         text: item.$1,
         center: point,
-        color: primary.withValues(alpha: 0.9),
-        fontSize: 9.8,
+        color: primary.withValues(alpha: 0.9 * t),
+        fontSize: 9.2,
         weight: FontWeight.w700,
       );
     }
@@ -737,9 +797,14 @@ class _BirthChartPainter extends CustomPainter {
     Canvas canvas, {
     required List<Offset> positions,
     required List<double> angles,
+    required double progress,
   }) {
-    for (var i = 0; i < angles.length; i++) {
+    final pointsToDraw = math.max(1, (angles.length * progress).round());
+    for (var i = 0; i < pointsToDraw; i++) {
       for (var j = i + 1; j < angles.length; j++) {
+        if (j >= pointsToDraw) {
+          continue;
+        }
         final delta = _angularDistance(angles[i], angles[j]);
         if ((delta - (2 * math.pi / 3)).abs() < 0.16) {
           final paint = Paint()
@@ -844,6 +909,53 @@ class _BirthChartPainter extends CustomPainter {
     return oldDelegate.seed != seed ||
         oldDelegate.primary != primary ||
         oldDelegate.accent != accent ||
-        oldDelegate.lineColor != lineColor;
+        oldDelegate.lineColor != lineColor ||
+        oldDelegate.progress != progress;
+  }
+}
+
+enum _AspectKind { trine, square, opposition }
+
+class _AspectLegendChip extends StatelessWidget {
+  const _AspectLegendChip({
+    required this.color,
+    required this.label,
+  });
+
+  final Color color;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(999),
+        color: color.withValues(alpha: 0.12),
+        border: Border.all(color: color.withValues(alpha: 0.35)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 6,
+            height: 6,
+            decoration: BoxDecoration(
+              color: color,
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: colorScheme.onSurface.withValues(alpha: 0.84),
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
+        ],
+      ),
+    );
   }
 }
