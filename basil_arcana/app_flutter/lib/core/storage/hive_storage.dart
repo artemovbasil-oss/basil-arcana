@@ -16,6 +16,7 @@ class HiveStorage {
   static const String readingsBox = 'readings';
   static const String settingsBox = 'settings';
   static const String cardStatsBox = 'card_stats';
+  static const String activityStatsBox = 'activity_stats';
 
   static const String _buildIdKey = 'basil_arcana_build_id';
   static const List<String> _cachePrefixesToClear = [
@@ -77,17 +78,17 @@ class HiveStorage {
     await Hive.openBox<ReadingModel>(readingsBox);
     await Hive.openBox<String>(settingsBox);
     await Hive.openBox<int>(cardStatsBox);
+    await Hive.openBox<int>(activityStatsBox);
   }
 
   static Future<void> _applyBuildIdSafeguard() async {
     if (!kIsWeb) {
       return;
     }
-    final buildId =
-        (AppConfig.appVersion.isNotEmpty
-                ? AppConfig.appVersion
-                : readWebBuildVersion())
-            .trim();
+    final buildId = (AppConfig.appVersion.isNotEmpty
+            ? AppConfig.appVersion
+            : readWebBuildVersion())
+        .trim();
     if (buildId.isEmpty) {
       return;
     }
@@ -126,6 +127,7 @@ class HiveStorage {
     await _deleteBox(readingsBox);
     await _deleteBox(settingsBox);
     await _deleteBox(cardStatsBox);
+    await _deleteBox(activityStatsBox);
   }
 
   static Future<void> _deleteBox(String boxName) async {

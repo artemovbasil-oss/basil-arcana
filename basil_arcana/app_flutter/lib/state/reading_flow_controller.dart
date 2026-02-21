@@ -16,6 +16,7 @@ import '../data/models/reading_model.dart';
 import '../data/models/spread_model.dart';
 import '../data/models/app_enums.dart';
 import '../data/repositories/ai_repository.dart';
+import '../data/repositories/activity_stats_repository.dart';
 import 'providers.dart';
 
 enum DetailsStatus { idle, loading, success, error }
@@ -690,6 +691,15 @@ class ReadingFlowController extends StateNotifier<ReadingFlowState> {
   Future<void> _runPostGenerationSideEffects(
     List<DrawnCardModel> drawnCards,
   ) async {
+    try {
+      await ref
+          .read(activityStatsRepositoryProvider)
+          .mark(UserActivityKind.reading);
+    } catch (error) {
+      if (kDebugMode) {
+        debugPrint('[ReadingFlow] mark reading activity failed: $error');
+      }
+    }
     try {
       await _incrementCardStats(drawnCards);
     } catch (error) {

@@ -11,6 +11,7 @@ import '../../core/widgets/energy_widgets.dart';
 import '../../data/repositories/ai_repository.dart';
 import '../../state/energy_controller.dart';
 import '../../state/providers.dart';
+import '../../data/repositories/activity_stats_repository.dart';
 import '../settings/settings_screen.dart';
 import 'astro_result_screen.dart';
 
@@ -147,6 +148,10 @@ class _NatalChartFlowScreenState extends ConsumerState<NatalChartFlowScreen> {
     if (!mounted) {
       return;
     }
+
+    await ref
+        .read(activityStatsRepositoryProvider)
+        .mark(UserActivityKind.natalChart);
 
     final copy = _NatalCopy.resolve(context);
     await Navigator.push(

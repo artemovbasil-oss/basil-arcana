@@ -72,6 +72,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   VoidCallback? _readingsListener;
   ValueListenable<Box<int>>? _cardStatsListenable;
   VoidCallback? _cardStatsListener;
+  ValueListenable<Box<int>>? _activityStatsListenable;
+  VoidCallback? _activityStatsListener;
   Timer? _streakReloadDebounce;
   late final AnimationController _fieldGlowController;
   late final AnimationController _titleShimmerController;
@@ -124,6 +126,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     _cardStatsListenable = ref.read(cardStatsRepositoryProvider).listenable();
     _cardStatsListener = _handleLocalStatsChanged;
     _cardStatsListenable?.addListener(_cardStatsListener!);
+
+    _activityStatsListenable =
+        ref.read(activityStatsRepositoryProvider).listenable();
+    _activityStatsListener = _handleLocalStatsChanged;
+    _activityStatsListenable?.addListener(_activityStatsListener!);
   }
 
   void _detachLiveStatsListeners() {
@@ -133,10 +140,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     if (_cardStatsListenable != null && _cardStatsListener != null) {
       _cardStatsListenable!.removeListener(_cardStatsListener!);
     }
+    if (_activityStatsListenable != null && _activityStatsListener != null) {
+      _activityStatsListenable!.removeListener(_activityStatsListener!);
+    }
     _readingsListenable = null;
     _readingsListener = null;
     _cardStatsListenable = null;
     _cardStatsListener = null;
+    _activityStatsListenable = null;
+    _activityStatsListener = null;
   }
 
   void _handleLocalStatsChanged() {
@@ -216,7 +228,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     required HomeStreakStats base,
   }) {
     final readings = ref.read(readingsRepositoryProvider).getReadings();
-    if (readings.isEmpty) {
+    final activity = ref.read(activityStatsRepositoryProvider);
+    final allDayCounts = activity.dailyCounts();
+    if (readings.isEmpty && allDayCounts.isEmpty) {
       return HomeStreakStats(
         currentStreakDays: 0,
         longestStreakDays: 0,
@@ -233,8 +247,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           return DateTime(local.year, local.month, local.day);
         })
         .toSet()
-        .toList()
-      ..sort((a, b) => b.compareTo(a));
+        .toList();
+    if (allDayCounts.isNotEmpty) {
+      uniqueDays.addAll(allDayCounts.keys);
+    }
+    uniqueDays.sort((a, b) => b.compareTo(a));
 
     var currentStreak = 0;
     if (uniqueDays.isNotEmpty) {
@@ -273,7 +290,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       prev = day;
     }
 
-    final latestCreatedAt = readings.first.createdAt.toLocal();
+    final latestReadingAt =
+        readings.isNotEmpty ? readings.first.createdAt : null;
+    final latestActivityAt = activity.lastActiveAt();
+    final latestCreatedAt = _latestDate(
+      latestReadingAt?.toLocal(),
+      latestActivityAt,
+    );
     return HomeStreakStats(
       currentStreakDays: currentStreak,
       longestStreakDays: longestStreak,
@@ -1425,176 +1448,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     required List<_TopCardStat> topCards,
     required DeckType selectedDeck,
   }) {
-    final readings = ref.read(readingsRepositoryProvider).getReadings();
     final allTimeStats = ref.read(cardStatsRepositoryProvider).getAllCounts();
     final cardById = <String, CardModel>{
       for (final card in cards) canonicalCardId(card.id): card,
     };
-    final now = DateTime.now();
-    final sampled = <_ProfileEntry>[];
-
-    for (final reading in readings) {
-      final ageDays = now.difference(reading.createdAt).inDays;
-      if (ageDays > 90) {
-        continue;
-      }
-      for (final drawn in reading.drawnCards) {
-        final normalizedId = canonicalCardId(drawn.cardId);
-        if (!_matchesProfileDeck(normalizedId, selectedDeck)) {
-          continue;
-        }
-        sampled.add(
-          _ProfileEntry(
-            cardId: normalizedId,
-            cardName: drawn.cardName.trim(),
-            createdAt: reading.createdAt,
-          ),
-        );
-      }
-    }
-
-    sampled.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    final cardsWindow = sampled.take(30).toList();
-    if (cardsWindow.isEmpty) {
-      return _buildEnergyProfileFromAllTimeStats(
-        allTimeStats: allTimeStats,
-        cardById: cardById,
-        topCards: topCards,
-        selectedDeck: selectedDeck,
-      );
-    }
-
-    final suitWeights = <_ElementKind, double>{
-      _ElementKind.wands: 0,
-      _ElementKind.cups: 0,
-      _ElementKind.swords: 0,
-      _ElementKind.pentacles: 0,
-    };
-    final frequencyWeighted = <String, double>{};
-    final frequencyNames = <String, String>{};
-    final monthlyRepeats = <String, int>{};
-
-    double majorWeight = 0;
-    double totalTarotWeight = 0;
-
-    for (final entry in cardsWindow) {
-      final ageDays = now.difference(entry.createdAt).inDays;
-      final weight = ageDays <= 7
-          ? 1.5
-          : ageDays <= 30
-              ? 1.0
-              : 0.5;
-      final normalizedId = entry.cardId;
-
-      if (_isTarotCard(normalizedId)) {
-        totalTarotWeight += weight;
-      }
-      if (_isMajorArcana(normalizedId)) {
-        majorWeight += weight;
-      }
-
-      final element = _bucketByDeck(
-        cardId: normalizedId,
-        selectedDeck: selectedDeck,
-      );
-      if (element != null) {
-        suitWeights[element] = (suitWeights[element] ?? 0) + weight;
-      }
-
-      final resolvedName = entry.cardName.isNotEmpty
-          ? _resolveProfileCardName(
-              normalizedCardId: normalizedId,
-              rawName: entry.cardName,
-              cardById: cardById,
-            )
-          : _resolveProfileCardName(
-              normalizedCardId: normalizedId,
-              rawName: normalizedId,
-              cardById: cardById,
-            );
-      frequencyNames[normalizedId] = resolvedName;
-      frequencyWeighted[normalizedId] =
-          (frequencyWeighted[normalizedId] ?? 0) + weight;
-
-      if (ageDays <= 30) {
-        monthlyRepeats[normalizedId] = (monthlyRepeats[normalizedId] ?? 0) + 1;
-      }
-    }
-
-    final totalElementsWeight = suitWeights.values.fold<double>(
-      0,
-      (sum, value) => sum + value,
-    );
-    final elementPercents = <_ElementKind, int>{};
-    for (final entry in suitWeights.entries) {
-      final percent = totalElementsWeight <= 0
-          ? 0
-          : ((entry.value / totalElementsWeight) * 100).round();
-      elementPercents[entry.key] = percent.clamp(0, 100);
-    }
-
-    final sortedElements = elementPercents.entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
-    final dominantElement =
-        sortedElements.isNotEmpty ? sortedElements.first.key : null;
-    final supportElement =
-        sortedElements.length > 1 ? sortedElements[1].key : null;
-    final majorPercent = selectedDeck == DeckType.lenormand ||
-            selectedDeck == DeckType.crowley
-        ? _concentrationPercent(suitWeights)
-        : totalTarotWeight <= 0
-            ? 0
-            : ((majorWeight / totalTarotWeight) * 100).round().clamp(0, 100);
-
-    final majorPool = frequencyWeighted.entries
-        .where((entry) => _isMajorArcana(entry.key))
-        .toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
-    final allPool = frequencyWeighted.entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
-
-    final dominantArchetypeId = majorPool.isNotEmpty
-        ? majorPool.first.key
-        : allPool.isNotEmpty
-            ? allPool.first.key
-            : null;
-    final dominantArchetypeName = dominantArchetypeId == null
-        ? null
-        : frequencyNames[dominantArchetypeId] ?? dominantArchetypeId;
-
-    final repeatedSignals = monthlyRepeats.entries
-        .where((entry) => entry.value >= 3)
-        .toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
-    final signalList = <_RepeatedCardSignal>[
-      for (final entry in repeatedSignals)
-        _RepeatedCardSignal(
-          cardName: frequencyNames[entry.key] ?? entry.key,
-          count30d: entry.value,
-        ),
-    ];
-    if (signalList.isEmpty) {
-      for (final card in topCards) {
-        if (card.count >= 3) {
-          signalList.add(
-            _RepeatedCardSignal(
-              cardName: card.name,
-              count30d: card.count,
-            ),
-          );
-        }
-      }
-    }
-
-    return _EnergyProfileData(
-      deckType: selectedDeck,
-      sampledCardsCount: cardsWindow.length,
-      elementPercents: elementPercents,
-      dominantElement: dominantElement,
-      supportElement: supportElement,
-      majorArcanaPercent: majorPercent,
-      dominantArchetype: dominantArchetypeName,
-      repeatedSignals: signalList,
+    return _buildEnergyProfileFromAllTimeStats(
+      allTimeStats: allTimeStats,
+      cardById: cardById,
+      topCards: topCards,
+      selectedDeck: selectedDeck,
     );
   }
 
@@ -2040,6 +1902,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                     copy: energyCopy,
                                     profile: profile,
                                     streakDays: _streakStats.currentStreakDays,
+                                    activeDays: _streakStats.activeDays,
                                   ),
                                 const SizedBox(height: 12),
                               ],
@@ -2577,18 +2440,6 @@ class _TopCardStat {
 
 enum _ElementKind { wands, cups, swords, pentacles }
 
-class _ProfileEntry {
-  const _ProfileEntry({
-    required this.cardId,
-    required this.cardName,
-    required this.createdAt,
-  });
-
-  final String cardId;
-  final String cardName;
-  final DateTime createdAt;
-}
-
 class _RepeatedCardSignal {
   const _RepeatedCardSignal({
     required this.cardName,
@@ -2815,7 +2666,7 @@ class _EnergyProfileCopy {
     if (code == 'ru') {
       return const _EnergyProfileCopy(
         title: 'Твой текущий энергетический паттерн',
-        subtitle: 'Аналитика по последним раскладам',
+        subtitle: 'Аналитика по всей истории активности',
         emptyState:
             'Пока мало данных. Сделай несколько раскладов, и профиль начнет заполняться.',
         elementsTitleRider: 'Круг стихий',
@@ -2829,9 +2680,9 @@ class _EnergyProfileCopy {
         destinyHighAlt: 'Паттерн концентрированный и сильный',
         archetypeTitle: 'Доминирующий архетип',
         archetypeFallback: 'Архетип пока формируется',
-        repeatsTitle: 'Повторяющиеся сигналы (30 дней)',
+        repeatsTitle: 'Повторяющиеся сигналы',
         repeatsFallback: 'Явных повторов пока нет.',
-        sampleWindowLabel: 'На основе последних 30 карт',
+        sampleWindowLabel: 'На основе всей истории карт',
         elementAction: 'Жезлы',
         elementEmotion: 'Кубки',
         elementMind: 'Мечи',
@@ -2853,7 +2704,7 @@ class _EnergyProfileCopy {
     if (code == 'kk') {
       return const _EnergyProfileCopy(
         title: 'Сенің ағымдағы энергия паттернің',
-        subtitle: 'Соңғы раскладтар аналитикасы',
+        subtitle: 'Белсенділіктің толық тарихы аналитикасы',
         emptyState:
             'Дерек әлі аз. Бірнеше расклад жасаңыз, профиль біртіндеп толады.',
         elementsTitleRider: 'Стихиялар шеңбері',
@@ -2867,9 +2718,9 @@ class _EnergyProfileCopy {
         destinyHighAlt: 'Паттерн шоғырланған әрі күшті',
         archetypeTitle: 'Басым архетип',
         archetypeFallback: 'Архетип әлі қалыптасып жатыр',
-        repeatsTitle: 'Қайталанатын сигналдар (30 күн)',
+        repeatsTitle: 'Қайталанатын сигналдар',
         repeatsFallback: 'Айқын қайталанулар әзірге жоқ.',
-        sampleWindowLabel: 'Соңғы 30 карта негізінде',
+        sampleWindowLabel: 'Карталар толық тарихы негізінде',
         elementAction: 'Таяқтар',
         elementEmotion: 'Кубоктар',
         elementMind: 'Қылыштар',
@@ -2890,7 +2741,7 @@ class _EnergyProfileCopy {
     }
     return const _EnergyProfileCopy(
       title: 'Your current energy pattern',
-      subtitle: 'Analytics from recent readings',
+      subtitle: 'Analytics from your full activity history',
       emptyState:
           'Not enough data yet. Complete a few readings and this profile will fill in.',
       elementsTitleRider: 'Element wheel',
@@ -2904,9 +2755,9 @@ class _EnergyProfileCopy {
       destinyHighAlt: 'Pattern is concentrated and intense',
       archetypeTitle: 'Dominant archetype',
       archetypeFallback: 'Archetype is forming',
-      repeatsTitle: 'Recurring signals (30 days)',
+      repeatsTitle: 'Recurring signals',
       repeatsFallback: 'No strong repeats yet.',
-      sampleWindowLabel: 'Based on your latest 30 cards',
+      sampleWindowLabel: 'Based on your full card history',
       elementAction: 'Wands',
       elementEmotion: 'Cups',
       elementMind: 'Swords',
@@ -3447,11 +3298,13 @@ class _EnergyProfileCard extends StatelessWidget {
     required this.copy,
     required this.profile,
     required this.streakDays,
+    required this.activeDays,
   });
 
   final _EnergyProfileCopy copy;
   final _EnergyProfileData profile;
   final int streakDays;
+  final int activeDays;
 
   @override
   Widget build(BuildContext context) {
@@ -3467,16 +3320,16 @@ class _EnergyProfileCard extends StatelessWidget {
           ]
         : isLenormand
             ? const [
-                Color(0xFF7ABAE2),
-                Color(0xFFC7A9C9),
-                Color(0xFFA9ADCD),
-                Color(0xFF8EBAA6),
+                Color(0xFF67D8C7),
+                Color(0xFF7DA8FF),
+                Color(0xFFCF96FF),
+                Color(0xFF7EDB9A),
               ]
             : const [
-                Color(0xFFE28E67),
-                Color(0xFF77B7DA),
-                Color(0xFFD6D7E5),
-                Color(0xFFD0B46D),
+                Color(0xFFFF8E6A),
+                Color(0xFF71C6F2),
+                Color(0xFFC4B8FF),
+                Color(0xFFF2CD6E),
               ];
     final slices = [
       _EnergySlice(
@@ -3500,6 +3353,14 @@ class _EnergyProfileCard extends StatelessWidget {
         color: palette[3],
       ),
     ];
+    final mainSignal =
+        profile.repeatedSignals.isEmpty ? null : profile.repeatedSignals.first;
+    final achievements = _buildAchievements(streakDays);
+    final recentGoal = max(3, min(30, (activeDays / 2).round()));
+    final cadencePercent = activeDays <= 0
+        ? 0
+        : ((activeDays / recentGoal) * 100).round().clamp(0, 100);
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
@@ -3513,7 +3374,7 @@ class _EnergyProfileCard extends StatelessWidget {
           end: Alignment.bottomRight,
           colors: [
             colorScheme.surfaceContainerHighest.withValues(alpha: 0.42),
-            colorScheme.primary.withValues(alpha: 0.12),
+            colorScheme.primary.withValues(alpha: 0.08),
           ],
         ),
       ),
@@ -3542,110 +3403,94 @@ class _EnergyProfileCard extends StatelessWidget {
                   ),
             ),
           ] else ...[
-            _EnergySectionTitle(text: copy.circleTitle(profile.deckType)),
-            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+              decoration: BoxDecoration(
+                color: colorScheme.surface.withValues(alpha: 0.32),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: colorScheme.outlineVariant.withValues(alpha: 0.34),
+                ),
+              ),
+              child: Row(
+                children: [
+                  _EnergyDonutChart(
+                    slices: slices,
+                    centerLabel: '${profile.sampledCardsCount}',
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          copy.circleTitle(profile.deckType),
+                          style:
+                              Theme.of(context).textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                        ),
+                        const SizedBox(height: 8),
+                        for (final slice in slices)
+                          _EnergyLegendRow(
+                            color: slice.color,
+                            label: slice.label,
+                            percent: slice.percent,
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 14),
             Row(
               children: [
-                _EnergyDonutChart(
-                  slices: slices,
-                  centerLabel: '${profile.sampledCardsCount}',
-                ),
-                const SizedBox(width: 12),
                 Expanded(
-                  child: Column(
-                    children: [
-                      for (final slice in slices)
-                        _EnergyLegendRow(
-                          color: slice.color,
-                          label: slice.label,
-                          percent: slice.percent,
-                        ),
-                    ],
+                  child: _InsightMetricTile(
+                    title: copy.destinyTitle(profile.deckType),
+                    value: '${profile.majorArcanaPercent}%',
+                    subtitle: copy.destinySummary(
+                      profile.deckType,
+                      profile.majorArcanaPercent,
+                    ),
+                    accent: palette[0],
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _InsightMetricTile(
+                    title: copy.archetypeTitle,
+                    value: profile.dominantArchetype ?? copy.archetypeFallback,
+                    subtitle: profile.dominantArchetype == null
+                        ? copy.archetypeDescriptionFallback
+                        : copy.archetypeDescription(profile.dominantArchetype!),
+                    accent: palette[1],
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 8),
-            Text(
-              copy.phaseSummary(
+            const SizedBox(height: 10),
+            _InsightMetricTile(
+              title: copy.repeatsTitle,
+              value: mainSignal == null
+                  ? copy.repeatsFallback
+                  : '${mainSignal.cardName} · ${mainSignal.count30d}x',
+              subtitle: copy.phaseSummary(
                 deckType: profile.deckType,
                 dominant: profile.dominantElement,
                 support: profile.supportElement,
               ),
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurface.withValues(alpha: 0.86),
-                  ),
+              accent: palette[2],
+              trailingTrend: cadencePercent,
             ),
             const SizedBox(height: 14),
-            _EnergySectionTitle(text: copy.destinyTitle(profile.deckType)),
+            _EnergySectionTitle(text: _awardsTitle(context)),
             const SizedBox(height: 8),
-            _FateIntensityBar(value: profile.majorArcanaPercent),
-            const SizedBox(height: 6),
-            Text(
-              copy.destinySummary(
-                profile.deckType,
-                profile.majorArcanaPercent,
-              ),
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurface.withValues(alpha: 0.84),
-                  ),
+            _AchievementGrid(
+              achievements: achievements,
+              streakDays: streakDays,
             ),
-            const SizedBox(height: 14),
-            _EnergySectionTitle(text: copy.archetypeTitle),
-            const SizedBox(height: 8),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
-              decoration: BoxDecoration(
-                color: colorScheme.surface.withValues(alpha: 0.38),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                  color: colorScheme.primary.withValues(alpha: 0.3),
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    profile.dominantArchetype ?? copy.archetypeFallback,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w800,
-                        ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    profile.dominantArchetype == null
-                        ? copy.archetypeDescriptionFallback
-                        : copy.archetypeDescription(profile.dominantArchetype!),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurface.withValues(alpha: 0.82),
-                        ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 14),
-            _EnergySectionTitle(text: copy.repeatsTitle),
-            const SizedBox(height: 8),
-            if (profile.repeatedSignals.isEmpty)
-              Text(
-                copy.repeatsFallback,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurface.withValues(alpha: 0.78),
-                    ),
-              )
-            else
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  for (final signal in profile.repeatedSignals.take(4))
-                    _SignalChip(
-                      label: signal.cardName,
-                      value: signal.count30d,
-                    ),
-                ],
-              ),
             if (streakDays > 1) ...[
               const SizedBox(height: 10),
               Text(
@@ -3659,6 +3504,271 @@ class _EnergyProfileCard extends StatelessWidget {
           ],
         ],
       ),
+    );
+  }
+
+  String _awardsTitle(BuildContext context) {
+    final code = Localizations.localeOf(context).languageCode;
+    if (code == 'ru') {
+      return 'Награды ритма';
+    }
+    if (code == 'kk') {
+      return 'Ритм марапаттары';
+    }
+    return 'Rhythm awards';
+  }
+
+  List<_AchievementMilestone> _buildAchievements(int streak) {
+    final thresholds = <int>[3, 5, 7, 14, 21];
+    final milestones = <_AchievementMilestone>[];
+    for (final value in thresholds) {
+      milestones.add(_AchievementMilestone(days: value));
+    }
+    final monthlyMax = max(30, ((streak + 29) ~/ 30) * 30);
+    for (var month = 30; month <= monthlyMax; month += 30) {
+      milestones.add(_AchievementMilestone(days: month, isMonthly: true));
+    }
+    return milestones;
+  }
+}
+
+class _InsightMetricTile extends StatelessWidget {
+  const _InsightMetricTile({
+    required this.title,
+    required this.value,
+    required this.subtitle,
+    required this.accent,
+    this.trailingTrend,
+  });
+
+  final String title;
+  final String value;
+  final String subtitle;
+  final Color accent;
+  final int? trailingTrend;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final trend = trailingTrend?.clamp(0, 100);
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(12, 11, 12, 11),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14),
+        color: colorScheme.surface.withValues(alpha: 0.32),
+        border: Border.all(
+          color: accent.withValues(alpha: 0.45),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  title,
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        color: colorScheme.onSurface.withValues(alpha: 0.78),
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+              ),
+              if (trend != null) _MiniTrendBubble(percent: trend),
+            ],
+          ),
+          const SizedBox(height: 5),
+          Text(
+            value,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: accent,
+                ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            subtitle,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurface.withValues(alpha: 0.78),
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MiniTrendBubble extends StatelessWidget {
+  const _MiniTrendBubble({required this.percent});
+
+  final int percent;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isUp = percent >= 50;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+      decoration: BoxDecoration(
+        color: (isUp ? const Color(0xFF73DBA1) : const Color(0xFFFF9D8D))
+            .withValues(alpha: 0.2),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            isUp ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded,
+            size: 11,
+            color: isUp ? const Color(0xFF73DBA1) : const Color(0xFFFF9D8D),
+          ),
+          Text(
+            '$percent%',
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: colorScheme.onSurface.withValues(alpha: 0.86),
+                  fontWeight: FontWeight.w700,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AchievementMilestone {
+  const _AchievementMilestone({
+    required this.days,
+    this.isMonthly = false,
+  });
+
+  final int days;
+  final bool isMonthly;
+}
+
+class _AchievementGrid extends StatelessWidget {
+  const _AchievementGrid({
+    required this.achievements,
+    required this.streakDays,
+  });
+
+  final List<_AchievementMilestone> achievements;
+  final int streakDays;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        for (final item in achievements)
+          _AchievementBadge(
+            days: item.days,
+            unlocked: streakDays >= item.days,
+            isMonthly: item.isMonthly,
+          ),
+      ],
+    );
+  }
+}
+
+class _AchievementBadge extends StatelessWidget {
+  const _AchievementBadge({
+    required this.days,
+    required this.unlocked,
+    required this.isMonthly,
+  });
+
+  final int days;
+  final bool unlocked;
+  final bool isMonthly;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final bg = unlocked
+        ? colorScheme.primary.withValues(alpha: 0.18)
+        : colorScheme.surface.withValues(alpha: 0.24);
+    final border = unlocked
+        ? colorScheme.primary.withValues(alpha: 0.5)
+        : colorScheme.outlineVariant.withValues(alpha: 0.35);
+    return Container(
+      constraints: const BoxConstraints(minWidth: 92),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: border),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _AchievementIcon(unlocked: unlocked, monthly: isMonthly),
+          const SizedBox(width: 6),
+          Text(
+            '$days',
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+          ),
+          const SizedBox(width: 2),
+          Text(
+            _dayShort(context),
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: colorScheme.onSurface.withValues(alpha: 0.72),
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _dayShort(BuildContext context) {
+    final code = Localizations.localeOf(context).languageCode;
+    if (code == 'ru') {
+      return 'дн';
+    }
+    if (code == 'kk') {
+      return 'күн';
+    }
+    return 'd';
+  }
+}
+
+class _AchievementIcon extends StatelessWidget {
+  const _AchievementIcon({
+    required this.unlocked,
+    required this.monthly,
+  });
+
+  final bool unlocked;
+  final bool monthly;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = unlocked ? const Color(0xFFFFD574) : const Color(0xFF7E7A95);
+    final svg = monthly
+        ? '''
+<svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+  <path d="M10 2.2l2 4.1 4.5.7-3.2 3.1.8 4.4-4.1-2.2-4.1 2.2.8-4.4-3.2-3.1 4.5-.7L10 2.2z" fill="#ffffff"/>
+</svg>
+'''
+        : '''
+<svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="10" cy="10" r="7" fill="none" stroke="#ffffff" stroke-width="1.8"/>
+  <path d="M6.2 10.4l2.3 2.2 5.3-5.3" fill="none" stroke="#ffffff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+''';
+    return SvgPicture.string(
+      svg,
+      width: 16,
+      height: 16,
+      colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
     );
   }
 }
@@ -3721,72 +3831,6 @@ class _EnergyLegendRow extends StatelessWidget {
                 ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _FateIntensityBar extends StatelessWidget {
-  const _FateIntensityBar({required this.value});
-
-  final int value;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final clamped = value.clamp(0, 100).toDouble();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(999),
-          child: LinearProgressIndicator(
-            minHeight: 11,
-            value: clamped / 100,
-            backgroundColor: colorScheme.surface.withValues(alpha: 0.42),
-            valueColor: AlwaysStoppedAnimation<Color>(
-              clamped >= 38 ? const Color(0xFFB26AFF) : colorScheme.primary,
-            ),
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          '$value%',
-          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
-        ),
-      ],
-    );
-  }
-}
-
-class _SignalChip extends StatelessWidget {
-  const _SignalChip({
-    required this.label,
-    required this.value,
-  });
-
-  final String label;
-  final int value;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: colorScheme.surface.withValues(alpha: 0.45),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(
-          color: colorScheme.primary.withValues(alpha: 0.32),
-        ),
-      ),
-      child: Text(
-        '$label · ${value}x',
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
       ),
     );
   }

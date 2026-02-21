@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 
 import '../data/repositories/ai_repository.dart';
+import '../data/repositories/activity_stats_repository.dart';
 import '../data/repositories/card_stats_repository.dart';
 import '../data/repositories/cards_repository.dart';
 import '../data/repositories/data_repository.dart';
@@ -42,6 +43,11 @@ final readingsRepositoryProvider = Provider<ReadingsRepository>((ref) {
 
 final cardStatsRepositoryProvider = Provider<CardStatsRepository>((ref) {
   return CardStatsRepository();
+});
+
+final activityStatsRepositoryProvider =
+    Provider<ActivityStatsRepository>((ref) {
+  return ActivityStatsRepository();
 });
 
 final energyTopUpRepositoryProvider = Provider<EnergyTopUpRepository>((ref) {
