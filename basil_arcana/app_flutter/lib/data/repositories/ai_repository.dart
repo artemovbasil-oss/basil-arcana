@@ -921,6 +921,7 @@ class AiRepository {
     final payload = {
       'birthDate': birthDate,
       'language': languageCode,
+      'clientNonce': requestId,
       'birthPlace': birthPlace.toJson(),
       if (birthTime != null && birthTime.trim().isNotEmpty)
         'birthTime': birthTime,
@@ -1063,6 +1064,12 @@ class AiRepository {
 
     try {
       final data = jsonDecode(response.body) as Map<String, dynamic>;
+      final responseRequestId = data['requestId'] as String?;
+      if (responseRequestId != null &&
+          responseRequestId.isNotEmpty &&
+          responseRequestId != requestId) {
+        throw const FormatException('Mismatched requestId in response');
+      }
       final interpretation = data['interpretation'];
       if (interpretation is String && interpretation.trim().isNotEmpty) {
         _logSuccess(
@@ -1147,6 +1154,7 @@ class AiRepository {
         'birthTime': personTwoBirthTime,
       },
       'language': languageCode,
+      'clientNonce': requestId,
     };
 
     final headers = {
@@ -1266,6 +1274,12 @@ class AiRepository {
 
     try {
       final data = jsonDecode(response.body) as Map<String, dynamic>;
+      final responseRequestId = data['requestId'] as String?;
+      if (responseRequestId != null &&
+          responseRequestId.isNotEmpty &&
+          responseRequestId != requestId) {
+        throw const FormatException('Mismatched requestId in response');
+      }
       final interpretation = data['interpretation'];
       if (interpretation is String && interpretation.trim().isNotEmpty) {
         _logSuccess(

@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
 import '../../core/navigation/app_route_config.dart';
 import '../../core/telegram/telegram_user_profile.dart';
@@ -41,6 +43,7 @@ class AstroResultScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final copy = _AstroResultCopy.resolve(context);
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: buildEnergyTopBar(
         context,
@@ -70,16 +73,9 @@ class AstroResultScreen extends ConsumerWidget {
                   ChatBubble(
                     isUser: false,
                     avatarEmoji: '🪄',
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(summary),
-                      ],
+                    child: _AstroSectionCard(
+                      heading: l10n.resultSectionArcaneSnapshot,
+                      body: summary,
                     ),
                   ),
                   if (showBirthChartVisual) ...[
@@ -99,29 +95,9 @@ class AstroResultScreen extends ConsumerWidget {
                     ChatBubble(
                       isUser: false,
                       avatarEmoji: '🪄',
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            copy.highlightsTitle,
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                          const SizedBox(height: 8),
-                          for (final line in highlights) ...[
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Padding(
-                                  padding: EdgeInsets.only(top: 2),
-                                  child: Text('• '),
-                                ),
-                                Expanded(child: Text(line)),
-                              ],
-                            ),
-                            if (line != highlights.last)
-                              const SizedBox(height: 6),
-                          ],
-                        ],
+                      child: _AstroSectionCard(
+                        heading: l10n.resultSectionWhy,
+                        bulletLines: highlights,
                       ),
                     ),
                   ],
@@ -129,16 +105,9 @@ class AstroResultScreen extends ConsumerWidget {
                   ChatBubble(
                     isUser: false,
                     avatarEmoji: '🪄',
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          copy.actionTitle,
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(action),
-                      ],
+                    child: _AstroSectionCard(
+                      heading: l10n.resultSectionAction,
+                      body: action,
                     ),
                   ),
                   const SizedBox(height: 14),
@@ -153,52 +122,261 @@ class AstroResultScreen extends ConsumerWidget {
                     avatarEmoji: '🪄',
                     child: _ReferralCard(copy: copy),
                   ),
-                  if (tarotQuestion != null &&
-                      tarotQuestion!.trim().isNotEmpty) ...[
-                    const SizedBox(height: 14),
-                    ChatBubble(
-                      isUser: false,
-                      avatarEmoji: '🪄',
-                      child: SizedBox(
-                        width: double.infinity,
-                        child: AppPrimaryButton(
-                          label: copy.tarotCtaButton,
-                          icon: Icons.auto_awesome,
-                          onPressed: () {
-                            ref
-                                .read(readingFlowControllerProvider.notifier)
-                                .setQuestion(tarotQuestion!.trim());
-                            Navigator.popUntil(
-                              context,
-                              (route) => route.isFirst,
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                  ],
+                  const SizedBox(height: 110),
                 ],
               ),
             ),
-            SafeArea(
-              top: false,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: AppGhostButton(
-                    label: copy.newButton,
-                    icon: Icons.auto_awesome,
-                    onPressed: () {
-                      Navigator.popUntil(context, (route) => route.isFirst);
-                    },
-                  ),
-                ),
-              ),
+            _AstroActionBar(
+              newLabel: l10n.resultNewButton,
+              moreLabel: l10n.resultWantMoreButton,
+              onNew: () {
+                Navigator.popUntil(context, (route) => route.isFirst);
+              },
+              onMore: () async {
+                await showModalBottomSheet<void>(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  builder: (sheetContext) {
+                    return SafeArea(
+                      top: false,
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+                        child: Container(
+                          padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .surfaceContainerHighest
+                                .withValues(alpha: 0.96),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .outlineVariant
+                                  .withValues(alpha: 0.42),
+                            ),
+                          ),
+                          child: SofiaPromoCard(prefilledMessage: sofiaPrefill),
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+              onTarot: tarotQuestion != null && tarotQuestion!.trim().isNotEmpty
+                  ? () {
+                      ref
+                          .read(readingFlowControllerProvider.notifier)
+                          .setQuestion(tarotQuestion!.trim());
+                      Navigator.popUntil(
+                        context,
+                        (route) => route.isFirst,
+                      );
+                    }
+                  : null,
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _AstroSectionCard extends StatelessWidget {
+  const _AstroSectionCard({
+    required this.heading,
+    this.body,
+    this.bulletLines,
+  });
+
+  final String heading;
+  final String? body;
+  final List<String>? bulletLines;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          heading,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: colorScheme.primary,
+                fontWeight: FontWeight.w700,
+              ),
+        ),
+        const SizedBox(height: 8),
+        if (body != null && body!.trim().isNotEmpty) Text(body!),
+        if (bulletLines != null)
+          for (final line in bulletLines!) ...[
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.only(top: 2),
+                  child: Text('• '),
+                ),
+                Expanded(child: Text(line)),
+              ],
+            ),
+            if (line != bulletLines!.last) const SizedBox(height: 6),
+          ],
+      ],
+    );
+  }
+}
+
+class _AstroActionBar extends StatelessWidget {
+  const _AstroActionBar({
+    required this.newLabel,
+    required this.moreLabel,
+    required this.onNew,
+    required this.onMore,
+    this.onTarot,
+  });
+
+  final String newLabel;
+  final String moreLabel;
+  final VoidCallback onNew;
+  final VoidCallback onMore;
+  final VoidCallback? onTarot;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: colorScheme.surface.withValues(alpha: 0.92),
+            borderRadius: BorderRadius.circular(22),
+            boxShadow: [
+              BoxShadow(
+                color: colorScheme.primary.withValues(alpha: 0.18),
+                blurRadius: 24,
+                offset: const Offset(0, 10),
+              ),
+            ],
+            border: Border.all(
+              color: colorScheme.outlineVariant.withValues(alpha: 0.4),
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton(
+                    onPressed: onNew,
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size.fromHeight(54),
+                      foregroundColor: colorScheme.primary,
+                      side: BorderSide(
+                        color: colorScheme.primary.withValues(alpha: 0.8),
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _AstroActionIcon(
+                          kind: _AstroActionIconKind.newReading,
+                          color: colorScheme.primary,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(newLabel),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: onMore,
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size.fromHeight(54),
+                      backgroundColor: colorScheme.primary,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const _AstroActionIcon(
+                          kind: _AstroActionIconKind.wantMore,
+                          color: Colors.white,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(moreLabel),
+                      ],
+                    ),
+                  ),
+                ),
+                if (onTarot != null) ...[
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    width: double.infinity,
+                    child: AppGhostButton(
+                      label: _AstroResultCopy.resolve(context).tarotCtaButton,
+                      icon: Icons.auto_awesome,
+                      onPressed: onTarot,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+enum _AstroActionIconKind { newReading, wantMore }
+
+class _AstroActionIcon extends StatelessWidget {
+  const _AstroActionIcon({
+    required this.kind,
+    required this.color,
+  });
+
+  final _AstroActionIconKind kind;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final svg = switch (kind) {
+      _AstroActionIconKind.newReading => '''
+<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  <rect x="4.2" y="6.2" width="10.4" height="13.2" rx="2.1" fill="none" stroke="#ffffff" stroke-width="1.8"/>
+  <rect x="9.4" y="4.4" width="10.4" height="13.2" rx="2.1" fill="none" stroke="#ffffff" stroke-width="1.8" opacity="0.9"/>
+  <path d="M18.2 2.6v3.6M16.4 4.4H20" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round"/>
+</svg>
+''',
+      _AstroActionIconKind.wantMore => '''
+<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  <path d="M12 3.2l1.2 3.2 3.2 1.2-3.2 1.2L12 12l-1.2-3.2-3.2-1.2 3.2-1.2L12 3.2z" fill="#ffffff"/>
+  <path d="M18.4 10.4l0.8 2.1 2.1 0.8-2.1 0.8-0.8 2.1-0.8-2.1-2.1-0.8 2.1-0.8 0.8-2.1z" fill="#ffffff" opacity="0.92"/>
+  <path d="M8.1 13.4l1.1 2.9 2.9 1.1-2.9 1.1-1.1 2.9-1.1-2.9-2.9-1.1 2.9-1.1 1.1-2.9z" fill="#ffffff" opacity="0.88"/>
+</svg>
+''',
+    };
+    return SvgPicture.string(
+      svg,
+      width: 18,
+      height: 18,
+      colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
     );
   }
 }

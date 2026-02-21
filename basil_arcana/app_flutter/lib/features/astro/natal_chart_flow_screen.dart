@@ -33,6 +33,7 @@ class _NatalChartFlowScreenState extends ConsumerState<NatalChartFlowScreen> {
   bool _isSubmitting = false;
   bool _isPlaceLoading = false;
   String? _placeError;
+  int _submitToken = 0;
   BirthPlaceSuggestion? _selectedBirthPlace;
   List<BirthPlaceSuggestion> _placeSuggestions = const [];
   Timer? _placeSearchDebounce;
@@ -40,6 +41,7 @@ class _NatalChartFlowScreenState extends ConsumerState<NatalChartFlowScreen> {
 
   @override
   void dispose() {
+    _submitToken++;
     _nameController.dispose();
     _dateController.dispose();
     _timeController.dispose();
@@ -101,6 +103,7 @@ class _NatalChartFlowScreenState extends ConsumerState<NatalChartFlowScreen> {
     if (_isSubmitting) {
       return;
     }
+    final submitToken = ++_submitToken;
     final name = _nameController.text.trim();
     final birthDate = _dateController.text.trim();
     final birthTime = _timeController.text.trim();
@@ -121,12 +124,13 @@ class _NatalChartFlowScreenState extends ConsumerState<NatalChartFlowScreen> {
       ref,
       EnergyAction.natalChart,
     );
+    if (!_isSubmitActive(submitToken)) {
+      return;
+    }
     if (!canProceed) {
-      if (mounted) {
-        setState(() {
-          _isSubmitting = false;
-        });
-      }
+      setState(() {
+        _isSubmitting = false;
+      });
       return;
     }
 
@@ -145,7 +149,7 @@ class _NatalChartFlowScreenState extends ConsumerState<NatalChartFlowScreen> {
       summary = _fallbackSummary(localeCode, name);
     }
 
-    if (!mounted) {
+    if (!_isSubmitActive(submitToken)) {
       return;
     }
 
@@ -177,12 +181,16 @@ class _NatalChartFlowScreenState extends ConsumerState<NatalChartFlowScreen> {
       ),
     );
 
-    if (!mounted) {
+    if (!_isSubmitActive(submitToken)) {
       return;
     }
     setState(() {
       _isSubmitting = false;
     });
+  }
+
+  bool _isSubmitActive(int token) {
+    return mounted && token == _submitToken;
   }
 
   void _onPlaceQueryChanged(String value) {

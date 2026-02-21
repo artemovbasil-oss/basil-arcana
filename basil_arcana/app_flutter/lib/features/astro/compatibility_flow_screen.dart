@@ -33,9 +33,11 @@ class _CompatibilityFlowScreenState
 
   int _step = 0;
   bool _isSubmitting = false;
+  int _submitToken = 0;
 
   @override
   void dispose() {
+    _submitToken++;
     _p1NameController.dispose();
     _p1DateController.dispose();
     _p1TimeController.dispose();
@@ -108,6 +110,10 @@ class _CompatibilityFlowScreenState
   }
 
   Future<void> _submit() async {
+    if (_isSubmitting) {
+      return;
+    }
+    final submitToken = ++_submitToken;
     setState(() {
       _isSubmitting = true;
     });
@@ -117,16 +123,17 @@ class _CompatibilityFlowScreenState
       ref,
       EnergyAction.compatibility,
     );
+    if (!_isSubmitActive(submitToken)) {
+      return;
+    }
     if (!canProceed) {
-      if (mounted) {
-        setState(() {
-          _isSubmitting = false;
-        });
-      }
+      setState(() {
+        _isSubmitting = false;
+      });
       return;
     }
 
-    if (!mounted) {
+    if (!_isSubmitActive(submitToken)) {
       return;
     }
 
@@ -153,7 +160,7 @@ class _CompatibilityFlowScreenState
           );
       score = 72 + Random().nextInt(17);
     } on AiRepositoryException {
-      if (!mounted) {
+      if (!_isSubmitActive(submitToken)) {
         return;
       }
       setState(() {
@@ -164,7 +171,7 @@ class _CompatibilityFlowScreenState
       );
       return;
     } catch (_) {
-      if (!mounted) {
+      if (!_isSubmitActive(submitToken)) {
         return;
       }
       setState(() {
@@ -176,10 +183,16 @@ class _CompatibilityFlowScreenState
       return;
     }
 
+    if (!_isSubmitActive(submitToken)) {
+      return;
+    }
     await ref
         .read(activityStatsRepositoryProvider)
         .mark(UserActivityKind.compatibility);
 
+    if (!_isSubmitActive(submitToken)) {
+      return;
+    }
     await Navigator.push(
       context,
       MaterialPageRoute(
@@ -200,12 +213,16 @@ class _CompatibilityFlowScreenState
       ),
     );
 
-    if (!mounted) {
+    if (!_isSubmitActive(submitToken)) {
       return;
     }
     setState(() {
       _isSubmitting = false;
     });
+  }
+
+  bool _isSubmitActive(int token) {
+    return mounted && token == _submitToken;
   }
 
   @override
