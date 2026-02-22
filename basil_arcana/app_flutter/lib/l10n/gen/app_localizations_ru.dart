@@ -251,6 +251,15 @@ class AppLocalizationsRu extends AppLocalizations {
   String get cardsDetailTitle => 'Детали карты';
 
   @override
+  String get cardTitleFieldTitle => 'Заголовок';
+
+  @override
+  String get cardTagsTitle => 'Теги';
+
+  @override
+  String get cardDescriptionTitle => 'Описание';
+
+  @override
   String get cardKeywordsTitle => 'Ключевые слова';
 
   @override

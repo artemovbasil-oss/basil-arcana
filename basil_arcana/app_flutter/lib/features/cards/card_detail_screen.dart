@@ -286,6 +286,58 @@ class _CardDetailScreenState extends ConsumerState<CardDetailScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
+                        l10n.cardTitleFieldTitle,
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: colorScheme.primary,
+                                ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        resolvedCard.name,
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        l10n.cardTagsTitle,
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: colorScheme.primary,
+                                ),
+                      ),
+                      const SizedBox(height: 10),
+                      if (resolvedCard.keywords.isNotEmpty)
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: resolvedCard.keywords
+                              .map((keyword) => _TagChip(label: keyword))
+                              .toList(growable: false),
+                        )
+                      else
+                        Text(
+                          l10n.cardDetailsFallback,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      const SizedBox(height: 20),
+                      Text(
+                        l10n.cardDescriptionTitle,
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: colorScheme.primary,
+                                ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        resolvedCard.description?.trim().isNotEmpty ?? false
+                            ? resolvedCard.description!
+                            : resolvedCard.meaning.general,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
                         l10n.cardDetailedTitle,
                         style:
                             Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -570,6 +622,36 @@ class _StatTile extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _TagChip extends StatelessWidget {
+  const _TagChip({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: colorScheme.primary.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: colorScheme.primary.withValues(alpha: 0.28),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        child: Text(
+          label,
+          style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: colorScheme.primary,
+                fontWeight: FontWeight.w600,
+              ),
+        ),
       ),
     );
   }

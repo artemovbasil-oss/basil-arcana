@@ -250,6 +250,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cardsDetailTitle => 'Card details';
 
   @override
+  String get cardTitleFieldTitle => 'Title';
+
+  @override
+  String get cardTagsTitle => 'Tags';
+
+  @override
+  String get cardDescriptionTitle => 'Description';
+
+  @override
   String get cardKeywordsTitle => 'Keywords';
 
   @override

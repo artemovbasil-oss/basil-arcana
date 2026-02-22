@@ -252,6 +252,15 @@ class AppLocalizationsKk extends AppLocalizations {
   String get cardsDetailTitle => 'Карта туралы';
 
   @override
+  String get cardTitleFieldTitle => 'Тақырып';
+
+  @override
+  String get cardTagsTitle => 'Тегтер';
+
+  @override
+  String get cardDescriptionTitle => 'Сипаттама';
+
+  @override
   String get cardKeywordsTitle => 'Түйін сөздер';
 
   @override

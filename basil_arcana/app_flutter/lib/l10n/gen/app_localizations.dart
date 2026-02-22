@@ -556,6 +556,24 @@ abstract class AppLocalizations {
   /// **'Card details'**
   String get cardsDetailTitle;
 
+  /// No description provided for @cardTitleFieldTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get cardTitleFieldTitle;
+
+  /// No description provided for @cardTagsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tags'**
+  String get cardTagsTitle;
+
+  /// No description provided for @cardDescriptionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get cardDescriptionTitle;
+
   /// No description provided for @cardKeywordsTitle.
   ///
   /// In en, this message translates to:

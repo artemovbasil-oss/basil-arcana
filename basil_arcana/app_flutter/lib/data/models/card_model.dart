@@ -70,6 +70,7 @@ class CardDto {
     required this.id,
     required this.deckId,
     required this.name,
+    required this.description,
     required this.keywords,
     required this.meaning,
     required this.detailedDescription,
@@ -83,6 +84,7 @@ class CardDto {
   final String id;
   final DeckType deckId;
   final String name;
+  final String description;
   final List<String> keywords;
   final CardMeaning meaning;
   final String detailedDescription;
@@ -106,6 +108,9 @@ class CardDto {
     final summary = _stringFromJson(json['summary']).isNotEmpty
         ? _stringFromJson(json['summary'])
         : _stringFromJson(json['generalMeaning']);
+    final description = _stringFromJson(json['description']).isNotEmpty
+        ? _stringFromJson(json['description'])
+        : summary;
     final meaningPayload = json['meaning'];
     final meaning = meaningPayload is Map<String, dynamic>
         ? CardMeaning.fromJsonSafe(
@@ -125,6 +130,7 @@ class CardDto {
       id: id,
       deckId: deckId,
       name: name,
+      description: description,
       keywords: keywords,
       meaning: meaning,
       detailedDescription: detailed,
@@ -143,6 +149,7 @@ class CardModel {
   final String id;
   final DeckType deckId;
   final String name;
+  final String? description;
   final List<String> keywords;
   final CardMeaning meaning;
   final String? detailedDescription;
@@ -156,6 +163,7 @@ class CardModel {
     required this.id,
     required this.deckId,
     required this.name,
+    this.description,
     required this.keywords,
     required this.meaning,
     this.detailedDescription,
@@ -170,6 +178,7 @@ class CardModel {
     String? id,
     DeckType? deckId,
     String? name,
+    String? description,
     List<String>? keywords,
     CardMeaning? meaning,
     String? detailedDescription,
@@ -183,6 +192,7 @@ class CardModel {
       id: id ?? this.id,
       deckId: deckId ?? this.deckId,
       name: name ?? this.name,
+      description: description ?? this.description,
       keywords: keywords ?? this.keywords,
       meaning: meaning ?? this.meaning,
       detailedDescription: detailedDescription ?? this.detailedDescription,
@@ -201,6 +211,7 @@ class CardModel {
       deckId:
           deckIdFromString(json['deck'] as String?) ?? _deckIdFromCardId(id),
       name: json['name'] as String,
+      description: json['description'] as String?,
       keywords: _normalizeKeywords(json['keywords'], id: id),
       meaning: CardMeaning.fromJson(json['meaning'] as Map<String, dynamic>),
       detailedDescription: json['detailedDescription'] as String?,
@@ -218,6 +229,7 @@ class CardModel {
       id: dto.id,
       deckId: dto.deckId,
       name: dto.name,
+      description: dto.description.isEmpty ? null : dto.description,
       keywords: dto.keywords,
       meaning: dto.meaning,
       detailedDescription:

@@ -19,7 +19,8 @@
       "love": 50,
       "clarity": 55
     },
-    "detailedDescription": "A fresh start and a leap of faith. Playful optimism and a willingness to explore. Naivety, rash risks, or ignoring the obvious. Begin, but carry a small plan with your hope."
+    "detailedDescription": "A fresh start and a leap of faith. Playful optimism and a willingness to explore. Naivety, rash risks, or ignoring the obvious. Begin, but carry a small plan with your hope.",
+    "description": "The Fool: A fresh start and a leap of faith. Key motifs: beginnings, freedom, trust."
   },
   "major_01_magician": {
     "title": "The Magician",
@@ -41,7 +42,8 @@
       "love": 50,
       "clarity": 55
     },
-    "detailedDescription": "Focused will and the tools to make ideas real. Confidence, skill, and aligned action. Manipulation or scattered energy. Pick one aim and commit your resources."
+    "detailedDescription": "Focused will and the tools to make ideas real. Confidence, skill, and aligned action. Manipulation or scattered energy. Pick one aim and commit your resources.",
+    "description": "The Magician: Focused will and the tools to make ideas real. Key motifs: will, skill, manifestation."
   },
   "major_02_high_priestess": {
     "title": "The High Priestess",
@@ -63,7 +65,8 @@
       "love": 50,
       "clarity": 55
     },
-    "detailedDescription": "Quiet knowledge and the pull of intuition. Trusting subtle signals and inner truth. Withholding, secrecy, or ignoring feelings. Listen before you speak or act."
+    "detailedDescription": "Quiet knowledge and the pull of intuition. Trusting subtle signals and inner truth. Withholding, secrecy, or ignoring feelings. Listen before you speak or act.",
+    "description": "The High Priestess: Quiet knowledge and the pull of intuition. Key motifs: intuition, mystery, inner voice."
   },
   "major_03_empress": {
     "title": "The Empress",
@@ -85,7 +88,8 @@
       "love": 50,
       "clarity": 55
     },
-    "detailedDescription": "Abundance, care, and embodied creativity. Warmth, growth, and fertile ideas. Overgiving or being smothered by comfort. Feed what you want to grow."
+    "detailedDescription": "Abundance, care, and embodied creativity. Warmth, growth, and fertile ideas. Overgiving or being smothered by comfort. Feed what you want to grow.",
+    "description": "The Empress: Abundance, care, and embodied creativity. Key motifs: nurture, abundance, creation."
   },
   "major_04_emperor": {
     "title": "The Emperor",
@@ -107,7 +111,8 @@
       "love": 50,
       "clarity": 55
     },
-    "detailedDescription": "Order, structure, and responsible leadership. Clear boundaries and steady authority. Rigidity, control, or fear of change. Lead with firmness and fairness."
+    "detailedDescription": "Order, structure, and responsible leadership. Clear boundaries and steady authority. Rigidity, control, or fear of change. Lead with firmness and fairness.",
+    "description": "The Emperor: Order, structure, and responsible leadership. Key motifs: structure, authority, stability."
   },
   "major_05_hierophant": {
     "title": "The Hierophant",
@@ -129,7 +134,8 @@
       "love": 50,
       "clarity": 55
     },
-    "detailedDescription": "Shared values, tradition, and learning from elders. Mentorship, ritual, and steady teachings. Dogma, conformity, or resisting growth. Honor the lesson, then make it your own."
+    "detailedDescription": "Shared values, tradition, and learning from elders. Mentorship, ritual, and steady teachings. Dogma, conformity, or resisting growth. Honor the lesson, then make it your own.",
+    "description": "The Hierophant: Shared values, tradition, and learning from elders. Key motifs: tradition, beliefs, guidance."
   },
   "major_06_lovers": {
     "title": "The Lovers",
@@ -151,7 +157,8 @@
       "love": 50,
       "clarity": 55
     },
-    "detailedDescription": "Alignment of values before commitment. Mutual choice, harmony, and honest connection. Indecision, temptation, or values out of sync. Choose what truly matches your heart."
+    "detailedDescription": "Alignment of values before commitment. Mutual choice, harmony, and honest connection. Indecision, temptation, or values out of sync. Choose what truly matches your heart.",
+    "description": "The Lovers: Alignment of values before commitment. Key motifs: alignment, choice, union."
   },
   "major_07_chariot": {
     "title": "The Chariot",
@@ -173,7 +180,8 @@
       "love": 50,
       "clarity": 55
     },
-    "detailedDescription": "Discipline and will guiding opposing forces. Momentum, confidence, and steady drive. Aggression, scattered focus, or forcing outcomes. Hold the reins and steer with purpose."
+    "detailedDescription": "Discipline and will guiding opposing forces. Momentum, confidence, and steady drive. Aggression, scattered focus, or forcing outcomes. Hold the reins and steer with purpose.",
+    "description": "The Chariot: Discipline and will guiding opposing forces. Key motifs: willpower, direction, victory."
   },
   "major_08_strength": {
     "title": "Strength",
@@ -195,7 +203,8 @@
       "love": 50,
       "clarity": 55
     },
-    "detailedDescription": "Gentle power and steady inner courage. Calm resilience and compassionate control. Self-doubt, suppressed anger, or forcing calm. Lead with patience, not pressure."
+    "detailedDescription": "Gentle power and steady inner courage. Calm resilience and compassionate control. Self-doubt, suppressed anger, or forcing calm. Lead with patience, not pressure.",
+    "description": "Strength: Gentle power and steady inner courage. Key motifs: courage, patience, compassion."
   },
   "major_09_hermit": {
     "title": "The Hermit",
@@ -217,7 +226,8 @@
       "love": 50,
       "clarity": 55
     },
-    "detailedDescription": "Withdrawal to find inner guidance. Reflection, clarity, and honest self-study. Isolation, avoidance, or withdrawing too long. Step back to see the path clearly."
+    "detailedDescription": "Withdrawal to find inner guidance. Reflection, clarity, and honest self-study. Isolation, avoidance, or withdrawing too long. Step back to see the path clearly.",
+    "description": "The Hermit: Withdrawal to find inner guidance. Key motifs: solitude, wisdom, guidance."
   },
   "major_10_wheel": {
     "title": "Wheel of Fortune",
@@ -239,7 +249,8 @@
       "love": 50,
       "clarity": 55
     },
-    "detailedDescription": "A turning cycle and shifting circumstances. Positive momentum and welcome change. Feeling stuck in a loop or resisting the turn. Move with the change instead of fighting it."
+    "detailedDescription": "A turning cycle and shifting circumstances. Positive momentum and welcome change. Feeling stuck in a loop or resisting the turn. Move with the change instead of fighting it.",
+    "description": "Wheel of Fortune: A turning cycle and shifting circumstances. Key motifs: cycles, change, fate."
   },
   "major_11_justice": {
     "title": "Justice",
@@ -261,7 +272,8 @@
       "love": 50,
       "clarity": 55
     },
-    "detailedDescription": "Clarity, fairness, and consequences. Honesty, integrity, and balanced judgment. Bias, denial, or fear of truth. Tell the truth and accept what it brings."
+    "detailedDescription": "Clarity, fairness, and consequences. Honesty, integrity, and balanced judgment. Bias, denial, or fear of truth. Tell the truth and accept what it brings.",
+    "description": "Justice: Clarity, fairness, and consequences. Key motifs: truth, balance, accountability."
   },
   "major_12_hanged_man": {
     "title": "The Hanged Man",
@@ -283,7 +295,8 @@
       "love": 50,
       "clarity": 55
     },
-    "detailedDescription": "A pause that reveals a new view. Letting go to gain insight. Stalling, martyrdom, or fear of change. Release control and see what shifts."
+    "detailedDescription": "A pause that reveals a new view. Letting go to gain insight. Stalling, martyrdom, or fear of change. Release control and see what shifts.",
+    "description": "The Hanged Man: A pause that reveals a new view. Key motifs: pause, surrender, perspective."
   },
   "major_13_death": {
     "title": "Death",
@@ -305,7 +318,8 @@
       "love": 50,
       "clarity": 55
     },
-    "detailedDescription": "An ending that clears the way forward. Release, renewal, and true transformation. Clinging to the past or fearing change. Let the old fall away so the new can rise."
+    "detailedDescription": "An ending that clears the way forward. Release, renewal, and true transformation. Clinging to the past or fearing change. Let the old fall away so the new can rise.",
+    "description": "Death: An ending that clears the way forward. Key motifs: ending, transformation, renewal."
   },
   "major_14_temperance": {
     "title": "Temperance",
@@ -327,7 +341,8 @@
       "love": 50,
       "clarity": 55
     },
-    "detailedDescription": "Blending extremes into harmony. Patience, healing, and steady integration. Imbalance, excess, or forcing a mix. Go slowly and let the blend settle."
+    "detailedDescription": "Blending extremes into harmony. Patience, healing, and steady integration. Imbalance, excess, or forcing a mix. Go slowly and let the blend settle.",
+    "description": "Temperance: Blending extremes into harmony. Key motifs: balance, healing, integration."
   },
   "major_15_devil": {
     "title": "The Devil",
@@ -349,7 +364,8 @@
       "love": 50,
       "clarity": 55
     },
-    "detailedDescription": "Attachments that feel like control. Awareness of what binds you. Addiction, fear, or giving away power. Name the chain, then loosen it."
+    "detailedDescription": "Attachments that feel like control. Awareness of what binds you. Addiction, fear, or giving away power. Name the chain, then loosen it.",
+    "description": "The Devil: Attachments that feel like control. Key motifs: attachment, temptation, control."
   },
   "major_16_tower": {
     "title": "The Tower",
@@ -371,7 +387,8 @@
       "love": 50,
       "clarity": 55
     },
-    "detailedDescription": "A sudden shake that reveals truth. Breakthrough, liberation, and clarity. Chaos, resistance, or fear of collapse. Let the false fall so the real can stand."
+    "detailedDescription": "A sudden shake that reveals truth. Breakthrough, liberation, and clarity. Chaos, resistance, or fear of collapse. Let the false fall so the real can stand.",
+    "description": "The Tower: A sudden shake that reveals truth. Key motifs: upheaval, truth, release."
   },
   "major_17_star": {
     "title": "The Star",
@@ -393,7 +410,8 @@
       "love": 50,
       "clarity": 55
     },
-    "detailedDescription": "A quiet promise of renewal. Hope, calm faith, and healing. Doubt, discouragement, or losing faith. Keep the signal alive, even if it is small."
+    "detailedDescription": "A quiet promise of renewal. Hope, calm faith, and healing. Doubt, discouragement, or losing faith. Keep the signal alive, even if it is small.",
+    "description": "The Star: A quiet promise of renewal. Key motifs: hope, healing, renewal."
   },
   "major_18_moon": {
     "title": "The Moon",
@@ -415,7 +433,8 @@
       "love": 50,
       "clarity": 55
     },
-    "detailedDescription": "The fog of intuition and the unseen. Imagination, empathy, and subtle guidance. Confusion, fear, or illusion. Move slowly and verify what you feel."
+    "detailedDescription": "The fog of intuition and the unseen. Imagination, empathy, and subtle guidance. Confusion, fear, or illusion. Move slowly and verify what you feel.",
+    "description": "The Moon: The fog of intuition and the unseen. Key motifs: mystery, dreams, uncertainty."
   },
   "major_19_sun": {
     "title": "The Sun",
@@ -437,7 +456,8 @@
       "love": 50,
       "clarity": 55
     },
-    "detailedDescription": "Warmth, visibility, and clear success. Joy, vitality, and honest celebration. Overexposure, ego, or burnout. Let your light be seen and shared."
+    "detailedDescription": "Warmth, visibility, and clear success. Joy, vitality, and honest celebration. Overexposure, ego, or burnout. Let your light be seen and shared.",
+    "description": "The Sun: Warmth, visibility, and clear success. Key motifs: joy, clarity, success."
   },
   "major_20_judgement": {
     "title": "Judgement",
@@ -459,7 +479,8 @@
       "love": 50,
       "clarity": 55
     },
-    "detailedDescription": "A call to rise and be accountable. Renewal, forgiveness, and clear purpose. Harsh self-judgment or refusing the call. Answer honestly and step into the next chapter."
+    "detailedDescription": "A call to rise and be accountable. Renewal, forgiveness, and clear purpose. Harsh self-judgment or refusing the call. Answer honestly and step into the next chapter.",
+    "description": "Judgement: A call to rise and be accountable. Key motifs: awakening, reckoning, purpose."
   },
   "major_21_world": {
     "title": "The World",
@@ -481,7 +502,8 @@
       "love": 50,
       "clarity": 55
     },
-    "detailedDescription": "Completion and a sense of wholeness. Integration, reward, and earned closure. Delays in finishing or fearing the next cycle. Honor what is complete and open the next door."
+    "detailedDescription": "Completion and a sense of wholeness. Integration, reward, and earned closure. Delays in finishing or fearing the next cycle. Honor what is complete and open the next door.",
+    "description": "The World: Completion and a sense of wholeness. Key motifs: completion, wholeness, integration."
   },
   "wands_00_knight": {
     "title": "Knight of Wands",
@@ -505,7 +527,8 @@
       "love": 50,
       "clarity": 54
     },
-    "detailedDescription": "The Knight of Wands points to decisive action and pursuit in the realm of passion, action, and courage. At its best, it shows bold movement and initiative. In shadow, it can show impulsiveness or recklessness. Advice: act with courage and direction."
+    "detailedDescription": "The Knight of Wands points to decisive action and pursuit in the realm of passion, action, and courage. At its best, it shows bold movement and initiative. In shadow, it can show impulsiveness or recklessness. Advice: act with courage and direction.",
+    "description": "Knight of Wands: The Knight of Wands points to decisive action and pursuit in the realm of passion, action, and courage. Key motifs: drive, action, quest."
   },
   "wands_01_king": {
     "title": "King of Wands",
@@ -529,7 +552,8 @@
       "love": 52,
       "clarity": 58
     },
-    "detailedDescription": "The King of Wands points to outward mastery and leadership in the realm of passion, action, and courage. At its best, it shows clear authority and wise direction. In shadow, it can show rigidity or misuse of power. Advice: use your authority with integrity."
+    "detailedDescription": "The King of Wands points to outward mastery and leadership in the realm of passion, action, and courage. At its best, it shows clear authority and wise direction. In shadow, it can show rigidity or misuse of power. Advice: use your authority with integrity.",
+    "description": "King of Wands: The King of Wands points to outward mastery and leadership in the realm of passion, action, and courage. Key motifs: leadership, authority, direction."
   },
   "wands_02_queen": {
     "title": "Queen of Wands",
@@ -553,7 +577,8 @@
       "love": 58,
       "clarity": 54
     },
-    "detailedDescription": "The Queen of Wands points to inner mastery and steady care in the realm of passion, action, and courage. At its best, it shows warm leadership and emotional intelligence. In shadow, it can show overcontrol or hidden resentment. Advice: lead quietly and consistently."
+    "detailedDescription": "The Queen of Wands points to inner mastery and steady care in the realm of passion, action, and courage. At its best, it shows warm leadership and emotional intelligence. In shadow, it can show overcontrol or hidden resentment. Advice: lead quietly and consistently.",
+    "description": "Queen of Wands: The Queen of Wands points to inner mastery and steady care in the realm of passion, action, and courage. Key motifs: mastery, care, inner strength."
   },
   "wands_03_page": {
     "title": "Page of Wands",
@@ -577,7 +602,8 @@
       "love": 52,
       "clarity": 54
     },
-    "detailedDescription": "The Page of Wands points to curiosity and new information in the realm of passion, action, and courage. At its best, it shows fresh study and openness. In shadow, it can show naivety or scattered attention. Advice: stay curious and grounded."
+    "detailedDescription": "The Page of Wands points to curiosity and new information in the realm of passion, action, and courage. At its best, it shows fresh study and openness. In shadow, it can show naivety or scattered attention. Advice: stay curious and grounded.",
+    "description": "Page of Wands: The Page of Wands points to curiosity and new information in the realm of passion, action, and courage. Key motifs: curiosity, messages, learning."
   },
   "wands_04_two": {
     "title": "Two of Wands",
@@ -601,7 +627,8 @@
       "love": 54,
       "clarity": 58
     },
-    "detailedDescription": "The Two of Wands points to a choice and a wider horizon in the realm of passion, action, and courage. At its best, it shows steady planning and clear options. In shadow, it can show indecision or waiting too long. Advice: choose a direction and commit."
+    "detailedDescription": "The Two of Wands points to a choice and a wider horizon in the realm of passion, action, and courage. At its best, it shows steady planning and clear options. In shadow, it can show indecision or waiting too long. Advice: choose a direction and commit.",
+    "description": "Two of Wands: The Two of Wands points to a choice and a wider horizon in the realm of passion, action, and courage. Key motifs: choice, balance, planning."
   },
   "wands_05_three": {
     "title": "Three of Wands",
@@ -625,7 +652,8 @@
       "love": 56,
       "clarity": 54
     },
-    "detailedDescription": "The Three of Wands points to early results and expansion in the realm of passion, action, and courage. At its best, it shows collaboration and momentum. In shadow, it can show misalignment or slow feedback. Advice: share the load and keep moving."
+    "detailedDescription": "The Three of Wands points to early results and expansion in the realm of passion, action, and courage. At its best, it shows collaboration and momentum. In shadow, it can show misalignment or slow feedback. Advice: share the load and keep moving.",
+    "description": "Three of Wands: The Three of Wands points to early results and expansion in the realm of passion, action, and courage. Key motifs: growth, teamwork, progress."
   },
   "wands_06_four": {
     "title": "Four of Wands",
@@ -649,7 +677,8 @@
       "love": 52,
       "clarity": 58
     },
-    "detailedDescription": "The Four of Wands points to stability and consolidation in the realm of passion, action, and courage. At its best, it shows healthy rest and grounded structure. In shadow, it can show stagnation or holding too tight. Advice: stabilize without freezing."
+    "detailedDescription": "The Four of Wands points to stability and consolidation in the realm of passion, action, and courage. At its best, it shows healthy rest and grounded structure. In shadow, it can show stagnation or holding too tight. Advice: stabilize without freezing.",
+    "description": "Four of Wands: The Four of Wands points to stability and consolidation in the realm of passion, action, and courage. Key motifs: stability, rest, foundation."
   },
   "wands_07_five": {
     "title": "Five of Wands",
@@ -673,7 +702,8 @@
       "love": 48,
       "clarity": 52
     },
-    "detailedDescription": "The Five of Wands points to friction and a test of will in the realm of passion, action, and courage. At its best, it shows learning through challenge. In shadow, it can show chaos, ego clashes, or loss. Advice: address the tension directly."
+    "detailedDescription": "The Five of Wands points to friction and a test of will in the realm of passion, action, and courage. At its best, it shows learning through challenge. In shadow, it can show chaos, ego clashes, or loss. Advice: address the tension directly.",
+    "description": "Five of Wands: The Five of Wands points to friction and a test of will in the realm of passion, action, and courage. Key motifs: challenge, conflict, test."
   },
   "wands_08_six": {
     "title": "Six of Wands",
@@ -697,7 +727,8 @@
       "love": 54,
       "clarity": 54
     },
-    "detailedDescription": "The Six of Wands points to progress and shared support in the realm of passion, action, and courage. At its best, it shows recognition and smooth cooperation. In shadow, it can show complacency or shallow wins. Advice: accept help and keep pace."
+    "detailedDescription": "The Six of Wands points to progress and shared support in the realm of passion, action, and courage. At its best, it shows recognition and smooth cooperation. In shadow, it can show complacency or shallow wins. Advice: accept help and keep pace.",
+    "description": "Six of Wands: The Six of Wands points to progress and shared support in the realm of passion, action, and courage. Key motifs: harmony, support, success."
   },
   "wands_09_seven": {
     "title": "Seven of Wands",
@@ -721,7 +752,8 @@
       "love": 50,
       "clarity": 56
     },
-    "detailedDescription": "The Seven of Wands points to strategy and measured resistance in the realm of passion, action, and courage. At its best, it shows focus, persistence, and smart boundaries. In shadow, it can show overdefending or second-guessing. Advice: protect your ground without closing off."
+    "detailedDescription": "The Seven of Wands points to strategy and measured resistance in the realm of passion, action, and courage. At its best, it shows focus, persistence, and smart boundaries. In shadow, it can show overdefending or second-guessing. Advice: protect your ground without closing off.",
+    "description": "Seven of Wands: The Seven of Wands points to strategy and measured resistance in the realm of passion, action, and courage. Key motifs: strategy, defense, evaluation."
   },
   "wands_10_eight": {
     "title": "Eight of Wands",
@@ -745,7 +777,8 @@
       "love": 50,
       "clarity": 58
     },
-    "detailedDescription": "The Eight of Wands points to speed and skill-building in the realm of passion, action, and courage. At its best, it shows productive flow and steady motion. In shadow, it can show rushed choices or burnout. Advice: move quickly, but keep form."
+    "detailedDescription": "The Eight of Wands points to speed and skill-building in the realm of passion, action, and courage. At its best, it shows productive flow and steady motion. In shadow, it can show rushed choices or burnout. Advice: move quickly, but keep form.",
+    "description": "Eight of Wands: The Eight of Wands points to speed and skill-building in the realm of passion, action, and courage. Key motifs: movement, practice, momentum."
   },
   "wands_11_nine": {
     "title": "Nine of Wands",
@@ -769,7 +802,8 @@
       "love": 56,
       "clarity": 54
     },
-    "detailedDescription": "The Nine of Wands points to endurance and nearing completion in the realm of passion, action, and courage. At its best, it shows strong boundaries and grit. In shadow, it can show fatigue or isolation. Advice: protect your energy and finish well."
+    "detailedDescription": "The Nine of Wands points to endurance and nearing completion in the realm of passion, action, and courage. At its best, it shows strong boundaries and grit. In shadow, it can show fatigue or isolation. Advice: protect your energy and finish well.",
+    "description": "Nine of Wands: The Nine of Wands points to endurance and nearing completion in the realm of passion, action, and courage. Key motifs: resilience, boundaries, near-complete."
   },
   "wands_12_ten": {
     "title": "Ten of Wands",
@@ -793,7 +827,8 @@
       "love": 52,
       "clarity": 56
     },
-    "detailedDescription": "The Ten of Wands points to a cycle reaching full weight in the realm of passion, action, and courage. At its best, it shows completion and a clear finish line. In shadow, it can show overload or carrying too much. Advice: share the burden and wrap it up."
+    "detailedDescription": "The Ten of Wands points to a cycle reaching full weight in the realm of passion, action, and courage. At its best, it shows completion and a clear finish line. In shadow, it can show overload or carrying too much. Advice: share the burden and wrap it up.",
+    "description": "Ten of Wands: The Ten of Wands points to a cycle reaching full weight in the realm of passion, action, and courage. Key motifs: culmination, burden, closure."
   },
   "wands_13_ace": {
     "title": "Ace of Wands",
@@ -817,7 +852,8 @@
       "love": 52,
       "clarity": 58
     },
-    "detailedDescription": "The Ace of Wands points to a new seed and raw potential in the realm of passion, action, and courage. At its best, it shows fresh energy and a clean opening. In shadow, it can show potential without follow-through. Advice: plant the seed and nurture it."
+    "detailedDescription": "The Ace of Wands points to a new seed and raw potential in the realm of passion, action, and courage. At its best, it shows fresh energy and a clean opening. In shadow, it can show potential without follow-through. Advice: plant the seed and nurture it.",
+    "description": "Ace of Wands: The Ace of Wands points to a new seed and raw potential in the realm of passion, action, and courage. Key motifs: spark, potential, beginning."
   },
   "swords_00_knight": {
     "title": "Knight of Swords",
@@ -841,7 +877,8 @@
       "love": 50,
       "clarity": 60
     },
-    "detailedDescription": "The Knight of Swords points to decisive action and pursuit in the realm of mind, truth, and decisions. At its best, it shows bold movement and initiative. In shadow, it can show impulsiveness or recklessness. Advice: act with courage and direction."
+    "detailedDescription": "The Knight of Swords points to decisive action and pursuit in the realm of mind, truth, and decisions. At its best, it shows bold movement and initiative. In shadow, it can show impulsiveness or recklessness. Advice: act with courage and direction.",
+    "description": "Knight of Swords: The Knight of Swords points to decisive action and pursuit in the realm of mind, truth, and decisions. Key motifs: drive, action, quest."
   },
   "swords_01_king": {
     "title": "King of Swords",
@@ -865,7 +902,8 @@
       "love": 52,
       "clarity": 64
     },
-    "detailedDescription": "The King of Swords points to outward mastery and leadership in the realm of mind, truth, and decisions. At its best, it shows clear authority and wise direction. In shadow, it can show rigidity or misuse of power. Advice: use your authority with integrity."
+    "detailedDescription": "The King of Swords points to outward mastery and leadership in the realm of mind, truth, and decisions. At its best, it shows clear authority and wise direction. In shadow, it can show rigidity or misuse of power. Advice: use your authority with integrity.",
+    "description": "King of Swords: The King of Swords points to outward mastery and leadership in the realm of mind, truth, and decisions. Key motifs: leadership, authority, direction."
   },
   "swords_02_queen": {
     "title": "Queen of Swords",
@@ -889,7 +927,8 @@
       "love": 58,
       "clarity": 60
     },
-    "detailedDescription": "The Queen of Swords points to inner mastery and steady care in the realm of mind, truth, and decisions. At its best, it shows warm leadership and emotional intelligence. In shadow, it can show overcontrol or hidden resentment. Advice: lead quietly and consistently."
+    "detailedDescription": "The Queen of Swords points to inner mastery and steady care in the realm of mind, truth, and decisions. At its best, it shows warm leadership and emotional intelligence. In shadow, it can show overcontrol or hidden resentment. Advice: lead quietly and consistently.",
+    "description": "Queen of Swords: The Queen of Swords points to inner mastery and steady care in the realm of mind, truth, and decisions. Key motifs: mastery, care, inner strength."
   },
   "swords_03_page": {
     "title": "Page of Swords",
@@ -913,7 +952,8 @@
       "love": 52,
       "clarity": 60
     },
-    "detailedDescription": "The Page of Swords points to curiosity and new information in the realm of mind, truth, and decisions. At its best, it shows fresh study and openness. In shadow, it can show naivety or scattered attention. Advice: stay curious and grounded."
+    "detailedDescription": "The Page of Swords points to curiosity and new information in the realm of mind, truth, and decisions. At its best, it shows fresh study and openness. In shadow, it can show naivety or scattered attention. Advice: stay curious and grounded.",
+    "description": "Page of Swords: The Page of Swords points to curiosity and new information in the realm of mind, truth, and decisions. Key motifs: curiosity, messages, learning."
   },
   "swords_04_two": {
     "title": "Two of Swords",
@@ -937,7 +977,8 @@
       "love": 54,
       "clarity": 64
     },
-    "detailedDescription": "The Two of Swords points to a choice and a wider horizon in the realm of mind, truth, and decisions. At its best, it shows steady planning and clear options. In shadow, it can show indecision or waiting too long. Advice: choose a direction and commit."
+    "detailedDescription": "The Two of Swords points to a choice and a wider horizon in the realm of mind, truth, and decisions. At its best, it shows steady planning and clear options. In shadow, it can show indecision or waiting too long. Advice: choose a direction and commit.",
+    "description": "Two of Swords: The Two of Swords points to a choice and a wider horizon in the realm of mind, truth, and decisions. Key motifs: choice, balance, planning."
   },
   "swords_05_three": {
     "title": "Three of Swords",
@@ -961,7 +1002,8 @@
       "love": 56,
       "clarity": 60
     },
-    "detailedDescription": "The Three of Swords points to early results and expansion in the realm of mind, truth, and decisions. At its best, it shows collaboration and momentum. In shadow, it can show misalignment or slow feedback. Advice: share the load and keep moving."
+    "detailedDescription": "The Three of Swords points to early results and expansion in the realm of mind, truth, and decisions. At its best, it shows collaboration and momentum. In shadow, it can show misalignment or slow feedback. Advice: share the load and keep moving.",
+    "description": "Three of Swords: The Three of Swords points to early results and expansion in the realm of mind, truth, and decisions. Key motifs: growth, teamwork, progress."
   },
   "swords_06_four": {
     "title": "Four of Swords",
@@ -985,7 +1027,8 @@
       "love": 52,
       "clarity": 64
     },
-    "detailedDescription": "The Four of Swords points to stability and consolidation in the realm of mind, truth, and decisions. At its best, it shows healthy rest and grounded structure. In shadow, it can show stagnation or holding too tight. Advice: stabilize without freezing."
+    "detailedDescription": "The Four of Swords points to stability and consolidation in the realm of mind, truth, and decisions. At its best, it shows healthy rest and grounded structure. In shadow, it can show stagnation or holding too tight. Advice: stabilize without freezing.",
+    "description": "Four of Swords: The Four of Swords points to stability and consolidation in the realm of mind, truth, and decisions. Key motifs: stability, rest, foundation."
   },
   "swords_07_five": {
     "title": "Five of Swords",
@@ -1009,7 +1052,8 @@
       "love": 48,
       "clarity": 58
     },
-    "detailedDescription": "The Five of Swords points to friction and a test of will in the realm of mind, truth, and decisions. At its best, it shows learning through challenge. In shadow, it can show chaos, ego clashes, or loss. Advice: address the tension directly."
+    "detailedDescription": "The Five of Swords points to friction and a test of will in the realm of mind, truth, and decisions. At its best, it shows learning through challenge. In shadow, it can show chaos, ego clashes, or loss. Advice: address the tension directly.",
+    "description": "Five of Swords: The Five of Swords points to friction and a test of will in the realm of mind, truth, and decisions. Key motifs: challenge, conflict, test."
   },
   "swords_08_six": {
     "title": "Six of Swords",
@@ -1033,7 +1077,8 @@
       "love": 54,
       "clarity": 60
     },
-    "detailedDescription": "The Six of Swords points to progress and shared support in the realm of mind, truth, and decisions. At its best, it shows recognition and smooth cooperation. In shadow, it can show complacency or shallow wins. Advice: accept help and keep pace."
+    "detailedDescription": "The Six of Swords points to progress and shared support in the realm of mind, truth, and decisions. At its best, it shows recognition and smooth cooperation. In shadow, it can show complacency or shallow wins. Advice: accept help and keep pace.",
+    "description": "Six of Swords: The Six of Swords points to progress and shared support in the realm of mind, truth, and decisions. Key motifs: harmony, support, success."
   },
   "swords_09_seven": {
     "title": "Seven of Swords",
@@ -1057,7 +1102,8 @@
       "love": 50,
       "clarity": 62
     },
-    "detailedDescription": "The Seven of Swords points to strategy and measured resistance in the realm of mind, truth, and decisions. At its best, it shows focus, persistence, and smart boundaries. In shadow, it can show overdefending or second-guessing. Advice: protect your ground without closing off."
+    "detailedDescription": "The Seven of Swords points to strategy and measured resistance in the realm of mind, truth, and decisions. At its best, it shows focus, persistence, and smart boundaries. In shadow, it can show overdefending or second-guessing. Advice: protect your ground without closing off.",
+    "description": "Seven of Swords: The Seven of Swords points to strategy and measured resistance in the realm of mind, truth, and decisions. Key motifs: strategy, defense, evaluation."
   },
   "swords_10_eight": {
     "title": "Eight of Swords",
@@ -1081,7 +1127,8 @@
       "love": 50,
       "clarity": 64
     },
-    "detailedDescription": "The Eight of Swords points to speed and skill-building in the realm of mind, truth, and decisions. At its best, it shows productive flow and steady motion. In shadow, it can show rushed choices or burnout. Advice: move quickly, but keep form."
+    "detailedDescription": "The Eight of Swords points to speed and skill-building in the realm of mind, truth, and decisions. At its best, it shows productive flow and steady motion. In shadow, it can show rushed choices or burnout. Advice: move quickly, but keep form.",
+    "description": "Eight of Swords: The Eight of Swords points to speed and skill-building in the realm of mind, truth, and decisions. Key motifs: movement, practice, momentum."
   },
   "swords_11_nine": {
     "title": "Nine of Swords",
@@ -1105,7 +1152,8 @@
       "love": 56,
       "clarity": 60
     },
-    "detailedDescription": "The Nine of Swords points to endurance and nearing completion in the realm of mind, truth, and decisions. At its best, it shows strong boundaries and grit. In shadow, it can show fatigue or isolation. Advice: protect your energy and finish well."
+    "detailedDescription": "The Nine of Swords points to endurance and nearing completion in the realm of mind, truth, and decisions. At its best, it shows strong boundaries and grit. In shadow, it can show fatigue or isolation. Advice: protect your energy and finish well.",
+    "description": "Nine of Swords: The Nine of Swords points to endurance and nearing completion in the realm of mind, truth, and decisions. Key motifs: resilience, boundaries, near-complete."
   },
   "swords_12_ten": {
     "title": "Ten of Swords",
@@ -1129,7 +1177,8 @@
       "love": 52,
       "clarity": 62
     },
-    "detailedDescription": "The Ten of Swords points to a cycle reaching full weight in the realm of mind, truth, and decisions. At its best, it shows completion and a clear finish line. In shadow, it can show overload or carrying too much. Advice: share the burden and wrap it up."
+    "detailedDescription": "The Ten of Swords points to a cycle reaching full weight in the realm of mind, truth, and decisions. At its best, it shows completion and a clear finish line. In shadow, it can show overload or carrying too much. Advice: share the burden and wrap it up.",
+    "description": "Ten of Swords: The Ten of Swords points to a cycle reaching full weight in the realm of mind, truth, and decisions. Key motifs: culmination, burden, closure."
   },
   "swords_13_ace": {
     "title": "Ace of Swords",
@@ -1153,7 +1202,8 @@
       "love": 52,
       "clarity": 64
     },
-    "detailedDescription": "The Ace of Swords points to a new seed and raw potential in the realm of mind, truth, and decisions. At its best, it shows fresh energy and a clean opening. In shadow, it can show potential without follow-through. Advice: plant the seed and nurture it."
+    "detailedDescription": "The Ace of Swords points to a new seed and raw potential in the realm of mind, truth, and decisions. At its best, it shows fresh energy and a clean opening. In shadow, it can show potential without follow-through. Advice: plant the seed and nurture it.",
+    "description": "Ace of Swords: The Ace of Swords points to a new seed and raw potential in the realm of mind, truth, and decisions. Key motifs: spark, potential, beginning."
   },
   "pentacles_00_knight": {
     "title": "Knight of Pentacles",
@@ -1177,7 +1227,8 @@
       "love": 50,
       "clarity": 56
     },
-    "detailedDescription": "The Knight of Pentacles points to decisive action and pursuit in the realm of material life, resources, and stability. At its best, it shows bold movement and initiative. In shadow, it can show impulsiveness or recklessness. Advice: act with courage and direction."
+    "detailedDescription": "The Knight of Pentacles points to decisive action and pursuit in the realm of material life, resources, and stability. At its best, it shows bold movement and initiative. In shadow, it can show impulsiveness or recklessness. Advice: act with courage and direction.",
+    "description": "Knight of Pentacles: The Knight of Pentacles points to decisive action and pursuit in the realm of material life, resources, and stability. Key motifs: drive, action, quest."
   },
   "pentacles_01_king": {
     "title": "King of Pentacles",
@@ -1201,7 +1252,8 @@
       "love": 52,
       "clarity": 60
     },
-    "detailedDescription": "The King of Pentacles points to outward mastery and leadership in the realm of material life, resources, and stability. At its best, it shows clear authority and wise direction. In shadow, it can show rigidity or misuse of power. Advice: use your authority with integrity."
+    "detailedDescription": "The King of Pentacles points to outward mastery and leadership in the realm of material life, resources, and stability. At its best, it shows clear authority and wise direction. In shadow, it can show rigidity or misuse of power. Advice: use your authority with integrity.",
+    "description": "King of Pentacles: The King of Pentacles points to outward mastery and leadership in the realm of material life, resources, and stability. Key motifs: leadership, authority, direction."
   },
   "pentacles_02_queen": {
     "title": "Queen of Pentacles",
@@ -1225,7 +1277,8 @@
       "love": 58,
       "clarity": 56
     },
-    "detailedDescription": "The Queen of Pentacles points to inner mastery and steady care in the realm of material life, resources, and stability. At its best, it shows warm leadership and emotional intelligence. In shadow, it can show overcontrol or hidden resentment. Advice: lead quietly and consistently."
+    "detailedDescription": "The Queen of Pentacles points to inner mastery and steady care in the realm of material life, resources, and stability. At its best, it shows warm leadership and emotional intelligence. In shadow, it can show overcontrol or hidden resentment. Advice: lead quietly and consistently.",
+    "description": "Queen of Pentacles: The Queen of Pentacles points to inner mastery and steady care in the realm of material life, resources, and stability. Key motifs: mastery, care, inner strength."
   },
   "pentacles_03_page": {
     "title": "Page of Pentacles",
@@ -1249,7 +1302,8 @@
       "love": 52,
       "clarity": 56
     },
-    "detailedDescription": "The Page of Pentacles points to curiosity and new information in the realm of material life, resources, and stability. At its best, it shows fresh study and openness. In shadow, it can show naivety or scattered attention. Advice: stay curious and grounded."
+    "detailedDescription": "The Page of Pentacles points to curiosity and new information in the realm of material life, resources, and stability. At its best, it shows fresh study and openness. In shadow, it can show naivety or scattered attention. Advice: stay curious and grounded.",
+    "description": "Page of Pentacles: The Page of Pentacles points to curiosity and new information in the realm of material life, resources, and stability. Key motifs: curiosity, messages, learning."
   },
   "pentacles_04_two": {
     "title": "Two of Pentacles",
@@ -1273,7 +1327,8 @@
       "love": 54,
       "clarity": 60
     },
-    "detailedDescription": "The Two of Pentacles points to a choice and a wider horizon in the realm of material life, resources, and stability. At its best, it shows steady planning and clear options. In shadow, it can show indecision or waiting too long. Advice: choose a direction and commit."
+    "detailedDescription": "The Two of Pentacles points to a choice and a wider horizon in the realm of material life, resources, and stability. At its best, it shows steady planning and clear options. In shadow, it can show indecision or waiting too long. Advice: choose a direction and commit.",
+    "description": "Two of Pentacles: The Two of Pentacles points to a choice and a wider horizon in the realm of material life, resources, and stability. Key motifs: choice, balance, planning."
   },
   "pentacles_05_three": {
     "title": "Three of Pentacles",
@@ -1297,7 +1352,8 @@
       "love": 56,
       "clarity": 56
     },
-    "detailedDescription": "The Three of Pentacles points to early results and expansion in the realm of material life, resources, and stability. At its best, it shows collaboration and momentum. In shadow, it can show misalignment or slow feedback. Advice: share the load and keep moving."
+    "detailedDescription": "The Three of Pentacles points to early results and expansion in the realm of material life, resources, and stability. At its best, it shows collaboration and momentum. In shadow, it can show misalignment or slow feedback. Advice: share the load and keep moving.",
+    "description": "Three of Pentacles: The Three of Pentacles points to early results and expansion in the realm of material life, resources, and stability. Key motifs: growth, teamwork, progress."
   },
   "pentacles_06_four": {
     "title": "Four of Pentacles",
@@ -1321,7 +1377,8 @@
       "love": 52,
       "clarity": 60
     },
-    "detailedDescription": "The Four of Pentacles points to stability and consolidation in the realm of material life, resources, and stability. At its best, it shows healthy rest and grounded structure. In shadow, it can show stagnation or holding too tight. Advice: stabilize without freezing."
+    "detailedDescription": "The Four of Pentacles points to stability and consolidation in the realm of material life, resources, and stability. At its best, it shows healthy rest and grounded structure. In shadow, it can show stagnation or holding too tight. Advice: stabilize without freezing.",
+    "description": "Four of Pentacles: The Four of Pentacles points to stability and consolidation in the realm of material life, resources, and stability. Key motifs: stability, rest, foundation."
   },
   "pentacles_07_five": {
     "title": "Five of Pentacles",
@@ -1345,7 +1402,8 @@
       "love": 48,
       "clarity": 54
     },
-    "detailedDescription": "The Five of Pentacles points to friction and a test of will in the realm of material life, resources, and stability. At its best, it shows learning through challenge. In shadow, it can show chaos, ego clashes, or loss. Advice: address the tension directly."
+    "detailedDescription": "The Five of Pentacles points to friction and a test of will in the realm of material life, resources, and stability. At its best, it shows learning through challenge. In shadow, it can show chaos, ego clashes, or loss. Advice: address the tension directly.",
+    "description": "Five of Pentacles: The Five of Pentacles points to friction and a test of will in the realm of material life, resources, and stability. Key motifs: challenge, conflict, test."
   },
   "pentacles_08_six": {
     "title": "Six of Pentacles",
@@ -1369,7 +1427,8 @@
       "love": 54,
       "clarity": 56
     },
-    "detailedDescription": "The Six of Pentacles points to progress and shared support in the realm of material life, resources, and stability. At its best, it shows recognition and smooth cooperation. In shadow, it can show complacency or shallow wins. Advice: accept help and keep pace."
+    "detailedDescription": "The Six of Pentacles points to progress and shared support in the realm of material life, resources, and stability. At its best, it shows recognition and smooth cooperation. In shadow, it can show complacency or shallow wins. Advice: accept help and keep pace.",
+    "description": "Six of Pentacles: The Six of Pentacles points to progress and shared support in the realm of material life, resources, and stability. Key motifs: harmony, support, success."
   },
   "pentacles_09_seven": {
     "title": "Seven of Pentacles",
@@ -1393,7 +1452,8 @@
       "love": 50,
       "clarity": 58
     },
-    "detailedDescription": "The Seven of Pentacles points to strategy and measured resistance in the realm of material life, resources, and stability. At its best, it shows focus, persistence, and smart boundaries. In shadow, it can show overdefending or second-guessing. Advice: protect your ground without closing off."
+    "detailedDescription": "The Seven of Pentacles points to strategy and measured resistance in the realm of material life, resources, and stability. At its best, it shows focus, persistence, and smart boundaries. In shadow, it can show overdefending or second-guessing. Advice: protect your ground without closing off.",
+    "description": "Seven of Pentacles: The Seven of Pentacles points to strategy and measured resistance in the realm of material life, resources, and stability. Key motifs: strategy, defense, evaluation."
   },
   "pentacles_10_eight": {
     "title": "Eight of Pentacles",
@@ -1417,7 +1477,8 @@
       "love": 50,
       "clarity": 60
     },
-    "detailedDescription": "The Eight of Pentacles points to speed and skill-building in the realm of material life, resources, and stability. At its best, it shows productive flow and steady motion. In shadow, it can show rushed choices or burnout. Advice: move quickly, but keep form."
+    "detailedDescription": "The Eight of Pentacles points to speed and skill-building in the realm of material life, resources, and stability. At its best, it shows productive flow and steady motion. In shadow, it can show rushed choices or burnout. Advice: move quickly, but keep form.",
+    "description": "Eight of Pentacles: The Eight of Pentacles points to speed and skill-building in the realm of material life, resources, and stability. Key motifs: movement, practice, momentum."
   },
   "pentacles_11_nine": {
     "title": "Nine of Pentacles",
@@ -1441,7 +1502,8 @@
       "love": 56,
       "clarity": 56
     },
-    "detailedDescription": "The Nine of Pentacles points to endurance and nearing completion in the realm of material life, resources, and stability. At its best, it shows strong boundaries and grit. In shadow, it can show fatigue or isolation. Advice: protect your energy and finish well."
+    "detailedDescription": "The Nine of Pentacles points to endurance and nearing completion in the realm of material life, resources, and stability. At its best, it shows strong boundaries and grit. In shadow, it can show fatigue or isolation. Advice: protect your energy and finish well.",
+    "description": "Nine of Pentacles: The Nine of Pentacles points to endurance and nearing completion in the realm of material life, resources, and stability. Key motifs: resilience, boundaries, near-complete."
   },
   "pentacles_12_ten": {
     "title": "Ten of Pentacles",
@@ -1465,7 +1527,8 @@
       "love": 52,
       "clarity": 58
     },
-    "detailedDescription": "The Ten of Pentacles points to a cycle reaching full weight in the realm of material life, resources, and stability. At its best, it shows completion and a clear finish line. In shadow, it can show overload or carrying too much. Advice: share the burden and wrap it up."
+    "detailedDescription": "The Ten of Pentacles points to a cycle reaching full weight in the realm of material life, resources, and stability. At its best, it shows completion and a clear finish line. In shadow, it can show overload or carrying too much. Advice: share the burden and wrap it up.",
+    "description": "Ten of Pentacles: The Ten of Pentacles points to a cycle reaching full weight in the realm of material life, resources, and stability. Key motifs: culmination, burden, closure."
   },
   "pentacles_13_ace": {
     "title": "Ace of Pentacles",
@@ -1489,7 +1552,8 @@
       "love": 52,
       "clarity": 60
     },
-    "detailedDescription": "The Ace of Pentacles points to a new seed and raw potential in the realm of material life, resources, and stability. At its best, it shows fresh energy and a clean opening. In shadow, it can show potential without follow-through. Advice: plant the seed and nurture it."
+    "detailedDescription": "The Ace of Pentacles points to a new seed and raw potential in the realm of material life, resources, and stability. At its best, it shows fresh energy and a clean opening. In shadow, it can show potential without follow-through. Advice: plant the seed and nurture it.",
+    "description": "Ace of Pentacles: The Ace of Pentacles points to a new seed and raw potential in the realm of material life, resources, and stability. Key motifs: spark, potential, beginning."
   },
   "cups_00_knight": {
     "title": "Knight of Cups",
@@ -1513,7 +1577,8 @@
       "love": 58,
       "clarity": 54
     },
-    "detailedDescription": "The Knight of Cups points to decisive action and pursuit in the realm of emotion, connection, and intuition. At its best, it shows bold movement and initiative. In shadow, it can show impulsiveness or recklessness. Advice: act with courage and direction."
+    "detailedDescription": "The Knight of Cups points to decisive action and pursuit in the realm of emotion, connection, and intuition. At its best, it shows bold movement and initiative. In shadow, it can show impulsiveness or recklessness. Advice: act with courage and direction.",
+    "description": "Knight of Cups: The Knight of Cups points to decisive action and pursuit in the realm of emotion, connection, and intuition. Key motifs: drive, action, quest."
   },
   "cups_01_king": {
     "title": "King of Cups",
@@ -1537,7 +1602,8 @@
       "love": 60,
       "clarity": 58
     },
-    "detailedDescription": "The King of Cups points to outward mastery and leadership in the realm of emotion, connection, and intuition. At its best, it shows clear authority and wise direction. In shadow, it can show rigidity or misuse of power. Advice: use your authority with integrity."
+    "detailedDescription": "The King of Cups points to outward mastery and leadership in the realm of emotion, connection, and intuition. At its best, it shows clear authority and wise direction. In shadow, it can show rigidity or misuse of power. Advice: use your authority with integrity.",
+    "description": "King of Cups: The King of Cups points to outward mastery and leadership in the realm of emotion, connection, and intuition. Key motifs: leadership, authority, direction."
   },
   "cups_02_queen": {
     "title": "Queen of Cups",
@@ -1561,7 +1627,8 @@
       "love": 66,
       "clarity": 54
     },
-    "detailedDescription": "The Queen of Cups points to inner mastery and steady care in the realm of emotion, connection, and intuition. At its best, it shows warm leadership and emotional intelligence. In shadow, it can show overcontrol or hidden resentment. Advice: lead quietly and consistently."
+    "detailedDescription": "The Queen of Cups points to inner mastery and steady care in the realm of emotion, connection, and intuition. At its best, it shows warm leadership and emotional intelligence. In shadow, it can show overcontrol or hidden resentment. Advice: lead quietly and consistently.",
+    "description": "Queen of Cups: The Queen of Cups points to inner mastery and steady care in the realm of emotion, connection, and intuition. Key motifs: mastery, care, inner strength."
   },
   "cups_03_page": {
     "title": "Page of Cups",
@@ -1585,7 +1652,8 @@
       "love": 60,
       "clarity": 54
     },
-    "detailedDescription": "The Page of Cups points to curiosity and new information in the realm of emotion, connection, and intuition. At its best, it shows fresh study and openness. In shadow, it can show naivety or scattered attention. Advice: stay curious and grounded."
+    "detailedDescription": "The Page of Cups points to curiosity and new information in the realm of emotion, connection, and intuition. At its best, it shows fresh study and openness. In shadow, it can show naivety or scattered attention. Advice: stay curious and grounded.",
+    "description": "Page of Cups: The Page of Cups points to curiosity and new information in the realm of emotion, connection, and intuition. Key motifs: curiosity, messages, learning."
   },
   "cups_04_two": {
     "title": "Two of Cups",
@@ -1609,7 +1677,8 @@
       "love": 62,
       "clarity": 58
     },
-    "detailedDescription": "The Two of Cups points to a choice and a wider horizon in the realm of emotion, connection, and intuition. At its best, it shows steady planning and clear options. In shadow, it can show indecision or waiting too long. Advice: choose a direction and commit."
+    "detailedDescription": "The Two of Cups points to a choice and a wider horizon in the realm of emotion, connection, and intuition. At its best, it shows steady planning and clear options. In shadow, it can show indecision or waiting too long. Advice: choose a direction and commit.",
+    "description": "Two of Cups: The Two of Cups points to a choice and a wider horizon in the realm of emotion, connection, and intuition. Key motifs: choice, balance, planning."
   },
   "cups_05_three": {
     "title": "Three of Cups",
@@ -1633,7 +1702,8 @@
       "love": 64,
       "clarity": 54
     },
-    "detailedDescription": "The Three of Cups points to early results and expansion in the realm of emotion, connection, and intuition. At its best, it shows collaboration and momentum. In shadow, it can show misalignment or slow feedback. Advice: share the load and keep moving."
+    "detailedDescription": "The Three of Cups points to early results and expansion in the realm of emotion, connection, and intuition. At its best, it shows collaboration and momentum. In shadow, it can show misalignment or slow feedback. Advice: share the load and keep moving.",
+    "description": "Three of Cups: The Three of Cups points to early results and expansion in the realm of emotion, connection, and intuition. Key motifs: growth, teamwork, progress."
   },
   "cups_06_four": {
     "title": "Four of Cups",
@@ -1657,7 +1727,8 @@
       "love": 60,
       "clarity": 58
     },
-    "detailedDescription": "The Four of Cups points to stability and consolidation in the realm of emotion, connection, and intuition. At its best, it shows healthy rest and grounded structure. In shadow, it can show stagnation or holding too tight. Advice: stabilize without freezing."
+    "detailedDescription": "The Four of Cups points to stability and consolidation in the realm of emotion, connection, and intuition. At its best, it shows healthy rest and grounded structure. In shadow, it can show stagnation or holding too tight. Advice: stabilize without freezing.",
+    "description": "Four of Cups: The Four of Cups points to stability and consolidation in the realm of emotion, connection, and intuition. Key motifs: stability, rest, foundation."
   },
   "cups_07_five": {
     "title": "Five of Cups",
@@ -1681,7 +1752,8 @@
       "love": 56,
       "clarity": 52
     },
-    "detailedDescription": "The Five of Cups points to friction and a test of will in the realm of emotion, connection, and intuition. At its best, it shows learning through challenge. In shadow, it can show chaos, ego clashes, or loss. Advice: address the tension directly."
+    "detailedDescription": "The Five of Cups points to friction and a test of will in the realm of emotion, connection, and intuition. At its best, it shows learning through challenge. In shadow, it can show chaos, ego clashes, or loss. Advice: address the tension directly.",
+    "description": "Five of Cups: The Five of Cups points to friction and a test of will in the realm of emotion, connection, and intuition. Key motifs: challenge, conflict, test."
   },
   "cups_08_six": {
     "title": "Six of Cups",
@@ -1705,7 +1777,8 @@
       "love": 62,
       "clarity": 54
     },
-    "detailedDescription": "The Six of Cups points to progress and shared support in the realm of emotion, connection, and intuition. At its best, it shows recognition and smooth cooperation. In shadow, it can show complacency or shallow wins. Advice: accept help and keep pace."
+    "detailedDescription": "The Six of Cups points to progress and shared support in the realm of emotion, connection, and intuition. At its best, it shows recognition and smooth cooperation. In shadow, it can show complacency or shallow wins. Advice: accept help and keep pace.",
+    "description": "Six of Cups: The Six of Cups points to progress and shared support in the realm of emotion, connection, and intuition. Key motifs: harmony, support, success."
   },
   "cups_09_seven": {
     "title": "Seven of Cups",
@@ -1729,7 +1802,8 @@
       "love": 58,
       "clarity": 56
     },
-    "detailedDescription": "The Seven of Cups points to strategy and measured resistance in the realm of emotion, connection, and intuition. At its best, it shows focus, persistence, and smart boundaries. In shadow, it can show overdefending or second-guessing. Advice: protect your ground without closing off."
+    "detailedDescription": "The Seven of Cups points to strategy and measured resistance in the realm of emotion, connection, and intuition. At its best, it shows focus, persistence, and smart boundaries. In shadow, it can show overdefending or second-guessing. Advice: protect your ground without closing off.",
+    "description": "Seven of Cups: The Seven of Cups points to strategy and measured resistance in the realm of emotion, connection, and intuition. Key motifs: strategy, defense, evaluation."
   },
   "cups_10_eight": {
     "title": "Eight of Cups",
@@ -1753,7 +1827,8 @@
       "love": 58,
       "clarity": 58
     },
-    "detailedDescription": "The Eight of Cups points to speed and skill-building in the realm of emotion, connection, and intuition. At its best, it shows productive flow and steady motion. In shadow, it can show rushed choices or burnout. Advice: move quickly, but keep form."
+    "detailedDescription": "The Eight of Cups points to speed and skill-building in the realm of emotion, connection, and intuition. At its best, it shows productive flow and steady motion. In shadow, it can show rushed choices or burnout. Advice: move quickly, but keep form.",
+    "description": "Eight of Cups: The Eight of Cups points to speed and skill-building in the realm of emotion, connection, and intuition. Key motifs: movement, practice, momentum."
   },
   "cups_11_nine": {
     "title": "Nine of Cups",
@@ -1777,7 +1852,8 @@
       "love": 64,
       "clarity": 54
     },
-    "detailedDescription": "The Nine of Cups points to endurance and nearing completion in the realm of emotion, connection, and intuition. At its best, it shows strong boundaries and grit. In shadow, it can show fatigue or isolation. Advice: protect your energy and finish well."
+    "detailedDescription": "The Nine of Cups points to endurance and nearing completion in the realm of emotion, connection, and intuition. At its best, it shows strong boundaries and grit. In shadow, it can show fatigue or isolation. Advice: protect your energy and finish well.",
+    "description": "Nine of Cups: The Nine of Cups points to endurance and nearing completion in the realm of emotion, connection, and intuition. Key motifs: resilience, boundaries, near-complete."
   },
   "cups_12_ten": {
     "title": "Ten of Cups",
@@ -1801,7 +1877,8 @@
       "love": 60,
       "clarity": 56
     },
-    "detailedDescription": "The Ten of Cups points to a cycle reaching full weight in the realm of emotion, connection, and intuition. At its best, it shows completion and a clear finish line. In shadow, it can show overload or carrying too much. Advice: share the burden and wrap it up."
+    "detailedDescription": "The Ten of Cups points to a cycle reaching full weight in the realm of emotion, connection, and intuition. At its best, it shows completion and a clear finish line. In shadow, it can show overload or carrying too much. Advice: share the burden and wrap it up.",
+    "description": "Ten of Cups: The Ten of Cups points to a cycle reaching full weight in the realm of emotion, connection, and intuition. Key motifs: culmination, burden, closure."
   },
   "cups_13_ace": {
     "title": "Ace of Cups",
@@ -1825,7 +1902,8 @@
       "love": 60,
       "clarity": 58
     },
-    "detailedDescription": "The Ace of Cups points to a new seed and raw potential in the realm of emotion, connection, and intuition. At its best, it shows fresh energy and a clean opening. In shadow, it can show potential without follow-through. Advice: plant the seed and nurture it."
+    "detailedDescription": "The Ace of Cups points to a new seed and raw potential in the realm of emotion, connection, and intuition. At its best, it shows fresh energy and a clean opening. In shadow, it can show potential without follow-through. Advice: plant the seed and nurture it.",
+    "description": "Ace of Cups: The Ace of Cups points to a new seed and raw potential in the realm of emotion, connection, and intuition. Key motifs: spark, potential, beginning."
   },
   "lenormand_01_rider": {
     "title": "Rider",
@@ -1850,7 +1928,8 @@
     },
     "detailedDescription": "Rider often arrives as a fast signal, call, message, or sudden update. Rider highlights a practical factor in the situation now. In the upside, it works like this: In light, it supports a clear and timely decision. Shadow risk to watch: In shadow, it can trigger overreaction or a context miss. Practical next move: Read it in sequence with neighboring cards before acting.",
     "imageUrl": "cards/lenormand/ln_rider.webp",
-    "video": "ln_rider.mp4"
+    "video": "ln_rider.mp4",
+    "description": "Rider: Rider highlights a practical factor in the situation now. Key motifs: news, speed, contact."
   },
   "lenormand_02_clover": {
     "title": "Clover",
@@ -1874,7 +1953,8 @@
       "clarity": 62
     },
     "detailedDescription": "Clover highlights a short lucky window where timing matters more than force. Clover highlights a practical factor in the situation now. In the upside, it works like this: In light, it supports a clear and timely decision. Shadow risk to watch: In shadow, it can trigger overreaction or a context miss. Practical next move: Read it in sequence with neighboring cards before acting.",
-    "imageUrl": "cards/lenormand/ln_clover.webp"
+    "imageUrl": "cards/lenormand/ln_clover.webp",
+    "description": "Clover: Clover highlights a practical factor in the situation now. Key motifs: luck, chance, window."
   },
   "lenormand_03_ship": {
     "title": "Ship",
@@ -1898,7 +1978,8 @@
       "clarity": 71
     },
     "detailedDescription": "Ship points to movement, travel, shifting direction, or long-distance links. Ship highlights a practical factor in the situation now. In the upside, it works like this: In light, it supports a clear and timely decision. Shadow risk to watch: In shadow, it can trigger overreaction or a context miss. Practical next move: Read it in sequence with neighboring cards before acting.",
-    "imageUrl": "cards/lenormand/ln_ship.webp"
+    "imageUrl": "cards/lenormand/ln_ship.webp",
+    "description": "Ship: Ship highlights a practical factor in the situation now. Key motifs: journey, distance, expansion."
   },
   "lenormand_04_house": {
     "title": "House",
@@ -1922,7 +2003,8 @@
       "clarity": 44
     },
     "detailedDescription": "House brings focus to home base, routines, and personal stability. House highlights a practical factor in the situation now. In the upside, it works like this: In light, it supports a clear and timely decision. Shadow risk to watch: In shadow, it can trigger overreaction or a context miss. Practical next move: Read it in sequence with neighboring cards before acting.",
-    "imageUrl": "cards/lenormand/ln_house.webp"
+    "imageUrl": "cards/lenormand/ln_house.webp",
+    "description": "House: House highlights a practical factor in the situation now. Key motifs: home, safety, foundation."
   },
   "lenormand_05_tree": {
     "title": "Tree",
@@ -1947,7 +2029,8 @@
     },
     "detailedDescription": "Tree reminds you about health, energy management, and long-cycle growth. Tree highlights a practical factor in the situation now. In the upside, it works like this: In light, it supports a clear and timely decision. Shadow risk to watch: In shadow, it can trigger overreaction or a context miss. Practical next move: Read it in sequence with neighboring cards before acting.",
     "imageUrl": "cards/lenormand/ln_tree.webp",
-    "video": "ln_tree.mp4"
+    "video": "ln_tree.mp4",
+    "description": "Tree: Tree highlights a practical factor in the situation now. Key motifs: health, roots, growth."
   },
   "lenormand_06_clouds": {
     "title": "Clouds",
@@ -1972,7 +2055,8 @@
     },
     "detailedDescription": "Clouds appears when facts are blurred by worry and mental noise. Clouds highlights a practical factor in the situation now. In the upside, it works like this: In light, it supports a clear and timely decision. Shadow risk to watch: In shadow, it can trigger overreaction or a context miss. Practical next move: Read it in sequence with neighboring cards before acting.",
     "imageUrl": "cards/lenormand/ln_clouds.webp",
-    "video": "ln_clouds.mp4"
+    "video": "ln_clouds.mp4",
+    "description": "Clouds: Clouds highlights a practical factor in the situation now. Key motifs: fog, doubt, confusion."
   },
   "lenormand_07_snake": {
     "title": "Snake",
@@ -1997,7 +2081,8 @@
     },
     "detailedDescription": "Snake describes a complex route where strategy and flexibility win. Snake highlights a practical factor in the situation now. In the upside, it works like this: In light, it supports a clear and timely decision. Shadow risk to watch: In shadow, it can trigger overreaction or a context miss. Practical next move: Read it in sequence with neighboring cards before acting.",
     "imageUrl": "cards/lenormand/ln_snake.webp",
-    "video": "ln_snake.mp4"
+    "video": "ln_snake.mp4",
+    "description": "Snake: Snake highlights a practical factor in the situation now. Key motifs: strategy, detour, motive."
   },
   "lenormand_08_coffin": {
     "title": "Coffin",
@@ -2021,7 +2106,8 @@
       "clarity": 44
     },
     "detailedDescription": "Coffin signals an ending that clears space for a cleaner next phase. Coffin highlights a practical factor in the situation now. In the upside, it works like this: In light, it supports a clear and timely decision. Shadow risk to watch: In shadow, it can trigger overreaction or a context miss. Practical next move: Read it in sequence with neighboring cards before acting.",
-    "imageUrl": "cards/lenormand/ln_coffin.webp"
+    "imageUrl": "cards/lenormand/ln_coffin.webp",
+    "description": "Coffin: Coffin highlights a practical factor in the situation now. Key motifs: ending, pause, release."
   },
   "lenormand_09_bouquet": {
     "title": "Bouquet",
@@ -2045,7 +2131,8 @@
       "clarity": 53
     },
     "detailedDescription": "Bouquet brings appreciation, charm, kindness, or a pleasant opening. Bouquet highlights a practical factor in the situation now. In the upside, it works like this: In light, it supports a clear and timely decision. Shadow risk to watch: In shadow, it can trigger overreaction or a context miss. Practical next move: Read it in sequence with neighboring cards before acting.",
-    "imageUrl": "cards/lenormand/ln_bouquet.webp"
+    "imageUrl": "cards/lenormand/ln_bouquet.webp",
+    "description": "Bouquet: Bouquet highlights a practical factor in the situation now. Key motifs: gift, pleasure, invite."
   },
   "lenormand_10_scythe": {
     "title": "Scythe",
@@ -2070,7 +2157,8 @@
     },
     "detailedDescription": "Scythe marks a sharp decision point where delay costs more than action. Scythe highlights a practical factor in the situation now. In the upside, it works like this: In light, it supports a clear and timely decision. Shadow risk to watch: In shadow, it can trigger overreaction or a context miss. Practical next move: Read it in sequence with neighboring cards before acting.",
     "imageUrl": "cards/lenormand/ln_scythe.webp",
-    "video": "ln_scythe.mp4"
+    "video": "ln_scythe.mp4",
+    "description": "Scythe: Scythe highlights a practical factor in the situation now. Key motifs: cut, risk, decision."
   },
   "lenormand_11_whip": {
     "title": "Whip",
@@ -2094,7 +2182,8 @@
       "clarity": 71
     },
     "detailedDescription": "Whip raises tension, repeating arguments, and patterns that need reset. Whip highlights a practical factor in the situation now. In the upside, it works like this: In light, it supports a clear and timely decision. Shadow risk to watch: In shadow, it can trigger overreaction or a context miss. Practical next move: Read it in sequence with neighboring cards before acting.",
-    "imageUrl": "cards/lenormand/ln_whip.webp"
+    "imageUrl": "cards/lenormand/ln_whip.webp",
+    "description": "Whip: Whip highlights a practical factor in the situation now. Key motifs: repeat, conflict, drive."
   },
   "lenormand_12_birds": {
     "title": "Birds",
@@ -2119,7 +2208,8 @@
     },
     "detailedDescription": "Birds activates conversations, calls, nervous chatter, and rapid exchange. Birds highlights a practical factor in the situation now. In the upside, it works like this: In light, it supports a clear and timely decision. Shadow risk to watch: In shadow, it can trigger overreaction or a context miss. Practical next move: Read it in sequence with neighboring cards before acting.",
     "imageUrl": "cards/lenormand/ln_birds.webp",
-    "video": "ln_birds.mp4"
+    "video": "ln_birds.mp4",
+    "description": "Birds: Birds highlights a practical factor in the situation now. Key motifs: talk, anxiety, buzz."
   },
   "lenormand_13_child": {
     "title": "Child",
@@ -2143,7 +2233,8 @@
       "clarity": 53
     },
     "detailedDescription": "Child introduces a fresh start, early-stage idea, or lightweight prototype. Child highlights a practical factor in the situation now. In the upside, it works like this: In light, it supports a clear and timely decision. Shadow risk to watch: In shadow, it can trigger overreaction or a context miss. Practical next move: Read it in sequence with neighboring cards before acting.",
-    "imageUrl": "cards/lenormand/ln_child.webp"
+    "imageUrl": "cards/lenormand/ln_child.webp",
+    "description": "Child: Child highlights a practical factor in the situation now. Key motifs: new, simple, curious."
   },
   "lenormand_14_fox": {
     "title": "Fox",
@@ -2167,7 +2258,8 @@
       "clarity": 62
     },
     "detailedDescription": "Fox pushes practical caution, incentives check, and smart self-protection. Fox highlights a practical factor in the situation now. In the upside, it works like this: In light, it supports a clear and timely decision. Shadow risk to watch: In shadow, it can trigger overreaction or a context miss. Practical next move: Read it in sequence with neighboring cards before acting.",
-    "imageUrl": "cards/lenormand/ln_fox.webp"
+    "imageUrl": "cards/lenormand/ln_fox.webp",
+    "description": "Fox: Fox highlights a practical factor in the situation now. Key motifs: work, caution, clever."
   },
   "lenormand_15_bear": {
     "title": "Bear",
@@ -2192,7 +2284,8 @@
     },
     "detailedDescription": "Bear connects to power, resources, financial weight, and protective authority. Bear highlights a practical factor in the situation now. In the upside, it works like this: In light, it supports a clear and timely decision. Shadow risk to watch: In shadow, it can trigger overreaction or a context miss. Practical next move: Read it in sequence with neighboring cards before acting.",
     "imageUrl": "cards/lenormand/ln_bear.webp",
-    "video": "ln_bear.mp4"
+    "video": "ln_bear.mp4",
+    "description": "Bear: Bear highlights a practical factor in the situation now. Key motifs: power, money, protector."
   },
   "lenormand_16_stars": {
     "title": "Stars",
@@ -2217,7 +2310,8 @@
     },
     "detailedDescription": "Stars gives a clean horizon and a clearer long-term direction. Stars highlights a practical factor in the situation now. In the upside, it works like this: In light, it supports a clear and timely decision. Shadow risk to watch: In shadow, it can trigger overreaction or a context miss. Practical next move: Read it in sequence with neighboring cards before acting.",
     "imageUrl": "cards/lenormand/ln_star.webp",
-    "video": "ln_star.mp4"
+    "video": "ln_star.mp4",
+    "description": "Stars: Stars highlights a practical factor in the situation now. Key motifs: guide, clarity, hope."
   },
   "lenormand_17_stork": {
     "title": "Stork",
@@ -2241,7 +2335,8 @@
       "clarity": 53
     },
     "detailedDescription": "Stork indicates change of state, role, location, or life rhythm. Stork highlights a practical factor in the situation now. In the upside, it works like this: In light, it supports a clear and timely decision. Shadow risk to watch: In shadow, it can trigger overreaction or a context miss. Practical next move: Read it in sequence with neighboring cards before acting.",
-    "imageUrl": "cards/lenormand/ln_stork.webp"
+    "imageUrl": "cards/lenormand/ln_stork.webp",
+    "description": "Stork: Stork highlights a practical factor in the situation now. Key motifs: change, move, upgrade."
   },
   "lenormand_18_dog": {
     "title": "Dog",
@@ -2265,7 +2360,8 @@
       "clarity": 62
     },
     "detailedDescription": "Dog points to loyalty, trust, and people you can rely on. Dog highlights a practical factor in the situation now. In the upside, it works like this: In light, it supports a clear and timely decision. Shadow risk to watch: In shadow, it can trigger overreaction or a context miss. Practical next move: Read it in sequence with neighboring cards before acting.",
-    "imageUrl": "cards/lenormand/ln_dog.webp"
+    "imageUrl": "cards/lenormand/ln_dog.webp",
+    "description": "Dog: Dog highlights a practical factor in the situation now. Key motifs: friend, trust, support."
   },
   "lenormand_19_tower": {
     "title": "Tower",
@@ -2289,7 +2385,8 @@
       "clarity": 71
     },
     "detailedDescription": "Tower highlights boundaries, institutions, formal distance, and structure. Tower highlights a practical factor in the situation now. In the upside, it works like this: In light, it supports a clear and timely decision. Shadow risk to watch: In shadow, it can trigger overreaction or a context miss. Practical next move: Read it in sequence with neighboring cards before acting.",
-    "imageUrl": "cards/lenormand/ln_tower.webp"
+    "imageUrl": "cards/lenormand/ln_tower.webp",
+    "description": "Tower: Tower highlights a practical factor in the situation now. Key motifs: distance, order, boundaries."
   },
   "lenormand_20_garden": {
     "title": "Garden",
@@ -2313,7 +2410,8 @@
       "clarity": 44
     },
     "detailedDescription": "Garden expands the topic into audience, network, community, and visibility. Garden highlights a practical factor in the situation now. In the upside, it works like this: In light, it supports a clear and timely decision. Shadow risk to watch: In shadow, it can trigger overreaction or a context miss. Practical next move: Read it in sequence with neighboring cards before acting.",
-    "imageUrl": "cards/lenormand/ln_garden.webp"
+    "imageUrl": "cards/lenormand/ln_garden.webp",
+    "description": "Garden: Garden highlights a practical factor in the situation now. Key motifs: network, public, event."
   },
   "lenormand_21_mountain": {
     "title": "Mountain",
@@ -2337,7 +2435,8 @@
       "power": 50,
       "love": 50,
       "clarity": 50
-    }
+    },
+    "description": "Mountain: Mountain highlights a practical factor in the situation now. Key motifs: mountain, lenormand, symbol."
   },
   "lenormand_22_crossroads": {
     "title": "Crossroads",
@@ -2362,7 +2461,8 @@
       "love": 50,
       "clarity": 50
     },
-    "video": "ln_crossroad.mp4"
+    "video": "ln_crossroad.mp4",
+    "description": "Crossroads: Crossroads highlights a practical factor in the situation now. Key motifs: crossroads, lenormand, symbol."
   },
   "lenormand_23_mice": {
     "title": "Mice",
@@ -2386,7 +2486,8 @@
       "clarity": 71
     },
     "detailedDescription": "Mice shows small leaks that quietly drain money, time, or focus. Mice highlights a practical factor in the situation now. In the upside, it works like this: In light, it supports a clear and timely decision. Shadow risk to watch: In shadow, it can trigger overreaction or a context miss. Practical next move: Read it in sequence with neighboring cards before acting.",
-    "imageUrl": "cards/lenormand/ln_mice.webp"
+    "imageUrl": "cards/lenormand/ln_mice.webp",
+    "description": "Mice: Mice highlights a practical factor in the situation now. Key motifs: loss, worry, drain."
   },
   "lenormand_24_heart": {
     "title": "Heart",
@@ -2410,7 +2511,8 @@
       "clarity": 44
     },
     "detailedDescription": "Heart returns attention to genuine feeling and emotional truth. Heart highlights a practical factor in the situation now. In the upside, it works like this: In light, it supports a clear and timely decision. Shadow risk to watch: In shadow, it can trigger overreaction or a context miss. Practical next move: Read it in sequence with neighboring cards before acting.",
-    "imageUrl": "cards/lenormand/ln_heart.webp"
+    "imageUrl": "cards/lenormand/ln_heart.webp",
+    "description": "Heart: Heart highlights a practical factor in the situation now. Key motifs: love, warmth, sincerity."
   },
   "lenormand_25_ring": {
     "title": "Ring",
@@ -2435,7 +2537,8 @@
     },
     "detailedDescription": "Ring speaks about commitment, contracts, cycles, and repeated agreements. Ring highlights a practical factor in the situation now. In the upside, it works like this: In light, it supports a clear and timely decision. Shadow risk to watch: In shadow, it can trigger overreaction or a context miss. Practical next move: Read it in sequence with neighboring cards before acting.",
     "imageUrl": "cards/lenormand/ln_ring.webp",
-    "video": "ln_ring.mp4"
+    "video": "ln_ring.mp4",
+    "description": "Ring: Ring highlights a practical factor in the situation now. Key motifs: union, contract, cycle."
   },
   "lenormand_26_book": {
     "title": "Book",
@@ -2460,7 +2563,8 @@
     },
     "detailedDescription": "Book reveals hidden information, learning, and knowledge not yet open. Book highlights a practical factor in the situation now. In the upside, it works like this: In light, it supports a clear and timely decision. Shadow risk to watch: In shadow, it can trigger overreaction or a context miss. Practical next move: Read it in sequence with neighboring cards before acting.",
     "imageUrl": "cards/lenormand/ln_book.webp",
-    "video": "ln_book.mp4"
+    "video": "ln_book.mp4",
+    "description": "Book: Book highlights a practical factor in the situation now. Key motifs: secret, learning, depth."
   },
   "lenormand_27_letter": {
     "title": "Letter",
@@ -2484,7 +2588,8 @@
       "clarity": 71
     },
     "detailedDescription": "Letter brings documents, messages, signatures, or explicit confirmation. Letter highlights a practical factor in the situation now. In the upside, it works like this: In light, it supports a clear and timely decision. Shadow risk to watch: In shadow, it can trigger overreaction or a context miss. Practical next move: Read it in sequence with neighboring cards before acting.",
-    "imageUrl": "cards/lenormand/ln_letter.webp"
+    "imageUrl": "cards/lenormand/ln_letter.webp",
+    "description": "Letter: Letter highlights a practical factor in the situation now. Key motifs: message, paper, facts."
   },
   "lenormand_28_man": {
     "title": "Man",
@@ -2509,7 +2614,8 @@
     },
     "detailedDescription": "Man emphasizes active masculine role, initiative, and decisive stance. Man highlights a practical factor in the situation now. In the upside, it works like this: In light, it supports a clear and timely decision. Shadow risk to watch: In shadow, it can trigger overreaction or a context miss. Practical next move: Read it in sequence with neighboring cards before acting.",
     "imageUrl": "cards/lenormand/ln_man.webp",
-    "video": "ln_man.mp4"
+    "video": "ln_man.mp4",
+    "description": "Man: Man highlights a practical factor in the situation now. Key motifs: actor, initiative, focus."
   },
   "lenormand_29_woman": {
     "title": "Woman",
@@ -2534,7 +2640,8 @@
     },
     "detailedDescription": "Woman emphasizes feminine role, intuition, and relational intelligence. Woman highlights a practical factor in the situation now. In the upside, it works like this: In light, it supports a clear and timely decision. Shadow risk to watch: In shadow, it can trigger overreaction or a context miss. Practical next move: Read it in sequence with neighboring cards before acting.",
     "imageUrl": "cards/lenormand/ln_woman.webp",
-    "video": "ln_woman.mp4"
+    "video": "ln_woman.mp4",
+    "description": "Woman: Woman highlights a practical factor in the situation now. Key motifs: figure, intuition, presence."
   },
   "lenormand_30_lily": {
     "title": "Lily",
@@ -2559,7 +2666,8 @@
     },
     "detailedDescription": "Lily is about maturity, quality, reputation, and calm authority. Lily highlights a practical factor in the situation now. In the upside, it works like this: In light, it supports a clear and timely decision. Shadow risk to watch: In shadow, it can trigger overreaction or a context miss. Practical next move: Read it in sequence with neighboring cards before acting.",
     "imageUrl": "cards/lenormand/ln_lily.webp",
-    "video": "ln_lily.mp4"
+    "video": "ln_lily.mp4",
+    "description": "Lily: Lily highlights a practical factor in the situation now. Key motifs: maturity, ethics, peace."
   },
   "lenormand_31_sun": {
     "title": "Sun",
@@ -2584,7 +2692,8 @@
     },
     "detailedDescription": "Sun adds momentum, confidence, and visible progress. Sun highlights a practical factor in the situation now. In the upside, it works like this: In light, it supports a clear and timely decision. Shadow risk to watch: In shadow, it can trigger overreaction or a context miss. Practical next move: Read it in sequence with neighboring cards before acting.",
     "imageUrl": "cards/lenormand/ln_sun.webp",
-    "video": "ln_sun.mp4"
+    "video": "ln_sun.mp4",
+    "description": "Sun: Sun highlights a practical factor in the situation now. Key motifs: success, energy, clarity."
   },
   "lenormand_32_moon": {
     "title": "Moon",
@@ -2609,7 +2718,8 @@
     },
     "detailedDescription": "Moon raises emotional cycles, recognition, and sensitivity to rhythm. Moon highlights a practical factor in the situation now. In the upside, it works like this: In light, it supports a clear and timely decision. Shadow risk to watch: In shadow, it can trigger overreaction or a context miss. Practical next move: Read it in sequence with neighboring cards before acting.",
     "imageUrl": "cards/lenormand/ln_moon.webp",
-    "video": "ln_moon.mp4"
+    "video": "ln_moon.mp4",
+    "description": "Moon: Moon highlights a practical factor in the situation now. Key motifs: emotion, reputation, rhythm."
   },
   "lenormand_33_key": {
     "title": "Key",
@@ -2633,7 +2743,8 @@
       "clarity": 53
     },
     "detailedDescription": "Key marks a precise solution, access point, and right move. Key highlights a practical factor in the situation now. In the upside, it works like this: In light, it supports a clear and timely decision. Shadow risk to watch: In shadow, it can trigger overreaction or a context miss. Practical next move: Read it in sequence with neighboring cards before acting.",
-    "imageUrl": "cards/lenormand/ln_key.webp"
+    "imageUrl": "cards/lenormand/ln_key.webp",
+    "description": "Key: Key highlights a practical factor in the situation now. Key motifs: answer, open, certainty."
   },
   "lenormand_34_fish": {
     "title": "Fish",
@@ -2658,7 +2769,8 @@
     },
     "detailedDescription": "Fish connects to money flow, liquidity, and entrepreneurial freedom. Fish highlights a practical factor in the situation now. In the upside, it works like this: In light, it supports a clear and timely decision. Shadow risk to watch: In shadow, it can trigger overreaction or a context miss. Practical next move: Read it in sequence with neighboring cards before acting.",
     "imageUrl": "cards/lenormand/ln_fish.webp",
-    "video": "ln_fish.mp4"
+    "video": "ln_fish.mp4",
+    "description": "Fish: Fish highlights a practical factor in the situation now. Key motifs: money, flow, freedom."
   },
   "lenormand_35_anchor": {
     "title": "Anchor",
@@ -2683,7 +2795,8 @@
     },
     "detailedDescription": "Anchor stabilizes the long game and supports consistency over time. Anchor highlights a practical factor in the situation now. In the upside, it works like this: In light, it supports a clear and timely decision. Shadow risk to watch: In shadow, it can trigger overreaction or a context miss. Practical next move: Read it in sequence with neighboring cards before acting.",
     "imageUrl": "cards/lenormand/ln_anchor.webp",
-    "video": "ln_anchor.mp4"
+    "video": "ln_anchor.mp4",
+    "description": "Anchor: Anchor highlights a practical factor in the situation now. Key motifs: stability, work, long-term."
   },
   "lenormand_36_cross": {
     "title": "Cross",
@@ -2707,7 +2820,8 @@
       "clarity": 44
     },
     "detailedDescription": "Cross signals a serious lesson, duty, and inner maturity test. Cross highlights a practical factor in the situation now. In the upside, it works like this: In light, it supports a clear and timely decision. Shadow risk to watch: In shadow, it can trigger overreaction or a context miss. Practical next move: Read it in sequence with neighboring cards before acting.",
-    "imageUrl": "cards/lenormand/ln_cross.webp"
+    "imageUrl": "cards/lenormand/ln_cross.webp",
+    "description": "Cross: Cross highlights a practical factor in the situation now. Key motifs: burden, fate, meaning."
   },
   "ac_00_fool": {
     "title": "The Fool",
@@ -2733,7 +2847,8 @@
       "clarity": 55
     },
     "detailedDescription": "A fresh start and a leap of faith. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Playful optimism and a willingness to explore. At its best, this card supports a mature strategy and deliberate action. Naivety, rash risks, or ignoring the obvious. In shadow, extremes, control patterns, or emotional swings become louder. Begin, but carry a small plan with your hope. Keep your attention on the symbol and turn the insight into one concrete step today.",
-    "imageUrl": "cards/ac/ac_joker.webp"
+    "imageUrl": "cards/ac/ac_joker.webp",
+    "description": "The Fool: A fresh start and a leap of faith. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Key motifs: beginnings, freedom, trust."
   },
   "ac_01_magician": {
     "title": "The Magician",
@@ -2759,7 +2874,8 @@
       "clarity": 55
     },
     "detailedDescription": "Focused will and the tools to make ideas real. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Confidence, skill, and aligned action. At its best, this card supports a mature strategy and deliberate action. Manipulation or scattered energy. In shadow, extremes, control patterns, or emotional swings become louder. Pick one aim and commit your resources. Keep your attention on the symbol and turn the insight into one concrete step today.",
-    "imageUrl": "cards/ac/ac_magician.webp"
+    "imageUrl": "cards/ac/ac_magician.webp",
+    "description": "The Magician: Focused will and the tools to make ideas real. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Key motifs: will, skill, manifestation."
   },
   "ac_02_high_priestess": {
     "title": "The High Priestess",
@@ -2785,7 +2901,8 @@
       "clarity": 55
     },
     "detailedDescription": "Quiet knowledge and the pull of intuition. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Trusting subtle signals and inner truth. At its best, this card supports a mature strategy and deliberate action. Withholding, secrecy, or ignoring feelings. In shadow, extremes, control patterns, or emotional swings become louder. Listen before you speak or act. Keep your attention on the symbol and turn the insight into one concrete step today.",
-    "imageUrl": "cards/ac/ac_high_priestess.webp"
+    "imageUrl": "cards/ac/ac_high_priestess.webp",
+    "description": "The High Priestess: Quiet knowledge and the pull of intuition. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Key motifs: intuition, mystery, inner voice."
   },
   "ac_03_empress": {
     "title": "The Empress",
@@ -2811,7 +2928,8 @@
       "clarity": 55
     },
     "detailedDescription": "Abundance, care, and embodied creativity. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Warmth, growth, and fertile ideas. At its best, this card supports a mature strategy and deliberate action. Overgiving or being smothered by comfort. In shadow, extremes, control patterns, or emotional swings become louder. Feed what you want to grow. Keep your attention on the symbol and turn the insight into one concrete step today.",
-    "imageUrl": "cards/ac/ac_empress.webp"
+    "imageUrl": "cards/ac/ac_empress.webp",
+    "description": "The Empress: Abundance, care, and embodied creativity. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Key motifs: nurture, abundance, creation."
   },
   "ac_04_emperor": {
     "title": "The Emperor",
@@ -2837,7 +2955,8 @@
       "clarity": 55
     },
     "detailedDescription": "Order, structure, and responsible leadership. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Clear boundaries and steady authority. At its best, this card supports a mature strategy and deliberate action. Rigidity, control, or fear of change. In shadow, extremes, control patterns, or emotional swings become louder. Lead with firmness and fairness. Keep your attention on the symbol and turn the insight into one concrete step today.",
-    "imageUrl": "cards/ac/ac_emperor.webp"
+    "imageUrl": "cards/ac/ac_emperor.webp",
+    "description": "The Emperor: Order, structure, and responsible leadership. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Key motifs: structure, authority, stability."
   },
   "ac_05_hierophant": {
     "title": "The Hierophant",
@@ -2863,7 +2982,8 @@
       "clarity": 55
     },
     "detailedDescription": "Shared values, tradition, and learning from elders. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Mentorship, ritual, and steady teachings. At its best, this card supports a mature strategy and deliberate action. Dogma, conformity, or resisting growth. In shadow, extremes, control patterns, or emotional swings become louder. Honor the lesson, then make it your own. Keep your attention on the symbol and turn the insight into one concrete step today.",
-    "imageUrl": "cards/ac/ac_hierophant.webp"
+    "imageUrl": "cards/ac/ac_hierophant.webp",
+    "description": "The Hierophant: Shared values, tradition, and learning from elders. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Key motifs: tradition, beliefs, guidance."
   },
   "ac_06_lovers": {
     "title": "The Lovers",
@@ -2889,7 +3009,8 @@
       "clarity": 55
     },
     "detailedDescription": "Alignment of values before commitment. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Mutual choice, harmony, and honest connection. At its best, this card supports a mature strategy and deliberate action. Indecision, temptation, or values out of sync. In shadow, extremes, control patterns, or emotional swings become louder. Choose what truly matches your heart. Keep your attention on the symbol and turn the insight into one concrete step today.",
-    "imageUrl": "cards/ac/ac_lovers.webp"
+    "imageUrl": "cards/ac/ac_lovers.webp",
+    "description": "The Lovers: Alignment of values before commitment. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Key motifs: alignment, choice, union."
   },
   "ac_07_chariot": {
     "title": "The Chariot",
@@ -2915,7 +3036,8 @@
       "clarity": 55
     },
     "detailedDescription": "Discipline and will guiding opposing forces. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Momentum, confidence, and steady drive. At its best, this card supports a mature strategy and deliberate action. Aggression, scattered focus, or forcing outcomes. In shadow, extremes, control patterns, or emotional swings become louder. Hold the reins and steer with purpose. Keep your attention on the symbol and turn the insight into one concrete step today.",
-    "imageUrl": "cards/ac/ac_chariot.webp"
+    "imageUrl": "cards/ac/ac_chariot.webp",
+    "description": "The Chariot: Discipline and will guiding opposing forces. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Key motifs: willpower, direction, victory."
   },
   "ac_08_strength": {
     "title": "Strength",
@@ -2941,7 +3063,8 @@
       "clarity": 55
     },
     "detailedDescription": "Gentle power and steady inner courage. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Calm resilience and compassionate control. At its best, this card supports a mature strategy and deliberate action. Self-doubt, suppressed anger, or forcing calm. In shadow, extremes, control patterns, or emotional swings become louder. Lead with patience, not pressure. Keep your attention on the symbol and turn the insight into one concrete step today.",
-    "imageUrl": "cards/ac/ac_power.webp"
+    "imageUrl": "cards/ac/ac_power.webp",
+    "description": "Strength: Gentle power and steady inner courage. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Key motifs: courage, patience, compassion."
   },
   "ac_09_hermit": {
     "title": "The Hermit",
@@ -2967,7 +3090,8 @@
       "clarity": 55
     },
     "detailedDescription": "Withdrawal to find inner guidance. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Reflection, clarity, and honest self-study. At its best, this card supports a mature strategy and deliberate action. Isolation, avoidance, or withdrawing too long. In shadow, extremes, control patterns, or emotional swings become louder. Step back to see the path clearly. Keep your attention on the symbol and turn the insight into one concrete step today.",
-    "imageUrl": "cards/ac/ac_hermit.webp"
+    "imageUrl": "cards/ac/ac_hermit.webp",
+    "description": "The Hermit: Withdrawal to find inner guidance. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Key motifs: solitude, wisdom, guidance."
   },
   "ac_10_wheel_of_fortune": {
     "title": "Wheel of Fortune",
@@ -2993,7 +3117,8 @@
       "clarity": 55
     },
     "detailedDescription": "A turning cycle and shifting circumstances. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Positive momentum and welcome change. At its best, this card supports a mature strategy and deliberate action. Feeling stuck in a loop or resisting the turn. In shadow, extremes, control patterns, or emotional swings become louder. Move with the change instead of fighting it. Keep your attention on the symbol and turn the insight into one concrete step today.",
-    "imageUrl": "cards/ac/ac_wheel.webp"
+    "imageUrl": "cards/ac/ac_wheel.webp",
+    "description": "Wheel of Fortune: A turning cycle and shifting circumstances. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Key motifs: cycles, change, fate."
   },
   "ac_11_justice": {
     "title": "Justice",
@@ -3019,7 +3144,8 @@
       "clarity": 55
     },
     "detailedDescription": "Clarity, fairness, and consequences. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Honesty, integrity, and balanced judgment. At its best, this card supports a mature strategy and deliberate action. Bias, denial, or fear of truth. In shadow, extremes, control patterns, or emotional swings become louder. Tell the truth and accept what it brings. Keep your attention on the symbol and turn the insight into one concrete step today.",
-    "imageUrl": "cards/ac/ac_justice.webp"
+    "imageUrl": "cards/ac/ac_justice.webp",
+    "description": "Justice: Clarity, fairness, and consequences. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Key motifs: truth, balance, accountability."
   },
   "ac_12_hanged_man": {
     "title": "The Hanged Man",
@@ -3045,7 +3171,8 @@
       "clarity": 55
     },
     "detailedDescription": "A pause that reveals a new view. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Letting go to gain insight. At its best, this card supports a mature strategy and deliberate action. Stalling, martyrdom, or fear of change. In shadow, extremes, control patterns, or emotional swings become louder. Release control and see what shifts. Keep your attention on the symbol and turn the insight into one concrete step today.",
-    "imageUrl": "cards/ac/ac_punishment.webp"
+    "imageUrl": "cards/ac/ac_punishment.webp",
+    "description": "The Hanged Man: A pause that reveals a new view. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Key motifs: pause, surrender, perspective."
   },
   "ac_13_death": {
     "title": "Death",
@@ -3071,7 +3198,8 @@
       "clarity": 55
     },
     "detailedDescription": "An ending that clears the way forward. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Release, renewal, and true transformation. At its best, this card supports a mature strategy and deliberate action. Clinging to the past or fearing change. In shadow, extremes, control patterns, or emotional swings become louder. Let the old fall away so the new can rise. Keep your attention on the symbol and turn the insight into one concrete step today.",
-    "imageUrl": "cards/ac/ac_death.webp"
+    "imageUrl": "cards/ac/ac_death.webp",
+    "description": "Death: An ending that clears the way forward. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Key motifs: ending, transformation, renewal."
   },
   "ac_14_temperance": {
     "title": "Temperance",
@@ -3097,7 +3225,8 @@
       "clarity": 55
     },
     "detailedDescription": "Blending extremes into harmony. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Patience, healing, and steady integration. At its best, this card supports a mature strategy and deliberate action. Imbalance, excess, or forcing a mix. In shadow, extremes, control patterns, or emotional swings become louder. Go slowly and let the blend settle. Keep your attention on the symbol and turn the insight into one concrete step today.",
-    "imageUrl": "cards/ac/ac_temperance.webp"
+    "imageUrl": "cards/ac/ac_temperance.webp",
+    "description": "Temperance: Blending extremes into harmony. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Key motifs: balance, healing, integration."
   },
   "ac_15_devil": {
     "title": "The Devil",
@@ -3123,7 +3252,8 @@
       "clarity": 55
     },
     "detailedDescription": "Attachments that feel like control. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Awareness of what binds you. At its best, this card supports a mature strategy and deliberate action. Addiction, fear, or giving away power. In shadow, extremes, control patterns, or emotional swings become louder. Name the chain, then loosen it. Keep your attention on the symbol and turn the insight into one concrete step today.",
-    "imageUrl": "cards/ac/ac_devil.webp"
+    "imageUrl": "cards/ac/ac_devil.webp",
+    "description": "The Devil: Attachments that feel like control. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Key motifs: attachment, temptation, control."
   },
   "ac_16_tower": {
     "title": "The Tower",
@@ -3149,7 +3279,8 @@
       "clarity": 55
     },
     "detailedDescription": "A sudden shake that reveals truth. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Breakthrough, liberation, and clarity. At its best, this card supports a mature strategy and deliberate action. Chaos, resistance, or fear of collapse. In shadow, extremes, control patterns, or emotional swings become louder. Let the false fall so the real can stand. Keep your attention on the symbol and turn the insight into one concrete step today.",
-    "imageUrl": "cards/ac/ac_tower.webp"
+    "imageUrl": "cards/ac/ac_tower.webp",
+    "description": "The Tower: A sudden shake that reveals truth. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Key motifs: upheaval, truth, release."
   },
   "ac_17_star": {
     "title": "The Star",
@@ -3175,7 +3306,8 @@
       "clarity": 55
     },
     "detailedDescription": "A quiet promise of renewal. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Hope, calm faith, and healing. At its best, this card supports a mature strategy and deliberate action. Doubt, discouragement, or losing faith. In shadow, extremes, control patterns, or emotional swings become louder. Keep the signal alive, even if it is small. Keep your attention on the symbol and turn the insight into one concrete step today.",
-    "imageUrl": "cards/ac/ac_star.webp"
+    "imageUrl": "cards/ac/ac_star.webp",
+    "description": "The Star: A quiet promise of renewal. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Key motifs: hope, healing, renewal."
   },
   "ac_18_moon": {
     "title": "The Moon",
@@ -3201,7 +3333,8 @@
       "clarity": 55
     },
     "detailedDescription": "The fog of intuition and the unseen. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Imagination, empathy, and subtle guidance. At its best, this card supports a mature strategy and deliberate action. Confusion, fear, or illusion. In shadow, extremes, control patterns, or emotional swings become louder. Move slowly and verify what you feel. Keep your attention on the symbol and turn the insight into one concrete step today.",
-    "imageUrl": "cards/ac/ac_moon.webp"
+    "imageUrl": "cards/ac/ac_moon.webp",
+    "description": "The Moon: The fog of intuition and the unseen. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Key motifs: mystery, dreams, uncertainty."
   },
   "ac_19_sun": {
     "title": "The Sun",
@@ -3227,7 +3360,8 @@
       "clarity": 55
     },
     "detailedDescription": "Warmth, visibility, and clear success. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Joy, vitality, and honest celebration. At its best, this card supports a mature strategy and deliberate action. Overexposure, ego, or burnout. In shadow, extremes, control patterns, or emotional swings become louder. Let your light be seen and shared. Keep your attention on the symbol and turn the insight into one concrete step today.",
-    "imageUrl": "cards/ac/ac_sun.webp"
+    "imageUrl": "cards/ac/ac_sun.webp",
+    "description": "The Sun: Warmth, visibility, and clear success. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Key motifs: joy, clarity, success."
   },
   "ac_20_judgement": {
     "title": "Judgement",
@@ -3253,7 +3387,8 @@
       "clarity": 55
     },
     "detailedDescription": "A call to rise and be accountable. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Renewal, forgiveness, and clear purpose. At its best, this card supports a mature strategy and deliberate action. Harsh self-judgment or refusing the call. In shadow, extremes, control patterns, or emotional swings become louder. Answer honestly and step into the next chapter. Keep your attention on the symbol and turn the insight into one concrete step today.",
-    "imageUrl": "cards/ac/ac_judgement.webp"
+    "imageUrl": "cards/ac/ac_judgement.webp",
+    "description": "Judgement: A call to rise and be accountable. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Key motifs: awakening, reckoning, purpose."
   },
   "ac_21_world": {
     "title": "The World",
@@ -3279,7 +3414,8 @@
       "clarity": 55
     },
     "detailedDescription": "Completion and a sense of wholeness. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Integration, reward, and earned closure. At its best, this card supports a mature strategy and deliberate action. Delays in finishing or fearing the next cycle. In shadow, extremes, control patterns, or emotional swings become louder. Honor what is complete and open the next door. Keep your attention on the symbol and turn the insight into one concrete step today.",
-    "imageUrl": "cards/ac/ac_world.webp"
+    "imageUrl": "cards/ac/ac_world.webp",
+    "description": "The World: Completion and a sense of wholeness. In the Crowley deck, the archetype is expressed through sharper contrast and inner alchemy. Key motifs: completion, wholeness, integration."
   },
   "ac_wands_ace": {
     "title": "Ace of Wands",
@@ -3305,7 +3441,8 @@
       "clarity": 64
     },
     "detailedDescription": "Ace of Wands in the Crowley deck channels pure ignition of the suit current through the axis of will, fire, and creative thrust. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card opens bold initiative and inspired execution while keeping intention coherent and usable. In shadow, the card can flip into haste, ego heat, and burnout, especially when force outruns awareness. Practical move: Ignite the intent and anchor it in one concrete move today.",
-    "imageUrl": "cards/ac/ac_wands_ace.webp"
+    "imageUrl": "cards/ac/ac_wands_ace.webp",
+    "description": "Ace of Wands: Ace of Wands in the Crowley deck channels pure ignition of the suit current through the axis of will, fire, and creative thrust. Key motifs: wands, ace, will."
   },
   "ac_wands_two": {
     "title": "Two of Wands",
@@ -3331,7 +3468,8 @@
       "clarity": 60
     },
     "detailedDescription": "Two of Wands in the Crowley deck channels polarity and directional choice through the axis of will, fire, and creative thrust. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card opens bold initiative and inspired execution while keeping intention coherent and usable. In shadow, the card can flip into haste, ego heat, and burnout, especially when force outruns awareness. Practical move: Choose one direction and cut parallel noise.",
-    "imageUrl": "cards/ac/ac_wands_two.webp"
+    "imageUrl": "cards/ac/ac_wands_two.webp",
+    "description": "Two of Wands: Two of Wands in the Crowley deck channels polarity and directional choice through the axis of will, fire, and creative thrust. Key motifs: wands, two, will."
   },
   "ac_wands_three": {
     "title": "Three of Wands",
@@ -3357,7 +3495,8 @@
       "clarity": 60
     },
     "detailedDescription": "Three of Wands in the Crowley deck channels expansion and first visible growth through the axis of will, fire, and creative thrust. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card opens bold initiative and inspired execution while keeping intention coherent and usable. In shadow, the card can flip into haste, ego heat, and burnout, especially when force outruns awareness. Practical move: Expand through allies and test your vision in reality.",
-    "imageUrl": "cards/ac/ac_wands_three.webp"
+    "imageUrl": "cards/ac/ac_wands_three.webp",
+    "description": "Three of Wands: Three of Wands in the Crowley deck channels expansion and first visible growth through the axis of will, fire, and creative thrust. Key motifs: wands, three, will."
   },
   "ac_wands_four": {
     "title": "Four of Wands",
@@ -3383,7 +3522,8 @@
       "clarity": 60
     },
     "detailedDescription": "Four of Wands in the Crowley deck channels stabilization of form and structure through the axis of will, fire, and creative thrust. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card opens bold initiative and inspired execution while keeping intention coherent and usable. In shadow, the card can flip into haste, ego heat, and burnout, especially when force outruns awareness. Practical move: Protect stability without turning it into a cage.",
-    "imageUrl": "cards/ac/ac_wands_four.webp"
+    "imageUrl": "cards/ac/ac_wands_four.webp",
+    "description": "Four of Wands: Four of Wands in the Crowley deck channels stabilization of form and structure through the axis of will, fire, and creative thrust. Key motifs: wands, four, will."
   },
   "ac_wands_five": {
     "title": "Five of Wands",
@@ -3409,7 +3549,8 @@
       "clarity": 60
     },
     "detailedDescription": "Five of Wands in the Crowley deck channels friction, ordeal, and recalibration through the axis of will, fire, and creative thrust. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card opens bold initiative and inspired execution while keeping intention coherent and usable. In shadow, the card can flip into haste, ego heat, and burnout, especially when force outruns awareness. Practical move: Treat tension as alchemical heat for growth.",
-    "imageUrl": "cards/ac/ac_wands_five.webp"
+    "imageUrl": "cards/ac/ac_wands_five.webp",
+    "description": "Five of Wands: Five of Wands in the Crowley deck channels friction, ordeal, and recalibration through the axis of will, fire, and creative thrust. Key motifs: wands, five, will."
   },
   "ac_wands_six": {
     "title": "Six of Wands",
@@ -3435,7 +3576,8 @@
       "clarity": 60
     },
     "detailedDescription": "Six of Wands in the Crowley deck channels harmonization and flow recovery through the axis of will, fire, and creative thrust. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card opens bold initiative and inspired execution while keeping intention coherent and usable. In shadow, the card can flip into haste, ego heat, and burnout, especially when force outruns awareness. Practical move: Lock in progress through gratitude and repeatable practice.",
-    "imageUrl": "cards/ac/ac_wands_six.webp"
+    "imageUrl": "cards/ac/ac_wands_six.webp",
+    "description": "Six of Wands: Six of Wands in the Crowley deck channels harmonization and flow recovery through the axis of will, fire, and creative thrust. Key motifs: wands, six, will."
   },
   "ac_wands_seven": {
     "title": "Seven of Wands",
@@ -3461,7 +3603,8 @@
       "clarity": 62
     },
     "detailedDescription": "Seven of Wands in the Crowley deck channels a will-test over distance through the axis of will, fire, and creative thrust. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card opens bold initiative and inspired execution while keeping intention coherent and usable. In shadow, the card can flip into haste, ego heat, and burnout, especially when force outruns awareness. Practical move: Hold your boundary and keep your center under pressure.",
-    "imageUrl": "cards/ac/ac_wands_seven.webp"
+    "imageUrl": "cards/ac/ac_wands_seven.webp",
+    "description": "Seven of Wands: Seven of Wands in the Crowley deck channels a will-test over distance through the axis of will, fire, and creative thrust. Key motifs: wands, seven, will."
   },
   "ac_wands_eight": {
     "title": "Eight of Wands",
@@ -3487,7 +3630,8 @@
       "clarity": 62
     },
     "detailedDescription": "Eight of Wands in the Crowley deck channels acceleration and controlled momentum through the axis of will, fire, and creative thrust. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card opens bold initiative and inspired execution while keeping intention coherent and usable. In shadow, the card can flip into haste, ego heat, and burnout, especially when force outruns awareness. Practical move: Ride the momentum while the channel is open.",
-    "imageUrl": "cards/ac/ac_wands_eight.webp"
+    "imageUrl": "cards/ac/ac_wands_eight.webp",
+    "description": "Eight of Wands: Eight of Wands in the Crowley deck channels acceleration and controlled momentum through the axis of will, fire, and creative thrust. Key motifs: wands, eight, will."
   },
   "ac_wands_nine": {
     "title": "Nine of Wands",
@@ -3513,7 +3657,8 @@
       "clarity": 62
     },
     "detailedDescription": "Nine of Wands in the Crowley deck channels mature focus and resource protection through the axis of will, fire, and creative thrust. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card opens bold initiative and inspired execution while keeping intention coherent and usable. In shadow, the card can flip into haste, ego heat, and burnout, especially when force outruns awareness. Practical move: Conserve energy and act with precision.",
-    "imageUrl": "cards/ac/ac_wands_nine.webp"
+    "imageUrl": "cards/ac/ac_wands_nine.webp",
+    "description": "Nine of Wands: Nine of Wands in the Crowley deck channels mature focus and resource protection through the axis of will, fire, and creative thrust. Key motifs: wands, nine, will."
   },
   "ac_wands_ten": {
     "title": "Ten of Wands",
@@ -3539,7 +3684,8 @@
       "clarity": 59
     },
     "detailedDescription": "Ten of Wands in the Crowley deck channels peak load and cycle completion through the axis of will, fire, and creative thrust. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card opens bold initiative and inspired execution while keeping intention coherent and usable. In shadow, the card can flip into haste, ego heat, and burnout, especially when force outruns awareness. Practical move: Delegate excess weight and clear space for a new cycle.",
-    "imageUrl": "cards/ac/ac_wands_ten.webp"
+    "imageUrl": "cards/ac/ac_wands_ten.webp",
+    "description": "Ten of Wands: Ten of Wands in the Crowley deck channels peak load and cycle completion through the axis of will, fire, and creative thrust. Key motifs: wands, ten, will."
   },
   "ac_wands_page": {
     "title": "Page of Wands",
@@ -3565,7 +3711,8 @@
       "clarity": 60
     },
     "detailedDescription": "Page of Wands in the Crowley deck channels a messenger of a new tonal shift through the axis of will, fire, and creative thrust. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card opens bold initiative and inspired execution while keeping intention coherent and usable. In shadow, the card can flip into haste, ego heat, and burnout, especially when force outruns awareness. Practical move: Track signs and learn from each signal.",
-    "imageUrl": "cards/ac/ac_wands_page.webp"
+    "imageUrl": "cards/ac/ac_wands_page.webp",
+    "description": "Page of Wands: Page of Wands in the Crowley deck channels a messenger of a new tonal shift through the axis of will, fire, and creative thrust. Key motifs: wands, page, will."
   },
   "ac_wands_knight": {
     "title": "Knight of Wands",
@@ -3591,7 +3738,8 @@
       "clarity": 59
     },
     "detailedDescription": "Knight of Wands in the Crowley deck channels a forceful charge into action through the axis of will, fire, and creative thrust. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card opens bold initiative and inspired execution while keeping intention coherent and usable. In shadow, the card can flip into haste, ego heat, and burnout, especially when force outruns awareness. Practical move: Aim your force at one target; do not fight blindly.",
-    "imageUrl": "cards/ac/ac_wands_knight.webp"
+    "imageUrl": "cards/ac/ac_wands_knight.webp",
+    "description": "Knight of Wands: Knight of Wands in the Crowley deck channels a forceful charge into action through the axis of will, fire, and creative thrust. Key motifs: wands, knight, will."
   },
   "ac_wands_queen": {
     "title": "Queen of Wands",
@@ -3617,7 +3765,8 @@
       "clarity": 60
     },
     "detailedDescription": "Queen of Wands in the Crowley deck channels magnetic receptivity and inner sovereignty through the axis of will, fire, and creative thrust. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card opens bold initiative and inspired execution while keeping intention coherent and usable. In shadow, the card can flip into haste, ego heat, and burnout, especially when force outruns awareness. Practical move: Increase magnetism through inner stillness and exact choice.",
-    "imageUrl": "cards/ac/ac_wands_queen.webp"
+    "imageUrl": "cards/ac/ac_wands_queen.webp",
+    "description": "Queen of Wands: Queen of Wands in the Crowley deck channels magnetic receptivity and inner sovereignty through the axis of will, fire, and creative thrust. Key motifs: wands, queen, will."
   },
   "ac_wands_king": {
     "title": "King of Wands",
@@ -3643,7 +3792,8 @@
       "clarity": 60
     },
     "detailedDescription": "King of Wands in the Crowley deck channels mastery, command, and strategic closure through the axis of will, fire, and creative thrust. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card opens bold initiative and inspired execution while keeping intention coherent and usable. In shadow, the card can flip into haste, ego heat, and burnout, especially when force outruns awareness. Practical move: Lead with calm strategy; mastery beats intensity spikes.",
-    "imageUrl": "cards/ac/ac_wands_king.webp"
+    "imageUrl": "cards/ac/ac_wands_king.webp",
+    "description": "King of Wands: King of Wands in the Crowley deck channels mastery, command, and strategic closure through the axis of will, fire, and creative thrust. Key motifs: wands, king, will."
   },
   "ac_cups_ace": {
     "title": "Ace of Cups",
@@ -3669,7 +3819,8 @@
       "clarity": 62
     },
     "detailedDescription": "Ace of Cups in the Crowley deck channels pure ignition of the suit current through the axis of emotion, devotion, and psychic receptivity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card deepens empathy and relational intelligence while keeping intention coherent and usable. In shadow, the card can sink into projection, sentimentality, and emotional loops, especially when force outruns awareness. Practical move: Ignite the intent and anchor it in one concrete move today.",
-    "imageUrl": "cards/ac/ac_cups_ace.webp"
+    "imageUrl": "cards/ac/ac_cups_ace.webp",
+    "description": "Ace of Cups: Ace of Cups in the Crowley deck channels pure ignition of the suit current through the axis of emotion, devotion, and psychic receptivity. Key motifs: cups, ace, will."
   },
   "ac_cups_two": {
     "title": "Two of Cups",
@@ -3695,7 +3846,8 @@
       "clarity": 58
     },
     "detailedDescription": "Two of Cups in the Crowley deck channels polarity and directional choice through the axis of emotion, devotion, and psychic receptivity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card deepens empathy and relational intelligence while keeping intention coherent and usable. In shadow, the card can sink into projection, sentimentality, and emotional loops, especially when force outruns awareness. Practical move: Choose one direction and cut parallel noise.",
-    "imageUrl": "cards/ac/ac_cups_two.webp"
+    "imageUrl": "cards/ac/ac_cups_two.webp",
+    "description": "Two of Cups: Two of Cups in the Crowley deck channels polarity and directional choice through the axis of emotion, devotion, and psychic receptivity. Key motifs: cups, two, will."
   },
   "ac_cups_three": {
     "title": "Three of Cups",
@@ -3721,7 +3873,8 @@
       "clarity": 58
     },
     "detailedDescription": "Three of Cups in the Crowley deck channels expansion and first visible growth through the axis of emotion, devotion, and psychic receptivity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card deepens empathy and relational intelligence while keeping intention coherent and usable. In shadow, the card can sink into projection, sentimentality, and emotional loops, especially when force outruns awareness. Practical move: Expand through allies and test your vision in reality.",
-    "imageUrl": "cards/ac/ac_cups_three.webp"
+    "imageUrl": "cards/ac/ac_cups_three.webp",
+    "description": "Three of Cups: Three of Cups in the Crowley deck channels expansion and first visible growth through the axis of emotion, devotion, and psychic receptivity. Key motifs: cups, three, will."
   },
   "ac_cups_four": {
     "title": "Four of Cups",
@@ -3747,7 +3900,8 @@
       "clarity": 58
     },
     "detailedDescription": "Four of Cups in the Crowley deck channels stabilization of form and structure through the axis of emotion, devotion, and psychic receptivity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card deepens empathy and relational intelligence while keeping intention coherent and usable. In shadow, the card can sink into projection, sentimentality, and emotional loops, especially when force outruns awareness. Practical move: Protect stability without turning it into a cage.",
-    "imageUrl": "cards/ac/ac_cups_four.webp"
+    "imageUrl": "cards/ac/ac_cups_four.webp",
+    "description": "Four of Cups: Four of Cups in the Crowley deck channels stabilization of form and structure through the axis of emotion, devotion, and psychic receptivity. Key motifs: cups, four, will."
   },
   "ac_cups_five": {
     "title": "Five of Cups",
@@ -3773,7 +3927,8 @@
       "clarity": 58
     },
     "detailedDescription": "Five of Cups in the Crowley deck channels friction, ordeal, and recalibration through the axis of emotion, devotion, and psychic receptivity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card deepens empathy and relational intelligence while keeping intention coherent and usable. In shadow, the card can sink into projection, sentimentality, and emotional loops, especially when force outruns awareness. Practical move: Treat tension as alchemical heat for growth.",
-    "imageUrl": "cards/ac/ac_cups_five.webp"
+    "imageUrl": "cards/ac/ac_cups_five.webp",
+    "description": "Five of Cups: Five of Cups in the Crowley deck channels friction, ordeal, and recalibration through the axis of emotion, devotion, and psychic receptivity. Key motifs: cups, five, will."
   },
   "ac_cups_six": {
     "title": "Six of Cups",
@@ -3799,7 +3954,8 @@
       "clarity": 58
     },
     "detailedDescription": "Six of Cups in the Crowley deck channels harmonization and flow recovery through the axis of emotion, devotion, and psychic receptivity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card deepens empathy and relational intelligence while keeping intention coherent and usable. In shadow, the card can sink into projection, sentimentality, and emotional loops, especially when force outruns awareness. Practical move: Lock in progress through gratitude and repeatable practice.",
-    "imageUrl": "cards/ac/ac_cups_six.webp"
+    "imageUrl": "cards/ac/ac_cups_six.webp",
+    "description": "Six of Cups: Six of Cups in the Crowley deck channels harmonization and flow recovery through the axis of emotion, devotion, and psychic receptivity. Key motifs: cups, six, will."
   },
   "ac_cups_seven": {
     "title": "Seven of Cups",
@@ -3825,7 +3981,8 @@
       "clarity": 60
     },
     "detailedDescription": "Seven of Cups in the Crowley deck channels a will-test over distance through the axis of emotion, devotion, and psychic receptivity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card deepens empathy and relational intelligence while keeping intention coherent and usable. In shadow, the card can sink into projection, sentimentality, and emotional loops, especially when force outruns awareness. Practical move: Hold your boundary and keep your center under pressure.",
-    "imageUrl": "cards/ac/ac_cups_seven.webp"
+    "imageUrl": "cards/ac/ac_cups_seven.webp",
+    "description": "Seven of Cups: Seven of Cups in the Crowley deck channels a will-test over distance through the axis of emotion, devotion, and psychic receptivity. Key motifs: cups, seven, will."
   },
   "ac_cups_eight": {
     "title": "Eight of Cups",
@@ -3851,7 +4008,8 @@
       "clarity": 60
     },
     "detailedDescription": "Eight of Cups in the Crowley deck channels acceleration and controlled momentum through the axis of emotion, devotion, and psychic receptivity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card deepens empathy and relational intelligence while keeping intention coherent and usable. In shadow, the card can sink into projection, sentimentality, and emotional loops, especially when force outruns awareness. Practical move: Ride the momentum while the channel is open.",
-    "imageUrl": "cards/ac/ac_cups_eight.webp"
+    "imageUrl": "cards/ac/ac_cups_eight.webp",
+    "description": "Eight of Cups: Eight of Cups in the Crowley deck channels acceleration and controlled momentum through the axis of emotion, devotion, and psychic receptivity. Key motifs: cups, eight, will."
   },
   "ac_cups_nine": {
     "title": "Nine of Cups",
@@ -3877,7 +4035,8 @@
       "clarity": 60
     },
     "detailedDescription": "Nine of Cups in the Crowley deck channels mature focus and resource protection through the axis of emotion, devotion, and psychic receptivity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card deepens empathy and relational intelligence while keeping intention coherent and usable. In shadow, the card can sink into projection, sentimentality, and emotional loops, especially when force outruns awareness. Practical move: Conserve energy and act with precision.",
-    "imageUrl": "cards/ac/ac_cups_nine.webp"
+    "imageUrl": "cards/ac/ac_cups_nine.webp",
+    "description": "Nine of Cups: Nine of Cups in the Crowley deck channels mature focus and resource protection through the axis of emotion, devotion, and psychic receptivity. Key motifs: cups, nine, will."
   },
   "ac_cups_ten": {
     "title": "Ten of Cups",
@@ -3903,7 +4062,8 @@
       "clarity": 57
     },
     "detailedDescription": "Ten of Cups in the Crowley deck channels peak load and cycle completion through the axis of emotion, devotion, and psychic receptivity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card deepens empathy and relational intelligence while keeping intention coherent and usable. In shadow, the card can sink into projection, sentimentality, and emotional loops, especially when force outruns awareness. Practical move: Delegate excess weight and clear space for a new cycle.",
-    "imageUrl": "cards/ac/ac_cups_ten.webp"
+    "imageUrl": "cards/ac/ac_cups_ten.webp",
+    "description": "Ten of Cups: Ten of Cups in the Crowley deck channels peak load and cycle completion through the axis of emotion, devotion, and psychic receptivity. Key motifs: cups, ten, will."
   },
   "ac_cups_page": {
     "title": "Page of Cups",
@@ -3929,7 +4089,8 @@
       "clarity": 58
     },
     "detailedDescription": "Page of Cups in the Crowley deck channels a messenger of a new tonal shift through the axis of emotion, devotion, and psychic receptivity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card deepens empathy and relational intelligence while keeping intention coherent and usable. In shadow, the card can sink into projection, sentimentality, and emotional loops, especially when force outruns awareness. Practical move: Track signs and learn from each signal.",
-    "imageUrl": "cards/ac/ac_cups_page.webp"
+    "imageUrl": "cards/ac/ac_cups_page.webp",
+    "description": "Page of Cups: Page of Cups in the Crowley deck channels a messenger of a new tonal shift through the axis of emotion, devotion, and psychic receptivity. Key motifs: cups, page, will."
   },
   "ac_cups_knight": {
     "title": "Knight of Cups",
@@ -3955,7 +4116,8 @@
       "clarity": 57
     },
     "detailedDescription": "Knight of Cups in the Crowley deck channels a forceful charge into action through the axis of emotion, devotion, and psychic receptivity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card deepens empathy and relational intelligence while keeping intention coherent and usable. In shadow, the card can sink into projection, sentimentality, and emotional loops, especially when force outruns awareness. Practical move: Aim your force at one target; do not fight blindly.",
-    "imageUrl": "cards/ac/ac_cups_knight.webp"
+    "imageUrl": "cards/ac/ac_cups_knight.webp",
+    "description": "Knight of Cups: Knight of Cups in the Crowley deck channels a forceful charge into action through the axis of emotion, devotion, and psychic receptivity. Key motifs: cups, knight, will."
   },
   "ac_cups_queen": {
     "title": "Queen of Cups",
@@ -3981,7 +4143,8 @@
       "clarity": 58
     },
     "detailedDescription": "Queen of Cups in the Crowley deck channels magnetic receptivity and inner sovereignty through the axis of emotion, devotion, and psychic receptivity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card deepens empathy and relational intelligence while keeping intention coherent and usable. In shadow, the card can sink into projection, sentimentality, and emotional loops, especially when force outruns awareness. Practical move: Increase magnetism through inner stillness and exact choice.",
-    "imageUrl": "cards/ac/ac_cups_queen.webp"
+    "imageUrl": "cards/ac/ac_cups_queen.webp",
+    "description": "Queen of Cups: Queen of Cups in the Crowley deck channels magnetic receptivity and inner sovereignty through the axis of emotion, devotion, and psychic receptivity. Key motifs: cups, queen, will."
   },
   "ac_cups_king": {
     "title": "King of Cups",
@@ -4007,7 +4170,8 @@
       "clarity": 58
     },
     "detailedDescription": "King of Cups in the Crowley deck channels mastery, command, and strategic closure through the axis of emotion, devotion, and psychic receptivity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card deepens empathy and relational intelligence while keeping intention coherent and usable. In shadow, the card can sink into projection, sentimentality, and emotional loops, especially when force outruns awareness. Practical move: Lead with calm strategy; mastery beats intensity spikes.",
-    "imageUrl": "cards/ac/ac_cups_king.webp"
+    "imageUrl": "cards/ac/ac_cups_king.webp",
+    "description": "King of Cups: King of Cups in the Crowley deck channels mastery, command, and strategic closure through the axis of emotion, devotion, and psychic receptivity. Key motifs: cups, king, will."
   },
   "ac_swords_ace": {
     "title": "Ace of Swords",
@@ -4033,7 +4197,8 @@
       "clarity": 84
     },
     "detailedDescription": "Ace of Swords in the Crowley deck channels pure ignition of the suit current through the axis of mind, language, and cutting clarity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card clears signal and removes mental noise while keeping intention coherent and usable. In shadow, the card can harden into overcontrol, cynicism, or self-attack, especially when force outruns awareness. Practical move: Ignite the intent and anchor it in one concrete move today.",
-    "imageUrl": "cards/ac/ac_swords_ace.webp"
+    "imageUrl": "cards/ac/ac_swords_ace.webp",
+    "description": "Ace of Swords: Ace of Swords in the Crowley deck channels pure ignition of the suit current through the axis of mind, language, and cutting clarity. Key motifs: swords, ace, will."
   },
   "ac_swords_two": {
     "title": "Two of Swords",
@@ -4059,7 +4224,8 @@
       "clarity": 80
     },
     "detailedDescription": "Two of Swords in the Crowley deck channels polarity and directional choice through the axis of mind, language, and cutting clarity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card clears signal and removes mental noise while keeping intention coherent and usable. In shadow, the card can harden into overcontrol, cynicism, or self-attack, especially when force outruns awareness. Practical move: Choose one direction and cut parallel noise.",
-    "imageUrl": "cards/ac/ac_swords_two.webp"
+    "imageUrl": "cards/ac/ac_swords_two.webp",
+    "description": "Two of Swords: Two of Swords in the Crowley deck channels polarity and directional choice through the axis of mind, language, and cutting clarity. Key motifs: swords, two, will."
   },
   "ac_swords_three": {
     "title": "Three of Swords",
@@ -4085,7 +4251,8 @@
       "clarity": 80
     },
     "detailedDescription": "Three of Swords in the Crowley deck channels expansion and first visible growth through the axis of mind, language, and cutting clarity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card clears signal and removes mental noise while keeping intention coherent and usable. In shadow, the card can harden into overcontrol, cynicism, or self-attack, especially when force outruns awareness. Practical move: Expand through allies and test your vision in reality.",
-    "imageUrl": "cards/ac/ac_swords_three.webp"
+    "imageUrl": "cards/ac/ac_swords_three.webp",
+    "description": "Three of Swords: Three of Swords in the Crowley deck channels expansion and first visible growth through the axis of mind, language, and cutting clarity. Key motifs: swords, three, will."
   },
   "ac_swords_four": {
     "title": "Four of Swords",
@@ -4111,7 +4278,8 @@
       "clarity": 80
     },
     "detailedDescription": "Four of Swords in the Crowley deck channels stabilization of form and structure through the axis of mind, language, and cutting clarity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card clears signal and removes mental noise while keeping intention coherent and usable. In shadow, the card can harden into overcontrol, cynicism, or self-attack, especially when force outruns awareness. Practical move: Protect stability without turning it into a cage.",
-    "imageUrl": "cards/ac/ac_swords_four.webp"
+    "imageUrl": "cards/ac/ac_swords_four.webp",
+    "description": "Four of Swords: Four of Swords in the Crowley deck channels stabilization of form and structure through the axis of mind, language, and cutting clarity. Key motifs: swords, four, will."
   },
   "ac_swords_five": {
     "title": "Five of Swords",
@@ -4137,7 +4305,8 @@
       "clarity": 80
     },
     "detailedDescription": "Five of Swords in the Crowley deck channels friction, ordeal, and recalibration through the axis of mind, language, and cutting clarity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card clears signal and removes mental noise while keeping intention coherent and usable. In shadow, the card can harden into overcontrol, cynicism, or self-attack, especially when force outruns awareness. Practical move: Treat tension as alchemical heat for growth.",
-    "imageUrl": "cards/ac/ac_swords_five.webp"
+    "imageUrl": "cards/ac/ac_swords_five.webp",
+    "description": "Five of Swords: Five of Swords in the Crowley deck channels friction, ordeal, and recalibration through the axis of mind, language, and cutting clarity. Key motifs: swords, five, will."
   },
   "ac_swords_six": {
     "title": "Six of Swords",
@@ -4163,7 +4332,8 @@
       "clarity": 80
     },
     "detailedDescription": "Six of Swords in the Crowley deck channels harmonization and flow recovery through the axis of mind, language, and cutting clarity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card clears signal and removes mental noise while keeping intention coherent and usable. In shadow, the card can harden into overcontrol, cynicism, or self-attack, especially when force outruns awareness. Practical move: Lock in progress through gratitude and repeatable practice.",
-    "imageUrl": "cards/ac/ac_swords_six.webp"
+    "imageUrl": "cards/ac/ac_swords_six.webp",
+    "description": "Six of Swords: Six of Swords in the Crowley deck channels harmonization and flow recovery through the axis of mind, language, and cutting clarity. Key motifs: swords, six, will."
   },
   "ac_swords_seven": {
     "title": "Seven of Swords",
@@ -4189,7 +4359,8 @@
       "clarity": 82
     },
     "detailedDescription": "Seven of Swords in the Crowley deck channels a will-test over distance through the axis of mind, language, and cutting clarity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card clears signal and removes mental noise while keeping intention coherent and usable. In shadow, the card can harden into overcontrol, cynicism, or self-attack, especially when force outruns awareness. Practical move: Hold your boundary and keep your center under pressure.",
-    "imageUrl": "cards/ac/ac_swords_seven.webp"
+    "imageUrl": "cards/ac/ac_swords_seven.webp",
+    "description": "Seven of Swords: Seven of Swords in the Crowley deck channels a will-test over distance through the axis of mind, language, and cutting clarity. Key motifs: swords, seven, will."
   },
   "ac_swords_eight": {
     "title": "Eight of Swords",
@@ -4215,7 +4386,8 @@
       "clarity": 82
     },
     "detailedDescription": "Eight of Swords in the Crowley deck channels acceleration and controlled momentum through the axis of mind, language, and cutting clarity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card clears signal and removes mental noise while keeping intention coherent and usable. In shadow, the card can harden into overcontrol, cynicism, or self-attack, especially when force outruns awareness. Practical move: Ride the momentum while the channel is open.",
-    "imageUrl": "cards/ac/ac_swords_eight.webp"
+    "imageUrl": "cards/ac/ac_swords_eight.webp",
+    "description": "Eight of Swords: Eight of Swords in the Crowley deck channels acceleration and controlled momentum through the axis of mind, language, and cutting clarity. Key motifs: swords, eight, will."
   },
   "ac_swords_nine": {
     "title": "Nine of Swords",
@@ -4241,7 +4413,8 @@
       "clarity": 82
     },
     "detailedDescription": "Nine of Swords in the Crowley deck channels mature focus and resource protection through the axis of mind, language, and cutting clarity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card clears signal and removes mental noise while keeping intention coherent and usable. In shadow, the card can harden into overcontrol, cynicism, or self-attack, especially when force outruns awareness. Practical move: Conserve energy and act with precision.",
-    "imageUrl": "cards/ac/ac_swords_nine.webp"
+    "imageUrl": "cards/ac/ac_swords_nine.webp",
+    "description": "Nine of Swords: Nine of Swords in the Crowley deck channels mature focus and resource protection through the axis of mind, language, and cutting clarity. Key motifs: swords, nine, will."
   },
   "ac_swords_ten": {
     "title": "Ten of Swords",
@@ -4267,7 +4440,8 @@
       "clarity": 79
     },
     "detailedDescription": "Ten of Swords in the Crowley deck channels peak load and cycle completion through the axis of mind, language, and cutting clarity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card clears signal and removes mental noise while keeping intention coherent and usable. In shadow, the card can harden into overcontrol, cynicism, or self-attack, especially when force outruns awareness. Practical move: Delegate excess weight and clear space for a new cycle.",
-    "imageUrl": "cards/ac/ac_swords_ten.webp"
+    "imageUrl": "cards/ac/ac_swords_ten.webp",
+    "description": "Ten of Swords: Ten of Swords in the Crowley deck channels peak load and cycle completion through the axis of mind, language, and cutting clarity. Key motifs: swords, ten, will."
   },
   "ac_swords_page": {
     "title": "Page of Swords",
@@ -4293,7 +4467,8 @@
       "clarity": 80
     },
     "detailedDescription": "Page of Swords in the Crowley deck channels a messenger of a new tonal shift through the axis of mind, language, and cutting clarity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card clears signal and removes mental noise while keeping intention coherent and usable. In shadow, the card can harden into overcontrol, cynicism, or self-attack, especially when force outruns awareness. Practical move: Track signs and learn from each signal.",
-    "imageUrl": "cards/ac/ac_swords_page.webp"
+    "imageUrl": "cards/ac/ac_swords_page.webp",
+    "description": "Page of Swords: Page of Swords in the Crowley deck channels a messenger of a new tonal shift through the axis of mind, language, and cutting clarity. Key motifs: swords, page, will."
   },
   "ac_swords_knight": {
     "title": "Knight of Swords",
@@ -4319,7 +4494,8 @@
       "clarity": 79
     },
     "detailedDescription": "Knight of Swords in the Crowley deck channels a forceful charge into action through the axis of mind, language, and cutting clarity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card clears signal and removes mental noise while keeping intention coherent and usable. In shadow, the card can harden into overcontrol, cynicism, or self-attack, especially when force outruns awareness. Practical move: Aim your force at one target; do not fight blindly.",
-    "imageUrl": "cards/ac/ac_swords_knight.webp"
+    "imageUrl": "cards/ac/ac_swords_knight.webp",
+    "description": "Knight of Swords: Knight of Swords in the Crowley deck channels a forceful charge into action through the axis of mind, language, and cutting clarity. Key motifs: swords, knight, will."
   },
   "ac_swords_queen": {
     "title": "Queen of Swords",
@@ -4345,7 +4521,8 @@
       "clarity": 80
     },
     "detailedDescription": "Queen of Swords in the Crowley deck channels magnetic receptivity and inner sovereignty through the axis of mind, language, and cutting clarity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card clears signal and removes mental noise while keeping intention coherent and usable. In shadow, the card can harden into overcontrol, cynicism, or self-attack, especially when force outruns awareness. Practical move: Increase magnetism through inner stillness and exact choice.",
-    "imageUrl": "cards/ac/ac_swords_queen.webp"
+    "imageUrl": "cards/ac/ac_swords_queen.webp",
+    "description": "Queen of Swords: Queen of Swords in the Crowley deck channels magnetic receptivity and inner sovereignty through the axis of mind, language, and cutting clarity. Key motifs: swords, queen, will."
   },
   "ac_swords_king": {
     "title": "King of Swords",
@@ -4371,7 +4548,8 @@
       "clarity": 80
     },
     "detailedDescription": "King of Swords in the Crowley deck channels mastery, command, and strategic closure through the axis of mind, language, and cutting clarity. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card clears signal and removes mental noise while keeping intention coherent and usable. In shadow, the card can harden into overcontrol, cynicism, or self-attack, especially when force outruns awareness. Practical move: Lead with calm strategy; mastery beats intensity spikes.",
-    "imageUrl": "cards/ac/ac_swords_king.webp"
+    "imageUrl": "cards/ac/ac_swords_king.webp",
+    "description": "King of Swords: King of Swords in the Crowley deck channels mastery, command, and strategic closure through the axis of mind, language, and cutting clarity. Key motifs: swords, king, will."
   },
   "ac_pentacles_ace": {
     "title": "Ace of Pentacles",
@@ -4397,7 +4575,8 @@
       "clarity": 68
     },
     "detailedDescription": "Ace of Pentacles in the Crowley deck channels pure ignition of the suit current through the axis of matter, body, and ritual manifestation. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card builds grounded structure and real-world outcomes while keeping intention coherent and usable. In shadow, the card can freeze into scarcity, inertia, and fear of change, especially when force outruns awareness. Practical move: Ignite the intent and anchor it in one concrete move today.",
-    "imageUrl": "cards/ac/ac_pentacles_ace.webp"
+    "imageUrl": "cards/ac/ac_pentacles_ace.webp",
+    "description": "Ace of Pentacles: Ace of Pentacles in the Crowley deck channels pure ignition of the suit current through the axis of matter, body, and ritual manifestation. Key motifs: disks, ace, will."
   },
   "ac_pentacles_two": {
     "title": "Two of Pentacles",
@@ -4423,7 +4602,8 @@
       "clarity": 64
     },
     "detailedDescription": "Two of Pentacles in the Crowley deck channels polarity and directional choice through the axis of matter, body, and ritual manifestation. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card builds grounded structure and real-world outcomes while keeping intention coherent and usable. In shadow, the card can freeze into scarcity, inertia, and fear of change, especially when force outruns awareness. Practical move: Choose one direction and cut parallel noise.",
-    "imageUrl": "cards/ac/ac_pentacles_two.webp"
+    "imageUrl": "cards/ac/ac_pentacles_two.webp",
+    "description": "Two of Pentacles: Two of Pentacles in the Crowley deck channels polarity and directional choice through the axis of matter, body, and ritual manifestation. Key motifs: disks, two, will."
   },
   "ac_pentacles_three": {
     "title": "Three of Pentacles",
@@ -4449,7 +4629,8 @@
       "clarity": 64
     },
     "detailedDescription": "Three of Pentacles in the Crowley deck channels expansion and first visible growth through the axis of matter, body, and ritual manifestation. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card builds grounded structure and real-world outcomes while keeping intention coherent and usable. In shadow, the card can freeze into scarcity, inertia, and fear of change, especially when force outruns awareness. Practical move: Expand through allies and test your vision in reality.",
-    "imageUrl": "cards/ac/ac_pentacles_three.webp"
+    "imageUrl": "cards/ac/ac_pentacles_three.webp",
+    "description": "Three of Pentacles: Three of Pentacles in the Crowley deck channels expansion and first visible growth through the axis of matter, body, and ritual manifestation. Key motifs: disks, three, will."
   },
   "ac_pentacles_four": {
     "title": "Four of Pentacles",
@@ -4475,7 +4656,8 @@
       "clarity": 64
     },
     "detailedDescription": "Four of Pentacles in the Crowley deck channels stabilization of form and structure through the axis of matter, body, and ritual manifestation. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card builds grounded structure and real-world outcomes while keeping intention coherent and usable. In shadow, the card can freeze into scarcity, inertia, and fear of change, especially when force outruns awareness. Practical move: Protect stability without turning it into a cage.",
-    "imageUrl": "cards/ac/ac_pentacles_four.webp"
+    "imageUrl": "cards/ac/ac_pentacles_four.webp",
+    "description": "Four of Pentacles: Four of Pentacles in the Crowley deck channels stabilization of form and structure through the axis of matter, body, and ritual manifestation. Key motifs: disks, four, will."
   },
   "ac_pentacles_five": {
     "title": "Five of Pentacles",
@@ -4501,7 +4683,8 @@
       "clarity": 64
     },
     "detailedDescription": "Five of Pentacles in the Crowley deck channels friction, ordeal, and recalibration through the axis of matter, body, and ritual manifestation. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card builds grounded structure and real-world outcomes while keeping intention coherent and usable. In shadow, the card can freeze into scarcity, inertia, and fear of change, especially when force outruns awareness. Practical move: Treat tension as alchemical heat for growth.",
-    "imageUrl": "cards/ac/ac_pentacles_five.webp"
+    "imageUrl": "cards/ac/ac_pentacles_five.webp",
+    "description": "Five of Pentacles: Five of Pentacles in the Crowley deck channels friction, ordeal, and recalibration through the axis of matter, body, and ritual manifestation. Key motifs: disks, five, will."
   },
   "ac_pentacles_six": {
     "title": "Six of Pentacles",
@@ -4527,7 +4710,8 @@
       "clarity": 64
     },
     "detailedDescription": "Six of Pentacles in the Crowley deck channels harmonization and flow recovery through the axis of matter, body, and ritual manifestation. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card builds grounded structure and real-world outcomes while keeping intention coherent and usable. In shadow, the card can freeze into scarcity, inertia, and fear of change, especially when force outruns awareness. Practical move: Lock in progress through gratitude and repeatable practice.",
-    "imageUrl": "cards/ac/ac_pentacles_six.webp"
+    "imageUrl": "cards/ac/ac_pentacles_six.webp",
+    "description": "Six of Pentacles: Six of Pentacles in the Crowley deck channels harmonization and flow recovery through the axis of matter, body, and ritual manifestation. Key motifs: disks, six, will."
   },
   "ac_pentacles_seven": {
     "title": "Seven of Pentacles",
@@ -4553,7 +4737,8 @@
       "clarity": 66
     },
     "detailedDescription": "Seven of Pentacles in the Crowley deck channels a will-test over distance through the axis of matter, body, and ritual manifestation. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card builds grounded structure and real-world outcomes while keeping intention coherent and usable. In shadow, the card can freeze into scarcity, inertia, and fear of change, especially when force outruns awareness. Practical move: Hold your boundary and keep your center under pressure.",
-    "imageUrl": "cards/ac/ac_pentacles_seven.webp"
+    "imageUrl": "cards/ac/ac_pentacles_seven.webp",
+    "description": "Seven of Pentacles: Seven of Pentacles in the Crowley deck channels a will-test over distance through the axis of matter, body, and ritual manifestation. Key motifs: disks, seven, will."
   },
   "ac_pentacles_eight": {
     "title": "Eight of Pentacles",
@@ -4579,7 +4764,8 @@
       "clarity": 66
     },
     "detailedDescription": "Eight of Pentacles in the Crowley deck channels acceleration and controlled momentum through the axis of matter, body, and ritual manifestation. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card builds grounded structure and real-world outcomes while keeping intention coherent and usable. In shadow, the card can freeze into scarcity, inertia, and fear of change, especially when force outruns awareness. Practical move: Ride the momentum while the channel is open.",
-    "imageUrl": "cards/ac/ac_pentacles_eight.webp"
+    "imageUrl": "cards/ac/ac_pentacles_eight.webp",
+    "description": "Eight of Pentacles: Eight of Pentacles in the Crowley deck channels acceleration and controlled momentum through the axis of matter, body, and ritual manifestation. Key motifs: disks, eight, will."
   },
   "ac_pentacles_nine": {
     "title": "Nine of Pentacles",
@@ -4605,7 +4791,8 @@
       "clarity": 66
     },
     "detailedDescription": "Nine of Pentacles in the Crowley deck channels mature focus and resource protection through the axis of matter, body, and ritual manifestation. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card builds grounded structure and real-world outcomes while keeping intention coherent and usable. In shadow, the card can freeze into scarcity, inertia, and fear of change, especially when force outruns awareness. Practical move: Conserve energy and act with precision.",
-    "imageUrl": "cards/ac/ac_pentacles_nine.webp"
+    "imageUrl": "cards/ac/ac_pentacles_nine.webp",
+    "description": "Nine of Pentacles: Nine of Pentacles in the Crowley deck channels mature focus and resource protection through the axis of matter, body, and ritual manifestation. Key motifs: disks, nine, will."
   },
   "ac_pentacles_ten": {
     "title": "Ten of Pentacles",
@@ -4631,7 +4818,8 @@
       "clarity": 63
     },
     "detailedDescription": "Ten of Pentacles in the Crowley deck channels peak load and cycle completion through the axis of matter, body, and ritual manifestation. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card builds grounded structure and real-world outcomes while keeping intention coherent and usable. In shadow, the card can freeze into scarcity, inertia, and fear of change, especially when force outruns awareness. Practical move: Delegate excess weight and clear space for a new cycle.",
-    "imageUrl": "cards/ac/ac_pentacles_ten.webp"
+    "imageUrl": "cards/ac/ac_pentacles_ten.webp",
+    "description": "Ten of Pentacles: Ten of Pentacles in the Crowley deck channels peak load and cycle completion through the axis of matter, body, and ritual manifestation. Key motifs: disks, ten, will."
   },
   "ac_pentacles_page": {
     "title": "Page of Pentacles",
@@ -4657,7 +4845,8 @@
       "clarity": 64
     },
     "detailedDescription": "Page of Pentacles in the Crowley deck channels a messenger of a new tonal shift through the axis of matter, body, and ritual manifestation. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card builds grounded structure and real-world outcomes while keeping intention coherent and usable. In shadow, the card can freeze into scarcity, inertia, and fear of change, especially when force outruns awareness. Practical move: Track signs and learn from each signal.",
-    "imageUrl": "cards/ac/ac_pentacles_page.webp"
+    "imageUrl": "cards/ac/ac_pentacles_page.webp",
+    "description": "Page of Pentacles: Page of Pentacles in the Crowley deck channels a messenger of a new tonal shift through the axis of matter, body, and ritual manifestation. Key motifs: disks, page, will."
   },
   "ac_pentacles_knight": {
     "title": "Knight of Pentacles",
@@ -4683,7 +4872,8 @@
       "clarity": 63
     },
     "detailedDescription": "Knight of Pentacles in the Crowley deck channels a forceful charge into action through the axis of matter, body, and ritual manifestation. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card builds grounded structure and real-world outcomes while keeping intention coherent and usable. In shadow, the card can freeze into scarcity, inertia, and fear of change, especially when force outruns awareness. Practical move: Aim your force at one target; do not fight blindly.",
-    "imageUrl": "cards/ac/ac_pentacles_knight.webp"
+    "imageUrl": "cards/ac/ac_pentacles_knight.webp",
+    "description": "Knight of Pentacles: Knight of Pentacles in the Crowley deck channels a forceful charge into action through the axis of matter, body, and ritual manifestation. Key motifs: disks, knight, will."
   },
   "ac_pentacles_queen": {
     "title": "Queen of Pentacles",
@@ -4709,7 +4899,8 @@
       "clarity": 64
     },
     "detailedDescription": "Queen of Pentacles in the Crowley deck channels magnetic receptivity and inner sovereignty through the axis of matter, body, and ritual manifestation. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card builds grounded structure and real-world outcomes while keeping intention coherent and usable. In shadow, the card can freeze into scarcity, inertia, and fear of change, especially when force outruns awareness. Practical move: Increase magnetism through inner stillness and exact choice.",
-    "imageUrl": "cards/ac/ac_pentacles_queen.webp"
+    "imageUrl": "cards/ac/ac_pentacles_queen.webp",
+    "description": "Queen of Pentacles: Queen of Pentacles in the Crowley deck channels magnetic receptivity and inner sovereignty through the axis of matter, body, and ritual manifestation. Key motifs: disks, queen, will."
   },
   "ac_pentacles_king": {
     "title": "King of Pentacles",
@@ -4735,6 +4926,7 @@
       "clarity": 64
     },
     "detailedDescription": "King of Pentacles in the Crowley deck channels mastery, command, and strategic closure through the axis of matter, body, and ritual manifestation. Crowley treats this Minor as a dynamic formula, not a static keyword, so the reading becomes a map of energy management. In light, the card builds grounded structure and real-world outcomes while keeping intention coherent and usable. In shadow, the card can freeze into scarcity, inertia, and fear of change, especially when force outruns awareness. Practical move: Lead with calm strategy; mastery beats intensity spikes.",
-    "imageUrl": "cards/ac/ac_pentacles_king.webp"
+    "imageUrl": "cards/ac/ac_pentacles_king.webp",
+    "description": "King of Pentacles: King of Pentacles in the Crowley deck channels mastery, command, and strategic closure through the axis of matter, body, and ritual manifestation. Key motifs: disks, king, will."
   }
 }

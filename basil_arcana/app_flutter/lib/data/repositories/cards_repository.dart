@@ -1,7 +1,6 @@
 import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
 
 import '../../core/assets/asset_paths.dart';
 import '../../core/config/assets_config.dart';
@@ -82,56 +81,9 @@ class CardsRepository {
     required DeckType deckId,
   }) async {
     final cacheKey = cardsCacheKey(locale);
-    var raw = await _loadLocalCards(cacheKey: cacheKey, locale: locale);
-    if (_isLegacyCardsPayload(raw)) {
-      final remoteRaw = await _tryLoadRemoteCards(
-        cacheKey: cacheKey,
-        locale: locale,
-      );
-      if (remoteRaw != null) {
-        raw = remoteRaw;
-      }
-    }
+    final raw = await _loadLocalCards(cacheKey: cacheKey, locale: locale);
     var cards = _parseCards(raw: raw, deckId: deckId);
 
-    // Safety fallback for newly introduced decks in older app bundles.
-    // If Lenormand data is missing locally, retry from CDN once.
-    final lenormandMissing = deckId == DeckType.lenormand
-        ? cards.isEmpty
-        : deckId == DeckType.all &&
-            !cards.any((card) => card.deckId == DeckType.lenormand);
-    if (lenormandMissing) {
-      final remoteRaw = await _tryLoadRemoteCards(
-        cacheKey: cacheKey,
-        locale: locale,
-      );
-      if (remoteRaw != null) {
-        final remoteCards = _parseCards(raw: remoteRaw, deckId: deckId);
-        final remoteHasLenormand = deckId == DeckType.lenormand
-            ? remoteCards.isNotEmpty
-            : remoteCards.any((card) => card.deckId == DeckType.lenormand);
-        if (remoteHasLenormand) {
-          cards = remoteCards;
-        }
-      }
-    }
-
-    final crowleyMissing = deckId == DeckType.crowley
-        ? _countCrowleyCards(cards) < 78
-        : deckId == DeckType.all && _countCrowleyCards(cards) < 78;
-    if (crowleyMissing) {
-      final remoteRaw = await _tryLoadRemoteCards(
-        cacheKey: cacheKey,
-        locale: locale,
-      );
-      if (remoteRaw != null) {
-        final remoteCards = _parseCards(raw: remoteRaw, deckId: deckId);
-        final remoteCrowleyCount = _countCrowleyCards(remoteCards);
-        if (remoteCrowleyCount >= 78) {
-          cards = remoteCards;
-        }
-      }
-    }
     final shouldCompleteCrowley = deckId == DeckType.crowley ||
         (deckId == DeckType.all &&
             _countCrowleyCards(cards) > 0 &&
@@ -206,54 +158,6 @@ class CardsRepository {
     _lastResponseStringLengths[cacheKey] = raw.length;
     _lastResponseByteLengths[cacheKey] = raw.length;
   }
-
-  Future<String?> _tryLoadRemoteCards({
-    required String cacheKey,
-    required Locale locale,
-  }) async {
-    final uri = Uri.parse(cardsUrl(locale.languageCode));
-    _lastAttemptedUrls[cacheKey] = uri.toString();
-    final client = http.Client();
-    try {
-      final response = await client.get(
-        uri,
-        headers: const {
-          'Accept': 'application/json',
-        },
-      ).timeout(const Duration(seconds: 8));
-      final parsed = decodeJsonResponse(response: response, uri: uri);
-      _recordRemoteResponseInfo(cacheKey, parsed.response);
-      _lastResponseRootTypes[cacheKey] = jsonRootType(parsed.decoded);
-      if (response.statusCode < 200 || response.statusCode >= 300) {
-        return null;
-      }
-      if (!_isValidCardsJson(parsed.decoded) ||
-          _isLegacyCardsPayload(parsed.raw)) {
-        return null;
-      }
-      _lastFetchTimes[cacheKey] = DateTime.now();
-      _lastError = null;
-      return parsed.raw;
-    } catch (error, stackTrace) {
-      _lastError = '${error.toString()}\n$stackTrace';
-      if (kEnableRuntimeLogs) {
-        debugPrint('[CardsRepository] remote load skipped: $error');
-      }
-      return null;
-    } finally {
-      client.close();
-    }
-  }
-
-  void _recordRemoteResponseInfo(String cacheKey, JsonResponseInfo response) {
-    _lastStatusCodes[cacheKey] = response.statusCode;
-    _lastContentTypes[cacheKey] = response.contentType;
-    _lastContentLengths[cacheKey] = response.contentLengthHeader;
-    _lastResponseSnippetsStart[cacheKey] = response.responseSnippetStart;
-    _lastResponseSnippetsEnd[cacheKey] = response.responseSnippetEnd;
-    _lastResponseStringLengths[cacheKey] = response.stringLength;
-    _lastResponseByteLengths[cacheKey] = response.bytesLength;
-  }
 }
 
 class CardsLoadException implements Exception {
@@ -279,46 +183,6 @@ bool _isValidCardsJson(Object? payload) {
     card['id'] ??= entry.key;
     return _isValidCardEntry(card);
   });
-}
-
-bool _isLegacyCardsPayload(String raw) {
-  try {
-    final decoded = parseJsonString(raw).decoded;
-    if (decoded is! Map<String, dynamic> || decoded.isEmpty) {
-      return true;
-    }
-    var crowleyCount = 0;
-    var richCards = 0;
-    for (final entry in decoded.entries) {
-      if (canonicalCardId(entry.key).startsWith('ac_')) {
-        crowleyCount++;
-      }
-      final value = entry.value;
-      if (value is! Map<String, dynamic>) {
-        continue;
-      }
-      final detailed =
-          _stringOrEmpty(value['detailedDescription']).isNotEmpty ||
-              _stringOrEmpty(value['description']).isNotEmpty;
-      final fact = _stringOrEmpty(value['fact']).isNotEmpty ||
-          _stringOrEmpty(value['funFact']).isNotEmpty;
-      final stats = value['stats'] is Map<String, dynamic> &&
-          (value['stats'] as Map<String, dynamic>).isNotEmpty;
-      if (detailed && fact && stats) {
-        richCards++;
-      }
-    }
-    final total = decoded.length;
-    if (crowleyCount < 78) {
-      return true;
-    }
-    if (total < 70) {
-      return true;
-    }
-    return (richCards / total) < 0.35;
-  } catch (_) {
-    return true;
-  }
 }
 
 int _countCrowleyCards(List<CardModel> cards) {
@@ -456,13 +320,6 @@ List<CardModel> _getActiveDeckCards(
   return deckRegistry[selectedDeckType] ?? const [];
 }
 
-String _stringOrEmpty(Object? value) {
-  if (value is String) {
-    return value.trim();
-  }
-  return '';
-}
-
 List<CardModel> _buildLenormandFallback(Locale locale) {
   final lang = locale.languageCode.toLowerCase();
   return _lenormandDefs.map((def) {
@@ -519,6 +376,7 @@ List<CardModel> _buildLenormandFallback(Locale locale) {
       id: def.id,
       deckId: DeckType.lenormand,
       name: title,
+      description: general,
       keywords: keywords,
       meaning: CardMeaning(
         general: general,
@@ -592,6 +450,7 @@ List<CardModel> _buildCrowleyFallback(Locale locale) {
       id: def.id,
       deckId: DeckType.crowley,
       name: title,
+      description: general,
       keywords: keywords,
       meaning: CardMeaning(
         general: general,
@@ -668,6 +527,7 @@ List<CardModel> _buildCrowleyFallback(Locale locale) {
           id: id,
           deckId: DeckType.crowley,
           name: title,
+          description: general,
           keywords: keywords,
           meaning: CardMeaning(
             general: general,

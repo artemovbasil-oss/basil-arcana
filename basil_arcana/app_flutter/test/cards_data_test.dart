@@ -4,6 +4,49 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('all cards include full detail fields for every locale', () {
+    const files = [
+      '../cdn/data/cards_en.json',
+      '../cdn/data/cards_ru.json',
+      '../cdn/data/cards_kz.json',
+    ];
+
+    for (final file in files) {
+      final contents = File(file).readAsStringSync();
+      final data = jsonDecode(contents);
+      final entries = _coerceEntries(data);
+      final invalid = entries.where((entry) {
+        final title =
+            ((entry['title'] as String?) ?? (entry['name'] as String?) ?? '')
+                .trim();
+        final description = (entry['description'] as String? ?? '').trim();
+        final detailed = (entry['detailedDescription'] as String? ?? '').trim();
+        final fact =
+            ((entry['fact'] as String?) ?? (entry['funFact'] as String?) ?? '')
+                .trim();
+        final keywords = entry['keywords'];
+        final stats = entry['stats'];
+        final hasKeywords = keywords is List && keywords.isNotEmpty;
+        final hasStats = stats is Map &&
+            stats['luck'] is num &&
+            stats['power'] is num &&
+            stats['love'] is num &&
+            stats['clarity'] is num;
+        return title.isEmpty ||
+            description.isEmpty ||
+            detailed.isEmpty ||
+            fact.isEmpty ||
+            !hasKeywords ||
+            !hasStats;
+      });
+      expect(
+        invalid,
+        isEmpty,
+        reason: 'Missing core detail fields in $file.',
+      );
+    }
+  });
+
   test('all cards include detailedDescription for every locale', () {
     const files = [
       '../cdn/data/cards_en.json',
