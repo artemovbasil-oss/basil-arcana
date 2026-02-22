@@ -21,6 +21,7 @@ class _VibePromptsScreenState extends ConsumerState<VibePromptsScreen>
     with TickerProviderStateMixin {
   late final AnimationController _breathController;
   late final AnimationController _shineController;
+  late final AnimationController _cursorController;
 
   final Random _random = Random();
 
@@ -30,6 +31,7 @@ class _VibePromptsScreenState extends ConsumerState<VibePromptsScreen>
   int _promptIndex = 0;
   bool _showShine = false;
   bool _flickerVisible = true;
+  bool _isTyping = false;
   bool _isDisposed = false;
 
   @override
@@ -44,6 +46,10 @@ class _VibePromptsScreenState extends ConsumerState<VibePromptsScreen>
       vsync: this,
       duration: const Duration(milliseconds: 1400),
     );
+    _cursorController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    )..repeat(reverse: true);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) {
@@ -59,6 +65,7 @@ class _VibePromptsScreenState extends ConsumerState<VibePromptsScreen>
     _isDisposed = true;
     _breathController.dispose();
     _shineController.dispose();
+    _cursorController.dispose();
     super.dispose();
   }
 
@@ -92,10 +99,11 @@ class _VibePromptsScreenState extends ConsumerState<VibePromptsScreen>
           _displayedText = '';
           _flickerVisible = true;
           _showShine = false;
+          _isTyping = false;
         });
       }
 
-      await Future<void>.delayed(const Duration(milliseconds: 320));
+      await Future<void>.delayed(const Duration(milliseconds: 220));
     }
   }
 
@@ -106,6 +114,7 @@ class _VibePromptsScreenState extends ConsumerState<VibePromptsScreen>
         _displayedText = '';
         _showShine = false;
         _flickerVisible = true;
+        _isTyping = true;
       });
     }
 
@@ -118,11 +127,22 @@ class _VibePromptsScreenState extends ConsumerState<VibePromptsScreen>
       });
       final char = prompt[i - 1];
       await Future<void>.delayed(
-        Duration(milliseconds: _typingDelayForChar(char)),
+        Duration(
+          milliseconds: _typingDelayForChar(
+            char: char,
+            index: i - 1,
+            total: prompt.length,
+          ),
+        ),
       );
     }
 
-    await Future<void>.delayed(const Duration(milliseconds: 380));
+    if (mounted) {
+      setState(() {
+        _isTyping = false;
+      });
+    }
+    await Future<void>.delayed(const Duration(milliseconds: 220));
   }
 
   Future<void> _runShine() async {
@@ -136,11 +156,11 @@ class _VibePromptsScreenState extends ConsumerState<VibePromptsScreen>
     if (!mounted || _isDisposed) {
       return;
     }
-    await Future<void>.delayed(const Duration(milliseconds: 380));
+    await Future<void>.delayed(const Duration(milliseconds: 220));
   }
 
   Future<void> _runFlicker() async {
-    const pattern = <int>[90, 60, 80, 45, 70, 50, 55, 120, 45, 120, 75, 170];
+    const pattern = <int>[56, 42, 60, 38, 58, 40, 70, 36, 82, 64, 98];
     for (var i = 0; i < pattern.length; i++) {
       if (!mounted || _isDisposed) {
         return;
@@ -148,29 +168,43 @@ class _VibePromptsScreenState extends ConsumerState<VibePromptsScreen>
       setState(() {
         _flickerVisible = i.isEven ? false : true;
       });
-      final jitter = _random.nextInt(24);
+      final jitter = _random.nextInt(18);
       await Future<void>.delayed(
         Duration(milliseconds: pattern[i] + jitter),
       );
     }
   }
 
-  int _typingDelayForChar(String char) {
+  int _typingDelayForChar({
+    required String char,
+    required int index,
+    required int total,
+  }) {
+    final progress = total <= 1 ? 1.0 : (index / (total - 1));
     if (char == ' ') {
-      return 42 + _random.nextInt(38);
+      return 28 + _random.nextInt(28);
     }
     const punctuation = '.,!?;:';
     if (punctuation.contains(char)) {
-      return 170 + _random.nextInt(150);
+      return 95 + _random.nextInt(95);
     }
-    final base = 46 + _random.nextInt(86);
-    if (_random.nextDouble() < 0.17) {
-      return base + 70 + _random.nextInt(140);
+
+    int base;
+    if (progress < 0.2) {
+      base = 22 + _random.nextInt(24);
+    } else if (progress < 0.7) {
+      base = 30 + _random.nextInt(30);
+    } else {
+      base = 44 + _random.nextInt(36);
     }
-    if (_random.nextDouble() < 0.12) {
-      return max(28, base - (12 + _random.nextInt(18)));
+
+    if (_random.nextDouble() < 0.1) {
+      base += 35 + _random.nextInt(70);
     }
-    return base;
+    if (_random.nextDouble() < 0.08) {
+      base -= 10 + _random.nextInt(10);
+    }
+    return max(16, base);
   }
 
   void _startReadingFromPrompt() {
@@ -278,7 +312,10 @@ class _VibePromptsScreenState extends ConsumerState<VibePromptsScreen>
                             child: _PromptText(
                               text: _displayedText,
                               animation: _shineController,
+                              cursorAnimation: _cursorController,
                               showShine: _showShine,
+                              showCursor: _displayedText.isNotEmpty &&
+                                  (_isTyping || _flickerVisible),
                               style: textTheme.headlineSmall?.copyWith(
                                 color: colorScheme.onSurface
                                     .withValues(alpha: 0.94),
@@ -366,14 +403,18 @@ class _PromptText extends StatelessWidget {
   const _PromptText({
     required this.text,
     required this.animation,
+    required this.cursorAnimation,
     required this.showShine,
+    required this.showCursor,
     required this.style,
     required this.shimmerColor,
   });
 
   final String text;
   final Animation<double> animation;
+  final Animation<double> cursorAnimation;
   final bool showShine;
+  final bool showCursor;
   final TextStyle? style;
   final Color shimmerColor;
 
@@ -382,14 +423,52 @@ class _PromptText extends StatelessWidget {
     if (text.isEmpty) {
       return const SizedBox(height: 84);
     }
+    final cursorColor = style?.color ?? Colors.white.withValues(alpha: 0.94);
+    final cursorHeight = (style?.fontSize ?? 34) * 0.86;
+    final composed = RichText(
+      textAlign: TextAlign.center,
+      text: TextSpan(
+        style: style,
+        children: [
+          TextSpan(text: text),
+          if (showCursor)
+            WidgetSpan(
+              alignment: PlaceholderAlignment.middle,
+              child: AnimatedBuilder(
+                animation: cursorAnimation,
+                builder: (context, _) {
+                  final opacity = 0.28 + (0.72 * cursorAnimation.value);
+                  return Padding(
+                    padding: const EdgeInsets.only(left: 4),
+                    child: Opacity(
+                      opacity: opacity,
+                      child: Container(
+                        width: 2,
+                        height: cursorHeight,
+                        decoration: BoxDecoration(
+                          color: cursorColor,
+                          borderRadius: BorderRadius.circular(2),
+                          boxShadow: [
+                            BoxShadow(
+                              color: cursorColor.withValues(alpha: 0.45),
+                              blurRadius: 8,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+        ],
+      ),
+    );
+
     if (!showShine) {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 14),
-        child: Text(
-          text,
-          textAlign: TextAlign.center,
-          style: style,
-        ),
+        child: composed,
       );
     }
     return AnimatedBuilder(
@@ -422,10 +501,9 @@ class _PromptText extends StatelessWidget {
           },
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 14),
-            child: Text(
-              text,
-              textAlign: TextAlign.center,
+            child: DefaultTextStyle.merge(
               style: style?.copyWith(color: Colors.white),
+              child: composed,
             ),
           ),
         );
