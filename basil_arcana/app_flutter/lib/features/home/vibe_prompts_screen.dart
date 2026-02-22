@@ -314,13 +314,13 @@ class _VibePromptsScreenState extends ConsumerState<VibePromptsScreen>
                               animation: _shineController,
                               cursorAnimation: _cursorController,
                               showShine: _showShine,
-                              showCursor: _displayedText.isNotEmpty &&
-                                  (_isTyping || _flickerVisible),
+                              showCursor:
+                                  _displayedText.isNotEmpty && _isTyping,
                               style: textTheme.headlineSmall?.copyWith(
                                 color: colorScheme.onSurface
                                     .withValues(alpha: 0.94),
                                 fontWeight: FontWeight.w500,
-                                fontSize: 36,
+                                fontSize: 32,
                                 height: 1.28,
                               ),
                               shimmerColor:
@@ -424,7 +424,8 @@ class _PromptText extends StatelessWidget {
       return const SizedBox(height: 84);
     }
     final cursorColor = style?.color ?? Colors.white.withValues(alpha: 0.94);
-    final cursorHeight = (style?.fontSize ?? 34) * 0.86;
+    final cursorHeight = (style?.fontSize ?? 32) * 0.82;
+    final cursorWidth = (style?.fontSize ?? 32) * 0.52;
     final composed = RichText(
       textAlign: TextAlign.center,
       text: TextSpan(
@@ -443,15 +444,15 @@ class _PromptText extends StatelessWidget {
                     child: Opacity(
                       opacity: opacity,
                       child: Container(
-                        width: 2,
+                        width: cursorWidth,
                         height: cursorHeight,
                         decoration: BoxDecoration(
                           color: cursorColor,
-                          borderRadius: BorderRadius.circular(2),
+                          borderRadius: BorderRadius.circular(2.5),
                           boxShadow: [
                             BoxShadow(
-                              color: cursorColor.withValues(alpha: 0.45),
-                              blurRadius: 8,
+                              color: cursorColor.withValues(alpha: 0.36),
+                              blurRadius: 6,
                             ),
                           ],
                         ),
