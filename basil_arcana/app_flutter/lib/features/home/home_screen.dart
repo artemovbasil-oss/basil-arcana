@@ -35,6 +35,7 @@ import 'self_analysis_report_service.dart';
 import 'widgets/self_analysis_report_cta_section.dart';
 import '../settings/settings_screen.dart';
 import '../spread/spread_screen.dart';
+import 'vibe_prompts_screen.dart';
 
 const String _settingsBoxName = 'settings';
 const String _sofiaConsentKey = 'sofiaConsentDecision';
@@ -999,6 +1000,45 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     );
   }
 
+  void _openVibePromptsScreen() {
+    Navigator.push(
+      context,
+      PageRouteBuilder<void>(
+        settings: appRouteSettings(showBackButton: true),
+        transitionDuration: const Duration(milliseconds: 700),
+        reverseTransitionDuration: const Duration(milliseconds: 520),
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            const VibePromptsScreen(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          final fade = CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOutCubic,
+            reverseCurve: Curves.easeInCubic,
+          );
+          final slide = Tween<Offset>(
+            begin: const Offset(0, 0.025),
+            end: Offset.zero,
+          ).animate(
+            CurvedAnimation(parent: animation, curve: Curves.easeOutQuart),
+          );
+          final scale = Tween<double>(begin: 0.985, end: 1.0).animate(
+            CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+          );
+          return FadeTransition(
+            opacity: fade,
+            child: SlideTransition(
+              position: slide,
+              child: ScaleTransition(
+                scale: scale,
+                child: child,
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -1069,40 +1109,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Container(
-                            height: 1,
-                            color: colorScheme.outlineVariant
-                                .withValues(alpha: 0.45),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          child: _ShimmerTitle(
-                            text: l10n.homeDescription,
-                            animation: _titleShimmerController,
-                            baseStyle: Theme.of(context)
-                                .textTheme
-                                .titleSmall
-                                ?.copyWith(
-                                  color: colorScheme.onSurface
-                                      .withValues(alpha: 0.86),
-                                  fontWeight: FontWeight.w400,
-                                ),
-                            shimmerColor:
-                                colorScheme.primary.withValues(alpha: 0.95),
-                          ),
-                        ),
-                        Expanded(
-                          child: Container(
-                            height: 1,
-                            color: colorScheme.outlineVariant
-                                .withValues(alpha: 0.45),
-                          ),
-                        ),
-                      ],
+                    Center(
+                      child: _VibeGhostButton(
+                        text: l10n.homeDescription,
+                        animation: _titleShimmerController,
+                        onTap: _openVibePromptsScreen,
+                      ),
                     ),
                     const SizedBox(height: 20),
                     AnimatedBuilder(
@@ -2332,6 +2344,62 @@ class _ShimmerTitle extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class _VibeGhostButton extends StatelessWidget {
+  const _VibeGhostButton({
+    required this.text,
+    required this.animation,
+    required this.onTap,
+  });
+
+  final String text;
+  final Animation<double> animation;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textStyle = Theme.of(context).textTheme.titleSmall?.copyWith(
+          color: colorScheme.onSurface.withValues(alpha: 0.88),
+          fontWeight: FontWeight.w500,
+        );
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(999),
+        onTap: onTap,
+        child: Ink(
+          height: 36,
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(
+              color: colorScheme.outlineVariant.withValues(alpha: 0.62),
+            ),
+            color: colorScheme.surface.withValues(alpha: 0.14),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _ShimmerTitle(
+                text: text,
+                animation: animation,
+                baseStyle: textStyle,
+                shimmerColor: colorScheme.primary.withValues(alpha: 0.95),
+              ),
+              const SizedBox(width: 8),
+              Icon(
+                Icons.casino_rounded,
+                size: 16,
+                color: colorScheme.onSurface.withValues(alpha: 0.8),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
