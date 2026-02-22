@@ -1109,12 +1109,31 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Center(
-                      child: _VibeGhostButton(
-                        text: l10n.homeDescription,
-                        animation: _titleShimmerController,
-                        onTap: _openVibePromptsScreen,
-                      ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            height: 1,
+                            color: colorScheme.outlineVariant
+                                .withValues(alpha: 0.45),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          child: _VibeGhostButton(
+                            text: l10n.homeDescription,
+                            animation: _titleShimmerController,
+                            onTap: _openVibePromptsScreen,
+                          ),
+                        ),
+                        Expanded(
+                          child: Container(
+                            height: 1,
+                            color: colorScheme.outlineVariant
+                                .withValues(alpha: 0.45),
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 20),
                     AnimatedBuilder(
@@ -2391,10 +2410,14 @@ class _VibeGhostButton extends StatelessWidget {
                 shimmerColor: colorScheme.primary.withValues(alpha: 0.95),
               ),
               const SizedBox(width: 8),
-              Icon(
-                Icons.casino_rounded,
-                size: 16,
-                color: colorScheme.onSurface.withValues(alpha: 0.8),
+              SvgPicture.asset(
+                'assets/icon/home_dice.svg',
+                width: 16,
+                height: 16,
+                colorFilter: ColorFilter.mode(
+                  colorScheme.onSurface.withValues(alpha: 0.8),
+                  BlendMode.srcIn,
+                ),
               ),
             ],
           ),

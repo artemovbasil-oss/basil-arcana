@@ -117,8 +117,9 @@ class _VibePromptsScreenState extends ConsumerState<VibePromptsScreen>
         _displayedText = prompt.substring(0, i);
       });
       final char = prompt[i - 1];
-      final pause = char == ' ' ? 14 : 28;
-      await Future<void>.delayed(Duration(milliseconds: pause));
+      await Future<void>.delayed(
+        Duration(milliseconds: _typingDelayForChar(char)),
+      );
     }
 
     await Future<void>.delayed(const Duration(milliseconds: 380));
@@ -152,6 +153,24 @@ class _VibePromptsScreenState extends ConsumerState<VibePromptsScreen>
         Duration(milliseconds: pattern[i] + jitter),
       );
     }
+  }
+
+  int _typingDelayForChar(String char) {
+    if (char == ' ') {
+      return 42 + _random.nextInt(38);
+    }
+    const punctuation = '.,!?;:';
+    if (punctuation.contains(char)) {
+      return 170 + _random.nextInt(150);
+    }
+    final base = 46 + _random.nextInt(86);
+    if (_random.nextDouble() < 0.17) {
+      return base + 70 + _random.nextInt(140);
+    }
+    if (_random.nextDouble() < 0.12) {
+      return max(28, base - (12 + _random.nextInt(18)));
+    }
+    return base;
   }
 
   void _startReadingFromPrompt() {
@@ -264,6 +283,7 @@ class _VibePromptsScreenState extends ConsumerState<VibePromptsScreen>
                                 color: colorScheme.onSurface
                                     .withValues(alpha: 0.94),
                                 fontWeight: FontWeight.w500,
+                                fontSize: 36,
                                 height: 1.28,
                               ),
                               shimmerColor:
@@ -464,11 +484,30 @@ class _VibePromptsCopy {
         title: 'Не знаешь что спросить?',
         cta: 'Задать этот вопрос',
         prompts: [
+          'Как я могу взять под контроль свою жизнь?',
+          'Какие шаги мне нужно предпринять, чтобы достичь своих целей?',
+          'Что мешает мне добиться успеха?',
+          'Как я могу преодолеть свои страхи и сомнения?',
+          'Как мне развить больше уверенности в себе?',
+          'Какие риски я боюсь взять на себя?',
+          'Почему я не достигаю своего полного потенциала?',
+          'Каков смысл и цель моей жизни?',
+          'Как я могу найти счастье и удовлетворение?',
+          'Как я могу внести позитивные изменения в мир?',
           'Почему я снова возвращаюсь к этому человеку?',
+          'Как улучшить отношения и перестать повторять старые сценарии?',
+          'Что мне важно обсудить с партнером прямо сейчас?',
           'Что мне мешает спокойно выбрать следующий шаг?',
           'Какая энергия сейчас тормозит мои деньги?',
+          'Какой финансовый шаг даст мне максимум пользы в ближайший месяц?',
+          'Почему деньги приходят рывками и как стабилизировать поток?',
+          'На чем мне сфокусироваться в карьере в этом квартале?',
           'Куда направить силы, чтобы быстрее увидеть результат?',
           'Как мне выйти из тревожного круга в отношениях?',
+          'Какой план действий поможет мне перестать откладывать важное?',
+          'Что сейчас самое важное для моего личного роста?',
+          'Какое решение стоит принять сейчас, чтобы не жалеть позже?',
+          'Что мне нужно отпустить, чтобы двигаться дальше?',
         ],
       );
     }
@@ -478,11 +517,25 @@ class _VibePromptsCopy {
         title: 'Не сұрауды білмейсің бе?',
         cta: 'Осы сұрақты қою',
         prompts: [
+          'Өмірімді бақылауға қалай аламын?',
+          'Мақсаттарыма жету үшін қандай қадамдар жасауым керек?',
+          'Табысыма не кедергі болып тұр?',
+          'Қорқыныш пен күмәнді қалай жеңемін?',
+          'Өзіме деген сенімді қалай арттырамын?',
+          'Қандай тәуекелдерді алуға қорқамын?',
+          'Неге әлеуетімді толық аша алмай жүрмін?',
+          'Өмірімнің мәні мен мақсаты қандай?',
+          'Бақыт пен қанағатты қалай табамын?',
           'Неге мен осы адамға қайта орала беремін?',
+          'Қарым-қатынасты жақсарту үшін қазір нені өзгертуім керек?',
           'Келесі қадамды таңдауға не кедергі?',
           'Қазір қаржыма қандай энергия тосқауыл болып тұр?',
+          'Келесі айда қаржыма ең пайдалы қадам қайсы?',
+          'Карьерамда қазір қай бағытқа күш салған дұрыс?',
           'Нәтижені тез көру үшін күшті қайда бағыттаймын?',
           'Қарым-қатынастағы уайым шеңберінен қалай шығамын?',
+          'Маңызды істерді кейінге қалдырмау үшін қандай жоспар керек?',
+          'Қазір қандай шешім кейін өкінбеуге көмектеседі?',
         ],
       );
     }
@@ -491,11 +544,27 @@ class _VibePromptsCopy {
       title: 'Not sure what to ask?',
       cta: 'Ask this question',
       prompts: [
+        'How can I take control of my life?',
+        'What steps should I take to reach my goals?',
+        'What is blocking my success right now?',
+        'How can I overcome fear and self-doubt?',
+        'How do I build stronger confidence in myself?',
+        'Which risks am I afraid to take?',
+        'Why am I not reaching my full potential?',
+        'What is the deeper purpose of my life?',
+        'How can I find more happiness and fulfillment?',
+        'How can I make a positive impact in the world?',
         'Why do I keep returning to this person?',
+        'How can I improve my relationship dynamics right now?',
         'What blocks me from choosing my next step calmly?',
         'What energy is slowing down my money right now?',
+        'What financial move would help me most this month?',
+        'What should I prioritize in my career this quarter?',
         'Where should I direct my focus for visible progress?',
         'How can I break this anxious cycle in relationships?',
+        'What plan would help me stop procrastinating on what matters?',
+        'What decision now will save me regret later?',
+        'What do I need to release to move forward?',
       ],
     );
   }
