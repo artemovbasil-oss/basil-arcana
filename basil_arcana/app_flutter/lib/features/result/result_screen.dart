@@ -55,6 +55,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
   bool _autoScrollEnabled = false;
   int _itemCounter = 0;
   String? _warmTip;
+  bool _inviteCardViewTracked = false;
   bool _referralStatsRequested = false;
   int? _referralInvited;
   int? _referralCredits;
@@ -844,6 +845,10 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
           child: SofiaPromoCard(prefilledMessage: sofiaPrefill),
         ),
       );
+    }
+    if (!_inviteCardViewTracked) {
+      _inviteCardViewTracked = true;
+      unawaited(_trackInviteShareEvent('invite_card_viewed'));
     }
     items.add(
       _ChatItem.basil(

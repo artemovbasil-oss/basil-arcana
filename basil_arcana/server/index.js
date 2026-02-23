@@ -404,6 +404,20 @@ async function tryClaimReferralForRequest(req) {
         referrerCredits: claim.freeFiveCardsCredits
       })
     );
+    try {
+      await logClientEvent({
+        telegramUserId: referrerUserId,
+        eventName: 'invite_accepted',
+        source: 'referral_claim',
+        metadata: {
+          referredUserId,
+          bonusCredits: claim.bonusCredits,
+          referrerCredits: claim.freeFiveCardsCredits
+        }
+      });
+    } catch (_) {
+      // Analytics must never block main request flow.
+    }
   }
 }
 
