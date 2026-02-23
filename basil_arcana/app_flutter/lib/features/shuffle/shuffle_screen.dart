@@ -4,6 +4,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
 import '../../core/widgets/app_buttons.dart';
@@ -43,6 +44,51 @@ class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
 
   static const _cardWidth = 140.0;
   static const _cardHeight = 210.0;
+  static const List<DeckType> _deckCycle = <DeckType>[
+    DeckType.all,
+    DeckType.lenormand,
+    DeckType.crowley,
+  ];
+
+  Future<void> _cycleDeck(DeckType currentDeck) async {
+    final currentIndex = _deckCycle.indexOf(currentDeck);
+    final nextDeck = currentIndex < 0
+        ? _deckCycle.first
+        : _deckCycle[(currentIndex + 1) % _deckCycle.length];
+    await ref.read(deckProvider.notifier).setDeck(nextDeck);
+  }
+
+  String _switchDeckLabel(BuildContext context, DeckType deck) {
+    final code = Localizations.localeOf(context).languageCode;
+    final nextDeck = _nextDeckInCycle(deck);
+    final nextDeckName = _deckName(context, nextDeck);
+    if (code == 'ru') {
+      return 'Сменить колоду: $nextDeckName';
+    }
+    if (code == 'kk') {
+      return 'Колоданы ауыстыру: $nextDeckName';
+    }
+    return 'Switch deck: $nextDeckName';
+  }
+
+  DeckType _nextDeckInCycle(DeckType currentDeck) {
+    final currentIndex = _deckCycle.indexOf(currentDeck);
+    if (currentIndex < 0) {
+      return _deckCycle.first;
+    }
+    return _deckCycle[(currentIndex + 1) % _deckCycle.length];
+  }
+
+  String _deckName(BuildContext context, DeckType deck) {
+    final l10n = AppLocalizations.of(context);
+    if (deck == DeckType.lenormand) {
+      return l10n.deckLenormandName;
+    }
+    if (deck == DeckType.crowley) {
+      return l10n.deckCrowleyName;
+    }
+    return 'RWS';
+  }
 
   void _navigateToResultIfNeeded() {
     if (_hasNavigatedToResult) {
@@ -139,7 +185,7 @@ class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
     final deckCoverUrl = deckCoverImageUrl(deckId);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
     final hasDrawnCards = state.drawnCards.isNotEmpty;
     final keptCount =
         state.spreadType?.cardCount ?? state.spread?.positions.length ?? 0;
@@ -207,6 +253,15 @@ class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
                               color: colorScheme.onSurface,
                             ),
                           ),
+                          if (!hasDrawnCards) ...[
+                            const SizedBox(height: 8),
+                            _DeckCycleButton(
+                              label: _switchDeckLabel(context, deckId),
+                              onTap: state.isLoading
+                                  ? null
+                                  : () => _cycleDeck(deckId),
+                            ),
+                          ],
                         ],
                       ),
                     ),
@@ -295,6 +350,60 @@ class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
                   ),
                 ],
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DeckCycleButton extends StatelessWidget {
+  const _DeckCycleButton({
+    required this.label,
+    required this.onTap,
+  });
+
+  final String label;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDisabled = onTap == null;
+    return InkWell(
+      borderRadius: BorderRadius.circular(999),
+      onTap: onTap,
+      child: Ink(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(999),
+          color:
+              colorScheme.primary.withValues(alpha: isDisabled ? 0.08 : 0.14),
+          border: Border.all(
+            color:
+                colorScheme.primary.withValues(alpha: isDisabled ? 0.18 : 0.28),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Opacity(
+              opacity: isDisabled ? 0.5 : 1,
+              child: SvgPicture.asset(
+                'assets/icon/deck_switch.svg',
+                width: 14,
+                height: 14,
+              ),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: colorScheme.primary
+                        .withValues(alpha: isDisabled ? 0.65 : 1),
+                    fontWeight: FontWeight.w700,
+                  ),
             ),
           ],
         ),
