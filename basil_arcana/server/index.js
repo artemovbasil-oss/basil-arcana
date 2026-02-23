@@ -54,7 +54,8 @@ const {
   clearUserQueryHistory,
   recordUserDailyActivity,
   getUserVisitStreak,
-  searchGeoPlaces
+  searchGeoPlaces,
+  logClientEvent
 } = require('./src/db');
 
 const app = express();
@@ -451,6 +452,31 @@ function parseUserIdFromInitData(initData) {
   }
 }
 
+function pickClientEventMetadata(raw) {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+    return null;
+  }
+  const result = {};
+  for (const [key, value] of Object.entries(raw)) {
+    if (typeof key !== 'string') {
+      continue;
+    }
+    const safeKey = key.trim().slice(0, 40);
+    if (!safeKey) {
+      continue;
+    }
+    if (
+      typeof value === 'string' ||
+      typeof value === 'number' ||
+      typeof value === 'boolean'
+    ) {
+      result[safeKey] =
+        typeof value === 'string' ? value.slice(0, 200) : value;
+    }
+  }
+  return Object.keys(result).length > 0 ? result : null;
+}
+
 async function createTelegramInvoiceLink({
   title,
   description,
@@ -816,6 +842,48 @@ app.get('/api/user/dashboard', telegramAuthMiddleware, async (req, res) => {
       code: encodeReferralCode(telegramUserId),
       link: buildReferralLink(telegramUserId)
     },
+    requestId: req.requestId
+  });
+});
+
+app.post('/api/telemetry/event', telegramAuthMiddleware, async (req, res) => {
+  if (!hasDb()) {
+    return res.status(503).json({
+      error: 'storage_unavailable',
+      reason: 'database_not_configured',
+      requestId: req.requestId
+    });
+  }
+  const telegramUserId =
+    Number.isFinite(Number(req.telegram?.userId)) && Number(req.telegram?.userId) > 0
+      ? Number(req.telegram.userId)
+      : parseUserIdFromInitData(readTelegramInitData(req).initData);
+  if (!telegramUserId) {
+    return res.status(401).json({
+      error: 'unauthorized',
+      reason: 'telegram_user_missing',
+      requestId: req.requestId
+    });
+  }
+  const eventName = typeof req.body?.eventName === 'string' ? req.body.eventName.trim() : '';
+  if (!eventName || eventName.length > 80) {
+    return res.status(400).json({
+      error: 'invalid_payload',
+      reason: 'eventName must be 1..80 chars',
+      requestId: req.requestId
+    });
+  }
+  const sourceRaw = typeof req.body?.source === 'string' ? req.body.source.trim() : '';
+  await upsertTelegramUserFromRequest(req);
+  await tryClaimReferralForRequest(req);
+  await logClientEvent({
+    telegramUserId,
+    eventName,
+    source: sourceRaw || null,
+    metadata: pickClientEventMetadata(req.body?.metadata)
+  });
+  return res.json({
+    ok: true,
     requestId: req.requestId
   });
 });

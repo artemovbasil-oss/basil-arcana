@@ -170,6 +170,25 @@ async function ensureSchema() {
   await pool.query(
     "CREATE INDEX IF NOT EXISTS idx_referral_events_referrer_created ON referral_events (referrer_user_id, created_at DESC);"
   );
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS user_client_events (
+      id BIGSERIAL PRIMARY KEY,
+      telegram_user_id BIGINT NOT NULL REFERENCES users(telegram_user_id) ON DELETE CASCADE,
+      event_name TEXT NOT NULL,
+      source TEXT,
+      metadata JSONB,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+
+  await pool.query(
+    "CREATE INDEX IF NOT EXISTS idx_user_client_events_user_created ON user_client_events (telegram_user_id, created_at DESC);"
+  );
+
+  await pool.query(
+    "CREATE INDEX IF NOT EXISTS idx_user_client_events_name_created ON user_client_events (event_name, created_at DESC);"
+  );
 }
 
 function normalizeText(value) {
@@ -988,6 +1007,33 @@ async function getUserVisitStreak({ telegramUserId }) {
   };
 }
 
+async function logClientEvent({
+  telegramUserId,
+  eventName,
+  source = null,
+  metadata = null
+}) {
+  if (!telegramUserId || !eventName) {
+    return;
+  }
+  const normalizedEventName = normalizeText(eventName);
+  if (!normalizedEventName) {
+    return;
+  }
+  const normalizedSource = normalizeText(source);
+  const payload =
+    metadata && typeof metadata === 'object' && !Array.isArray(metadata)
+      ? metadata
+      : null;
+  await getDb().query(
+    `
+    INSERT INTO user_client_events (telegram_user_id, event_name, source, metadata)
+    VALUES ($1, $2, $3, $4::jsonb);
+    `,
+    [telegramUserId, normalizedEventName.slice(0, 80), normalizedSource, JSON.stringify(payload)]
+  );
+}
+
 function normalizePlaceQuery(value) {
   if (typeof value !== 'string') {
     return '';
@@ -1146,5 +1192,6 @@ module.exports = {
   clearUserQueryHistory,
   recordUserDailyActivity,
   getUserVisitStreak,
-  searchGeoPlaces
+  searchGeoPlaces,
+  logClientEvent
 };

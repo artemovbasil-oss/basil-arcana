@@ -10,6 +10,7 @@ import '../data/repositories/cards_repository.dart';
 import '../data/repositories/data_repository.dart';
 import '../data/repositories/energy_topup_repository.dart';
 import '../data/repositories/home_insights_repository.dart';
+import '../data/repositories/invite_telemetry_repository.dart';
 import '../data/repositories/query_history_repository.dart';
 import '../data/repositories/spreads_repository.dart';
 import '../data/repositories/readings_repository.dart';
@@ -64,6 +65,12 @@ final queryHistoryRepositoryProvider = Provider<QueryHistoryRepository>((ref) {
 
 final homeInsightsRepositoryProvider = Provider<HomeInsightsRepository>((ref) {
   return HomeInsightsRepository();
+});
+
+final inviteTelemetryRepositoryProvider = Provider<InviteTelemetryRepository>((
+  ref,
+) {
+  return InviteTelemetryRepository();
 });
 
 final userDashboardRepositoryProvider =

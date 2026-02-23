@@ -24,6 +24,7 @@ import '../../data/models/drawn_card_model.dart';
 import '../../data/models/spread_model.dart';
 import '../../data/models/ai_result_model.dart';
 import '../../data/repositories/ai_repository.dart';
+import '../../data/repositories/user_dashboard_repository.dart';
 import '../../state/energy_controller.dart';
 import '../../state/reading_flow_controller.dart';
 import '../../state/providers.dart';
@@ -54,6 +55,9 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
   bool _autoScrollEnabled = false;
   int _itemCounter = 0;
   String? _warmTip;
+  bool _referralStatsRequested = false;
+  int? _referralInvited;
+  int? _referralCredits;
 
   @override
   void dispose() {
@@ -90,6 +94,9 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
             prev?.aiResult?.fullText != next.aiResult?.fullText &&
             !(prev?.aiUsed == false && next.aiUsed == true)) {
           _replaceReadingMessages(next);
+        }
+        if (prev?.aiResult == null && next.aiResult != null) {
+          unawaited(_loadReferralStats());
         }
       },
     );
@@ -829,28 +836,31 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
       );
     }
 
+    final referralLink = _resolveReferralLink();
     if (hasSofiaPromo) {
-      final referralLink = _resolveReferralLink();
       items.add(
         _ChatItem.basil(
           id: _nextId(),
           child: SofiaPromoCard(prefilledMessage: sofiaPrefill),
         ),
       );
-      items.add(
-        _ChatItem.basil(
-          id: _nextId(),
-          child: _ShareWithFriendsCard(
-            title: l10n.resultReferralTitle,
-            body: l10n.resultReferralBody,
-            buttonLabel: l10n.resultReferralButton,
-            copiedLabel: l10n.resultReferralCopied,
-            shareUrl: referralLink,
-            shareMessage: l10n.resultReferralShareMessage,
-          ),
-        ),
-      );
     }
+    items.add(
+      _ChatItem.basil(
+        id: _nextId(),
+        child: _ShareWithFriendsCard(
+          title: l10n.resultReferralTitle,
+          body: l10n.resultReferralBody,
+          buttonLabel: l10n.resultReferralButton,
+          copiedLabel: l10n.resultReferralCopied,
+          shareUrl: referralLink,
+          shareMessage: l10n.resultReferralShareMessage,
+          progressText: _referralProgressLine(context),
+          isLoadingProgress: !_referralStatsRequested,
+          onTrackEvent: _trackInviteShareEvent,
+        ),
+      ),
+    );
 
     if (_warmTip != null) {
       items.add(
@@ -911,6 +921,57 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
       return 'https://t.me/tarot_arkana_bot/app';
     }
     return buildReferralLinkForUserId(profile.userId);
+  }
+
+  Future<void> _loadReferralStats() async {
+    if (_referralStatsRequested) {
+      return;
+    }
+    _referralStatsRequested = true;
+    try {
+      final UserDashboardData data =
+          await ref.read(userDashboardRepositoryProvider).fetchDashboard();
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _referralInvited = data.totalInvited;
+        _referralCredits = data.freeFiveCardsCredits;
+      });
+    } catch (_) {
+      // Keep invite sharing available even if dashboard loading fails.
+    }
+  }
+
+  Future<void> _trackInviteShareEvent(String eventName) async {
+    try {
+      await ref.read(inviteTelemetryRepositoryProvider).track(
+        eventName: eventName,
+        source: 'result_referral_card',
+        metadata: <String, Object?>{
+          'invited': _referralInvited ?? -1,
+          'credits': _referralCredits ?? -1,
+        },
+      );
+    } catch (_) {
+      // Tracking must never block UX.
+    }
+  }
+
+  String? _referralProgressLine(BuildContext context) {
+    final invited = _referralInvited;
+    final credits = _referralCredits;
+    if (invited == null && credits == null) {
+      return null;
+    }
+    final code = Localizations.localeOf(context).languageCode;
+    if (code == 'ru') {
+      return 'Приглашено: ${invited ?? 0} · Бонусных кредитов: ${credits ?? 0}';
+    }
+    if (code == 'kk') {
+      return 'Шақырылғандар: ${invited ?? 0} · Бонус кредиттер: ${credits ?? 0}';
+    }
+    return 'Invited: ${invited ?? 0} · Bonus credits: ${credits ?? 0}';
   }
 
   Widget _buildChatItem(_ChatItem item, ReadingFlowState state) {
@@ -2313,6 +2374,9 @@ class _ShareWithFriendsCard extends StatelessWidget {
     required this.copiedLabel,
     required this.shareUrl,
     required this.shareMessage,
+    required this.isLoadingProgress,
+    this.progressText,
+    this.onTrackEvent,
   });
 
   final String title;
@@ -2321,6 +2385,9 @@ class _ShareWithFriendsCard extends StatelessWidget {
   final String copiedLabel;
   final String shareUrl;
   final String shareMessage;
+  final bool isLoadingProgress;
+  final String? progressText;
+  final Future<void> Function(String eventName)? onTrackEvent;
 
   @override
   Widget build(BuildContext context) {
@@ -2345,11 +2412,29 @@ class _ShareWithFriendsCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(body, style: Theme.of(context).textTheme.bodyMedium),
+          if (isLoadingProgress || (progressText?.trim().isNotEmpty ?? false))
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: isLoadingProgress
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text(
+                      progressText!,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurface.withOpacity(0.72),
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+            ),
           const SizedBox(height: 12),
           AppGhostButton(
             label: buttonLabel,
             icon: Icons.ios_share,
             onPressed: () async {
+              await onTrackEvent?.call('invite_share_clicked');
               final textToCopy = '$shareMessage\n$shareUrl';
               await Clipboard.setData(ClipboardData(text: textToCopy));
               if (context.mounted) {
@@ -2361,7 +2446,13 @@ class _ShareWithFriendsCard extends StatelessWidget {
                 'https://t.me/share/url?url=${Uri.encodeComponent(shareUrl)}'
                 '&text=${Uri.encodeComponent(shareMessage)}',
               );
-              await launchUrl(shareUri, mode: LaunchMode.externalApplication);
+              final opened = await launchUrl(
+                shareUri,
+                mode: LaunchMode.externalApplication,
+              );
+              if (opened) {
+                await onTrackEvent?.call('invite_share_opened');
+              }
             },
           ),
         ],
