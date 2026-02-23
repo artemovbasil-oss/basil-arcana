@@ -2434,7 +2434,7 @@ class _ShareWithFriendsCard extends StatelessWidget {
             label: buttonLabel,
             icon: Icons.ios_share,
             onPressed: () async {
-              await onTrackEvent?.call('invite_share_clicked');
+              unawaited(onTrackEvent?.call('invite_share_clicked'));
               final textToCopy = '$shareMessage\n$shareUrl';
               await Clipboard.setData(ClipboardData(text: textToCopy));
               if (context.mounted) {
@@ -2451,7 +2451,7 @@ class _ShareWithFriendsCard extends StatelessWidget {
                 mode: LaunchMode.externalApplication,
               );
               if (opened) {
-                await onTrackEvent?.call('invite_share_opened');
+                unawaited(onTrackEvent?.call('invite_share_opened'));
               }
             },
           ),

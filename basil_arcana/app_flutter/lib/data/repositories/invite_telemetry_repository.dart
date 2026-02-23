@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:async';
 
 import 'package:http/http.dart' as http;
 
@@ -21,15 +22,17 @@ class InviteTelemetryRepository {
     );
     final client = TelegramApiClient(http.Client());
     try {
-      await client.post(
-        uri,
-        headers: const {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'eventName': name,
-          'source': eventSource,
-          'metadata': metadata,
-        }),
-      );
+      await client
+          .post(
+            uri,
+            headers: const {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'eventName': name,
+              'source': eventSource,
+              'metadata': metadata,
+            }),
+          )
+          .timeout(const Duration(seconds: 2));
     } finally {
       client.close();
     }
