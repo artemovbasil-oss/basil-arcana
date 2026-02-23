@@ -189,7 +189,7 @@ class AppLocalizationsKk extends AppLocalizations {
   String get homeTryPrompt => 'Осы сұрақтардың бірін көріңіз:';
 
   @override
-  String get homeRecentQueriesButton => '🕘 Алдыңғы сұрақтар';
+  String get homeRecentQueriesButton => 'Алдыңғы сұрақтар';
 
   @override
   String get homeExample1 => 'Энергиямды қайда бағыттаған дұрыс?';
@@ -493,7 +493,7 @@ class AppLocalizationsKk extends AppLocalizations {
 
   @override
   String get resultReferralShareMessage =>
-      'Basil Arcana-ны байқап көр: Telegram ішіндегі әдемі әрі нақты Таро жайылмалары.';
+      'Telegram-да the real magic-ті аш: махаббат, қаржы және келесі қадам үшін стильді Таро айқындығы.';
 
   @override
   String get resultDeepPrompt =>

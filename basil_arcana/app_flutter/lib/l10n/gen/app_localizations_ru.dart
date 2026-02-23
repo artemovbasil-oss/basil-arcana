@@ -188,7 +188,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get homeTryPrompt => 'Попробуй один из этих запросов:';
 
   @override
-  String get homeRecentQueriesButton => '🕘 Прошлые запросы';
+  String get homeRecentQueriesButton => 'Прошлые запросы';
 
   @override
   String get homeExample1 => 'Куда направить свою энергию?';
@@ -495,7 +495,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get resultReferralShareMessage =>
-      'Загляни в Basil Arcana: красивые и точные расклады Таро прямо в Telegram.';
+      'Открой the real magic в Telegram: стильные расклады Таро для любви, денег и твоего следующего шага.';
 
   @override
   String get resultDeepPrompt => 'Хочешь детали про отношения и карьеру?';

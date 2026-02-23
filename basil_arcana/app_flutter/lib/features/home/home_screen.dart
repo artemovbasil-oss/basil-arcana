@@ -2485,41 +2485,22 @@ class _HomeInviteCompactCard extends StatelessWidget {
         children: [
           SvgPicture.asset(
             'assets/icon/home_invite.svg',
-            width: 20,
-            height: 20,
+            width: 28,
+            height: 28,
           ),
           const SizedBox(width: 8),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              color: colorScheme.primary,
-                              fontWeight: FontWeight.w700,
-                            ),
+                Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        color: colorScheme.primary,
+                        fontWeight: FontWeight.w700,
                       ),
-                    ),
-                    const SizedBox(width: 6),
-                    InkWell(
-                      borderRadius: BorderRadius.circular(20),
-                      onTap: onHelpTap,
-                      child: Padding(
-                        padding: const EdgeInsets.all(2),
-                        child: SvgPicture.asset(
-                          'assets/icon/help_circle.svg',
-                          width: 16,
-                          height: 16,
-                        ),
-                      ),
-                    ),
-                  ],
                 ),
                 const SizedBox(height: 2),
                 if (isLoading)
@@ -2573,6 +2554,19 @@ class _HomeInviteCompactCard extends StatelessWidget {
                         ),
                   ),
                 ],
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          InkWell(
+            borderRadius: BorderRadius.circular(20),
+            onTap: onHelpTap,
+            child: Padding(
+              padding: const EdgeInsets.all(4),
+              child: SvgPicture.asset(
+                'assets/icon/help_circle.svg',
+                width: 16,
+                height: 16,
               ),
             ),
           ),
@@ -4945,10 +4939,12 @@ class _RecentQueriesChip extends StatelessWidget {
               color: const Color(0xFF8B5CF6),
               borderRadius: BorderRadius.circular(16),
             ),
-            child: const Icon(
-              Icons.history,
-              size: 18,
-              color: Colors.white,
+            child: Center(
+              child: SvgPicture.asset(
+                'assets/icon/history_recent.svg',
+                width: 18,
+                height: 18,
+              ),
             ),
           ),
         ),

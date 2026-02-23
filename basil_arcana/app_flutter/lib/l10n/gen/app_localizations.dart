@@ -433,7 +433,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeRecentQueriesButton.
   ///
   /// In en, this message translates to:
-  /// **'🕘 Recent prompts'**
+  /// **'Recent prompts'**
   String get homeRecentQueriesButton;
 
   /// No description provided for @homeExample1.
@@ -997,7 +997,7 @@ abstract class AppLocalizations {
   /// No description provided for @resultReferralShareMessage.
   ///
   /// In en, this message translates to:
-  /// **'Try Basil Arcana: stylish and accurate Tarot readings right in Telegram.'**
+  /// **'Discover the real magic in Telegram — stylish Tarot clarity for love, money, and your next move.'**
   String get resultReferralShareMessage;
 
   /// No description provided for @resultDeepPrompt.

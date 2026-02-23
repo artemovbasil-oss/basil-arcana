@@ -187,7 +187,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeTryPrompt => 'Try one of these prompts:';
 
   @override
-  String get homeRecentQueriesButton => '🕘 Recent prompts';
+  String get homeRecentQueriesButton => 'Recent prompts';
 
   @override
   String get homeExample1 => 'Where should I place my energy?';
@@ -492,7 +492,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get resultReferralShareMessage =>
-      'Try Basil Arcana: stylish and accurate Tarot readings right in Telegram.';
+      'Discover the real magic in Telegram — stylish Tarot clarity for love, money, and your next move.';
 
   @override
   String get resultDeepPrompt => 'Want details on relationships and career?';
