@@ -28,7 +28,6 @@ class _VibePromptsScreenState extends ConsumerState<VibePromptsScreen>
   _VibePromptsCopy? _copy;
   final ValueNotifier<String> _displayedText = ValueNotifier<String>('');
   String _currentPrompt = '';
-  int _promptIndex = 0;
   bool _showShine = false;
   bool _flickerVisible = true;
   bool _isTyping = false;
@@ -73,39 +72,54 @@ class _VibePromptsScreenState extends ConsumerState<VibePromptsScreen>
   Future<void> _runPromptLoop() async {
     while (mounted && !_isDisposed) {
       final copy = _copy ?? _VibePromptsCopy.resolve(context);
-      final prompts = copy.prompts;
+      final prompts = _shufflePrompts(copy.prompts);
       if (prompts.isEmpty) {
         return;
       }
 
-      final prompt = prompts[_promptIndex % prompts.length];
-      _promptIndex += 1;
-      await _typePrompt(prompt);
-      if (!mounted || _isDisposed) {
-        return;
-      }
+      for (final prompt in prompts) {
+        await _typePrompt(prompt);
+        if (!mounted || _isDisposed) {
+          return;
+        }
 
-      await _runShine();
-      if (!mounted || _isDisposed) {
-        return;
-      }
+        await _runShine();
+        if (!mounted || _isDisposed) {
+          return;
+        }
 
-      await _runFlicker();
-      if (!mounted || _isDisposed) {
-        return;
-      }
+        await _runFlicker();
+        if (!mounted || _isDisposed) {
+          return;
+        }
 
-      if (mounted) {
-        setState(() {
-          _displayedText.value = '';
-          _flickerVisible = true;
-          _showShine = false;
-          _isTyping = false;
-        });
-      }
+        if (mounted) {
+          setState(() {
+            _displayedText.value = '';
+            _flickerVisible = true;
+            _showShine = false;
+            _isTyping = false;
+          });
+        }
 
-      await Future<void>.delayed(const Duration(milliseconds: 220));
+        await Future<void>.delayed(const Duration(milliseconds: 220));
+      }
     }
+  }
+
+  List<String> _shufflePrompts(List<String> source) {
+    final prompts = source.toList(growable: false);
+    if (prompts.length < 2) {
+      return prompts;
+    }
+    final shuffled = prompts.toList();
+    for (var i = shuffled.length - 1; i > 0; i--) {
+      final j = _random.nextInt(i + 1);
+      final tmp = shuffled[i];
+      shuffled[i] = shuffled[j];
+      shuffled[j] = tmp;
+    }
+    return shuffled;
   }
 
   Future<void> _typePrompt(String prompt) async {
@@ -593,6 +607,21 @@ class _VibePromptsCopy {
           'Что сейчас самое важное для моего личного роста?',
           'Какое решение стоит принять сейчас, чтобы не жалеть позже?',
           'Что мне нужно отпустить, чтобы двигаться дальше?',
+          'Какой вопрос я избегаю, хотя он уже стучится в мою дверь?',
+          'Где моя интуиция шепчет тише, чем мой страх?',
+          'Как вернуть себе внутренний огонь без выгорания?',
+          'Какой разговор изменит мои отношения к лучшему?',
+          'Что во мне готово к новому уровню прямо сейчас?',
+          'Какая привычка ворует мою энергию каждый день?',
+          'Где мне выбрать мягкость, а где — твердость?',
+          'Какой знак Вселенная уже показала, а я его игнорирую?',
+          'Какая одна смелая просьба может открыть мне новые двери?',
+          'Что поможет мне перестать жить на автопилоте?',
+          'Какую роль мне пора отпустить в отношениях?',
+          'Что усилит мой денежный поток без суеты?',
+          'Какая идея может стать моим прорывом этой весной?',
+          'Что мне важно услышать о себе именно сегодня?',
+          'Какой шаг приблизит меня к жизни, где я чувствую себя в своем месте?',
         ],
       );
     }
@@ -621,6 +650,21 @@ class _VibePromptsCopy {
           'Қарым-қатынастағы уайым шеңберінен қалай шығамын?',
           'Маңызды істерді кейінге қалдырмау үшін қандай жоспар керек?',
           'Қазір қандай шешім кейін өкінбеуге көмектеседі?',
+          'Қай сұрақтан қашып жүрмін, бірақ ол маған қайта оралып жатыр?',
+          'Интуициям мен қорқынышымның қайсысын қазір көбірек тыңдап жүрмін?',
+          'Күйіп кетпей, ішкі отымды қалай қайта жағамын?',
+          'Қай әңгіме қарым-қатынасымды жақсартады?',
+          'Қазір менің қай бөлігім жаңа деңгейге дайын?',
+          'Күн сайын энергиямды жейтін әдет қайсы?',
+          'Қай жерде жұмсақ болу, қай жерде шекара қою керек?',
+          'Әлем маған қай белгіні көрсетті, ал мен байқамай жүрмін?',
+          'Қандай батыл өтініш жаңа есіктерді аша алады?',
+          'Автопилотпен өмір сүруді тоқтатуға не көмектеседі?',
+          'Қарым-қатынаста қай рөлді босататын уақыт келді?',
+          'Ақша ағынын сабырмен күшейту үшін не істеуім керек?',
+          'Қай идея осы маусымда серпіліс әкеле алады?',
+          'Бүгін өзім туралы нені естігенім маңызды?',
+          'Өз орнымда екенімді сезінетін өмірге қай қадам жақындатады?',
         ],
       );
     }
@@ -650,6 +694,21 @@ class _VibePromptsCopy {
         'What plan would help me stop procrastinating on what matters?',
         'What decision now will save me regret later?',
         'What do I need to release to move forward?',
+        'What question am I avoiding even though it keeps calling me?',
+        'Where is my intuition whispering louder than my fear?',
+        'How can I relight my inner fire without burning out?',
+        'What conversation could transform my relationship right now?',
+        'What part of me is ready for a new level?',
+        'Which habit is quietly draining my energy every day?',
+        'Where do I need softness, and where do I need stronger boundaries?',
+        'What sign has the universe already shown me that I keep ignoring?',
+        'What one bold ask could open a new door for me?',
+        'How do I stop living on autopilot and feel fully present again?',
+        'What role in love am I ready to let go of?',
+        'How can I grow my money flow with less chaos and more clarity?',
+        'Which idea could become my breakthrough this season?',
+        'What do I most need to hear about myself today?',
+        'What next move brings me closer to a life that feels truly mine?',
       ],
     );
   }
