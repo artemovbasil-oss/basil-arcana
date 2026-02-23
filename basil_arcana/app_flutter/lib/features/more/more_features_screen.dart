@@ -131,11 +131,35 @@ class _MoreFeaturesScreenState extends ConsumerState<MoreFeaturesScreen> {
       return;
     }
 
-    final canProceed = await trySpendEnergyForAction(
-      context,
-      ref,
-      EnergyAction.natalChart,
-    );
+    var canProceed = false;
+    try {
+      final consumeResult = await ref
+          .read(userDashboardRepositoryProvider)
+          .consumeFreeFiveCardsCredit(reason: 'natal_chart_unlock');
+      if (consumeResult.consumed) {
+        canProceed = true;
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                l10n.settingsDashboardFreePremiumRemaining(
+                  consumeResult.remaining,
+                ),
+              ),
+            ),
+          );
+        }
+      }
+    } catch (_) {
+      // Fall back to regular energy flow.
+    }
+    if (!canProceed) {
+      canProceed = await trySpendEnergyForAction(
+        context,
+        ref,
+        EnergyAction.natalChart,
+      );
+    }
     if (!canProceed || !mounted) {
       return;
     }

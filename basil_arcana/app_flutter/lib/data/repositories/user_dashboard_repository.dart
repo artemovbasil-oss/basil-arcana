@@ -148,7 +148,9 @@ class UserDashboardRepository {
     }
   }
 
-  Future<ConsumeFiveCardsCreditResult> consumeFreeFiveCardsCredit() async {
+  Future<ConsumeFiveCardsCreditResult> consumeFreeFiveCardsCredit({
+    String reason = 'spread_five_unlock',
+  }) async {
     final uri = Uri.parse(ApiConfig.apiBaseUrl).replace(
       path: '/api/premium/five-cards/consume',
     );
@@ -157,7 +159,9 @@ class UserDashboardRepository {
       final response = await client.post(
         uri,
         headers: const {'Content-Type': 'application/json'},
-        body: '{}',
+        body: jsonEncode({
+          'reason': reason,
+        }),
       );
       if (response.statusCode < 200 || response.statusCode >= 300) {
         throw UserDashboardRepositoryException(

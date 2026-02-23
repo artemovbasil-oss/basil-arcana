@@ -951,11 +951,12 @@ app.post('/api/premium/five-cards/consume', telegramAuthMiddleware, async (req, 
       requestId: req.requestId
     });
   }
+  const reasonRaw = typeof req.body?.reason === 'string' ? req.body.reason.trim() : '';
   await upsertTelegramUserFromRequest(req);
   await tryClaimReferralForRequest(req);
   const result = await consumeFreeFiveCardsCredit({
     telegramUserId,
-    reason: 'spread_five_unlock'
+    reason: reasonRaw || 'spread_five_unlock'
   });
   return res.json({
     ok: result.ok,

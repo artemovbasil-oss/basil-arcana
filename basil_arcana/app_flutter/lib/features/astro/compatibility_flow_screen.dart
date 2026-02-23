@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
 import '../../core/navigation/app_route_config.dart';
 import '../../core/widgets/app_buttons.dart';
@@ -118,11 +119,36 @@ class _CompatibilityFlowScreenState
       _isSubmitting = true;
     });
 
-    final canProceed = await trySpendEnergyForAction(
-      context,
-      ref,
-      EnergyAction.compatibility,
-    );
+    var canProceed = false;
+    try {
+      final consumeResult = await ref
+          .read(userDashboardRepositoryProvider)
+          .consumeFreeFiveCardsCredit(reason: 'compatibility_unlock');
+      if (consumeResult.consumed) {
+        canProceed = true;
+        if (mounted) {
+          final l10n = AppLocalizations.of(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                l10n.settingsDashboardFreePremiumRemaining(
+                  consumeResult.remaining,
+                ),
+              ),
+            ),
+          );
+        }
+      }
+    } catch (_) {
+      // Fall back to regular energy flow.
+    }
+    if (!canProceed) {
+      canProceed = await trySpendEnergyForAction(
+        context,
+        ref,
+        EnergyAction.compatibility,
+      );
+    }
     if (!_isSubmitActive(submitToken)) {
       return;
     }

@@ -145,9 +145,20 @@ async function ensureSchema() {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS user_perks_state (
       telegram_user_id BIGINT PRIMARY KEY REFERENCES users(telegram_user_id) ON DELETE CASCADE,
-      free_five_cards_credits INTEGER NOT NULL DEFAULT 0,
+      free_five_cards_credits INTEGER NOT NULL DEFAULT 5,
       total_referral_credits_granted INTEGER NOT NULL DEFAULT 0,
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+  await pool.query(`
+    ALTER TABLE user_perks_state
+    ALTER COLUMN free_five_cards_credits SET DEFAULT 5;
+  `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS app_migrations (
+      name TEXT PRIMARY KEY,
+      applied_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
   `);
 
@@ -189,6 +200,39 @@ async function ensureSchema() {
   await pool.query(
     "CREATE INDEX IF NOT EXISTS idx_user_client_events_name_created ON user_client_events (event_name, created_at DESC);"
   );
+
+  const grantMigrationName = 'grant_free_premium_credits_2026_02_23';
+  const migrationRes = await pool.query(
+    `
+    INSERT INTO app_migrations (name)
+    VALUES ($1)
+    ON CONFLICT (name) DO NOTHING
+    RETURNING name;
+    `,
+    [grantMigrationName]
+  );
+  if (migrationRes.rows[0]) {
+    await pool.query(
+      `
+      INSERT INTO user_perks_state (
+        telegram_user_id,
+        free_five_cards_credits,
+        total_referral_credits_granted,
+        updated_at
+      )
+      SELECT
+        u.telegram_user_id,
+        5,
+        0,
+        NOW()
+      FROM users u
+      ON CONFLICT (telegram_user_id)
+      DO UPDATE SET
+        free_five_cards_credits = user_perks_state.free_five_cards_credits + 5,
+        updated_at = NOW();
+      `
+    );
+  }
 }
 
 function normalizeText(value) {
@@ -235,6 +279,18 @@ async function upsertUserProfile({ telegramUserId, telegramUser, locale = null }
       user.photoUrl,
       normalizedLocale
     ]
+  );
+  await pool.query(
+    `
+    INSERT INTO user_perks_state (
+      telegram_user_id,
+      updated_at
+    )
+    VALUES ($1, NOW())
+    ON CONFLICT (telegram_user_id)
+    DO NOTHING;
+    `,
+    [telegramUserId]
   );
 }
 
