@@ -872,20 +872,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     return 'https://t.me/tarot_arkana_bot/app';
   }
 
-  String? _homeReferralProgressLine(BuildContext context) {
-    final invited = _homeReferralInvited;
-    final credits = _homeReferralCredits;
-    if (invited == null && credits == null) {
-      return null;
-    }
+  String _homeInvitedLabel(BuildContext context) {
+    final invited = _homeReferralInvited ?? 0;
     final code = Localizations.localeOf(context).languageCode;
     if (code == 'ru') {
-      return 'Приглашено: ${invited ?? 0} · Бонусных кредитов: ${credits ?? 0}';
+      return 'Приглашено: $invited';
     }
     if (code == 'kk') {
-      return 'Шақырылғандар: ${invited ?? 0} · Бонус кредиттер: ${credits ?? 0}';
+      return 'Шақырылғандар: $invited';
     }
-    return 'Invited: ${invited ?? 0} · Bonus credits: ${credits ?? 0}';
+    return 'Invited: $invited';
+  }
+
+  String _homeBonusLabel(BuildContext context) {
+    final credits = _homeReferralCredits ?? 0;
+    final code = Localizations.localeOf(context).languageCode;
+    if (code == 'ru') {
+      return 'Бонусы: $credits';
+    }
+    if (code == 'kk') {
+      return 'Бонустар: $credits';
+    }
+    return 'Bonuses: $credits';
   }
 
   Future<void> _trackHomeInviteEvent(String eventName) async {
@@ -925,6 +933,50 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     if (opened) {
       unawaited(_trackHomeInviteEvent('invite_share_opened'));
     }
+  }
+
+  Future<void> _showHomeInviteInfoModal(AppLocalizations l10n) async {
+    unawaited(_trackHomeInviteEvent('invite_info_opened'));
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+      ),
+      builder: (sheetContext) {
+        return SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(18, 16, 18, 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.resultReferralTitle,
+                  style: Theme.of(sheetContext).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  l10n.resultReferralBody,
+                  style: Theme.of(sheetContext).textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 14),
+                AppPrimaryButton(
+                  label: l10n.resultReferralButton,
+                  onPressed: () async {
+                    Navigator.of(sheetContext).pop();
+                    await _shareHomeReferralLink(l10n);
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   Future<void> _showOnboardingIfNeeded() async {
@@ -1150,7 +1202,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       l10n.homeQuickTopicWeatherTomorrow,
     ];
     final hasQuestion = _controller.text.trim().isNotEmpty;
-    final copy = _SofiaCopy.resolve(context);
     final featureCopy = _HomeFeatureCopy.resolve(context);
     final streakCopy = _HomeStreakCopy.resolve(context);
     final deckHint = _deckHint(l10n, deckId);
@@ -1349,15 +1400,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       ),
                     ),
                     const SizedBox(height: 16),
-                    _HomeInviteCard(
-                      title: l10n.resultReferralTitle,
-                      body: l10n.resultReferralBody,
-                      buttonLabel: l10n.resultReferralButton,
-                      progressText: _homeReferralProgressLine(context),
-                      isLoadingProgress: !_homeReferralStatsRequested,
-                      onShareTap: () => _shareHomeReferralLink(l10n),
-                    ),
-                    const SizedBox(height: 16),
                     SizedBox(
                       height: 40,
                       child: ListView.separated(
@@ -1501,25 +1543,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (_sofiaConsentState == _SofiaConsentState.undecided)
-                _SofiaConsentCard(
-                  copy: copy,
-                  isBusy: _sendingConsent,
-                  compact: true,
-                  onOpenInfo: _showSofiaInfoModal,
-                  onAccept: () => _setSofiaConsentState(
-                    _SofiaConsentState.accepted,
-                  ),
-                  onReject: () => _setSofiaConsentState(
-                    _SofiaConsentState.rejected,
-                  ),
-                )
-              else
-                _SofiaInfoCard(
-                  copy: copy,
-                  compact: true,
-                  onTap: _showSofiaInfoModal,
-                ),
+              _HomeInviteCompactCard(
+                title: l10n.resultReferralTitle,
+                invitedLabel: _homeInvitedLabel(context),
+                bonusLabel: _homeBonusLabel(context),
+                isLoading: !_homeReferralStatsRequested,
+                onShareTap: () => _shareHomeReferralLink(l10n),
+                onHelpTap: () => _showHomeInviteInfoModal(l10n),
+              ),
               const SizedBox(height: 10),
               _PrimaryActionButton(
                 isActive: hasQuestion,
@@ -2416,73 +2447,149 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   }
 }
 
-class _HomeInviteCard extends StatelessWidget {
-  const _HomeInviteCard({
+class _HomeInviteCompactCard extends StatelessWidget {
+  const _HomeInviteCompactCard({
     required this.title,
-    required this.body,
-    required this.buttonLabel,
-    required this.isLoadingProgress,
+    required this.invitedLabel,
+    required this.bonusLabel,
+    required this.isLoading,
     required this.onShareTap,
-    this.progressText,
+    required this.onHelpTap,
   });
 
   final String title;
-  final String body;
-  final String buttonLabel;
-  final bool isLoadingProgress;
-  final String? progressText;
+  final String invitedLabel;
+  final String bonusLabel;
+  final bool isLoading;
   final Future<void> Function() onShareTap;
+  final VoidCallback onHelpTap;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(14),
+    return Ink(
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        color: colorScheme.primary.withValues(alpha: 0.06),
-        border: Border.all(color: colorScheme.primary.withValues(alpha: 0.24)),
+        borderRadius: BorderRadius.circular(20),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            colorScheme.primary.withValues(alpha: 0.08),
+            colorScheme.surfaceContainerHighest.withValues(alpha: 0.55),
+          ],
+        ),
+        border: Border.all(color: colorScheme.primary.withValues(alpha: 0.22)),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Text(
-            title,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: colorScheme.primary,
-                  fontWeight: FontWeight.w700,
-                ),
+          SvgPicture.asset(
+            'assets/icon/home_invite.svg',
+            width: 20,
+            height: 20,
           ),
-          const SizedBox(height: 8),
-          Text(body, style: Theme.of(context).textTheme.bodyMedium),
-          if (isLoadingProgress || (progressText?.trim().isNotEmpty ?? false))
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: isLoadingProgress
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : Text(
-                      progressText!,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color:
-                                colorScheme.onSurface.withValues(alpha: 0.72),
-                            fontWeight: FontWeight.w600,
-                          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              color: colorScheme.primary,
+                              fontWeight: FontWeight.w700,
+                            ),
+                      ),
                     ),
+                    const SizedBox(width: 6),
+                    InkWell(
+                      borderRadius: BorderRadius.circular(20),
+                      onTap: onHelpTap,
+                      child: Padding(
+                        padding: const EdgeInsets.all(2),
+                        child: SvgPicture.asset(
+                          'assets/icon/help_circle.svg',
+                          width: 16,
+                          height: 16,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 2),
+                if (isLoading)
+                  SizedBox(
+                    width: 14,
+                    height: 14,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: colorScheme.primary,
+                    ),
+                  )
+                else
+                  Text(
+                    '$invitedLabel · $bonusLabel',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurface.withValues(alpha: 0.78),
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+              ],
             ),
-          const SizedBox(height: 12),
-          AppGhostButton(
-            label: buttonLabel,
-            icon: Icons.ios_share,
-            onPressed: onShareTap,
+          ),
+          const SizedBox(width: 8),
+          InkWell(
+            borderRadius: BorderRadius.circular(999),
+            onTap: onShareTap,
+            child: Ink(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+              decoration: BoxDecoration(
+                color: colorScheme.primary.withValues(alpha: 0.14),
+                borderRadius: BorderRadius.circular(999),
+                border: Border.all(
+                    color: colorScheme.primary.withValues(alpha: 0.25)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SvgPicture.asset(
+                    'assets/icon/home_share.svg',
+                    width: 13,
+                    height: 13,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    _shareLabel(context),
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                          color: colorScheme.primary,
+                          fontWeight: FontWeight.w700,
+                        ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),
     );
+  }
+
+  String _shareLabel(BuildContext context) {
+    final code = Localizations.localeOf(context).languageCode;
+    if (code == 'ru') {
+      return 'Поделиться';
+    }
+    if (code == 'kk') {
+      return 'Бөлісу';
+    }
+    return 'Share';
   }
 }
 
@@ -4676,157 +4783,6 @@ class _HomeMagicLoadingCard extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _SofiaConsentCard extends StatelessWidget {
-  const _SofiaConsentCard({
-    required this.copy,
-    required this.isBusy,
-    required this.onOpenInfo,
-    required this.onAccept,
-    required this.onReject,
-    this.compact = false,
-  });
-
-  final _SofiaCopy copy;
-  final bool isBusy;
-  final VoidCallback onOpenInfo;
-  final VoidCallback onAccept;
-  final VoidCallback onReject;
-  final bool compact;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return InkWell(
-      borderRadius: BorderRadius.circular(20),
-      onTap: onOpenInfo,
-      child: Ink(
-        padding: EdgeInsets.all(compact ? 12 : 14),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          color: colorScheme.surfaceVariant
-              .withValues(alpha: compact ? 0.18 : 0.26),
-          border: Border.all(
-            color:
-                colorScheme.outlineVariant.withValues(alpha: compact ? 0.7 : 1),
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    copy.consentTitle,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
-                  ),
-                ),
-                Icon(
-                  Icons.chevron_right,
-                  color: colorScheme.onSurface.withOpacity(0.5),
-                ),
-              ],
-            ),
-            SizedBox(height: compact ? 4 : 6),
-            RichText(
-              text: TextSpan(
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurface
-                          .withValues(alpha: compact ? 0.72 : 0.78),
-                    ),
-                children: [
-                  TextSpan(text: '${copy.consentBodyPrefix} '),
-                  TextSpan(
-                    text: copy.sofiaName,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: colorScheme.primary,
-                          fontWeight: FontWeight.w700,
-                        ),
-                  ),
-                  TextSpan(text: ' ${copy.consentBodySuffix}'),
-                ],
-              ),
-            ),
-            SizedBox(height: compact ? 8 : 10),
-            Row(
-              children: [
-                Expanded(
-                  child: AppSmallButton(
-                    label: copy.acceptButton,
-                    onPressed: isBusy ? null : onAccept,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: AppSmallButton(
-                    label: copy.rejectButton,
-                    onPressed: isBusy ? null : onReject,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SofiaInfoCard extends StatelessWidget {
-  const _SofiaInfoCard({
-    required this.copy,
-    required this.onTap,
-    this.compact = false,
-  });
-
-  final _SofiaCopy copy;
-  final VoidCallback onTap;
-  final bool compact;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    const outerRadius = 20.0;
-    return InkWell(
-      borderRadius: BorderRadius.circular(outerRadius),
-      onTap: onTap,
-      child: Ink(
-        padding: EdgeInsets.all(compact ? 12 : 14),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(outerRadius),
-          color: colorScheme.surfaceVariant
-              .withValues(alpha: compact ? 0.16 : 0.24),
-          border: Border.all(
-            color: colorScheme.outlineVariant
-                .withValues(alpha: compact ? 0.68 : 1),
-          ),
-        ),
-        child: Row(
-          children: [
-            Text(
-              '🦹‍♀️',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                copy.infoCardTitle,
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-            ),
-            Icon(
-              Icons.chevron_right,
-              color: colorScheme.onSurface.withOpacity(0.45),
-            ),
-          ],
-        ),
       ),
     );
   }
