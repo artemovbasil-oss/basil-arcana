@@ -2244,7 +2244,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   ),
                   const SizedBox(height: 8),
                   Container(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(18),
                       border: Border.all(
@@ -2257,11 +2257,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         SizedBox(
-                          width: 112,
+                          width: 88,
                           child: AspectRatio(
                             aspectRatio: 0.68,
                             child: ClipRRect(
-                              borderRadius: BorderRadius.circular(14),
+                              borderRadius: BorderRadius.circular(12),
                               child: Image.network(
                                 dailyCard.imageUrl,
                                 fit: BoxFit.cover,
@@ -2278,28 +2278,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(999),
-                                  color: colorScheme.primary
-                                      .withValues(alpha: 0.14),
-                                ),
-                                child: Text(
-                                  copy.dailyCardBadgeLabel,
-                                  style: Theme.of(sheetContext)
-                                      .textTheme
-                                      .labelSmall
-                                      ?.copyWith(
-                                        color: colorScheme.primary,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                ),
-                              ),
-                              const SizedBox(height: 8),
                               Text(
                                 dailyCard.name,
                                 style: Theme.of(sheetContext)
@@ -2310,7 +2288,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                       fontWeight: FontWeight.w700,
                                     ),
                               ),
-                              const SizedBox(height: 8),
+                              const SizedBox(height: 6),
                               Text(
                                 dailyCard.meaning.general.trim().isEmpty
                                     ? copy.dailyCardFallback
@@ -2321,7 +2299,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                     ?.copyWith(
                                       color: colorScheme.onSurface
                                           .withValues(alpha: 0.8),
-                                      height: 1.38,
+                                      height: 1.32,
                                     ),
                               ),
                             ],
@@ -2330,15 +2308,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       ],
                     ),
                   ),
-                  const SizedBox(height: 14),
-                  Text(
-                    copy.dailyCardInsightTitle,
-                    style:
-                        Theme.of(sheetContext).textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.w700,
-                            ),
-                  ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 12),
                   Expanded(
                     child: FutureBuilder<String>(
                       future: requestFuture,
@@ -3608,13 +3578,6 @@ class _DailyCardConversionBlock extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            copy.dailyCardActionsTitle,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
-          ),
-          const SizedBox(height: 10),
           AppPrimaryButton(
             label: copy.dailyCardPrimaryCta,
             onPressed: onStartReading,
