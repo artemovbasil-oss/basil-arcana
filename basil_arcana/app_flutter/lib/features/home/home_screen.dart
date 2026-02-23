@@ -1169,69 +1169,72 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                               width: 2.1,
                             ),
                           ),
-                          child: Stack(
-                            children: [
-                              TextField(
-                                controller: _controller,
-                                focusNode: _focusNode,
-                                maxLines: questionMaxLines,
-                                minLines: questionMinLines,
-                                decoration: InputDecoration(
-                                  hintText: l10n.homeQuestionPlaceholder,
-                                  hintStyle: Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium
-                                      ?.copyWith(
-                                        color: colorScheme.onSurface
-                                            .withValues(alpha: 0.45),
-                                      ),
-                                  border: InputBorder.none,
-                                  contentPadding: const EdgeInsets.fromLTRB(
-                                    16,
-                                    16,
-                                    108,
-                                    16,
-                                  ),
-                                  alignLabelWithHint: true,
-                                ),
-                                onChanged: (value) {
-                                  ref
-                                      .read(
-                                        readingFlowControllerProvider.notifier,
-                                      )
-                                      .setQuestion(value);
-                                  setState(() {});
-                                },
-                              ),
-                              if (hasQuestion)
-                                Positioned(
-                                  right: 10,
-                                  bottom: 10,
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      _InlineIconButton(
-                                        icon: Icons.close,
-                                        tooltip: l10n.homeClearQuestionTooltip,
-                                        onTap: _clearQuestion,
-                                      ),
-                                      const SizedBox(width: 8),
-                                      _InlineIconButton(
-                                        icon: Icons.arrow_forward,
-                                        tooltip: l10n.homeContinueButton,
-                                        onTap: () => _handlePrimaryAction(
-                                          hasQuestion,
-                                        ),
-                                        backgroundColor: colorScheme.primary,
-                                        iconColor: Colors.white,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                            ],
-                          ),
+                          child: child,
                         );
                       },
+                      child: RepaintBoundary(
+                        child: Stack(
+                          children: [
+                            TextField(
+                              controller: _controller,
+                              focusNode: _focusNode,
+                              maxLines: questionMaxLines,
+                              minLines: questionMinLines,
+                              decoration: InputDecoration(
+                                hintText: l10n.homeQuestionPlaceholder,
+                                hintStyle: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(
+                                      color: colorScheme.onSurface
+                                          .withValues(alpha: 0.45),
+                                    ),
+                                border: InputBorder.none,
+                                contentPadding: const EdgeInsets.fromLTRB(
+                                  16,
+                                  16,
+                                  108,
+                                  16,
+                                ),
+                                alignLabelWithHint: true,
+                              ),
+                              onChanged: (value) {
+                                ref
+                                    .read(
+                                      readingFlowControllerProvider.notifier,
+                                    )
+                                    .setQuestion(value);
+                                setState(() {});
+                              },
+                            ),
+                            if (hasQuestion)
+                              Positioned(
+                                right: 10,
+                                bottom: 10,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    _InlineIconButton(
+                                      icon: Icons.close,
+                                      tooltip: l10n.homeClearQuestionTooltip,
+                                      onTap: _clearQuestion,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    _InlineIconButton(
+                                      icon: Icons.arrow_forward,
+                                      tooltip: l10n.homeContinueButton,
+                                      onTap: () => _handlePrimaryAction(
+                                        hasQuestion,
+                                      ),
+                                      backgroundColor: colorScheme.primary,
+                                      iconColor: Colors.white,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
                     ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),

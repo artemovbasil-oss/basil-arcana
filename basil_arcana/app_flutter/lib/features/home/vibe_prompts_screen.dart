@@ -26,7 +26,7 @@ class _VibePromptsScreenState extends ConsumerState<VibePromptsScreen>
   final Random _random = Random();
 
   _VibePromptsCopy? _copy;
-  String _displayedText = '';
+  final ValueNotifier<String> _displayedText = ValueNotifier<String>('');
   String _currentPrompt = '';
   int _promptIndex = 0;
   bool _showShine = false;
@@ -63,6 +63,7 @@ class _VibePromptsScreenState extends ConsumerState<VibePromptsScreen>
   @override
   void dispose() {
     _isDisposed = true;
+    _displayedText.dispose();
     _breathController.dispose();
     _shineController.dispose();
     _cursorController.dispose();
@@ -96,7 +97,7 @@ class _VibePromptsScreenState extends ConsumerState<VibePromptsScreen>
 
       if (mounted) {
         setState(() {
-          _displayedText = '';
+          _displayedText.value = '';
           _flickerVisible = true;
           _showShine = false;
           _isTyping = false;
@@ -111,26 +112,26 @@ class _VibePromptsScreenState extends ConsumerState<VibePromptsScreen>
     if (mounted) {
       setState(() {
         _currentPrompt = prompt;
-        _displayedText = '';
+        _displayedText.value = '';
         _showShine = false;
         _flickerVisible = true;
         _isTyping = true;
       });
     }
 
-    for (var i = 1; i <= prompt.length; i++) {
+    final typed = StringBuffer();
+    for (var i = 0; i < prompt.length; i++) {
       if (!mounted || _isDisposed) {
         return;
       }
-      setState(() {
-        _displayedText = prompt.substring(0, i);
-      });
-      final char = prompt[i - 1];
+      final char = prompt[i];
+      typed.write(char);
+      _displayedText.value = typed.toString();
       await Future<void>.delayed(
         Duration(
           milliseconds: _typingDelayForChar(
             char: char,
-            index: i - 1,
+            index: i,
             total: prompt.length,
           ),
         ),
@@ -309,22 +310,27 @@ class _VibePromptsScreenState extends ConsumerState<VibePromptsScreen>
                             opacity: _flickerVisible ? 1 : 0.12,
                             duration: const Duration(milliseconds: 110),
                             curve: Curves.easeOut,
-                            child: _PromptText(
-                              text: _displayedText,
-                              animation: _shineController,
-                              cursorAnimation: _cursorController,
-                              showShine: _showShine,
-                              showCursor:
-                                  _displayedText.isNotEmpty && _isTyping,
-                              style: textTheme.headlineSmall?.copyWith(
-                                color: colorScheme.onSurface
-                                    .withValues(alpha: 0.94),
-                                fontWeight: FontWeight.w500,
-                                fontSize: 32,
-                                height: 1.28,
-                              ),
-                              shimmerColor:
-                                  colorScheme.primary.withValues(alpha: 0.95),
+                            child: ValueListenableBuilder<String>(
+                              valueListenable: _displayedText,
+                              builder: (context, displayedText, _) {
+                                return _PromptText(
+                                  text: displayedText,
+                                  animation: _shineController,
+                                  cursorAnimation: _cursorController,
+                                  showShine: _showShine,
+                                  showCursor:
+                                      displayedText.isNotEmpty && _isTyping,
+                                  style: textTheme.headlineSmall?.copyWith(
+                                    color: colorScheme.onSurface
+                                        .withValues(alpha: 0.94),
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 32,
+                                    height: 1.28,
+                                  ),
+                                  shimmerColor: colorScheme.primary
+                                      .withValues(alpha: 0.95),
+                                );
+                              },
                             ),
                           ),
                         ),
