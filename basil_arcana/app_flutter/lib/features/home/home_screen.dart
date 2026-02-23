@@ -935,6 +935,76 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     }
   }
 
+  Future<void> _trackDailyStoryEvent(String eventName, CardModel card) async {
+    try {
+      await ref.read(inviteTelemetryRepositoryProvider).track(
+        eventName: eventName,
+        source: 'daily_story_card',
+        metadata: <String, Object?>{
+          'card_id': card.id,
+          'card_name': card.name,
+        },
+      );
+    } catch (_) {
+      // Tracking must never block UX.
+    }
+  }
+
+  Future<void> _shareDailyStory({
+    required CardModel dailyCard,
+    required _HomeStreakCopy copy,
+  }) async {
+    final l10n = AppLocalizations.of(context);
+    final localeCode = Localizations.localeOf(context).languageCode;
+    final interpretationRaw = _dailyCardInterpretationCardId == dailyCard.id
+        ? (_dailyCardInterpretation ?? '')
+        : '';
+    final interpretation = interpretationRaw.trim().isNotEmpty
+        ? interpretationRaw.trim()
+        : dailyCard.meaning.general.trim();
+    final insight = interpretation.isEmpty
+        ? dailyCard.name
+        : interpretation.length > 180
+            ? '${interpretation.substring(0, 180)}...'
+            : interpretation;
+    final link = _resolveHomeReferralLink();
+
+    final storyText = switch (localeCode) {
+      'ru' => 'the real magic · Карта дня: ${dailyCard.name}\n'
+          'Инсайт: $insight\n'
+          'Шаг дня: ${copy.dailyCardQuestion(dailyCard.name)}\n'
+          'Забери свою карту дня:',
+      'kk' => 'the real magic · Күн картасы: ${dailyCard.name}\n'
+          'Инсайт: $insight\n'
+          'Күн қадамы: ${copy.dailyCardQuestion(dailyCard.name)}\n'
+          'Өзіңнің күн картаңды аш:',
+      _ => 'the real magic · Card of the day: ${dailyCard.name}\n'
+          'Insight: $insight\n'
+          'Step of the day: ${copy.dailyCardQuestion(dailyCard.name)}\n'
+          'Get your daily card:',
+    };
+
+    unawaited(_trackDailyStoryEvent('daily_story_share_clicked', dailyCard));
+    await Clipboard.setData(ClipboardData(text: '$storyText\n$link'));
+    if (!mounted) {
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.resultReferralCopied)),
+    );
+    final shareUri = Uri.parse(
+      'https://t.me/share/url?url=${Uri.encodeComponent(link)}'
+      '&text=${Uri.encodeComponent(storyText)}',
+    );
+    final opened = await launchUrl(
+      shareUri,
+      mode: LaunchMode.externalApplication,
+    );
+    if (opened) {
+      unawaited(_trackDailyStoryEvent('daily_story_share_opened', dailyCard));
+    }
+  }
+
   Future<void> _showHomeInviteInfoModal(AppLocalizations l10n) async {
     unawaited(_trackHomeInviteEvent('invite_info_opened'));
     await showModalBottomSheet<void>(
@@ -2355,6 +2425,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       }
                       await _showSofiaInfoModal();
                     },
+                    onShareStory: () => _shareDailyStory(
+                      dailyCard: dailyCard,
+                      copy: copy,
+                    ),
                   ),
                 ],
               ),
@@ -3275,6 +3349,7 @@ class _HomeStreakCopy {
     required this.dailyCardActionsTitle,
     required this.dailyCardPrimaryCta,
     required this.dailyCardSecondaryCta,
+    required this.dailyCardShareCta,
     required this.dailyCardQuestionPrefix,
     required this.streakLoadingSubtitle,
     required this.reportSectionTitle,
@@ -3314,6 +3389,7 @@ class _HomeStreakCopy {
   final String dailyCardActionsTitle;
   final String dailyCardPrimaryCta;
   final String dailyCardSecondaryCta;
+  final String dailyCardShareCta;
   final String dailyCardQuestionPrefix;
   final String streakLoadingSubtitle;
   final String reportSectionTitle;
@@ -3381,6 +3457,7 @@ class _HomeStreakCopy {
         dailyCardActionsTitle: 'Сделать следующий шаг',
         dailyCardPrimaryCta: 'Сделать расклад по карте',
         dailyCardSecondaryCta: 'Личная консультация Софии',
+        dailyCardShareCta: 'Поделиться историей дня',
         dailyCardQuestionPrefix:
             'Какой следующий шаг мне сделать сегодня, учитывая карту',
         streakLoadingSubtitle: 'Подтягиваем актуальный streak...',
@@ -3427,6 +3504,7 @@ class _HomeStreakCopy {
         dailyCardActionsTitle: 'Келесі қадам',
         dailyCardPrimaryCta: 'Карта бойынша расклад жасау',
         dailyCardSecondaryCta: 'Софиямен жеке консультация',
+        dailyCardShareCta: 'Күн тарихымен бөлісу',
         dailyCardQuestionPrefix:
             'Осы картаға сүйеніп, бүгін мен қандай келесі қадам жасауым керек',
         streakLoadingSubtitle: 'Өзекті streak жүктелуде...',
@@ -3472,6 +3550,7 @@ class _HomeStreakCopy {
       dailyCardActionsTitle: 'Take the next step',
       dailyCardPrimaryCta: 'Start a reading from this card',
       dailyCardSecondaryCta: 'Personal consultation with Sofia',
+      dailyCardShareCta: 'Share daily story',
       dailyCardQuestionPrefix:
           'What next step should I take today based on the card',
       streakLoadingSubtitle: 'Loading latest streak...',
@@ -3506,11 +3585,13 @@ class _DailyCardConversionBlock extends StatelessWidget {
     required this.copy,
     required this.onStartReading,
     required this.onSofiaTap,
+    required this.onShareStory,
   });
 
   final _HomeStreakCopy copy;
   final VoidCallback onStartReading;
   final VoidCallback onSofiaTap;
+  final VoidCallback onShareStory;
 
   @override
   Widget build(BuildContext context) {
@@ -3542,6 +3623,12 @@ class _DailyCardConversionBlock extends StatelessWidget {
           AppGhostButton(
             label: copy.dailyCardSecondaryCta,
             onPressed: onSofiaTap,
+          ),
+          const SizedBox(height: 8),
+          AppGhostButton(
+            label: copy.dailyCardShareCta,
+            icon: Icons.ios_share,
+            onPressed: onShareStory,
           ),
         ],
       ),
