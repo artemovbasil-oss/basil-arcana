@@ -4,11 +4,13 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/config/app_version.dart';
 import '../../core/navigation/app_route_config.dart';
@@ -67,6 +69,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   bool _reportFlowInFlight = false;
   bool _loadingReportEntitlements = false;
   bool _hasYearlyReportAccess = false;
+  bool _homeInviteCardViewTracked = false;
+  bool _homeReferralStatsRequested = false;
+  int? _homeReferralInvited;
+  int? _homeReferralCredits;
+  String? _homeReferralLink;
   bool _didRequestOnboarding = false;
   final ValueNotifier<int> _streakModalRefreshTick = ValueNotifier<int>(0);
   ValueListenable<Box<ReadingModel>>? _readingsListenable;
@@ -101,6 +108,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     });
     _loadStreakStats();
     _loadReportEntitlements();
+    _loadHomeReferralStats();
     _loadQueryHistoryAvailability();
     _attachLiveStatsListeners();
     _readingFlowSubscription = ref.listenManual<ReadingFlowState>(
@@ -830,6 +838,95 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     );
   }
 
+  Future<void> _loadHomeReferralStats() async {
+    if (_homeReferralStatsRequested) {
+      return;
+    }
+    _homeReferralStatsRequested = true;
+    try {
+      final data =
+          await ref.read(userDashboardRepositoryProvider).fetchDashboard();
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _homeReferralInvited = data.totalInvited;
+        _homeReferralCredits = data.freeFiveCardsCredits;
+        _homeReferralLink =
+            data.referralLink.trim().isEmpty ? null : data.referralLink.trim();
+      });
+    } catch (_) {
+      // Keep sharing available with local fallback link.
+    }
+  }
+
+  String _resolveHomeReferralLink() {
+    final fromDashboard = (_homeReferralLink ?? '').trim();
+    if (fromDashboard.isNotEmpty) {
+      return fromDashboard;
+    }
+    final profile = readTelegramUserProfile();
+    if (profile != null) {
+      return buildReferralLinkForUserId(profile.userId);
+    }
+    return 'https://t.me/tarot_arkana_bot/app';
+  }
+
+  String? _homeReferralProgressLine(BuildContext context) {
+    final invited = _homeReferralInvited;
+    final credits = _homeReferralCredits;
+    if (invited == null && credits == null) {
+      return null;
+    }
+    final code = Localizations.localeOf(context).languageCode;
+    if (code == 'ru') {
+      return 'Приглашено: ${invited ?? 0} · Бонусных кредитов: ${credits ?? 0}';
+    }
+    if (code == 'kk') {
+      return 'Шақырылғандар: ${invited ?? 0} · Бонус кредиттер: ${credits ?? 0}';
+    }
+    return 'Invited: ${invited ?? 0} · Bonus credits: ${credits ?? 0}';
+  }
+
+  Future<void> _trackHomeInviteEvent(String eventName) async {
+    try {
+      await ref.read(inviteTelemetryRepositoryProvider).track(
+        eventName: eventName,
+        source: 'home_invite_card',
+        metadata: <String, Object?>{
+          'invited': _homeReferralInvited ?? -1,
+          'credits': _homeReferralCredits ?? -1,
+        },
+      );
+    } catch (_) {
+      // Tracking must never block UX.
+    }
+  }
+
+  Future<void> _shareHomeReferralLink(AppLocalizations l10n) async {
+    final referralLink = _resolveHomeReferralLink();
+    unawaited(_trackHomeInviteEvent('invite_share_clicked'));
+    final text = '${l10n.resultReferralShareMessage}\n$referralLink';
+    await Clipboard.setData(ClipboardData(text: text));
+    if (!mounted) {
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.resultReferralCopied)),
+    );
+    final shareUri = Uri.parse(
+      'https://t.me/share/url?url=${Uri.encodeComponent(referralLink)}'
+      '&text=${Uri.encodeComponent(l10n.resultReferralShareMessage)}',
+    );
+    final opened = await launchUrl(
+      shareUri,
+      mode: LaunchMode.externalApplication,
+    );
+    if (opened) {
+      unawaited(_trackHomeInviteEvent('invite_share_opened'));
+    }
+  }
+
   Future<void> _showOnboardingIfNeeded() async {
     if (!mounted || _didRequestOnboarding) {
       return;
@@ -1068,6 +1165,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     final isCompactScreen = screenHeight < 760;
     final questionMinLines = isCompactScreen ? 2 : 3;
     final questionMaxLines = isCompactScreen ? 6 : 8;
+    if (!_homeInviteCardViewTracked) {
+      _homeInviteCardViewTracked = true;
+      unawaited(_trackHomeInviteEvent('invite_card_viewed'));
+    }
 
     return Scaffold(
       appBar: buildEnergyTopBar(
@@ -1246,6 +1347,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                               fontWeight: FontWeight.w400,
                             ),
                       ),
+                    ),
+                    const SizedBox(height: 16),
+                    _HomeInviteCard(
+                      title: l10n.resultReferralTitle,
+                      body: l10n.resultReferralBody,
+                      buttonLabel: l10n.resultReferralButton,
+                      progressText: _homeReferralProgressLine(context),
+                      isLoadingProgress: !_homeReferralStatsRequested,
+                      onShareTap: () => _shareHomeReferralLink(l10n),
                     ),
                     const SizedBox(height: 16),
                     SizedBox(
@@ -2303,6 +2413,76 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       DeckType.crowley => '${l10n.deckLabel}: ${l10n.deckCrowleyName}',
       _ => '${l10n.deckLabel}: ${l10n.deckTarotRiderWaite}',
     };
+  }
+}
+
+class _HomeInviteCard extends StatelessWidget {
+  const _HomeInviteCard({
+    required this.title,
+    required this.body,
+    required this.buttonLabel,
+    required this.isLoadingProgress,
+    required this.onShareTap,
+    this.progressText,
+  });
+
+  final String title;
+  final String body;
+  final String buttonLabel;
+  final bool isLoadingProgress;
+  final String? progressText;
+  final Future<void> Function() onShareTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        color: colorScheme.primary.withValues(alpha: 0.06),
+        border: Border.all(color: colorScheme.primary.withValues(alpha: 0.24)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  color: colorScheme.primary,
+                  fontWeight: FontWeight.w700,
+                ),
+          ),
+          const SizedBox(height: 8),
+          Text(body, style: Theme.of(context).textTheme.bodyMedium),
+          if (isLoadingProgress || (progressText?.trim().isNotEmpty ?? false))
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: isLoadingProgress
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text(
+                      progressText!,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color:
+                                colorScheme.onSurface.withValues(alpha: 0.72),
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+            ),
+          const SizedBox(height: 12),
+          AppGhostButton(
+            label: buttonLabel,
+            icon: Icons.ios_share,
+            onPressed: onShareTap,
+          ),
+        ],
+      ),
+    );
   }
 }
 
