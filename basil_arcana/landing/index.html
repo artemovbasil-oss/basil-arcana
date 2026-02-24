@@ -426,6 +426,29 @@
         min-height: 4.1em;
       }
 
+      .card-link {
+        position: relative;
+        display: block;
+        text-decoration: none;
+        color: inherit;
+      }
+
+      .card-link .card-chevron {
+        position: absolute;
+        top: 0.58rem;
+        right: 0.72rem;
+        color: var(--accent-soft);
+        font-size: 1.08rem;
+        line-height: 1;
+        opacity: 0.9;
+        transition: transform 0.2s ease, opacity 0.2s ease;
+      }
+
+      .card-link:hover .card-chevron {
+        transform: translateX(3px);
+        opacity: 1;
+      }
+
       .card.sofia-card {
         padding: 0.62rem;
       }
@@ -774,11 +797,18 @@
           <h2 data-i18n="sofiaTitle"></h2>
           <p data-i18n="sofiaDesc"></p>
         </article>
-        <article class="card reveal" data-delay="3">
+        <a
+          class="card card-link reveal"
+          data-delay="3"
+          href="./mini-app.html"
+          data-link="miniProduct"
+          data-track="open_mini_product"
+        >
           <div class="card-mark">03</div>
+          <span class="card-chevron" aria-hidden="true">›</span>
           <h2 data-i18n="miniTitle"></h2>
           <p data-i18n="miniDesc"></p>
-        </article>
+        </a>
       </section>
 
       <nav class="site-links" aria-label="Site navigation"><a data-nav="news" data-link="news" data-path="./news.html" data-track="nav_news" href="./news.html">Новости</a><a data-nav="academy" data-link="academy" data-path="./academy.html" data-track="nav_academy" href="./academy.html">Академия Таро</a><a data-nav="tarot" data-link="tarot" data-path="./tarot-values.html" data-track="nav_tarot" href="./tarot-values.html">Карты таро «RWS»</a><a data-nav="lenormand" data-link="lenormand" data-path="./lenormand-values.html" data-track="nav_lenormand" href="./lenormand-values.html">Колода Таро Ленорман</a><a data-nav="crowley" data-link="crowley" data-path="./crowley-values.html" data-track="nav_crowley" href="./crowley-values.html">Колода Таро Тота Алистера Кроули</a></nav>
@@ -881,6 +911,7 @@
           { selector: '[data-track="nav_tarot"]', path: "./tarot-values.html" },
           { selector: '[data-track="nav_lenormand"]', path: "./lenormand-values.html" },
           { selector: '[data-track="nav_academy"]', path: "./academy.html" },
+          { selector: '[data-link="miniProduct"]', path: "./mini-app.html" },
         ];
         navLinks.forEach(({ selector, path }) => {
           const node = document.querySelector(selector);

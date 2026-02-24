@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BasilArcana Mini App — что умеет приложение и как оно помогает в раскладах</title>
+    <meta name="description" content="BasilArcana Mini App в Telegram: быстрые расклады 1/3/5 карт, режим медитации перед вопросом, история чтений, практические советы и персональный разбор с Софией." />
+    <meta name="keywords" content="BasilArcana mini app, tarot mini app telegram, расклады таро онлайн, бот таро telegram, таро приложение" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="theme-color" content="#121317" />
+    <link rel="canonical" href="https://www.basilarcana.com/mini-app.html" />
+    <link rel="alternate" hreflang="ru" href="https://www.basilarcana.com/mini-app.html?lang=ru" />
+    <link rel="alternate" hreflang="kk" href="https://www.basilarcana.com/mini-app.html?lang=kz" />
+    <link rel="alternate" hreflang="en" href="https://www.basilarcana.com/mini-app.html?lang=en" />
+    <link rel="alternate" hreflang="x-default" href="https://www.basilarcana.com/mini-app.html" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="BasilArcana" />
+    <meta property="og:title" content="BasilArcana Mini App — what it can do for your readings" />
+    <meta property="og:description" content="A practical and immersive Tarot mini app in Telegram: clearer questions, better interpretations, and fast action steps." />
+    <meta property="og:url" content="https://www.basilarcana.com/mini-app.html" />
+    <meta property="og:image" content="https://basilarcana-assets.b-cdn.net/ba-landing/therealmagic.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="BasilArcana Mini App" />
+    <meta name="twitter:description" content="See what the BasilArcana mini app can do: faster tarot spreads, clearer prompts, and practical guidance." />
+    <meta name="twitter:image" content="https://basilarcana-assets.b-cdn.net/ba-landing/therealmagic.png" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+
+    <style>
+      :root {
+        --text: #f3f3f8;
+        --text-soft: #bbb8ca;
+        --accent: #b889ff;
+        --accent-soft: #e3d2ff;
+        --card: rgba(255, 255, 255, 0.06);
+        --card-border: rgba(184, 137, 255, 0.32);
+      }
+
+      * { box-sizing: border-box; }
+      html, body { margin: 0; min-height: 100%; }
+      body {
+        font-family: "Manrope", sans-serif;
+        color: var(--text);
+        background: radial-gradient(circle at 15% 20%, rgba(184, 137, 255, 0.13), transparent 40%), linear-gradient(150deg, #14151b, #1a1b24 55%, #15161d);
+      }
+
+      .wrap { width: min(1140px, calc(100% - 2rem)); margin: 0 auto; padding: 1.05rem 0 1.6rem; }
+      .topbar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.05rem 0 .75rem; }
+      .logo {
+        font-family: "Space Grotesk", sans-serif;
+        font-weight: 600;
+        letter-spacing: .02em;
+        font-size: clamp(.95rem,1.35vw,1.2rem);
+        color: var(--accent-soft);
+        text-decoration: none;
+        line-height: 1.2;
+      }
+      .langs { display: inline-flex; gap: .45rem; background: rgba(255,255,255,.08); border: 1px solid var(--card-border); border-radius: 999px; padding: .28rem; }
+      .lang-btn {
+        border: 0;
+        background: transparent;
+        color: var(--text-soft);
+        border-radius: 999px;
+        font-family: "Manrope", sans-serif;
+        font-size: .88rem;
+        font-weight: 600;
+        letter-spacing: .03em;
+        padding: .46rem .82rem;
+        line-height: 1;
+        cursor: pointer;
+      }
+      .lang-btn[aria-pressed="true"] { color: #100d17; background: linear-gradient(135deg,#b889ff,#e3d2ff); font-weight: 700; }
+
+      .breadcrumbs { display: flex; align-items: center; gap: .5rem; margin: .15rem 0 .9rem; color: var(--text-soft); font-size: .84rem; }
+      .breadcrumbs a { color: var(--accent-soft); text-decoration: none; border-bottom: 1px solid rgba(227,210,255,.35); }
+      .breadcrumb-sep { opacity: .55; }
+
+      .hero {
+        display: grid;
+        grid-template-columns: 1fr 420px;
+        gap: 1rem;
+        border: 1px solid var(--card-border);
+        border-radius: 20px;
+        background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+        padding: 1.2rem;
+      }
+      .hero h1 { margin: 0; font-family: "Space Grotesk", sans-serif; font-size: clamp(1.5rem,3.2vw,2.4rem); line-height: 1.12; }
+      .hero p { margin: .75rem 0 0; color: var(--text-soft); line-height: 1.62; }
+      .hero-media img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 14px;
+        border: 1px solid var(--card-border);
+        display: block;
+      }
+      .hero-actions { margin-top: .95rem; display: flex; flex-wrap: wrap; gap: .55rem; }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        border-radius: 11px;
+        padding: .58rem .84rem;
+        font-size: .88rem;
+        font-weight: 700;
+      }
+      .btn.primary { color: #0f0d16; background: linear-gradient(135deg, var(--accent), var(--accent-soft)); box-shadow: 0 10px 24px rgba(184,137,255,.3); }
+      .btn.alt { color: var(--text); background: rgba(255,255,255,.08); border: 1px solid var(--card-border); }
+
+      .section { margin-top: 1rem; border: 1px solid var(--card-border); border-radius: 18px; background: var(--card); padding: 1rem; }
+      .section h2 { margin: 0 0 .4rem; font-family: "Space Grotesk", sans-serif; font-size: 1.08rem; }
+      .section-lead { margin: 0; color: var(--text-soft); line-height: 1.6; }
+
+      .features { margin-top: .8rem; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .72rem; }
+      .feature { border: 1px solid var(--card-border); border-radius: 13px; background: rgba(255,255,255,.04); padding: .72rem; }
+      .feature h3 { margin: 0 0 .32rem; font-size: .95rem; color: var(--accent-soft); }
+      .feature p { margin: 0; color: var(--text-soft); line-height: 1.52; font-size: .9rem; }
+
+      .cta-block {
+        margin-top: 1rem;
+        border: 1px solid var(--card-border);
+        border-radius: 18px;
+        background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+        padding: 1rem;
+      }
+      .cta-grid { margin-top: .72rem; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .65rem; }
+      .cta-card {
+        border: 1px solid var(--card-border);
+        border-radius: 14px;
+        background: rgba(255,255,255,.05);
+        padding: .75rem;
+      }
+      .cta-card h3 { margin: .1rem 0 .35rem; font-size: .96rem; }
+      .cta-card p { margin: 0 0 .6rem; color: var(--text-soft); font-size: .87rem; line-height: 1.45; min-height: 4.2em; }
+      .cta-tag { color: var(--accent-soft); font-size: .78rem; }
+      .cta-card .btn { width: 100%; }
+
+      .site-links { display: flex; flex-wrap: wrap; gap: .75rem 1.05rem; margin: 1.2rem 0 .65rem; padding: .66rem .72rem; border: 1px solid var(--card-border); border-radius: 12px; background: rgba(255,255,255,.06); }
+      .site-links a { color: var(--accent-soft); text-decoration: none; border-bottom: 1px solid rgba(227,210,255,.38); font-size: .88rem; font-weight: 700; }
+      .footer { border-top: 1px solid rgba(184,137,255,.3); margin: 0 0 .5rem; padding: .58rem 0 .15rem; color: var(--text-soft); font-size: .82rem; }
+
+      @media (max-width: 980px) {
+        .hero { grid-template-columns: 1fr; }
+        .hero-media { order: -1; }
+        .features { grid-template-columns: 1fr; }
+        .cta-grid { grid-template-columns: 1fr; }
+      }
+    </style>
+
+    <script type="application/ld+json" id="seo-jsonld">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://www.basilarcana.com/#organization","name":"BasilArcana","url":"https://www.basilarcana.com/","logo":"https://cdn.basilarcana.com/sofia/sofia.webp","sameAs":["https://t.me/tarot_arkana_bot","https://t.me/SofiaKnoxx"]},{"@type":"WebSite","@id":"https://www.basilarcana.com/#website","url":"https://www.basilarcana.com/","name":"BasilArcana","publisher":{"@id":"https://www.basilarcana.com/#organization"},"potentialAction":{"@type":"SearchAction","target":"https://www.basilarcana.com/news.html?query={search_term_string}","query-input":"required name=search_term_string"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Главная","item":"https://www.basilarcana.com/"},{"@type":"ListItem","position":2,"name":"BasilArcana Mini App","item":"https://www.basilarcana.com/mini-app.html"}]},{"@type":"WebPage","name":"BasilArcana Mini App","url":"https://www.basilarcana.com/mini-app.html","inLanguage":["ru","en","kk"],"description":"Mini app in Telegram for tarot readings, guided prompt prep, and practical interpretation."}]}</script>
+  </head>
+  <body>
+    <main class="wrap">
+      <header class="topbar">
+        <a class="logo" href="./index.html" data-i18n="topLine">Магический плюс вайб</a>
+        <div class="langs" role="group" aria-label="Language switcher">
+          <button class="lang-btn" data-lang="ru" aria-pressed="true">RU</button>
+          <button class="lang-btn" data-lang="kz" aria-pressed="false">KZ</button>
+          <button class="lang-btn" data-lang="en" aria-pressed="false">EN</button>
+        </div>
+      </header>
+
+      <nav class="breadcrumbs" aria-label="Breadcrumbs">
+        <a class="breadcrumb-home" href="./index.html">Главная</a>
+        <span class="breadcrumb-sep">/</span>
+        <span class="breadcrumb-current" aria-current="page" data-i18n="titleShort">Mini App</span>
+      </nav>
+
+      <section class="hero">
+        <div>
+          <h1 data-i18n="title">Что умеет BasilArcana Mini App</h1>
+          <p data-i18n="lead"></p>
+          <div class="hero-actions">
+            <a class="btn primary" href="https://t.me/tarot_arkana_bot/app" target="_blank" rel="noreferrer" data-i18n="ctaMini"></a>
+            <a class="btn alt" href="https://t.me/tarot_arkana_bot" target="_blank" rel="noreferrer" data-i18n="ctaBot"></a>
+            <a class="btn alt" href="https://t.me/SofiaKnoxx" target="_blank" rel="noreferrer" data-i18n="ctaSofia"></a>
+          </div>
+        </div>
+        <div class="hero-media">
+          <img src="https://basilarcana-assets.b-cdn.net/ba-landing/therealmagic.png" alt="BasilArcana Mini App" loading="eager" />
+        </div>
+      </section>
+
+      <section class="section">
+        <h2 data-i18n="featuresTitle"></h2>
+        <p class="section-lead" data-i18n="featuresLead"></p>
+        <div class="features">
+          <article class="feature"><h3 data-i18n="f1Title"></h3><p data-i18n="f1Desc"></p></article>
+          <article class="feature"><h3 data-i18n="f2Title"></h3><p data-i18n="f2Desc"></p></article>
+          <article class="feature"><h3 data-i18n="f3Title"></h3><p data-i18n="f3Desc"></p></article>
+          <article class="feature"><h3 data-i18n="f4Title"></h3><p data-i18n="f4Desc"></p></article>
+          <article class="feature"><h3 data-i18n="f5Title"></h3><p data-i18n="f5Desc"></p></article>
+          <article class="feature"><h3 data-i18n="f6Title"></h3><p data-i18n="f6Desc"></p></article>
+        </div>
+      </section>
+
+      <section class="cta-block">
+        <h2 data-i18n="ctaBlockTitle"></h2>
+        <p class="section-lead" data-i18n="ctaBlockLead"></p>
+        <div class="cta-grid">
+          <article class="cta-card">
+            <div class="cta-tag">01</div>
+            <h3 data-i18n="botTitle"></h3>
+            <p data-i18n="botDesc"></p>
+            <a class="btn alt" href="https://t.me/tarot_arkana_bot" target="_blank" rel="noreferrer" data-i18n="ctaBot"></a>
+          </article>
+          <article class="cta-card">
+            <div class="cta-tag">02</div>
+            <h3 data-i18n="sofiaTitle"></h3>
+            <p data-i18n="sofiaDesc"></p>
+            <a class="btn alt" href="https://t.me/SofiaKnoxx" target="_blank" rel="noreferrer" data-i18n="ctaSofia"></a>
+          </article>
+          <article class="cta-card">
+            <div class="cta-tag">03</div>
+            <h3 data-i18n="miniTitle"></h3>
+            <p data-i18n="miniDesc"></p>
+            <a class="btn primary" href="https://t.me/tarot_arkana_bot/app" target="_blank" rel="noreferrer" data-i18n="ctaMini"></a>
+          </article>
+        </div>
+      </section>
+
+      <nav class="site-links" aria-label="Site navigation"><a data-nav="news" data-link="news" data-path="./news.html" data-track="nav_news" href="./news.html">Новости</a><a data-nav="academy" data-link="academy" data-path="./academy.html" data-track="nav_academy" href="./academy.html">Академия Таро</a><a data-nav="tarot" data-link="tarot" data-path="./tarot-values.html" data-track="nav_tarot" href="./tarot-values.html">Карты таро «RWS»</a><a data-nav="lenormand" data-link="lenormand" data-path="./lenormand-values.html" data-track="nav_lenormand" href="./lenormand-values.html">Колода Таро Ленорман</a><a data-nav="crowley" data-link="crowley" data-path="./crowley-values.html" data-track="nav_crowley" href="./crowley-values.html">Колода Таро Тота Алистера Кроули</a></nav>
+      <footer class="footer" data-i18n="footer"></footer>
+    </main>
+
+    <script>
+      const LANG_STORAGE_KEY = "basilarcana_lang";
+      const copy = {
+        ru: {
+          topLine: "Магический плюс вайб",
+          titleShort: "Mini App",
+          title: "Что умеет BasilArcana Mini App",
+          lead: "Это не просто экран с картами, а удобный Telegram‑инструмент, который помогает быстро получить расклад, понять его человеческим языком и сразу перейти к действию. Мы сделали интерфейс так, чтобы вам было легко думать, чувствовать и принимать решения без лишнего шума.",
+          ctaMini: "Открыть mini app",
+          ctaBot: "Открыть Telegram-бот",
+          ctaSofia: "Написать Софии",
+          featuresTitle: "Что внутри приложения",
+          featuresLead: "Коротко: меньше хаоса, больше ясности. Подходит и новичкам, и тем, кто уже давно в практике.",
+          f1Title: "Расклады 1/3/5 карт за минуту",
+          f1Desc: "Быстрый сценарий для ежедневных вопросов: отношения, работа, деньги, внутреннее состояние.",
+          f2Title: "Режим медитации перед вопросом",
+          f2Desc: "Если не знаете, как сформулировать запрос, mini app мягко ведет к ясному и точному вопросу.",
+          f3Title: "Понятная трактовка без эзотерического тумана",
+          f3Desc: "Каждый ответ переводится в конкретные шаги: что сделать сегодня, что отложить, что проверить фактами.",
+          f4Title: "История и динамика чтений",
+          f4Desc: "Можно смотреть, как меняются ваши запросы и решения со временем, а не читать каждый расклад изолированно.",
+          f5Title: "Премиум‑атмосфера и быстрый UX",
+          f5Desc: "Интерфейс сделан как ритуал: красиво, спокойно и без перегруза, с доступом в пару тапов.",
+          f6Title: "Переход к живому разбору",
+          f6Desc: "Когда нужен более глубокий взгляд, из mini app легко выйти на личный разбор с Софией.",
+          ctaBlockTitle: "Выберите формат, который подходит вам сейчас",
+          ctaBlockLead: "Можно начать с mini app, перейти в бот или сразу написать Софии для персонального разбора.",
+          botTitle: "Telegram‑бот",
+          botDesc: "Быстрые расклады 1/3/5 карт с четкими формулировками и практическими подсказками.",
+          sofiaTitle: "Личный разбор с Софией",
+          sofiaDesc: "Профессиональная интерпретация раскладов и натальной карты: глубоко и по делу.",
+          miniTitle: "Mini app",
+          miniDesc: "Иммерсивный формат внутри Telegram: карты, логика чтения и мгновенный доступ к инсайтам.",
+          footer: "BasilArcana · RU / KZ / EN · Telegram-first experience"
+        },
+        kz: {
+          topLine: "Магия плюс vibe",
+          titleShort: "Mini App",
+          title: "BasilArcana Mini App не істей алады",
+          lead: "Бұл жай ғана карта экраны емес, Telegram ішіндегі ыңғайлы құрал: жылдам таралым алу, оны түсінікті тілмен оқу және бірден әрекетке көшу. Интерфейс ойды нақтылап, эмоцияны реттеп, артық шуды азайту үшін жасалған.",
+          ctaMini: "Mini app ашу",
+          ctaBot: "Telegram-ботты ашу",
+          ctaSofia: "Софияға жазу",
+          featuresTitle: "Қосымша ішінде не бар",
+          featuresLead: "Қысқаша: аз хаос, көп айқындық. Жаңадан бастағандарға да, тәжірибесі барларға да ыңғайлы.",
+          f1Title: "1/3/5 карталық таралым бір минутта",
+          f1Desc: "Күнделікті сұрақтарға арналған жылдам сценарий: қарым-қатынас, жұмыс, қаржы, ішкі күй.",
+          f2Title: "Сұрақ алдында медитация режимі",
+          f2Desc: "Сұранысты құрастыру қиын болса, mini app нақты әрі түсінікті сұраққа әкеледі.",
+          f3Title: "Түсінікті интерпретация",
+          f3Desc: "Әр жауап нақты әрекетке аударылады: бүгін не істеу, нені тоқтату, нені фактпен тексеру.",
+          f4Title: "Оқылым тарихы мен динамикасы",
+          f4Desc: "Сұрақтар мен шешімдердің уақыт бойынша қалай өзгеретінін бақылауға болады.",
+          f5Title: "Премиум атмосфера және жылдам UX",
+          f5Desc: "Интерфейс ритуал секілді: әдемі, тыныш, артық элементсіз және жылдам қолжетімді.",
+          f6Title: "Жеке талдауға көшу",
+          f6Desc: "Тереңірек талдау керек болса, mini app ішінен бірден Софияға өте аласыз.",
+          ctaBlockTitle: "Қазір сізге ыңғайлы форматты таңдаңыз",
+          ctaBlockLead: "Mini app-тен бастауға, ботқа өтуге немесе бірден Софияға жазуға болады.",
+          botTitle: "Telegram-бот",
+          botDesc: "1/3/5 карталық таралымдар, нақты жауаптар және практикалық бағыт.",
+          sofiaTitle: "Софиямен жеке талдау",
+          sofiaDesc: "Расклад және натал карта бойынша кәсіби интерпретация: терең әрі нақты.",
+          miniTitle: "Mini app",
+          miniDesc: "Telegram ішіндегі иммерсивті формат: карталар, оқу логикасы және жылдам инсайт.",
+          footer: "BasilArcana · RU / KZ / EN · Telegram-first experience"
+        },
+        en: {
+          topLine: "Magic plus vibe",
+          titleShort: "Mini App",
+          title: "What the BasilArcana Mini App can do",
+          lead: "This is more than a card screen. It is a practical Telegram tool that helps you get a spread fast, understand it in plain language, and move into action right away. The interface is built to reduce noise and increase clarity.",
+          ctaMini: "Open mini app",
+          ctaBot: "Open Telegram bot",
+          ctaSofia: "Message Sofia",
+          featuresTitle: "What you get inside",
+          featuresLead: "In short: less chaos, more clarity. Useful for beginners and advanced readers alike.",
+          f1Title: "1/3/5-card spreads in under a minute",
+          f1Desc: "A fast flow for daily decisions: relationships, work, money, and emotional state.",
+          f2Title: "Meditation mode before your question",
+          f2Desc: "When you are unsure what to ask, the mini app guides you toward a precise prompt.",
+          f3Title: "Human interpretation without mystic fog",
+          f3Desc: "Each reading is translated into practical actions: what to do now, what to pause, what to verify.",
+          f4Title: "Reading history and decision dynamics",
+          f4Desc: "Track how your questions and choices evolve over time instead of treating each spread in isolation.",
+          f5Title: "Premium vibe and fast UX",
+          f5Desc: "A calm ritual-style interface with quick access and no overload.",
+          f6Title: "Seamless path to personal reading",
+          f6Desc: "When you need depth, move from the mini app to a direct session with Sofia.",
+          ctaBlockTitle: "Choose the format that fits you right now",
+          ctaBlockLead: "Start in mini app, continue in the bot, or go straight to Sofia for a personal interpretation.",
+          botTitle: "Telegram bot",
+          botDesc: "Fast 1/3/5-card spreads with precise wording and practical guidance.",
+          sofiaTitle: "Personal reading with Sofia",
+          sofiaDesc: "Professional interpretation of spreads and natal charts with depth and clarity.",
+          miniTitle: "Mini app",
+          miniDesc: "An immersive Telegram format with card logic, clear flow, and instant access to insight.",
+          footer: "BasilArcana · RU / KZ / EN · Telegram-first experience"
+        }
+      };
+
+      function withLang(path, lang) {
+        const url = new URL(path, window.location.href);
+        if (lang && lang !== "ru") url.searchParams.set("lang", lang);
+        return `${url.pathname}${url.search}`;
+      }
+
+      function applyLang(lang) {
+        const resolved = copy[lang] ? lang : "ru";
+        const pack = copy[resolved];
+        document.documentElement.lang = resolved === "kz" ? "kk" : resolved;
+
+        document.querySelectorAll("[data-i18n]").forEach((node) => {
+          node.textContent = pack[node.dataset.i18n] || "";
+        });
+        document.querySelectorAll(".lang-btn").forEach((btn) => {
+          btn.setAttribute("aria-pressed", String(btn.dataset.lang === resolved));
+        });
+
+        const home = document.querySelector(".breadcrumb-home");
+        if (home) {
+          const labels = { ru: "Главная", kz: "Басты бет", en: "Home" };
+          home.textContent = labels[resolved] || labels.ru;
+          home.setAttribute("href", withLang("./index.html", resolved));
+        }
+
+        document.querySelector(".logo").setAttribute("href", withLang("./index.html", resolved));
+
+        /* nav-i18n */const navLabelPack={ru:{news:'Новости',academy:'Академия Таро',tarot:'Карты таро «RWS»',lenormand:'Колода Таро Ленорман',crowley:'Колода Таро Тота Алистера Кроули'},kz:{news:'Жаңалықтар',academy:'Таро Академиясы',tarot:'RWS Таро карталары',lenormand:'Ленорман Таро колодасы',crowley:'Алистер Кроули Тот Таро колодасы'},en:{news:'News',academy:'Tarot Academy',tarot:'RWS Tarot Cards',lenormand:'Lenormand Tarot Deck',crowley:'Aleister Crowley Thoth Tarot Deck'}};const langCode=(typeof resolved!=='undefined'&&resolved)||(typeof lang!=='undefined'&&lang)||'ru';const navPack=navLabelPack[langCode]||navLabelPack.ru;document.querySelectorAll('[data-nav]').forEach((node)=>{const key=node.dataset.nav;if(navPack[key])node.textContent=navPack[key];const p=node.dataset.path||node.getAttribute('href')||'';if(!p)return;const u=new URL(p,window.location.href);if(langCode==='ru')u.searchParams.delete('lang');else u.searchParams.set('lang',langCode);node.setAttribute('href',u.pathname+u.search);});
+
+        const url = new URL(window.location.href);
+        if (resolved === "ru") url.searchParams.delete("lang");
+        else url.searchParams.set("lang", resolved);
+        window.history.replaceState({}, "", url.toString());
+        window.localStorage.setItem(LANG_STORAGE_KEY, resolved);
+      }
+
+      document.querySelectorAll(".lang-btn").forEach((btn) => {
+        btn.addEventListener("click", () => applyLang(btn.dataset.lang));
+      });
+
+      const initialLang = new URLSearchParams(window.location.search).get("lang");
+      const storedLang = window.localStorage.getItem(LANG_STORAGE_KEY);
+      applyLang(initialLang || storedLang || "ru");
+    </script>
+  </body>
+</html>
