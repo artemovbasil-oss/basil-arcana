@@ -9,148 +9,152 @@ class AppLocalizationsTr extends AppLocalizations {
   AppLocalizationsTr([String locale = 'tr']) : super(locale);
 
   @override
-  String get appTitle => 'The real magic';
+  String get appTitle => 'Gerçek büyü';
 
   @override
-  String get historyTooltip => 'History';
+  String get historyTooltip => 'Geçmiş';
 
   @override
-  String get settingsTitle => 'Settings';
+  String get settingsTitle => 'Ayarlar';
 
   @override
-  String get settingsPromoTitle => 'Promo code';
+  String get settingsPromoTitle => 'Promosyon kodu';
 
   @override
-  String get settingsPromoDescription => 'Enter a promo code to activate it.';
+  String get settingsPromoDescription =>
+      'Etkinleştirmek için bir promosyon kodu girin.';
 
   @override
-  String get settingsPromoHint => 'Enter promo code';
+  String get settingsPromoHint => 'Promosyon kodunu girin';
 
   @override
-  String get settingsPromoApplyButton => 'Activate promo code';
+  String get settingsPromoApplyButton => 'Promosyon kodunu etkinleştir';
 
   @override
-  String get settingsPromoInvalid => 'Promo code is invalid.';
+  String get settingsPromoInvalid => 'Promosyon kodu geçersiz.';
 
   @override
-  String get settingsPromoApplied => 'Promo code activated successfully.';
+  String get settingsPromoApplied =>
+      'Promosyon kodu başarıyla etkinleştirildi.';
 
   @override
-  String get settingsPromoResetButton => 'Disable promo code';
+  String get settingsPromoResetButton => 'Promosyon kodunu devre dışı bırak';
 
   @override
-  String get settingsPromoResetDone => 'Promo disabled. Back to free version.';
+  String get settingsPromoResetDone =>
+      'Promosyon devre dışı bırakıldı. Ücretsiz sürüme geri dönün.';
 
   @override
-  String get settingsDashboardTitle => 'Your profile dashboard';
+  String get settingsDashboardTitle => 'Profil kontrol paneliniz';
 
   @override
-  String get settingsDashboardTopCardsTitle => 'Top cards by frequency';
+  String get settingsDashboardTopCardsTitle => 'Sıklığa göre en iyi kartlar';
 
   @override
-  String get settingsDashboardTopCardsEmpty => 'No card stats yet.';
+  String get settingsDashboardTopCardsEmpty => 'Henüz kart istatistiği yok.';
 
   @override
-  String get settingsDashboardServicesTitle => 'Paid services';
+  String get settingsDashboardServicesTitle => 'Ücretli hizmetler';
 
   @override
-  String get settingsDashboardServicesEmpty => 'No active paid services.';
+  String get settingsDashboardServicesEmpty => 'Aktif ücretli hizmet yok.';
 
   @override
   String get settingsDashboardServiceUnlimitedNoDate =>
-      'Unlimited energy plan is active.';
+      'Sınırsız enerji planı aktif.';
 
   @override
   String settingsDashboardServiceUnlimitedWithDate(Object date) {
-    return 'Unlimited energy plan is active until $date.';
+    return 'Sınırsız enerji planı $date tarihine kadar etkindir.';
   }
 
   @override
   String settingsDashboardEnergy(Object value) {
-    return 'Current energy: $value';
+    return 'Mevcut enerji: $value';
   }
 
   @override
   String settingsDashboardFreePremium(int count) {
-    return 'Free bonuses (five-card reading / compatibility / natal chart): $count';
+    return 'Ücretsiz bonuslar (beş kart okuma / uyumluluk / doğum haritası): $count';
   }
 
   @override
   String settingsDashboardFreePremiumRemaining(int count) {
-    return 'Free bonuses left: $count';
+    return 'Kalan ücretsiz bonuslar: $count';
   }
 
   @override
   String settingsDashboardInvited(int count) {
-    return 'Invited users: $count';
+    return 'Davet edilen kullanıcılar: $count';
   }
 
   @override
-  String get settingsDashboardShareButton => 'Share personal referral link';
+  String get settingsDashboardShareButton =>
+      'Kişisel yönlendirme bağlantısını paylaşın';
 
   @override
   String get settingsDashboardLoadError =>
-      'Could not load dashboard data right now.';
+      'Kontrol paneli verileri şu anda yüklenemiyor.';
 
   @override
-  String get languageLabel => 'Language';
+  String get languageLabel => 'Dil';
 
   @override
-  String get languageEnglish => 'English (EN)';
+  String get languageEnglish => 'İngilizce (EN)';
 
   @override
-  String get languageRussian => 'Russian (RU)';
+  String get languageRussian => 'Rusça (RU)';
 
   @override
-  String get languageKazakh => 'Kazakh (KZ)';
+  String get languageKazakh => 'Kazakça (KZ)';
 
   @override
-  String get deckLabel => 'Deck';
+  String get deckLabel => 'Deste';
 
   @override
-  String get deckAll => 'All decks';
+  String get deckAll => 'Tüm desteler';
 
   @override
-  String get deckMajor => 'Major Arcana';
+  String get deckMajor => 'Büyük Arkana';
 
   @override
-  String get deckWands => 'Wands';
+  String get deckWands => 'Değnekler';
 
   @override
-  String get deckCups => 'Cups';
+  String get deckCups => 'Kupalar';
 
   @override
-  String get deckSwords => 'Swords';
+  String get deckSwords => 'Kılıçlar';
 
   @override
-  String get deckPentacles => 'Pentacles';
+  String get deckPentacles => 'Tılsımlar';
 
   @override
   String get deckTarotRiderWaite => 'Rider-Waite Tarot';
 
   @override
-  String get deckLenormand => 'Lenormand deck';
+  String get deckLenormand => 'Lenormand güvertesi';
 
   @override
-  String get deckCrowley => 'Aleister Crowley deck';
+  String get deckCrowley => 'Aleister Crowley destesi';
 
   @override
-  String get deckAllName => 'All decks';
+  String get deckAllName => 'Tüm desteler';
 
   @override
-  String get deckMajorName => 'Major Arcana';
+  String get deckMajorName => 'Büyük Arkana';
 
   @override
-  String get deckWandsName => 'Wands';
+  String get deckWandsName => 'Değnekler';
 
   @override
-  String get deckCupsName => 'Cups';
+  String get deckCupsName => 'Kupalar';
 
   @override
-  String get deckSwordsName => 'Swords';
+  String get deckSwordsName => 'Kılıçlar';
 
   @override
-  String get deckPentaclesName => 'Pentacles';
+  String get deckPentaclesName => 'Tılsımlar';
 
   @override
   String get deckLenormandName => 'Lenormand';
@@ -159,676 +163,683 @@ class AppLocalizationsTr extends AppLocalizations {
   String get deckCrowleyName => 'Crowley';
 
   @override
-  String get deckDebugLogLabel => 'Debug: log Wands asset path';
+  String get deckDebugLogLabel =>
+      'Hata ayıklama: Wands varlık yolunu günlüğe kaydet';
 
   @override
-  String get homeTagline => 'Clarity, in cards.';
+  String get homeTagline => 'Kartlarda netlik.';
 
   @override
   String get homeSubtitle =>
-      'Ask a question and explore the threads that shape your next step';
+      'Bir soru sorun ve bir sonraki adımınızı şekillendirecek konuları keşfedin';
 
   @override
-  String get homeDescription => 'Catch the magic vibe';
+  String get homeDescription => 'Büyülü havayı yakalayın';
 
   @override
-  String get homeQuestionPlaceholder => 'Type your question here…';
+  String get homeQuestionPlaceholder => 'Sorunuzu buraya yazın…';
 
   @override
-  String get homeQuestionLabel => 'What\'s your question?';
+  String get homeQuestionLabel => 'Sorunuz nedir?';
 
   @override
-  String get homeQuestionHint => 'Type what you want clarity on';
+  String get homeQuestionHint => 'Netlik istediğiniz şeyi yazın';
 
   @override
-  String get homeClearQuestionTooltip => 'Clear question';
+  String get homeClearQuestionTooltip => 'Soruyu temizle';
 
   @override
-  String get homeTryPrompt => 'Try one of these prompts:';
+  String get homeTryPrompt => 'Bu istemlerden birini deneyin:';
 
   @override
-  String get homeRecentQueriesButton => 'Recent prompts';
+  String get homeRecentQueriesButton => 'Son istemler';
 
   @override
-  String get homeExample1 => 'Where should I place my energy?';
+  String get homeExample1 => 'Enerjimi nereye yönlendirmeliyim?';
 
   @override
-  String get homeExample2 => 'What is the hidden lesson here?';
+  String get homeExample2 => 'Buradaki gizli ders nedir?';
 
   @override
-  String get homeExample3 => 'What needs patience from me?';
+  String get homeExample3 => 'Benden sabır gerektiren ne?';
 
   @override
-  String get homeQuickTopicRelationships => 'Relationships';
+  String get homeQuickTopicRelationships => 'İlişkiler';
 
   @override
-  String get homeQuickTopicMoney => 'Money';
+  String get homeQuickTopicMoney => 'Para';
 
   @override
-  String get homeQuickTopicFuture => 'Future';
+  String get homeQuickTopicFuture => 'Gelecek';
 
   @override
-  String get homeQuickTopicGrowth => 'Growth point';
+  String get homeQuickTopicGrowth => 'Büyüme noktası';
 
   @override
-  String get homeQuickTopicWeatherTomorrow => 'Tomorrow\'s weather';
+  String get homeQuickTopicWeatherTomorrow => 'Yarının hava durumu';
 
   @override
-  String get homeContinueButton => 'Continue to your spread';
+  String get homeContinueButton => 'Açılımına devam et';
 
   @override
-  String get homeAllCardsButton => 'All cards';
+  String get homeAllCardsButton => 'Tüm kartlar';
 
   @override
-  String get homeAllCardsDescription => 'Touch the magic of the cards';
+  String get homeAllCardsDescription => 'Kartların büyüsüne dokunun';
 
   @override
-  String get cardsTitle => 'All cards';
+  String get cardsTitle => 'Tüm kartlar';
 
   @override
-  String get cardsEmptyTitle => 'No cards to show yet';
+  String get cardsEmptyTitle => 'Henüz gösterilecek kart yok';
 
   @override
-  String get cardsEmptySubtitle => 'Please try again in a moment.';
+  String get cardsEmptySubtitle => 'Lütfen kısa bir süre sonra tekrar deneyin.';
 
   @override
-  String get cardsLoadError => 'Cards data missing or invalid.';
+  String get cardsLoadError => 'Kart verileri eksik veya geçersiz.';
 
   @override
-  String get dataLoadTitle => 'Unable to reach the card library.';
+  String get dataLoadTitle => 'Kart kitaplığına erişilemiyor.';
 
   @override
-  String get dataLoadRetry => 'Retry';
+  String get dataLoadRetry => 'Yeniden dene';
 
   @override
-  String get dataLoadUseCache => 'Use cached data';
+  String get dataLoadUseCache => 'Önbelleğe alınmış verileri kullan';
 
   @override
-  String get dataLoadSpreadsError => 'Unable to load spreads right now.';
+  String get dataLoadSpreadsError => 'Şu anda spreadler yüklenemiyor.';
 
   @override
-  String get cardsDetailTitle => 'Card details';
+  String get cardsDetailTitle => 'Kart ayrıntıları';
 
   @override
-  String get cardTitleFieldTitle => 'Title';
+  String get cardTitleFieldTitle => 'Başlık';
 
   @override
-  String get cardTagsTitle => 'Tags';
+  String get cardTagsTitle => 'Etiketler';
 
   @override
-  String get cardDescriptionTitle => 'Description';
+  String get cardDescriptionTitle => 'Tanım';
 
   @override
-  String get cardKeywordsTitle => 'Keywords';
+  String get cardKeywordsTitle => 'Anahtar Kelimeler';
 
   @override
-  String get cardGeneralTitle => 'General meaning';
+  String get cardGeneralTitle => 'Genel anlam';
 
   @override
-  String get cardDetailedTitle => 'Detailed description';
+  String get cardDetailedTitle => 'Ayrıntılı açıklama';
 
   @override
-  String get cardFunFactTitle => 'Fun fact';
+  String get cardFunFactTitle => 'Eğlenceli gerçek';
 
   @override
-  String get cardStatsTitle => 'Stats';
+  String get cardStatsTitle => 'İstatistikler';
 
   @override
-  String get cardDetailsFallback => 'Details unavailable.';
+  String get cardDetailsFallback => 'Ayrıntılar mevcut değil.';
 
   @override
-  String get statLuck => 'Luck';
+  String get statLuck => 'Şans';
 
   @override
-  String get statPower => 'Power';
+  String get statPower => 'Güç';
 
   @override
-  String get statLove => 'Love';
+  String get statLove => 'Aşk';
 
   @override
-  String get statClarity => 'Clarity';
+  String get statClarity => 'Netlik';
 
   @override
-  String get cardsDetailKeywordsTitle => 'Keywords';
+  String get cardsDetailKeywordsTitle => 'Anahtar Kelimeler';
 
   @override
-  String get cardsDetailMeaningTitle => 'General meaning';
+  String get cardsDetailMeaningTitle => 'Genel anlam';
 
   @override
-  String get cardsDetailDescriptionTitle => 'Detailed description';
+  String get cardsDetailDescriptionTitle => 'Ayrıntılı açıklama';
 
   @override
-  String get cardsDetailFunFactTitle => 'Fun fact';
+  String get cardsDetailFunFactTitle => 'Eğlenceli gerçek';
 
   @override
-  String get cardsDetailStatsTitle => 'Stats';
+  String get cardsDetailStatsTitle => 'İstatistikler';
 
   @override
-  String get cardsDetailStatLuck => 'Luck';
+  String get cardsDetailStatLuck => 'Şans';
 
   @override
-  String get cardsDetailStatPower => 'Power';
+  String get cardsDetailStatPower => 'Güç';
 
   @override
-  String get cardsDetailStatLove => 'Love';
+  String get cardsDetailStatLove => 'Aşk';
 
   @override
-  String get cardsDetailStatClarity => 'Clarity';
+  String get cardsDetailStatClarity => 'Netlik';
 
   @override
-  String get videoTapToPlay => 'Tap to play';
+  String get videoTapToPlay => 'Oynamak için dokunun';
 
   @override
-  String get cdnHealthTitle => 'CDN health';
+  String get cdnHealthTitle => 'CDN sağlığı';
 
   @override
-  String get cdnHealthAssetsBaseLabel => 'Assets base URL';
+  String get cdnHealthAssetsBaseLabel => 'Öğeler temel URL\'si';
 
   @override
-  String get cdnHealthLocaleLabel => 'Locale';
+  String get cdnHealthLocaleLabel => 'Yerel ayar';
 
   @override
-  String get cdnHealthCardsFileLabel => 'Cards JSON';
+  String get cdnHealthCardsFileLabel => 'Kartlar JSON';
 
   @override
-  String get cdnHealthSpreadsFileLabel => 'Spreads JSON';
+  String get cdnHealthSpreadsFileLabel => 'Açılımlar JSON';
 
   @override
-  String get cdnHealthVideoIndexLabel => 'Video index';
+  String get cdnHealthVideoIndexLabel => 'Video dizini';
 
   @override
-  String get cdnHealthLastFetchLabel => 'Last fetch';
+  String get cdnHealthLastFetchLabel => 'Son getirme';
 
   @override
-  String get cdnHealthLastCacheLabel => 'Last cache hit';
+  String get cdnHealthLastCacheLabel => 'Son önbellek isabeti';
 
   @override
-  String get cdnHealthTestFetch => 'Test fetch cards/spreads';
+  String get cdnHealthTestFetch => 'Getirme kartlarını/spread\'leri test edin';
 
   @override
-  String get cdnHealthStatusIdle => 'Idle';
+  String get cdnHealthStatusIdle => 'Boşta';
 
   @override
-  String get cdnHealthStatusSuccess => 'Fetch succeeded';
+  String get cdnHealthStatusSuccess => 'Getirme başarılı oldu';
 
   @override
-  String get cdnHealthStatusFailed => 'Fetch failed';
+  String get cdnHealthStatusFailed => 'Getirme başarısız oldu';
 
   @override
-  String get spreadTitle => 'Choose a spread';
+  String get spreadTitle => 'Bir açılım seç';
 
   @override
-  String get spreadOneCardTitle => 'One card';
+  String get spreadOneCardTitle => 'Bir kart';
 
   @override
   String get spreadOneCardSubtitle =>
-      'A quick mirror for the moment. One card — one clear focus.';
+      'Şimdilik hızlı bir ayna. Tek kart – tek net odak.';
 
   @override
-  String get spreadThreeCardTitle => 'Three cards';
+  String get spreadThreeCardTitle => 'Üç kart';
 
   @override
   String get spreadThreeCardSubtitle =>
-      'A simple arc of your story. Three cards — context and direction.';
+      'Hikayenizin basit bir akışı. Üç kart – bağlam ve yön.';
 
   @override
-  String get spreadFiveCardTitle => 'Five cards';
+  String get spreadFiveCardTitle => 'Beş kart';
 
   @override
   String get spreadFiveCardSubtitle =>
-      'A deeper look at your path. Five cards — layered context and guidance.';
+      'Yolunuza daha derin bir bakış. Beş kart — katmanlı bağlam ve rehberlik.';
 
   @override
   String get spreadLenormandOneCardSubtitle =>
-      'A practical signal for right now. One card — one clear indicator.';
+      'Şu an için pratik bir sinyal. Bir kart — tek bir açık gösterge.';
 
   @override
   String get spreadLenormandThreeCardSubtitle =>
-      'A cause-to-outcome line. Three cards — trigger, development, nearest result.';
+      'Neden-sonuç çizgisi. Üç kart – tetikleme, geliştirme, en yakın sonuç.';
 
   @override
   String get spreadLenormandFiveCardSubtitle =>
-      'A living chain of events. Five cards — each next symbol refines the previous one.';
+      'Yaşayan bir olaylar zinciri. Beş kart — sonraki her sembol bir öncekini geliştirir.';
 
   @override
-  String get spreadFivePosition1 => 'Core energy';
+  String get spreadFivePosition1 => 'Çekirdek enerjisi';
 
   @override
-  String get spreadFivePosition2 => 'What helps';
+  String get spreadFivePosition2 => 'Ne yardımcı olur?';
 
   @override
-  String get spreadFivePosition3 => 'What blocks';
+  String get spreadFivePosition3 => 'Hangi bloklar';
 
   @override
-  String get spreadFivePosition4 => 'Hidden factor';
+  String get spreadFivePosition4 => 'Gizli faktör';
 
   @override
-  String get spreadFivePosition5 => 'Outcome and advice';
+  String get spreadFivePosition5 => 'Sonuç ve tavsiye';
 
   @override
-  String get spreadLabelPast => 'Past';
+  String get spreadLabelPast => 'Geçmiş';
 
   @override
-  String get spreadLabelPresent => 'Present';
+  String get spreadLabelPresent => 'Şimdi';
 
   @override
-  String get spreadLabelFuture => 'Future';
+  String get spreadLabelFuture => 'Gelecek';
 
   @override
   String spreadCardCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count cards',
-      one: '1 card',
+      other: '$count kart',
+      one: '1 kart',
     );
     return '$_temp0';
   }
 
   @override
   String spreadLoadError(Object error) {
-    return 'Error: $error';
+    return 'Hata: $error';
   }
 
   @override
-  String get shuffleTitle => 'Shuffle the deck';
+  String get shuffleTitle => 'Desteyi karıştır';
 
   @override
-  String get shuffleSubtitle => 'Shuffling the deck';
+  String get shuffleSubtitle => 'Desteyi karıştırma';
 
   @override
-  String get shuffleReadingSubtitle => 'Reading your spread';
+  String get shuffleReadingSubtitle => 'Açılımın okunuyor';
 
   @override
-  String get shuffleDrawButton => 'Draw cards';
+  String get shuffleDrawButton => 'Kart çek';
 
   @override
-  String get resultTitle => 'Your reading';
+  String get resultTitle => 'Okumanız';
 
   @override
-  String get resultStatusAiReading => 'Basil is interpreting…';
+  String get resultStatusAiReading => 'Basil yorumluyor…';
 
   @override
-  String get resultRequestIdUnavailable => 'Request ID unavailable';
+  String get resultRequestIdUnavailable => 'İstek kimliği kullanılamıyor';
 
   @override
   String resultRequestIdLabel(Object id) {
-    return 'Request ID: $id';
+    return 'İstek Kimliği: $id';
   }
 
   @override
-  String get resultSnackSaved => 'Reading saved.';
+  String get resultSnackSaved => 'Okuma kaydedildi.';
 
   @override
-  String get resultSectionArcaneSnapshot => 'Arcane Snapshot';
+  String get resultSectionArcaneSnapshot => 'Gizemli Anlık Görüntü';
 
   @override
-  String get resultSectionWhy => 'Why this reading';
+  String get resultSectionWhy => 'Neden bu okuma';
 
   @override
-  String get resultSectionAction => 'Action step (next 24–72h)';
+  String get resultSectionAction => 'Eylem adımı (sonraki 24-72 saat)';
 
   @override
   String resultLenormandStep(int step, int total) {
-    return 'Lenormand step $step of $total';
+    return 'Lenormand adımı $step / $total';
   }
 
   @override
-  String get resultLenormandBuildsOn => 'Builds on';
+  String get resultLenormandBuildsOn => 'Üzerine inşa edilmiştir';
 
   @override
-  String get resultReferralTitle => 'Referral bonus';
+  String get resultReferralTitle => 'Tavsiye bonusu';
 
   @override
   String get resultReferralBody =>
-      'Share your personal link with friends and get 20 free premium five-card readings, 20 compatibility tests, and 20 natal charts for every new user who joins from your link.';
+      'Kişisel bağlantınızı arkadaşlarınızla paylaşın ve bağlantınızdan katılan her yeni kullanıcı için 20 ücretsiz premium beş kart okuması, 20 uyumluluk testi ve 20 doğum haritası kazanın.';
 
   @override
-  String get resultReferralButton => 'Share link';
+  String get resultReferralButton => 'Bağlantıyı paylaş';
 
   @override
   String get resultReferralCopied =>
-      'Referral link copied. Send it in Telegram.';
+      'Yönlendirme bağlantısı kopyalandı. Telegram\'da gönderin.';
 
   @override
   String get resultReferralShareMessage =>
-      'Discover the real magic in Telegram — stylish Tarot clarity for love, money, and your next move.';
+      'Telegram\'daki gerçek büyüyü keşfedin; aşk, para ve bir sonraki hamleniz için şık Tarot netliği.';
 
   @override
-  String get resultDeepPrompt => 'Want details on relationships and career?';
+  String get resultDeepPrompt =>
+      'İlişkiler ve kariyer hakkında ayrıntılı bilgi mi istiyorsunuz?';
 
   @override
-  String get resultDeepNotNow => 'Not now';
+  String get resultDeepNotNow => 'Şimdi değil';
 
   @override
-  String get resultDeepShowDetails => 'Yes';
+  String get resultDeepShowDetails => 'Evet';
 
   @override
   String get resultDeepRetryMessage =>
-      'The deeper reading slipped away. Want to try again?';
+      'Daha derin okumalar kayıp gitti. Tekrar denemek ister misin?';
 
   @override
-  String get resultDeepCancel => 'Cancel';
+  String get resultDeepCancel => 'İptal etmek';
 
   @override
-  String get resultDeepTryAgain => 'Try again';
+  String get resultDeepTryAgain => 'Tekrar deneyin';
 
   @override
-  String get resultDeepTypingLabel => 'Oracle is typing…';
+  String get resultDeepTypingLabel => 'Kâhin yazıyor…';
 
   @override
-  String get resultDeepRelationshipsHeading => 'Relationships';
+  String get resultDeepRelationshipsHeading => 'İlişkiler';
 
   @override
-  String get resultDeepCareerHeading => 'Career';
+  String get resultDeepCareerHeading => 'Kariyer';
 
   @override
   String cardsDrawnCount(int count) {
-    return 'Drawn $count×';
+    return '$count× çizilmiş';
   }
 
   @override
-  String get resultDetailsTitle => 'Details';
+  String get resultDetailsTitle => 'Detaylar';
 
   @override
-  String get resultSaveButton => 'Save reading';
+  String get resultSaveButton => 'Okumayı kaydet';
 
   @override
-  String get resultNewButton => 'New reading';
+  String get resultNewButton => 'Yeni okuma';
 
   @override
-  String get resultWantMoreButton => 'Want more';
+  String get resultWantMoreButton => 'Daha fazlası';
 
   @override
   String get resultStatusUnauthorized =>
-      'Service unavailable — try again in a moment.';
+      'Hizmet kullanılamıyor; bir süre sonra tekrar deneyin.';
 
   @override
-  String get resultStatusNoInternet => 'No internet — showing offline reading';
+  String get resultStatusNoInternet =>
+      'İnternet yok — çevrimdışı okuma gösteriliyor';
 
   @override
-  String get resultStatusTimeout => 'The oracle paused — tap to retry.';
+  String get resultStatusTimeout =>
+      'Oracle duraklatıldı; yeniden denemek için dokunun.';
 
   @override
   String get resultStatusTooManyAttempts =>
-      'Too many attempts — please wait and try again.';
+      'Çok fazla deneme yapıldı. Lütfen bekleyin ve tekrar deneyin.';
 
   @override
   String resultStatusServerUnavailableWithStatus(int status) {
-    return 'Oracle unavailable ($status) — try again in a moment.';
+    return 'Oracle kullanılamıyor ($status) — birazdan tekrar deneyin.';
   }
 
   @override
   String get resultStatusServerUnavailable =>
-      'Oracle unavailable — try again in a moment.';
+      'Oracle kullanılamıyor; birazdan tekrar deneyin.';
 
   @override
   String get resultStatusMissingApiBaseUrl =>
-      'Configuration error — missing API base URL.';
+      'Yapılandırma hatası — eksik API temel URL\'si.';
 
   @override
   String get resultStatusUnexpectedResponse =>
-      'Unexpected response — tap to retry.';
+      'Beklenmeyen yanıt — yeniden denemek için dokunun.';
 
   @override
   String get resultStatusInterpretationUnavailable =>
-      'AI interpretation unavailable — tap to retry.';
+      'Yapay zeka yorumu kullanılamıyor; yeniden denemek için dokunun.';
 
   @override
-  String get oracleWaitingTitle => 'The Oracle is listening…';
+  String get oracleWaitingTitle => 'Oracle dinliyor…';
 
   @override
   String get oracleWaitingSubtitle =>
-      'Hold steady while the cards settle into focus.';
+      'Kartlar odağa yerleşene kadar sabit durun.';
 
   @override
-  String get oracleTimeoutTitle => 'The Oracle is silent…';
+  String get oracleTimeoutTitle => 'Oracle sessiz…';
 
   @override
-  String get oracleTimeoutBody => 'Sometimes clarity needs another breath.';
+  String get oracleTimeoutBody => 'Bazen netlik bir nefes daha ister.';
 
   @override
-  String get actionCancel => 'Cancel';
+  String get actionCancel => 'İptal etmek';
 
   @override
-  String get actionTryAgain => 'Try again';
+  String get actionTryAgain => 'Tekrar deneyin';
 
   @override
-  String get actionApply => 'Apply';
+  String get actionApply => 'Uygula';
 
   @override
-  String get historyTitle => 'Reading history';
+  String get historyTitle => 'Okuma geçmişi';
 
   @override
-  String get historyEmpty => 'History is empty for now.';
+  String get historyEmpty => 'Geçmiş şimdilik boş.';
 
   @override
-  String get historyClearButton => 'Clear history';
+  String get historyClearButton => 'Geçmişi temizle';
 
   @override
-  String get historyDetailTitle => 'Reading detail';
+  String get historyDetailTitle => 'Okuma detayı';
 
   @override
   String get historyTldrTitle => 'TL;DR';
 
   @override
-  String get queryHistoryTitle => 'Recent prompts';
+  String get queryHistoryTitle => 'Son istemler';
 
   @override
-  String get queryHistoryEmpty => 'No previous prompts yet.';
+  String get queryHistoryEmpty => 'Henüz önceki istem yok.';
 
   @override
-  String get queryHistoryLoadError => 'Could not load prompt history.';
+  String get queryHistoryLoadError => 'İstem geçmişi yüklenemedi.';
 
   @override
-  String get queryHistoryRetry => 'Retry';
+  String get queryHistoryRetry => 'Yeniden dene';
 
   @override
-  String get offlineFallbackReflection => 'reflection';
+  String get offlineFallbackReflection => 'yansıma';
 
   @override
   String offlineFallbackSummary(Object question, Object keywords) {
-    return 'For “$question”, the reading centers on $keywords.';
+    return '“$question” için okuma $keywords üzerinde yoğunlaşır.';
   }
 
   @override
   String offlineFallbackAdviceLabel(Object advice) {
-    return 'Advice: $advice';
+    return 'Tavsiye: $advice';
   }
 
   @override
   String get offlineFallbackWhy =>
-      'Each position reflects a facet of your question, and the card themes align with where attention can be placed now.';
+      'Her pozisyon sorunuzun bir yönünü yansıtır ve kart temaları dikkatin şu anda odaklanabileceği yere uygundur.';
 
   @override
   String get offlineFallbackAction =>
-      'Choose one small, practical step that honors the advice in the cards.';
+      'Kartlardaki tavsiyeyi dikkate alan küçük, pratik bir adım seçin.';
 
   @override
-  String get moreFeaturesTitle => 'More features';
+  String get moreFeaturesTitle => 'Daha fazla özellik';
 
   @override
-  String get natalChartTitle => 'Natal chart';
+  String get natalChartTitle => 'Doğum haritası';
 
   @override
   String get natalChartDescription =>
-      'Get a personal astrological overview based on your birth data.';
+      'Doğum verilerinize dayalı kişisel astrolojik genel bakış alın.';
 
   @override
-  String get natalChartFreeLabel => 'Free';
+  String get natalChartFreeLabel => 'Ücretsiz';
 
   @override
-  String get natalChartButton => 'I want';
+  String get natalChartButton => 'İstiyorum';
 
   @override
-  String get natalChartBirthDateLabel => 'Date of birth';
+  String get natalChartBirthDateLabel => 'Doğum tarihi';
 
   @override
   String get natalChartBirthDateHint => 'YYYY-MM-DD';
 
   @override
-  String get natalChartBirthDateError => 'Please enter your birth date.';
+  String get natalChartBirthDateError => 'Lütfen doğum tarihinizi giriniz.';
 
   @override
-  String get natalChartBirthTimeLabel => 'Time of birth';
+  String get natalChartBirthTimeLabel => 'Doğum saati';
 
   @override
   String get natalChartBirthTimeHint => 'HH:MM';
 
   @override
-  String get natalChartBirthTimeHelper => 'If unsure, use 12:00 (noon).';
+  String get natalChartBirthTimeHelper =>
+      'Emin değilseniz 12:00\'ı (öğlen) kullanın.';
 
   @override
-  String get natalChartGenerateButton => 'Generate';
+  String get natalChartGenerateButton => 'Oluştur';
 
   @override
-  String get natalChartLoading => 'Creating your natal chart…';
+  String get natalChartLoading => 'Doğum haritanız oluşturuluyor…';
 
   @override
-  String get natalChartResultTitle => 'Your interpretation';
+  String get natalChartResultTitle => 'Yorumunuz';
 
   @override
   String get natalChartError =>
-      'Couldn’t generate the natal chart. Please try again.';
+      'Doğum haritası oluşturulamadı. Lütfen tekrar deneyin.';
 
   @override
   String energyLabelWithPercent(int value) {
-    return 'Oracle energy: $value%';
+    return 'Oracle enerjisi: %$value';
   }
 
   @override
-  String get energyLabel => 'Oracle energy';
+  String get energyLabel => 'Oracle enerjisi';
 
   @override
   String get energyInfoTooltip =>
-      'Energy is spent on actions and restores over time';
+      'Enerji eylemlere harcanır ve zamanla yenilenir';
 
   @override
-  String get energyRecoveryReady => 'Fully recharged.';
+  String get energyRecoveryReady => 'Tamamen şarj edildi.';
 
   @override
-  String get energyRecoveryLessThanMinute => 'Full in less than a minute.';
+  String get energyRecoveryLessThanMinute => 'Bir dakikadan kısa sürede doldu.';
 
   @override
   String energyRecoveryInMinutes(int minutes) {
-    return 'Full in $minutes min.';
+    return '$minutes dk. içinde doldu.';
   }
 
   @override
   String energyActionCost(int value) {
-    return 'Action cost: $value%';
+    return 'İşlem maliyeti: %$value';
   }
 
   @override
-  String get energyTopUpButton => 'Top up';
+  String get energyTopUpButton => 'Yükle';
 
   @override
-  String get energyTopUpTitle => 'Feed your arcane flow';
+  String get energyTopUpTitle => 'Gizemli akışınızı besleyin';
 
   @override
   String get energyTopUpDescription =>
-      'Your energy keeps the reading clear and deep. Choose your rhythm and stay in the magic.';
+      'Enerjiniz okumayı net ve derin tutar. Ritiminizi seçin ve büyünün içinde kalın.';
 
   @override
   String get energyTopUpDescriptionCompact =>
-      'Energy is spent on actions and recovers over time. You can wait for free recharge or boost it instantly with Stars.';
+      'Enerji eylemlere harcanır ve zamanla iyileşir. Ücretsiz şarjı bekleyebilir veya Yıldızlarla anında artırabilirsiniz.';
 
   @override
-  String get energyCostsTitle => 'Energy cost per action';
+  String get energyCostsTitle => 'Eylem başına enerji maliyeti';
 
   @override
-  String get energyCostReading => 'Reading';
+  String get energyCostReading => 'Okuma';
 
   @override
-  String get energyCostDeepDetails => 'Deep details';
+  String get energyCostDeepDetails => 'Derin ayrıntılar';
 
   @override
-  String get energyCostNatalChart => 'Natal chart';
+  String get energyCostNatalChart => 'Doğum haritası';
 
   @override
-  String get energyCostCompatibility => 'Love compatibility';
+  String get energyCostCompatibility => 'Aşk uyumluluğu';
 
   @override
-  String get energyNextFreeReady => 'Your next free attempt is ready.';
+  String get energyNextFreeReady => 'Bir sonraki ücretsiz denemeniz hazır.';
 
   @override
   String energyNextFreeIn(String value) {
-    return 'Next free attempt in: $value';
+    return 'Sonraki ücretsiz deneme tarihi: $value';
   }
 
   @override
-  String get energyPackSmall => 'Buy +25% energy';
+  String get energyPackSmall => '+%25 enerji satın alın';
 
   @override
-  String get energyPackMedium => 'Buy +50% energy';
+  String get energyPackMedium => '+%50 enerji satın alın';
 
   @override
-  String get energyPackFull => 'Top up to 100%';
+  String get energyPackFull => '%100\'e kadar yükleme';
 
   @override
-  String get energyPackWeekUnlimited => 'Unlimited for 1 week — 99 ⭐';
+  String get energyPackWeekUnlimited => '1 hafta boyunca sınırsız — 99 ⭐';
 
   @override
-  String get energyPackMonthUnlimited => 'Unlimited for 1 month — 499 ⭐';
+  String get energyPackMonthUnlimited => '1 ay boyunca sınırsız — 499 ⭐';
 
   @override
-  String get energyPackYearUnlimited => 'Unlimited for 1 year — 4999 ⭐';
+  String get energyPackYearUnlimited => '1 yıl boyunca sınırsız — 4999 ⭐';
 
   @override
   String energyTopUpSuccess(int value) {
-    return 'Energy restored by $value%.';
+    return 'Enerji %$value oranında yenilendi.';
   }
 
   @override
-  String get energyUnlimitedActivated => 'Unlimited energy activated.';
+  String get energyUnlimitedActivated => 'Sınırsız enerji etkinleştirildi.';
 
   @override
-  String get energyTopUpProcessing => 'Opening payment...';
+  String get energyTopUpProcessing => 'Ödeme açılıyor...';
 
   @override
   String get energyTopUpOnlyInTelegram =>
-      'Top up with Telegram Stars is available only inside Telegram.';
+      'Telegram Yıldızları ile yükleme yalnızca Telegram\'da mümkündür.';
 
   @override
-  String get energyTopUpPaymentCancelled => 'Payment was cancelled.';
+  String get energyTopUpPaymentCancelled => 'Ödeme iptal edildi.';
 
   @override
-  String get energyTopUpPaymentPending => 'Payment is pending confirmation.';
+  String get energyTopUpPaymentPending => 'Ödeme onayı bekleniyor.';
 
   @override
-  String get energyTopUpPaymentFailed => 'Payment failed. Try again.';
+  String get energyTopUpPaymentFailed =>
+      'Ödeme başarısız oldu. Tekrar deneyin.';
 
   @override
   String get energyTopUpServiceUnavailable =>
-      'Payment is temporarily unavailable.';
+      'Ödeme geçici olarak kullanılamıyor.';
 
   @override
   String energyInsufficientForAction(int value) {
-    return 'Not enough energy for this action ($value%).';
+    return 'Bu işlem için yeterli enerji yok (%$value).';
   }
 
   @override
-  String get professionalReadingTitle => 'Professional reading';
+  String get professionalReadingTitle => 'Profesyonel okuma';
 
   @override
   String get professionalReadingDescription =>
-      'Deep interpretation of your spread by an oracle.';
+      'Açılımının bir uzman tarafından derinlemesine yorumu.';
 
   @override
-  String get professionalReadingButton => 'Choose plan';
+  String get professionalReadingButton => 'Planı seç';
 
   @override
   String get professionalReadingOpenBotMessage =>
-      'Open the bot to see subscription plans.';
+      'Abonelik planlarını görmek için botu açın.';
 
   @override
-  String get professionalReadingOpenBotAction => 'Open bot';
+  String get professionalReadingOpenBotAction => 'Botu aç';
 
   @override
-  String get professionalReadingOpenBotSnackbar => 'Open bot to choose a plan.';
+  String get professionalReadingOpenBotSnackbar =>
+      'Bir plan seçmek için botu açın.';
 
   @override
-  String get languageFrench => 'Français (FR)';
+  String get languageFrench => 'Fransızca (FR)';
 
   @override
   String get languageTurkish => 'Türkçe (TR)';
