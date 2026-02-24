@@ -63,7 +63,7 @@
     <section class="gallery" id="gallery"></section>
     <p class="status" id="status"></p>
 
-    <nav class="site-links" aria-label="Навигация сайта"><a href="./news.html">Новости</a><a href="./academy.html">Академия Таро</a><a href="./tarot-values.html">Карты таро «RWS»</a><a href="./lenormand-values.html">Колода Таро Ленорман</a><a href="./crowley-values.html">Колода Таро Тота Алистера Кроули</a></nav>
+    <nav class="site-links" aria-label="Site navigation"><a data-nav="news" data-link="news" data-path="./news.html" data-track="nav_news" href="./news.html">Новости</a><a data-nav="academy" data-link="academy" data-path="./academy.html" data-track="nav_academy" href="./academy.html">Академия Таро</a><a data-nav="tarot" data-link="tarot" data-path="./tarot-values.html" data-track="nav_tarot" href="./tarot-values.html">Карты таро «RWS»</a><a data-nav="lenormand" data-link="lenormand" data-path="./lenormand-values.html" data-track="nav_lenormand" href="./lenormand-values.html">Колода Таро Ленорман</a><a data-nav="crowley" data-link="crowley" data-path="./crowley-values.html" data-track="nav_crowley" href="./crowley-values.html">Колода Таро Тота Алистера Кроули</a></nav>
     <footer class="footer" data-i18n="footer"></footer>
   </main>
 
@@ -82,7 +82,7 @@
       const resolved=ui[lang]?lang:'ru';const pack=ui[resolved];
       document.documentElement.lang=resolved==='kz'?'kk':resolved;
       document.querySelectorAll('[data-i18n]').forEach((n)=>{const k=n.dataset.i18n;if(pack[k])n.textContent=pack[k];});
-      document.querySelectorAll('.lang-btn').forEach((b)=>b.setAttribute('aria-pressed',String(b.dataset.lang===resolved)));
+      document.querySelectorAll('.lang-btn').forEach((b)=>b.setAttribute('aria-pressed',String(b.dataset.lang===resolved)));/* nav-i18n */const navLabelPack={ru:{news:'Новости',academy:'Академия Таро',tarot:'Карты таро «RWS»',lenormand:'Колода Таро Ленорман',crowley:'Колода Таро Тота Алистера Кроули'},kz:{news:'Жаңалықтар',academy:'Таро Академиясы',tarot:'RWS Таро карталары',lenormand:'Ленорман Таро колодасы',crowley:'Алистер Кроули Тот Таро колодасы'},en:{news:'News',academy:'Tarot Academy',tarot:'RWS Tarot Cards',lenormand:'Lenormand Tarot Deck',crowley:'Aleister Crowley Thoth Tarot Deck'}};const langCode=(typeof resolved!=='undefined'&&resolved)||(typeof lang!=='undefined'&&lang)||'ru';const navPack=navLabelPack[langCode]||navLabelPack.ru;document.querySelectorAll('[data-nav]').forEach((node)=>{const key=node.dataset.nav;if(navPack[key])node.textContent=navPack[key];const p=node.dataset.path||node.getAttribute('href')||'';if(!p)return;const u=new URL(p,window.location.href);if(langCode==='ru')u.searchParams.delete('lang');else u.searchParams.set('lang',langCode);node.setAttribute('href',u.pathname+u.search);});
       const home=document.querySelector('.breadcrumb-home');if(home){const h={ru:'Главная',kz:'Басты бет',en:'Home'};home.textContent=h[resolved]||h.ru;home.href=withLang('./index.html',resolved);}const cur=document.querySelector('.breadcrumb-current');if(cur)cur.textContent=pack.title;
       
       document.querySelectorAll('[data-link="tarot"]').forEach((n)=>n.href=withLang('./tarot-values.html',resolved));
