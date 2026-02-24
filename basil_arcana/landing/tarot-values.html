@@ -1,113 +1,22 @@
 <!doctype html>
-<html lang="ru">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Карты Таро: значения и трактовки · BasilArcana</title>
-    <meta name="description" content="Полный каталог карт Таро BasilArcana с переходом на отдельные страницы каждой карты." />
-    <meta name="robots" content="index, follow, max-image-preview:large" />
-    <meta name="theme-color" content="#111218" />
-    <link rel="canonical" href="https://www.basilarcana.com/tarot-values.html" />
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content="Карты Таро: значения и трактовки" />
-    <meta property="og:description" content="Полный каталог карт Таро BasilArcana с переходом на отдельные страницы каждой карты." />
-    <meta property="og:url" content="https://www.basilarcana.com/tarot-values.html" />
-    <meta property="og:image" content="https://cdn.basilarcana.com/cards/major/major_01_magician.webp" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Карты Таро: значения и трактовки" />
-    <meta name="twitter:description" content="Полный каталог карт Таро BasilArcana с переходом на отдельные страницы каждой карты." />
-    <meta name="twitter:image" content="https://cdn.basilarcana.com/cards/major/major_01_magician.webp" />
-    <style>
-      :root { --text:#f3f3f8; --text-soft:#bbb8ca; --accent-soft:#e3d2ff; --card:rgba(255,255,255,.06); --card-border:rgba(184,137,255,.32); }
-      * { box-sizing: border-box; } html, body { margin: 0; min-height: 100%; }
-      body { font-family: "Manrope", sans-serif; color: var(--text); background: radial-gradient(circle at 15% 20%, rgba(184,137,255,0.12), transparent 40%), linear-gradient(150deg, #14151b, #1a1b24 55%, #15161d); }
-      .wrap { width: min(1120px, calc(100% - 2rem)); margin: 0 auto; padding: 1.05rem 0 1.6rem; }
-      .topbar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0 0 0.75rem; }
-      .logo { font-family: "Space Grotesk", sans-serif; font-weight: 600; letter-spacing: 0.02em; font-size: clamp(0.95rem, 1.35vw, 1.2rem); color: var(--accent-soft); text-decoration: none; }
-      .langs { display: inline-flex; gap: 0.45rem; background: rgba(255,255,255,0.08); border: 1px solid var(--card-border); border-radius: 999px; padding: 0.28rem; }
-      .lang-btn { border: 0; background: transparent; color: var(--text-soft); border-radius: 999px; font: inherit; font-weight: 600; letter-spacing: 0.03em; padding: 0.46rem 0.82rem; cursor: pointer; }
-      .lang-btn[aria-pressed="true"] { color: #100d17; background: linear-gradient(135deg, #b889ff, #e3d2ff); }
-      .breadcrumbs{display:flex;align-items:center;gap:.5rem;margin:.15rem 0 .9rem;color:var(--text-soft);font-size:.84rem;line-height:1.3;}
-      .breadcrumbs a{color:var(--accent-soft);text-decoration:none;border-bottom:1px solid rgba(227,210,255,.35);}
-      .hero { border:1px solid var(--card-border); border-radius:20px; background:var(--card); padding:1.2rem; }
-      h1 { margin:0; font-family:"Space Grotesk",sans-serif; font-size:clamp(1.5rem,3vw,2.4rem); }
-      .lead { margin:.7rem 0 0; color:var(--text-soft); line-height:1.58; max-width:74ch; }
-      .gallery { margin-top:1rem; display:grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap:.9rem; }
-      .tarot-card { border:1px solid var(--card-border); border-radius:16px; background:var(--card); padding:.68rem; text-decoration:none; color:inherit; display:block; transition:transform .2s ease; }
-      .tarot-card:hover { transform:translateY(-3px); }
-      .tarot-card img { width:100%; aspect-ratio:3/5; object-fit:cover; border-radius:12px; display:block; }
-      .tarot-card h3 { margin:.72rem 0 0; font-size:1rem; line-height:1.22; min-height:2.4em; }
-      .tarot-card p { margin:.42rem 0 0; color:var(--text-soft); font-size:.9rem; line-height:1.4; min-height:2.8em; }
-      .site-links { display:flex; flex-wrap:wrap; gap:.75rem 1.05rem; margin:1.25rem 0 .65rem; padding:.66rem .72rem; border:1px solid var(--card-border); border-radius:12px; background:rgba(255,255,255,.06); }
-      .site-links a { color:var(--accent-soft); text-decoration:none; border-bottom:1px solid rgba(227,210,255,.38); font-size:.88rem; font-weight:700; }
-      .footer{border-top:1px solid rgba(184,137,255,.3);margin:0 0 .5rem;padding:.58rem 0 .15rem;color:var(--text-soft);font-size:.82rem;}
-      @media(max-width:960px){ .gallery{grid-template-columns:repeat(3,minmax(0,1fr));} }
-      @media(max-width:560px){ .gallery{grid-template-columns:repeat(2,minmax(0,1fr));} }
-    </style>
-  </head>
-  <body>
-    <main class="wrap">
-      <header class="topbar"><a class="logo" href="./index.html" data-i18n="topLine"></a><div class="langs" role="group" aria-label="Language switcher"><button class="lang-btn" data-lang="ru" aria-pressed="true">RU</button><button class="lang-btn" data-lang="kz" aria-pressed="false">KZ</button><button class="lang-btn" data-lang="en" aria-pressed="false">EN</button></div></header>
-      <nav class="breadcrumbs" aria-label="Breadcrumbs"><a class="breadcrumb-home" href="./index.html">Главная</a><span class="breadcrumb-sep">/</span><a class="breadcrumb-section" href="./index.html" data-i18n="section"></a><span class="breadcrumb-sep">/</span><span class="breadcrumb-current" aria-current="page"></span></nav>
-      <section class="hero"><h1 data-i18n="title"></h1><p class="lead" data-i18n="lead"></p></section>
-      <section class="gallery" id="gallery"></section>
-      <nav class="site-links" aria-label="Внутренние ссылки"><a href="./news.html" data-i18n="navNews" data-link="news"></a><a href="./tarot-values.html" data-i18n="navTarot" data-link="tarot"></a><a href="./lenormand-values.html" data-i18n="navLenormand" data-link="lenormand"></a><a href="./academy.html" data-i18n="navAcademy" data-link="academy"></a></nav>
-      <footer class="footer" data-i18n="footer"></footer>
-    </main>
-    <script>
-      const LANG_STORAGE_KEY = "basilarcana_lang";
-      const deck = "tarot";
-      const ui = {
-        ru: { topLine:"Магический плюс вайб", section:"Разделы", title:"Карты Таро: значения и трактовки", lead:"Выберите карту Таро и откройте отдельную SEO-страницу с расширенной интерпретацией, фактами и аналитическими рекомендациями.", navNews:"Новости", navTarot:"Карты Таро", navLenormand:"Колода Ленорман", navAcademy:"Академия Таро", footer:"BasilArcana · RU / KZ / EN · Telegram-first experience" },
-        kz: { topLine:"Магия плюс vibe", section:"Бөлімдер", title:"Таро карталары: мағынасы мен түсіндірмесі", lead:"Таро картасын таңдап, кеңейтілген интерпретациясы бар жеке SEO-бетке өтіңіз.", navNews:"Жаңалықтар", navTarot:"Таро карталары", navLenormand:"Ленорман колодасы", navAcademy:"Таро академиясы", footer:"BasilArcana · RU / KZ / EN · Telegram-first experience" },
-        en: { topLine:"Magic plus vibe", section:"Sections", title:"Tarot Cards: meanings and interpretations", lead:"Choose any Tarot card to open its dedicated SEO page with extended interpretation and practical guidance.", navNews:"News", navTarot:"Tarot cards", navLenormand:"Lenormand deck", navAcademy:"Tarot Academy", footer:"BasilArcana · RU / KZ / EN · Telegram-first experience" }
-      };
-      const cardAlias = {major_10_wheel: 'major_10_wheel_of_fortune'};
-      const lenoSlugAlias = {stars: 'star', crossroads: 'crossroad'};
-      function withLang(path, lang){ const u = new URL(path, window.location.href); if (lang && lang!=='ru') u.searchParams.set('lang', lang); return `${u.pathname}${u.search}`; }
-      function imageUrl(key, card){
-        if (key.startsWith('lenormand_')) {
-          if (card.imageUrl) return `https://basilarcana-assets.b-cdn.net/${card.imageUrl.replace(/^\/+/, '')}`;
-          let tail = key.replace(/^lenormand_\d+_/, '');
-          tail = lenoSlugAlias[tail] || tail;
-          return `https://basilarcana-assets.b-cdn.net/cards/lenormand/ln_${tail}.webp`;
-        }
-        if (card.imageUrl) return `https://cdn.basilarcana.com/${card.imageUrl.replace(/^\/+/, '')}`;
-        const suit = key.split('_')[0];
-        const resolved = cardAlias[key] || key;
-        return `https://cdn.basilarcana.com/cards/${suit}/${resolved}.webp`;
-      }
-      function cardHref(key, lang){ return withLang(`./card-${key.replaceAll('_','-')}.html`, lang); }
-      async function loadCards(lang){
-        const res = await fetch(`https://cdn.basilarcana.com/data/cards_${lang}.json`, {cache:'no-store'});
-        if (!res.ok) throw new Error('cards failed');
-        const payload = await res.json();
-        return Object.entries(payload).filter(([,c]) => deck==='lenormand' ? c.deck==='lenormand' : c.deck!=='lenormand');
-      }
-      async function applyLang(lang){
-        const resolved = ui[lang] ? lang : 'ru';
-        const pack = ui[resolved];
-        document.documentElement.lang = resolved==='kz' ? 'kk' : resolved;
-        document.querySelectorAll('[data-i18n]').forEach((n)=>{ const k=n.dataset.i18n; if (pack[k]) n.textContent=pack[k]; });
-        document.querySelectorAll('.lang-btn').forEach((b)=>b.setAttribute('aria-pressed', String(b.dataset.lang===resolved)));
-        const home = document.querySelector('.breadcrumb-home'); if (home) { const h={ru:'Главная',kz:'Басты бет',en:'Home'}; home.textContent=h[resolved]||h.ru; home.href = withLang('./index.html', resolved); }
-        const current = document.querySelector('.breadcrumb-current'); if (current) current.textContent = pack.title;
-        document.querySelectorAll('[data-link="news"]').forEach((n)=>n.href=withLang('./news.html', resolved));
-        document.querySelectorAll('[data-link="tarot"]').forEach((n)=>n.href=withLang('./tarot-values.html', resolved));
-        document.querySelectorAll('[data-link="lenormand"]').forEach((n)=>n.href=withLang('./lenormand-values.html', resolved));
-        document.querySelectorAll('[data-link="academy"]').forEach((n)=>n.href=withLang('./academy.html', resolved));
-        const cards = await loadCards(resolved);
-        const gallery = document.getElementById('gallery'); gallery.innerHTML='';
-        cards.forEach(([key, card]) => {
-          const a = document.createElement('a'); a.className='tarot-card'; a.href = cardHref(key, resolved);
-          a.innerHTML = `<img src="${imageUrl(key, card)}" loading="lazy" alt="${card.title || key}" /><h3>${card.title || key}</h3><p>${(card.meaning?.general || card.description || '').slice(0,120)}</p>`;
-          gallery.appendChild(a);
-        });
-        const url = new URL(window.location.href); if (resolved==='ru') url.searchParams.delete('lang'); else url.searchParams.set('lang', resolved); window.history.replaceState({}, '', url.toString()); window.localStorage.setItem(LANG_STORAGE_KEY, resolved);
-      }
-      document.querySelectorAll('.lang-btn').forEach((b)=>b.addEventListener('click', ()=>applyLang(b.dataset.lang)));
-      const initialLang = new URLSearchParams(window.location.search).get('lang'); const storedLang = window.localStorage.getItem(LANG_STORAGE_KEY);
-      applyLang(initialLang || storedLang || 'ru').catch(()=>{});
-    </script>
-  </body>
-</html>
+<html lang="ru"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Каталог классических карт Таро Rider-Waite-Smith · BasilArcana</title><meta name="description" content="Полный каталог классической системы RWS: значения карт, переход на детальную страницу каждой карты и практическая интерпретация." /><meta name="robots" content="index, follow, max-image-preview:large" />
+<meta name="theme-color" content="#111218" /><link rel="canonical" href="https://www.basilarcana.com/tarot-values.html" />
+<meta property="og:type" content="website" /><meta property="og:title" content="Каталог классических карт Таро Rider-Waite-Smith" /><meta property="og:description" content="Полный каталог классической системы RWS: значения карт, переход на детальную страницу каждой карты и практическая интерпретация." />
+<meta property="og:url" content="https://www.basilarcana.com/tarot-values.html" /><meta property="og:image" content="https://cdn.basilarcana.com/cards/major/major_01_magician.webp" />
+<meta name="twitter:card" content="summary_large_image" /><meta name="twitter:title" content="Каталог классических карт Таро Rider-Waite-Smith" /><meta name="twitter:description" content="Полный каталог классической системы RWS: значения карт, переход на детальную страницу каждой карты и практическая интерпретация." /><meta name="twitter:image" content="https://cdn.basilarcana.com/cards/major/major_01_magician.webp" />
+<style>:root{--text:#f3f3f8;--text-soft:#bbb8ca;--accent:#b889ff;--accent-soft:#e3d2ff;--card:rgba(255,255,255,.06);--card-border:rgba(184,137,255,.32);}*{box-sizing:border-box}html,body{margin:0;min-height:100%}body{font-family:"Manrope",sans-serif;color:var(--text);background:radial-gradient(circle at 15% 20%, rgba(184,137,255,.14), transparent 42%),linear-gradient(150deg,#14151b,#1a1b24 55%,#15161d)}.wrap{width:min(1180px,calc(100% - 2rem));margin:0 auto;padding:1rem 0 1.6rem}.topbar{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:0 0 .8rem}.logo{font-family:"Space Grotesk",sans-serif;font-weight:600;letter-spacing:.02em;font-size:clamp(.95rem,1.35vw,1.2rem);color:var(--accent-soft);text-decoration:none}.langs{display:inline-flex;gap:.45rem;background:rgba(255,255,255,.08);border:1px solid var(--card-border);border-radius:999px;padding:.28rem}.lang-btn{border:0;background:transparent;color:var(--text-soft);border-radius:999px;font:inherit;font-weight:600;letter-spacing:.03em;padding:.46rem .82rem;cursor:pointer}.lang-btn[aria-pressed="true"]{color:#100d17;background:linear-gradient(135deg,#b889ff,#e3d2ff)}.breadcrumbs{display:flex;align-items:center;gap:.5rem;margin:.1rem 0 .9rem;color:var(--text-soft);font-size:.84rem}.breadcrumbs a{color:var(--accent-soft);text-decoration:none;border-bottom:1px solid rgba(227,210,255,.35)}.hero{border:1px solid var(--card-border);border-radius:20px;background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.04));padding:1.2rem}h1{margin:0;font-family:"Space Grotesk",sans-serif;font-size:clamp(1.45rem,2.9vw,2.25rem);line-height:1.15}.lead{margin:.55rem 0 0;color:var(--text-soft);line-height:1.63;max-width:80ch}.gallery{margin-top:1rem;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.9rem}.card{border:1px solid var(--card-border);border-radius:16px;background:rgba(255,255,255,.06);padding:.68rem;text-decoration:none;color:inherit;display:block;transition:transform .2s ease,border-color .2s ease}.card:hover{transform:translateY(-3px);border-color:rgba(227,210,255,.58)}.card img{width:100%;aspect-ratio:3/5;object-fit:cover;border-radius:12px;display:block}.card h3{margin:.72rem 0 0;font-size:1rem;line-height:1.22;min-height:2.4em}.card p{margin:.42rem 0 0;color:var(--text-soft);font-size:.9rem;line-height:1.4;min-height:2.8em}.site-links{display:flex;flex-wrap:wrap;gap:.75rem 1.05rem;margin:1.2rem 0 .65rem;padding:.66rem .72rem;border:1px solid var(--card-border);border-radius:12px;background:rgba(255,255,255,.06)}.site-links a{color:var(--accent-soft);text-decoration:none;border-bottom:1px solid rgba(227,210,255,.38);font-size:.88rem;font-weight:700}.footer{border-top:1px solid rgba(184,137,255,.3);margin:0 0 .5rem;padding:.58rem 0 .15rem;color:var(--text-soft);font-size:.82rem}.status{margin-top:.7rem;color:var(--text-soft);font-size:.9rem}@media(max-width:960px){.gallery{grid-template-columns:repeat(3,minmax(0,1fr));}}@media(max-width:560px){.gallery{grid-template-columns:repeat(2,minmax(0,1fr));}}</style>
+</head><body><main class="wrap"><header class="topbar"><a class="logo" href="./index.html" data-i18n="topLine"></a><div class="langs" role="group" aria-label="Language switcher"><button class="lang-btn" data-lang="ru" aria-pressed="true">RU</button><button class="lang-btn" data-lang="kz" aria-pressed="false">KZ</button><button class="lang-btn" data-lang="en" aria-pressed="false">EN</button></div></header>
+<nav class="breadcrumbs" aria-label="Breadcrumbs"><a class="breadcrumb-home" href="./index.html">Главная</a><span class="breadcrumb-sep">/</span><a class="breadcrumb-section" href="./index.html" data-i18n="section"></a><span class="breadcrumb-sep">/</span><span class="breadcrumb-current" aria-current="page"></span></nav>
+<section class="hero"><h1 data-i18n="title"></h1><p class="lead" data-i18n="lead"></p></section><section class="gallery" id="gallery"></section><p class="status" id="status"></p>
+<nav class="site-links" aria-label="Внутренние ссылки"><a href="./news.html" data-i18n="navNews" data-link="news"></a><a href="./tarot-values.html" data-i18n="navTarot" data-link="tarot"></a><a href="./lenormand-values.html" data-i18n="navLenormand" data-link="lenormand"></a><a href="./academy.html" data-i18n="navAcademy" data-link="academy"></a></nav><footer class="footer" data-i18n="footer"></footer></main>
+<script>
+const LANG_STORAGE_KEY='basilarcana_lang';const deck='tarot';
+const ui={ru:{topLine:'Магический плюс вайб',section:'Разделы',title:'Каталог классических карт Таро Rider-Waite-Smith',lead:'Классический каталог RWS: все арканы и масти с переходом на отдельные страницы карт, где собраны значения, аналитическая трактовка и практические выводы.',loading:'Загружаем карты...',error:'Не удалось загрузить карты.',navNews:'Новости',navTarot:'Карты Таро',navLenormand:'Колода Ленорман',navAcademy:'Академия Таро',footer:'BasilArcana · RU / KZ / EN · Telegram-first experience'},kz:{topLine:'Магия плюс vibe',section:'Бөлімдер',title:'Классикалық Rider-Waite-Smith Таро каталогы',lead:'Классикалық RWS каталогы: әр карта жеке бетке өтеді, онда мағына, аналитикалық интерпретация және практикалық қорытынды берілген.',loading:'Карталар жүктелуде...',error:'Карталарды жүктеу мүмкін болмады.',navNews:'Жаңалықтар',navTarot:'Таро карталары',navLenormand:'Ленорман колодасы',navAcademy:'Таро академиясы',footer:'BasilArcana · RU / KZ / EN · Telegram-first experience'},en:{topLine:'Magic plus vibe',section:'Sections',title:'Classic Rider-Waite-Smith Tarot Catalog',lead:'A complete RWS catalog with dedicated pages for each card: meanings, analytical interpretation, and practical takeaways.',loading:'Loading cards...',error:'Failed to load cards.',navNews:'News',navTarot:'Tarot cards',navLenormand:'Lenormand deck',navAcademy:'Tarot Academy',footer:'BasilArcana · RU / KZ / EN · Telegram-first experience'}};
+const cardAlias={major_10_wheel:'major_10_wheel_of_fortune'};const lenoSlugAlias={stars:'star',crossroads:'crossroad'};const embeddedLenormand={};
+function withLang(path,lang){const u=new URL(path,window.location.href);if(lang&&lang!=='ru')u.searchParams.set('lang',lang);return `${u.pathname}${u.search}`;}
+function imageUrl(key,card){if(key.startsWith('lenormand_')){if(card.imageUrl)return `https://basilarcana-assets.b-cdn.net/${card.imageUrl.replace(/^\/+/, '')}`;let tail=key.replace(/^lenormand_\d+_/,'');tail=lenoSlugAlias[tail]||tail;return `https://basilarcana-assets.b-cdn.net/cards/lenormand/ln_${tail}.webp`;}if(card.imageUrl)return `https://cdn.basilarcana.com/${card.imageUrl.replace(/^\/+/, '')}`;const suit=key.split('_')[0];const resolved=cardAlias[key]||key;return `https://cdn.basilarcana.com/cards/${suit}/${resolved}.webp`;}
+async function loadCards(lang){if(deck==='lenormand'){const local=embeddedLenormand[lang]||embeddedLenormand.ru||{};const entries=Object.entries(local).filter(([k,v])=>k.startsWith('lenormand_')&&v&&typeof v==='object');if(entries.length)return entries;}const res=await fetch(`https://cdn.basilarcana.com/data/cards_${lang}.json`,{cache:'no-store'});if(!res.ok)throw new Error('cards');const payload=await res.json();return Object.entries(payload).filter(([,c])=>deck==='lenormand'?c.deck==='lenormand':c.deck!=='lenormand');}
+async function applyLang(lang){const resolved=ui[lang]?lang:'ru';const pack=ui[resolved];document.documentElement.lang=resolved==='kz'?'kk':resolved;document.querySelectorAll('[data-i18n]').forEach((n)=>{const k=n.dataset.i18n;if(pack[k])n.textContent=pack[k];});document.querySelectorAll('.lang-btn').forEach((b)=>b.setAttribute('aria-pressed',String(b.dataset.lang===resolved)));const home=document.querySelector('.breadcrumb-home');if(home){const h={ru:'Главная',kz:'Басты бет',en:'Home'};home.textContent=h[resolved]||h.ru;home.href=withLang('./index.html',resolved);}const cur=document.querySelector('.breadcrumb-current');if(cur)cur.textContent=pack.title;document.querySelectorAll('[data-link="news"]').forEach((n)=>n.href=withLang('./news.html',resolved));document.querySelectorAll('[data-link="tarot"]').forEach((n)=>n.href=withLang('./tarot-values.html',resolved));document.querySelectorAll('[data-link="lenormand"]').forEach((n)=>n.href=withLang('./lenormand-values.html',resolved));document.querySelectorAll('[data-link="academy"]').forEach((n)=>n.href=withLang('./academy.html',resolved));const status=document.getElementById('status');status.textContent=pack.loading;try{const cards=await loadCards(resolved);const gallery=document.getElementById('gallery');gallery.innerHTML='';cards.forEach(([key,card])=>{const a=document.createElement('a');a.className='card';a.href=withLang(`./card-${key.replaceAll('_','-')}.html`,resolved);a.innerHTML=`<img src="${imageUrl(key,card)}" alt="${card.title||key}" loading="lazy" /><h3>${card.title||key}</h3><p>${(card.meaning?.general||card.description||'').slice(0,120)}</p>`;gallery.appendChild(a);});status.textContent='';}catch(e){status.textContent=pack.error;}const url=new URL(window.location.href);if(resolved==='ru')url.searchParams.delete('lang');else url.searchParams.set('lang',resolved);window.history.replaceState({},'',url.toString());window.localStorage.setItem(LANG_STORAGE_KEY,resolved);}
+document.querySelectorAll('.lang-btn').forEach((b)=>b.addEventListener('click',()=>applyLang(b.dataset.lang)));const initialLang=new URLSearchParams(window.location.search).get('lang');const storedLang=window.localStorage.getItem(LANG_STORAGE_KEY);applyLang(initialLang||storedLang||'ru');
+</script></body></html>
