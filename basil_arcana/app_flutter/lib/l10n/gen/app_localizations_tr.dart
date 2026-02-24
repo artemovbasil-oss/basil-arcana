@@ -89,8 +89,7 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String get settingsDashboardShareButton =>
-      'Kişisel yönlendirme bağlantısını paylaşın';
+  String get settingsDashboardShareButton => 'Kişisel davet bağlantını paylaş';
 
   @override
   String get settingsDashboardLoadError =>
@@ -164,7 +163,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get deckDebugLogLabel =>
-      'Hata ayıklama: Wands varlık yolunu günlüğe kaydet';
+      'Hata ayıklama: Değnekler varlık yolunu kaydet';
 
   @override
   String get homeTagline => 'Kartlarda netlik.';
@@ -249,7 +248,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get dataLoadUseCache => 'Önbelleğe alınmış verileri kullan';
 
   @override
-  String get dataLoadSpreadsError => 'Şu anda spreadler yüklenemiyor.';
+  String get dataLoadSpreadsError => 'Açılımlar şu anda yüklenemiyor.';
 
   @override
   String get cardsDetailTitle => 'Kart ayrıntıları';
@@ -342,22 +341,22 @@ class AppLocalizationsTr extends AppLocalizations {
   String get cdnHealthVideoIndexLabel => 'Video dizini';
 
   @override
-  String get cdnHealthLastFetchLabel => 'Son getirme';
+  String get cdnHealthLastFetchLabel => 'Son indirme';
 
   @override
   String get cdnHealthLastCacheLabel => 'Son önbellek isabeti';
 
   @override
-  String get cdnHealthTestFetch => 'Getirme kartlarını/spread\'leri test edin';
+  String get cdnHealthTestFetch => 'Kart ve açılım indirmesini test et';
 
   @override
   String get cdnHealthStatusIdle => 'Boşta';
 
   @override
-  String get cdnHealthStatusSuccess => 'Getirme başarılı oldu';
+  String get cdnHealthStatusSuccess => 'İndirme başarılı';
 
   @override
-  String get cdnHealthStatusFailed => 'Getirme başarısız oldu';
+  String get cdnHealthStatusFailed => 'İndirme başarısız';
 
   @override
   String get spreadTitle => 'Bir açılım seç';
@@ -530,7 +529,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String cardsDrawnCount(int count) {
-    return '$count× çizilmiş';
+    return '$count kez çekildi';
   }
 
   @override
@@ -555,7 +554,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get resultStatusTimeout =>
-      'Oracle duraklatıldı; yeniden denemek için dokunun.';
+      'Kâhin durakladı; yeniden denemek için dokunun.';
 
   @override
   String get resultStatusTooManyAttempts =>
@@ -563,12 +562,12 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String resultStatusServerUnavailableWithStatus(int status) {
-    return 'Oracle kullanılamıyor ($status) — birazdan tekrar deneyin.';
+    return 'Kâhin şu anda kullanılamıyor ($status); birazdan tekrar deneyin.';
   }
 
   @override
   String get resultStatusServerUnavailable =>
-      'Oracle kullanılamıyor; birazdan tekrar deneyin.';
+      'Kâhin şu anda kullanılamıyor; birazdan tekrar deneyin.';
 
   @override
   String get resultStatusMissingApiBaseUrl =>
@@ -583,23 +582,23 @@ class AppLocalizationsTr extends AppLocalizations {
       'Yapay zeka yorumu kullanılamıyor; yeniden denemek için dokunun.';
 
   @override
-  String get oracleWaitingTitle => 'Oracle dinliyor…';
+  String get oracleWaitingTitle => 'Kâhin dinliyor…';
 
   @override
   String get oracleWaitingSubtitle =>
       'Kartlar odağa yerleşene kadar sabit durun.';
 
   @override
-  String get oracleTimeoutTitle => 'Oracle sessiz…';
+  String get oracleTimeoutTitle => 'Kâhin sessiz…';
 
   @override
   String get oracleTimeoutBody => 'Bazen netlik bir nefes daha ister.';
 
   @override
-  String get actionCancel => 'İptal etmek';
+  String get actionCancel => 'İptal';
 
   @override
-  String get actionTryAgain => 'Tekrar deneyin';
+  String get actionTryAgain => 'Tekrar dene';
 
   @override
   String get actionApply => 'Uygula';
@@ -702,11 +701,11 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String energyLabelWithPercent(int value) {
-    return 'Oracle enerjisi: %$value';
+    return 'Kâhin enerjisi: %$value';
   }
 
   @override
-  String get energyLabel => 'Oracle enerjisi';
+  String get energyLabel => 'Kâhin enerjisi';
 
   @override
   String get energyInfoTooltip =>
@@ -746,7 +745,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get energyCostsTitle => 'Eylem başına enerji maliyeti';
 
   @override
-  String get energyCostReading => 'Okuma';
+  String get energyCostReading => 'Tiraj';
 
   @override
   String get energyCostDeepDetails => 'Derin ayrıntılar';
@@ -822,7 +821,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get professionalReadingDescription =>
-      'Açılımının bir uzman tarafından derinlemesine yorumu.';
+      'Açılımının bir uzman tarafından derinlemesine yorumlanması.';
 
   @override
   String get professionalReadingButton => 'Planı seç';

@@ -113,7 +113,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get deckLabel => 'Jeu';
 
   @override
-  String get deckAll => 'Tous les decks';
+  String get deckAll => 'Tous les jeux';
 
   @override
   String get deckMajor => 'Arcanes majeurs';
@@ -140,7 +140,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get deckCrowley => 'Jeu Aleister Crowley';
 
   @override
-  String get deckAllName => 'Tous les decks';
+  String get deckAllName => 'Tous les jeux';
 
   @override
   String get deckMajorName => 'Arcanes majeurs';
@@ -165,7 +165,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get deckDebugLogLabel =>
-      'Débogage : enregistrer le chemin de l\'actif Wands';
+      'Debug : journaliser le chemin de la ressource Bâtons';
 
   @override
   String get homeTagline => 'Clarté, dans les cartes.';
@@ -191,10 +191,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get homeClearQuestionTooltip => 'Effacer la question';
 
   @override
-  String get homeTryPrompt => 'Essayez l\'une de ces invites :';
+  String get homeTryPrompt => 'Essayez l une de ces questions :';
 
   @override
-  String get homeRecentQueriesButton => 'Invites récentes';
+  String get homeRecentQueriesButton => 'Questions récentes';
 
   @override
   String get homeExample1 => 'Où dois-je placer mon énergie ?';
@@ -352,7 +352,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String get cdnHealthLastCacheLabel => 'Dernier accès au cache';
 
   @override
-  String get cdnHealthTestFetch => 'Test de récupération de cartes/spreads';
+  String get cdnHealthTestFetch =>
+      'Tester le chargement des cartes et des tirages';
 
   @override
   String get cdnHealthStatusIdle => 'Inactif';
@@ -446,7 +447,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get shuffleSubtitle => 'Mélanger le jeu';
 
   @override
-  String get shuffleReadingSubtitle => 'Lire votre spread';
+  String get shuffleReadingSubtitle => 'Lecture de votre tirage';
 
   @override
   String get shuffleDrawButton => 'Tirer des cartes';
@@ -480,7 +481,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String resultLenormandStep(int step, int total) {
-    return 'Lenormand étape $step de $total';
+    return 'Étape Lenormand $step sur $total';
   }
 
   @override
@@ -548,7 +549,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get resultNewButton => 'Nouvelle lecture';
 
   @override
-  String get resultWantMoreButton => 'Je veux plus';
+  String get resultWantMoreButton => 'En savoir plus';
 
   @override
   String get resultStatusUnauthorized =>
@@ -626,14 +627,14 @@ class AppLocalizationsFr extends AppLocalizations {
   String get historyTldrTitle => 'TL;DR';
 
   @override
-  String get queryHistoryTitle => 'Invites récentes';
+  String get queryHistoryTitle => 'Questions récentes';
 
   @override
-  String get queryHistoryEmpty => 'Aucune invite précédente pour l\'instant.';
+  String get queryHistoryEmpty => 'Aucune question précédente pour le moment.';
 
   @override
   String get queryHistoryLoadError =>
-      'Impossible de charger l historique des requêtes.';
+      'Impossible de charger l historique des questions.';
 
   @override
   String get queryHistoryRetry => 'Réessayer';
@@ -710,11 +711,11 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String energyLabelWithPercent(int value) {
-    return 'Énergie oracle : $value %';
+    return 'Énergie de l Oracle : $value %';
   }
 
   @override
-  String get energyLabel => 'Énergie Oracle';
+  String get energyLabel => 'Énergie de l Oracle';
 
   @override
   String get energyInfoTooltip =>
@@ -754,7 +755,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get energyCostsTitle => 'Coût énergétique par action';
 
   @override
-  String get energyCostReading => 'En lisant';
+  String get energyCostReading => 'Tirage';
 
   @override
   String get energyCostDeepDetails => 'Détails profonds';

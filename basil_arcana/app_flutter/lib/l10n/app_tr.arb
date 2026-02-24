@@ -53,7 +53,7 @@
       }
     }
   },
-  "settingsDashboardShareButton": "Kişisel yönlendirme bağlantısını paylaşın",
+  "settingsDashboardShareButton": "Kişisel davet bağlantını paylaş",
   "settingsDashboardLoadError": "Kontrol paneli verileri şu anda yüklenemiyor.",
   "languageLabel": "Dil",
   "languageEnglish": "İngilizce (EN)",
@@ -77,7 +77,7 @@
   "deckPentaclesName": "Tılsımlar",
   "deckLenormandName": "Lenormand",
   "deckCrowleyName": "Crowley",
-  "deckDebugLogLabel": "Hata ayıklama: Wands varlık yolunu günlüğe kaydet",
+  "deckDebugLogLabel": "Hata ayıklama: Değnekler varlık yolunu kaydet",
   "homeTagline": "Kartlarda netlik.",
   "homeSubtitle": "Bir soru sorun ve bir sonraki adımınızı şekillendirecek konuları keşfedin",
   "homeDescription": "Büyülü havayı yakalayın",
@@ -105,7 +105,7 @@
   "dataLoadTitle": "Kart kitaplığına erişilemiyor.",
   "dataLoadRetry": "Yeniden dene",
   "dataLoadUseCache": "Önbelleğe alınmış verileri kullan",
-  "dataLoadSpreadsError": "Şu anda spreadler yüklenemiyor.",
+  "dataLoadSpreadsError": "Açılımlar şu anda yüklenemiyor.",
   "cardsDetailTitle": "Kart ayrıntıları",
   "cardTitleFieldTitle": "Başlık",
   "cardTagsTitle": "Etiketler",
@@ -136,12 +136,12 @@
   "cdnHealthCardsFileLabel": "Kartlar JSON",
   "cdnHealthSpreadsFileLabel": "Açılımlar JSON",
   "cdnHealthVideoIndexLabel": "Video dizini",
-  "cdnHealthLastFetchLabel": "Son getirme",
+  "cdnHealthLastFetchLabel": "Son indirme",
   "cdnHealthLastCacheLabel": "Son önbellek isabeti",
-  "cdnHealthTestFetch": "Getirme kartlarını/spread'leri test edin",
+  "cdnHealthTestFetch": "Kart ve açılım indirmesini test et",
   "cdnHealthStatusIdle": "Boşta",
-  "cdnHealthStatusSuccess": "Getirme başarılı oldu",
-  "cdnHealthStatusFailed": "Getirme başarısız oldu",
+  "cdnHealthStatusSuccess": "İndirme başarılı",
+  "cdnHealthStatusFailed": "İndirme başarısız",
   "spreadTitle": "Bir açılım seç",
   "spreadOneCardTitle": "Bir kart",
   "spreadOneCardSubtitle": "Şimdilik hızlı bir ayna. Tek kart – tek net odak.",
@@ -217,7 +217,7 @@
   "resultDeepTypingLabel": "Kâhin yazıyor…",
   "resultDeepRelationshipsHeading": "İlişkiler",
   "resultDeepCareerHeading": "Kariyer",
-  "cardsDrawnCount": "{count}× çizilmiş",
+  "cardsDrawnCount": "{count} kez çekildi",
   "@cardsDrawnCount": {
     "placeholders": {
       "count": {
@@ -231,9 +231,9 @@
   "resultWantMoreButton": "Daha fazlası",
   "resultStatusUnauthorized": "Hizmet kullanılamıyor; bir süre sonra tekrar deneyin.",
   "resultStatusNoInternet": "İnternet yok — çevrimdışı okuma gösteriliyor",
-  "resultStatusTimeout": "Oracle duraklatıldı; yeniden denemek için dokunun.",
+  "resultStatusTimeout": "Kâhin durakladı; yeniden denemek için dokunun.",
   "resultStatusTooManyAttempts": "Çok fazla deneme yapıldı. Lütfen bekleyin ve tekrar deneyin.",
-  "resultStatusServerUnavailableWithStatus": "Oracle kullanılamıyor ({status}) — birazdan tekrar deneyin.",
+  "resultStatusServerUnavailableWithStatus": "Kâhin şu anda kullanılamıyor ({status}); birazdan tekrar deneyin.",
   "@resultStatusServerUnavailableWithStatus": {
     "placeholders": {
       "status": {
@@ -241,16 +241,16 @@
       }
     }
   },
-  "resultStatusServerUnavailable": "Oracle kullanılamıyor; birazdan tekrar deneyin.",
+  "resultStatusServerUnavailable": "Kâhin şu anda kullanılamıyor; birazdan tekrar deneyin.",
   "resultStatusMissingApiBaseUrl": "Yapılandırma hatası — eksik API temel URL'si.",
   "resultStatusUnexpectedResponse": "Beklenmeyen yanıt — yeniden denemek için dokunun.",
   "resultStatusInterpretationUnavailable": "Yapay zeka yorumu kullanılamıyor; yeniden denemek için dokunun.",
-  "oracleWaitingTitle": "Oracle dinliyor…",
+  "oracleWaitingTitle": "Kâhin dinliyor…",
   "oracleWaitingSubtitle": "Kartlar odağa yerleşene kadar sabit durun.",
-  "oracleTimeoutTitle": "Oracle sessiz…",
+  "oracleTimeoutTitle": "Kâhin sessiz…",
   "oracleTimeoutBody": "Bazen netlik bir nefes daha ister.",
-  "actionCancel": "İptal etmek",
-  "actionTryAgain": "Tekrar deneyin",
+  "actionCancel": "İptal",
+  "actionTryAgain": "Tekrar dene",
   "actionApply": "Uygula",
   "historyTitle": "Okuma geçmişi",
   "historyEmpty": "Geçmiş şimdilik boş.",
@@ -292,8 +292,8 @@
   "natalChartLoading": "Doğum haritanız oluşturuluyor…",
   "natalChartResultTitle": "Yorumunuz",
   "natalChartError": "Doğum haritası oluşturulamadı. Lütfen tekrar deneyin.",
-  "energyLabelWithPercent": "Oracle enerjisi: %{value}",
-  "energyLabel": "Oracle enerjisi",
+  "energyLabelWithPercent": "Kâhin enerjisi: %{value}",
+  "energyLabel": "Kâhin enerjisi",
   "energyInfoTooltip": "Enerji eylemlere harcanır ve zamanla yenilenir",
   "@energyLabelWithPercent": {
     "placeholders": {
@@ -325,7 +325,7 @@
   "energyTopUpDescription": "Enerjiniz okumayı net ve derin tutar. Ritiminizi seçin ve büyünün içinde kalın.",
   "energyTopUpDescriptionCompact": "Enerji eylemlere harcanır ve zamanla iyileşir. Ücretsiz şarjı bekleyebilir veya Yıldızlarla anında artırabilirsiniz.",
   "energyCostsTitle": "Eylem başına enerji maliyeti",
-  "energyCostReading": "Okuma",
+  "energyCostReading": "Tiraj",
   "energyCostDeepDetails": "Derin ayrıntılar",
   "energyCostNatalChart": "Doğum haritası",
   "energyCostCompatibility": "Aşk uyumluluğu",
@@ -368,7 +368,7 @@
     }
   },
   "professionalReadingTitle": "Profesyonel okuma",
-  "professionalReadingDescription": "Açılımının bir uzman tarafından derinlemesine yorumu.",
+  "professionalReadingDescription": "Açılımının bir uzman tarafından derinlemesine yorumlanması.",
   "professionalReadingButton": "Planı seç",
   "professionalReadingOpenBotMessage": "Abonelik planlarını görmek için botu açın.",
   "professionalReadingOpenBotAction": "Botu aç",
