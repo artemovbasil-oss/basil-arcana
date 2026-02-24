@@ -27,11 +27,10 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   _installGlobalErrorHandlers();
   try {
-    await AppConfig.init().timeout(const Duration(seconds: 5), onTimeout: () {
+    await AppConfig.init().timeout(const Duration(seconds: 2), onTimeout: () {
       debugPrint('[Startup] AppConfig.init timeout; continuing with defaults.');
     });
     await HiveStorage.init();
-    await CardCacheCleanup.clearPersistedCardCaches();
     final settingsBox = Hive.box<String>('settings');
     final languageCode = settingsBox.get('languageCode') ?? 'en';
     final runtimeBuildVersion = (AppConfig.appVersion.isNotEmpty
@@ -53,10 +52,10 @@ Future<void> main() async {
       schemaVersion: kCardSchemaVersion,
     );
 
-    await _runLocalDataSelfCheck();
-    await _runApiAvailabilitySelfCheck();
-
     runApp(const ProviderScope(child: BasilArcanaApp()));
+    unawaited(CardCacheCleanup.clearPersistedCardCaches());
+    unawaited(_runLocalDataSelfCheck());
+    unawaited(_runApiAvailabilitySelfCheck());
   } catch (error, stackTrace) {
     runApp(
       _BootstrapErrorApp(

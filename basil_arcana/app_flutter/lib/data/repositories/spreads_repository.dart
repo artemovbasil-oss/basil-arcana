@@ -1,5 +1,4 @@
 import 'dart:collection';
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -64,19 +63,20 @@ class SpreadsRepository {
   }
 
   String _buildVersionTag() {
-    final runtimeVersion =
-        (AppConfig.appVersion.isNotEmpty ? AppConfig.appVersion : readWebBuildVersion())
-            .trim();
+    final runtimeVersion = (AppConfig.appVersion.isNotEmpty
+            ? AppConfig.appVersion
+            : readWebBuildVersion())
+        .trim();
     return runtimeVersion.isNotEmpty ? runtimeVersion : 'dev';
   }
 
   Future<List<SpreadModel>> fetchSpreads({required Locale locale}) async {
     final cacheKey = spreadsCacheKey(locale);
-    final raw = await _loadLocalSpreads(cacheKey: cacheKey, locale: locale);
-    return _parseSpreads(raw: raw);
+    final parsed = await _loadLocalSpreads(cacheKey: cacheKey, locale: locale);
+    return _parseSpreadsDecoded(parsed.decoded);
   }
 
-  Future<String> _loadLocalSpreads({
+  Future<JsonParseResult> _loadLocalSpreads({
     required String cacheKey,
     required Locale locale,
   }) async {
@@ -99,7 +99,7 @@ class SpreadsRepository {
       _recordLocalResponseInfo(cacheKey, raw);
       _lastCacheTimes[cacheKey] = DateTime.now();
       _lastError = null;
-      return parsed.raw;
+      return parsed;
     } catch (error, stackTrace) {
       _lastError = '${error.toString()}\n$stackTrace';
       if (kEnableDevDiagnostics) {
@@ -168,7 +168,10 @@ String _snippetEnd(String body) {
   return body.substring(body.length - 200);
 }
 
-List<SpreadModel> _parseSpreads({required String raw}) {
-  final data = jsonDecode(raw) as List<dynamic>;
+List<SpreadModel> _parseSpreadsDecoded(Object decoded) {
+  if (decoded is! List<dynamic>) {
+    return const [];
+  }
+  final data = decoded;
   return data.map((item) => SpreadModel.fromJson(item)).toList();
 }

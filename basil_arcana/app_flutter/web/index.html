@@ -143,7 +143,18 @@
       return /iphone|ipad|ipod/i.test(userAgent);
     }
 
-    (function purgeWebCachesAndStorage() {
+    (function purgeWebCachesAndStorageOnBuildChange() {
+      var cleanupBuildIdKey = 'basil_arcana_cache_cleanup_build';
+      var buildId = String(window.__buildVersion || 'dev').trim() || 'dev';
+      var lastCleanupBuildId = '';
+      try {
+        lastCleanupBuildId = String(window.localStorage.getItem(cleanupBuildIdKey) || '');
+      } catch (_) {}
+
+      if (lastCleanupBuildId === buildId) {
+        return;
+      }
+
       var cacheKeyFragments = [
         'cards_',
         'cardsCache',
@@ -192,28 +203,9 @@
         return removedKeys;
       }
 
-      if ('serviceWorker' in navigator && navigator.serviceWorker) {
-        navigator.serviceWorker.getRegistrations().then(function (registrations) {
-          registrations.forEach(function (registration) {
-            registration.unregister();
-          });
-        }).catch(function (error) {
-          console.warn('Service worker cleanup failed', error);
-        });
-      }
-
-      if (window.caches && caches.keys) {
-        caches.keys().then(function (keys) {
-          return Promise.all(keys.map(function (key) {
-            return caches.delete(key);
-          }));
-        }).catch(function (error) {
-          console.warn('CacheStorage cleanup failed', error);
-        });
-      }
-
       try {
         purgeStorage(window.localStorage, 'localStorage');
+        window.localStorage.setItem(cleanupBuildIdKey, buildId);
       } catch (error) {
         console.warn('localStorage cleanup failed', error);
       }
@@ -358,12 +350,19 @@
     <div id="flutter_mount"></div>
   </div>
   <script>
-    window.addEventListener('load', function (ev) {
+    var bootstrapStarted = false;
+
+    function startFlutterBootstrap() {
+      if (bootstrapStarted) {
+        return;
+      }
+      bootstrapStarted = true;
       var v = window.__buildVersion || 'dev';
       window.__flutterBootstrapUrl = 'flutter_bootstrap.js?v=' + v;
-      loadScript('telegram_bridge.js?v=' + v).then(function () {
-        return loadScript('flutter.js?v=' + v, { defer: '' });
-      }).then(function () {
+      Promise.all([
+        loadScript('telegram_bridge.js?v=' + v),
+        loadScript('flutter.js?v=' + v, { defer: '' })
+      ]).then(function () {
         _flutter.loader.loadEntrypoint({
           entrypointUrl: 'main.dart.js?v=' + v,
           serviceWorker: null,
@@ -381,7 +380,13 @@
         };
         console.error('[boot] load error', error);
       });
-    });
+    }
+
+    if (document.readyState === 'loading') {
+      window.addEventListener('DOMContentLoaded', startFlutterBootstrap, { once: true });
+    } else {
+      startFlutterBootstrap();
+    }
   </script>
 </body>
 </html>

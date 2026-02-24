@@ -83,6 +83,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   ValueListenable<Box<int>>? _activityStatsListenable;
   VoidCallback? _activityStatsListener;
   Timer? _streakReloadDebounce;
+  bool _streakLoadInFlight = false;
+  bool _streakLoadQueued = false;
   late final AnimationController _fieldGlowController;
   late final AnimationController _titleShimmerController;
 
@@ -165,11 +167,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       return;
     }
     final localSnapshot = _buildLocalStreakStatsSnapshot(base: _streakStats);
-    setState(() {
-      _streakStats = localSnapshot;
-      _loadingStreak = false;
-    });
-    _refreshOpenStreakModal();
+    if (!_sameStreakStats(_streakStats, localSnapshot) || _loadingStreak) {
+      setState(() {
+        _streakStats = localSnapshot;
+        _loadingStreak = false;
+      });
+      _refreshOpenStreakModal();
+    }
     _streakReloadDebounce?.cancel();
     _streakReloadDebounce = Timer(const Duration(milliseconds: 450), () {
       if (!mounted) {
@@ -200,6 +204,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   }
 
   Future<void> _loadStreakStats() async {
+    if (_streakLoadInFlight) {
+      _streakLoadQueued = true;
+      return;
+    }
+    _streakLoadInFlight = true;
     if (!_loadingStreak) {
       setState(() {
         _loadingStreak = true;
@@ -230,6 +239,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         _loadingStreak = false;
       });
       _refreshOpenStreakModal();
+    } finally {
+      _streakLoadInFlight = false;
+      if (_streakLoadQueued && mounted) {
+        _streakLoadQueued = false;
+        unawaited(_loadStreakStats());
+      }
     }
   }
 
@@ -338,6 +353,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       return first;
     }
     return second.isAfter(first) ? second : first;
+  }
+
+  bool _sameStreakStats(HomeStreakStats a, HomeStreakStats b) {
+    return a.currentStreakDays == b.currentStreakDays &&
+        a.longestStreakDays == b.longestStreakDays &&
+        a.activeDays == b.activeDays &&
+        a.awarenessPercent == b.awarenessPercent &&
+        a.awarenessLocked == b.awarenessLocked &&
+        a.lastActiveAt == b.lastActiveAt;
   }
 
   Future<void> _loadReportEntitlements() async {

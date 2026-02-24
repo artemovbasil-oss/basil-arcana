@@ -81,8 +81,8 @@ class CardsRepository {
     required DeckType deckId,
   }) async {
     final cacheKey = cardsCacheKey(locale);
-    final raw = await _loadLocalCards(cacheKey: cacheKey, locale: locale);
-    var cards = _parseCards(raw: raw, deckId: deckId);
+    final parsed = await _loadLocalCards(cacheKey: cacheKey, locale: locale);
+    var cards = _parseCardsDecoded(decoded: parsed.decoded, deckId: deckId);
 
     final shouldCompleteCrowley = deckId == DeckType.crowley ||
         (deckId == DeckType.all &&
@@ -110,7 +110,7 @@ class CardsRepository {
     return cards;
   }
 
-  Future<String> _loadLocalCards({
+  Future<JsonParseResult> _loadLocalCards({
     required String cacheKey,
     required Locale locale,
   }) async {
@@ -133,7 +133,7 @@ class CardsRepository {
       _recordLocalResponseInfo(cacheKey, parsed.raw);
       _lastCacheTimes[cacheKey] = DateTime.now();
       _lastError = null;
-      return parsed.raw;
+      return parsed;
     } catch (error, stackTrace) {
       _lastError = '${error.toString()}\n$stackTrace';
       if (kEnableDevDiagnostics) {
@@ -214,8 +214,10 @@ String _snippetEnd(String body) {
   return body.substring(body.length - 200);
 }
 
-List<CardModel> _parseCards({required String raw, required DeckType deckId}) {
-  final decoded = parseJsonString(raw).decoded;
+List<CardModel> _parseCardsDecoded({
+  required Object decoded,
+  required DeckType deckId,
+}) {
   if (decoded is! Map<String, dynamic>) {
     return const [];
   }
