@@ -169,6 +169,18 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://www.basilarcana.com/news-french-mini-app-launch.html</loc>
+    <lastmod>2026-02-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.basilarcana.com/news-turkish-mini-app-launch.html</loc>
+    <lastmod>2026-02-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://www.basilarcana.com/card-ac-00-fool.html</loc>
     <lastmod>2026-02-24</lastmod>
     <changefreq>monthly</changefreq>
