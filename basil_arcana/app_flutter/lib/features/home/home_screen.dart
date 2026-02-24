@@ -4630,7 +4630,7 @@ class _EnergyLegendRow extends StatelessWidget {
   }
 }
 
-class _EnergyDonutChart extends StatelessWidget {
+class _EnergyDonutChart extends StatefulWidget {
   const _EnergyDonutChart({
     required this.slices,
     required this.centerLabel,
@@ -4640,25 +4640,54 @@ class _EnergyDonutChart extends StatelessWidget {
   final String centerLabel;
 
   @override
+  State<_EnergyDonutChart> createState() => _EnergyDonutChartState();
+}
+
+class _EnergyDonutChartState extends State<_EnergyDonutChart>
+    with TickerProviderStateMixin {
+  late final AnimationController _revealController;
+  late final AnimationController _orbitController;
+
+  @override
+  void initState() {
+    super.initState();
+    _revealController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    )..forward();
+    _orbitController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 7),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _revealController.dispose();
+    _orbitController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    return TweenAnimationBuilder<double>(
-      tween: Tween<double>(begin: 0, end: 1),
-      duration: const Duration(milliseconds: 900),
-      curve: Curves.easeOutCubic,
-      builder: (context, progress, _) {
+    return AnimatedBuilder(
+      animation: Listenable.merge([_revealController, _orbitController]),
+      builder: (context, _) {
+        final reveal = Curves.easeOutCubic.transform(_revealController.value);
         return SizedBox(
           width: 126,
           height: 126,
           child: CustomPaint(
             painter: _DonutChartPainter(
-              slices: slices,
-              trackColor: colorScheme.surface.withValues(alpha: 0.45),
-              progress: progress,
+              slices: widget.slices,
+              trackColor: colorScheme.surface.withValues(alpha: 0.38),
+              progress: reveal,
+              orbitPhase: _orbitController.value,
             ),
             child: Center(
               child: Text(
-                centerLabel,
+                widget.centerLabel,
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w800,
                     ),
@@ -4713,22 +4742,34 @@ class _DonutChartPainter extends CustomPainter {
     required this.slices,
     required this.trackColor,
     required this.progress,
+    required this.orbitPhase,
   });
 
   final List<_EnergySlice> slices;
   final Color trackColor;
   final double progress;
+  final double orbitPhase;
 
   @override
   void paint(Canvas canvas, Size size) {
     final center = size.center(Offset.zero);
-    final stroke = size.width * 0.13;
+    final stroke = size.width * 0.12;
     final radius = (size.width - stroke) / 2;
     final rect = Rect.fromCircle(center: center, radius: radius);
+    final auraPaint = Paint()
+      ..shader = RadialGradient(
+        colors: [
+          const Color(0xFF9A7CFF).withValues(alpha: 0.20),
+          const Color(0xFF58C8FF).withValues(alpha: 0.14),
+          Colors.transparent,
+        ],
+      ).createShader(Rect.fromCircle(center: center, radius: radius * 1.22));
+    canvas.drawCircle(center, radius * 1.15, auraPaint);
+
     final trackPaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = stroke
-      ..strokeCap = StrokeCap.butt
+      ..strokeCap = StrokeCap.round
       ..color = trackColor;
     canvas.drawArc(rect, 0, pi * 2, false, trackPaint);
 
@@ -4740,26 +4781,62 @@ class _DonutChartPainter extends CustomPainter {
       }
       final fullSweep = (slice.percent / 100) * pi * 2;
       final sweep = fullSweep * safeProgress;
-      final drawSweep = max(0.0, sweep - 0.025);
+      final drawSweep = max(0.0, sweep - 0.05);
       if (sweep <= 0.001) {
         start += fullSweep;
         continue;
       }
+      final glowPaint = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = stroke + 3
+        ..strokeCap = StrokeCap.round
+        ..color = slice.color.withValues(alpha: 0.30)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4.5);
+      canvas.drawArc(rect, start, drawSweep, false, glowPaint);
+
       final paint = Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = stroke
-        ..strokeCap = StrokeCap.butt
-        ..color = slice.color;
+        ..strokeCap = StrokeCap.round
+        ..color = slice.color.withValues(alpha: 0.98);
       canvas.drawArc(rect, start, drawSweep, false, paint);
+
+      final markerAngle = start + drawSweep / 2;
+      final markerOffset = Offset(
+        center.dx + cos(markerAngle) * radius,
+        center.dy + sin(markerAngle) * radius,
+      );
+      canvas.drawCircle(
+        markerOffset,
+        2.1,
+        Paint()..color = Colors.white.withValues(alpha: 0.75),
+      );
       start += fullSweep;
     }
+
+    final orbitRadius = radius + stroke * 0.84;
+    final orbitAngle = -pi / 2 + (pi * 2 * orbitPhase);
+    final orbitOffset = Offset(
+      center.dx + cos(orbitAngle) * orbitRadius,
+      center.dy + sin(orbitAngle) * orbitRadius,
+    );
+    final orbitGlowPaint = Paint()
+      ..color = const Color(0xFF8BF3D6).withValues(alpha: 0.55)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
+    canvas.drawCircle(orbitOffset, 4.2, orbitGlowPaint);
+    canvas.drawCircle(
+      orbitOffset,
+      2.2,
+      Paint()..color = const Color(0xFFC5FFF0),
+    );
   }
 
   @override
   bool shouldRepaint(covariant _DonutChartPainter oldDelegate) {
     return oldDelegate.slices != slices ||
         oldDelegate.trackColor != trackColor ||
-        oldDelegate.progress != progress;
+        oldDelegate.progress != progress ||
+        oldDelegate.orbitPhase != orbitPhase;
   }
 }
 
