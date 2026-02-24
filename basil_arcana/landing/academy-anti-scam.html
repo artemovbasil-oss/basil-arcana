@@ -82,6 +82,8 @@
       <nav class="breadcrumbs" aria-label="Breadcrumbs">
         <a class="breadcrumb-home" href="./index.html">Главная</a>
         <span class="breadcrumb-sep">/</span>
+        <a class="breadcrumb-section" href="./academy.html">Академия Таро</a>
+        <span class="breadcrumb-sep">/</span>
         <span class="breadcrumb-current" aria-current="page"></span>
       </nav>
       <article class="article"><h1>Антискам в Таро и эзотерике: как распознать мошенников и защититься</h1><p class="lead">Главная защита от скама — не скорость реакции, а дисциплина проверки: факты, условия, границы и безопасная оплата.</p><h2>Что проверять перед оплатой</h2><ul><li>Публичные контакты и реальные отзывы.</li><li>Ясное описание услуги и результата.</li><li>Прозрачные условия, включая отмену и возврат.</li></ul><h2>Как звучит манипуляция</h2><ul><li>«Если не оплатишь сейчас, будет беда».</li><li>Давление страхом и срочностью.</li><li>Просьбы передать персональные данные и доступы.</li></ul><h2>Безопасный алгоритм</h2><p>Берите паузу 24 часа, сохраняйте переписку и чеки, оплачивайте через отслеживаемые каналы. В сомнительной ситуации лучше остановить диалог, чем платить за чужую манипуляцию.</p></article>
@@ -135,6 +137,12 @@
           const homeUrl = new URL("./index.html", window.location.href);
           if (resolved && resolved !== "ru") homeUrl.searchParams.set("lang", resolved);
           breadcrumbHome.setAttribute("href", homeUrl.pathname + homeUrl.search);
+        }
+        const breadcrumbSection = document.querySelector(".breadcrumb-section");
+        if (breadcrumbSection) {
+          const sectionLabels = { ru: "Академия Таро", kz: "Таро академиясы", en: "Tarot Academy" };
+          breadcrumbSection.textContent = sectionLabels[resolved] || sectionLabels.ru;
+          breadcrumbSection.setAttribute("href", withLang("./academy.html", resolved));
         }
         const breadcrumbCurrent = document.querySelector(".breadcrumb-current");
         if (breadcrumbCurrent) {

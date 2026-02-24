@@ -82,6 +82,8 @@
       <nav class="breadcrumbs" aria-label="Breadcrumbs">
         <a class="breadcrumb-home" href="./index.html">Главная</a>
         <span class="breadcrumb-sep">/</span>
+        <a class="breadcrumb-section" href="./academy.html">Академия Таро</a>
+        <span class="breadcrumb-sep">/</span>
         <span class="breadcrumb-current" aria-current="page"></span>
       </nav>
       <article class="article"><h1>Таро и психология: как символы помогают принимать решения</h1><p class="lead">Карты могут работать как инструмент саморефлексии: они структурируют внимание и помогают видеть скрытые мотивы и эмоции.</p><h2>Почему это работает</h2><ul><li>Символы поднимают личные ассоциации, которые сложно заметить в «обычном» мышлении.</li><li>Расклад дает структуру: эмоции, факты, риск, ресурс, действие.</li><li>Появляется дистанция от импульса, а значит — более зрелый выбор.</li></ul><h2>Что важно держать в фокусе</h2><p>Таро не заменяет медицину, психотерапию и юридическую консультацию. Его сильная сторона — помочь вам яснее мыслить и действовать осознанно.</p><h2>Практика на каждый день</h2><ul><li>После расклада проверяйте выводы фактами.</li><li>Записывайте альтернативные интерпретации.</li><li>Фиксируйте один конкретный шаг на 24 часа.</li></ul></article>
@@ -135,6 +137,12 @@
           const homeUrl = new URL("./index.html", window.location.href);
           if (resolved && resolved !== "ru") homeUrl.searchParams.set("lang", resolved);
           breadcrumbHome.setAttribute("href", homeUrl.pathname + homeUrl.search);
+        }
+        const breadcrumbSection = document.querySelector(".breadcrumb-section");
+        if (breadcrumbSection) {
+          const sectionLabels = { ru: "Академия Таро", kz: "Таро академиясы", en: "Tarot Academy" };
+          breadcrumbSection.textContent = sectionLabels[resolved] || sectionLabels.ru;
+          breadcrumbSection.setAttribute("href", withLang("./academy.html", resolved));
         }
         const breadcrumbCurrent = document.querySelector(".breadcrumb-current");
         if (breadcrumbCurrent) {

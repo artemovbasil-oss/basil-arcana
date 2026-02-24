@@ -82,6 +82,8 @@
       <nav class="breadcrumbs" aria-label="Breadcrumbs">
         <a class="breadcrumb-home" href="./index.html">Главная</a>
         <span class="breadcrumb-sep">/</span>
+        <a class="breadcrumb-section" href="./academy.html">Академия Таро</a>
+        <span class="breadcrumb-sep">/</span>
         <span class="breadcrumb-current" aria-current="page"></span>
       </nav>
       <article class="article"><h1>Как правильно задавать вопрос Таро для точного и полезного ответа</h1><p class="lead">Точность расклада начинается не с карты, а с формулировки вопроса. Чем конкретнее запрос, тем полезнее интерпретация.</p><h2>Формула сильного вопроса</h2><ul><li>Цель: что именно вы хотите улучшить.</li><li>Срок: неделя, месяц, квартал.</li><li>Зона влияния: что зависит лично от вас.</li></ul><p>Рабочий шаблон: «Что мне важно учесть, чтобы получить X в срок Y?».</p><h2>Ошибки, которые размывают ответ</h2><ul><li>Вопросы без срока и контекста.</li><li>Попытка переложить ответственность на карты.</li><li>Повторные расклады на один и тот же вопрос без новых вводных.</li></ul><h2>Как завершать расклад</h2><p>Добавьте финальный вопрос: «Какой один шаг я делаю сегодня?». Это переводит символический смысл в реальное действие.</p></article>
@@ -135,6 +137,12 @@
           const homeUrl = new URL("./index.html", window.location.href);
           if (resolved && resolved !== "ru") homeUrl.searchParams.set("lang", resolved);
           breadcrumbHome.setAttribute("href", homeUrl.pathname + homeUrl.search);
+        }
+        const breadcrumbSection = document.querySelector(".breadcrumb-section");
+        if (breadcrumbSection) {
+          const sectionLabels = { ru: "Академия Таро", kz: "Таро академиясы", en: "Tarot Academy" };
+          breadcrumbSection.textContent = sectionLabels[resolved] || sectionLabels.ru;
+          breadcrumbSection.setAttribute("href", withLang("./academy.html", resolved));
         }
         const breadcrumbCurrent = document.querySelector(".breadcrumb-current");
         if (breadcrumbCurrent) {

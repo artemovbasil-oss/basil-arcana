@@ -82,6 +82,8 @@
       <nav class="breadcrumbs" aria-label="Breadcrumbs">
         <a class="breadcrumb-home" href="./index.html">Главная</a>
         <span class="breadcrumb-sep">/</span>
+        <a class="breadcrumb-section" href="./academy.html">Академия Таро</a>
+        <span class="breadcrumb-sep">/</span>
         <span class="breadcrumb-current" aria-current="page"></span>
       </nav>
       <article class="article"><h1>Младшие арканы Таро: как читать события, людей и детали ситуации</h1><p class="lead">Младшие арканы — это рабочая «операционка» расклада: темп, коммуникация, деньги, эмоции и повседневные решения.</p><h2>Базовая логика мастей</h2><ul><li>Жезлы: инициатива, действие, запуск.</li><li>Кубки: чувства, контакт, эмоциональный фон.</li><li>Мечи: анализ, границы, выбор позиции.</li><li>Пентакли: ресурсы, тело, деньги, устойчивость.</li></ul><h2>Как превращать карту в действие</h2><p>Смотрите не только «что значит карта», но и «что делать с этим значением в ближайшие 24–48 часов». Тогда расклад становится практически полезным.</p><h2>Полезный формат интерпретации</h2><ul><li>Что уже запущено в ситуации.</li><li>Где узкое место или риск.</li><li>Какой следующий шаг даст максимальный эффект.</li></ul></article>
@@ -135,6 +137,12 @@
           const homeUrl = new URL("./index.html", window.location.href);
           if (resolved && resolved !== "ru") homeUrl.searchParams.set("lang", resolved);
           breadcrumbHome.setAttribute("href", homeUrl.pathname + homeUrl.search);
+        }
+        const breadcrumbSection = document.querySelector(".breadcrumb-section");
+        if (breadcrumbSection) {
+          const sectionLabels = { ru: "Академия Таро", kz: "Таро академиясы", en: "Tarot Academy" };
+          breadcrumbSection.textContent = sectionLabels[resolved] || sectionLabels.ru;
+          breadcrumbSection.setAttribute("href", withLang("./academy.html", resolved));
         }
         const breadcrumbCurrent = document.querySelector(".breadcrumb-current");
         if (breadcrumbCurrent) {

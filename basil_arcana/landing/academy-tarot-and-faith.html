@@ -82,6 +82,8 @@
       <nav class="breadcrumbs" aria-label="Breadcrumbs">
         <a class="breadcrumb-home" href="./index.html">Главная</a>
         <span class="breadcrumb-sep">/</span>
+        <a class="breadcrumb-section" href="./academy.html">Академия Таро</a>
+        <span class="breadcrumb-sep">/</span>
         <span class="breadcrumb-current" aria-current="page"></span>
       </nav>
       <article class="article"><h1>Таро и вера: как использовать расклады без конфликта с религиозными ценностями</h1><p class="lead">Таро может быть совместимо с жизнью верующего человека, если использовать его как инструмент осмысления, а не как замену духовной опоры.</p><h2>Безопасная рамка практики</h2><ul><li>Карты не подменяют молитву, совесть и личную ответственность.</li><li>Интерпретация проверяется этикой: добросовестность, уважение к людям, отказ от манипуляции.</li><li>Фокус на зрелом выборе, а не на «приговоре судьбы».</li></ul><h2>Признаки экологичного формата</h2><ul><li>После расклада больше ясности и внутреннего мира.</li><li>Меньше паники и зависимости от «внешнего вердикта».</li><li>Появляется конкретный и этичный следующий шаг.</li></ul><h2>Практический вывод</h2><p>Смысл в целостности: вера, разум и рефлексия могут работать вместе, если в центре остаются свобода совести и ответственность за свои действия.</p></article>
@@ -135,6 +137,12 @@
           const homeUrl = new URL("./index.html", window.location.href);
           if (resolved && resolved !== "ru") homeUrl.searchParams.set("lang", resolved);
           breadcrumbHome.setAttribute("href", homeUrl.pathname + homeUrl.search);
+        }
+        const breadcrumbSection = document.querySelector(".breadcrumb-section");
+        if (breadcrumbSection) {
+          const sectionLabels = { ru: "Академия Таро", kz: "Таро академиясы", en: "Tarot Academy" };
+          breadcrumbSection.textContent = sectionLabels[resolved] || sectionLabels.ru;
+          breadcrumbSection.setAttribute("href", withLang("./academy.html", resolved));
         }
         const breadcrumbCurrent = document.querySelector(".breadcrumb-current");
         if (breadcrumbCurrent) {

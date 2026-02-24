@@ -82,6 +82,8 @@
       <nav class="breadcrumbs" aria-label="Breadcrumbs">
         <a class="breadcrumb-home" href="./index.html">Главная</a>
         <span class="breadcrumb-sep">/</span>
+        <a class="breadcrumb-section" href="./academy.html">Академия Таро</a>
+        <span class="breadcrumb-sep">/</span>
         <span class="breadcrumb-current" aria-current="page"></span>
       </nav>
       <article class="article"><h1>Таро для начинающих: с чего начать практику и не бросить</h1><p class="lead">Старт в Таро проще и эффективнее, когда вы опираетесь на короткий ритм, а не на попытку «выучить все сразу».</p><h2>С чего начать в первую неделю</h2><ul><li>Выберите одну колоду, с которой вам эмоционально комфортно работать каждый день.</li><li>Практикуйте формат «1 вопрос + 1 карта + 1 действие на сегодня».</li><li>Закладывайте 10 минут в день, а не редкие длинные сессии.</li></ul><h2>Как формулировать вопросы</h2><p>Ставьте вопросы в зоне личного влияния: не «что будет?», а «что мне важно учесть, чтобы улучшить результат в ближайшие 7 дней?».</p><ul><li>Добавляйте контекст: сфера, срок, цель.</li><li>Уточняйте риск: «что может помешать?».</li><li>Фиксируйте следующий шаг после расклада.</li></ul><h2>Что даст стабильный прогресс</h2><p>Ведите дневник: дата, вопрос, карта, первый вывод, фактический итог через 24–72 часа. Это быстро формирует личный словарь значений и снижает тревожность в чтении.</p></article>
@@ -135,6 +137,12 @@
           const homeUrl = new URL("./index.html", window.location.href);
           if (resolved && resolved !== "ru") homeUrl.searchParams.set("lang", resolved);
           breadcrumbHome.setAttribute("href", homeUrl.pathname + homeUrl.search);
+        }
+        const breadcrumbSection = document.querySelector(".breadcrumb-section");
+        if (breadcrumbSection) {
+          const sectionLabels = { ru: "Академия Таро", kz: "Таро академиясы", en: "Tarot Academy" };
+          breadcrumbSection.textContent = sectionLabels[resolved] || sectionLabels.ru;
+          breadcrumbSection.setAttribute("href", withLang("./academy.html", resolved));
         }
         const breadcrumbCurrent = document.querySelector(".breadcrumb-current");
         if (breadcrumbCurrent) {

@@ -82,6 +82,8 @@
       <nav class="breadcrumbs" aria-label="Breadcrumbs">
         <a class="breadcrumb-home" href="./index.html">Главная</a>
         <span class="breadcrumb-sep">/</span>
+        <a class="breadcrumb-section" href="./academy.html">Академия Таро</a>
+        <span class="breadcrumb-sep">/</span>
         <span class="breadcrumb-current" aria-current="page"></span>
       </nav>
       <article class="article"><h1>Этичный расклад Таро про отношения: границы и безопасная практика</h1><p class="lead">В теме отношений особенно важно читать карты этично: с уважением к границам и без попытки контроля другого человека.</p><h2>На чем строится этичный подход</h2><ul><li>Фокус на вашей зоне влияния, а не на управлении партнером.</li><li>Отказ от сценариев давления, слежки и эмоционального шантажа.</li><li>Переход от драмы к конкретным шагам коммуникации.</li></ul><h2>Какие вопросы работают лучше</h2><ul><li>Что я не хочу видеть в этой динамике?</li><li>Какой мой зрелый шаг в ближайшую неделю?</li><li>Как сохранить самоуважение и контакт одновременно?</li></ul><h2>Итог хорошего расклада</h2><p>Больше ясности, меньше зависимости. Если после интерпретации вы чувствуете опору и понимаете следующий шаг, формат выбран правильно.</p></article>
@@ -135,6 +137,12 @@
           const homeUrl = new URL("./index.html", window.location.href);
           if (resolved && resolved !== "ru") homeUrl.searchParams.set("lang", resolved);
           breadcrumbHome.setAttribute("href", homeUrl.pathname + homeUrl.search);
+        }
+        const breadcrumbSection = document.querySelector(".breadcrumb-section");
+        if (breadcrumbSection) {
+          const sectionLabels = { ru: "Академия Таро", kz: "Таро академиясы", en: "Tarot Academy" };
+          breadcrumbSection.textContent = sectionLabels[resolved] || sectionLabels.ru;
+          breadcrumbSection.setAttribute("href", withLang("./academy.html", resolved));
         }
         const breadcrumbCurrent = document.querySelector(".breadcrumb-current");
         if (breadcrumbCurrent) {
