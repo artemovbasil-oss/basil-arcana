@@ -1,5 +1,5 @@
 {
-  "@@locale": "en",
+  "@@locale": "tr",
   "appTitle": "The real magic",
   "historyTooltip": "History",
   "settingsTitle": "Settings",
@@ -373,6 +373,6 @@
   "professionalReadingOpenBotMessage": "Open the bot to see subscription plans.",
   "professionalReadingOpenBotAction": "Open bot",
   "professionalReadingOpenBotSnackbar": "Open bot to choose a plan.",
-  "languageFrench": "French (FR)",
-  "languageTurkish": "Turkish (TR)"
+  "languageFrench": "Français (FR)",
+  "languageTurkish": "Türkçe (TR)"
 }

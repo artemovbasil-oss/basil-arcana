@@ -161,6 +161,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 settingsController.updateLanguage(value);
               },
             ),
+            _LanguageOption(
+              label: l10n.languageFrench,
+              language: AppLanguage.fr,
+              groupValue: settingsState.language,
+              onSelected: (value) {
+                settingsController.updateLanguage(value);
+              },
+            ),
+            _LanguageOption(
+              label: l10n.languageTurkish,
+              language: AppLanguage.tr,
+              groupValue: settingsState.language,
+              onSelected: (value) {
+                settingsController.updateLanguage(value);
+              },
+            ),
             const SizedBox(height: 20),
             Text(
               l10n.deckLabel,

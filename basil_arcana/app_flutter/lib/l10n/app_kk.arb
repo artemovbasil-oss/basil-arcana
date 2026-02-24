@@ -372,5 +372,7 @@
   "professionalReadingButton": "Тариф таңдау",
   "professionalReadingOpenBotMessage": "Жазылым жоспарларын көру үшін ботты ашыңыз.",
   "professionalReadingOpenBotAction": "Ботты ашу",
-  "professionalReadingOpenBotSnackbar": "Тарифті таңдау үшін ботты ашыңыз."
+  "professionalReadingOpenBotSnackbar": "Тарифті таңдау үшін ботты ашыңыз.",
+  "languageFrench": "Français (FR)",
+  "languageTurkish": "Türkçe (TR)"
 }

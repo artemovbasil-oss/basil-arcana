@@ -552,6 +552,12 @@ function normalizeLocale(value) {
   if (code.startsWith('kk') || code.startsWith('kz')) {
     return 'kk';
   }
+  if (code.startsWith('fr')) {
+    return 'fr';
+  }
+  if (code.startsWith('tr')) {
+    return 'tr';
+  }
   return 'en';
 }
 
@@ -605,6 +611,12 @@ function buildSofiaPromo(locale) {
   }
   if (normalized === 'kk') {
     return 'Терең әрі нақты талдау керек пе? Кәсіби таролог және астролог София Ноксқа жүгін.\nПрофиль: https://t.me/SofiaKnoxx\nБіздің Telegram-ботта жазылымды қосып, жеке консультация ал.';
+  }
+  if (normalized === 'fr') {
+    return 'Envie d une lecture plus profonde et plus précise ? Contactez la tarologue et astrologue professionnelle Sofia Knox.\nProfil : https://t.me/SofiaKnoxx\nActivez un abonnement dans notre bot Telegram pour obtenir une consultation personnelle.';
+  }
+  if (normalized === 'tr') {
+    return 'Daha derin ve daha net bir yorum mu istiyorsun? Profesyonel tarot uzmanı ve astrolog Sofia Knox ile iletişime geç.\nProfil: https://t.me/SofiaKnoxx\nKişisel danışmanlık almak için Telegram botumuzda aboneliği etkinleştir.';
   }
   return 'Want a deeper and more precise reading? Connect with professional tarot reader and astrologer Sofia Knox.\nProfile: https://t.me/SofiaKnoxx\nActivate a subscription in our Telegram bot to get a personal consultation.';
 }

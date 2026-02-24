@@ -372,5 +372,7 @@
   "professionalReadingButton": "Выбрать тариф",
   "professionalReadingOpenBotMessage": "Открой бота, чтобы увидеть тарифы подписки.",
   "professionalReadingOpenBotAction": "Открыть бота",
-  "professionalReadingOpenBotSnackbar": "Открой бота, чтобы выбрать тариф."
+  "professionalReadingOpenBotSnackbar": "Открой бота, чтобы выбрать тариф.",
+  "languageFrench": "Français (FR)",
+  "languageTurkish": "Türkçe (TR)"
 }

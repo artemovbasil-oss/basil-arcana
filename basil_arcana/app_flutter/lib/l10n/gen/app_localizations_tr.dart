@@ -4,9 +4,9 @@ import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
 
-/// The translations for English (`en`).
-class AppLocalizationsEn extends AppLocalizations {
-  AppLocalizationsEn([String locale = 'en']) : super(locale);
+/// The translations for Turkish (`tr`).
+class AppLocalizationsTr extends AppLocalizations {
+  AppLocalizationsTr([String locale = 'tr']) : super(locale);
 
   @override
   String get appTitle => 'The real magic';
@@ -828,8 +828,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get professionalReadingOpenBotSnackbar => 'Open bot to choose a plan.';
 
   @override
-  String get languageFrench => 'French (FR)';
+  String get languageFrench => 'Français (FR)';
 
   @override
-  String get languageTurkish => 'Turkish (TR)';
+  String get languageTurkish => 'Türkçe (TR)';
 }

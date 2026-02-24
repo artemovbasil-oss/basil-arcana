@@ -833,4 +833,10 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get professionalReadingOpenBotSnackbar =>
       'Открой бота, чтобы выбрать тариф.';
+
+  @override
+  String get languageFrench => 'Français (FR)';
+
+  @override
+  String get languageTurkish => 'Türkçe (TR)';
 }

@@ -832,4 +832,10 @@ class AppLocalizationsKk extends AppLocalizations {
   @override
   String get professionalReadingOpenBotSnackbar =>
       'Тарифті таңдау үшін ботты ашыңыз.';
+
+  @override
+  String get languageFrench => 'Français (FR)';
+
+  @override
+  String get languageTurkish => 'Türkçe (TR)';
 }

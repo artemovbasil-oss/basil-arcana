@@ -6,8 +6,10 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
 import 'app_localizations_en.dart';
+import 'app_localizations_fr.dart';
 import 'app_localizations_kk.dart';
 import 'app_localizations_ru.dart';
+import 'app_localizations_tr.dart';
 
 // ignore_for_file: type=lint
 
@@ -96,8 +98,10 @@ abstract class AppLocalizations {
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
     Locale('en'),
+    Locale('fr'),
     Locale('kk'),
-    Locale('ru')
+    Locale('ru'),
+    Locale('tr')
   ];
 
   /// No description provided for @appTitle.
@@ -1587,6 +1591,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open bot to choose a plan.'**
   String get professionalReadingOpenBotSnackbar;
+
+  /// No description provided for @languageFrench.
+  ///
+  /// In en, this message translates to:
+  /// **'French (FR)'**
+  String get languageFrench;
+
+  /// No description provided for @languageTurkish.
+  ///
+  /// In en, this message translates to:
+  /// **'Turkish (TR)'**
+  String get languageTurkish;
 }
 
 class _AppLocalizationsDelegate
@@ -1600,7 +1616,7 @@ class _AppLocalizationsDelegate
 
   @override
   bool isSupported(Locale locale) =>
-      <String>['en', 'kk', 'ru'].contains(locale.languageCode);
+      <String>['en', 'fr', 'kk', 'ru', 'tr'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -1611,10 +1627,14 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
   switch (locale.languageCode) {
     case 'en':
       return AppLocalizationsEn();
+    case 'fr':
+      return AppLocalizationsFr();
     case 'kk':
       return AppLocalizationsKk();
     case 'ru':
       return AppLocalizationsRu();
+    case 'tr':
+      return AppLocalizationsTr();
   }
 
   throw FlutterError(

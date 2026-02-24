@@ -37,11 +37,7 @@ class BasilArcanaApp extends ConsumerWidget {
       },
       navigatorObservers: [TelegramBackButtonObserver()],
       locale: locale,
-      supportedLocales: const [
-        Locale('en'),
-        Locale('ru'),
-        Locale('kk'),
-      ],
+      supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       home: const SplashScreen(),
       routes: {

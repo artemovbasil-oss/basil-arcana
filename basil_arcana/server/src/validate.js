@@ -128,8 +128,8 @@ function validateDetailsRequest(body) {
   if (!isNonEmptyString(locale)) {
     return 'locale is required';
   }
-  if (!['en', 'ru', 'kk'].includes(locale)) {
-    return 'locale must be one of en, ru, kk';
+  if (!['en', 'ru', 'kk', 'fr', 'tr'].includes(locale)) {
+    return 'locale must be one of en, ru, kk, fr, tr';
   }
 
   return null;
@@ -156,8 +156,8 @@ function validateNatalChartRequest(body) {
   if (!isNonEmptyString(language)) {
     return 'language is required';
   }
-  if (!['en', 'ru', 'kk'].includes(language)) {
-    return 'language must be one of en, ru, kk';
+  if (!['en', 'ru', 'kk', 'fr', 'tr'].includes(language)) {
+    return 'language must be one of en, ru, kk, fr, tr';
   }
 
   return null;
@@ -198,8 +198,8 @@ function validateCompatibilityRequest(body) {
   if (!isNonEmptyString(language)) {
     return 'language is required';
   }
-  if (!['en', 'ru', 'kk'].includes(language)) {
-    return 'language must be one of en, ru, kk';
+  if (!['en', 'ru', 'kk', 'fr', 'tr'].includes(language)) {
+    return 'language must be one of en, ru, kk, fr, tr';
   }
 
   return null;

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-enum AppLanguage { en, ru, kz }
+enum AppLanguage { en, ru, kz, fr, tr }
 
 extension AppLanguageX on AppLanguage {
   String get code {
@@ -11,6 +11,10 @@ extension AppLanguageX on AppLanguage {
         return 'ru';
       case AppLanguage.kz:
         return 'kk';
+      case AppLanguage.fr:
+        return 'fr';
+      case AppLanguage.tr:
+        return 'tr';
     }
   }
 
@@ -22,6 +26,10 @@ extension AppLanguageX on AppLanguage {
         return AppLanguage.ru;
       case 'kk':
         return AppLanguage.kz;
+      case 'fr':
+        return AppLanguage.fr;
+      case 'tr':
+        return AppLanguage.tr;
       case 'en':
       default:
         return AppLanguage.en;

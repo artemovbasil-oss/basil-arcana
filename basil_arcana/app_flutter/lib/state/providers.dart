@@ -108,6 +108,12 @@ String? _normalizeSupportedLanguageCode(String? raw) {
   if (code.startsWith('kk') || code.startsWith('kz')) {
     return 'kk';
   }
+  if (code.startsWith('fr')) {
+    return 'fr';
+  }
+  if (code.startsWith('tr')) {
+    return 'tr';
+  }
   if (code.startsWith('en')) {
     return 'en';
   }
@@ -120,6 +126,10 @@ Locale _localeFromLanguageCode(String code) {
       return const Locale('ru');
     case 'kk':
       return const Locale('kk');
+    case 'fr':
+      return const Locale('fr');
+    case 'tr':
+      return const Locale('tr');
     case 'en':
     default:
       return const Locale('en');
