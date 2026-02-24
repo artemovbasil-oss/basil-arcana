@@ -39,14 +39,7 @@
 </head>
 <body>
   <main class="wrap">
-    <header class="topbar">
-      <a class="logo" href="./index.html" data-i18n="topLine"></a>
-      <div class="langs" role="group" aria-label="Language switcher">
-        <button class="lang-btn" data-lang="ru" aria-pressed="true">RU</button>
-        <button class="lang-btn" data-lang="kz" aria-pressed="false">KZ</button>
-        <button class="lang-btn" data-lang="en" aria-pressed="false">EN</button>
-      </div>
-    </header>
+    <header class="topbar"><a class="logo" href="./index.html" data-i18n="topLine">Магический плюс вайб</a><div class="langs" role="group" aria-label="Language switcher"><button class="lang-btn" data-lang="ru" aria-pressed="true">RU</button><button class="lang-btn" data-lang="kz" aria-pressed="false">KZ</button><button class="lang-btn" data-lang="en" aria-pressed="false">EN</button></div></header>
 
     <nav class="breadcrumbs" aria-label="Breadcrumbs">
       <a class="breadcrumb-home" href="./index.html">Главная</a><span>/</span>
@@ -62,22 +55,16 @@
     <section class="gallery" id="gallery"></section>
     <p class="status" id="status"></p>
 
-    <nav class="site-links" aria-label="Внутренние ссылки">
-      <a href="./news.html" data-i18n="navNews" data-link="news"></a>
-      <a href="./tarot-values.html" data-i18n="navTarot" data-link="tarot"></a>
-      <a href="./crowley-values.html" data-i18n="navCrowley" data-link="crowley"></a>
-      <a href="./lenormand-values.html" data-i18n="navLenormand" data-link="lenormand"></a>
-      <a href="./academy.html" data-i18n="navAcademy" data-link="academy"></a>
-    </nav>
+    <nav class="site-links" aria-label="Каталоги колод"><a href="./tarot-values.html" data-link="tarot">Карты таро «RWS»</a><a href="./lenormand-values.html" data-link="lenormand">Колода Таро Ленорман</a><a href="./crowley-values.html" data-link="crowley">Колода Таро Тота Алистера Кроули</a></nav>
     <footer class="footer" data-i18n="footer"></footer>
   </main>
 
   <script>
     const LANG_STORAGE_KEY='basilarcana_lang';
     const ui={
-      ru:{topLine:'Магический плюс вайб',section:'Карты Таро',title:'Каталог карт Таро Алистера Кроули (Thoth)',lead:'Полный каталог колоды Кроули: все арканы с переходом на отдельные страницы карт, где собраны значения, аналитическая трактовка и практические выводы для реальных ситуаций.',loading:'Загружаем карты...',error:'Не удалось загрузить карты.',navNews:'Новости',navTarot:'Карты Таро (RWS)',navCrowley:'Колода Кроули',navLenormand:'Колода Ленорман',navAcademy:'Академия Таро',footer:'BasilArcana · RU / KZ / EN · Telegram-first experience'},
-      kz:{topLine:'Магия плюс vibe',section:'Таро карталары',title:'Алистер Кроули (Thoth) Таро каталогы',lead:'Кроули колодасының толық каталогы: барлық аркандар жеке беттерге өтеді, онда мағына, аналитикалық интерпретация және практикалық қорытынды берілген.',loading:'Карталар жүктелуде...',error:'Карталарды жүктеу мүмкін болмады.',navNews:'Жаңалықтар',navTarot:'Таро карталары (RWS)',navCrowley:'Кроули колодасы',navLenormand:'Ленорман колодасы',navAcademy:'Таро академиясы',footer:'BasilArcana · RU / KZ / EN · Telegram-first experience'},
-      en:{topLine:'Magic plus vibe',section:'Tarot cards',title:'Aleister Crowley (Thoth) Tarot Catalog',lead:'A complete Crowley deck catalog with dedicated pages for each card: meanings, analytical interpretation, and practical takeaways.',loading:'Loading cards...',error:'Failed to load cards.',navNews:'News',navTarot:'Tarot cards (RWS)',navCrowley:'Crowley deck',navLenormand:'Lenormand deck',navAcademy:'Tarot Academy',footer:'BasilArcana · RU / KZ / EN · Telegram-first experience'}
+      ru:{topLine:'Магический плюс вайб',section:'Карты Таро',title:'Каталог карт Таро Алистера Кроули (Thoth)',lead:'Полный каталог колоды Кроули: все арканы с переходом на отдельные страницы карт, где собраны значения, аналитическая трактовка и практические выводы для реальных ситуаций.',loading:'Загружаем карты...',error:'Не удалось загрузить карты.',navTarot:'Карты таро «RWS»',navCrowley:'Колода Таро Тота Алистера Кроули',navLenormand:'Колода Таро Ленорман',footer:'BasilArcana · RU / KZ / EN · Telegram-first experience'},
+      kz:{topLine:'Магия плюс vibe',section:'Таро карталары',title:'Алистер Кроули (Thoth) Таро каталогы',lead:'Кроули колодасының толық каталогы: барлық аркандар жеке беттерге өтеді, онда мағына, аналитикалық интерпретация және практикалық қорытынды берілген.',loading:'Карталар жүктелуде...',error:'Карталарды жүктеу мүмкін болмады.',navTarot:'RWS Таро карталары',navCrowley:'Кроули колодасы',navLenormand:'Ленорман Таро колодасы',footer:'BasilArcana · RU / KZ / EN · Telegram-first experience'},
+      en:{topLine:'Magic plus vibe',section:'Tarot cards',title:'Aleister Crowley (Thoth) Tarot Catalog',lead:'A complete Crowley deck catalog with dedicated pages for each card: meanings, analytical interpretation, and practical takeaways.',loading:'Loading cards...',error:'Failed to load cards.',navTarot:'RWS Tarot cards',navCrowley:'Aleister Crowley Thoth Tarot deck',navLenormand:'Lenormand Tarot deck',footer:'BasilArcana · RU / KZ / EN · Telegram-first experience'}
     };
     function withLang(path,lang){const u=new URL(path,window.location.href);if(lang&&lang!=='ru')u.searchParams.set('lang',lang);return `${u.pathname}${u.search}`;}
     function imageUrl(card){if(card.imageUrl)return `https://cdn.basilarcana.com/${card.imageUrl.replace(/^\/+/, '')}`;return ''}
@@ -88,11 +75,11 @@
       document.querySelectorAll('[data-i18n]').forEach((n)=>{const k=n.dataset.i18n;if(pack[k])n.textContent=pack[k];});
       document.querySelectorAll('.lang-btn').forEach((b)=>b.setAttribute('aria-pressed',String(b.dataset.lang===resolved)));
       const home=document.querySelector('.breadcrumb-home');if(home){const h={ru:'Главная',kz:'Басты бет',en:'Home'};home.textContent=h[resolved]||h.ru;home.href=withLang('./index.html',resolved);}const cur=document.querySelector('.breadcrumb-current');if(cur)cur.textContent=pack.title;
-      document.querySelectorAll('[data-link="news"]').forEach((n)=>n.href=withLang('./news.html',resolved));
+      
       document.querySelectorAll('[data-link="tarot"]').forEach((n)=>n.href=withLang('./tarot-values.html',resolved));
       document.querySelectorAll('[data-link="crowley"]').forEach((n)=>n.href=withLang('./crowley-values.html',resolved));
       document.querySelectorAll('[data-link="lenormand"]').forEach((n)=>n.href=withLang('./lenormand-values.html',resolved));
-      document.querySelectorAll('[data-link="academy"]').forEach((n)=>n.href=withLang('./academy.html',resolved));
+      
       const status=document.getElementById('status');status.textContent=pack.loading;
       try{
         const cards=await loadCards(resolved);const gallery=document.getElementById('gallery');gallery.innerHTML='';
