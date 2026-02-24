@@ -74,7 +74,13 @@
       .breadcrumb-current{opacity:.9;}
           .article a{color:var(--accent-soft);text-decoration:none;border-bottom:1px solid rgba(227,210,255,.4);}
       .article a:hover{color:#fff;border-bottom-color:rgba(255,255,255,.55);}
-    </style>
+    /* unified header */
+.topbar{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:1rem!important;padding:0 0 .8rem!important;}
+.logo{font-family:"Space Grotesk",sans-serif!important;font-weight:600!important;letter-spacing:.02em!important;font-size:clamp(.95rem,1.35vw,1.2rem)!important;color:var(--accent-soft,#e3d2ff)!important;text-decoration:none!important;line-height:1.2!important;}
+.langs{display:inline-flex!important;gap:.45rem!important;background:rgba(255,255,255,.08)!important;border:1px solid var(--card-border,rgba(184,137,255,.32))!important;border-radius:999px!important;padding:.28rem!important;}
+.lang-btn{border:0!important;background:transparent!important;color:var(--text-soft,#bbb8ca)!important;border-radius:999px!important;font-family:"Manrope",sans-serif!important;font-size:.88rem!important;font-weight:600!important;letter-spacing:.03em!important;padding:.46rem .82rem!important;line-height:1!important;cursor:pointer!important;}
+.lang-btn[aria-pressed="true"]{color:#100d17!important;background:linear-gradient(135deg,#b889ff,#e3d2ff)!important;font-weight:700!important;}
+</style>
   </head>
   <body>
     <main class="wrap">
@@ -87,7 +93,7 @@
         <span class="breadcrumb-current" aria-current="page"></span>
       </nav>
       <article class="article"><h1>Интуиция или тревога: как отличить внутренний сигнал от страха</h1><p class="lead">Интуиция обычно спокойная и ясная, тревога — резкая, категоричная и торопит к немедленным действиям.</p><h2>Три быстрых маркера</h2><ul><li>Состояние тела: собранность против суеты и напряжения.</li><li>Язык мысли: конкретный ориентир против драматичных крайностей.</li><li>Проверяемость: опора на факты против предположений.</li></ul><h2>Как снизить шум перед решением</h2><p>Сделайте паузу 10–15 минут после расклада, затем запишите первую интерпретацию и проверьте ее на факты. Это резко повышает качество чтения.</p><h2>Полезный вопрос для самопроверки</h2><ul><li>Что из этого вывода я могу проверить уже сегодня?</li><li>Какой риск я могу снизить одним действием?</li><li>Что я делаю из страха, а что из зрелой позиции?</li></ul></article>
-      <nav class="site-links" aria-label="Каталоги колод"><a href="./tarot-values.html" data-link="tarot">Карты таро «RWS»</a><a href="./lenormand-values.html" data-link="lenormand">Колода Таро Ленорман</a><a href="./crowley-values.html" data-link="crowley">Колода Таро Тота Алистера Кроули</a></nav>
+      <nav class="site-links" aria-label="Навигация сайта"><a href="./news.html">Новости</a><a href="./academy.html">Академия Таро</a><a href="./tarot-values.html">Карты таро «RWS»</a><a href="./lenormand-values.html">Колода Таро Ленорман</a><a href="./crowley-values.html">Колода Таро Тота Алистера Кроули</a></nav>
       <footer class="footer" data-i18n="footer">BasilArcana · RU / KZ / EN · Telegram-first experience</footer>
     </main>
     <script src="./academy-translations.js"></script>

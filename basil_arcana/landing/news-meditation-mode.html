@@ -67,7 +67,13 @@
       @media (max-width:960px){.bottom-cta{flex-direction:column;align-items:flex-start;} .sofia-panel{grid-template-columns:1fr;}}
       .breadcrumbs{display:flex;align-items:center;gap:.5rem;margin:.15rem 0 .9rem;color:var(--text-soft);font-size:.84rem;line-height:1.3;}
       .breadcrumbs a{color:var(--accent-soft);text-decoration:none;border-bottom:1px solid rgba(227,210,255,.35);} .breadcrumb-sep{opacity:.55;} .breadcrumb-current{opacity:.9;}
-    </style>
+    /* unified header */
+.topbar{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:1rem!important;padding:0 0 .8rem!important;}
+.logo{font-family:"Space Grotesk",sans-serif!important;font-weight:600!important;letter-spacing:.02em!important;font-size:clamp(.95rem,1.35vw,1.2rem)!important;color:var(--accent-soft,#e3d2ff)!important;text-decoration:none!important;line-height:1.2!important;}
+.langs{display:inline-flex!important;gap:.45rem!important;background:rgba(255,255,255,.08)!important;border:1px solid var(--card-border,rgba(184,137,255,.32))!important;border-radius:999px!important;padding:.28rem!important;}
+.lang-btn{border:0!important;background:transparent!important;color:var(--text-soft,#bbb8ca)!important;border-radius:999px!important;font-family:"Manrope",sans-serif!important;font-size:.88rem!important;font-weight:600!important;letter-spacing:.03em!important;padding:.46rem .82rem!important;line-height:1!important;cursor:pointer!important;}
+.lang-btn[aria-pressed="true"]{color:#100d17!important;background:linear-gradient(135deg,#b889ff,#e3d2ff)!important;font-weight:700!important;}
+</style>
   </head>
   <body>
     <div class="stars"></div>
@@ -85,7 +91,7 @@
         <div class="sofia-copy"><h2 data-i18n="sofiaTitle"></h2><p data-i18n="sofiaText"></p><div class="sofia-actions"><a class="btn primary-cta" href="https://t.me/tarot_arkana_bot/app" target="_blank" rel="noreferrer" data-i18n="ctaMini"></a><a class="btn alt" href="https://t.me/tarot_arkana_bot" target="_blank" rel="noreferrer" data-i18n="ctaBot"></a><a class="btn alt" href="https://t.me/SofiaKnoxx" target="_blank" rel="noreferrer" data-i18n="ctaSofia"></a></div></div>
         <article class="sofia-card"><img src="https://cdn.basilarcana.com/sofia/sofia.webp" alt="Sofia" loading="lazy" /><div><strong data-i18n="sofiaName"></strong><span data-i18n="sofiaRole"></span></div></article>
       </section>
-      <nav class="site-links" aria-label="Каталоги колод"><a href="./tarot-values.html" data-link="tarot">Карты таро «RWS»</a><a href="./lenormand-values.html" data-link="lenormand">Колода Таро Ленорман</a><a href="./crowley-values.html" data-link="crowley">Колода Таро Тота Алистера Кроули</a></nav>
+      <nav class="site-links" aria-label="Навигация сайта"><a href="./news.html">Новости</a><a href="./academy.html">Академия Таро</a><a href="./tarot-values.html">Карты таро «RWS»</a><a href="./lenormand-values.html">Колода Таро Ленорман</a><a href="./crowley-values.html">Колода Таро Тота Алистера Кроули</a></nav>
       <footer class="footer" data-i18n="footer"></footer>
     </main>
 

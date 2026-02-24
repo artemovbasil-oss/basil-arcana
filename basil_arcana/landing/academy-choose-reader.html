@@ -74,7 +74,13 @@
       .breadcrumb-current{opacity:.9;}
           .article a{color:var(--accent-soft);text-decoration:none;border-bottom:1px solid rgba(227,210,255,.4);}
       .article a:hover{color:#fff;border-bottom-color:rgba(255,255,255,.55);}
-    </style>
+    /* unified header */
+.topbar{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:1rem!important;padding:0 0 .8rem!important;}
+.logo{font-family:"Space Grotesk",sans-serif!important;font-weight:600!important;letter-spacing:.02em!important;font-size:clamp(.95rem,1.35vw,1.2rem)!important;color:var(--accent-soft,#e3d2ff)!important;text-decoration:none!important;line-height:1.2!important;}
+.langs{display:inline-flex!important;gap:.45rem!important;background:rgba(255,255,255,.08)!important;border:1px solid var(--card-border,rgba(184,137,255,.32))!important;border-radius:999px!important;padding:.28rem!important;}
+.lang-btn{border:0!important;background:transparent!important;color:var(--text-soft,#bbb8ca)!important;border-radius:999px!important;font-family:"Manrope",sans-serif!important;font-size:.88rem!important;font-weight:600!important;letter-spacing:.03em!important;padding:.46rem .82rem!important;line-height:1!important;cursor:pointer!important;}
+.lang-btn[aria-pressed="true"]{color:#100d17!important;background:linear-gradient(135deg,#b889ff,#e3d2ff)!important;font-weight:700!important;}
+</style>
   </head>
   <body>
     <main class="wrap">
@@ -87,7 +93,7 @@
         <span class="breadcrumb-current" aria-current="page"></span>
       </nav>
       <article class="article"><h1>Как выбрать таролога: критерии, риски и защита от зависимости</h1><p class="lead">Надежный специалист усиливает вашу самостоятельность, а не привязывает к постоянным повторным оплатам через страх.</p><h2>Признаки профессионального таролога</h2><ul><li>Прозрачные условия: формат, срок, стоимость и границы метода.</li><li>Спокойная коммуникация без давления «решай прямо сейчас».</li><li>Понятный практический результат после сессии.</li></ul><h2>Красные флаги</h2><ul><li>Гарантии 100% исхода.</li><li>Угрозы и запугивание «катастрофой».</li><li>Навязывание бесконечных «дочисток» и срочных доплат.</li></ul><h2>Как защитить себя</h2><p>До оплаты задайте три вопроса: что входит в сессию, каковы ограничения метода, какой результат вы получите. Четкие ответы обычно быстро отсеивают небезопасные практики.</p></article>
-      <nav class="site-links" aria-label="Каталоги колод"><a href="./tarot-values.html" data-link="tarot">Карты таро «RWS»</a><a href="./lenormand-values.html" data-link="lenormand">Колода Таро Ленорман</a><a href="./crowley-values.html" data-link="crowley">Колода Таро Тота Алистера Кроули</a></nav>
+      <nav class="site-links" aria-label="Навигация сайта"><a href="./news.html">Новости</a><a href="./academy.html">Академия Таро</a><a href="./tarot-values.html">Карты таро «RWS»</a><a href="./lenormand-values.html">Колода Таро Ленорман</a><a href="./crowley-values.html">Колода Таро Тота Алистера Кроули</a></nav>
       <footer class="footer" data-i18n="footer">BasilArcana · RU / KZ / EN · Telegram-first experience</footer>
     </main>
     <script src="./academy-translations.js"></script>

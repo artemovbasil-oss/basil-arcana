@@ -74,7 +74,13 @@
       .breadcrumb-current{opacity:.9;}
           .article a{color:var(--accent-soft);text-decoration:none;border-bottom:1px solid rgba(227,210,255,.4);}
       .article a:hover{color:#fff;border-bottom-color:rgba(255,255,255,.55);}
-    </style>
+    /* unified header */
+.topbar{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:1rem!important;padding:0 0 .8rem!important;}
+.logo{font-family:"Space Grotesk",sans-serif!important;font-weight:600!important;letter-spacing:.02em!important;font-size:clamp(.95rem,1.35vw,1.2rem)!important;color:var(--accent-soft,#e3d2ff)!important;text-decoration:none!important;line-height:1.2!important;}
+.langs{display:inline-flex!important;gap:.45rem!important;background:rgba(255,255,255,.08)!important;border:1px solid var(--card-border,rgba(184,137,255,.32))!important;border-radius:999px!important;padding:.28rem!important;}
+.lang-btn{border:0!important;background:transparent!important;color:var(--text-soft,#bbb8ca)!important;border-radius:999px!important;font-family:"Manrope",sans-serif!important;font-size:.88rem!important;font-weight:600!important;letter-spacing:.03em!important;padding:.46rem .82rem!important;line-height:1!important;cursor:pointer!important;}
+.lang-btn[aria-pressed="true"]{color:#100d17!important;background:linear-gradient(135deg,#b889ff,#e3d2ff)!important;font-weight:700!important;}
+</style>
   </head>
   <body>
     <main class="wrap">
@@ -87,7 +93,7 @@
         <span class="breadcrumb-current" aria-current="page"></span>
       </nav>
       <article class="article"><h1>Таро и психология: как символы помогают принимать решения</h1><p class="lead">Карты могут работать как инструмент саморефлексии: они структурируют внимание и помогают видеть скрытые мотивы и эмоции.</p><h2>Почему это работает</h2><ul><li>Символы поднимают личные ассоциации, которые сложно заметить в «обычном» мышлении.</li><li>Расклад дает структуру: эмоции, факты, риск, ресурс, действие.</li><li>Появляется дистанция от импульса, а значит — более зрелый выбор.</li></ul><h2>Что важно держать в фокусе</h2><p>Таро не заменяет медицину, психотерапию и юридическую консультацию. Его сильная сторона — помочь вам яснее мыслить и действовать осознанно.</p><h2>Практика на каждый день</h2><ul><li>После расклада проверяйте выводы фактами.</li><li>Записывайте альтернативные интерпретации.</li><li>Фиксируйте один конкретный шаг на 24 часа.</li></ul></article>
-      <nav class="site-links" aria-label="Каталоги колод"><a href="./tarot-values.html" data-link="tarot">Карты таро «RWS»</a><a href="./lenormand-values.html" data-link="lenormand">Колода Таро Ленорман</a><a href="./crowley-values.html" data-link="crowley">Колода Таро Тота Алистера Кроули</a></nav>
+      <nav class="site-links" aria-label="Навигация сайта"><a href="./news.html">Новости</a><a href="./academy.html">Академия Таро</a><a href="./tarot-values.html">Карты таро «RWS»</a><a href="./lenormand-values.html">Колода Таро Ленорман</a><a href="./crowley-values.html">Колода Таро Тота Алистера Кроули</a></nav>
       <footer class="footer" data-i18n="footer">BasilArcana · RU / KZ / EN · Telegram-first experience</footer>
     </main>
     <script src="./academy-translations.js"></script>
