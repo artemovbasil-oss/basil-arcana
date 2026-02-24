@@ -107,6 +107,17 @@ class CardsRepository {
       return [...cards, ..._buildCrowleyFallback(locale)];
     }
 
+    if (locale.languageCode == 'fr' || locale.languageCode == 'tr') {
+      return cards
+          .map((card) => card.copyWith(
+                name: _localizedCardName(
+                  cardId: card.id,
+                  original: card.name,
+                  languageCode: locale.languageCode,
+                ),
+              ))
+          .toList(growable: false);
+    }
     return cards;
   }
 
@@ -158,6 +169,261 @@ class CardsRepository {
     _lastResponseStringLengths[cacheKey] = raw.length;
     _lastResponseByteLengths[cacheKey] = raw.length;
   }
+}
+
+String _localizedCardName({
+  required String cardId,
+  required String original,
+  required String languageCode,
+}) {
+  if (languageCode != 'fr' && languageCode != 'tr') {
+    return original;
+  }
+
+  final id = canonicalCardId(cardId);
+  final majorName = _majorArcanaName(id: id, languageCode: languageCode);
+  if (majorName != null) {
+    return majorName;
+  }
+  final lenormandName = _lenormandName(id: id, languageCode: languageCode);
+  if (lenormandName != null) {
+    return lenormandName;
+  }
+  final suitedName = _suitedCardName(id: id, languageCode: languageCode);
+  if (suitedName != null) {
+    return suitedName;
+  }
+  return original;
+}
+
+String? _majorArcanaName({required String id, required String languageCode}) {
+  final majorKey = id.startsWith('ac_')
+      ? id.replaceFirst('ac_', 'major_')
+      : id.startsWith('major_')
+          ? id
+          : null;
+  if (majorKey == null || !majorKey.startsWith('major_')) {
+    return null;
+  }
+  const fr = {
+    'major_00_fool': 'Le Mat',
+    'major_01_magician': 'Le Magicien',
+    'major_02_high_priestess': 'La Papesse',
+    'major_03_empress': 'L Imperatrice',
+    'major_04_emperor': 'L Empereur',
+    'major_05_hierophant': 'Le Pape',
+    'major_06_lovers': 'Les Amoureux',
+    'major_07_chariot': 'Le Chariot',
+    'major_08_strength': 'La Force',
+    'major_09_hermit': 'L Hermite',
+    'major_10_wheel': 'La Roue de Fortune',
+    'major_10_wheel_of_fortune': 'La Roue de Fortune',
+    'major_11_justice': 'La Justice',
+    'major_12_hanged_man': 'Le Pendu',
+    'major_13_death': 'Arcane sans nom',
+    'major_14_temperance': 'Temperance',
+    'major_15_devil': 'Le Diable',
+    'major_16_tower': 'La Maison Dieu',
+    'major_17_star': 'L Etoile',
+    'major_18_moon': 'La Lune',
+    'major_19_sun': 'Le Soleil',
+    'major_20_judgement': 'Le Jugement',
+    'major_21_world': 'Le Monde',
+  };
+  const tr = {
+    'major_00_fool': 'Deli',
+    'major_01_magician': 'Büyücü',
+    'major_02_high_priestess': 'Başrahibe',
+    'major_03_empress': 'İmparatoriçe',
+    'major_04_emperor': 'İmparator',
+    'major_05_hierophant': 'Başrahip',
+    'major_06_lovers': 'Aşıklar',
+    'major_07_chariot': 'Savaş Arabası',
+    'major_08_strength': 'Güç',
+    'major_09_hermit': 'Ermiş',
+    'major_10_wheel': 'Kader Çarkı',
+    'major_10_wheel_of_fortune': 'Kader Çarkı',
+    'major_11_justice': 'Adalet',
+    'major_12_hanged_man': 'Asılan Adam',
+    'major_13_death': 'Ölüm',
+    'major_14_temperance': 'Denge',
+    'major_15_devil': 'Şeytan',
+    'major_16_tower': 'Kule',
+    'major_17_star': 'Yıldız',
+    'major_18_moon': 'Ay',
+    'major_19_sun': 'Güneş',
+    'major_20_judgement': 'Yargı',
+    'major_21_world': 'Dünya',
+  };
+  if (languageCode == 'fr') {
+    return fr[majorKey];
+  }
+  return tr[majorKey];
+}
+
+String? _suitedCardName({required String id, required String languageCode}) {
+  String? suit;
+  String? rank;
+  if (id.startsWith('ac_')) {
+    final parts = id.split('_');
+    if (parts.length >= 3) {
+      suit = parts[1];
+      rank = parts.sublist(2).join('_');
+    }
+  } else {
+    final parts = id.split('_');
+    if (parts.length >= 3) {
+      suit = parts[0];
+      rank = parts[2];
+    }
+  }
+  if (suit == null || rank == null) {
+    return null;
+  }
+  const frRank = {
+    'ace': 'As',
+    'two': 'Deux',
+    'three': 'Trois',
+    'four': 'Quatre',
+    'five': 'Cinq',
+    'six': 'Six',
+    'seven': 'Sept',
+    'eight': 'Huit',
+    'nine': 'Neuf',
+    'ten': 'Dix',
+    'page': 'Page',
+    'knight': 'Chevalier',
+    'queen': 'Reine',
+    'king': 'Roi',
+  };
+  const trRank = {
+    'ace': 'As',
+    'two': 'İki',
+    'three': 'Üç',
+    'four': 'Dört',
+    'five': 'Beş',
+    'six': 'Altı',
+    'seven': 'Yedi',
+    'eight': 'Sekiz',
+    'nine': 'Dokuz',
+    'ten': 'On',
+    'page': 'Vale',
+    'knight': 'Şövalye',
+    'queen': 'Kraliçe',
+    'king': 'Kral',
+  };
+  const frSuit = {
+    'wands': 'Bâtons',
+    'cups': 'Coupes',
+    'swords': 'Épées',
+    'pentacles': 'Pentacles',
+  };
+  const trSuit = {
+    'wands': 'Değnekler',
+    'cups': 'Kupalar',
+    'swords': 'Kılıçlar',
+    'pentacles': 'Tılsımlar',
+  };
+  if (!frSuit.containsKey(suit)) {
+    return null;
+  }
+  if (languageCode == 'fr') {
+    final r = frRank[rank];
+    final s = frSuit[suit];
+    if (r == null || s == null) return null;
+    return '$r de $s';
+  }
+  final r = trRank[rank];
+  final s = trSuit[suit];
+  if (r == null || s == null) return null;
+  return '$s $r';
+}
+
+String? _lenormandName({required String id, required String languageCode}) {
+  if (!id.startsWith('lenormand_')) {
+    return null;
+  }
+  final slug = id.split('_').skip(2).join('_');
+  const fr = {
+    'rider': 'Cavalier',
+    'clover': 'Trèfle',
+    'ship': 'Navire',
+    'house': 'Maison',
+    'tree': 'Arbre',
+    'clouds': 'Nuages',
+    'snake': 'Serpent',
+    'coffin': 'Cercueil',
+    'bouquet': 'Bouquet',
+    'scythe': 'Faux',
+    'whip': 'Fouet',
+    'birds': 'Oiseaux',
+    'child': 'Enfant',
+    'fox': 'Renard',
+    'bear': 'Ours',
+    'stars': 'Étoiles',
+    'stork': 'Cigogne',
+    'dog': 'Chien',
+    'tower': 'Tour',
+    'garden': 'Jardin',
+    'mountain': 'Montagne',
+    'crossroads': 'Carrefour',
+    'mice': 'Souris',
+    'heart': 'Coeur',
+    'ring': 'Anneau',
+    'book': 'Livre',
+    'letter': 'Lettre',
+    'man': 'Homme',
+    'woman': 'Femme',
+    'lily': 'Lys',
+    'sun': 'Soleil',
+    'moon': 'Lune',
+    'key': 'Clé',
+    'fish': 'Poissons',
+    'anchor': 'Ancre',
+    'cross': 'Croix',
+  };
+  const tr = {
+    'rider': 'Süvari',
+    'clover': 'Yonca',
+    'ship': 'Gemi',
+    'house': 'Ev',
+    'tree': 'Ağaç',
+    'clouds': 'Bulutlar',
+    'snake': 'Yılan',
+    'coffin': 'Tabut',
+    'bouquet': 'Buket',
+    'scythe': 'Tırpan',
+    'whip': 'Kamçı',
+    'birds': 'Kuşlar',
+    'child': 'Çocuk',
+    'fox': 'Tilki',
+    'bear': 'Ayı',
+    'stars': 'Yıldızlar',
+    'stork': 'Leylek',
+    'dog': 'Köpek',
+    'tower': 'Kule',
+    'garden': 'Bahçe',
+    'mountain': 'Dağ',
+    'crossroads': 'Kavşak',
+    'mice': 'Fareler',
+    'heart': 'Kalp',
+    'ring': 'Yüzük',
+    'book': 'Kitap',
+    'letter': 'Mektup',
+    'man': 'Erkek',
+    'woman': 'Kadın',
+    'lily': 'Zambak',
+    'sun': 'Güneş',
+    'moon': 'Ay',
+    'key': 'Anahtar',
+    'fish': 'Balık',
+    'anchor': 'Çapa',
+    'cross': 'Haç',
+  };
+  if (languageCode == 'fr') {
+    return fr[slug];
+  }
+  return tr[slug];
 }
 
 class CardsLoadException implements Exception {

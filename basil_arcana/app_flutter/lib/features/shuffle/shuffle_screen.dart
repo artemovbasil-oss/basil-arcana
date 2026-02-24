@@ -68,6 +68,12 @@ class _ShuffleScreenState extends ConsumerState<ShuffleScreen>
     if (code == 'kk') {
       return 'Колоданы ауыстыру: $nextDeckName';
     }
+    if (code == 'fr') {
+      return 'Changer de jeu : $nextDeckName';
+    }
+    if (code == 'tr') {
+      return 'Desteyi değiştir: $nextDeckName';
+    }
     return 'Switch deck: $nextDeckName';
   }
 

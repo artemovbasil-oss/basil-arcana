@@ -553,6 +553,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     if (code == 'kk') {
       return 'Қазіргі энергия';
     }
+    if (code == 'fr') {
+      return 'Énergie actuelle';
+    }
+    if (code == 'tr') {
+      return 'Mevcut enerji';
+    }
     return 'Current energy';
   }
 
@@ -563,6 +569,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
     if (code == 'kk') {
       return 'Ақылы жазылымдар';
+    }
+    if (code == 'fr') {
+      return 'Abonnements payants';
+    }
+    if (code == 'tr') {
+      return 'Ücretli abonelikler';
     }
     return 'Paid subscriptions';
   }
@@ -575,6 +587,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     if (code == 'kk') {
       return 'Шақыру үшін бонустар';
     }
+    if (code == 'fr') {
+      return 'Bonus de parrainage';
+    }
+    if (code == 'tr') {
+      return 'Davet bonusları';
+    }
     return 'Referral bonuses';
   }
 
@@ -585,6 +603,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
     if (code == 'kk') {
       return '5 картаға премиум ашылым: $count';
+    }
+    if (code == 'fr') {
+      return 'Tirage premium 5 cartes : $count';
+    }
+    if (code == 'tr') {
+      return 'Premium 5 kart açılımı: $count';
     }
     return 'Premium five-card spread: $count';
   }
@@ -597,6 +621,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     if (code == 'kk') {
       return 'Натал карта және үйлесімділік: $count';
     }
+    if (code == 'fr') {
+      return 'Thème natal et compatibilité : $count';
+    }
+    if (code == 'tr') {
+      return 'Doğum haritası ve uyumluluk: $count';
+    }
     return 'Natal chart and compatibility: $count';
   }
 
@@ -607,6 +637,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
     if (code == 'kk') {
       return 'София үшін келісімді қайтарып алу';
+    }
+    if (code == 'fr') {
+      return 'Retirer le consentement pour Sofia';
+    }
+    if (code == 'tr') {
+      return 'Sofia iznini geri çek';
     }
     return 'Withdraw Sofia consent';
   }
@@ -619,6 +655,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     if (code == 'kk') {
       return 'Келісім қайтарылды. Басты экранда сұрау қайта көрсетіледі.';
     }
+    if (code == 'fr') {
+      return 'Consentement retiré. La demande réapparaîtra sur l écran d accueil.';
+    }
+    if (code == 'tr') {
+      return 'Onay geri çekildi. İstek ana ekranda yeniden görünecek.';
+    }
     return 'Consent withdrawn. The request will appear again on Home.';
   }
 
@@ -629,6 +671,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
     if (code == 'kk') {
       return 'Құпиялық';
+    }
+    if (code == 'fr') {
+      return 'Confidentialité';
+    }
+    if (code == 'tr') {
+      return 'Gizlilik';
     }
     return 'Privacy';
   }
@@ -641,6 +689,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     if (code == 'kk') {
       return 'Егер ойың өзгерсе, осында ат пен username жіберуге берілген келісімді өшіре аласың.';
     }
+    if (code == 'fr') {
+      return 'Si vous changez d avis, vous pouvez ici retirer le consentement au partage du nom et du nom d utilisateur.';
+    }
+    if (code == 'tr') {
+      return 'Fikriniz değişirse ad ve kullanıcı adını paylaşma iznini buradan sıfırlayabilirsiniz.';
+    }
     return 'If you change your mind, reset consent for sharing name and username here.';
   }
 
@@ -651,6 +705,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
     if (code == 'kk') {
       return 'Келісімді қайтарып алу жіберілмеді. Қайтадан көр.';
+    }
+    if (code == 'fr') {
+      return 'Impossible d envoyer la révocation du consentement. Veuillez réessayer.';
+    }
+    if (code == 'tr') {
+      return 'Onay geri çekme isteği gönderilemedi. Lütfen tekrar deneyin.';
     }
     return 'Could not submit consent withdrawal. Please try again.';
   }

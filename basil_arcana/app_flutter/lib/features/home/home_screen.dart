@@ -686,7 +686,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         ? 'Скачать / поделиться PDF'
                         : lang == 'kk'
                             ? 'PDF жүктеу / бөлісу'
-                            : 'Download / share PDF';
+                            : lang == 'fr'
+                                ? 'Télécharger / partager le PDF'
+                                : lang == 'tr'
+                                    ? 'PDF indir / paylaş'
+                                    : 'Download / share PDF';
                     return AppPrimaryButton(
                       label: exportLabel,
                       onPressed: () async {
@@ -905,6 +909,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     if (code == 'kk') {
       return 'Шақырылғандар: $invited';
     }
+    if (code == 'fr') {
+      return 'Invités : $invited';
+    }
+    if (code == 'tr') {
+      return 'Davet edilen: $invited';
+    }
     return 'Invited: $invited';
   }
 
@@ -916,6 +926,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     }
     if (code == 'kk') {
       return 'Бонустар: $credits';
+    }
+    if (code == 'fr') {
+      return 'Bonus : $credits';
+    }
+    if (code == 'tr') {
+      return 'Bonuslar: $credits';
     }
     return 'Bonuses: $credits';
   }
@@ -1002,6 +1018,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           'Инсайт: $insight\n'
           'Күн қадамы: ${copy.dailyCardQuestion(dailyCard.name)}\n'
           'Өзіңнің күн картаңды аш:',
+      'fr' => 'the real magic · Carte du jour : ${dailyCard.name}\n'
+          'Insight : $insight\n'
+          'Étape du jour : ${copy.dailyCardQuestion(dailyCard.name)}\n'
+          'Ouvre ta carte du jour :',
+      'tr' => 'the real magic · Günün kartı: ${dailyCard.name}\n'
+          'İçgörü: $insight\n'
+          'Günün adımı: ${copy.dailyCardQuestion(dailyCard.name)}\n'
+          'Günün kartını aç:',
       _ => 'the real magic · Card of the day: ${dailyCard.name}\n'
           'Insight: $insight\n'
           'Step of the day: ${copy.dailyCardQuestion(dailyCard.name)}\n'
@@ -2314,9 +2338,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                               ),
                               const SizedBox(height: 6),
                               Text(
-                                dailyCard.meaning.general.trim().isEmpty
-                                    ? copy.dailyCardFallback
-                                    : dailyCard.meaning.general.trim(),
+                                () {
+                                  final localeCode =
+                                      Localizations.localeOf(sheetContext)
+                                          .languageCode;
+                                  if (localeCode == 'fr' ||
+                                      localeCode == 'tr') {
+                                    return copy.dailyCardFallback;
+                                  }
+                                  final summary =
+                                      dailyCard.meaning.general.trim();
+                                  return summary.isEmpty
+                                      ? copy.dailyCardFallback
+                                      : summary;
+                                }(),
                                 style: Theme.of(sheetContext)
                                     .textTheme
                                     .bodySmall
@@ -2622,6 +2657,12 @@ class _HomeInviteCompactCard extends StatelessWidget {
     if (code == 'kk') {
       return 'Бөлісу';
     }
+    if (code == 'fr') {
+      return 'Partager';
+    }
+    if (code == 'tr') {
+      return 'Paylaş';
+    }
     return 'Share';
   }
 }
@@ -2854,6 +2895,32 @@ class _HomeOnboardingCopy {
         closeButton: 'Керемет',
       );
     }
+    if (code == 'fr') {
+      return _HomeOnboardingCopy(
+        title: 'The real magic',
+        subtitle: subtitle,
+        itemLenormand: 'Tirage Lenormand',
+        itemLenormandHint: 'Choisis le jeu dans le profil',
+        itemCompatibility: 'Compatibilité du couple',
+        itemCompatibilityHint: 'Essaie gratuitement',
+        itemNatal: 'Lecture du thème natal',
+        itemNatalHint: 'Essaie gratuitement',
+        closeButton: 'Super',
+      );
+    }
+    if (code == 'tr') {
+      return _HomeOnboardingCopy(
+        title: 'The real magic',
+        subtitle: subtitle,
+        itemLenormand: 'Lenormand açılımı',
+        itemLenormandHint: 'Desteyi profilden seç',
+        itemCompatibility: 'Çift uyumluluk testi',
+        itemCompatibilityHint: 'Ücretsiz dene',
+        itemNatal: 'Doğum haritası yorumu',
+        itemNatalHint: 'Ücretsiz dene',
+        closeButton: 'Harika',
+      );
+    }
     return _HomeOnboardingCopy(
       title: 'The real magic',
       subtitle: subtitle,
@@ -2928,6 +2995,7 @@ class _EnergyProfileData {
 
 class _EnergyProfileCopy {
   const _EnergyProfileCopy({
+    required this.localeCode,
     required this.title,
     required this.subtitle,
     required this.emptyState,
@@ -2970,6 +3038,7 @@ class _EnergyProfileCopy {
     required this.archetypePromptPrefix,
   });
 
+  final String localeCode;
   final String title;
   final String subtitle;
   final String emptyState;
@@ -3083,40 +3152,64 @@ class _EnergyProfileCopy {
     }
     final dominantLabel = elementLabel(deckType, dominant).toLowerCase();
     if (support == null) {
-      if (title.startsWith('Твой')) {
+      if (localeCode == 'ru') {
         return 'Сейчас доминирует $dominantLabel. Это твой основной вектор периода.';
       }
-      if (title.startsWith('Сенің')) {
+      if (localeCode == 'kk') {
         return 'Қазір $dominantLabel басым. Осы кезеңнің негізгі бағыты осы.';
+      }
+      if (localeCode == 'fr') {
+        return 'En ce moment, $dominantLabel domine. C est votre axe principal de la période.';
+      }
+      if (localeCode == 'tr') {
+        return 'Şu anda $dominantLabel baskın. Bu dönemin ana yönü bu.';
       }
       return 'Your pattern is led by $dominantLabel right now.';
     }
     final supportLabel = elementLabel(deckType, support).toLowerCase();
-    if (title.startsWith('Твой')) {
+    if (localeCode == 'ru') {
       return 'Ты в фазе, где $dominantLabel ведёт, а $supportLabel поддерживает движение.';
     }
-    if (title.startsWith('Сенің')) {
+    if (localeCode == 'kk') {
       return '$dominantLabel алда, ал $supportLabel оны қолдап тұр.';
+    }
+    if (localeCode == 'fr') {
+      return 'Vous êtes dans une phase où $dominantLabel mène et $supportLabel soutient le mouvement.';
+    }
+    if (localeCode == 'tr') {
+      return '$dominantLabel önde, $supportLabel ise akışı destekliyor.';
     }
     return 'You are in a phase where $dominantLabel leads and $supportLabel supports it.';
   }
 
   String archetypeDescription(String cardName) {
-    if (title.startsWith('Твой')) {
+    if (localeCode == 'ru') {
       return 'Ведущий архетип сейчас: $cardName. Используй его как ориентир для решений ближайших дней.';
     }
-    if (title.startsWith('Сенің')) {
+    if (localeCode == 'kk') {
       return 'Қазір жетекші архетип: $cardName. Жақын күндердегі шешімдерде осыны бағдар етіңіз.';
+    }
+    if (localeCode == 'fr') {
+      return 'Votre archétype dominant actuel est $cardName. Utilisez-le comme repère pour les décisions des prochains jours.';
+    }
+    if (localeCode == 'tr') {
+      return 'Şu anki baskın arketipiniz $cardName. Önümüzdeki günlerde karar verirken bunu pusula olarak kullanın.';
     }
     return 'Your current leading archetype is $cardName. Use it as a compass for near-term decisions.';
   }
 
   String localeHint(int streakDays) {
-    if (title.startsWith('Твой')) {
+    if (localeCode == 'ru') {
       return 'Серия $streakDays дней усиливает точность профиля.';
     }
-    if (title.startsWith('Сенің')) {
+    if (localeCode == 'kk') {
       return '$streakDays күндік серия профиль дәлдігін арттырады.';
+    }
+    if (localeCode == 'fr') {
+      return 'Une série de $streakDays jours améliore la précision du profil.';
+    }
+    if (localeCode == 'tr') {
+      return '$streakDays günlük seri profil doğruluğunu artırır.';
     }
     return '$streakDays-day streak improves profile precision.';
   }
@@ -3150,11 +3243,15 @@ class _EnergyProfileCopy {
     }
     return [
       archetypeDescription(cardName),
-      title.startsWith('Твой')
+      localeCode == 'ru'
           ? 'Архетип $cardName показывает стиль действий на ближайший цикл. Чем чаще он повторяется, тем точнее подсказывает твой следующий шаг.'
-          : title.startsWith('Сенің')
+          : localeCode == 'kk'
               ? '$cardName архетипі жақын циклдегі әрекет стилін көрсетеді. Ол жиірек қайталанған сайын, келесі қадамды дәлірек көрсетеді.'
-              : '$cardName archetype reflects your current action style. The more often it repeats, the clearer your next move becomes.',
+              : localeCode == 'fr'
+                  ? 'L archétype $cardName reflète votre style d action actuel. Plus il se répète, plus votre prochaine étape devient claire.'
+                  : localeCode == 'tr'
+                      ? '$cardName arketipi mevcut eylem tarzınızı gösterir. Ne kadar sık tekrar ederse sonraki adım o kadar netleşir.'
+                      : '$cardName archetype reflects your current action style. The more often it repeats, the clearer your next move becomes.',
     ];
   }
 
@@ -3175,6 +3272,7 @@ class _EnergyProfileCopy {
     final code = Localizations.localeOf(context).languageCode;
     if (code == 'ru') {
       return const _EnergyProfileCopy(
+        localeCode: 'ru',
         title: 'Твой текущий энергетический паттерн',
         subtitle: 'Аналитика по всей истории активности',
         emptyState:
@@ -3225,6 +3323,7 @@ class _EnergyProfileCopy {
     }
     if (code == 'kk') {
       return const _EnergyProfileCopy(
+        localeCode: 'kk',
         title: 'Сенің ағымдағы энергия паттернің',
         subtitle: 'Белсенділіктің толық тарихы аналитикасы',
         emptyState:
@@ -3273,7 +3372,110 @@ class _EnergyProfileCopy {
             'Басым архетипімді талдап, практикалық кеңес бер. Архетип:',
       );
     }
+    if (code == 'fr') {
+      return const _EnergyProfileCopy(
+        localeCode: 'fr',
+        title: 'Votre modèle énergétique actuel',
+        subtitle: 'Analyse basée sur tout votre historique d activité',
+        emptyState:
+            'Pas encore assez de données. Faites quelques tirages et ce profil se remplira.',
+        elementsTitleRider: 'Roue des éléments',
+        elementsTitleLenormand: 'Roue des histoires',
+        elementsTitleCrowley: 'Roue des phases arcaniques',
+        destinyTitleRider: 'Intensité du destin',
+        destinyTitleAlt: 'Intensité du modèle',
+        destinyLowRider: 'Phase de fond : vous gardez le contrôle',
+        destinyHighRider: 'Phase à fort impact sur le destin',
+        destinyLowAlt: 'Le modèle est souple et diffus',
+        destinyHighAlt: 'Le modèle est concentré et intense',
+        archetypeTitle: 'Archétype dominant',
+        archetypeFallback: 'Archétype en formation',
+        repeatsTitle: 'Signaux récurrents',
+        repeatsFallback: 'Pas encore de répétitions nettes.',
+        sampleWindowLabel: 'Basé sur tout votre historique de cartes',
+        elementAction: 'Bâtons',
+        elementEmotion: 'Coupes',
+        elementMind: 'Épées',
+        elementMatter: 'Pentacles',
+        lenormandMovement: 'Mouvement',
+        lenormandRelations: 'Relations',
+        lenormandChallenges: 'Défis',
+        lenormandMaterial: 'Ressources',
+        crowleyImpulse: 'Impulsion',
+        crowleyChoice: 'Choix',
+        crowleyTransformation: 'Transformation',
+        crowleyIntegration: 'Intégration',
+        phaseSummaryFallback:
+            'Le profil collecte encore des signaux, le résumé reste donc neutre pour le moment.',
+        archetypeDescriptionFallback:
+            'Lorsque davantage de tirages seront disponibles, votre archétype dominant apparaîtra ici.',
+        patternShortTitle: 'Modèle',
+        archetypeShortTitle: 'Archétype',
+        patternDetailsTitle: 'Intensité du modèle',
+        archetypeDetailsTitle: 'Archétype dominant',
+        repeatsPercentMeaningPrefix: 'Conscience',
+        repeatsPercentMeaningSuffix:
+            ' est un indice de stabilité : plus le pourcentage est élevé, plus ce signal se répète dans votre historique.',
+        askOracleCta: 'Demander à l Oracle',
+        patternPromptPrefix:
+            'Analyse mon modèle actuel et propose la prochaine étape. Focus :',
+        archetypePromptPrefix:
+            'Analyse mon archétype dominant et propose une étape pratique. Archétype :',
+      );
+    }
+    if (code == 'tr') {
+      return const _EnergyProfileCopy(
+        localeCode: 'tr',
+        title: 'Mevcut enerji kalıbın',
+        subtitle: 'Tüm etkinlik geçmişinden analiz',
+        emptyState:
+            'Henüz yeterli veri yok. Birkaç açılım yapın, profil dolmaya başlayacak.',
+        elementsTitleRider: 'Element çarkı',
+        elementsTitleLenormand: 'Hikâye çarkı',
+        elementsTitleCrowley: 'Arkana faz çarkı',
+        destinyTitleRider: 'Kader yoğunluğu',
+        destinyTitleAlt: 'Kalıp yoğunluğu',
+        destinyLowRider: 'Arka plan fazı: direksiyon sizde',
+        destinyHighRider: 'Kaderi şekillendiren faz',
+        destinyLowAlt: 'Kalıp yumuşak ve yaygın',
+        destinyHighAlt: 'Kalıp yoğun ve güçlü',
+        archetypeTitle: 'Baskın arketip',
+        archetypeFallback: 'Arketip oluşuyor',
+        repeatsTitle: 'Tekrarlayan sinyaller',
+        repeatsFallback: 'Henüz güçlü tekrar yok.',
+        sampleWindowLabel: 'Tüm kart geçmişinize göre',
+        elementAction: 'Değnekler',
+        elementEmotion: 'Kupalar',
+        elementMind: 'Kılıçlar',
+        elementMatter: 'Tılsımlar',
+        lenormandMovement: 'Hareket',
+        lenormandRelations: 'İlişkiler',
+        lenormandChallenges: 'Zorluklar',
+        lenormandMaterial: 'Kaynaklar',
+        crowleyImpulse: 'İtki',
+        crowleyChoice: 'Seçim',
+        crowleyTransformation: 'Dönüşüm',
+        crowleyIntegration: 'Entegrasyon',
+        phaseSummaryFallback:
+            'Profil hâlâ sinyal topluyor; bu yüzden özet şimdilik nötr.',
+        archetypeDescriptionFallback:
+            'Daha fazla açılım biriktikçe baskın arketipiniz burada görünecek.',
+        patternShortTitle: 'Kalıp',
+        archetypeShortTitle: 'Arketip',
+        patternDetailsTitle: 'Kalıp yoğunluğu',
+        archetypeDetailsTitle: 'Baskın arketip',
+        repeatsPercentMeaningPrefix: 'Farkındalık',
+        repeatsPercentMeaningSuffix:
+            ' bir istikrar indeksidir: yüzde ne kadar yüksekse bu sinyal geçmişinizde o kadar sık tekrar eder.',
+        askOracleCta: 'Kâhine sor',
+        patternPromptPrefix:
+            'Mevcut kalıbımı yorumla ve bir sonraki adımı öner. Odak:',
+        archetypePromptPrefix:
+            'Baskın arketipimi yorumla ve pratik bir sonraki adımı ver. Arketip:',
+      );
+    }
     return const _EnergyProfileCopy(
+      localeCode: 'en',
       title: 'Your current energy pattern',
       subtitle: 'Analytics from your full activity history',
       emptyState:
@@ -3524,6 +3726,101 @@ class _HomeStreakCopy {
         lastActivePrefix: 'Соңғы белсенділік',
         closeLabel: 'Жабу',
         dayUnit: _kkDayUnit,
+      );
+    }
+    if (code == 'fr') {
+      return const _HomeStreakCopy(
+        tileLoadingTitle: '...',
+        tileLoadingSubtitle: 'Chargement de la série...',
+        tileSubtitle: 'Série et statistiques',
+        modalTitle: 'Votre série',
+        currentStreakLabel: 'Actuelle',
+        bestStreakLabel: 'Record',
+        awarenessLabel: 'Conscience',
+        dailyCardTileTitle: 'Carte du jour',
+        dailyCardModalTitle: 'Carte du jour',
+        dailyCardFallback: 'Sélection de la carte...',
+        dailyCardPending:
+            'Interprétation de ce que cette carte signifie pour vous aujourd hui...',
+        dailyCardError: 'Impossible de charger l interprétation. Réessayez.',
+        dailyCardBadgeLabel: 'Énergie du jour',
+        dailyCardInsightTitle: 'Interprétation',
+        dailyCardActionsTitle: 'Passer à l étape suivante',
+        dailyCardPrimaryCta: 'Lancer un tirage à partir de cette carte',
+        dailyCardSecondaryCta: 'Consultation personnelle avec Sofia',
+        dailyCardShareCta: 'Partager l histoire du jour',
+        dailyCardQuestionPrefix:
+            'Quelle prochaine étape dois-je faire aujourd hui en tenant compte de la carte',
+        streakLoadingSubtitle: 'Chargement de la série la plus récente...',
+        reportSectionTitle: 'Rapport personnel',
+        reportSectionBody:
+            'Rapport de coaching basé sur vos 30 derniers jours de tirages : tendances, équilibre et recommandations.',
+        reportPaidCta: 'Obtenir le rapport (PDF) — 200 ⭐',
+        reportFreeCta: 'Obtenir le rapport (PDF) — gratuit',
+        reportHelper: 'Basé sur votre historique des 30 derniers jours',
+        reportInsufficientTitle: 'Données insuffisantes',
+        reportInsufficientBody:
+            'Il faut au moins 10 cartes sur les 30 derniers jours. Faites encore quelques tirages puis revenez.',
+        reportConfirmTitle: 'Générer le rapport ?',
+        reportConfirmBody:
+            'Nous allons créer un rapport PDF sur vos 30 derniers jours de tirages. Prix — 200 ⭐.',
+        reportConfirmContinue: 'Continuer',
+        reportConfirmCancel: 'Annuler',
+        reportReadyTitle: 'Rapport prêt',
+        reportOpenPdf: 'Ouvrir le PDF',
+        reportSharePdf: 'Partager',
+        reportGenerateFailed:
+            'Impossible de générer le PDF après paiement. Contactez le support, nous vous aiderons.',
+        lastActivePrefix: 'Dernière activité',
+        closeLabel: 'Fermer',
+        dayUnit: _frDayUnit,
+      );
+    }
+    if (code == 'tr') {
+      return const _HomeStreakCopy(
+        tileLoadingTitle: '...',
+        tileLoadingSubtitle: 'Seri yükleniyor...',
+        tileSubtitle: 'Seri ve istatistikler',
+        modalTitle: 'Seriniz',
+        currentStreakLabel: 'Mevcut',
+        bestStreakLabel: 'En iyi',
+        awarenessLabel: 'Farkındalık',
+        dailyCardTileTitle: 'Günün kartı',
+        dailyCardModalTitle: 'Günün kartı',
+        dailyCardFallback: 'Kart seçiliyor...',
+        dailyCardPending: 'Bu kartın bugün sizin için anlamını yorumluyoruz...',
+        dailyCardError: 'Yorum yüklenemedi. Tekrar deneyin.',
+        dailyCardBadgeLabel: 'Günün enerjisi',
+        dailyCardInsightTitle: 'Yorum',
+        dailyCardActionsTitle: 'Bir sonraki adım',
+        dailyCardPrimaryCta: 'Bu kartla açılıma başla',
+        dailyCardSecondaryCta: 'Sofia ile kişisel danışmanlık',
+        dailyCardShareCta: 'Günün hikâyesini paylaş',
+        dailyCardQuestionPrefix:
+            'Bu karta göre bugün hangi sonraki adımı atmalıyım',
+        streakLoadingSubtitle: 'En güncel seri yükleniyor...',
+        reportSectionTitle: 'Kişisel rapor',
+        reportSectionBody:
+            'Son 30 günlük açılımlarınıza dayalı koç tarzı rapor: kalıplar, denge ve nazik öneriler.',
+        reportPaidCta: 'Raporu al (PDF) — 200 ⭐',
+        reportFreeCta: 'Raporu al (PDF) — ücretsiz',
+        reportHelper: 'Son 30 günlük açılım geçmişinize göre',
+        reportInsufficientTitle: 'Yetersiz veri',
+        reportInsufficientBody:
+            'Son 30 günde en az 10 kart gerekiyor. Birkaç açılım daha yapıp tekrar gelin.',
+        reportConfirmTitle: 'Rapor oluşturulsun mu?',
+        reportConfirmBody:
+            'Son 30 günlük açılımlarınızdan bir PDF raporu oluşturacağız. Ücret — 200 ⭐.',
+        reportConfirmContinue: 'Devam et',
+        reportConfirmCancel: 'İptal',
+        reportReadyTitle: 'Rapor hazır',
+        reportOpenPdf: 'PDF aç',
+        reportSharePdf: 'Paylaş',
+        reportGenerateFailed:
+            'Ödeme sonrası PDF oluşturulamadı. Lütfen destekle iletişime geçin.',
+        lastActivePrefix: 'Son etkinlik',
+        closeLabel: 'Kapat',
+        dayUnit: _trDayUnit,
       );
     }
     return const _HomeStreakCopy(
@@ -4111,6 +4408,12 @@ class _EnergyProfileCard extends StatelessWidget {
     if (code == 'kk') {
       return 'Ритм марапаттары';
     }
+    if (code == 'fr') {
+      return 'Récompenses du rythme';
+    }
+    if (code == 'tr') {
+      return 'Ritim ödülleri';
+    }
     return 'Rhythm awards';
   }
 
@@ -4530,6 +4833,12 @@ class _AchievementBadge extends StatelessWidget {
     if (code == 'kk') {
       return 'күн';
     }
+    if (code == 'fr') {
+      return 'j';
+    }
+    if (code == 'tr') {
+      return 'g';
+    }
     return 'd';
   }
 }
@@ -4855,6 +5164,12 @@ class _HomeMagicLoadingCard extends StatelessWidget {
     if (code == 'kk') {
       return 'Бірнеше секунд күте тұр…';
     }
+    if (code == 'fr') {
+      return 'Patiente une seconde…';
+    }
+    if (code == 'tr') {
+      return 'Birkaç saniye bekleyin…';
+    }
     return 'Give me a couple of seconds...';
   }
 
@@ -4981,6 +5296,50 @@ class _SofiaCopy {
             'Қатынас, ақша, мансап не ішкі күй болсын, саған айқын бағыт табуға көмектеседі.',
         submitError: 'Таңдауды сақтау мүмкін болмады. Қайтадан көріңіз.',
         closeLabel: 'Жабу',
+      );
+    }
+    if (code == 'fr') {
+      return const _SofiaCopy(
+        sofiaName: '@SofiaKnoxx',
+        consentTitle: 'Consentement au traitement des données',
+        consentBodyPrefix: 'Autoriser l envoi de votre nom à notre astrologue',
+        consentBodySuffix: 'pour les notifications',
+        acceptButton: 'J accepte',
+        rejectButton: 'Je refuse',
+        infoCardTitle: 'Notre tarologue-astrologue Sofia',
+        modalTitle: 'Notre tarologue-astrologue Sofia',
+        consentModalBody:
+            'Vous pouvez autoriser l envoi de votre nom et de votre username Telegram à Sofia pour les notifications. Destinataire : @SofiaKnoxx.',
+        consentModalScope:
+            'Seuls votre nom et votre username sont transmis. En cas de refus, seules des statistiques anonymes sont envoyées.',
+        profileModalBody:
+            'Sofia aide à clarifier même les situations complexes avec douceur et précision.',
+        profileModalScope:
+            'Relations, argent, carrière ou chaos intérieur : elle aide à voir le tableau global et la prochaine étape.',
+        submitError: 'Impossible d enregistrer votre choix. Réessayez.',
+        closeLabel: 'Fermer',
+      );
+    }
+    if (code == 'tr') {
+      return const _SofiaCopy(
+        sofiaName: '@SofiaKnoxx',
+        consentTitle: 'Veri işleme onayı',
+        consentBodyPrefix: 'Adınızın astrologumuza gönderilmesine izin ver',
+        consentBodySuffix: 'bildirimler için',
+        acceptButton: 'Kabul ediyorum',
+        rejectButton: 'Reddediyorum',
+        infoCardTitle: 'Tarot astrologumuz Sofia',
+        modalTitle: 'Tarot astrologumuz Sofia',
+        consentModalBody:
+            'Bildirimler için adınızı ve Telegram kullanıcı adınızı Sofia ya göndermeye izin verebilirsiniz. Alıcı: @SofiaKnoxx.',
+        consentModalScope:
+            'Yalnızca adınız ve kullanıcı adınız paylaşılır. Redderseniz sadece anonim istatistikler gönderilir.',
+        profileModalBody:
+            'Sofia en karmaşık durumları bile sakin ve net şekilde analiz etmenize yardımcı olur.',
+        profileModalScope:
+            'İlişki, para, kariyer veya iç karmaşa fark etmez; resmi ve sonraki adımı netleştirir.',
+        submitError: 'Seçiminiz kaydedilemedi. Lütfen tekrar deneyin.',
+        closeLabel: 'Kapat',
       );
     }
     return const _SofiaCopy(
@@ -5265,6 +5624,14 @@ String _enDayUnit(int days) {
   return days == 1 ? 'day' : 'days';
 }
 
+String _frDayUnit(int days) {
+  return days <= 1 ? 'jour' : 'jours';
+}
+
+String _trDayUnit(int days) {
+  return 'gün';
+}
+
 class _HomeFeatureCopy {
   const _HomeFeatureCopy({
     required this.natalTitle,
@@ -5290,6 +5657,20 @@ class _HomeFeatureCopy {
         natalTitle: 'Наталдық\nкарта',
         compatibilityTitle: 'Махаббат\nүйлесімділігі',
         libraryTitle: 'Карталар\nкітапханасы',
+      );
+    }
+    if (code == 'fr') {
+      return const _HomeFeatureCopy(
+        natalTitle: 'Thème\nnatal',
+        compatibilityTitle: 'Compatibilité\namoureuse',
+        libraryTitle: 'Bibliothèque\nde cartes',
+      );
+    }
+    if (code == 'tr') {
+      return const _HomeFeatureCopy(
+        natalTitle: 'Doğum\nharitası',
+        compatibilityTitle: 'Aşk\nuyumu',
+        libraryTitle: 'Kart\nkütüphanesi',
       );
     }
     return const _HomeFeatureCopy(

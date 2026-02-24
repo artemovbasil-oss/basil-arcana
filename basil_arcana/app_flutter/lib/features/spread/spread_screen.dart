@@ -622,10 +622,31 @@ class _FiveCardsPremiumCopy {
         title: '5 картаға премиум жайылма',
         body:
             'Бұл формат жағдайды терең ашады: бес позиция жасырын себептерді, күштердің тепе-теңдігін және ең дәл келесі қадамды көрсетеді.',
-        scope:
-            '1 жылдық шексіз жазылымға кіреді. Бір реттік кіру: 1⭐.',
+        scope: '1 жылдық шексіз жазылымға кіреді. Бір реттік кіру: 1⭐.',
         buyButton: 'Қолжетімділікті сатып алу',
         premiumTag: 'Премиум',
+      );
+    }
+    if (code == 'fr') {
+      return const _FiveCardsPremiumCopy(
+        title: 'Tirage premium à 5 cartes',
+        body:
+            'Ce tirage ouvre une couche plus profonde de votre histoire : cinq positions révèlent les causes cachées, l équilibre des forces et la meilleure prochaine action.',
+        scope:
+            'Inclus dans l abonnement illimité 1 an. Accès unique : 1⭐ par tirage.',
+        buyButton: 'Acheter l accès',
+        premiumTag: 'Premium',
+      );
+    }
+    if (code == 'tr') {
+      return const _FiveCardsPremiumCopy(
+        title: 'Premium 5 kart açılımı',
+        body:
+            'Bu açılım hikâyenizin daha derin katmanını açar: beş pozisyon gizli nedenleri, güç dengesini ve en doğru sonraki adımı gösterir.',
+        scope:
+            '1 yıllık sınırsız aboneliğe dahildir. Tek seferlik erişim: açılım başına 1⭐.',
+        buyButton: 'Erişim satın al',
+        premiumTag: 'Premium',
       );
     }
     return const _FiveCardsPremiumCopy(

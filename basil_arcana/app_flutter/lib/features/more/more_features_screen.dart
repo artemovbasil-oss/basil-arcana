@@ -281,6 +281,12 @@ class _MoreFeaturesScreenState extends ConsumerState<MoreFeaturesScreen> {
     if (code == 'kk') {
       return 'Туған жері';
     }
+    if (code == 'fr') {
+      return 'Lieu de naissance';
+    }
+    if (code == 'tr') {
+      return 'Doğum yeri';
+    }
     return 'Birth place';
   }
 
@@ -291,6 +297,12 @@ class _MoreFeaturesScreenState extends ConsumerState<MoreFeaturesScreen> {
     }
     if (code == 'kk') {
       return 'Қаланы енгізіп, тізімнен таңдаңыз';
+    }
+    if (code == 'fr') {
+      return 'Saisissez une ville et choisissez-la dans la liste';
+    }
+    if (code == 'tr') {
+      return 'Şehri yazın ve listeden seçin';
     }
     return 'Type city and select from the list';
   }
@@ -303,6 +315,12 @@ class _MoreFeaturesScreenState extends ConsumerState<MoreFeaturesScreen> {
     if (code == 'kk') {
       return 'Туған жерді тізімнен таңдаңыз.';
     }
+    if (code == 'fr') {
+      return 'Sélectionnez le lieu de naissance dans la liste.';
+    }
+    if (code == 'tr') {
+      return 'Doğum yerini listeden seçin.';
+    }
     return 'Select birth place from the list.';
   }
 
@@ -313,6 +331,12 @@ class _MoreFeaturesScreenState extends ConsumerState<MoreFeaturesScreen> {
     }
     if (code == 'kk') {
       return 'Қалалар ізделуде…';
+    }
+    if (code == 'fr') {
+      return 'Recherche des villes…';
+    }
+    if (code == 'tr') {
+      return 'Şehirler aranıyor…';
     }
     return 'Searching cities…';
   }

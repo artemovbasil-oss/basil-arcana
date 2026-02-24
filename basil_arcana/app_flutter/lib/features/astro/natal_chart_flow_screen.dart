@@ -297,6 +297,12 @@ class _NatalChartFlowScreenState extends ConsumerState<NatalChartFlowScreen> {
     if (languageCode == 'kk') {
       return '$name үшін қазір ішкі тұрақтылық пен сыртқы әрекеттің тепе-теңдігі маңызды. Наталдық картада күшті шешімдеріңіз тәртіп пен өзіңізге адалдықтан туатыны көрінеді.';
     }
+    if (languageCode == 'fr') {
+      return 'Pour $name, l enjeu principal du moment est d équilibrer stabilité intérieure et initiative extérieure. Le thème natal montre que vos décisions les plus fortes naissent de la discipline et de l alignement avec vous-même.';
+    }
+    if (languageCode == 'tr') {
+      return '$name için şu anda temel tema, iç denge ile dış inisiyatifi birlikte tutmak. Doğum haritası, en güçlü kararlarınızın disiplin ve kendinizle dürüst hizalanmadan doğduğunu gösteriyor.';
+    }
     return 'For $name, the key theme now is balancing inner stability with outward initiative. The natal chart suggests your strongest decisions come from discipline and honest self-alignment.';
   }
 
@@ -566,6 +572,12 @@ class _NatalCopy {
     if (screenTitle == 'Наталдық карта') {
       return '$normalizedName үшін наталдық карта жаса';
     }
+    if (screenTitle == 'Thème natal') {
+      return 'Génère un thème natal pour $normalizedName';
+    }
+    if (screenTitle == 'Doğum Haritası') {
+      return '$normalizedName için doğum haritası oluştur';
+    }
     return 'Generate a natal chart for $normalizedName';
   }
 
@@ -575,6 +587,12 @@ class _NatalCopy {
     }
     if (screenTitle == 'Наталдық карта') {
       return 'Туған күні: $date';
+    }
+    if (screenTitle == 'Thème natal') {
+      return 'Date de naissance : $date';
+    }
+    if (screenTitle == 'Doğum Haritası') {
+      return 'Doğum tarihi: $date';
     }
     return 'Birth date: $date';
   }
@@ -586,6 +604,12 @@ class _NatalCopy {
     if (screenTitle == 'Наталдық карта') {
       return 'Туған уақыты: $time';
     }
+    if (screenTitle == 'Thème natal') {
+      return 'Heure de naissance : $time';
+    }
+    if (screenTitle == 'Doğum Haritası') {
+      return 'Doğum saati: $time';
+    }
     return 'Birth time: $time';
   }
 
@@ -595,6 +619,12 @@ class _NatalCopy {
     }
     if (screenTitle == 'Наталдық карта') {
       return 'Туған жері: $place';
+    }
+    if (screenTitle == 'Thème natal') {
+      return 'Lieu de naissance : $place';
+    }
+    if (screenTitle == 'Doğum Haritası') {
+      return 'Doğum yeri: $place';
     }
     return 'Birth place: $place';
   }
@@ -606,6 +636,12 @@ class _NatalCopy {
     }
     if (screenTitle == 'Наталдық карта') {
       return '$normalizedName үшін сәттілікке расклад';
+    }
+    if (screenTitle == 'Thème natal') {
+      return 'Tirage chance pour $normalizedName';
+    }
+    if (screenTitle == 'Doğum Haritası') {
+      return '$normalizedName için şans açılımı';
     }
     return 'Luck spread for $normalizedName';
   }
@@ -629,6 +665,26 @@ class _NatalCopy {
         'Қарым-қатынасты сүзгіден өткізіңіз: қай адамнан кейін күшіңіз түседі. Бір апта сол байланысты азайтыңыз.',
         'Үш түн ұйқы режимін реттеңіз. Ұйқы бұзылса, жақсы ой да іске айналмайды.',
         'Бір зиянды әдетті таңдаңыз да (артық скролл, кеш чат), 7 күнге екі есе қысқартыңыз.',
+      ];
+      return options[DateTime.now().microsecondsSinceEpoch % options.length];
+    }
+    if (screenTitle == 'Thème natal') {
+      final options = [
+        '$normalizedName, faites 25 minutes de rangement sur votre bureau et vos notes : le désordre externe grignote vite la qualité des décisions.',
+        'Fixez une échéance concrète sous 48 heures : facture, appel, document. La clarté intérieure fonctionne mieux avec une action concrète.',
+        'Faites un audit de votre entourage : qui vous laisse vidé. Réduisez ce contact d au moins 30 % cette semaine.',
+        'Stabilisez votre sommeil pendant trois nuits d affilée. Sans récupération, les prises de conscience restent théoriques.',
+        'Choisissez une habitude de fuite (scroll, sucre, chats tardifs) et réduisez-la de moitié pendant 7 jours.',
+      ];
+      return options[DateTime.now().microsecondsSinceEpoch % options.length];
+    }
+    if (screenTitle == 'Doğum Haritası') {
+      final options = [
+        '$normalizedName, 25 dakika boyunca masa ve notlarını toparla: dıştaki dağınıklık karar kalitesini hızlıca düşürür.',
+        '48 saat içinde tek bir somut son tarih koy: fatura, arama, evrak. İçsel netlik, pratik aksiyonla güçlenir.',
+        'Çevreni gözden geçir: kimle konuşunca enerjin düşüyor? Bu hafta o teması en az %30 azalt.',
+        'Üç gece üst üste uyku düzenini sabitle. İyileşme yoksa içgörü eyleme zor dönüşür.',
+        'Bir kaçak alışkanlık seç (sonsuz kaydırma, geç saat sohbeti, şeker) ve 7 gün yarıya indir.',
       ];
       return options[DateTime.now().microsecondsSinceEpoch % options.length];
     }
@@ -690,6 +746,54 @@ class _NatalCopy {
             'Негізгі фокус: күшті қырларыңызды тұрақты ырғақ арқылы біртіндеп ашыңыз.',
         footerHint:
             'Наталдық карта — туған күн, уақыт және орынға негізделген жеке астрологиялық сызба.',
+      );
+    }
+    if (code == 'fr') {
+      return const _NatalCopy(
+        screenTitle: 'Thème natal',
+        nameLabel: 'Nom',
+        nameHint: 'Saisissez le nom',
+        dateLabel: 'Date de naissance',
+        dateHint: 'AAAA-MM-JJ',
+        timeLabel: 'Heure de naissance',
+        timeHint: 'HH:MM',
+        placeLabel: 'Lieu de naissance',
+        placeHint: 'Saisissez la ville et choisissez dans la liste',
+        placeLoadingLabel: 'Recherche des villes…',
+        placeSearchError: 'Impossible de charger le répertoire des villes.',
+        loadingLabel: 'Création du thème natal…',
+        backButton: 'Retour',
+        nextButton: 'Suivant',
+        generateButton: 'Construire',
+        resultTitle: 'Votre interprétation',
+        highlightAdvice:
+            'Focus principal : déployez vos forces progressivement avec un rythme stable.',
+        footerHint:
+            'Le thème natal est votre carte astrologique personnelle basée sur la date, l heure et le lieu de naissance.',
+      );
+    }
+    if (code == 'tr') {
+      return const _NatalCopy(
+        screenTitle: 'Doğum Haritası',
+        nameLabel: 'İsim',
+        nameHint: 'İsim girin',
+        dateLabel: 'Doğum tarihi',
+        dateHint: 'YYYY-AA-GG',
+        timeLabel: 'Doğum saati',
+        timeHint: 'SS:DD',
+        placeLabel: 'Doğum yeri',
+        placeHint: 'Şehri yazın ve listeden seçin',
+        placeLoadingLabel: 'Şehirler aranıyor…',
+        placeSearchError: 'Şehir dizini yüklenemedi.',
+        loadingLabel: 'Doğum haritası oluşturuluyor…',
+        backButton: 'Geri',
+        nextButton: 'İleri',
+        generateButton: 'Oluştur',
+        resultTitle: 'Yorumunuz',
+        highlightAdvice:
+            'Ana odak: güçlü yönlerinizi istikrarlı bir ritimle adım adım açın.',
+        footerHint:
+            'Doğum haritası; doğum tarihi, saati ve yerine göre kişisel astrolojik haritanızdır.',
       );
     }
     return const _NatalCopy(

@@ -443,6 +443,12 @@ class _CompatibilityCopy {
     if (screenTitle == 'Махаббат үйлесімділігі') {
       return step < 3 ? '1-адам' : '2-адам';
     }
+    if (screenTitle == 'Compatibilité amoureuse') {
+      return step < 3 ? 'Personne 1' : 'Personne 2';
+    }
+    if (screenTitle == 'Aşk uyumu') {
+      return step < 3 ? 'Kişi 1' : 'Kişi 2';
+    }
     return step < 3 ? 'Person 1' : 'Person 2';
   }
 
@@ -459,6 +465,20 @@ class _CompatibilityCopy {
         0 => 'Аты',
         1 => 'Туған күні',
         _ => 'Туған уақыты',
+      };
+    }
+    if (screenTitle == 'Compatibilité amoureuse') {
+      return switch (step % 3) {
+        0 => 'Nom',
+        1 => 'Date de naissance',
+        _ => 'Heure de naissance',
+      };
+    }
+    if (screenTitle == 'Aşk uyumu') {
+      return switch (step % 3) {
+        0 => 'İsim',
+        1 => 'Doğum tarihi',
+        _ => 'Doğum saati',
       };
     }
     return switch (step % 3) {
@@ -483,6 +503,20 @@ class _CompatibilityCopy {
         _ => 'СС:ММ',
       };
     }
+    if (screenTitle == 'Compatibilité amoureuse') {
+      return switch (step % 3) {
+        0 => 'Saisissez le nom',
+        1 => 'AAAA-MM-JJ',
+        _ => 'HH:MM',
+      };
+    }
+    if (screenTitle == 'Aşk uyumu') {
+      return switch (step % 3) {
+        0 => 'İsim girin',
+        1 => 'YYYY-AA-GG',
+        _ => 'SS:DD',
+      };
+    }
     return switch (step % 3) {
       0 => 'Enter name',
       1 => 'YYYY-MM-DD',
@@ -497,6 +531,12 @@ class _CompatibilityCopy {
     if (screenTitle == 'Махаббат үйлесімділігі') {
       return 'Үйлесімділікті тексер: $p1 және $p2';
     }
+    if (screenTitle == 'Compatibilité amoureuse') {
+      return 'Vérifie la compatibilité : $p1 et $p2';
+    }
+    if (screenTitle == 'Aşk uyumu') {
+      return '$p1 ve $p2 uyumunu kontrol et';
+    }
     return 'Check compatibility: $p1 and $p2';
   }
 
@@ -506,6 +546,12 @@ class _CompatibilityCopy {
     }
     if (screenTitle == 'Махаббат үйлесімділігі') {
       return 'Үйлесім индексі: $score%';
+    }
+    if (screenTitle == 'Compatibilité amoureuse') {
+      return 'Indice de compatibilité : $score%';
+    }
+    if (screenTitle == 'Aşk uyumu') {
+      return 'Uyum indeksi: $score%';
     }
     return 'Compatibility index: $score%';
   }
@@ -517,6 +563,12 @@ class _CompatibilityCopy {
     if (screenTitle == 'Махаббат үйлесімділігі') {
       return '$p1 + $p2 жұбының стилі: «эмоциялық адалдық + нақты келісімдер». ';
     }
+    if (screenTitle == 'Compatibilité amoureuse') {
+      return 'Style du couple $p1 + $p2 : «honnêteté émotionnelle + accords clairs».';
+    }
+    if (screenTitle == 'Aşk uyumu') {
+      return '$p1 + $p2 çift stili: "duygusal dürüstlük + net anlaşmalar."';
+    }
     return '$p1 + $p2 couple style: "emotional honesty + clear agreements."';
   }
 
@@ -526,6 +578,12 @@ class _CompatibilityCopy {
     }
     if (screenTitle == 'Махаббат үйлесімділігі') {
       return '$p1 және $p2 үйлесімділігін білу';
+    }
+    if (screenTitle == 'Compatibilité amoureuse') {
+      return '$p1 et $p2 : comprendre la compatibilité';
+    }
+    if (screenTitle == 'Aşk uyumu') {
+      return '$p1 ve $p2 uyumluluğunu öğren';
     }
     return 'check compatibility between $p1 and $p2';
   }
@@ -548,6 +606,26 @@ class _CompatibilityCopy {
         'Жұмыстан кейін 60 минут «тыныш аймақ» жасаңыз: шағымсыз. Кейін қысқа қорытынды айтыңыз.',
         'Тітіркендіретін тақырыптарды алдын ала бөліп алыңыз: әрқайсысына өз шекарасы болсын.',
         'Тұрмысты тексеріңіз: ұйқы, тамақ, шаршау. Көп жанжал сезімнен емес, шаршаудан туады.',
+      ];
+      return options[Random().nextInt(options.length)];
+    }
+    if (screenTitle == 'Compatibilité amoureuse') {
+      final options = [
+        'Coupez les téléphones pendant 15 minutes. Discutez d un seul point de friction concret et définissez une règle claire pour la semaine.',
+        'Alignez vos attentes financières du mois : qui paie quoi, et quand.',
+        'Installez une zone calme de 60 minutes après le travail sans reproches. Puis faites un bref débrief chacun.',
+        'Identifiez un sujet déclencheur pour chacun et fixez quand et comment en parler.',
+        'Vérifiez les bases: sommeil, repas, stress. Beaucoup de disputes sont des problèmes d énergie, pas d amour.',
+      ];
+      return options[Random().nextInt(options.length)];
+    }
+    if (screenTitle == 'Aşk uyumu') {
+      final options = [
+        '15 dakika telefonları kapatın. Tek bir gerçek sürtüşme konusunu konuşup bu hafta için net bir kural belirleyin.',
+        'Ay için para beklentilerini hizalayın: kim neyi ne zaman ödeyecek.',
+        'İş sonrası 60 dakikalık eleştirisiz sakin alan oluşturun. Sonra ikiniz de iki kısa cümleyle özetleyin.',
+        'Her kişi için bir tetikleyici konu belirleyin ve ne zaman konuşulacağını netleştirin.',
+        'Önce temelleri kontrol edin: uyku, beslenme, stres. Birçok kavga sevgi değil enerji problemidir.',
       ];
       return options[Random().nextInt(options.length)];
     }
@@ -592,6 +670,37 @@ class _CompatibilityCopy {
             'Назар аймағы: қарым-қатынас қарқыны мен жеке шекаралар туралы күтулерді алдын ала келісіп алыңыз.',
         footerHint:
             'Жұп үйлесімділігін тексеру қарым-қатынаста мінез, ырғақ және құндылықтардың қалай үйлесетінін көрсетеді.',
+      );
+    }
+    if (code == 'fr') {
+      return const _CompatibilityCopy(
+        screenTitle: 'Compatibilité amoureuse',
+        loadingLabel: 'Calcul de la compatibilité…',
+        backButton: 'Retour',
+        nextButton: 'Suivant',
+        generateButton: 'Vérifier',
+        resultTitle: 'Analyse de compatibilité',
+        errorText:
+            'Impossible de générer la compatibilité. Veuillez réessayer.',
+        conflictLine:
+            'Zone d attention: alignez tôt vos attentes sur le rythme de communication et les limites personnelles.',
+        footerHint:
+            'La compatibilité montre comment vos personnalités, rythmes et valeurs interagissent dans la relation.',
+      );
+    }
+    if (code == 'tr') {
+      return const _CompatibilityCopy(
+        screenTitle: 'Aşk uyumu',
+        loadingLabel: 'Uyum hesaplanıyor…',
+        backButton: 'Geri',
+        nextButton: 'İleri',
+        generateButton: 'Kontrol et',
+        resultTitle: 'Uyum yorumu',
+        errorText: 'Uyum oluşturulamadı. Lütfen tekrar deneyin.',
+        conflictLine:
+            'Dikkat alanı: iletişim hızı ve kişisel sınırlar konusunda beklentileri en baştan netleştirin.',
+        footerHint:
+            'Uyum, kişiliklerinizin, ritminizin ve değerlerinizin ilişkide nasıl etkileştiğini gösterir.',
       );
     }
     return const _CompatibilityCopy(

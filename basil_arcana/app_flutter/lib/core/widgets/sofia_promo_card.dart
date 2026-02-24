@@ -158,6 +158,12 @@ class SofiaPromoCard extends StatelessWidget {
     if (localeCode == 'kk') {
       return 'Терең жеке консультация';
     }
+    if (localeCode == 'fr') {
+      return 'Consultation personnelle approfondie';
+    }
+    if (localeCode == 'tr') {
+      return 'Derin kişisel danışmanlık';
+    }
     return 'Deep Personal Consultation';
   }
 
@@ -167,6 +173,12 @@ class SofiaPromoCard extends StatelessWidget {
     }
     if (localeCode == 'kk') {
       return 'Кәсіби таролог және астролог София Нокс сұрағыңды тереңірек әрі нақтырақ талдауға көмектеседі.';
+    }
+    if (localeCode == 'fr') {
+      return 'La tarologue et astrologue professionnelle Sofia Knox peut analyser votre question plus en profondeur et avec précision.';
+    }
+    if (localeCode == 'tr') {
+      return 'Profesyonel tarot uzmanı ve astrolog Sofia Knox, sorunu daha derin ve daha net şekilde analiz etmene yardımcı olur.';
     }
     return 'Professional tarot reader and astrologer Sofia Knox can unpack your question with deeper precision.';
   }
@@ -178,6 +190,12 @@ class SofiaPromoCard extends StatelessWidget {
     if (localeCode == 'kk') {
       return 'София профилін ашу';
     }
+    if (localeCode == 'fr') {
+      return 'Ouvrir le profil de Sofia';
+    }
+    if (localeCode == 'tr') {
+      return 'Sofia profilini aç';
+    }
     return 'Open Sofia profile';
   }
 
@@ -187,6 +205,12 @@ class SofiaPromoCard extends StatelessWidget {
     }
     if (localeCode == 'kk') {
       return 'Жеке консультация алу үшін Telegram-боттағы жазылымды қос.';
+    }
+    if (localeCode == 'fr') {
+      return 'Activez un abonnement dans notre bot Telegram pour réserver une consultation personnelle.';
+    }
+    if (localeCode == 'tr') {
+      return 'Kişisel danışmanlık almak için Telegram botumuzda aboneliği etkinleştir.';
     }
     return 'Activate a subscription in our Telegram bot to book a personal consultation.';
   }
@@ -201,6 +225,12 @@ class SofiaPromoCard extends StatelessWidget {
     }
     if (localeCode == 'kk') {
       return 'Сәлем, София! Жеке консультация алғым келеді.\n\nМенің қысқаша нәтижем:\n$summary';
+    }
+    if (localeCode == 'fr') {
+      return 'Bonjour Sofia ! Je souhaite une consultation personnelle.\n\nBref résumé de mon tirage :\n$summary';
+    }
+    if (localeCode == 'tr') {
+      return 'Merhaba Sofia! Kişisel danışmanlık istiyorum.\n\nAçılımımın kısa özeti:\n$summary';
     }
     return 'Hi Sofia! I would like a personal consultation.\n\nShort summary of my reading:\n$summary';
   }
@@ -218,6 +248,12 @@ class SofiaPromoCard extends StatelessWidget {
     }
     if (localeCode == 'kk') {
       return 'Қысқаша нәтиже көшірілді. Оны Софияға хабарламаға қой.';
+    }
+    if (localeCode == 'fr') {
+      return 'Résumé copié. Collez-le dans votre message à Sofia.';
+    }
+    if (localeCode == 'tr') {
+      return 'Özet kopyalandı. Sofia ya göndereceğin mesaja yapıştır.';
     }
     return 'Summary copied. Paste it into your message to Sofia.';
   }

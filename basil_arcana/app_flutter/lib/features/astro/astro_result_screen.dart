@@ -506,6 +506,38 @@ class _AstroResultCopy {
             'Basil Arcana-ны байқап көр: Telegram ішіндегі Таро жайылмалары, үйлесімділік және наталдық карталар.',
       );
     }
+    if (code == 'fr') {
+      return const _AstroResultCopy(
+        highlightsTitle: 'Points clés',
+        actionTitle: 'Étape d action',
+        newButton: 'Nouvelle demande',
+        referralTitle: 'Bonus de parrainage',
+        referralBody:
+            'Partagez votre lien personnel avec vos amis et recevez 20 tirages premium 5 cartes, 20 tests de compatibilité et 20 thèmes natals pour chaque nouvel utilisateur.',
+        referralButton: 'Partager le lien',
+        birthChartTitle: 'Votre carte natale',
+        tarotCtaButton: 'Faire un tirage de Tarot',
+        referralCopied: 'Lien de parrainage copié. Envoyez-le dans Telegram.',
+        referralShareMessage:
+            'Essayez Basil Arcana : tirages de Tarot, compatibilité et thèmes natals directement dans Telegram.',
+      );
+    }
+    if (code == 'tr') {
+      return const _AstroResultCopy(
+        highlightsTitle: 'Öne çıkanlar',
+        actionTitle: 'Eylem adımı',
+        newButton: 'Yeni istek',
+        referralTitle: 'Davet bonusu',
+        referralBody:
+            'Kişisel bağlantını arkadaşlarınla paylaş ve katılan her yeni kullanıcı için 20 premium 5 kart açılımı, 20 uyumluluk testi ve 20 doğum haritası kazan.',
+        referralButton: 'Bağlantıyı paylaş',
+        birthChartTitle: 'Doğum haritanız',
+        tarotCtaButton: 'Tarot açılımı yap',
+        referralCopied: 'Davet bağlantısı kopyalandı. Telegram da gönderin.',
+        referralShareMessage:
+            'Basil Arcana yı dene: Telegram da Tarot açılımları, uyumluluk ve doğum haritası.',
+      );
+    }
     return const _AstroResultCopy(
       highlightsTitle: 'Key Highlights',
       actionTitle: 'Action Step',
@@ -620,6 +652,20 @@ class _BirthChartVisualCard extends StatelessWidget {
         _AspectKind.trine => 'Тригон',
         _AspectKind.square => 'Квадрат',
         _AspectKind.opposition => 'Оппозиция',
+      };
+    }
+    if (code == 'fr') {
+      return switch (kind) {
+        _AspectKind.trine => 'Trigone',
+        _AspectKind.square => 'Carré',
+        _AspectKind.opposition => 'Opposition',
+      };
+    }
+    if (code == 'tr') {
+      return switch (kind) {
+        _AspectKind.trine => 'Üçgen',
+        _AspectKind.square => 'Kare',
+        _AspectKind.opposition => 'Karşıtlık',
       };
     }
     return switch (kind) {

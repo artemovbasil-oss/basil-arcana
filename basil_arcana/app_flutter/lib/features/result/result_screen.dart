@@ -906,6 +906,12 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
     if (code == 'kk') {
       return '5 картаға премиум талдау';
     }
+    if (code == 'fr') {
+      return 'Tirage premium à 5 cartes';
+    }
+    if (code == 'tr') {
+      return 'Premium 5 kart açılımı';
+    }
     return 'Premium 5-card reading';
   }
 
@@ -916,6 +922,12 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
     }
     if (code == 'kk') {
       return 'Қабат бойынша: себеп, динамика және нақты әрекет векторы.';
+    }
+    if (code == 'fr') {
+      return 'Couche par couche : causes, dynamiques et direction précise pour la prochaine étape.';
+    }
+    if (code == 'tr') {
+      return 'Katman katman: nedenler, dinamikler ve bir sonraki adım için net bir yön.';
     }
     return 'Layer by layer: causes, dynamics, and a precise next-step vector.';
   }
@@ -975,6 +987,12 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
     }
     if (code == 'kk') {
       return 'Шақырылғандар: ${invited ?? 0} · Бонус кредиттер: ${credits ?? 0}';
+    }
+    if (code == 'fr') {
+      return 'Invités : ${invited ?? 0} · Crédits bonus : ${credits ?? 0}';
+    }
+    if (code == 'tr') {
+      return 'Davet edilen: ${invited ?? 0} · Bonus krediler: ${credits ?? 0}';
     }
     return 'Invited: ${invited ?? 0} · Bonus credits: ${credits ?? 0}';
   }
@@ -1060,6 +1078,18 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
           'Бүгін бір сәт баяу тыныстап, өзіңізге кідіріс беріңіз. Кішкентай үзіліс күнді жеңілдетеді.',
           'Мүмкіндік болса, өзіңізге кішкентай қамқорлық жасаңыз. Шағын қолдау үлкен әсер береді.',
           'Бүгін мінсіздіктен гөрі тұрақтылықты таңдаңыз. Кішкентай қадам да алға жылжу.',
+        ];
+      case 'fr':
+        return const [
+          'Prenez une respiration lente et accordez-vous une petite pause aujourd hui. Les mini-pauses allègent la journée.',
+          'Si possible, faites un petit geste de douceur envers vous-même aujourd hui. Les petites attentions comptent.',
+          'Visez la stabilité plutôt que la perfection aujourd hui. Un petit pas reste un progrès.',
+        ];
+      case 'tr':
+        return const [
+          'Yavaş bir nefes alın ve bugün kendinize kısa bir mola verin. Küçük duraklamalar günü hafifletir.',
+          'Mümkünse bugün kendinize küçük bir iyilik yapın. Ufak özenler birikir.',
+          'Bugün mükemmellik yerine istikrarı seçin. Küçük adım da ilerlemedir.',
         ];
       case 'en':
       default:
@@ -1683,13 +1713,21 @@ String _loadingQuestionText({
           ? 'ваш запрос'
           : localeCode == 'kk'
               ? 'сұрағыңыз'
-              : 'your question')
+              : localeCode == 'fr'
+                  ? 'votre question'
+                  : localeCode == 'tr'
+                      ? 'sorunuz'
+                      : 'your question')
       : trimmed;
   final prefix = localeCode == 'ru'
       ? 'Разбираем ситуацию'
       : localeCode == 'kk'
           ? 'Жағдайды талдап жатырмыз'
-          : 'Reading your situation';
+          : localeCode == 'fr'
+              ? 'On analyse votre situation'
+              : localeCode == 'tr'
+                  ? 'Durumunuzu yorumluyoruz'
+                  : 'Reading your situation';
   return '$prefix — «$safeQuestion»';
 }
 
@@ -1705,6 +1743,12 @@ String _subscriptionLoaderText({
     if (localeCode == 'kk') {
       return 'Жазылым үшін рақмет, сен үшін есеп тегін';
     }
+    if (localeCode == 'fr') {
+      return 'Merci pour votre abonnement, ce tirage est offert.';
+    }
+    if (localeCode == 'tr') {
+      return 'Aboneliğiniz için teşekkürler, bu açılım sizin için ücretsiz.';
+    }
     return 'Thanks for your subscription, this reading is free for you';
   }
   if (localeCode == 'ru') {
@@ -1712,6 +1756,12 @@ String _subscriptionLoaderText({
   }
   if (localeCode == 'kk') {
     return 'Бұл жайылма $readingEnergyCost энергия тұрады. Ұнаса, келесі жолы жазылым алып, осындай талдауларды лимитсіз алуға болады.';
+  }
+  if (localeCode == 'fr') {
+    return 'Ce tirage coûte $readingEnergyCost points d énergie. Si cela vous plaît, vous pouvez prendre un abonnement la prochaine fois pour des tirages illimités.';
+  }
+  if (localeCode == 'tr') {
+    return 'Bu açılımın maliyeti $readingEnergyCost enerji. Beğenirseniz bir dahaki sefere abonelikle sınırsız açılım alabilirsiniz.';
   }
   return 'This reading costs $readingEnergyCost energy. If you like it, next time you can get a subscription for unlimited readings.';
 }
@@ -2239,6 +2289,12 @@ class _PremiumReadingBadge extends StatelessWidget {
     }
     if (code == 'kk') {
       return 'ПРЕМИУМ РЕЖИМ';
+    }
+    if (code == 'fr') {
+      return 'MODE PREMIUM';
+    }
+    if (code == 'tr') {
+      return 'PREMIUM MOD';
     }
     return 'PREMIUM MODE';
   }
