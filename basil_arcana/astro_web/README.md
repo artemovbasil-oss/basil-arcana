@@ -18,6 +18,21 @@ npm start
 Open:
 - `http://localhost:8080/`
 - `http://localhost:8080/health`
+- `http://localhost:8080/api/contracts`
+
+## Current MVP (v1)
+
+- Onboarding: local profile capture (name, birth date/time/city/timezone)
+- Natal route: `/natal-chart` (server-driven mock report)
+- Daily route: `/daily` (focus/risk/step card)
+- Friends route: `/friends` (compatibility-lite score + advice)
+
+### API endpoints
+
+- `GET /api/contracts`
+- `POST /api/natal-report`
+- `POST /api/daily-insight`
+- `POST /api/compatibility-report`
 
 ## Railway deploy (separate service)
 

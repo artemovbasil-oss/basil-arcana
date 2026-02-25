@@ -295,6 +295,38 @@ p {
   font-size: 0.95rem;
 }
 
+.form-grid {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.form-grid label {
+  display: grid;
+  gap: 0.35rem;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.form-grid input {
+  width: 100%;
+  border: 1px solid rgba(210, 219, 255, 0.22);
+  border-radius: 10px;
+  background: rgba(9, 11, 20, 0.72);
+  color: var(--ink);
+  padding: 0.68rem 0.72rem;
+  font: inherit;
+}
+
+.form-grid input:focus {
+  outline: none;
+  border-color: rgba(137, 242, 208, 0.75);
+  box-shadow: 0 0 0 2px rgba(137, 242, 208, 0.2);
+}
+
+.form-submit {
+  justify-content: center;
+}
+
 .footer {
   border-top: 1px solid rgba(187, 192, 225, 0.2);
   color: #98a2bf;
