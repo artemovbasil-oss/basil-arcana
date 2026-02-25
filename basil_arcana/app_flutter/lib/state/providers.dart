@@ -99,6 +99,7 @@ final energyProvider = StateNotifierProvider<EnergyController, EnergyState>((
 const _settingsBoxName = 'settings';
 const _languageCodeKey = 'languageCode';
 const _deckIdKey = 'deckId';
+const _highContrastKey = 'highContrastEnabled';
 
 String? _normalizeSupportedLanguageCode(String? raw) {
   final code = raw?.trim().toLowerCase() ?? '';
@@ -196,6 +197,29 @@ class DeckNotifier extends StateNotifier<DeckType> {
 final deckProvider = StateNotifierProvider<DeckNotifier, DeckType>((ref) {
   final box = Hive.box<String>(_settingsBoxName);
   return DeckNotifier(box);
+});
+
+bool _highContrastFromStorage(String? value) {
+  final normalized = value?.trim().toLowerCase();
+  return normalized == '1' || normalized == 'true';
+}
+
+class HighContrastNotifier extends StateNotifier<bool> {
+  HighContrastNotifier(this._box)
+      : super(_highContrastFromStorage(_box.get(_highContrastKey)));
+
+  final Box<String> _box;
+
+  Future<void> setHighContrast(bool enabled) async {
+    state = enabled;
+    await _box.put(_highContrastKey, enabled ? '1' : '0');
+  }
+}
+
+final highContrastProvider =
+    StateNotifierProvider<HighContrastNotifier, bool>((ref) {
+  final box = Hive.box<String>(_settingsBoxName);
+  return HighContrastNotifier(box);
 });
 
 final cardsProvider = FutureProvider((ref) async {

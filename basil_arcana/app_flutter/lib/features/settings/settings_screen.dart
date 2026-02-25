@@ -137,45 +137,53 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               style: AppTextStyles.subtitle(context),
             ),
             const SizedBox(height: 8),
-            _LanguageOption(
-              label: l10n.languageEnglish,
-              language: AppLanguage.en,
-              groupValue: settingsState.language,
-              onSelected: (value) {
-                settingsController.updateLanguage(value);
+            DropdownButtonFormField<AppLanguage>(
+              key: ValueKey(settingsState.language),
+              initialValue: settingsState.language,
+              decoration: const InputDecoration(
+                prefixIcon: Icon(Icons.translate_rounded),
+              ),
+              items: <DropdownMenuItem<AppLanguage>>[
+                DropdownMenuItem(
+                  value: AppLanguage.en,
+                  child: Text(l10n.languageEnglish),
+                ),
+                DropdownMenuItem(
+                  value: AppLanguage.ru,
+                  child: Text(l10n.languageRussian),
+                ),
+                DropdownMenuItem(
+                  value: AppLanguage.kz,
+                  child: Text(l10n.languageKazakh),
+                ),
+                DropdownMenuItem(
+                  value: AppLanguage.fr,
+                  child: Text(l10n.languageFrench),
+                ),
+                DropdownMenuItem(
+                  value: AppLanguage.tr,
+                  child: Text(l10n.languageTurkish),
+                ),
+              ],
+              onChanged: (value) {
+                if (value != null) {
+                  settingsController.updateLanguage(value);
+                }
               },
             ),
-            _LanguageOption(
-              label: l10n.languageRussian,
-              language: AppLanguage.ru,
-              groupValue: settingsState.language,
-              onSelected: (value) {
-                settingsController.updateLanguage(value);
-              },
+            const SizedBox(height: 20),
+            Text(
+              _accessibilitySectionTitle(context),
+              style: AppTextStyles.subtitle(context),
             ),
-            _LanguageOption(
-              label: l10n.languageKazakh,
-              language: AppLanguage.kz,
-              groupValue: settingsState.language,
-              onSelected: (value) {
-                settingsController.updateLanguage(value);
-              },
-            ),
-            _LanguageOption(
-              label: l10n.languageFrench,
-              language: AppLanguage.fr,
-              groupValue: settingsState.language,
-              onSelected: (value) {
-                settingsController.updateLanguage(value);
-              },
-            ),
-            _LanguageOption(
-              label: l10n.languageTurkish,
-              language: AppLanguage.tr,
-              groupValue: settingsState.language,
-              onSelected: (value) {
-                settingsController.updateLanguage(value);
-              },
+            const SizedBox(height: 8),
+            Card(
+              child: SwitchListTile(
+                title: Text(_highContrastLabel(context)),
+                subtitle: Text(_highContrastHint(context)),
+                value: settingsState.highContrastEnabled,
+                onChanged: settingsController.updateHighContrast,
+              ),
             ),
             const SizedBox(height: 20),
             Text(
@@ -664,6 +672,57 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return 'Consent withdrawn. The request will appear again on Home.';
   }
 
+  String _accessibilitySectionTitle(BuildContext context) {
+    final code = Localizations.localeOf(context).languageCode;
+    if (code == 'ru') {
+      return 'Доступность';
+    }
+    if (code == 'kk') {
+      return 'Қолжетімділік';
+    }
+    if (code == 'fr') {
+      return 'Accessibilité';
+    }
+    if (code == 'tr') {
+      return 'Erişilebilirlik';
+    }
+    return 'Accessibility';
+  }
+
+  String _highContrastLabel(BuildContext context) {
+    final code = Localizations.localeOf(context).languageCode;
+    if (code == 'ru') {
+      return 'Режим для слабовидящих';
+    }
+    if (code == 'kk') {
+      return 'Нашар көретіндерге арналған режим';
+    }
+    if (code == 'fr') {
+      return 'Mode malvoyant';
+    }
+    if (code == 'tr') {
+      return 'Az gören modu';
+    }
+    return 'Low-vision mode';
+  }
+
+  String _highContrastHint(BuildContext context) {
+    final code = Localizations.localeOf(context).languageCode;
+    if (code == 'ru') {
+      return 'Усиливает контраст интерфейса для более комфортного чтения.';
+    }
+    if (code == 'kk') {
+      return 'Мәтінді жеңіл оқу үшін интерфейс контрастын күшейтеді.';
+    }
+    if (code == 'fr') {
+      return 'Renforce le contraste de l interface pour faciliter la lecture.';
+    }
+    if (code == 'tr') {
+      return 'Daha rahat okuma için arayüz kontrastını artırır.';
+    }
+    return 'Increases UI contrast for easier reading.';
+  }
+
   String _privacySectionTitle(BuildContext context) {
     final code = Localizations.localeOf(context).languageCode;
     if (code == 'ru') {
@@ -802,39 +861,6 @@ class _DeckOption extends StatelessWidget {
       color: isSelected ? colorScheme.primary.withOpacity(0.12) : null,
       child: RadioListTile<DeckType>(
         value: deckType,
-        groupValue: groupValue,
-        onChanged: (value) {
-          if (value != null) {
-            onSelected(value);
-          }
-        },
-        title: Text(label),
-      ),
-    );
-  }
-}
-
-class _LanguageOption extends StatelessWidget {
-  const _LanguageOption({
-    required this.label,
-    required this.language,
-    required this.groupValue,
-    required this.onSelected,
-  });
-
-  final String label;
-  final AppLanguage language;
-  final AppLanguage groupValue;
-  final ValueChanged<AppLanguage> onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final isSelected = language == groupValue;
-    return Card(
-      color: isSelected ? colorScheme.primary.withOpacity(0.12) : null,
-      child: RadioListTile<AppLanguage>(
-        value: language,
         groupValue: groupValue,
         onChanged: (value) {
           if (value != null) {

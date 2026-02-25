@@ -8,29 +8,40 @@ class SettingsState {
   const SettingsState({
     required this.language,
     required this.deckType,
+    required this.highContrastEnabled,
     required this.initialLanguage,
     required this.initialDeckType,
+    required this.initialHighContrastEnabled,
   });
 
   final AppLanguage language;
   final DeckType deckType;
+  final bool highContrastEnabled;
   final AppLanguage initialLanguage;
   final DeckType initialDeckType;
+  final bool initialHighContrastEnabled;
 
   bool get isDirty =>
-      language != initialLanguage || deckType != initialDeckType;
+      language != initialLanguage ||
+      deckType != initialDeckType ||
+      highContrastEnabled != initialHighContrastEnabled;
 
   SettingsState copyWith({
     AppLanguage? language,
     DeckType? deckType,
+    bool? highContrastEnabled,
     AppLanguage? initialLanguage,
     DeckType? initialDeckType,
+    bool? initialHighContrastEnabled,
   }) {
     return SettingsState(
       language: language ?? this.language,
       deckType: deckType ?? this.deckType,
+      highContrastEnabled: highContrastEnabled ?? this.highContrastEnabled,
       initialLanguage: initialLanguage ?? this.initialLanguage,
       initialDeckType: initialDeckType ?? this.initialDeckType,
+      initialHighContrastEnabled:
+          initialHighContrastEnabled ?? this.initialHighContrastEnabled,
     );
   }
 }
@@ -48,16 +59,25 @@ class SettingsController extends StateNotifier<SettingsState> {
     state = state.copyWith(deckType: deckType);
   }
 
+  void updateHighContrast(bool enabled) {
+    state = state.copyWith(highContrastEnabled: enabled);
+  }
+
   Future<void> apply() async {
     final language = state.language;
     final deckType = state.deckType;
+    final highContrastEnabled = state.highContrastEnabled;
     await ref.read(localeProvider.notifier).setLocale(language.locale);
     await ref.read(deckProvider.notifier).setDeck(deckType);
+    await ref
+        .read(highContrastProvider.notifier)
+        .setHighContrast(highContrastEnabled);
     ref.invalidate(cardsProvider);
     ref.invalidate(cardsAllProvider);
     state = state.copyWith(
       initialLanguage: language,
       initialDeckType: deckType,
+      initialHighContrastEnabled: highContrastEnabled,
     );
   }
 }
@@ -66,14 +86,17 @@ final settingsControllerProvider =
     StateNotifierProvider.autoDispose<SettingsController, SettingsState>((ref) {
   final locale = ref.watch(localeProvider);
   final deckType = ref.watch(deckProvider);
+  final highContrastEnabled = ref.watch(highContrastProvider);
   final language = AppLanguageX.fromLocale(locale);
   return SettingsController(
     ref,
     SettingsState(
       language: language,
       deckType: deckType,
+      highContrastEnabled: highContrastEnabled,
       initialLanguage: language,
       initialDeckType: deckType,
+      initialHighContrastEnabled: highContrastEnabled,
     ),
   );
 });

@@ -19,6 +19,7 @@ class BasilArcanaApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final locale = ref.watch(localeProvider);
     final selectedDeck = ref.watch(deckProvider);
+    final highContrastEnabled = ref.watch(highContrastProvider);
     final appThemeFlavor = switch (selectedDeck) {
       DeckType.crowley => AppThemeFlavor.crowley,
       DeckType.lenormand => AppThemeFlavor.lenormand,
@@ -26,7 +27,10 @@ class BasilArcanaApp extends ConsumerWidget {
     };
     return MaterialApp(
       onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
-      theme: buildAppTheme(flavor: appThemeFlavor),
+      theme: buildAppTheme(
+        flavor: appThemeFlavor,
+        highContrast: highContrastEnabled,
+      ),
       builder: (context, child) {
         return Stack(
           children: [

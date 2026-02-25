@@ -6,8 +6,11 @@ enum AppThemeFlavor {
   crowley,
 }
 
-ThemeData buildAppTheme({AppThemeFlavor flavor = AppThemeFlavor.rider}) {
-  final palette = _paletteForFlavor(flavor);
+ThemeData buildAppTheme({
+  AppThemeFlavor flavor = AppThemeFlavor.rider,
+  bool highContrast = false,
+}) {
+  final palette = _paletteForFlavor(flavor, highContrast: highContrast);
 
   final colorScheme = ColorScheme.fromSeed(
     seedColor: palette.primary,
@@ -21,6 +24,9 @@ ThemeData buildAppTheme({AppThemeFlavor flavor = AppThemeFlavor.rider}) {
     background: palette.background,
     surface: palette.surface,
     surfaceVariant: palette.surfaceVariant,
+    onSurface: Colors.white,
+    onSurfaceVariant: const Color(0xFFF1F1F1),
+    outline: palette.outlineVariant,
     outlineVariant: palette.outlineVariant,
   );
 
@@ -131,7 +137,20 @@ class _ThemePalette {
   final Color outlineVariant;
 }
 
-_ThemePalette _paletteForFlavor(AppThemeFlavor flavor) {
+_ThemePalette _paletteForFlavor(
+  AppThemeFlavor flavor, {
+  required bool highContrast,
+}) {
+  if (highContrast) {
+    return const _ThemePalette(
+      primary: Color(0xFFFFD86B),
+      accent: Color(0xFFFFFFFF),
+      background: Color(0xFF000000),
+      surface: Color(0xFF101010),
+      surfaceVariant: Color(0xFF1A1A1A),
+      outlineVariant: Color(0xFFEAEAEA),
+    );
+  }
   switch (flavor) {
     case AppThemeFlavor.crowley:
       return const _ThemePalette(
