@@ -46,7 +46,7 @@ class AppPrimaryButton extends StatelessWidget {
       minimumSize: const Size.fromHeight(54),
       padding: padding ?? const EdgeInsets.symmetric(vertical: 14),
       backgroundColor: backgroundColor ?? colorScheme.primary,
-      foregroundColor: foregroundColor ?? Colors.white,
+      foregroundColor: foregroundColor ?? colorScheme.onPrimary,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       textStyle: const TextStyle(fontWeight: FontWeight.w600),
     );

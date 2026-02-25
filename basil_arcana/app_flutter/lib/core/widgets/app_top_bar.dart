@@ -132,18 +132,19 @@ class _InitialsAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       width: 32,
       height: 32,
       decoration: BoxDecoration(
-        color: const Color(0xFF8F4BFF),
+        color: colorScheme.primary,
         borderRadius: BorderRadius.circular(999),
       ),
       alignment: Alignment.center,
       child: Text(
         initials,
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: Colors.white,
+              color: colorScheme.onPrimary,
               fontWeight: FontWeight.w700,
             ),
       ),
@@ -183,25 +184,39 @@ class _EnergyHeaderPillState extends ConsumerState<_EnergyHeaderPill>
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final energy = ref.watch(energyProvider);
+    final highContrast = ref.watch(highContrastProvider);
     final energyValueText = energy.isUnlimited ? '∞' : '${energy.percent}%';
     final isLow = energy.clampedValue < 15;
-    const vividPurple = Color(0xFFA05CFF);
-    const darkBurgundy = Color(0xFF4A102A);
-    const nearBlack = Color(0xFF08060C);
-    final progress = energy.progress.clamp(0, 1);
-    final base = progress >= 0.5
-        ? Color.lerp(darkBurgundy, vividPurple, (progress - 0.5) * 2)!
-        : Color.lerp(nearBlack, darkBurgundy, progress * 2)!;
-    final end = Color.lerp(base, nearBlack, 0.48)!;
-    final edge = Color.lerp(base, Colors.white, 0.08)!;
+    final progress = energy.progress.clamp(0.0, 1.0);
+    final base = highContrast
+        ? const Color(0xFF101010)
+        : (progress >= 0.5
+            ? Color.lerp(
+                const Color(0xFF4A102A),
+                const Color(0xFFA05CFF),
+                (progress - 0.5) * 2,
+              )!
+            : Color.lerp(
+                const Color(0xFF08060C),
+                const Color(0xFF4A102A),
+                progress * 2,
+              )!);
+    final end = highContrast
+        ? const Color(0xFF000000)
+        : Color.lerp(base, const Color(0xFF08060C), 0.48)!;
+    final edge =
+        highContrast ? Colors.white : Color.lerp(base, Colors.white, 0.08)!;
 
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
         final curveT = Curves.easeInOutSine.transform(_controller.value);
-        final pulse =
-            isLow ? (0.988 + 0.03 * curveT) : (0.996 + 0.012 * curveT);
-        final glow = isLow ? (0.25 + 0.22 * curveT) : (0.1 + 0.1 * curveT);
+        final pulse = highContrast
+            ? 1.0
+            : (isLow ? (0.988 + 0.03 * curveT) : (0.996 + 0.012 * curveT));
+        final glow = highContrast
+            ? 0.0
+            : (isLow ? (0.25 + 0.22 * curveT) : (0.1 + 0.1 * curveT));
         return Transform.scale(
           scale: pulse,
           child: Material(
@@ -225,13 +240,15 @@ class _EnergyHeaderPillState extends ConsumerState<_EnergyHeaderPill>
                     end: Alignment.centerRight,
                   ),
                   border: Border.all(color: edge),
-                  boxShadow: [
-                    BoxShadow(
-                      color: base.withOpacity(glow),
-                      blurRadius: isLow ? 16 : 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
+                  boxShadow: glow <= 0
+                      ? null
+                      : [
+                          BoxShadow(
+                            color: base.withOpacity(glow),
+                            blurRadius: isLow ? 16 : 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                 ),
                 child: Row(
                   children: [
@@ -241,7 +258,9 @@ class _EnergyHeaderPillState extends ConsumerState<_EnergyHeaderPill>
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.labelMedium?.copyWith(
-                          color: Colors.white,
+                          color: highContrast
+                              ? theme.colorScheme.onSurface
+                              : Colors.white,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -249,15 +268,19 @@ class _EnergyHeaderPillState extends ConsumerState<_EnergyHeaderPill>
                     Text(
                       energyValueText,
                       style: theme.textTheme.labelMedium?.copyWith(
-                        color: Colors.white,
+                        color: highContrast
+                            ? theme.colorScheme.onSurface
+                            : Colors.white,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
                     const SizedBox(width: 6),
-                    const Icon(
+                    Icon(
                       Icons.chevron_right,
                       size: 16,
-                      color: Colors.white,
+                      color: highContrast
+                          ? theme.colorScheme.onSurface
+                          : Colors.white,
                     ),
                   ],
                 ),

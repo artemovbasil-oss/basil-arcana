@@ -2122,7 +2122,7 @@ class _ActionBar extends StatelessWidget {
                                 padding:
                                     const EdgeInsets.symmetric(vertical: 14),
                                 backgroundColor: colorScheme.primary,
-                                foregroundColor: Colors.white,
+                                foregroundColor: colorScheme.onPrimary,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(18),
                                 ),
@@ -2132,9 +2132,9 @@ class _ActionBar extends StatelessWidget {
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  const _ActionSvgIcon(
+                                  _ActionSvgIcon(
                                     kind: _ActionIconKind.wantMore,
-                                    color: Colors.white,
+                                    color: colorScheme.onPrimary,
                                   ),
                                   const SizedBox(width: 8),
                                   Text(moreLabel),

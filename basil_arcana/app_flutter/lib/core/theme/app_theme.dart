@@ -12,6 +12,10 @@ ThemeData buildAppTheme({
 }) {
   final palette = _paletteForFlavor(flavor, highContrast: highContrast);
   final onPrimaryColor = highContrast ? Colors.black : Colors.white;
+  final cardElevation = highContrast ? 0.0 : 3.0;
+  final buttonElevation = highContrast ? 0.0 : 8.0;
+  final shadowColor =
+      highContrast ? Colors.transparent : palette.accent.withOpacity(0.35);
   final baseTextTheme = const TextTheme(
     headlineSmall: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
     titleLarge: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
@@ -32,7 +36,7 @@ ThemeData buildAppTheme({
     primary: palette.primary,
     secondary: palette.accent,
     onPrimary: onPrimaryColor,
-    onPrimaryContainer: onPrimaryColor,
+    onPrimaryContainer: Colors.white,
     onSecondary: Colors.black,
     background: palette.background,
     surface: palette.surface,
@@ -57,8 +61,9 @@ ThemeData buildAppTheme({
     cardTheme: CardThemeData(
       color: palette.surface,
       surfaceTintColor: Colors.transparent,
-      elevation: 3,
-      shadowColor: palette.accent.withOpacity(0.18),
+      elevation: cardElevation,
+      shadowColor:
+          highContrast ? Colors.transparent : palette.accent.withOpacity(0.18),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
     ),
     inputDecorationTheme: InputDecorationTheme(
@@ -92,9 +97,9 @@ ThemeData buildAppTheme({
       style: ElevatedButton.styleFrom(
         minimumSize: const Size.fromHeight(54),
         backgroundColor: palette.primary,
-        foregroundColor: Colors.white,
-        elevation: 8,
-        shadowColor: palette.accent.withOpacity(0.35),
+        foregroundColor: onPrimaryColor,
+        elevation: buttonElevation,
+        shadowColor: shadowColor,
         shape: const StadiumBorder(),
         textStyle: const TextStyle(fontWeight: FontWeight.w600),
       ),

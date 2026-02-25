@@ -388,7 +388,7 @@ class _PackActionButton extends StatelessWidget {
             minimumSize: const Size.fromHeight(54),
             padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
             backgroundColor: colorScheme.primary,
-            foregroundColor: Colors.white,
+            foregroundColor: colorScheme.onPrimary,
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
             textStyle: const TextStyle(fontWeight: FontWeight.w600),

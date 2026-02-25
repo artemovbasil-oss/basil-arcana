@@ -1187,7 +1187,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                           style: ElevatedButton.styleFrom(
                             minimumSize: const Size.fromHeight(44),
                             backgroundColor: colorScheme.primary,
-                            foregroundColor: Colors.white,
+                            foregroundColor: colorScheme.onPrimary,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(14),
                             ),
@@ -4526,7 +4526,7 @@ class _EnergyProfileCard extends StatelessWidget {
                       style: ElevatedButton.styleFrom(
                         minimumSize: const Size.fromHeight(46),
                         backgroundColor: colorScheme.primary,
-                        foregroundColor: Colors.white,
+                        foregroundColor: colorScheme.onPrimary,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
                         ),
@@ -4535,7 +4535,7 @@ class _EnergyProfileCard extends StatelessWidget {
                         ctaLabel,
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
                               fontWeight: FontWeight.w800,
-                              color: Colors.white,
+                              color: colorScheme.onPrimary,
                             ),
                       ),
                     ),
