@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/models/app_enums.dart';
@@ -60,24 +62,27 @@ class SettingsController extends StateNotifier<SettingsState> {
   }
 
   void updateHighContrast(bool enabled) {
-    state = state.copyWith(highContrastEnabled: enabled);
+    if (state.highContrastEnabled == enabled &&
+        state.initialHighContrastEnabled == enabled) {
+      return;
+    }
+    state = state.copyWith(
+      highContrastEnabled: enabled,
+      initialHighContrastEnabled: enabled,
+    );
+    unawaited(ref.read(highContrastProvider.notifier).setHighContrast(enabled));
   }
 
   Future<void> apply() async {
     final language = state.language;
     final deckType = state.deckType;
-    final highContrastEnabled = state.highContrastEnabled;
     await ref.read(localeProvider.notifier).setLocale(language.locale);
     await ref.read(deckProvider.notifier).setDeck(deckType);
-    await ref
-        .read(highContrastProvider.notifier)
-        .setHighContrast(highContrastEnabled);
     ref.invalidate(cardsProvider);
     ref.invalidate(cardsAllProvider);
     state = state.copyWith(
       initialLanguage: language,
       initialDeckType: deckType,
-      initialHighContrastEnabled: highContrastEnabled,
     );
   }
 }
