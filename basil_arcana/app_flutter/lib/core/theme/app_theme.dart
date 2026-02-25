@@ -11,6 +11,19 @@ ThemeData buildAppTheme({
   bool highContrast = false,
 }) {
   final palette = _paletteForFlavor(flavor, highContrast: highContrast);
+  final onPrimaryColor = highContrast ? Colors.black : Colors.white;
+  final baseTextTheme = const TextTheme(
+    headlineSmall: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+    titleLarge: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+    titleMedium: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+    bodyMedium: TextStyle(fontSize: 14, height: 1.4),
+    bodySmall: TextStyle(fontSize: 12, height: 1.3),
+    labelLarge: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+    labelMedium: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+    labelSmall: TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
+  );
+  final textTheme =
+      highContrast ? _scaleTextTheme(baseTextTheme, 1.08) : baseTextTheme;
 
   final colorScheme = ColorScheme.fromSeed(
     seedColor: palette.primary,
@@ -18,8 +31,8 @@ ThemeData buildAppTheme({
   ).copyWith(
     primary: palette.primary,
     secondary: palette.accent,
-    onPrimary: Colors.white,
-    onPrimaryContainer: Colors.white,
+    onPrimary: onPrimaryColor,
+    onPrimaryContainer: onPrimaryColor,
     onSecondary: Colors.black,
     background: palette.background,
     surface: palette.surface,
@@ -106,16 +119,7 @@ ThemeData buildAppTheme({
       color: palette.outlineVariant.withOpacity(0.8),
       thickness: 1,
     ),
-    textTheme: const TextTheme(
-      headlineSmall: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
-      titleLarge: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
-      titleMedium: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-      bodyMedium: TextStyle(fontSize: 14, height: 1.4),
-      bodySmall: TextStyle(fontSize: 12, height: 1.3),
-      labelLarge: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-      labelMedium: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
-      labelSmall: TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
-    ),
+    textTheme: textTheme,
   );
 }
 
@@ -143,7 +147,7 @@ _ThemePalette _paletteForFlavor(
 }) {
   if (highContrast) {
     return const _ThemePalette(
-      primary: Color(0xFFFFD86B),
+      primary: Color(0xFFFFFFFF),
       accent: Color(0xFFFFFFFF),
       background: Color(0xFF000000),
       surface: Color(0xFF101010),
@@ -180,4 +184,24 @@ _ThemePalette _paletteForFlavor(
         outlineVariant: Color(0xFF4A425B),
       );
   }
+}
+
+TextTheme _scaleTextTheme(TextTheme base, double factor) {
+  TextStyle? scale(TextStyle? style) {
+    if (style == null || style.fontSize == null) {
+      return style;
+    }
+    return style.copyWith(fontSize: style.fontSize! * factor);
+  }
+
+  return base.copyWith(
+    headlineSmall: scale(base.headlineSmall),
+    titleLarge: scale(base.titleLarge),
+    titleMedium: scale(base.titleMedium),
+    bodyMedium: scale(base.bodyMedium),
+    bodySmall: scale(base.bodySmall),
+    labelLarge: scale(base.labelLarge),
+    labelMedium: scale(base.labelMedium),
+    labelSmall: scale(base.labelSmall),
+  );
 }
