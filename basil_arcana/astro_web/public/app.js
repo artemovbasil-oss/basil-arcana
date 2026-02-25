@@ -1,58 +1,35 @@
 const app = document.getElementById("app");
 const nav = document.getElementById("nav");
 const menuButton = document.getElementById("menuButton");
-const profileKey = "astro_profile_v1";
+
+const state = {
+  profile: null,
+  profileReady: false,
+  friends: []
+};
 
 menuButton.addEventListener("click", () => {
   nav.classList.toggle("open");
 });
 
-function getProfile() {
-  try {
-    const raw = window.localStorage.getItem(profileKey);
-    if (!raw) {
-      return null;
-    }
-    return JSON.parse(raw);
-  } catch {
-    return null;
-  }
-}
-
-function saveProfile(profile) {
-  window.localStorage.setItem(profileKey, JSON.stringify(profile));
-}
-
-function hasProfile(profile) {
-  return Boolean(profile?.name && profile?.birthDate && profile?.birthTime && profile?.birthCity);
-}
-
-function signFromMonth(month) {
-  const signs = [
-    "Capricorn", "Aquarius", "Pisces", "Aries", "Taurus", "Gemini",
-    "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius"
-  ];
-  return signs[(month + 11) % 12];
-}
-
-function risingFromTime(time) {
-  const hour = Number(String(time || "00:00").split(":")[0]);
-  const rising = [
-    "Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
-    "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"
-  ];
-  return rising[Math.floor((Number.isFinite(hour) ? hour : 0) / 2) % 12];
-}
-
 async function fetchJson(url, options) {
   const response = await fetch(url, {
-    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      ...(options?.headers || {})
+    },
     ...options
   });
+  const payload = await response.json().catch(() => ({}));
   if (!response.ok) {
-    throw new Error(`Request failed: ${response.status}`);
+    throw new Error(payload?.message || `Request failed: ${response.status}`);
   }
-  return response.json();
+  return payload;
+}
+
+function hasProfile(profile = state.profile) {
+  return Boolean(profile?.name && profile?.birthDate && profile?.birthTime && profile?.birthCity);
 }
 
 function shell({ eyebrow, title, intro, primaryCta, secondaryCta, rightPanel, body }) {
@@ -76,26 +53,28 @@ function shell({ eyebrow, title, intro, primaryCta, secondaryCta, rightPanel, bo
 }
 
 function homeView() {
-  const profile = getProfile();
-  const profileReady = hasProfile(profile);
+  const profileReady = hasProfile();
   return shell({
     eyebrow: "Astrology MVP",
     title: "Natal intelligence<br/>daily engagement<br/>friend chemistry",
     intro:
       "MVP focus: accurate birth profile, one deep natal report, daily ritual card, and lightweight friend compatibility.",
-    primaryCta: { href: profileReady ? "/natal-chart" : "/onboarding", label: profileReady ? "Open My Natal" : "Start Onboarding" },
+    primaryCta: {
+      href: profileReady ? "/natal-chart" : "/onboarding",
+      label: profileReady ? "Open My Natal" : "Start Onboarding"
+    },
     secondaryCta: { href: "/daily", label: "Open Daily" },
     rightPanel: `
       <h2>MVP status</h2>
       <div class="metric-grid">
         <div class="metric"><strong>${profileReady ? "Ready" : "Missing"}</strong><p>Birth Profile</p></div>
         <div class="metric"><strong>Live</strong><p>Natal Route</p></div>
-        <div class="metric"><strong>Live</strong><p>Daily Route</p></div>
+        <div class="metric"><strong>${state.friends.length}</strong><p>Saved Friends</p></div>
       </div>
       <ul class="bullet-list">
-        <li>Profile saved locally for rapid iteration</li>
-        <li>Server-side mock contracts available under /api</li>
-        <li>Designed for Telegram + Google auth upgrade</li>
+        <li>Session-based profile API is active</li>
+        <li>Daily streak tracked server-side in session</li>
+        <li>Friend list + compatibility route ready</li>
       </ul>
     `,
     body: `
@@ -120,7 +99,7 @@ function homeView() {
 }
 
 function onboardingView() {
-  const profile = getProfile() || {};
+  const profile = state.profile || {};
   return `
     <section class="section">
       <article class="card">
@@ -171,7 +150,7 @@ function natalViewEmpty() {
     intro: "Complete onboarding first. This keeps interpretations consistent and useful.",
     primaryCta: { href: "/onboarding", label: "Complete Onboarding" },
     secondaryCta: { href: "/", label: "Back Home" },
-    rightPanel: `<h2>Why</h2><p>No birth data means no house system, no rising sign, and weak recommendations.</p>`,
+    rightPanel: "<h2>Why</h2><p>No birth data means no house system, no rising sign, and weak recommendations.</p>",
     body: ""
   });
 }
@@ -189,7 +168,6 @@ function dailyViewLoading() {
 }
 
 function friendsView() {
-  const profile = getProfile();
   return `
     <section class="section">
       <article class="card">
@@ -206,13 +184,18 @@ function friendsView() {
         <label>Friend sign
           <input required name="friendSign" placeholder="e.g. Libra" />
         </label>
-        <button class="btn primary form-submit" type="submit">Check compatibility</button>
+        <button class="btn primary form-submit" type="submit">Save friend</button>
       </form>
+    </section>
+    <section class="section">
+      <article class="card">
+        <h2>Your friends</h2>
+        <div id="friendsList" class="friends-list"></div>
+      </article>
     </section>
     <section class="section">
       <article id="friendResult" class="card" style="display:none"></article>
     </section>
-    ${!hasProfile(profile) ? '<section class="section"><article class="route-card"><p>Tip: complete onboarding first for better personalized friend advice.</p></article></section>' : ''}
   `;
 }
 
@@ -225,7 +208,11 @@ function faqView() {
         <div class="faq">
           <article class="faq-item">
             <h3>What is already implemented?</h3>
-            <p>Onboarding flow, natal route, daily route, friend compatibility route, and server mock API contracts.</p>
+            <p>Onboarding flow, natal route, daily route, friend compatibility route, and server API contracts.</p>
+          </article>
+          <article class="faq-item">
+            <h3>Where is profile stored now?</h3>
+            <p>In a server-side session keyed by the astro_sid cookie. Next step is persistent DB storage.</p>
           </article>
           <article class="faq-item">
             <h3>What comes next?</h3>
@@ -253,17 +240,43 @@ function markActiveNav(path) {
   });
 }
 
+function renderFriendsList() {
+  const container = document.getElementById("friendsList");
+  if (!container) {
+    return;
+  }
+  if (!state.friends.length) {
+    container.innerHTML = "<p class=\"muted\">No friends saved yet.</p>";
+    return;
+  }
+
+  container.innerHTML = state.friends
+    .map(
+      (friend) => `
+      <div class="friend-row" data-id="${friend.id}">
+        <div>
+          <strong>${friend.friendName}</strong>
+          <p>${friend.friendSign}</p>
+        </div>
+        <button class="btn ghost js-check-friend" data-id="${friend.id}">Check</button>
+      </div>
+    `
+    )
+    .join("");
+}
+
 async function hydrateNatal() {
-  const profile = getProfile();
-  if (!hasProfile(profile)) {
+  if (!hasProfile()) {
     app.innerHTML = natalViewEmpty();
     return;
   }
+
   try {
     const data = await fetchJson("/api/natal-report", {
       method: "POST",
-      body: JSON.stringify({ profile })
+      body: JSON.stringify({})
     });
+    const profile = state.profile;
 
     app.innerHTML = `
       <section class="section">
@@ -296,8 +309,7 @@ async function hydrateNatal() {
 }
 
 async function hydrateDaily() {
-  const profile = getProfile();
-  if (!hasProfile(profile)) {
+  if (!hasProfile()) {
     app.innerHTML = shell({
       eyebrow: "Daily",
       title: "Complete profile first",
@@ -313,7 +325,7 @@ async function hydrateDaily() {
   try {
     const data = await fetchJson("/api/daily-insight", {
       method: "POST",
-      body: JSON.stringify({ profile })
+      body: JSON.stringify({})
     });
 
     app.innerHTML = `
@@ -335,6 +347,9 @@ async function hydrateDaily() {
         <article class="route-card">
           <h2>Streak</h2>
           <p>${data.streakLabel}</p>
+          <ul class="bullet-list">${(data.history || [])
+            .map((item) => `<li>${item.dayKey}: ${item.focus}</li>`)
+            .join("")}</ul>
         </article>
       </section>
     `;
@@ -346,53 +361,97 @@ async function hydrateDaily() {
   }
 }
 
+async function runCompatibility(friend) {
+  const result = document.getElementById("friendResult");
+  if (!result) {
+    return;
+  }
+
+  try {
+    const data = await fetchJson("/api/compatibility-report", {
+      method: "POST",
+      body: JSON.stringify({ friend })
+    });
+    result.style.display = "block";
+    result.innerHTML = `
+      <span class="eyebrow">Compatibility</span>
+      <h2>${data.score}/100 with ${friend.friendName}</h2>
+      <ul class="bullet-list">${data.highlights.map((item) => `<li>${item}</li>`).join("")}</ul>
+      <p>${data.advice}</p>
+    `;
+  } catch (error) {
+    result.style.display = "block";
+    result.innerHTML = `<p>Failed to calculate compatibility: ${error.message}</p>`;
+  }
+}
+
 function attachRouteHandlers(path) {
   if (path === "/onboarding") {
     const form = document.getElementById("onboardingForm");
-    form?.addEventListener("submit", (event) => {
+    form?.addEventListener("submit", async (event) => {
       event.preventDefault();
       const formData = new FormData(form);
       const profile = Object.fromEntries(formData.entries());
-      saveProfile(profile);
-      window.history.pushState({}, "", "/natal-chart");
-      render();
+      try {
+        const payload = await fetchJson("/api/profile", {
+          method: "PUT",
+          body: JSON.stringify({ profile })
+        });
+        state.profile = payload.profile;
+        state.profileReady = payload.profileReady;
+        window.history.pushState({}, "", "/natal-chart");
+        render();
+      } catch (error) {
+        alert(`Failed to save profile: ${error.message}`);
+      }
     });
   }
 
   if (path === "/friends") {
+    renderFriendsList();
+
     const form = document.getElementById("friendForm");
-    const result = document.getElementById("friendResult");
     form?.addEventListener("submit", async (event) => {
       event.preventDefault();
       const formData = new FormData(form);
       const friend = Object.fromEntries(formData.entries());
-      const profile = getProfile();
-      const payload = {
-        profile,
-        friend
-      };
       try {
-        const data = await fetchJson("/api/compatibility-report", {
+        const payload = await fetchJson("/api/friends", {
           method: "POST",
-          body: JSON.stringify(payload)
+          body: JSON.stringify(friend)
         });
-        if (result) {
-          result.style.display = "block";
-          result.innerHTML = `
-            <span class="eyebrow">Compatibility</span>
-            <h2>${data.score}/100 with ${friend.friendName}</h2>
-            <ul class="bullet-list">${data.highlights.map((item) => `<li>${item}</li>`).join("")}</ul>
-            <p>${data.advice}</p>
-          `;
-        }
+        state.friends = payload.friends || [];
+        form.reset();
+        renderFriendsList();
       } catch (error) {
-        if (result) {
-          result.style.display = "block";
-          result.innerHTML = `<p>Failed to calculate compatibility: ${error.message}</p>`;
-        }
+        alert(`Failed to save friend: ${error.message}`);
       }
     });
+
+    const list = document.getElementById("friendsList");
+    list?.addEventListener("click", async (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement) || !target.classList.contains("js-check-friend")) {
+        return;
+      }
+      const id = target.getAttribute("data-id");
+      const friend = state.friends.find((item) => item.id === id);
+      if (!friend) {
+        return;
+      }
+      await runCompatibility(friend);
+    });
   }
+}
+
+async function loadSessionState() {
+  const [profilePayload, friendsPayload] = await Promise.all([
+    fetchJson("/api/profile"),
+    fetchJson("/api/friends")
+  ]);
+  state.profile = profilePayload.profile || null;
+  state.profileReady = Boolean(profilePayload.profileReady);
+  state.friends = friendsPayload.friends || [];
 }
 
 function render() {
@@ -426,11 +485,13 @@ document.addEventListener("click", (event) => {
 });
 
 window.addEventListener("popstate", render);
-render();
 
-window.__astroPreview = {
-  getProfile,
-  saveProfile,
-  signFromMonth,
-  risingFromTime
-};
+loadSessionState()
+  .catch((error) => {
+    console.error("Failed to initialize session state", error);
+  })
+  .finally(() => {
+    render();
+  });
+
+window.__astroState = state;

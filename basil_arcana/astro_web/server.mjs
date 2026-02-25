@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import express from "express";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -7,19 +8,52 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const port = Number(process.env.PORT || 8080);
 const publicDir = path.join(__dirname, "public");
+const sessionCookieName = "astro_sid";
 
-app.use(express.json({ limit: "256kb" }));
-app.use(
-  express.static(publicDir, {
-    setHeaders: (res, filePath) => {
-      if (filePath.endsWith("index.html")) {
-        res.setHeader("Cache-Control", "no-store");
-        return;
-      }
-      res.setHeader("Cache-Control", "public, max-age=300");
+const sessionStore = new Map();
+
+function parseCookies(cookieHeader) {
+  const result = {};
+  if (!cookieHeader) {
+    return result;
+  }
+  const pairs = cookieHeader.split(";");
+  for (const pair of pairs) {
+    const [rawKey, ...rawValue] = pair.split("=");
+    const key = String(rawKey || "").trim();
+    const value = rawValue.join("=").trim();
+    if (key) {
+      result[key] = decodeURIComponent(value || "");
     }
-  })
-);
+  }
+  return result;
+}
+
+function getOrCreateSession(req, res) {
+  const cookies = parseCookies(req.headers.cookie);
+  const cookieSid = String(cookies[sessionCookieName] || "").trim();
+  if (cookieSid && sessionStore.has(cookieSid)) {
+    return { sid: cookieSid, data: sessionStore.get(cookieSid) };
+  }
+
+  const sid = crypto.randomUUID();
+  const session = {
+    createdAt: Date.now(),
+    profile: null,
+    friends: [],
+    daily: {
+      streak: 0,
+      lastDayKey: "",
+      history: []
+    }
+  };
+  sessionStore.set(sid, session);
+  res.setHeader(
+    "Set-Cookie",
+    `${sessionCookieName}=${encodeURIComponent(sid)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000`
+  );
+  return { sid, data: session };
+}
 
 function pickProfile(body) {
   const profile = body?.profile;
@@ -99,17 +133,37 @@ function risingFromTime(timeText) {
   return signs[Math.floor(hour / 2) % signs.length];
 }
 
+function resolveSessionProfile(reqProfile, session) {
+  const bodyProfile = pickProfile({ profile: reqProfile });
+  if (bodyProfile) {
+    return bodyProfile;
+  }
+  return pickProfile({ profile: session.profile });
+}
+
+function pushDailyHistory(dailyState, entry) {
+  const history = Array.isArray(dailyState.history) ? dailyState.history : [];
+  dailyState.history = [entry, ...history.filter((item) => item.dayKey !== entry.dayKey)].slice(0, 7);
+}
+
 const contracts = {
+  session_profile: {
+    get: "GET /api/profile",
+    put: "PUT /api/profile",
+    response: {
+      profile: "nullable profile",
+      profileReady: "boolean"
+    }
+  },
+  friends: {
+    list: "GET /api/friends",
+    create: "POST /api/friends",
+    response: {
+      friends: [{ id: "string", friendName: "string", friendSign: "string", createdAt: "number" }]
+    }
+  },
   natal_report: {
-    request: {
-      profile: {
-        name: "string",
-        birthDate: "YYYY-MM-DD",
-        birthTime: "HH:mm",
-        birthCity: "string",
-        timezone: "string"
-      }
-    },
+    request: { profile: "optional (fallback to session profile)" },
     response: {
       core: { sun: "string", moon: "string", rising: "string" },
       summary: "string",
@@ -118,22 +172,16 @@ const contracts = {
     }
   },
   daily_insight: {
-    request: {
-      profile: {
-        name: "string",
-        birthDate: "YYYY-MM-DD",
-        birthTime: "HH:mm",
-        birthCity: "string",
-        timezone: "string"
-      }
-    },
+    request: { profile: "optional (fallback to session profile)" },
     response: {
       dateLabel: "string",
       intro: "string",
       focus: "string",
       risk: "string",
       step: "string",
-      streakLabel: "string"
+      streakLabel: "string",
+      streak: "number",
+      history: [{ dayKey: "YYYY-MM-DD", focus: "string", step: "string" }]
     }
   },
   compatibility_report: {
@@ -152,6 +200,25 @@ const contracts = {
   }
 };
 
+app.use(express.json({ limit: "256kb" }));
+app.use((req, res, next) => {
+  const session = getOrCreateSession(req, res);
+  req.sessionId = session.sid;
+  req.sessionData = session.data;
+  next();
+});
+app.use(
+  express.static(publicDir, {
+    setHeaders: (res, filePath) => {
+      if (filePath.endsWith("index.html")) {
+        res.setHeader("Cache-Control", "no-store");
+        return;
+      }
+      res.setHeader("Cache-Control", "public, max-age=300");
+    }
+  })
+);
+
 app.get("/health", (_req, res) => {
   res.json({ ok: true, service: "astro-web" });
 });
@@ -160,12 +227,56 @@ app.get("/api/contracts", (_req, res) => {
   res.json({ ok: true, contracts });
 });
 
-app.post("/api/natal-report", (req, res) => {
+app.get("/api/profile", (req, res) => {
+  const profile = pickProfile({ profile: req.sessionData.profile });
+  res.json({
+    ok: true,
+    profile,
+    profileReady: Boolean(profile)
+  });
+});
+
+app.put("/api/profile", (req, res) => {
   const profile = pickProfile(req.body);
   if (!profile) {
     return res.status(400).json({
       error: "invalid_profile",
       message: "name, birthDate, birthTime and birthCity are required"
+    });
+  }
+  req.sessionData.profile = profile;
+  return res.json({ ok: true, profile, profileReady: true });
+});
+
+app.get("/api/friends", (req, res) => {
+  res.json({ ok: true, friends: req.sessionData.friends || [] });
+});
+
+app.post("/api/friends", (req, res) => {
+  const friendName = String(req.body?.friendName || "").trim();
+  const friendSign = String(req.body?.friendSign || "").trim();
+  if (!friendName || !friendSign) {
+    return res.status(400).json({
+      error: "invalid_friend",
+      message: "friendName and friendSign are required"
+    });
+  }
+  const friend = {
+    id: crypto.randomUUID(),
+    friendName,
+    friendSign,
+    createdAt: Date.now()
+  };
+  req.sessionData.friends = [friend, ...(req.sessionData.friends || [])].slice(0, 20);
+  return res.json({ ok: true, friend, friends: req.sessionData.friends });
+});
+
+app.post("/api/natal-report", (req, res) => {
+  const profile = resolveSessionProfile(req.body?.profile, req.sessionData);
+  if (!profile) {
+    return res.status(400).json({
+      error: "invalid_profile",
+      message: "profile is required"
     });
   }
 
@@ -191,7 +302,7 @@ app.post("/api/natal-report", (req, res) => {
 });
 
 app.post("/api/daily-insight", (req, res) => {
-  const profile = pickProfile(req.body);
+  const profile = resolveSessionProfile(req.body?.profile, req.sessionData);
   if (!profile) {
     return res.status(400).json({
       error: "invalid_profile",
@@ -200,6 +311,7 @@ app.post("/api/daily-insight", (req, res) => {
   }
 
   const now = new Date();
+  const dayKey = now.toISOString().slice(0, 10);
   const weekday = now.toLocaleDateString("en-US", { weekday: "long" });
   const dateLabel = now.toLocaleDateString("en-US", {
     weekday: "long",
@@ -207,13 +319,31 @@ app.post("/api/daily-insight", (req, res) => {
     day: "numeric"
   });
 
+  const sessionDaily = req.sessionData.daily || { streak: 0, lastDayKey: "", history: [] };
+  if (sessionDaily.lastDayKey !== dayKey) {
+    const previous = sessionDaily.lastDayKey ? new Date(`${sessionDaily.lastDayKey}T00:00:00Z`) : null;
+    const current = new Date(`${dayKey}T00:00:00Z`);
+    const gapDays = previous ? Math.round((current - previous) / 86400000) : 0;
+    sessionDaily.streak = gapDays === 1 ? sessionDaily.streak + 1 : 1;
+    sessionDaily.lastDayKey = dayKey;
+  }
+
+  const focus = "Prioritize one conversation that prevents future misunderstanding.";
+  const risk = "Reactive messaging can escalate small ambiguity into unnecessary conflict.";
+  const step = "Before noon, send one clear note: goal, boundary, and next checkpoint.";
+
+  pushDailyHistory(sessionDaily, { dayKey, focus, step });
+  req.sessionData.daily = sessionDaily;
+
   return res.json({
     dateLabel,
     intro: `${profile.name}, ${weekday} works best when you reduce context switching and protect one strategic block of deep work.`,
-    focus: "Prioritize one conversation that prevents future misunderstanding.",
-    risk: "Reactive messaging can escalate small ambiguity into unnecessary conflict.",
-    step: "Before noon, send one clear note: goal, boundary, and next checkpoint.",
-    streakLabel: "Current streak: 1 day (MVP mock)."
+    focus,
+    risk,
+    step,
+    streak: sessionDaily.streak,
+    streakLabel: `Current streak: ${sessionDaily.streak} day${sessionDaily.streak === 1 ? "" : "s"}.`,
+    history: sessionDaily.history
   });
 });
 
@@ -229,7 +359,7 @@ app.post("/api/compatibility-report", (req, res) => {
     });
   }
 
-  const profile = pickProfile(req.body);
+  const profile = resolveSessionProfile(req.body?.profile, req.sessionData);
   const userSign = profile ? signFromDate(profile.birthDate) : "Unknown";
   const score = Math.max(55, Math.min(95, 60 + ((friendName.length + friendSign.length) % 35)));
 

@@ -22,13 +22,18 @@ Open:
 
 ## Current MVP (v1)
 
-- Onboarding: local profile capture (name, birth date/time/city/timezone)
+- Onboarding: profile capture (name, birth date/time/city/timezone) via session API
 - Natal route: `/natal-chart` (server-driven mock report)
 - Daily route: `/daily` (focus/risk/step card)
-- Friends route: `/friends` (compatibility-lite score + advice)
+- Friends route: `/friends` (save friends + compatibility-lite score + advice)
+- Session cookie: `astro_sid` (HttpOnly, SameSite=Lax)
 
 ### API endpoints
 
+- `GET /api/profile`
+- `PUT /api/profile`
+- `GET /api/friends`
+- `POST /api/friends`
 - `GET /api/contracts`
 - `POST /api/natal-report`
 - `POST /api/daily-insight`
