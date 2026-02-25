@@ -45,8 +45,10 @@ Open:
 2. Set **Root Directory** to `basil_arcana/astro_web`.
 3. Build command: `npm install`
 4. Start command: `npm start`
-5. Add custom domain: `app.basilarcana.com`
-6. In GoDaddy DNS add:
+5. Add environment variable:
+   - `DATABASE_URL` (recommended, enables persistent sessions in Postgres)
+6. Add custom domain: `app.basilarcana.com`
+7. In GoDaddy DNS add:
    - `CNAME` name `app` value `<railway-target>.up.railway.app`
    - `TXT` name `_railway-verify.app` value `railway-verify-...` (exact value from Railway)
 
@@ -56,7 +58,12 @@ Open:
 dig +short app.basilarcana.com CNAME
 dig +short TXT _railway-verify.app.basilarcana.com
 curl -sS https://app.basilarcana.com/health
+curl -sS https://app.basilarcana.com/api/profile
 openssl s_client -connect app.basilarcana.com:443 -servername app.basilarcana.com </dev/null 2>/dev/null | openssl x509 -noout -ext subjectAltName
 ```
 
 Expected SAN includes `DNS:app.basilarcana.com`.
+
+`/health` now includes `dbEnabled`:
+- `true` when `DATABASE_URL` is configured and table `astro_web_sessions` is active
+- `false` when running in in-memory fallback mode

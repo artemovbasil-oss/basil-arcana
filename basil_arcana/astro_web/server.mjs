@@ -2,6 +2,9 @@ import crypto from "node:crypto";
 import express from "express";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import pg from "pg";
+
+const { Pool } = pg;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -9,8 +12,43 @@ const app = express();
 const port = Number(process.env.PORT || 8080);
 const publicDir = path.join(__dirname, "public");
 const sessionCookieName = "astro_sid";
+const databaseUrl = String(process.env.DATABASE_URL || "").trim();
+
+app.set("trust proxy", 1);
 
 const sessionStore = new Map();
+let dbPool = null;
+
+function defaultSessionData() {
+  return {
+    createdAt: Date.now(),
+    profile: null,
+    friends: [],
+    daily: {
+      streak: 0,
+      lastDayKey: "",
+      history: []
+    }
+  };
+}
+
+function normalizeSessionData(raw) {
+  const source = raw && typeof raw === "object" ? raw : {};
+  const profile = source.profile && typeof source.profile === "object" ? source.profile : null;
+  const friends = Array.isArray(source.friends) ? source.friends : [];
+  const dailySource = source.daily && typeof source.daily === "object" ? source.daily : {};
+
+  return {
+    createdAt: Number.isFinite(Number(source.createdAt)) ? Number(source.createdAt) : Date.now(),
+    profile,
+    friends,
+    daily: {
+      streak: Number.isFinite(Number(dailySource.streak)) ? Number(dailySource.streak) : 0,
+      lastDayKey: String(dailySource.lastDayKey || ""),
+      history: Array.isArray(dailySource.history) ? dailySource.history : []
+    }
+  };
+}
 
 function parseCookies(cookieHeader) {
   const result = {};
@@ -29,30 +67,111 @@ function parseCookies(cookieHeader) {
   return result;
 }
 
-function getOrCreateSession(req, res) {
+function buildSessionCookie(sid, req) {
+  const forwardedProto = String(req.headers["x-forwarded-proto"] || "").toLowerCase();
+  const shouldUseSecure = req.secure || forwardedProto.includes("https") || process.env.NODE_ENV === "production";
+  const securePart = shouldUseSecure ? "; Secure" : "";
+  return `${sessionCookieName}=${encodeURIComponent(sid)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000${securePart}`;
+}
+
+async function initDb() {
+  if (!databaseUrl) {
+    return;
+  }
+  dbPool = new Pool({ connectionString: databaseUrl });
+  await dbPool.query(`
+    CREATE TABLE IF NOT EXISTS astro_web_sessions (
+      sid TEXT PRIMARY KEY,
+      data JSONB NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+}
+
+async function loadSessionFromDb(sid) {
+  if (!dbPool) {
+    return null;
+  }
+  const result = await dbPool.query("SELECT data FROM astro_web_sessions WHERE sid = $1 LIMIT 1", [sid]);
+  if (!result.rowCount) {
+    return null;
+  }
+  return normalizeSessionData(result.rows[0].data);
+}
+
+async function createSessionInDb(sid, data) {
+  if (!dbPool) {
+    return;
+  }
+  await dbPool.query(
+    `
+      INSERT INTO astro_web_sessions (sid, data)
+      VALUES ($1, $2::jsonb)
+      ON CONFLICT (sid)
+      DO NOTHING
+    `,
+    [sid, JSON.stringify(normalizeSessionData(data))]
+  );
+}
+
+async function saveSessionToDb(sid, data) {
+  if (!dbPool) {
+    return;
+  }
+  const normalized = normalizeSessionData(data);
+  await dbPool.query(
+    `
+      INSERT INTO astro_web_sessions (sid, data, updated_at)
+      VALUES ($1, $2::jsonb, NOW())
+      ON CONFLICT (sid)
+      DO UPDATE SET data = EXCLUDED.data, updated_at = NOW()
+    `,
+    [sid, JSON.stringify(normalized)]
+  );
+}
+
+async function getOrCreateSession(req, res) {
   const cookies = parseCookies(req.headers.cookie);
   const cookieSid = String(cookies[sessionCookieName] || "").trim();
-  if (cookieSid && sessionStore.has(cookieSid)) {
-    return { sid: cookieSid, data: sessionStore.get(cookieSid) };
+
+  if (dbPool) {
+    if (cookieSid) {
+      const existing = await loadSessionFromDb(cookieSid);
+      if (existing) {
+        return { sid: cookieSid, data: existing };
+      }
+      const seeded = defaultSessionData();
+      await createSessionInDb(cookieSid, seeded);
+      return { sid: cookieSid, data: seeded };
+    }
+
+    const sid = crypto.randomUUID();
+    const seeded = defaultSessionData();
+    await createSessionInDb(sid, seeded);
+    res.setHeader("Set-Cookie", buildSessionCookie(sid, req));
+    return { sid, data: seeded };
   }
 
-  const sid = crypto.randomUUID();
-  const session = {
-    createdAt: Date.now(),
-    profile: null,
-    friends: [],
-    daily: {
-      streak: 0,
-      lastDayKey: "",
-      history: []
-    }
-  };
+  if (cookieSid && sessionStore.has(cookieSid)) {
+    return { sid: cookieSid, data: normalizeSessionData(sessionStore.get(cookieSid)) };
+  }
+
+  const sid = cookieSid || crypto.randomUUID();
+  const session = defaultSessionData();
   sessionStore.set(sid, session);
-  res.setHeader(
-    "Set-Cookie",
-    `${sessionCookieName}=${encodeURIComponent(sid)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000`
-  );
+  if (!cookieSid) {
+    res.setHeader("Set-Cookie", buildSessionCookie(sid, req));
+  }
   return { sid, data: session };
+}
+
+async function persistSession(sid, data) {
+  if (dbPool) {
+    await saveSessionToDb(sid, data);
+    return;
+  }
+  sessionStore.set(sid, normalizeSessionData(data));
 }
 
 function pickProfile(body) {
@@ -201,11 +320,15 @@ const contracts = {
 };
 
 app.use(express.json({ limit: "256kb" }));
-app.use((req, res, next) => {
-  const session = getOrCreateSession(req, res);
-  req.sessionId = session.sid;
-  req.sessionData = session.data;
-  next();
+app.use(async (req, res, next) => {
+  try {
+    const session = await getOrCreateSession(req, res);
+    req.sessionId = session.sid;
+    req.sessionData = normalizeSessionData(session.data);
+    next();
+  } catch (error) {
+    next(error);
+  }
 });
 app.use(
   express.static(publicDir, {
@@ -220,11 +343,11 @@ app.use(
 );
 
 app.get("/health", (_req, res) => {
-  res.json({ ok: true, service: "astro-web" });
+  res.json({ ok: true, service: "astro-web", dbEnabled: Boolean(dbPool) });
 });
 
 app.get("/api/contracts", (_req, res) => {
-  res.json({ ok: true, contracts });
+  res.json({ ok: true, contracts, dbEnabled: Boolean(dbPool) });
 });
 
 app.get("/api/profile", (req, res) => {
@@ -236,7 +359,7 @@ app.get("/api/profile", (req, res) => {
   });
 });
 
-app.put("/api/profile", (req, res) => {
+app.put("/api/profile", async (req, res) => {
   const profile = pickProfile(req.body);
   if (!profile) {
     return res.status(400).json({
@@ -245,6 +368,7 @@ app.put("/api/profile", (req, res) => {
     });
   }
   req.sessionData.profile = profile;
+  await persistSession(req.sessionId, req.sessionData);
   return res.json({ ok: true, profile, profileReady: true });
 });
 
@@ -252,7 +376,7 @@ app.get("/api/friends", (req, res) => {
   res.json({ ok: true, friends: req.sessionData.friends || [] });
 });
 
-app.post("/api/friends", (req, res) => {
+app.post("/api/friends", async (req, res) => {
   const friendName = String(req.body?.friendName || "").trim();
   const friendSign = String(req.body?.friendSign || "").trim();
   if (!friendName || !friendSign) {
@@ -268,6 +392,7 @@ app.post("/api/friends", (req, res) => {
     createdAt: Date.now()
   };
   req.sessionData.friends = [friend, ...(req.sessionData.friends || [])].slice(0, 20);
+  await persistSession(req.sessionId, req.sessionData);
   return res.json({ ok: true, friend, friends: req.sessionData.friends });
 });
 
@@ -301,7 +426,7 @@ app.post("/api/natal-report", (req, res) => {
   });
 });
 
-app.post("/api/daily-insight", (req, res) => {
+app.post("/api/daily-insight", async (req, res) => {
   const profile = resolveSessionProfile(req.body?.profile, req.sessionData);
   if (!profile) {
     return res.status(400).json({
@@ -334,6 +459,7 @@ app.post("/api/daily-insight", (req, res) => {
 
   pushDailyHistory(sessionDaily, { dayKey, focus, step });
   req.sessionData.daily = sessionDaily;
+  await persistSession(req.sessionId, req.sessionData);
 
   return res.json({
     dateLabel,
@@ -378,6 +504,29 @@ app.get("*", (_req, res) => {
   res.sendFile(path.join(publicDir, "index.html"));
 });
 
-app.listen(port, "0.0.0.0", () => {
-  console.log(`astro-web listening on :${port}`);
+app.use((error, req, res, next) => {
+  if (res.headersSent) {
+    return next(error);
+  }
+  console.error("astro-web error", error);
+  if (String(req.path || "").startsWith("/api/")) {
+    return res.status(500).json({ error: "internal_error" });
+  }
+  return res.status(500).send("Internal Server Error");
 });
+
+initDb()
+  .then(() => {
+    if (dbPool) {
+      console.log("astro-web db enabled");
+    } else {
+      console.log("astro-web db disabled (DATABASE_URL missing)");
+    }
+    app.listen(port, "0.0.0.0", () => {
+      console.log(`astro-web listening on :${port}`);
+    });
+  })
+  .catch((error) => {
+    console.error("Failed to initialize astro-web", error);
+    process.exit(1);
+  });
