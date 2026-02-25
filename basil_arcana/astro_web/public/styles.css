@@ -1,0 +1,342 @@
+:root {
+  --bg: #0a0b12;
+  --bg-soft: #111424;
+  --ink: #f6f3ea;
+  --muted: #b7bac9;
+  --line: #2b3047;
+  --accent: #89f2d0;
+  --accent-2: #ffc57a;
+  --card: rgba(15, 18, 31, 0.72);
+  --card-strong: rgba(18, 22, 38, 0.86);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  color: var(--ink);
+  background: radial-gradient(circle at 10% 10%, #171b31 0, #0a0b12 55%);
+  font-family: "Space Grotesk", "Segoe UI", sans-serif;
+}
+
+a {
+  color: inherit;
+}
+
+.sky-noise {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.15;
+  background-image: radial-gradient(1px 1px at 15% 25%, #fff, transparent),
+    radial-gradient(1px 1px at 25% 85%, #fff, transparent),
+    radial-gradient(1px 1px at 72% 12%, #fff, transparent),
+    radial-gradient(1px 1px at 89% 65%, #fff, transparent),
+    radial-gradient(1px 1px at 42% 43%, #fff, transparent),
+    radial-gradient(1px 1px at 58% 77%, #fff, transparent);
+}
+
+.gradient-orb {
+  position: fixed;
+  width: 48vmax;
+  height: 48vmax;
+  border-radius: 50%;
+  filter: blur(68px);
+  opacity: 0.2;
+  pointer-events: none;
+}
+
+.orb-a {
+  background: #2a8f7a;
+  top: -22vmax;
+  left: -15vmax;
+  animation: driftA 14s ease-in-out infinite alternate;
+}
+
+.orb-b {
+  background: #8f5d27;
+  bottom: -24vmax;
+  right: -15vmax;
+  animation: driftB 16s ease-in-out infinite alternate;
+}
+
+@keyframes driftA {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(8vmax, 6vmax, 0);
+  }
+}
+
+@keyframes driftB {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-7vmax, -4vmax, 0);
+  }
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  justify-content: space-between;
+  padding: 1rem clamp(1rem, 4vw, 3rem);
+  background: rgba(10, 11, 18, 0.66);
+  border-bottom: 1px solid rgba(164, 173, 203, 0.16);
+  backdrop-filter: blur(10px);
+}
+
+.brand {
+  text-decoration: none;
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #ffefcf;
+}
+
+.nav {
+  display: flex;
+  gap: 1rem;
+}
+
+.nav a {
+  text-decoration: none;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.nav a:hover,
+.nav a.active {
+  color: var(--ink);
+}
+
+.menu-btn {
+  display: none;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 0.45rem 0.8rem;
+}
+
+.page {
+  width: min(1140px, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: clamp(1.25rem, 2vw, 2rem) 0 clamp(3rem, 6vw, 5rem);
+}
+
+.hero {
+  display: grid;
+  gap: 1.8rem;
+  grid-template-columns: 1.3fr 1fr;
+  align-items: stretch;
+}
+
+.card {
+  border: 1px solid rgba(221, 224, 245, 0.16);
+  border-radius: 18px;
+  background: var(--card);
+  padding: clamp(1.1rem, 2.5vw, 1.8rem);
+  box-shadow: 0 20px 70px rgba(0, 0, 0, 0.24);
+}
+
+.eyebrow {
+  display: inline-block;
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+h1,
+h2 {
+  margin: 0.65rem 0 1rem;
+  line-height: 0.96;
+  font-family: "Cormorant Garamond", serif;
+  font-weight: 700;
+}
+
+h1 {
+  font-size: clamp(2.2rem, 7vw, 5.1rem);
+}
+
+h2 {
+  font-size: clamp(1.7rem, 4.6vw, 3rem);
+}
+
+p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  margin-top: 1.2rem;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.74rem 1.05rem;
+  border-radius: 999px;
+  text-decoration: none;
+  font-size: 0.9rem;
+  border: 1px solid transparent;
+}
+
+.btn.primary {
+  background: linear-gradient(120deg, #9bf0d2, #ffcb8c);
+  color: #151826;
+}
+
+.btn.ghost {
+  border-color: var(--line);
+  color: var(--ink);
+}
+
+.metric-grid {
+  margin-top: 1.2rem;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.metric {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 0.85rem;
+  background: var(--card-strong);
+}
+
+.metric strong {
+  display: block;
+  font-size: 1.1rem;
+  margin-bottom: 0.35rem;
+}
+
+.section {
+  margin-top: clamp(1.6rem, 3.5vw, 3rem);
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.95rem;
+}
+
+.feature-card {
+  border-radius: 16px;
+  border: 1px solid rgba(225, 234, 255, 0.18);
+  background: rgba(15, 18, 31, 0.75);
+  padding: 1rem;
+}
+
+.feature-card h3 {
+  margin: 0 0 0.45rem;
+  font-size: 1rem;
+}
+
+.bullet-list {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.bullet-list li {
+  color: var(--muted);
+  padding-left: 1rem;
+  position: relative;
+}
+
+.bullet-list li::before {
+  content: "✦";
+  position: absolute;
+  left: 0;
+  color: var(--accent-2);
+}
+
+.route-card {
+  border-radius: 16px;
+  padding: 1.2rem;
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  background: rgba(10, 12, 22, 0.6);
+}
+
+.faq {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.faq-item {
+  border: 1px solid rgba(239, 241, 255, 0.18);
+  border-radius: 12px;
+  padding: 0.9rem;
+  background: rgba(17, 20, 35, 0.76);
+}
+
+.faq-item h3 {
+  margin: 0 0 0.35rem;
+  font-size: 0.95rem;
+}
+
+.footer {
+  border-top: 1px solid rgba(187, 192, 225, 0.2);
+  color: #98a2bf;
+  font-size: 0.82rem;
+  text-align: center;
+  padding: 1.4rem 1rem 2.2rem;
+}
+
+@media (max-width: 940px) {
+  .hero {
+    grid-template-columns: 1fr;
+  }
+
+  .feature-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .menu-btn {
+    display: inline-flex;
+  }
+
+  .nav {
+    display: none;
+    position: absolute;
+    right: 1rem;
+    top: 64px;
+    min-width: 180px;
+    flex-direction: column;
+    border: 1px solid rgba(207, 213, 241, 0.2);
+    border-radius: 12px;
+    background: rgba(13, 15, 26, 0.97);
+    padding: 0.75rem;
+  }
+
+  .nav.open {
+    display: flex;
+  }
+
+  .feature-grid,
+  .metric-grid {
+    grid-template-columns: 1fr;
+  }
+}

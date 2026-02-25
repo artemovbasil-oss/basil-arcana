@@ -235,8 +235,12 @@ app.use((req, res, next) => {
 });
 
 const APP_VERSION = process.env.APP_VERSION || '2026-02-08-1';
-const PUBLIC_ROOT = process.env.PUBLIC_ROOT || path.join(__dirname, 'public');
-const PUBLIC_INDEX = path.join(PUBLIC_ROOT, 'index.html');
+const APP_ROOT =
+  process.env.APP_ROOT || process.env.PUBLIC_ROOT || path.join(__dirname, 'public');
+const APP_INDEX = path.join(APP_ROOT, 'index.html');
+const LANDING_ROOT =
+  process.env.LANDING_ROOT || path.join(__dirname, '..', 'landing');
+const LANDING_INDEX = path.join(LANDING_ROOT, 'index.html');
 const API_BASE_URL_ENV = process.env.API_BASE_URL || process.env.BASE_URL || '';
 const ASSETS_BASE_URL_ENV = process.env.ASSETS_BASE_URL || 'https://cdn.basilarcana.com';
 const STARS_PACK_FULL_XTR = 5;
@@ -643,22 +647,29 @@ function appendPromoToReadingResult(parsed, locale) {
   return next;
 }
 
-app.get('/config.json', (req, res) => {
+function setNoCacheHeaders(res) {
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
   res.setHeader('Pragma', 'no-cache');
   res.setHeader('Expires', '0');
+}
+
+app.get('/config.json', (req, res) => {
+  setNoCacheHeaders(res);
   res.json(buildConfigPayload(req));
 });
 
-const staticOptions = {
+app.get('/app/config.json', (req, res) => {
+  setNoCacheHeaders(res);
+  res.json(buildConfigPayload(req));
+});
+
+const appStaticOptions = {
   index: false,
   fallthrough: true,
   setHeaders: (res, filePath) => {
     const filename = path.basename(filePath);
     if (filename === 'index.html') {
-      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
-      res.setHeader('Pragma', 'no-cache');
-      res.setHeader('Expires', '0');
+      setNoCacheHeaders(res);
       return;
     }
     if (filename === 'flutter.js' || filename === 'flutter_bootstrap.js') {
@@ -671,23 +682,59 @@ const staticOptions = {
   }
 };
 
-if (fs.existsSync(PUBLIC_ROOT)) {
-  app.get('/v/:version', (req, res) => res.redirect(302, '/'));
-  app.get('/v/:version/', (req, res) => res.redirect(302, '/'));
+const landingStaticOptions = {
+  index: false,
+  fallthrough: true,
+  setHeaders: (res, filePath) => {
+    const filename = path.basename(filePath);
+    if (filename.endsWith('.html')) {
+      setNoCacheHeaders(res);
+      return;
+    }
+    if (filename === 'sitemap.xml' || filename === 'robots.txt') {
+      res.setHeader('Cache-Control', 'public, max-age=300');
+      return;
+    }
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+  }
+};
+
+if (fs.existsSync(APP_ROOT)) {
+  app.get('/v/:version', (req, res) => res.redirect(302, '/app'));
+  app.get('/v/:version/', (req, res) => res.redirect(302, '/app'));
   app.get('/v/:version/*', (req, res) => {
     const restPath = req.params[0] ? `/${req.params[0]}` : '/';
-    return res.redirect(302, restPath);
+    return res.redirect(302, `/app${restPath}`);
   });
 
-  app.use(express.static(PUBLIC_ROOT, staticOptions));
+  app.use('/app', express.static(APP_ROOT, appStaticOptions));
+}
+
+if (fs.existsSync(LANDING_ROOT)) {
+  app.use(express.static(LANDING_ROOT, landingStaticOptions));
 }
 
 app.get('/', (req, res) => {
-  if (fs.existsSync(PUBLIC_INDEX)) {
-    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
-    res.setHeader('Pragma', 'no-cache');
-    res.setHeader('Expires', '0');
-    return res.sendFile(PUBLIC_INDEX);
+  if (fs.existsSync(LANDING_INDEX)) {
+    setNoCacheHeaders(res);
+    return res.sendFile(LANDING_INDEX);
+  }
+  if (fs.existsSync(APP_INDEX)) {
+    setNoCacheHeaders(res);
+    return res.sendFile(APP_INDEX);
+  }
+  return res.json({
+    ok: true,
+    name: 'basils-arcana',
+    message: 'Basil’s Arcana API',
+    requestId: req.requestId
+  });
+});
+
+app.get('/app', (req, res) => {
+  if (fs.existsSync(APP_INDEX)) {
+    setNoCacheHeaders(res);
+    return res.sendFile(APP_INDEX);
   }
   return res.json({
     ok: true,
@@ -2269,14 +2316,27 @@ app.post('/api/compatibility/generate_web', async (req, res) => {
 });
 
 app.get('*', (req, res) => {
-  if (req.path.startsWith('/api') || req.path === '/health' || req.path === '/config.json') {
+  if (
+    req.path.startsWith('/api') ||
+    req.path === '/health' ||
+    req.path === '/config.json' ||
+    req.path === '/app/config.json'
+  ) {
     return res.status(404).json({ error: 'not_found', requestId: req.requestId });
   }
-  if (fs.existsSync(PUBLIC_INDEX)) {
-    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
-    res.setHeader('Pragma', 'no-cache');
-    res.setHeader('Expires', '0');
-    return res.sendFile(PUBLIC_INDEX);
+  if (req.path === '/app' || req.path.startsWith('/app/')) {
+    if (fs.existsSync(APP_INDEX)) {
+      setNoCacheHeaders(res);
+      return res.sendFile(APP_INDEX);
+    }
+  }
+  if (fs.existsSync(LANDING_INDEX)) {
+    setNoCacheHeaders(res);
+    return res.sendFile(LANDING_INDEX);
+  }
+  if (fs.existsSync(APP_INDEX)) {
+    setNoCacheHeaders(res);
+    return res.sendFile(APP_INDEX);
   }
   return res.status(404).json({ error: 'not_found', requestId: req.requestId });
 });

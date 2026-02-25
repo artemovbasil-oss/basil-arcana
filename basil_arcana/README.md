@@ -64,11 +64,22 @@ curl -X POST http://localhost:3000/api/reading/generate \
 ## Deploy to Railway
 
 1. Create a Railway project from this GitHub repo.
-2. For the Flutter web service, point Railway to `basil_arcana/app_flutter/Dockerfile.web` and set `API_BASE_URL`.
-3. In Railway Variables for the API service, set:
+2. Create one web service from `basil_arcana/server`:
+   - Build command: `npm ci`
+   - Start command: `npm start`
+3. Build Flutter web app with `/app` base path and copy it into `server/public`:
+   - `cd app_flutter`
+   - `flutter pub get`
+   - `flutter gen-l10n`
+   - `flutter build web --release --pwa-strategy=none --base-href /app/ --web-define=BUILD_ID=<build-id>`
+   - `mkdir -p ../server/public`
+   - `cp -R build/web/* ../server/public/`
+4. In Railway Variables for the web service, set:
    - `OPENAI_API_KEY`
    - `ARCANA_API_KEY`
    - `TELEGRAM_BOT_TOKEN` (required for Telegram Stars invoices in mini app)
+   - `DATABASE_URL` (Railway Postgres)
+   - `API_BASE_URL` (for runtime config, usually `https://basilarcana.com`)
    - `OPENAI_MODEL` (optional)
    - `RATE_LIMIT_WINDOW_MS` (optional, default 60000)
    - `RATE_LIMIT_MAX` (optional, default 60)
@@ -76,8 +87,12 @@ curl -X POST http://localhost:3000/api/reading/generate \
    - `STARS_PACK_WEEK_XTR` (optional, default `99`)
    - `STARS_PACK_MONTH_XTR` (optional, default `499`)
    - `STARS_PACK_YEAR_XTR` (optional, default `4999`)
-4. Ensure the `start` script runs (`npm start`). Railway uses `process.env.PORT`.
-5. Use the Railway public URL to test `/health`.
+   - `APP_ROOT` (optional, default `server/public`)
+   - `LANDING_ROOT` (optional, default `landing`)
+5. Attach `basilarcana.com` to this web service and check:
+   - `https://basilarcana.com/` (landing)
+   - `https://basilarcana.com/app` (Flutter app)
+   - `https://basilarcana.com/health` (healthcheck)
 
 ## Telegram bot (Railway)
 
@@ -88,11 +103,11 @@ curl -X POST http://localhost:3000/api/reading/generate \
 3. Build command: `cd bot && npm ci && npm run build`
 4. Start command: `cd bot && npm run start`
 
-## Attach custom domain: api.basilarcana.com
+## Attach custom domain: basilarcana.com
 
-1. In Railway → Settings → Domains, add `api.basilarcana.com`.
+1. In Railway → Settings → Domains, add `basilarcana.com` (and `www.basilarcana.com` if needed).
 2. In DNS, create a CNAME record:
-   - Name: `api`
+   - Name: `@` (or `www`, depending on your DNS setup)
    - Target: the Railway-provided hostname
 3. If using Cloudflare, set the proxy to **OFF** (DNS only).
 
@@ -110,11 +125,11 @@ flutter run
 flutter run --dart-define=API_BASE_URL=http://10.0.2.2:3000
 ```
 
-Production default: `https://api.basilarcana.com`.
+Production default: `https://basilarcana.com`.
 
 ## Notes
 - Secrets are never committed to the repo. Use Railway Variables or local environment variables.
-- The web client loads `/config.json` at runtime; set `API_BASE_URL` in the web service environment. No `API_KEY` is embedded in the web bundle.
+- The web client loads runtime config at `/config.json` and `/app/config.json`; set `API_BASE_URL` in Railway Variables. No `API_KEY` is embedded in the web bundle.
 - No binary assets are included; all card faces are rendered with Flutter UI components.
 
 ## Release checklist (web + bot + iOS Telegram)
@@ -122,7 +137,7 @@ Production default: `https://api.basilarcana.com`.
   - `cd app_flutter`
   - `flutter pub get`
   - `flutter gen-l10n`
-  - `flutter build web --release --pwa-strategy=none --web-define=BUILD_ID=<build-id>`
+  - `flutter build web --release --pwa-strategy=none --base-href /app/ --web-define=BUILD_ID=<build-id>`
   - `mkdir -p ../server/public`
   - `cp -R build/web/* ../server/public/`
 - **Local bot build**:
@@ -131,9 +146,8 @@ Production default: `https://api.basilarcana.com`.
   - `npm run build`
   - `npm run start`
 - **Railway environment variables**:
-  - Web service: `API_BASE_URL`
-  - Web service (optional): `APP_VERSION` (default `2026-02-08-1`), `PUBLIC_ROOT` (default `server/public`)
-  - API service: `OPENAI_API_KEY`, `ARCANA_API_KEY`, `TELEGRAM_BOT_TOKEN`, `DATABASE_URL` (+ optional `OPENAI_MODEL`, `SOFIA_NOTIFY_CHAT_ID`, rate limit vars, `STARS_PACK_FULL_XTR`, `STARS_PACK_WEEK_XTR`, `STARS_PACK_MONTH_XTR`, `STARS_PACK_YEAR_XTR`)
+  - One web service: `OPENAI_API_KEY`, `ARCANA_API_KEY`, `TELEGRAM_BOT_TOKEN`, `DATABASE_URL`, `API_BASE_URL`
+  - One web service (optional): `APP_VERSION` (default `2026-02-08-1`), `APP_ROOT` (default `server/public`), `LANDING_ROOT` (default `landing`)
   - Bot service: `TELEGRAM_BOT_TOKEN`, `DATABASE_URL`, `TELEGRAM_WEBAPP_URL` (optional), `APP_VERSION` (optional), `SOFIA_CHAT_ID` (or `SOFIA_NOTIFY_CHAT_ID`)
 - **iOS Telegram verification**:
   - Open the mini app via the bot button on iOS.
