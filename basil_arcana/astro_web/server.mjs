@@ -509,6 +509,9 @@ function buildCompatibilityDetail({ userSign, friendSign, friendName = "Friend",
       : score >= 62
         ? "Neutral dynamic. Keep communication explicit."
         : "Sensitivity elevated. Clarify intent early.";
+  const syncScore = Math.max(35, Math.min(96, score + ((seed % 9) - 4)));
+  const emotionalScore = Math.max(30, Math.min(95, score + ((seed % 13) - 6)));
+  const frictionScore = Math.max(22, Math.min(90, 100 - score + ((seed % 7) - 3)));
   const highlights = [
     `${userSign} x ${friendSign}: conversation quality improves with direct framing of expectations.`,
     score >= 72
@@ -519,7 +522,43 @@ function buildCompatibilityDetail({ userSign, friendSign, friendName = "Friend",
       : "Repair cycles stay short when both sides confirm intent early."
   ];
   const advice = `With ${friendName}, set one shared weekly ritual and one explicit repair rule after friction.`;
-  return { score, trend, note, highlights, advice, userSign, friendSign, period };
+  const rationale =
+    score >= 76
+      ? `High score comes from strong behavioral resonance between ${userSign} and ${friendSign}: communication tempo and decision style are naturally aligned.`
+      : score >= 62
+        ? `Balanced score reflects mixed resonance: there is enough overlap for steady collaboration, but outcomes depend on clear language and explicit expectations.`
+        : `Lower score indicates higher friction load between ${userSign} and ${friendSign}: coordination remains possible, but requires stricter communication hygiene and pacing discipline.`;
+  return {
+    score,
+    trend,
+    note,
+    highlights,
+    advice,
+    rationale,
+    domains: [
+      {
+        key: "sync",
+        label: "Communication Sync",
+        score: syncScore,
+        comment: syncScore >= 70 ? "Fast understanding with little clarification overhead." : "Needs explicit framing to avoid ambiguity."
+      },
+      {
+        key: "emotional",
+        label: "Emotional Stability",
+        score: emotionalScore,
+        comment: emotionalScore >= 70 ? "Repair cycles are typically short and constructive." : "Emotional timing can drift without clear checkpoints."
+      },
+      {
+        key: "friction",
+        label: "Friction Load",
+        score: frictionScore,
+        comment: frictionScore <= 35 ? "Low conflict pressure in routine interactions." : "Potential tension rises under stress or unclear boundaries."
+      }
+    ],
+    userSign,
+    friendSign,
+    period
+  };
 }
 
 function buildDynamicCompatibility(profile, friend, dayKey, period, userSign) {

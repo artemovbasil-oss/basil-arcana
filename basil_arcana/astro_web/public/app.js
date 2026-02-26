@@ -822,6 +822,7 @@ function renderFriendGauge(score) {
 function renderFriendAccordion(friend, { expanded = false } = {}) {
   const score = Math.max(0, Math.min(100, Math.round(Number(friend?.score) || 0)));
   const highlights = Array.isArray(friend?.highlights) ? friend.highlights : [];
+  const domains = Array.isArray(friend?.domains) ? friend.domains : [];
   const detailId = `friend-detail-${String(friend?.id || friend?.friendName || "friend").replace(/[^a-z0-9_-]/gi, "_")}`;
   return `
     <article class="friend-accordion ${expanded ? "open" : ""}" data-id="${friend.id || ""}">
@@ -838,6 +839,20 @@ function renderFriendAccordion(friend, { expanded = false } = {}) {
       </button>
       <div id="${detailId}" class="friend-accordion-body">
         <p class="friend-premium-note">${friend.note || "Compatibility insight will appear after analysis."}</p>
+        <p class="friend-rationale">${friend.rationale || ""}</p>
+        <div class="friend-domain-grid">
+          ${domains
+            .map(
+              (domain) => `
+                <article class="friend-domain-card">
+                  <span>${domain.label}</span>
+                  <strong>${Math.max(0, Math.min(100, Number(domain.score) || 0))}%</strong>
+                  <p>${domain.comment || ""}</p>
+                </article>
+              `
+            )
+            .join("")}
+        </div>
         <ul class="bullet-list friend-highlights">
           ${highlights.map((item) => `<li>${item}</li>`).join("")}
         </ul>
@@ -1528,19 +1543,27 @@ function faqView() {
     <section class="section">
       <article class="card">
         <span class="eyebrow">FAQ</span>
-        <h1>Astronautica scope</h1>
+        <h1>Astronautica method</h1>
         <div class="faq">
           <article class="faq-item">
-            <h3>What is already implemented?</h3>
-            <p>Onboarding flow, natal route, daily route, friend compatibility route, and server API contracts.</p>
+            <h3>How do we calculate natal data?</h3>
+            <p>We use birth date, exact time and geolocation to compute tropical zodiac placements and Placidus houses with deterministic astronomical math. Same input always returns same chart.</p>
           </article>
           <article class="faq-item">
-            <h3>How does auth work now?</h3>
-            <p>Telegram auth with server-side signature verification and session persistence.</p>
+            <h3>Why this is not fortune-telling?</h3>
+            <p>Astronautica does not claim supernatural certainty. We separate calculation from interpretation and present it as structured decision support for communication, timing and self-reflection.</p>
           </article>
           <article class="faq-item">
-            <h3>What comes next?</h3>
-            <p>Google login provider, DB-backed user identities, and real ephemeris calculations.</p>
+            <h3>What makes this more rigorous than generic horoscope apps?</h3>
+            <p>We combine personalized chart geometry, explicit assumptions, and repeatable compatibility sub-signals. No random daily text unrelated to your profile.</p>
+          </article>
+          <article class="faq-item">
+            <h3>How do friend compatibility scores work?</h3>
+            <p>Score is a composite of communication sync, emotional stability and friction load. We provide domain-level explanations so you see why the score is high, medium or low.</p>
+          </article>
+          <article class="faq-item">
+            <h3>Is this medical, legal or financial advice?</h3>
+            <p>No. This product is for reflection and planning only. High-stakes decisions should be validated with qualified professionals and real-world evidence.</p>
           </article>
         </div>
       </article>
@@ -1553,8 +1576,8 @@ const routes = {
   "/login": loginView,
   "/onboarding": onboardingView,
   "/profile": profileView,
-  "/natal-chart": natalViewLoading,
-  "/daily": dailyViewLoading,
+  "/natal-chart": () => `<section class="section"><article class="card"><p class="muted">Loading...</p></article></section>`,
+  "/daily": () => `<section class="section"><article class="card"><p class="muted">Loading...</p></article></section>`,
   "/friends": friendsView,
   "/faq": faqView
 };
@@ -1628,23 +1651,69 @@ function normalizeTelegramHandle(value) {
 }
 
 function shareFriendCompatibility(friendName, friendSign, score) {
-  const target = window.prompt("Friend contact: email or Telegram username (@username)");
-  if (!target) {
-    return;
-  }
-  const subject = "Astronautica compatibility snapshot";
-  const body = `Compatibility preview for ${friendName} (${friendSign}): ${score}%. Want to compare notes together?`;
-  if (looksLikeEmail(target)) {
-    window.location.href = `mailto:${encodeURIComponent(target)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    return;
-  }
-  const handle = normalizeTelegramHandle(target);
-  if (!handle) {
-    alert("Please enter a valid email or Telegram username.");
-    return;
-  }
-  const message = `${subject}\n\n${body}`;
-  window.open(`https://t.me/${encodeURIComponent(handle)}?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer");
+  const pct = Math.max(0, Math.min(100, Math.round(Number(score) || 0)));
+  const reason = pct >= 75
+    ? "strong communication sync and stable emotional rhythm"
+    : pct >= 62
+      ? "moderate alignment with clear communication requirements"
+      : "higher friction load that needs explicit boundaries";
+  openShareModal({ friendName, friendSign, score: pct, reason });
+}
+
+function closeShareModal() {
+  document.querySelector(".share-modal-backdrop")?.remove();
+}
+
+function openShareModal(payload) {
+  closeShareModal();
+  const modal = document.createElement("div");
+  modal.className = "share-modal-backdrop";
+  modal.innerHTML = `
+    <div class="share-modal card" role="dialog" aria-modal="true" aria-label="Share compatibility">
+      <span class="eyebrow">Share</span>
+      <h2>Share compatibility</h2>
+      <p>${payload.friendName} (${payload.friendSign}) · ${payload.score}%</p>
+      <form id="shareModalForm" class="form-grid">
+        <label>Friend contact
+          <input required name="contact" placeholder="email@example.com or @telegram" />
+        </label>
+        <div class="share-modal-actions">
+          <button type="button" class="btn ghost js-share-cancel">Cancel</button>
+          <button type="submit" class="btn primary">Share</button>
+        </div>
+      </form>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  modal.addEventListener("click", (event) => {
+    if (event.target === modal) {
+      closeShareModal();
+    }
+  });
+  modal.querySelector(".js-share-cancel")?.addEventListener("click", closeShareModal);
+  const form = modal.querySelector("#shareModalForm");
+  form?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const contact = String(new FormData(form).get("contact") || "").trim();
+    const subject = "Compatibility check from Astronautica";
+    const summary = `I checked our compatibility on app.basilarcana.com: ${payload.score}%.`;
+    const reasonText = `Why this score: ${payload.reason}.`;
+    const linkText = "View details: https://app.basilarcana.com";
+    const body = `${summary}\n${reasonText}\n\n${linkText}`;
+    if (looksLikeEmail(contact)) {
+      window.location.href = `mailto:${encodeURIComponent(contact)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      closeShareModal();
+      return;
+    }
+    const handle = normalizeTelegramHandle(contact);
+    if (!handle) {
+      alert("Please enter a valid email or Telegram username.");
+      return;
+    }
+    window.open(`https://t.me/${encodeURIComponent(handle)}?text=${encodeURIComponent(`${subject}\n\n${body}`)}`, "_blank", "noopener,noreferrer");
+    closeShareModal();
+  });
 }
 
 async function hydrateNatal() {

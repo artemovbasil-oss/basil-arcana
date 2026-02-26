@@ -864,6 +864,41 @@ p {
   margin-bottom: 0.4rem;
 }
 
+.friend-rationale {
+  margin-bottom: 0.45rem;
+}
+
+.friend-domain-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.45rem;
+  margin-bottom: 0.48rem;
+}
+
+.friend-domain-card {
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  padding: 0.45rem 0.5rem;
+  display: grid;
+  gap: 0.18rem;
+}
+
+.friend-domain-card span {
+  color: var(--muted);
+  font-size: 0.64rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.friend-domain-card strong {
+  font-size: 1rem;
+}
+
+.friend-domain-card p {
+  margin: 0;
+  font-size: 0.78rem;
+}
+
 .friend-highlights {
   margin-top: 0.35rem;
   margin-bottom: 0.45rem;
@@ -871,6 +906,26 @@ p {
 
 .friend-actions {
   margin-top: 0.55rem;
+}
+
+.share-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.68);
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+}
+
+.share-modal {
+  width: min(520px, 100%);
+}
+
+.share-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.45rem;
 }
 
 .energy-cards {
@@ -1446,6 +1501,10 @@ body[data-theme="light"] .energy-star.neutral {
   }
 
   .energy-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .friend-domain-grid {
     grid-template-columns: 1fr;
   }
 
