@@ -18,7 +18,8 @@ const state = {
   friends: [],
   dashboard: null,
   homePeriod: "week",
-  theme: "dark"
+  theme: "dark",
+  profileEditMode: false
 };
 
 menuButton.addEventListener("click", () => {
@@ -67,6 +68,32 @@ let citySuggestTimer = null;
 
 function hasProfile(profile = state.profile) {
   return Boolean(profile?.name && profile?.birthDate && profile?.birthTime && profile?.birthCity);
+}
+
+function actionPlanEntries(actionPlan, profile, core) {
+  const source = Array.isArray(actionPlan) ? actionPlan : [];
+  const name = (profile?.name || "User").split(/\s+/).filter(Boolean)[0] || "User";
+  const sun = core?.sun || "your solar sign";
+  const moon = core?.moon || "your lunar pattern";
+  const rising = core?.rising || "your rising behavior";
+  const templates = [
+    {
+      title: "Boundaries Protocol",
+      action: source[0] || "Define one non-negotiable boundary for the week.",
+      comment: `${name}, this stabilizes ${moon}-driven reactivity and prevents avoidable social energy loss.`
+    },
+    {
+      title: "Execution Cadence",
+      action: source[1] || "Convert one emotional reaction into a measurable action.",
+      comment: `Use ${sun} motivation as a trigger: translate feeling into one concrete output with a deadline.`
+    },
+    {
+      title: "Weekly Integration",
+      action: source[2] || "Review one long-term commitment every Sunday.",
+      comment: `This keeps ${rising} presentation aligned with your actual priorities and commitments.`
+    }
+  ];
+  return templates;
 }
 
 function getInitials() {
@@ -999,6 +1026,14 @@ function profileView() {
   const authLabel = state.authUser?.username
     ? `@${state.authUser.username}`
     : [state.authUser?.firstName, state.authUser?.lastName].filter(Boolean).join(" ");
+  const isEditing = Boolean(state.profileEditMode);
+  const profileLines = [
+    { label: "Name", value: profile.name || "N/A" },
+    { label: "Date of birth", value: profile.birthDate || "N/A" },
+    { label: "Birth time", value: profile.birthTime || "N/A" },
+    { label: "Birth city", value: profile.birthCity || "N/A" },
+    { label: "Timezone", value: profile.timezone || "UTC" }
+  ];
   return `
     <section class="section">
       <article class="card">
@@ -1008,32 +1043,58 @@ function profileView() {
       </article>
     </section>
     <section class="section">
-      <form id="profileForm" class="card form-grid">
-        <label>Name
-          <input required name="name" value="${profile.name || ""}" placeholder="Your name" />
-        </label>
-        <label>Date of birth
-          <input required type="date" name="birthDate" value="${profile.birthDate || ""}" />
-        </label>
-        <label>Birth time
-          <input required type="time" name="birthTime" value="${profile.birthTime || ""}" />
-        </label>
-        <label>Birth city
-          <input id="profileBirthCity" required name="birthCity" value="${profile.birthCity || ""}" placeholder="City, Country" list="citySuggestions" autocomplete="off" />
-        </label>
-        <label>Timezone
-          <input required name="timezone" value="${profile.timezone || "UTC"}" placeholder="UTC+3" />
-        </label>
-        <input type="hidden" name="latitude" value="${Number.isFinite(Number(profile.latitude)) ? Number(profile.latitude) : ""}" />
-        <input type="hidden" name="longitude" value="${Number.isFinite(Number(profile.longitude)) ? Number(profile.longitude) : ""}" />
-        <input type="hidden" name="timezoneIana" value="${profile.timezoneIana || ""}" />
-        <datalist id="citySuggestions"></datalist>
-        <button class="btn primary form-submit" type="submit">Save profile</button>
-      </form>
+      <article class="card">
+        ${
+          isEditing
+            ? `
+              <form id="profileForm" class="form-grid">
+                <label>Name
+                  <input required name="name" value="${profile.name || ""}" placeholder="Your name" />
+                </label>
+                <label>Date of birth
+                  <input required type="date" name="birthDate" value="${profile.birthDate || ""}" />
+                </label>
+                <label>Birth time
+                  <input required type="time" name="birthTime" value="${profile.birthTime || ""}" />
+                </label>
+                <label>Birth city
+                  <input id="profileBirthCity" required name="birthCity" value="${profile.birthCity || ""}" placeholder="City, Country" list="citySuggestions" autocomplete="off" />
+                </label>
+                <label>Timezone
+                  <input required name="timezone" value="${profile.timezone || "UTC"}" placeholder="UTC+3" />
+                </label>
+                <input type="hidden" name="latitude" value="${Number.isFinite(Number(profile.latitude)) ? Number(profile.latitude) : ""}" />
+                <input type="hidden" name="longitude" value="${Number.isFinite(Number(profile.longitude)) ? Number(profile.longitude) : ""}" />
+                <input type="hidden" name="timezoneIana" value="${profile.timezoneIana || ""}" />
+                <datalist id="citySuggestions"></datalist>
+              </form>
+            `
+            : `
+              <div class="profile-readonly">
+                ${profileLines
+                  .map(
+                    (item) => `
+                      <div class="profile-row">
+                        <span>${item.label}</span>
+                        <strong>${item.value}</strong>
+                      </div>
+                    `
+                  )
+                  .join("")}
+              </div>
+            `
+        }
+      </article>
     </section>
     <section class="section">
-      <article class="card">
-        <button id="profileLogoutButton" class="btn ghost" type="button">Logout</button>
+      <article class="card profile-actions-card">
+        <div class="profile-actions">
+          <div class="profile-actions-left">
+            <button id="profileLogoutButton" class="btn ghost" type="button">Logout</button>
+            <button id="profileEditButton" class="btn ghost" type="button">${isEditing ? "Cancel edit" : "Edit"}</button>
+          </div>
+          <button id="profileUpdateButton" class="btn primary profile-update-btn" type="button" style="display:none">Update data</button>
+        </div>
       </article>
     </section>
   `;
@@ -1144,6 +1205,7 @@ function buildNatalEditorial(profile, report) {
   const housesFocus = Array.isArray(report?.housesFocus) ? report.housesFocus : [];
   const aspects = Array.isArray(report?.aspects) ? report.aspects : [];
   const actionPlan = Array.isArray(report?.growthPlan) ? report.growthPlan : [];
+  const planItems = actionPlanEntries(actionPlan, profile, report?.core || {});
   const planets = Array.isArray(report?.planets) ? report.planets : [];
   const topPlanets = planets.slice(0, 3).map((item) => `${item.key} in ${item.sign}`);
   const voiceName = (profile?.name || "User").split(/\s+/).filter(Boolean)[0] || "User";
@@ -1206,7 +1268,19 @@ function buildNatalEditorial(profile, report) {
       <article class="route-card content-panel premium-panel">
         <span class="premium-kicker">Execution</span>
         <h2>Action Plan</h2>
-        <ol class="premium-steps">${actionPlan.map((item) => `<li>${item}</li>`).join("")}</ol>
+        <ol class="premium-steps">
+          ${planItems
+            .map(
+              (item) => `
+                <li class="premium-step">
+                  <h4>${item.title}</h4>
+                  <p class="premium-step-action">${item.action}</p>
+                  <p class="premium-step-comment">${item.comment}</p>
+                </li>
+              `
+            )
+            .join("")}
+        </ol>
         <p><strong>Profile context:</strong> ${profile?.name || "User"} can run this plan as a weekly ritual with measurable checkpoints and a short post-week retrospective.</p>
       </article>
     </section>
@@ -1294,6 +1368,22 @@ function bindNatalToc() {
   });
 }
 
+function scrollToNatalHash({ smooth = true } = {}) {
+  if (window.location.pathname !== "/natal-chart") {
+    return;
+  }
+  const hash = String(window.location.hash || "").trim();
+  if (!hash || hash === "#") {
+    return;
+  }
+  const id = hash.slice(1);
+  const target = document.getElementById(id);
+  if (!target) {
+    return;
+  }
+  target.scrollIntoView({ behavior: smooth ? "smooth" : "auto", block: "start" });
+}
+
 function natalViewEmpty() {
   return shell({
     eyebrow: "Natal Report",
@@ -1323,26 +1413,26 @@ function friendsView() {
     .map((sign) => `<option value="${sign}">${sign}</option>`)
     .join("");
   return `
-    <section class="section">
+    <section class="hero">
       <article class="card">
         <span class="eyebrow">Step 4 · Friends</span>
         <h1>Friend compatibility</h1>
-        <p>Fast synastry-lite view for communication and daily interaction.</p>
+        <p>Fast synastry-lite view for communication quality, conflict timing and daily collaboration windows.</p>
       </article>
-    </section>
-    <section class="section">
-      <form id="friendForm" class="card form-grid">
-        <label>Friend name
-          <input required name="friendName" placeholder="Friend name" />
-        </label>
-        <label>Friend sign
-          <select required name="friendSign">
-            <option value="">Select sign</option>
-            ${zodiacSelectOptions}
-          </select>
-        </label>
-        <button class="btn primary form-submit" type="submit">Save friend</button>
-      </form>
+      <aside class="card">
+        <form id="friendForm" class="form-grid">
+          <label>Friend name
+            <input required name="friendName" placeholder="Friend name" />
+          </label>
+          <label>Friend sign
+            <select required name="friendSign">
+              <option value="">Select sign</option>
+              ${zodiacSelectOptions}
+            </select>
+          </label>
+          <button class="btn primary form-submit" type="submit">Add friend</button>
+        </form>
+      </aside>
     </section>
     <section class="section">
       <article class="card">
@@ -1501,6 +1591,7 @@ async function hydrateNatal() {
     `;
     bindNatalToc();
     bindNatalAsciiLogo();
+    window.setTimeout(() => scrollToNatalHash({ smooth: false }), 0);
   } catch (error) {
     if (error.status === 401) {
       await refreshAuthState();
@@ -1851,26 +1942,48 @@ function attachRouteHandlers(path) {
 
   if (path === "/profile") {
     const profileForm = document.getElementById("profileForm");
-    bindCityAutocomplete(profileForm, "profileBirthCity");
-    profileForm?.addEventListener("submit", async (event) => {
-      event.preventDefault();
-      try {
-        await submitProfileForm(profileForm, null);
-      } catch (error) {
-        if (error.status === 401) {
-          await refreshAuthState();
-          navigate("/login", { replace: true });
-          return;
+    const profileUpdateButton = document.getElementById("profileUpdateButton");
+    if (profileForm) {
+      bindCityAutocomplete(profileForm, "profileBirthCity");
+      profileForm.addEventListener("submit", (event) => event.preventDefault());
+      const initialSnapshot = JSON.stringify(Object.fromEntries(new FormData(profileForm).entries()));
+      const syncDirtyState = () => {
+        const currentSnapshot = JSON.stringify(Object.fromEntries(new FormData(profileForm).entries()));
+        const dirty = currentSnapshot !== initialSnapshot;
+        if (profileUpdateButton) {
+          profileUpdateButton.style.display = dirty ? "inline-flex" : "none";
+          profileUpdateButton.disabled = !dirty;
         }
-        alert(`Failed to save profile: ${error.message}`);
-      }
-    });
+      };
+      profileForm.addEventListener("input", syncDirtyState);
+      profileForm.addEventListener("change", syncDirtyState);
+      profileUpdateButton?.addEventListener("click", async () => {
+        try {
+          await submitProfileForm(profileForm, null);
+          state.profileEditMode = false;
+          render();
+        } catch (error) {
+          if (error.status === 401) {
+            await refreshAuthState();
+            navigate("/login", { replace: true });
+            return;
+          }
+          alert(`Failed to update profile: ${error.message}`);
+        }
+      });
+    }
 
     const profileLogoutButton = document.getElementById("profileLogoutButton");
     profileLogoutButton?.addEventListener("click", async () => {
       await fetchJson("/api/auth/logout", { method: "POST", body: JSON.stringify({}) });
       await loadSessionState();
       navigate("/login", { replace: true });
+    });
+
+    const profileEditButton = document.getElementById("profileEditButton");
+    profileEditButton?.addEventListener("click", () => {
+      state.profileEditMode = !state.profileEditMode;
+      render();
     });
   }
 
@@ -1947,6 +2060,9 @@ async function loadSessionState() {
 
 function render() {
   let path = window.location.pathname;
+  if (path !== "/profile") {
+    state.profileEditMode = false;
+  }
   const profileExists = hasProfile();
 
   if (state.authRequired && !state.authenticated && path !== "/login") {
@@ -1984,12 +2100,38 @@ function render() {
 
 document.addEventListener("click", (event) => {
   const target = event.target;
-  if (!(target instanceof HTMLAnchorElement)) {
+  if (!(target instanceof Element)) {
     return;
   }
-  const href = target.getAttribute("href");
+  const anchor = target.closest("a");
+  if (!(anchor instanceof HTMLAnchorElement)) {
+    return;
+  }
+  const href = anchor.getAttribute("href");
   if (!href || href.startsWith("http") || href.startsWith("mailto:")) {
     return;
+  }
+
+  if (href.startsWith("#")) {
+    event.preventDefault();
+    if (history.replaceState) {
+      history.replaceState(null, "", `${window.location.pathname}${href}`);
+    }
+    scrollToNatalHash({ smooth: true });
+    return;
+  }
+
+  if (href.startsWith("/")) {
+    const [nextPath, hash = ""] = href.split("#");
+    const samePath = nextPath === window.location.pathname;
+    if (samePath && hash) {
+      event.preventDefault();
+      if (history.replaceState) {
+        history.replaceState(null, "", href);
+      }
+      scrollToNatalHash({ smooth: true });
+      return;
+    }
   }
   event.preventDefault();
   window.history.pushState({}, "", href);

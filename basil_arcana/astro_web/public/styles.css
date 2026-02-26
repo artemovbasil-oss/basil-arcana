@@ -851,12 +851,91 @@ p {
   line-height: 1.42;
 }
 
+.premium-step {
+  list-style: decimal;
+  display: grid;
+  gap: 0.18rem;
+}
+
+.premium-step h4 {
+  margin: 0;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink);
+}
+
+.premium-step-action {
+  margin: 0;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.premium-step-comment {
+  margin: 0;
+  color: var(--muted);
+}
+
 .placement-notes {
   display: grid;
   gap: 0.28rem;
   margin-top: 0.6rem;
   padding-top: 0.58rem;
   border-top: 1px solid var(--line);
+}
+
+.profile-readonly {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.profile-row {
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  padding: 0.56rem 0.62rem;
+  display: grid;
+  gap: 0.15rem;
+}
+
+.profile-row span {
+  color: var(--muted);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.profile-row strong {
+  font-size: 0.95rem;
+}
+
+.profile-actions-card {
+  padding-top: 0.72rem;
+  padding-bottom: 0.72rem;
+}
+
+.profile-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+}
+
+.profile-actions-left {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.profile-update-btn {
+  background: #1f9d55;
+  border-color: #1f9d55;
+  color: #ffffff;
+}
+
+.profile-update-btn:hover {
+  background: transparent;
+  color: #1f9d55;
+  border-color: #1f9d55;
 }
 
 .editorial-grid {
@@ -1251,6 +1330,18 @@ body[data-theme="light"] .energy-star.neutral {
 
   .form-grid select {
     min-height: 46px;
+    width: 100%;
+  }
+
+  .profile-actions {
+    flex-wrap: wrap;
+  }
+
+  .profile-actions-left {
+    width: 100%;
+  }
+
+  .profile-actions #profileUpdateButton {
     width: 100%;
   }
 

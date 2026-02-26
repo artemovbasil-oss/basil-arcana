@@ -790,7 +790,8 @@ function buildDashboardPayload(sessionData, period = "week") {
   });
   const weekday = now.toLocaleDateString("en-US", { weekday: "long" });
 
-  const natalCore = {
+  const natalDetail = buildNatalDetail(profile);
+  const natalCore = natalDetail?.core || {
     sun: signFromDate(profile.birthDate),
     moon: moonFromDate(profile.birthDate),
     rising: risingFromTime(profile.birthTime)
