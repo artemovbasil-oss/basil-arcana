@@ -122,32 +122,32 @@ const zodiacOrder = [
 ];
 
 const aspectAngles = [0, 60, 90, 120, 180];
-const zodiacGlyphs = {
-  Aries: "♈",
-  Taurus: "♉",
-  Gemini: "♊",
-  Cancer: "♋",
-  Leo: "♌",
-  Virgo: "♍",
-  Libra: "♎",
-  Scorpio: "♏",
-  Sagittarius: "♐",
-  Capricorn: "♑",
-  Aquarius: "♒",
-  Pisces: "♓"
+const zodiacIconClasses = {
+  Aries: "fa-solid fa-aries",
+  Taurus: "fa-solid fa-taurus",
+  Gemini: "fa-solid fa-gemini",
+  Cancer: "fa-solid fa-cancer",
+  Leo: "fa-solid fa-leo",
+  Virgo: "fa-solid fa-virgo",
+  Libra: "fa-solid fa-libra",
+  Scorpio: "fa-solid fa-scorpio",
+  Sagittarius: "fa-solid fa-sagittarius",
+  Capricorn: "fa-solid fa-capricorn",
+  Aquarius: "fa-solid fa-aquarius",
+  Pisces: "fa-solid fa-pisces"
 };
 
-const planetGlyphs = {
-  Sun: "☉",
-  Moon: "☽",
-  Mercury: "☿",
-  Venus: "♀",
-  Mars: "♂",
-  Jupiter: "♃",
-  Saturn: "♄",
-  Uranus: "♅",
-  Neptune: "♆",
-  Pluto: "♇"
+const planetIconClasses = {
+  Sun: "fa-solid fa-sun",
+  Moon: "fa-solid fa-moon",
+  Mercury: "fa-solid fa-mercury",
+  Venus: "fa-solid fa-venus",
+  Mars: "fa-solid fa-mars",
+  Jupiter: "fa-solid fa-star",
+  Saturn: "fa-solid fa-circle-notch",
+  Uranus: "fa-solid fa-atom",
+  Neptune: "fa-solid fa-water",
+  Pluto: "fa-solid fa-circle"
 };
 
 function degreeToRad(degree) {
@@ -190,14 +190,16 @@ function zodiacIndex(sign) {
   return index >= 0 ? index : 0;
 }
 
-function zodiacGlyph(sign) {
-  return zodiacGlyphs[String(sign || "").trim()] || "◌";
+function zodiacIcon(sign) {
+  const iconClass = zodiacIconClasses[String(sign || "").trim()] || "fa-regular fa-circle";
+  return `<i class="${iconClass} astro-icon" aria-hidden="true"></i>`;
 }
 
-function planetGlyph(key) {
+function planetIcon(key) {
   const raw = String(key || "").trim();
   const normalized = raw.charAt(0).toUpperCase() + raw.slice(1).toLowerCase();
-  return planetGlyphs[normalized] || raw.slice(0, 2).toUpperCase() || "•";
+  const iconClass = planetIconClasses[normalized] || "fa-regular fa-circle";
+  return `<i class="${iconClass} astro-icon" aria-hidden="true"></i>`;
 }
 
 function planetLongitude(planet, index) {
@@ -286,7 +288,7 @@ function renderNatalChartSvg(data) {
           .map((sign, index) => {
             const degree = index * 30 + 15;
             const signPoint = pointOnCircle(center, center, signRadius, degree);
-            return `<text class="natal-sign-label" x="${signPoint.x}" y="${signPoint.y}" text-anchor="middle" dominant-baseline="middle">${zodiacGlyph(sign)} ${sign.slice(0, 3).toUpperCase()}</text>`;
+            return `<text class="natal-sign-label" x="${signPoint.x}" y="${signPoint.y}" text-anchor="middle" dominant-baseline="middle">${sign.slice(0, 3).toUpperCase()}</text>`;
           })
           .join("")}
 
@@ -301,7 +303,7 @@ function renderNatalChartSvg(data) {
         ${planets
           .map((planet) => {
             const guide = pointOnCircle(center, center, aspectRadius + 8, planet.longitude);
-            const symbol = planetGlyph(planet.key);
+            const symbol = String(planet.key || "").slice(0, 2).toUpperCase();
             return `
               <line class="natal-planet-line" x1="${guide.x}" y1="${guide.y}" x2="${planet.dot.x}" y2="${planet.dot.y}" />
               <circle class="natal-planet-dot" cx="${planet.dot.x}" cy="${planet.dot.y}" r="4.2" />
@@ -445,7 +447,7 @@ function renderFriendsBlock(dashboard, period) {
         <div class="friend-row">
           <div>
             <strong>${friend.friendName}</strong>
-            <p>${zodiacGlyph(friend.friendSign)} ${friend.friendSign} · ${friend.trend}</p>
+            <p>${zodiacIcon(friend.friendSign)} ${friend.friendSign} · ${friend.trend}</p>
           </div>
           <div class="friend-score">
             ${renderFriendGauge(score)}
@@ -534,13 +536,15 @@ function renderHomeDashboard(dashboard) {
   const period = dashboard.periodForecast?.period || state.homePeriod;
   const forecastSummary = renderForecastSummary(dashboard, period);
   const friendsBlock = renderFriendsBlock(dashboard, period);
+  const profileName = String(dashboard.profile?.name || "");
+  const nameClass = profileName.length > 18 ? "mask-fade" : "name-plain";
 
   return `
     <section class="hero">
       <article class="card">
         <span class="eyebrow">User Dashboard</span>
-        <h1 class="dashboard-name"><span class="mask-fade">${dashboard.profile.name}</span></h1>
-        <p>${zodiacGlyph(dashboard.natalCore.sun)} ${dashboard.natalCore.sun} sun, ${zodiacGlyph(dashboard.natalCore.moon)} ${dashboard.natalCore.moon} moon, ${zodiacGlyph(dashboard.natalCore.rising)} ${dashboard.natalCore.rising} rising.</p>
+        <h1 class="dashboard-name"><span class="${nameClass}">${dashboard.profile.name}</span></h1>
+        <p>${zodiacIcon(dashboard.natalCore.sun)} ${dashboard.natalCore.sun} sun, ${zodiacIcon(dashboard.natalCore.moon)} ${dashboard.natalCore.moon} moon, ${zodiacIcon(dashboard.natalCore.rising)} ${dashboard.natalCore.rising} rising.</p>
         <div class="hero-actions">
           <a class="btn primary" href="/natal-chart">Natal Profile</a>
           <a class="btn ghost" href="/profile">Edit Birth Data</a>
@@ -703,11 +707,96 @@ function natalViewLoading() {
   return `
     <section class="section">
       <article class="card">
-        <span class="eyebrow">Step 2 · ☉ Natal</span>
+        <span class="eyebrow">Step 2 · Natal</span>
         <h1>Your natal report</h1>
         <p id="natalStatus">Preparing your chart...</p>
       </article>
     </section>
+  `;
+}
+
+function renderNatalHeader(profile, report) {
+  const nameClass = String(profile?.name || "").length > 20 ? "mask-fade" : "name-plain";
+  const chips = [
+    `${zodiacIcon(report?.core?.sun)} Sun: ${report?.core?.sun || "Unknown"}`,
+    `${zodiacIcon(report?.core?.moon)} Moon: ${report?.core?.moon || "Unknown"}`,
+    `${zodiacIcon(report?.core?.rising)} Rising: ${report?.core?.rising || "Unknown"}`,
+    `<i class="fa-regular fa-calendar astro-icon" aria-hidden="true"></i> ${profile?.birthDate || "N/A"}`,
+    `<i class="fa-regular fa-clock astro-icon" aria-hidden="true"></i> ${profile?.birthTime || "N/A"}`,
+    `<i class="fa-solid fa-location-dot astro-icon" aria-hidden="true"></i> ${profile?.birthCity || "N/A"}`
+  ];
+
+  return `
+    <section class="section">
+      <article class="card natal-head-card">
+        <span class="eyebrow">Natal Report</span>
+        <h1 class="natal-main-name"><span class="${nameClass}">${profile?.name || "User"}</span></h1>
+        <div class="chip-grid">
+          ${chips.map((chip) => `<span class="astro-chip">${chip}</span>`).join("")}
+        </div>
+      </article>
+    </section>
+  `;
+}
+
+function interpretPlanetPlacement(item) {
+  const planet = String(item?.key || "Planet");
+  const sign = String(item?.sign || "Unknown");
+  const house = Number(item?.house);
+  const retrograde = item?.retrograde ? "Retrograde indicates this theme is processed internally before action." : "";
+
+  const byPlanet = {
+    Sun: `Identity and will are expressed through ${sign} style.`,
+    Moon: `Emotional regulation and safety needs are filtered through ${sign}.`,
+    Mercury: `Thinking and communication are optimized by ${sign} patterns.`,
+    Venus: `Affection, aesthetics and relational bonding move through ${sign}.`,
+    Mars: `Action, drive and conflict response are energized by ${sign}.`,
+    Jupiter: `Growth and opportunity expand through ${sign} behavior.`,
+    Saturn: `Discipline and long-term structure are shaped by ${sign}.`,
+    Uranus: `Innovation and autonomy pressure this area toward change.`,
+    Neptune: `Meaning, ideals and ambiguity require grounded boundaries here.`,
+    Pluto: `Deep transformation and power dynamics surface in this zone.`
+  };
+
+  const base = byPlanet[planet] || `${planet} themes manifest through ${sign}.`;
+  const houseText = Number.isFinite(house)
+    ? `Primary focus appears in house ${house}, so outcomes are strongest in that life domain.`
+    : "House influence is broad and less localized.";
+  return `${base} ${houseText} ${retrograde}`.trim();
+}
+
+function renderPlanetPlacementTable(planets) {
+  const safePlanets = Array.isArray(planets) ? planets : [];
+  return `
+    <div class="table-wrap">
+      <table class="placement-table">
+        <thead>
+          <tr>
+            <th>Planet</th>
+            <th>Sign</th>
+            <th>House</th>
+            <th>State</th>
+            <th>Meaning</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${safePlanets
+            .map((item) => {
+              const stateLabel = item.retrograde ? "Retrograde" : "Direct";
+              return `
+                <tr>
+                  <td>${planetIcon(item.key)} <strong>${item.key}</strong></td>
+                  <td>${zodiacIcon(item.sign)} ${item.sign}</td>
+                  <td>${Number.isFinite(item.house) ? item.house : "—"}</td>
+                  <td>${stateLabel}</td>
+                  <td>${interpretPlanetPlacement(item)}</td>
+                </tr>
+              `;
+            })
+            .join("")}
+        </tbody>
+      </table>
+    </div>
   `;
 }
 
@@ -716,32 +805,58 @@ function buildNatalEditorial(profile, report) {
   const moon = report?.core?.moon || "Unknown";
   const rising = report?.core?.rising || "Unknown";
   const life = report?.lifeAreas || {};
+  const housesFocus = Array.isArray(report?.housesFocus) ? report.housesFocus : [];
+  const aspects = Array.isArray(report?.aspects) ? report.aspects : [];
+  const actionPlan = Array.isArray(report?.growthPlan) ? report.growthPlan : [];
   return `
     <section class="section">
       <article class="route-card content-panel">
-        <h2>Interpretation Framework</h2>
-        <p><strong>Identity axis:</strong> ${zodiacGlyph(sun)} ${sun} defines visible motivation, ${zodiacGlyph(moon)} ${moon} defines emotional processing, and ${zodiacGlyph(rising)} ${rising} defines behavioral presentation under pressure.</p>
+        <h2><i class="fa-solid fa-compass astro-icon" aria-hidden="true"></i> Interpretation Framework</h2>
+        <p><strong>Identity axis:</strong> ${zodiacIcon(sun)} ${sun} defines visible motivation, ${zodiacIcon(moon)} ${moon} defines emotional processing, and ${zodiacIcon(rising)} ${rising} defines behavioral presentation under pressure.</p>
         <p>This reading is designed for practical planning. The goal is not prediction, but better timing, better communication, and better personal decisions.</p>
       </article>
     </section>
     <section class="section">
       <div class="editorial-grid">
         <article class="feature-card content-card">
-          <h3>🜂 Work Strategy</h3>
+          <h3><i class="fa-solid fa-briefcase astro-icon" aria-hidden="true"></i> Work Strategy</h3>
           <p>${life.career || "Career interpretation appears here based on chart geometry and planetary focus."}</p>
           <p>Execution advice: define a single weekly strategic objective and protect two uninterrupted deep-work windows.</p>
         </article>
         <article class="feature-card content-card">
-          <h3>☍ Relationship Dynamics</h3>
+          <h3><i class="fa-solid fa-user-group astro-icon" aria-hidden="true"></i> Relationship Dynamics</h3>
           <p>${life.relationships || "Relational interpretation appears here from Venus, Moon and house emphasis."}</p>
           <p>Communication advice: state expectations early, then mirror back agreements in concrete language.</p>
         </article>
         <article class="feature-card content-card">
-          <h3>☿ Decision Hygiene</h3>
+          <h3><i class="fa-solid fa-brain astro-icon" aria-hidden="true"></i> Decision Hygiene</h3>
           <p>When emotional load is high, convert interpretation into short measurable actions. This reduces drift and stabilizes outcomes.</p>
           <p>Use 24-hour review cycles for decisions that impact money, commitment, and reputation.</p>
         </article>
       </div>
+    </section>
+    <section class="section">
+      <article class="route-card content-panel">
+        <h2><i class="fa-solid fa-layer-group astro-icon" aria-hidden="true"></i> House Dynamics</h2>
+        <div class="chip-grid">
+          ${housesFocus
+            .map((item) => `<span class="astro-chip">House ${item.house}: ${item.meaning}</span>`)
+            .join("")}
+        </div>
+      </article>
+    </section>
+    <section class="section">
+      <article class="route-card content-panel">
+        <h2><i class="fa-solid fa-chart-line astro-icon" aria-hidden="true"></i> Aspect Dynamics</h2>
+        <ul class="bullet-list">${aspects.slice(0, 8).map((item) => `<li>${item}</li>`).join("")}</ul>
+      </article>
+    </section>
+    <section class="section">
+      <article class="route-card content-panel">
+        <h2><i class="fa-solid fa-list-check astro-icon" aria-hidden="true"></i> Action Plan</h2>
+        <ul class="bullet-list">${actionPlan.map((item) => `<li>${item}</li>`).join("")}</ul>
+        <p><strong>Profile context:</strong> ${profile?.name || "User"} can use this plan as a weekly review ritual with measurable checkpoints.</p>
+      </article>
     </section>
   `;
 }
@@ -762,7 +877,7 @@ function dailyViewLoading() {
   return `
     <section class="section">
       <article class="card">
-        <span class="eyebrow">Step 3 · ☽ Daily</span>
+        <span class="eyebrow">Step 3 · Daily</span>
         <h1>Daily focus</h1>
         <p id="dailyStatus">Building daily signal...</p>
       </article>
@@ -774,7 +889,7 @@ function friendsView() {
   return `
     <section class="section">
       <article class="card">
-        <span class="eyebrow">Step 4 · ☍ Friends</span>
+        <span class="eyebrow">Step 4 · Friends</span>
         <h1>Friend compatibility</h1>
         <p>Fast synastry-lite view for communication and daily interaction.</p>
       </article>
@@ -861,7 +976,7 @@ function renderFriendsList() {
       <div class="friend-row" data-id="${friend.id}">
         <div>
           <strong>${friend.friendName}</strong>
-          <p>${friend.friendSign}</p>
+          <p>${zodiacIcon(friend.friendSign)} ${friend.friendSign}</p>
         </div>
         <button class="btn ghost js-check-friend" data-id="${friend.id}">Check</button>
       </div>
@@ -886,15 +1001,11 @@ async function hydrateNatal() {
     const natalChartSvg = renderNatalChartSvg(data);
 
     const editorial = buildNatalEditorial(profile, data);
+    const placementsTable = renderPlanetPlacementTable(data.planets || []);
+    const life = data.lifeAreas || {};
 
     app.innerHTML = `
-      <section class="section">
-        <article class="card">
-          <span class="eyebrow">Natal Report</span>
-          <h1>${profile.name}: ${zodiacGlyph(data.core.sun)} ${data.core.sun} sun, ${zodiacGlyph(data.core.moon)} ${data.core.moon} moon, ${zodiacGlyph(data.core.rising)} ${data.core.rising} rising</h1>
-          <p>${data.summary}</p>
-        </article>
-      </section>
+      ${renderNatalHeader(profile, data)}
       <section class="section">
         <article class="route-card">
           <h2>Natal wheel</h2>
@@ -902,59 +1013,39 @@ async function hydrateNatal() {
         </article>
       </section>
       <section class="section">
+        <article class="route-card content-panel">
+          <h2><i class="fa-solid fa-table astro-icon" aria-hidden="true"></i> Planet Placement Matrix</h2>
+          <p>${data.summary}</p>
+          ${placementsTable}
+        </article>
+      </section>
+      <section class="section">
         <div class="feature-grid">
-          <article class="feature-card"><h3>Strength</h3><p>${data.blocks.strength}</p></article>
-          <article class="feature-card"><h3>Blind Spot</h3><p>${data.blocks.blindSpot}</p></article>
-          <article class="feature-card"><h3>Action</h3><p>${data.blocks.action}</p></article>
+          <article class="feature-card content-card">
+            <h3><i class="fa-solid fa-heart astro-icon" aria-hidden="true"></i> Relationships</h3>
+            <p>${life.relationships || "N/A"}</p>
+          </article>
+          <article class="feature-card content-card">
+            <h3><i class="fa-solid fa-briefcase astro-icon" aria-hidden="true"></i> Career</h3>
+            <p>${life.career || "N/A"}</p>
+          </article>
+          <article class="feature-card content-card">
+            <h3><i class="fa-solid fa-coins astro-icon" aria-hidden="true"></i> Money</h3>
+            <p>${life.money || "N/A"}</p>
+          </article>
+          <article class="feature-card content-card">
+            <h3><i class="fa-solid fa-bolt astro-icon" aria-hidden="true"></i> Energy</h3>
+            <p>${life.energy || "N/A"}</p>
+          </article>
+          <article class="feature-card content-card">
+            <h3><i class="fa-solid fa-compass astro-icon" aria-hidden="true"></i> Strength</h3>
+            <p>${data.blocks?.strength || "N/A"}</p>
+          </article>
+          <article class="feature-card content-card">
+            <h3><i class="fa-solid fa-shield-halved astro-icon" aria-hidden="true"></i> Blind Spot</h3>
+            <p>${data.blocks?.blindSpot || "N/A"}</p>
+          </article>
         </div>
-      </section>
-      <section class="section">
-        <article class="route-card">
-          <h2>Planet placements</h2>
-          <ul class="bullet-list">${(data.planets || [])
-            .map((item) => `<li>${planetGlyph(item.key)} ${item.key}: ${zodiacGlyph(item.sign)} ${item.sign}, house ${item.house}${item.retrograde ? " (R)" : ""}</li>`)
-            .join("")}</ul>
-        </article>
-      </section>
-      <section class="section">
-        <article class="route-card">
-          <h2>Life areas</h2>
-          <ul class="bullet-list">
-            <li><strong>Relationships:</strong> ${data.lifeAreas?.relationships || "N/A"}</li>
-            <li><strong>Career:</strong> ${data.lifeAreas?.career || "N/A"}</li>
-            <li><strong>Money:</strong> ${data.lifeAreas?.money || "N/A"}</li>
-            <li><strong>Energy:</strong> ${data.lifeAreas?.energy || "N/A"}</li>
-          </ul>
-        </article>
-      </section>
-      <section class="section">
-        <article class="route-card">
-          <h2>House focus</h2>
-          <ul class="bullet-list">${(data.housesFocus || [])
-            .map((item) => `<li>House ${item.house} (${item.theme}): ${item.meaning}</li>`)
-            .join("")}</ul>
-        </article>
-      </section>
-      <section class="section">
-        <article class="route-card">
-          <h2>All houses</h2>
-          <ul class="bullet-list">${(data.housesAll || [])
-            .map((item) => `<li>House ${item.house}: ${zodiacGlyph(item.sign)} ${item.sign}</li>`)
-            .join("")}</ul>
-        </article>
-      </section>
-      <section class="section">
-        <article class="route-card">
-          <h2>Growth plan</h2>
-          <ul class="bullet-list">${(data.growthPlan || []).map((item) => `<li>${item}</li>`).join("")}</ul>
-          <p style="margin-top:0.8rem">Calculation mode: ${data.calculation?.mode || "unknown"} · ${data.calculation?.houseSystem || "n/a"} · ${data.calculation?.zodiac || "n/a"}</p>
-        </article>
-      </section>
-      <section class="section">
-        <article class="route-card">
-          <h2>Major aspects</h2>
-          <ul class="bullet-list">${data.aspects.map((item) => `<li>${item}</li>`).join("")}</ul>
-        </article>
       </section>
       ${editorial}
     `;

@@ -8,6 +8,8 @@
   --line-strong: #3a3a3a;
   --button-inverse-bg: #ffffff;
   --button-inverse-ink: #000000;
+  --font-serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --font-sans: "IBM Plex Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 * {
@@ -20,7 +22,7 @@ body {
   min-height: 100%;
   background: var(--bg);
   color: var(--ink);
-  font-family: "IBM Plex Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: var(--font-serif);
 }
 
 body[data-theme="light"] {
@@ -62,6 +64,7 @@ body[data-theme="light"] .topbar {
 }
 
 .brand {
+  font-family: var(--font-sans);
   text-decoration: none;
   text-transform: uppercase;
   letter-spacing: 0.12em;
@@ -78,6 +81,7 @@ body[data-theme="light"] .topbar {
 }
 
 .nav a {
+  font-family: var(--font-sans);
   text-decoration: none;
   font-size: 0.78rem;
   text-transform: uppercase;
@@ -93,6 +97,7 @@ body[data-theme="light"] .topbar {
 }
 
 .menu-btn {
+  font-family: var(--font-sans);
   display: none;
   border: 1px solid var(--line-strong);
   background: transparent;
@@ -135,6 +140,7 @@ body[data-theme="light"] .topbar {
 }
 
 .profile-initials {
+  font-family: var(--font-sans);
   font-size: 0.74rem;
   text-transform: uppercase;
   font-weight: 600;
@@ -200,6 +206,7 @@ body[data-theme="light"] .topbar {
 }
 
 .eyebrow {
+  font-family: var(--font-sans);
   display: inline-block;
   text-transform: uppercase;
   letter-spacing: 0.12em;
@@ -246,6 +253,7 @@ p {
 }
 
 .btn {
+  font-family: var(--font-sans);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -331,6 +339,48 @@ p {
   mask-image: linear-gradient(90deg, #000 0%, #000 84%, transparent 100%);
 }
 
+.name-plain {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.astro-icon {
+  color: var(--ink);
+  font-size: 0.86em;
+  margin-right: 0.3em;
+  vertical-align: baseline;
+}
+
+.natal-head-card {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.natal-main-name {
+  margin: 0;
+}
+
+.chip-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.astro-chip {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--line-strong);
+  background: var(--surface-2);
+  color: var(--ink);
+  padding: 0.32rem 0.52rem;
+  font-size: 0.74rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  font-family: var(--font-sans);
+}
+
 .feature-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -389,6 +439,7 @@ p {
 }
 
 .form-grid label {
+  font-family: var(--font-sans);
   display: grid;
   gap: 0.32rem;
   color: var(--muted);
@@ -427,6 +478,49 @@ p {
 
 .form-submit {
   justify-content: center;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+}
+
+.placement-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 920px;
+}
+
+.placement-table th,
+.placement-table td {
+  border-bottom: 1px solid var(--line);
+  border-right: 1px solid var(--line);
+  padding: 0.62rem 0.66rem;
+  vertical-align: top;
+  text-align: left;
+}
+
+.placement-table th:last-child,
+.placement-table td:last-child {
+  border-right: 0;
+}
+
+.placement-table th {
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+  background: var(--surface-2);
+}
+
+.placement-table td {
+  font-size: 0.92rem;
+  line-height: 1.35;
+}
+
+.placement-table tr:hover td {
+  background: var(--surface-2);
 }
 
 .friends-list {
@@ -620,6 +714,7 @@ p {
 }
 
 .theme-toggle {
+  font-family: var(--font-sans);
   border: 1px solid var(--line-strong);
   background: transparent;
   color: var(--muted);
@@ -762,6 +857,7 @@ body[data-theme="light"] .friend-gauge-fill {
 }
 
 .footer {
+  font-family: var(--font-sans);
   border-top: 1px solid var(--line);
   color: var(--muted);
   font-size: 0.74rem;
