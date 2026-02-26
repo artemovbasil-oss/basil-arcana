@@ -70,11 +70,20 @@ function getInitials() {
   const first = String(state.authUser?.firstName || "").trim();
   const last = String(state.authUser?.lastName || "").trim();
   const username = String(state.authUser?.username || "").trim();
+  const profileName = String(state.profile?.name || "").trim();
   if (first || last) {
     return `${first.slice(0, 1)}${last.slice(0, 1)}`.toUpperCase() || "?";
   }
   if (username) {
     return username.slice(0, 2).toUpperCase();
+  }
+  if (profileName) {
+    return profileName
+      .split(/\s+/)
+      .slice(0, 2)
+      .map((part) => part.slice(0, 1))
+      .join("")
+      .toUpperCase();
   }
   return "AU";
 }
@@ -104,6 +113,168 @@ function applyTheme(nextTheme) {
   if (themeToggle) {
     themeToggle.textContent = `Theme: ${theme}`;
   }
+}
+
+const zodiacOrder = [
+  "Aries",
+  "Taurus",
+  "Gemini",
+  "Cancer",
+  "Leo",
+  "Virgo",
+  "Libra",
+  "Scorpio",
+  "Sagittarius",
+  "Capricorn",
+  "Aquarius",
+  "Pisces"
+];
+
+const aspectAngles = [0, 60, 90, 120, 180];
+
+function degreeToRad(degree) {
+  return ((degree - 90) * Math.PI) / 180;
+}
+
+function pointOnCircle(cx, cy, radius, degree) {
+  const rad = degreeToRad(degree);
+  return {
+    x: cx + Math.cos(rad) * radius,
+    y: cy + Math.sin(rad) * radius
+  };
+}
+
+function stringHash(input) {
+  const value = String(input || "");
+  let hash = 0;
+  for (let index = 0; index < value.length; index += 1) {
+    hash = (hash * 31 + value.charCodeAt(index)) >>> 0;
+  }
+  return hash;
+}
+
+function normalizeAngle(angle) {
+  let value = angle % 360;
+  if (value < 0) {
+    value += 360;
+  }
+  return value;
+}
+
+function shortestAngleDelta(a, b) {
+  const diff = Math.abs(a - b) % 360;
+  return diff > 180 ? 360 - diff : diff;
+}
+
+function zodiacIndex(sign) {
+  const normalized = String(sign || "").trim();
+  const index = zodiacOrder.indexOf(normalized);
+  return index >= 0 ? index : 0;
+}
+
+function planetLongitude(planet, index) {
+  const signBase = zodiacIndex(planet.sign) * 30;
+  const spread = Number.isFinite(planet.house) ? ((planet.house - 1) % 12) * 1.6 : 0;
+  const jitter = (stringHash(`${planet.key}:${index}`) % 18) - 9;
+  return normalizeAngle(signBase + 15 + spread + jitter);
+}
+
+function buildAspectGeometry(planets) {
+  const lines = [];
+  for (let left = 0; left < planets.length; left += 1) {
+    for (let right = left + 1; right < planets.length; right += 1) {
+      const delta = shortestAngleDelta(planets[left].longitude, planets[right].longitude);
+      const matched = aspectAngles.find((angle) => Math.abs(delta - angle) <= 6);
+      if (!matched) {
+        continue;
+      }
+      lines.push({
+        left: planets[left],
+        right: planets[right],
+        matched,
+        type: matched === 60 || matched === 120 ? "soft" : "hard"
+      });
+    }
+  }
+  return lines.slice(0, 24);
+}
+
+function renderNatalChartSvg(data) {
+  const size = 760;
+  const center = size / 2;
+  const outerRadius = 330;
+  const signRadius = 286;
+  const houseRadius = 245;
+  const aspectRadius = 188;
+  const planetRadius = 226;
+  const labelRadius = 254;
+
+  const planets = (data.planets || []).slice(0, 10).map((planet, index) => {
+    const longitude = planetLongitude(planet, index);
+    const dot = pointOnCircle(center, center, planetRadius, longitude);
+    const label = pointOnCircle(center, center, labelRadius, longitude);
+    return {
+      ...planet,
+      longitude,
+      dot,
+      label
+    };
+  });
+
+  const aspects = buildAspectGeometry(planets);
+  const houses = Array.from({ length: 12 }, (_, idx) => idx + 1);
+
+  return `
+    <div class="natal-graphic">
+      <svg class="natal-chart-svg" viewBox="0 0 ${size} ${size}" role="img" aria-label="Natal chart wheel">
+        <circle class="natal-ring" cx="${center}" cy="${center}" r="${outerRadius}" />
+        <circle class="natal-ring" cx="${center}" cy="${center}" r="${houseRadius}" />
+        <circle class="natal-ring-inner" cx="${center}" cy="${center}" r="${aspectRadius}" />
+
+        ${houses
+          .map((house) => {
+            const degree = (house - 1) * 30;
+            const lineStart = pointOnCircle(center, center, aspectRadius, degree);
+            const lineEnd = pointOnCircle(center, center, outerRadius, degree);
+            const houseLabel = pointOnCircle(center, center, 214, degree + 14);
+            return `
+              <line class="natal-house-line" x1="${lineStart.x}" y1="${lineStart.y}" x2="${lineEnd.x}" y2="${lineEnd.y}" />
+              <text class="natal-house-label" x="${houseLabel.x}" y="${houseLabel.y}" text-anchor="middle" dominant-baseline="middle">${house}</text>
+            `;
+          })
+          .join("")}
+
+        ${zodiacOrder
+          .map((sign, index) => {
+            const degree = index * 30 + 15;
+            const signPoint = pointOnCircle(center, center, signRadius, degree);
+            return `<text class="natal-sign-label" x="${signPoint.x}" y="${signPoint.y}" text-anchor="middle" dominant-baseline="middle">${sign}</text>`;
+          })
+          .join("")}
+
+        ${aspects
+          .map((aspect) => {
+            const start = pointOnCircle(center, center, aspectRadius, aspect.left.longitude);
+            const end = pointOnCircle(center, center, aspectRadius, aspect.right.longitude);
+            return `<line class="natal-aspect-line ${aspect.type}" x1="${start.x}" y1="${start.y}" x2="${end.x}" y2="${end.y}" />`;
+          })
+          .join("")}
+
+        ${planets
+          .map((planet) => {
+            const guide = pointOnCircle(center, center, aspectRadius + 8, planet.longitude);
+            const symbol = String(planet.key || "").slice(0, 2).toUpperCase();
+            return `
+              <line class="natal-planet-line" x1="${guide.x}" y1="${guide.y}" x2="${planet.dot.x}" y2="${planet.dot.y}" />
+              <circle class="natal-planet-dot" cx="${planet.dot.x}" cy="${planet.dot.y}" r="4.2" />
+              <text class="natal-planet-label" x="${planet.label.x}" y="${planet.label.y}" text-anchor="middle" dominant-baseline="middle">${symbol}</text>
+            `;
+          })
+          .join("")}
+      </svg>
+      <p class="muted">Outer ring: signs. Inner wheel: houses. Chords: major aspects. Markers: planetary placements.</p>
+    </div>
+  `;
 }
 
 function shell({ eyebrow, title, intro, primaryCta, secondaryCta, rightPanel, body }) {
@@ -474,12 +645,20 @@ async function hydrateNatal() {
     });
     const profile = state.profile;
 
+    const natalChartSvg = renderNatalChartSvg(data);
+
     app.innerHTML = `
       <section class="section">
         <article class="card">
           <span class="eyebrow">Natal Report</span>
           <h1>${profile.name}: ${data.core.sun} sun, ${data.core.moon} moon, ${data.core.rising} rising</h1>
           <p>${data.summary}</p>
+        </article>
+      </section>
+      <section class="section">
+        <article class="route-card">
+          <h2>Natal wheel</h2>
+          ${natalChartSvg}
         </article>
       </section>
       <section class="section">
