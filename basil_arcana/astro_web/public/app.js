@@ -16,6 +16,7 @@ const state = {
   profile: null,
   profileReady: false,
   friends: [],
+  friendInsights: {},
   dashboard: null,
   homePeriod: "week",
   theme: "dark",
@@ -506,6 +507,11 @@ function energyPointLabel(period, index) {
   return ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][index] || `M${index + 1}`;
 }
 
+function daysInCurrentMonth() {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+}
+
 function todayIndexForPeriod(period, length) {
   const now = new Date();
   if (period === "year") {
@@ -534,7 +540,7 @@ function starPoints(cx, cy, outer = 4.2, inner = 2.1) {
 }
 
 function buildEnergySeries(profile, period, intensity) {
-  const count = period === "year" ? 12 : period === "month" ? 30 : 7;
+  const count = period === "year" ? 12 : period === "month" ? daysInCurrentMonth() : 7;
   const baseSeed = stringHash(`${profile?.name || "anon"}:${profile?.birthDate || "0000-00-00"}:${period}:${intensity}`);
   const baseline = Math.max(28, Math.min(82, Number(intensity) || 50));
   const values = Array.from({ length: count }, (_, index) => {
@@ -813,28 +819,43 @@ function renderFriendGauge(score) {
   `;
 }
 
+function renderFriendAccordion(friend, { expanded = false } = {}) {
+  const score = Math.max(0, Math.min(100, Math.round(Number(friend?.score) || 0)));
+  const highlights = Array.isArray(friend?.highlights) ? friend.highlights : [];
+  const detailId = `friend-detail-${String(friend?.id || friend?.friendName || "friend").replace(/[^a-z0-9_-]/gi, "_")}`;
+  return `
+    <article class="friend-accordion ${expanded ? "open" : ""}" data-id="${friend.id || ""}">
+      <button class="friend-accordion-trigger" type="button" aria-expanded="${expanded ? "true" : "false"}" aria-controls="${detailId}">
+        <div class="friend-row">
+          <div>
+            <strong>${friend.friendName}</strong>
+            <p>${zodiacIcon(friend.friendSign)} ${friend.friendSign} · ${friend.trend || "stable"}</p>
+          </div>
+          <div class="friend-score">
+            ${renderFriendGauge(score)}
+          </div>
+        </div>
+      </button>
+      <div id="${detailId}" class="friend-accordion-body">
+        <p class="friend-premium-note">${friend.note || "Compatibility insight will appear after analysis."}</p>
+        <ul class="bullet-list friend-highlights">
+          ${highlights.map((item) => `<li>${item}</li>`).join("")}
+        </ul>
+        <p>${friend.advice || ""}</p>
+        <div class="friend-actions">
+          <button class="btn ghost js-share-friend" type="button" data-name="${friend.friendName}" data-sign="${friend.friendSign}" data-score="${score}">Share with friend</button>
+        </div>
+      </div>
+    </article>
+  `;
+}
+
 function renderFriendsBlock(dashboard, period) {
   const dynamicFriends = Array.isArray(dashboard?.friendsDynamic) ? dashboard.friendsDynamic : [];
   if (!dynamicFriends.length) {
     return `<p class="muted">No friends yet. Add friends to unlock dynamic compatibility tracking.</p>`;
   }
-  return dynamicFriends
-    .map((friend) => {
-      const score = normalizedFriendScore(friend.score, period);
-      return `
-        <div class="friend-row">
-          <div>
-            <strong>${friend.friendName}</strong>
-            <p>${zodiacIcon(friend.friendSign)} ${friend.friendSign} · ${friend.trend}</p>
-          </div>
-          <div class="friend-score">
-            ${renderFriendGauge(score)}
-            <p>${friend.note}</p>
-          </div>
-        </div>
-      `;
-    })
-    .join("");
+  return `<div class="friends-accordion-list">${dynamicFriends.map((friend) => renderFriendAccordion(friend)).join("")}</div>`;
 }
 
 function renderForecastSummary(dashboard, period) {
@@ -865,6 +886,8 @@ function updateHomeDynamicBlocks(dashboard, period, { animate = false } = {}) {
       friendsBlock.classList.add("swap-in");
     }
     friendsBlock.innerHTML = renderFriendsBlock(dashboard, period);
+    bindFriendAccordionInteractions(friendsBlock);
+    bindShareFriendButtons(friendsBlock);
   }
   document.querySelectorAll(".js-period").forEach((button) => {
     const buttonPeriod = button.getAttribute("data-period");
@@ -1473,7 +1496,7 @@ function friendsView() {
     <section class="hero">
       <article class="card">
         <span class="eyebrow">Step 4 · Friends</span>
-        <h1>Friend compatibility</h1>
+        <h1>Check friends?</h1>
         <p>Fast synastry-lite view for communication quality, conflict timing and daily collaboration windows.</p>
       </article>
       <aside class="card">
@@ -1496,9 +1519,6 @@ function friendsView() {
         <h2>Your friends</h2>
         <div id="friendsList" class="friends-list"></div>
       </article>
-    </section>
-    <section class="section">
-      <article id="friendResult" class="card" style="display:none"></article>
     </section>
   `;
 }
@@ -1529,7 +1549,7 @@ function faqView() {
 }
 
 const routes = {
-  "/": homeViewLoading,
+  "/": () => (state.dashboard ? renderHomeDashboard(state.dashboard) : homeViewLoading()),
   "/login": loginView,
   "/onboarding": onboardingView,
   "/profile": profileView,
@@ -1556,19 +1576,75 @@ function renderFriendsList() {
     return;
   }
 
-  container.innerHTML = state.friends
-    .map(
-      (friend) => `
-      <div class="friend-row" data-id="${friend.id}">
-        <div>
-          <strong>${friend.friendName}</strong>
-          <p>${zodiacIcon(friend.friendSign)} ${friend.friendSign}</p>
-        </div>
-        <button class="btn ghost js-check-friend" data-id="${friend.id}">Check</button>
-      </div>
-    `
-    )
-    .join("");
+  container.innerHTML = `<div class="friends-accordion-list">${
+    state.friends
+      .map((friend) => {
+        const insight = state.friendInsights[String(friend.id)] || {};
+        return renderFriendAccordion({ ...friend, ...insight });
+      })
+      .join("")
+  }</div>`;
+}
+
+function bindFriendAccordionInteractions(root = document) {
+  root.querySelectorAll(".friend-accordion-trigger").forEach((button) => {
+    button.addEventListener("click", () => {
+      const card = button.closest(".friend-accordion");
+      if (!(card instanceof HTMLElement)) {
+        return;
+      }
+      const isOpen = card.classList.toggle("open");
+      button.setAttribute("aria-expanded", isOpen ? "true" : "false");
+    });
+  });
+}
+
+function bindShareFriendButtons(root = document) {
+  root.querySelectorAll(".js-share-friend").forEach((button) => {
+    button.addEventListener("click", (event) => {
+      event.stopPropagation();
+      const target = event.currentTarget;
+      if (!(target instanceof HTMLElement)) {
+        return;
+      }
+      const friendName = target.getAttribute("data-name") || "Friend";
+      const friendSign = target.getAttribute("data-sign") || "Unknown";
+      const score = Number(target.getAttribute("data-score")) || 0;
+      shareFriendCompatibility(friendName, friendSign, score);
+    });
+  });
+}
+
+function looksLikeEmail(value) {
+  const v = String(value || "").trim();
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+}
+
+function normalizeTelegramHandle(value) {
+  const raw = String(value || "").trim();
+  const withoutUrl = raw.replace(/^https?:\/\/t\.me\//i, "");
+  const withoutAt = withoutUrl.replace(/^@/, "");
+  return withoutAt.replace(/[^a-zA-Z0-9_]/g, "");
+}
+
+function shareFriendCompatibility(friendName, friendSign, score) {
+  const target = window.prompt("Friend contact: email or Telegram username (@username)");
+  if (!target) {
+    return;
+  }
+  const subject = "Astronautica compatibility snapshot";
+  const body = `Compatibility preview for ${friendName} (${friendSign}): ${score}%. Want to compare notes together?`;
+  if (looksLikeEmail(target)) {
+    window.location.href = `mailto:${encodeURIComponent(target)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    return;
+  }
+  const handle = normalizeTelegramHandle(target);
+  if (!handle) {
+    alert("Please enter a valid email or Telegram username.");
+    return;
+  }
+  const message = `${subject}\n\n${body}`;
+  window.open(`https://t.me/${encodeURIComponent(handle)}?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer");
 }
 
 async function hydrateNatal() {
@@ -1799,35 +1875,6 @@ async function hydrateDaily() {
   }
 }
 
-async function runCompatibility(friend) {
-  const result = document.getElementById("friendResult");
-  if (!result) {
-    return;
-  }
-
-  try {
-    const data = await fetchJson("/api/compatibility-report", {
-      method: "POST",
-      body: JSON.stringify({ friend })
-    });
-    result.style.display = "block";
-    result.innerHTML = `
-      <span class="eyebrow">Compatibility</span>
-      <h2>${data.score}/100 with ${friend.friendName}</h2>
-      <ul class="bullet-list">${data.highlights.map((item) => `<li>${item}</li>`).join("")}</ul>
-      <p>${data.advice}</p>
-    `;
-  } catch (error) {
-    if (error.status === 401) {
-      await refreshAuthState();
-      navigate("/login", { replace: true });
-      return;
-    }
-    result.style.display = "block";
-    result.innerHTML = `<p>Failed to calculate compatibility: ${error.message}</p>`;
-  }
-}
-
 function mountTelegramWidget() {
   const mount = document.getElementById("telegramWidgetMount");
   if (!mount || !state.telegramBotUsername) {
@@ -1998,6 +2045,14 @@ async function submitProfileForm(form, afterSavePath = null) {
 }
 
 function attachRouteHandlers(path) {
+  if (path === "/") {
+    const homeFriends = document.getElementById("homeFriendsBlock");
+    if (homeFriends) {
+      bindFriendAccordionInteractions(homeFriends);
+      bindShareFriendButtons(homeFriends);
+    }
+  }
+
   if (path === "/login") {
     if (!state.authenticated && state.telegramLoginEnabled) {
       mountTelegramWidget();
@@ -2081,7 +2136,28 @@ function attachRouteHandlers(path) {
   }
 
   if (path === "/friends") {
-    renderFriendsList();
+    const refreshFriendInsights = async () => {
+      try {
+        const payload = await fetchJson("/api/dashboard?period=week");
+        const dynamic = Array.isArray(payload?.dashboard?.friendsDynamic) ? payload.dashboard.friendsDynamic : [];
+        state.friendInsights = dynamic.reduce((acc, item) => {
+          if (item?.id) {
+            acc[String(item.id)] = item;
+          }
+          return acc;
+        }, {});
+      } catch {
+        state.friendInsights = {};
+      }
+    };
+    refreshFriendInsights().finally(() => {
+      renderFriendsList();
+      const list = document.getElementById("friendsList");
+      if (list) {
+        bindFriendAccordionInteractions(list);
+        bindShareFriendButtons(list);
+      }
+    });
 
     const form = document.getElementById("friendForm");
     form?.addEventListener("submit", async (event) => {
@@ -2095,7 +2171,13 @@ function attachRouteHandlers(path) {
         });
         state.friends = payload.friends || [];
         form.reset();
+        await refreshFriendInsights();
         renderFriendsList();
+        const list = document.getElementById("friendsList");
+        if (list) {
+          bindFriendAccordionInteractions(list);
+          bindShareFriendButtons(list);
+        }
       } catch (error) {
         if (error.status === 401) {
           await refreshAuthState();
@@ -2104,20 +2186,6 @@ function attachRouteHandlers(path) {
         }
         alert(`Failed to save friend: ${error.message}`);
       }
-    });
-
-    const list = document.getElementById("friendsList");
-    list?.addEventListener("click", async (event) => {
-      const target = event.target;
-      if (!(target instanceof HTMLElement) || !target.classList.contains("js-check-friend")) {
-        return;
-      }
-      const id = target.getAttribute("data-id");
-      const friend = state.friends.find((item) => item.id === id);
-      if (!friend) {
-        return;
-      }
-      await runCompatibility(friend);
     });
   }
 }
@@ -2139,6 +2207,8 @@ async function loadSessionState() {
     state.profile = null;
     state.profileReady = false;
     state.friends = [];
+    state.friendInsights = {};
+    state.dashboard = null;
     return;
   }
 
@@ -2149,6 +2219,25 @@ async function loadSessionState() {
   state.profile = profilePayload.profile || null;
   state.profileReady = Boolean(profilePayload.profileReady);
   state.friends = friendsPayload.friends || [];
+  if (state.profileReady) {
+    try {
+      const payload = await fetchJson(`/api/dashboard?period=${encodeURIComponent(state.homePeriod)}`);
+      state.dashboard = payload.dashboard || null;
+      const dynamic = Array.isArray(payload?.dashboard?.friendsDynamic) ? payload.dashboard.friendsDynamic : [];
+      state.friendInsights = dynamic.reduce((acc, item) => {
+        if (item?.id) {
+          acc[String(item.id)] = item;
+        }
+        return acc;
+      }, {});
+    } catch {
+      state.dashboard = null;
+      state.friendInsights = {};
+    }
+  } else {
+    state.dashboard = null;
+    state.friendInsights = {};
+  }
 }
 
 function render() {

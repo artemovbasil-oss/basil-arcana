@@ -657,7 +657,6 @@ p {
 .friend-gauge {
   width: 50px;
   height: 50px;
-  transform: rotate(-90deg);
 }
 
 .friend-gauge-bg {
@@ -671,6 +670,9 @@ p {
   stroke: var(--ink);
   stroke-width: 3.1;
   stroke-linecap: round;
+  transform: rotate(-90deg);
+  transform-origin: center;
+  transform-box: fill-box;
 }
 
 .friend-gauge-fill.high {
@@ -685,8 +687,6 @@ p {
   fill: var(--ink);
   font-size: 6.5px;
   font-weight: 700;
-  transform: rotate(90deg);
-  transform-origin: center;
 }
 
 .friend-gauge-text.high {
@@ -824,6 +824,53 @@ p {
 
 .energy-legend .dot.dip {
   background: #d64545;
+}
+
+.friends-accordion-list {
+  display: grid;
+  gap: 0.58rem;
+}
+
+.friend-accordion {
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.friend-accordion-trigger {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: inherit;
+  padding: 0;
+}
+
+.friend-accordion-body {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.28s ease, opacity 0.2s ease;
+}
+
+.friend-accordion.open .friend-accordion-body {
+  max-height: 420px;
+  opacity: 1;
+  border-top: 1px solid var(--line);
+  padding: 0.7rem 0.72rem 0.8rem;
+}
+
+.friend-premium-note {
+  color: var(--ink);
+  margin-bottom: 0.4rem;
+}
+
+.friend-highlights {
+  margin-top: 0.35rem;
+  margin-bottom: 0.45rem;
+}
+
+.friend-actions {
+  margin-top: 0.55rem;
 }
 
 .energy-cards {

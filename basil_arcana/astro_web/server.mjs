@@ -499,22 +499,44 @@ function buildPeriodForecast(period, profile, now) {
   };
 }
 
-function buildDynamicCompatibility(profile, friend, dayKey) {
-  const userSign = profile ? signFromDate(profile.birthDate) : "Unknown";
-  const seed = hashStringToInt(`${friend.id || friend.friendName}:${friend.friendSign}:${dayKey}:${userSign}`);
+function buildCompatibilityDetail({ userSign, friendSign, friendName = "Friend", dayKey, period = "week", seedKey = "" }) {
+  const seed = hashStringToInt(`${seedKey}:${friendSign}:${dayKey}:${userSign}:${period}`);
   const score = 52 + (seed % 47);
+  const trend = score >= 75 ? "high" : score >= 62 ? "stable" : "fragile";
+  const note =
+    score >= 75
+      ? "Easy dialogue window today. Good day for co-planning."
+      : score >= 62
+        ? "Neutral dynamic. Keep communication explicit."
+        : "Sensitivity elevated. Clarify intent early.";
+  const highlights = [
+    `${userSign} x ${friendSign}: conversation quality improves with direct framing of expectations.`,
+    score >= 72
+      ? "Coordination potential is above baseline for planning and shared decisions."
+      : "Alignment grows when goals are translated into concrete next steps.",
+    score <= 60
+      ? "Conflict risk rises if assumptions are left unspoken."
+      : "Repair cycles stay short when both sides confirm intent early."
+  ];
+  const advice = `With ${friendName}, set one shared weekly ritual and one explicit repair rule after friction.`;
+  return { score, trend, note, highlights, advice, userSign, friendSign, period };
+}
+
+function buildDynamicCompatibility(profile, friend, dayKey, period, userSign) {
+  const normalizedUserSign = String(userSign || "").trim() || (profile ? signFromDate(profile.birthDate) : "Unknown");
+  const detail = buildCompatibilityDetail({
+    userSign: normalizedUserSign,
+    friendSign: friend.friendSign,
+    friendName: friend.friendName,
+    dayKey,
+    period,
+    seedKey: friend.id || friend.friendName
+  });
   return {
     id: friend.id,
     friendName: friend.friendName,
     friendSign: friend.friendSign,
-    score,
-    trend: score >= 75 ? "high" : score >= 62 ? "stable" : "fragile",
-    note:
-      score >= 75
-        ? "Easy dialogue window today. Good day for co-planning."
-        : score >= 62
-          ? "Neutral dynamic. Keep communication explicit."
-          : "Sensitivity elevated. Clarify intent early."
+    ...detail
   };
 }
 
@@ -805,9 +827,7 @@ function buildDashboardPayload(sessionData, period = "week") {
   };
 
   const periodForecast = buildPeriodForecast(period, profile, now);
-  const friendsDynamic = (sessionData.friends || []).map((friend) =>
-    buildDynamicCompatibility(profile, friend, dayKey)
-  );
+  const friendsDynamic = (sessionData.friends || []).map((friend) => buildDynamicCompatibility(profile, friend, dayKey, period, natalCore.sun));
 
   return {
     profile,
@@ -1340,17 +1360,20 @@ app.post("/api/compatibility-report", requireAuth, (req, res) => {
   }
 
   const profile = resolveSessionProfile(req.body?.profile, req.userData);
-  const userSign = profile ? signFromDate(profile.birthDate) : "Unknown";
-  const score = Math.max(55, Math.min(95, 60 + ((friendName.length + friendSign.length) % 35)));
+  const natal = profile ? buildNatalDetail(profile) : null;
+  const userSign = natal?.core?.sun || (profile ? signFromDate(profile.birthDate) : "Unknown");
+  const dayKey = new Date().toISOString().slice(0, 10);
+  const detail = buildCompatibilityDetail({
+    userSign,
+    friendSign,
+    friendName,
+    dayKey,
+    period: "week",
+    seedKey: friendName
+  });
 
   return res.json({
-    score,
-    highlights: [
-      `${userSign} x ${friendSign}: conversation quality improves with direct framing of expectations.`,
-      "High short-term resonance in planning and idea generation.",
-      "Conflict risk appears when feedback is delayed too long."
-    ],
-    advice: `With ${friendName}, set one shared weekly ritual and one explicit repair rule after friction.`
+    ...detail
   });
 });
 
