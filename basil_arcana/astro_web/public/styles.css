@@ -872,14 +872,16 @@ p {
 
 .natal-toc {
   display: block;
+  position: sticky;
+  top: 92px;
+  align-self: start;
 }
 
 .natal-toc-sticky {
-  position: sticky;
-  top: 92px;
-  border: 1px solid var(--line);
-  background: var(--surface);
-  padding: 0.75rem;
+  position: static;
+  border: 0;
+  background: transparent;
+  padding: 0.35rem 0 0.1rem;
 }
 
 .natal-toc-nav {
@@ -891,25 +893,26 @@ p {
 .natal-toc-nav a {
   display: block;
   text-decoration: none;
-  color: var(--muted);
-  border-left: 1px solid var(--line);
-  padding: 0.35rem 0.45rem;
-  font-size: 0.73rem;
+  color: color-mix(in srgb, var(--muted) 92%, var(--ink) 8%);
+  border-left: 1px solid color-mix(in srgb, var(--line) 92%, var(--ink) 8%);
+  padding: 0.32rem 0.45rem;
+  font-size: 0.7rem;
+  font-weight: 400;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.07em;
   transition: color 0.16s ease, border-color 0.16s ease, background-color 0.16s ease;
 }
 
 .natal-toc-nav a:hover {
-  color: var(--ink);
-  border-left-color: var(--line-strong);
-  background: var(--surface-2);
+  color: color-mix(in srgb, var(--ink) 75%, var(--muted) 25%);
+  border-left-color: color-mix(in srgb, var(--line-strong) 88%, var(--ink) 12%);
+  background: transparent;
 }
 
 .natal-toc-nav a.active {
   color: var(--ink);
   border-left-color: var(--ink);
-  background: var(--surface-2);
+  background: transparent;
 }
 
 .natal-chart-svg {
