@@ -237,12 +237,12 @@ h1 {
 .typewriter-heading.is-typing::after {
   content: "";
   display: inline-block;
-  width: 0.08em;
-  height: 0.88em;
-  margin-left: 0.08em;
+  width: 0.42em;
+  height: 0.82em;
+  margin-left: 0.1em;
   background: currentColor;
-  vertical-align: -0.08em;
-  animation: type-caret 0.7s steps(1, end) infinite;
+  vertical-align: -0.05em;
+  animation: type-caret 0.85s steps(1, end) infinite;
 }
 
 @keyframes type-caret {

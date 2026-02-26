@@ -539,7 +539,30 @@ function starPoints(cx, cy, outer = 4.2, inner = 2.1) {
   return points.join(" ");
 }
 
-function buildEnergySeries(profile, period, intensity) {
+function buildEnergySeries(dashboard, period) {
+  const serverSeries = dashboard?.periodForecast?.series;
+  if (
+    serverSeries
+    && serverSeries.period === period
+    && Array.isArray(serverSeries.values)
+    && serverSeries.values.length
+  ) {
+    const values = serverSeries.values.map((value) => Math.max(0, Math.min(100, Number(value) || 0)));
+    const peak = Math.max(...values);
+    const dip = Math.min(...values);
+    const labels = Array.isArray(serverSeries.labels) && serverSeries.labels.length === values.length
+      ? serverSeries.labels.map((label) => String(label || ""))
+      : values.map((_, index) => energyPointLabel(period, index));
+    return {
+      values,
+      labels,
+      peakIndex: Number.isFinite(serverSeries.peakIndex) ? serverSeries.peakIndex : values.indexOf(peak),
+      dipIndex: Number.isFinite(serverSeries.dipIndex) ? serverSeries.dipIndex : values.indexOf(dip),
+      source: serverSeries.source || "transit-derived"
+    };
+  }
+  const profile = dashboard?.profile;
+  const intensity = Number(dashboard?.periodForecast?.intensity || 50);
   const count = period === "year" ? 12 : period === "month" ? daysInCurrentMonth() : 7;
   const baseSeed = stringHash(`${profile?.name || "anon"}:${profile?.birthDate || "0000-00-00"}:${period}:${intensity}`);
   const baseline = Math.max(28, Math.min(82, Number(intensity) || 50));
@@ -556,7 +579,8 @@ function buildEnergySeries(profile, period, intensity) {
     values,
     peakIndex: values.indexOf(peak),
     dipIndex: values.indexOf(dip),
-    labels: values.map((_, index) => energyPointLabel(period, index))
+    labels: values.map((_, index) => energyPointLabel(period, index)),
+    source: "synthetic-fallback"
   };
 }
 
@@ -567,12 +591,21 @@ function buildSmoothPath(points) {
   if (points.length === 1) {
     return `M ${points[0].x} ${points[0].y}`;
   }
+  if (points.length === 2) {
+    return `M ${points[0].x} ${points[0].y} L ${points[1].x} ${points[1].y}`;
+  }
   let path = `M ${points[0].x} ${points[0].y}`;
   for (let i = 0; i < points.length - 1; i += 1) {
-    const current = points[i];
-    const next = points[i + 1];
-    const controlX = (current.x + next.x) / 2;
-    path += ` Q ${controlX} ${current.y} ${next.x} ${next.y}`;
+    const p0 = points[i - 1] || points[i];
+    const p1 = points[i];
+    const p2 = points[i + 1];
+    const p3 = points[i + 2] || p2;
+    const tension = 0.18;
+    const cp1x = p1.x + ((p2.x - p0.x) * tension) / 3;
+    const cp1y = p1.y + ((p2.y - p0.y) * tension) / 3;
+    const cp2x = p2.x - ((p3.x - p1.x) * tension) / 3;
+    const cp2y = p2.y - ((p3.y - p1.y) * tension) / 3;
+    path += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p2.x} ${p2.y}`;
   }
   return path;
 }
@@ -599,8 +632,7 @@ function visibleLabelIndexes(length, period) {
 }
 
 function renderEnergyChart(dashboard, period) {
-  const intensity = Number(dashboard?.periodForecast?.intensity || 50);
-  const series = buildEnergySeries(dashboard?.profile, period, intensity);
+  const series = buildEnergySeries(dashboard, period);
   const width = 980;
   const height = 238;
   const padX = 18;
@@ -643,7 +675,7 @@ function renderEnergyChart(dashboard, period) {
         ${points
           .map((point, index) => {
             const tone = index === series.peakIndex ? "peak" : index === series.dipIndex ? "dip" : "neutral";
-            const size = tone === "neutral" ? 5.1 : 7;
+            const size = tone === "neutral" ? 6 : 8.4;
             return `<polygon class="energy-star ${tone}" points="${starPoints(point.x, point.y, size, size * 0.46)}" />`;
           })
           .join("")}
@@ -669,7 +701,7 @@ function renderEnergyChart(dashboard, period) {
 
 function renderEnergyCards(dashboard, period) {
   const intensity = Number(dashboard?.periodForecast?.intensity || 50);
-  const series = buildEnergySeries(dashboard?.profile, period, intensity);
+  const series = buildEnergySeries(dashboard, period);
   const todayIndex = todayIndexForPeriod(period, series.values.length);
   const todayLabel = series.labels[todayIndex] || "Today";
   const todayValue = series.values[todayIndex] || 0;
@@ -1867,11 +1899,11 @@ function animateHeadingTypewriter() {
   heading.dataset.typed = "1";
   heading.classList.add("typewriter-heading", "is-typing");
   holder.textContent = "";
-  const duration = Math.max(360, Math.min(920, fullText.length * 24));
+  const duration = Math.max(620, Math.min(1680, fullText.length * 38));
   const start = performance.now();
   const tick = (now) => {
     const progress = Math.min(1, (now - start) / duration);
-    const eased = Math.pow(progress, 1.55);
+    const eased = Math.pow(progress, 1.45);
     const nextLength = Math.max(1, Math.round(fullText.length * eased));
     holder.textContent = fullText.slice(0, nextLength);
     if (progress < 1) {

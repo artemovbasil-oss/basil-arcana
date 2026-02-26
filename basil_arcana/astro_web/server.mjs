@@ -457,6 +457,101 @@ function risingFromTime(timeText) {
   return signs[Math.floor(hour / 2) % signs.length];
 }
 
+const zodiacElements = {
+  Aries: "fire",
+  Leo: "fire",
+  Sagittarius: "fire",
+  Taurus: "earth",
+  Virgo: "earth",
+  Capricorn: "earth",
+  Gemini: "air",
+  Libra: "air",
+  Aquarius: "air",
+  Cancer: "water",
+  Scorpio: "water",
+  Pisces: "water"
+};
+
+function signElement(sign) {
+  return zodiacElements[String(sign || "").trim()] || "neutral";
+}
+
+function monthDayCount(now) {
+  const year = now.getUTCFullYear();
+  const month = now.getUTCMonth();
+  return new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
+}
+
+function buildRealEnergySeries(profile, period, now, natalCore) {
+  if (!Number.isFinite(profile.latitude) || !Number.isFinite(profile.longitude)) {
+    return null;
+  }
+  const count = period === "year" ? 12 : period === "month" ? monthDayCount(now) : 7;
+  const year = now.getUTCFullYear();
+  const month = now.getUTCMonth();
+  const labels = [];
+  const values = [];
+  for (let idx = 0; idx < count; idx += 1) {
+    let pointDate;
+    if (period === "year") {
+      pointDate = new Date(Date.UTC(year, idx, 1, 12, 0, 0));
+      labels.push(["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][idx]);
+    } else if (period === "month") {
+      pointDate = new Date(Date.UTC(year, month, idx + 1, 12, 0, 0));
+      labels.push(String(idx + 1));
+    } else {
+      const mondayBased = now.getUTCDay() === 0 ? 6 : now.getUTCDay() - 1;
+      const monday = new Date(Date.UTC(year, month, now.getUTCDate() - mondayBased, 12, 0, 0));
+      pointDate = new Date(monday.getTime() + idx * 86400000);
+      labels.push(["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][idx]);
+    }
+    try {
+      const origin = new Origin({
+        year: pointDate.getUTCFullYear(),
+        month: pointDate.getUTCMonth(),
+        date: pointDate.getUTCDate(),
+        hour: pointDate.getUTCHours(),
+        minute: pointDate.getUTCMinutes(),
+        latitude: profile.latitude,
+        longitude: profile.longitude
+      });
+      const horoscope = new Horoscope({
+        origin,
+        houseSystem: "placidus",
+        zodiac: "tropical",
+        language: "en"
+      });
+      const transitSun = horoscope?.CelestialBodies?.sun?.Sign?.label || "Unknown";
+      const transitMoon = horoscope?.CelestialBodies?.moon?.Sign?.label || "Unknown";
+      const transitRising = horoscope?.Ascendant?.Sign?.label || "Unknown";
+      const natalSun = natalCore?.sun || "Unknown";
+      const natalMoon = natalCore?.moon || "Unknown";
+      const natalRising = natalCore?.rising || "Unknown";
+      let score = 48;
+      if (transitSun === natalSun) score += 16;
+      if (transitMoon === natalMoon) score += 12;
+      if (transitRising === natalRising) score += 9;
+      if (signElement(transitSun) === signElement(natalSun)) score += 6;
+      if (signElement(transitMoon) === signElement(natalMoon)) score += 7;
+      const phaseNoise = (hashStringToInt(`${transitSun}:${transitMoon}:${idx}:${period}`) % 9) - 4;
+      score += phaseNoise;
+      values.push(Math.max(8, Math.min(96, Math.round(score))));
+    } catch {
+      values.push(50);
+    }
+  }
+  const peak = Math.max(...values);
+  const dip = Math.min(...values);
+  return {
+    period,
+    values,
+    labels,
+    peakIndex: values.indexOf(peak),
+    dipIndex: values.indexOf(dip),
+    source: "transit-derived"
+  };
+}
+
 function resolveSessionProfile(reqProfile, session) {
   const bodyProfile = pickProfile({ profile: reqProfile });
   if (bodyProfile) {
@@ -479,7 +574,7 @@ function hashStringToInt(value) {
   return hash;
 }
 
-function buildPeriodForecast(period, profile, now) {
+function buildPeriodForecast(period, profile, now, natalCore) {
   const normalizedPeriod = ["week", "month", "year"].includes(period) ? period : "week";
   const daySeed = Number(now.toISOString().slice(0, 10).replaceAll("-", ""));
   const sign = signFromDate(profile.birthDate);
@@ -492,10 +587,12 @@ function buildPeriodForecast(period, profile, now) {
     year: `For this year, your best outcomes come from long-range consistency and explicit partnership boundaries.`
   };
 
+  const series = buildRealEnergySeries(profile, normalizedPeriod, now, natalCore);
   return {
     period: normalizedPeriod,
     intensity,
-    summary: messageByPeriod[normalizedPeriod]
+    summary: messageByPeriod[normalizedPeriod],
+    series
   };
 }
 
@@ -865,7 +962,7 @@ function buildDashboardPayload(sessionData, period = "week") {
     horoscopeToday: `${profile.name}, ${weekday} rewards disciplined pacing and clean boundaries in communication.`
   };
 
-  const periodForecast = buildPeriodForecast(period, profile, now);
+  const periodForecast = buildPeriodForecast(period, profile, now, natalCore);
   const friendsDynamic = (sessionData.friends || []).map((friend) => buildDynamicCompatibility(profile, friend, dayKey, period, natalCore.sun));
 
   return {

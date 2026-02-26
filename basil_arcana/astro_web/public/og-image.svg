@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="Astronautica">
+  <defs>
+    <radialGradient id="g" cx="50%" cy="48%" r="60%">
+      <stop offset="0%" stop-color="#161616"/>
+      <stop offset="100%" stop-color="#050505"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#g)"/>
+  <g fill="#f2f2f2" font-family="Times New Roman, Georgia, serif" font-style="italic" font-size="54" text-anchor="middle">
+    <text x="600" y="246">   .a.   </text>
+    <text x="600" y="302">  /aaa\  </text>
+    <text x="600" y="358"> (aa aa) </text>
+    <text x="600" y="414">  \aaa/  </text>
+    <text x="600" y="470">   `a`   </text>
+  </g>
+  <text x="600" y="570" fill="#9c9c9c" font-family="IBM Plex Sans, Helvetica, Arial, sans-serif" font-size="26" letter-spacing="4" text-anchor="middle">ASTRONAUTICA · app.basilarcana.com</text>
+</svg>
