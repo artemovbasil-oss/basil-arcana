@@ -8,7 +8,6 @@
   --line-strong: #3a3a3a;
   --button-inverse-bg: #ffffff;
   --button-inverse-ink: #000000;
-  --font-serif: "Source Serif 4", Georgia, "Times New Roman", serif;
   --font-sans: "IBM Plex Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
@@ -22,7 +21,7 @@ body {
   min-height: 100%;
   background: var(--bg);
   color: var(--ink);
-  font-family: var(--font-serif);
+  font-family: var(--font-sans);
 }
 
 body[data-theme="light"] {
@@ -505,6 +504,13 @@ p {
   border-right: 0;
 }
 
+.placement-table th:nth-child(1),
+.placement-table th:nth-child(2),
+.placement-table td:nth-child(1),
+.placement-table td:nth-child(2) {
+  white-space: nowrap;
+}
+
 .placement-table th {
   font-family: var(--font-sans);
   font-size: 0.72rem;
@@ -517,6 +523,12 @@ p {
 .placement-table td {
   font-size: 0.92rem;
   line-height: 1.35;
+}
+
+.astro-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
 }
 
 .placement-table tr:hover td {
@@ -916,6 +928,52 @@ body[data-theme="light"] .friend-gauge-fill {
 
   .editorial-grid {
     grid-template-columns: 1fr;
+  }
+
+  .placement-table {
+    min-width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  .placement-table thead {
+    display: none;
+  }
+
+  .placement-table,
+  .placement-table tbody,
+  .placement-table tr,
+  .placement-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .placement-table tr {
+    border-bottom: 1px solid var(--line);
+    padding: 0.52rem 0;
+  }
+
+  .placement-table td {
+    border-right: 0;
+    border-bottom: 0;
+    padding: 0.32rem 0.62rem;
+    white-space: normal;
+  }
+
+  .placement-table td::before {
+    content: attr(data-label);
+    display: block;
+    font-family: var(--font-sans);
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--muted);
+    margin-bottom: 0.14rem;
+  }
+
+  .placement-table td[data-label="Planet"],
+  .placement-table td[data-label="Sign"] {
+    white-space: nowrap;
   }
 
   .form-grid input {

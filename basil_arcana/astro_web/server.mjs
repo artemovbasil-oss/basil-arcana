@@ -29,7 +29,64 @@ app.set("trust proxy", 1);
 
 const sessionStore = new Map();
 const geoCache = new Map();
+const citySuggestCache = new Map();
 let dbPool = null;
+const allowedCityCountryCodes = new Set([
+  "AL",
+  "AD",
+  "AM",
+  "AT",
+  "AZ",
+  "BA",
+  "BE",
+  "BG",
+  "BY",
+  "CH",
+  "CY",
+  "CZ",
+  "DE",
+  "DK",
+  "EE",
+  "ES",
+  "FI",
+  "FR",
+  "GB",
+  "GE",
+  "GR",
+  "HR",
+  "HU",
+  "IE",
+  "IS",
+  "IT",
+  "KZ",
+  "KG",
+  "LI",
+  "LT",
+  "LU",
+  "LV",
+  "MD",
+  "ME",
+  "MK",
+  "MT",
+  "NL",
+  "NO",
+  "PL",
+  "PT",
+  "RO",
+  "RS",
+  "RU",
+  "SE",
+  "SI",
+  "SK",
+  "SM",
+  "TJ",
+  "TM",
+  "TR",
+  "UA",
+  "UZ",
+  "VA",
+  "XK"
+]);
 
 function defaultSessionData() {
   return {
@@ -557,6 +614,56 @@ async function geocodeCity(cityName) {
   return result;
 }
 
+async function suggestCities(query, limit = 12) {
+  const normalized = String(query || "").trim().toLowerCase();
+  if (!normalized || normalized.length < 2) {
+    return [];
+  }
+  const key = `${normalized}:${limit}`;
+  if (citySuggestCache.has(key)) {
+    return citySuggestCache.get(key);
+  }
+
+  const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
+    query
+  )}&count=30&language=en&format=json`;
+  const response = await fetch(url);
+  if (!response.ok) {
+    return [];
+  }
+  const payload = await response.json();
+  const results = Array.isArray(payload?.results) ? payload.results : [];
+  const filtered = results
+    .filter((item) => allowedCityCountryCodes.has(String(item?.country_code || "").toUpperCase()))
+    .slice(0, Math.max(1, Math.min(30, Number(limit) || 12)))
+    .map((item) => {
+      const name = String(item?.name || "").trim();
+      const admin1 = String(item?.admin1 || "").trim();
+      const country = String(item?.country || "").trim();
+      const latitude = Number(item?.latitude);
+      const longitude = Number(item?.longitude);
+      const timezoneIana = String(item?.timezone || "").trim() || null;
+      const parts = [name, admin1, country].filter(Boolean);
+      return {
+        name,
+        admin1,
+        country,
+        countryCode: String(item?.country_code || "").toUpperCase(),
+        latitude: Number.isFinite(latitude) ? latitude : null,
+        longitude: Number.isFinite(longitude) ? longitude : null,
+        timezoneIana,
+        displayName: parts.join(", ")
+      };
+    });
+
+  citySuggestCache.set(key, filtered);
+  if (citySuggestCache.size > 400) {
+    const firstKey = citySuggestCache.keys().next().value;
+    citySuggestCache.delete(firstKey);
+  }
+  return filtered;
+}
+
 async function ensureProfileCoordinates(profile) {
   if (Number.isFinite(profile.latitude) && Number.isFinite(profile.longitude)) {
     return profile;
@@ -959,6 +1066,20 @@ app.post("/api/auth/logout", async (req, res) => {
 app.get("/api/profile", requireAuth, (req, res) => {
   const profile = pickProfile({ profile: req.sessionData.profile });
   res.json({ ok: true, profile, profileReady: Boolean(profile) });
+});
+
+app.get("/api/cities", requireAuth, async (req, res) => {
+  const query = String(req.query?.query || "").trim();
+  const limit = Math.max(1, Math.min(20, Number(req.query?.limit) || 12));
+  if (!query || query.length < 2) {
+    return res.json({ ok: true, cities: [] });
+  }
+  try {
+    const cities = await suggestCities(query, limit);
+    return res.json({ ok: true, cities });
+  } catch {
+    return res.json({ ok: true, cities: [] });
+  }
 });
 
 app.put("/api/profile", requireAuth, async (req, res) => {

@@ -62,6 +62,9 @@ async function fetchJson(url, options) {
   return payload;
 }
 
+const citySuggestionMeta = new Map();
+let citySuggestTimer = null;
+
 function hasProfile(profile = state.profile) {
   return Boolean(profile?.name && profile?.birthDate && profile?.birthTime && profile?.birthCity);
 }
@@ -536,15 +539,26 @@ function renderHomeDashboard(dashboard) {
   const period = dashboard.periodForecast?.period || state.homePeriod;
   const forecastSummary = renderForecastSummary(dashboard, period);
   const friendsBlock = renderFriendsBlock(dashboard, period);
-  const profileName = String(dashboard.profile?.name || "");
-  const nameClass = profileName.length > 18 ? "mask-fade" : "name-plain";
+  const profileName = String(dashboard.profile?.name || "").trim();
+  const displayName = profileName.split(/\s+/).filter(Boolean)[0] || profileName || "User";
+  const nameClass = displayName.length > 18 ? "mask-fade" : "name-plain";
+  const chips = [
+    `${zodiacIcon(dashboard.natalCore.sun)} Sun: ${dashboard.natalCore.sun}`,
+    `${zodiacIcon(dashboard.natalCore.moon)} Moon: ${dashboard.natalCore.moon}`,
+    `${zodiacIcon(dashboard.natalCore.rising)} Rising: ${dashboard.natalCore.rising}`,
+    `<i class="fa-regular fa-calendar astro-icon" aria-hidden="true"></i> ${dashboard.profile?.birthDate || ""}`,
+    `<i class="fa-regular fa-clock astro-icon" aria-hidden="true"></i> ${dashboard.profile?.birthTime || ""}`,
+    `<i class="fa-solid fa-location-dot astro-icon" aria-hidden="true"></i> ${dashboard.profile?.birthCity || ""}`
+  ].filter((item) => item.replace(/<[^>]+>/g, "").trim());
 
   return `
     <section class="hero">
       <article class="card">
         <span class="eyebrow">User Dashboard</span>
-        <h1 class="dashboard-name"><span class="${nameClass}">${dashboard.profile.name}</span></h1>
-        <p>${zodiacIcon(dashboard.natalCore.sun)} ${dashboard.natalCore.sun} sun, ${zodiacIcon(dashboard.natalCore.moon)} ${dashboard.natalCore.moon} moon, ${zodiacIcon(dashboard.natalCore.rising)} ${dashboard.natalCore.rising} rising.</p>
+        <h1 class="dashboard-name"><span class="${nameClass}">${displayName}</span></h1>
+        <div class="chip-grid">
+          ${chips.map((chip) => `<span class="astro-chip">${chip}</span>`).join("")}
+        </div>
         <div class="hero-actions">
           <a class="btn primary" href="/natal-chart">Natal Profile</a>
           <a class="btn ghost" href="/profile">Edit Birth Data</a>
@@ -631,6 +645,9 @@ function loginView() {
 
 function onboardingView() {
   const profile = state.profile || {};
+  const fallbackName = [state.authUser?.firstName, state.authUser?.lastName].filter(Boolean).join(" ").trim()
+    || String(state.authUser?.username || "").trim();
+  const resolvedName = profile.name || fallbackName;
   return `
     <section class="section">
       <article class="card">
@@ -642,7 +659,7 @@ function onboardingView() {
     <section class="section">
       <form id="onboardingForm" class="card form-grid">
         <label>Name
-          <input required name="name" value="${profile.name || ""}" placeholder="Your name" />
+          <input required name="name" value="${resolvedName || ""}" placeholder="Your name" />
         </label>
         <label>Date of birth
           <input required type="date" name="birthDate" value="${profile.birthDate || ""}" />
@@ -651,11 +668,15 @@ function onboardingView() {
           <input required type="time" name="birthTime" value="${profile.birthTime || ""}" />
         </label>
         <label>Birth city
-          <input required name="birthCity" value="${profile.birthCity || ""}" placeholder="City, Country" />
+          <input id="onboardingBirthCity" required name="birthCity" value="${profile.birthCity || ""}" placeholder="City, Country" list="citySuggestions" autocomplete="off" />
         </label>
         <label>Timezone
           <input required name="timezone" value="${profile.timezone || "UTC"}" placeholder="UTC+3" />
         </label>
+        <input type="hidden" name="latitude" value="${Number.isFinite(Number(profile.latitude)) ? Number(profile.latitude) : ""}" />
+        <input type="hidden" name="longitude" value="${Number.isFinite(Number(profile.longitude)) ? Number(profile.longitude) : ""}" />
+        <input type="hidden" name="timezoneIana" value="${profile.timezoneIana || ""}" />
+        <datalist id="citySuggestions"></datalist>
         <button class="btn primary form-submit" type="submit">Save and continue</button>
       </form>
     </section>
@@ -687,11 +708,15 @@ function profileView() {
           <input required type="time" name="birthTime" value="${profile.birthTime || ""}" />
         </label>
         <label>Birth city
-          <input required name="birthCity" value="${profile.birthCity || ""}" placeholder="City, Country" />
+          <input id="profileBirthCity" required name="birthCity" value="${profile.birthCity || ""}" placeholder="City, Country" list="citySuggestions" autocomplete="off" />
         </label>
         <label>Timezone
           <input required name="timezone" value="${profile.timezone || "UTC"}" placeholder="UTC+3" />
         </label>
+        <input type="hidden" name="latitude" value="${Number.isFinite(Number(profile.latitude)) ? Number(profile.latitude) : ""}" />
+        <input type="hidden" name="longitude" value="${Number.isFinite(Number(profile.longitude)) ? Number(profile.longitude) : ""}" />
+        <input type="hidden" name="timezoneIana" value="${profile.timezoneIana || ""}" />
+        <datalist id="citySuggestions"></datalist>
         <button class="btn primary form-submit" type="submit">Save profile</button>
       </form>
     </section>
@@ -785,11 +810,11 @@ function renderPlanetPlacementTable(planets) {
               const stateLabel = item.retrograde ? "Retrograde" : "Direct";
               return `
                 <tr>
-                  <td>${planetIcon(item.key)} <strong>${item.key}</strong></td>
-                  <td>${zodiacIcon(item.sign)} ${item.sign}</td>
-                  <td>${Number.isFinite(item.house) ? item.house : "—"}</td>
-                  <td>${stateLabel}</td>
-                  <td>${interpretPlanetPlacement(item)}</td>
+                  <td data-label="Planet"><span class="astro-inline">${planetIcon(item.key)} <strong>${item.key}</strong></span></td>
+                  <td data-label="Sign"><span class="astro-inline">${zodiacIcon(item.sign)} ${item.sign}</span></td>
+                  <td data-label="House">${Number.isFinite(item.house) ? item.house : "—"}</td>
+                  <td data-label="State">${stateLabel}</td>
+                  <td data-label="Meaning">${interpretPlanetPlacement(item)}</td>
                 </tr>
               `;
             })
@@ -1284,6 +1309,67 @@ function handleSwitchTelegramAccount() {
   window.open(authUrl, "_blank", "noopener,noreferrer");
 }
 
+async function loadCitySuggestions(query) {
+  const q = String(query || "").trim();
+  if (q.length < 2) {
+    return [];
+  }
+  const payload = await fetchJson(`/api/cities?query=${encodeURIComponent(q)}&limit=12`);
+  return Array.isArray(payload?.cities) ? payload.cities : [];
+}
+
+function bindCityAutocomplete(form, cityInputId) {
+  const cityInput = document.getElementById(cityInputId);
+  const datalist = form?.querySelector("#citySuggestions");
+  const latitudeInput = form?.querySelector('input[name="latitude"]');
+  const longitudeInput = form?.querySelector('input[name="longitude"]');
+  const timezoneIanaInput = form?.querySelector('input[name="timezoneIana"]');
+  const timezoneInput = form?.querySelector('input[name="timezone"]');
+
+  if (!form || !cityInput || !datalist) {
+    return;
+  }
+
+  const applySelectedMeta = () => {
+    const selected = citySuggestionMeta.get(cityInput.value);
+    if (!selected) {
+      return;
+    }
+    if (latitudeInput) latitudeInput.value = String(selected.latitude ?? "");
+    if (longitudeInput) longitudeInput.value = String(selected.longitude ?? "");
+    if (timezoneIanaInput) timezoneIanaInput.value = String(selected.timezoneIana ?? "");
+    if (timezoneInput && !timezoneInput.value.trim()) {
+      timezoneInput.value = String(selected.timezoneIana || "UTC");
+    }
+  };
+
+  cityInput.addEventListener("input", () => {
+    citySuggestionMeta.delete(cityInput.value);
+    if (citySuggestTimer) {
+      window.clearTimeout(citySuggestTimer);
+    }
+    citySuggestTimer = window.setTimeout(async () => {
+      try {
+        const cities = await loadCitySuggestions(cityInput.value);
+        datalist.innerHTML = cities
+          .map((city) => {
+            const label = String(city.displayName || city.name || "").trim();
+            if (label) {
+              citySuggestionMeta.set(label, city);
+            }
+            return `<option value="${label}"></option>`;
+          })
+          .join("");
+      } catch {
+        datalist.innerHTML = "";
+      }
+    }, 180);
+  });
+
+  cityInput.addEventListener("change", applySelectedMeta);
+  cityInput.addEventListener("blur", applySelectedMeta);
+}
+
 async function submitProfileForm(form, afterSavePath = null) {
   const formData = new FormData(form);
   const profile = Object.fromEntries(formData.entries());
@@ -1320,6 +1406,7 @@ function attachRouteHandlers(path) {
 
   if (path === "/onboarding") {
     const form = document.getElementById("onboardingForm");
+    bindCityAutocomplete(form, "onboardingBirthCity");
     form?.addEventListener("submit", async (event) => {
       event.preventDefault();
       try {
@@ -1337,6 +1424,7 @@ function attachRouteHandlers(path) {
 
   if (path === "/profile") {
     const profileForm = document.getElementById("profileForm");
+    bindCityAutocomplete(profileForm, "profileBirthCity");
     profileForm?.addEventListener("submit", async (event) => {
       event.preventDefault();
       try {
