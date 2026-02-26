@@ -1648,8 +1648,19 @@ function bindFriendAccordionInteractions(root = document) {
       if (!(card instanceof HTMLElement)) {
         return;
       }
+      const body = card.querySelector(".friend-accordion-body");
       const isOpen = card.classList.toggle("open");
       button.setAttribute("aria-expanded", isOpen ? "true" : "false");
+      if (body instanceof HTMLElement) {
+        if (isOpen) {
+          body.style.maxHeight = `${body.scrollHeight + 24}px`;
+          window.setTimeout(() => {
+            body.style.maxHeight = `${body.scrollHeight + 24}px`;
+          }, 140);
+        } else {
+          body.style.maxHeight = "0px";
+        }
+      }
     });
   });
 }

@@ -849,11 +849,11 @@ p {
   max-height: 0;
   overflow: hidden;
   opacity: 0;
-  transition: max-height 0.28s ease, opacity 0.2s ease;
+  transition: max-height 0.34s ease, opacity 0.24s ease, padding 0.2s ease;
 }
 
 .friend-accordion.open .friend-accordion-body {
-  max-height: 420px;
+  max-height: 0;
   opacity: 1;
   border-top: 1px solid var(--line);
   padding: 0.7rem 0.72rem 0.8rem;

@@ -609,22 +609,51 @@ function buildCompatibilityDetail({ userSign, friendSign, friendName = "Friend",
   const syncScore = Math.max(35, Math.min(96, score + ((seed % 9) - 4)));
   const emotionalScore = Math.max(30, Math.min(95, score + ((seed % 13) - 6)));
   const frictionScore = Math.max(22, Math.min(90, 100 - score + ((seed % 7) - 3)));
+  const archetypeBySign = {
+    Aries: "initiative-heavy",
+    Taurus: "stability-first",
+    Gemini: "information-dense",
+    Cancer: "care-driven",
+    Leo: "expressive",
+    Virgo: "precision-first",
+    Libra: "agreement-seeking",
+    Scorpio: "intensity-driven",
+    Sagittarius: "expansion-oriented",
+    Capricorn: "structure-led",
+    Aquarius: "systems-oriented",
+    Pisces: "intuition-led"
+  };
+  const userElement = signElement(userSign);
+  const friendElement = signElement(friendSign);
+  const elementMessage =
+    userElement === friendElement
+      ? `${userElement[0].toUpperCase()}${userElement.slice(1)}-element overlap amplifies natural rapport and shared pacing.`
+      : userElement === "fire" && friendElement === "air"
+        ? "Fire + Air pairing tends to accelerate ideation and execution when priorities are explicit."
+        : userElement === "earth" && friendElement === "water"
+          ? "Earth + Water pairing supports dependable progress through emotional trust and practical follow-through."
+          : "Cross-element pairing can be highly productive, but benefits from explicit protocols and shared definitions.";
   const highlights = [
-    `${userSign} x ${friendSign}: conversation quality improves with direct framing of expectations.`,
+    `${userSign} x ${friendSign}: interaction style is ${archetypeBySign[userSign] || "distinct"} meeting ${archetypeBySign[friendSign] || "distinct"} patterns.`,
+    elementMessage,
     score >= 72
-      ? "Coordination potential is above baseline for planning and shared decisions."
-      : "Alignment grows when goals are translated into concrete next steps.",
+      ? "Coordination potential is above baseline for planning, commitments and shared deadlines."
+      : "Alignment improves when goals are decomposed into short, observable checkpoints.",
     score <= 60
-      ? "Conflict risk rises if assumptions are left unspoken."
-      : "Repair cycles stay short when both sides confirm intent early."
+      ? "Friction risk increases if assumptions stay implicit, especially under time pressure."
+      : "Repair cycles remain short when feedback is immediate and behavior-specific."
   ];
-  const advice = `With ${friendName}, set one shared weekly ritual and one explicit repair rule after friction.`;
+  const advice = score >= 72
+    ? `With ${friendName}, assign ownership early and run a weekly 10-minute sync to preserve momentum.`
+    : score >= 62
+      ? `With ${friendName}, define one weekly objective and one explicit communication rule for updates.`
+      : `With ${friendName}, reduce ambiguity: confirm intent, timeline and decision owner in one message.`;
   const rationale =
     score >= 76
-      ? `High score comes from strong behavioral resonance between ${userSign} and ${friendSign}: communication tempo and decision style are naturally aligned.`
+      ? `High score reflects strong behavioral resonance between ${userSign} and ${friendSign}: tempo, response timing and decision framing are naturally compatible.`
       : score >= 62
-        ? `Balanced score reflects mixed resonance: there is enough overlap for steady collaboration, but outcomes depend on clear language and explicit expectations.`
-        : `Lower score indicates higher friction load between ${userSign} and ${friendSign}: coordination remains possible, but requires stricter communication hygiene and pacing discipline.`;
+        ? `Balanced score reflects selective resonance: some dimensions align well, while others require deliberate communication structure.`
+        : `Lower score reflects elevated coordination friction between ${userSign} and ${friendSign}: stable outcomes require tighter protocol and pacing discipline.`;
   return {
     score,
     trend,
