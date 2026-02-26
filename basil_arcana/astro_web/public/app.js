@@ -2,7 +2,6 @@ const app = document.getElementById("app");
 const nav = document.getElementById("nav");
 const menuButton = document.getElementById("menuButton");
 const profileButton = document.getElementById("profileButton");
-const profileAvatar = document.getElementById("profileAvatar");
 const profileInitials = document.getElementById("profileInitials");
 const themeToggle = document.getElementById("themeToggle");
 const themeStorageKey = "astronautica_theme";
@@ -90,20 +89,11 @@ function getInitials() {
 }
 
 function renderProfileChip() {
-  if (!profileButton || !profileAvatar || !profileInitials) {
+  if (!profileButton || !profileInitials) {
     return;
   }
-  const photoUrl = String(state.authUser?.photoUrl || "").trim();
-  if (state.authenticated && photoUrl) {
-    profileAvatar.src = photoUrl;
-    profileAvatar.classList.add("is-visible");
-    profileInitials.style.display = "none";
-  } else {
-    profileAvatar.classList.remove("is-visible");
-    profileAvatar.removeAttribute("src");
-    profileInitials.style.display = "inline-flex";
-    profileInitials.textContent = state.authenticated ? getInitials() : "?";
-  }
+  profileInitials.style.display = "inline-flex";
+  profileInitials.textContent = state.authenticated ? getInitials() : "?";
 }
 
 function applyTheme(nextTheme) {
@@ -132,6 +122,33 @@ const zodiacOrder = [
 ];
 
 const aspectAngles = [0, 60, 90, 120, 180];
+const zodiacGlyphs = {
+  Aries: "♈",
+  Taurus: "♉",
+  Gemini: "♊",
+  Cancer: "♋",
+  Leo: "♌",
+  Virgo: "♍",
+  Libra: "♎",
+  Scorpio: "♏",
+  Sagittarius: "♐",
+  Capricorn: "♑",
+  Aquarius: "♒",
+  Pisces: "♓"
+};
+
+const planetGlyphs = {
+  Sun: "☉",
+  Moon: "☽",
+  Mercury: "☿",
+  Venus: "♀",
+  Mars: "♂",
+  Jupiter: "♃",
+  Saturn: "♄",
+  Uranus: "♅",
+  Neptune: "♆",
+  Pluto: "♇"
+};
 
 function degreeToRad(degree) {
   return ((degree - 90) * Math.PI) / 180;
@@ -173,6 +190,16 @@ function zodiacIndex(sign) {
   return index >= 0 ? index : 0;
 }
 
+function zodiacGlyph(sign) {
+  return zodiacGlyphs[String(sign || "").trim()] || "◌";
+}
+
+function planetGlyph(key) {
+  const raw = String(key || "").trim();
+  const normalized = raw.charAt(0).toUpperCase() + raw.slice(1).toLowerCase();
+  return planetGlyphs[normalized] || raw.slice(0, 2).toUpperCase() || "•";
+}
+
 function planetLongitude(planet, index) {
   const signBase = zodiacIndex(planet.sign) * 30;
   const spread = Number.isFinite(planet.house) ? ((planet.house - 1) % 12) * 1.6 : 0;
@@ -193,7 +220,17 @@ function buildAspectGeometry(planets) {
         left: planets[left],
         right: planets[right],
         matched,
-        type: matched === 60 || matched === 120 ? "soft" : "hard"
+        type: matched === 60 || matched === 120 ? "soft" : "hard",
+        styleClass:
+          matched === 0
+            ? "conjunction"
+            : matched === 180
+              ? "opposition"
+              : matched === 90
+                ? "square"
+                : matched === 120
+                  ? "trine"
+                  : "sextile"
       });
     }
   }
@@ -249,7 +286,7 @@ function renderNatalChartSvg(data) {
           .map((sign, index) => {
             const degree = index * 30 + 15;
             const signPoint = pointOnCircle(center, center, signRadius, degree);
-            return `<text class="natal-sign-label" x="${signPoint.x}" y="${signPoint.y}" text-anchor="middle" dominant-baseline="middle">${sign}</text>`;
+            return `<text class="natal-sign-label" x="${signPoint.x}" y="${signPoint.y}" text-anchor="middle" dominant-baseline="middle">${zodiacGlyph(sign)} ${sign.slice(0, 3).toUpperCase()}</text>`;
           })
           .join("")}
 
@@ -257,14 +294,14 @@ function renderNatalChartSvg(data) {
           .map((aspect) => {
             const start = pointOnCircle(center, center, aspectRadius, aspect.left.longitude);
             const end = pointOnCircle(center, center, aspectRadius, aspect.right.longitude);
-            return `<line class="natal-aspect-line ${aspect.type}" x1="${start.x}" y1="${start.y}" x2="${end.x}" y2="${end.y}" />`;
+            return `<line class="natal-aspect-line ${aspect.type} ${aspect.styleClass}" x1="${start.x}" y1="${start.y}" x2="${end.x}" y2="${end.y}" />`;
           })
           .join("")}
 
         ${planets
           .map((planet) => {
             const guide = pointOnCircle(center, center, aspectRadius + 8, planet.longitude);
-            const symbol = String(planet.key || "").slice(0, 2).toUpperCase();
+            const symbol = planetGlyph(planet.key);
             return `
               <line class="natal-planet-line" x1="${guide.x}" y1="${guide.y}" x2="${planet.dot.x}" y2="${planet.dot.y}" />
               <circle class="natal-planet-dot" cx="${planet.dot.x}" cy="${planet.dot.y}" r="4.2" />
@@ -339,7 +376,7 @@ function renderHomeDashboard(dashboard) {
       <article class="card">
         <span class="eyebrow">User Dashboard</span>
         <h1>${dashboard.profile.name}</h1>
-        <p>${dashboard.natalCore.sun} sun, ${dashboard.natalCore.moon} moon, ${dashboard.natalCore.rising} rising.</p>
+        <p>${zodiacGlyph(dashboard.natalCore.sun)} ${dashboard.natalCore.sun} sun, ${zodiacGlyph(dashboard.natalCore.moon)} ${dashboard.natalCore.moon} moon, ${zodiacGlyph(dashboard.natalCore.rising)} ${dashboard.natalCore.rising} rising.</p>
         <div class="hero-actions">
           <a class="btn primary" href="/natal-chart">Natal Profile</a>
           <a class="btn ghost" href="/profile">Edit Birth Data</a>
@@ -502,7 +539,7 @@ function natalViewLoading() {
   return `
     <section class="section">
       <article class="card">
-        <span class="eyebrow">Step 2</span>
+        <span class="eyebrow">Step 2 · ☉ Natal</span>
         <h1>Your natal report</h1>
         <p id="natalStatus">Preparing your chart...</p>
       </article>
@@ -526,7 +563,7 @@ function dailyViewLoading() {
   return `
     <section class="section">
       <article class="card">
-        <span class="eyebrow">Step 3</span>
+        <span class="eyebrow">Step 3 · ☽ Daily</span>
         <h1>Daily focus</h1>
         <p id="dailyStatus">Building daily signal...</p>
       </article>
@@ -538,7 +575,7 @@ function friendsView() {
   return `
     <section class="section">
       <article class="card">
-        <span class="eyebrow">Step 4</span>
+        <span class="eyebrow">Step 4 · ☍ Friends</span>
         <h1>Friend compatibility</h1>
         <p>Fast synastry-lite view for communication and daily interaction.</p>
       </article>
@@ -653,7 +690,7 @@ async function hydrateNatal() {
       <section class="section">
         <article class="card">
           <span class="eyebrow">Natal Report</span>
-          <h1>${profile.name}: ${data.core.sun} sun, ${data.core.moon} moon, ${data.core.rising} rising</h1>
+          <h1>${profile.name}: ${zodiacGlyph(data.core.sun)} ${data.core.sun} sun, ${zodiacGlyph(data.core.moon)} ${data.core.moon} moon, ${zodiacGlyph(data.core.rising)} ${data.core.rising} rising</h1>
           <p>${data.summary}</p>
         </article>
       </section>
@@ -674,7 +711,7 @@ async function hydrateNatal() {
         <article class="route-card">
           <h2>Planet placements</h2>
           <ul class="bullet-list">${(data.planets || [])
-            .map((item) => `<li>${item.key}: ${item.sign}, house ${item.house}${item.retrograde ? " (R)" : ""}</li>`)
+            .map((item) => `<li>${planetGlyph(item.key)} ${item.key}: ${zodiacGlyph(item.sign)} ${item.sign}, house ${item.house}${item.retrograde ? " (R)" : ""}</li>`)
             .join("")}</ul>
         </article>
       </section>
@@ -701,7 +738,7 @@ async function hydrateNatal() {
         <article class="route-card">
           <h2>All houses</h2>
           <ul class="bullet-list">${(data.housesAll || [])
-            .map((item) => `<li>House ${item.house}: ${item.sign}</li>`)
+            .map((item) => `<li>House ${item.house}: ${zodiacGlyph(item.sign)} ${item.sign}</li>`)
             .join("")}</ul>
         </article>
       </section>

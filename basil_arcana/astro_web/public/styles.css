@@ -134,21 +134,16 @@ body[data-theme="light"] .topbar {
   color: var(--bg);
 }
 
-.profile-avatar {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: none;
-}
-
-.profile-avatar.is-visible {
-  display: block;
-}
-
 .profile-initials {
-  font-size: 0.73rem;
+  font-size: 0.74rem;
   text-transform: uppercase;
   font-weight: 600;
+  letter-spacing: 0.03em;
+  line-height: 1;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
 }
 
 .page {
@@ -382,6 +377,18 @@ p {
   padding: 0.64rem 0.68rem;
   font: inherit;
   transition: border-color 0.18s ease, background-color 0.18s ease;
+  min-height: 44px;
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+}
+
+.form-grid input[type="date"],
+.form-grid input[type="time"] {
+  -webkit-appearance: none;
+  appearance: none;
+  padding-right: 0.58rem;
 }
 
 .form-grid input:focus {
@@ -522,7 +529,7 @@ p {
 .natal-aspect-line {
   stroke: #8f8f8f;
   stroke-width: 1;
-  opacity: 0.82;
+  opacity: 0.88;
 }
 
 .natal-aspect-line.hard {
@@ -531,6 +538,26 @@ p {
 
 .natal-aspect-line.soft {
   stroke: #757575;
+}
+
+.natal-aspect-line.conjunction {
+  stroke-width: 1.35;
+}
+
+.natal-aspect-line.opposition {
+  stroke-width: 1.35;
+}
+
+.natal-aspect-line.square {
+  stroke-dasharray: 6 4;
+}
+
+.natal-aspect-line.trine {
+  stroke-dasharray: 2 4;
+}
+
+.natal-aspect-line.sextile {
+  stroke-dasharray: 3 5;
 }
 
 body[data-theme="light"] .natal-aspect-line {
@@ -600,5 +627,10 @@ body[data-theme="light"] .natal-aspect-line.soft {
   .feature-grid,
   .metric-grid {
     grid-template-columns: 1fr;
+  }
+
+  .form-grid input {
+    min-height: 46px;
+    width: 100%;
   }
 }
