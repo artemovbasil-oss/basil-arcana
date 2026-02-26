@@ -521,8 +521,8 @@ function renderEnergyChart(dashboard, period) {
   const todayPoint = points[todayIndex];
   const todayValue = todayMarkerValue(period);
 
-  const todayBadgeY = chartBottom + 13;
-  const todayBadgeRadius = period === "year" ? 9 : 8;
+  const todayBadgeY = todayPoint.y;
+  const todayBadgeRadius = period === "year" ? 11 : 10;
   return `
     <div class="energy-chart-wrap">
       <svg
@@ -542,7 +542,7 @@ function renderEnergyChart(dashboard, period) {
         ${points
           .map((point, index) => {
             const tone = index === series.peakIndex ? "peak" : index === series.dipIndex ? "dip" : "neutral";
-            const size = tone === "neutral" ? 3.2 : 4.9;
+            const size = tone === "neutral" ? 5.1 : 7;
             return `<polygon class="energy-star ${tone}" points="${starPoints(point.x, point.y, size, size * 0.46)}" />`;
           })
           .join("")}
@@ -550,7 +550,7 @@ function renderEnergyChart(dashboard, period) {
         <text class="energy-label dip" x="${dipPoint.x}" y="${dipPoint.y + 18}" text-anchor="middle">▼ ${dipPoint.value}</text>
         <line class="energy-today-line" x1="${todayPoint.x}" y1="${padY}" x2="${todayPoint.x}" y2="${chartBottom}" />
         <circle class="energy-today-badge" cx="${todayPoint.x}" cy="${todayBadgeY}" r="${todayBadgeRadius}" />
-        <text class="energy-today-text" x="${todayPoint.x}" y="${todayBadgeY + 0.3}" text-anchor="middle" dominant-baseline="middle">${todayValue}</text>
+        <text class="energy-today-text" x="${todayPoint.x}" y="${todayBadgeY + 0.2}" text-anchor="middle" dominant-baseline="middle">${todayValue}</text>
         ${labelIndexes
           .map((index) => {
             const point = points[index];
