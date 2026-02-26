@@ -3,6 +3,11 @@ const nav = document.getElementById("nav");
 const menuButton = document.getElementById("menuButton");
 
 const state = {
+  authRequired: false,
+  authenticated: false,
+  authUser: null,
+  telegramLoginEnabled: false,
+  telegramBotUsername: null,
   profile: null,
   profileReady: false,
   friends: []
@@ -11,6 +16,15 @@ const state = {
 menuButton.addEventListener("click", () => {
   nav.classList.toggle("open");
 });
+
+function navigate(path, { replace = false } = {}) {
+  if (replace) {
+    window.history.replaceState({}, "", path);
+  } else {
+    window.history.pushState({}, "", path);
+  }
+  render();
+}
 
 async function fetchJson(url, options) {
   const response = await fetch(url, {
@@ -23,7 +37,10 @@ async function fetchJson(url, options) {
   });
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) {
-    throw new Error(payload?.message || `Request failed: ${response.status}`);
+    const error = new Error(payload?.message || payload?.reason || `Request failed: ${response.status}`);
+    error.status = response.status;
+    error.payload = payload;
+    throw error;
   }
   return payload;
 }
@@ -65,16 +82,16 @@ function homeView() {
     },
     secondaryCta: { href: "/daily", label: "Open Daily" },
     rightPanel: `
-      <h2>MVP status</h2>
+      <h2>Session</h2>
       <div class="metric-grid">
+        <div class="metric"><strong>${state.authenticated ? "Auth" : "Guest"}</strong><p>Access</p></div>
         <div class="metric"><strong>${profileReady ? "Ready" : "Missing"}</strong><p>Birth Profile</p></div>
-        <div class="metric"><strong>Live</strong><p>Natal Route</p></div>
         <div class="metric"><strong>${state.friends.length}</strong><p>Saved Friends</p></div>
       </div>
       <ul class="bullet-list">
-        <li>Session-based profile API is active</li>
-        <li>Daily streak tracked server-side in session</li>
-        <li>Friend list + compatibility route ready</li>
+        <li>Telegram auth gate is enabled when bot token is configured</li>
+        <li>Profile and friends persisted via session store</li>
+        <li>Ready for Google auth as second provider</li>
       </ul>
     `,
     body: `
@@ -96,6 +113,53 @@ function homeView() {
       </section>
     `
   });
+}
+
+function loginView() {
+  const userLabel = state.authUser?.username
+    ? `@${state.authUser.username}`
+    : state.authUser?.firstName || "";
+
+  if (state.authenticated) {
+    return `
+      <section class="section">
+        <article class="card">
+          <span class="eyebrow">Authentication</span>
+          <h1>You are signed in</h1>
+          <p>Provider: Telegram ${userLabel ? `(${userLabel})` : ""}</p>
+          <div class="hero-actions">
+            <a class="btn primary" href="/">Continue</a>
+            <button id="logoutButton" class="btn ghost" type="button">Logout</button>
+          </div>
+        </article>
+      </section>
+    `;
+  }
+
+  const loginEnabled = state.telegramLoginEnabled && state.telegramBotUsername;
+
+  return `
+    <section class="section">
+      <article class="card">
+        <span class="eyebrow">Authentication</span>
+        <h1>Sign in with Telegram</h1>
+        <p>This service is available only to authorized users.</p>
+      </article>
+    </section>
+    <section class="section">
+      <article class="card">
+        ${
+          loginEnabled
+            ? `<div id="telegramWidgetMount"></div>
+               <div class="hero-actions">
+                 <button id="webAppAuthButton" class="btn ghost" type="button">Login from Telegram WebApp context</button>
+               </div>
+               <p id="loginStatus" class="muted" style="margin-top:0.8rem"></p>`
+            : `<p>Telegram login is not configured yet. Set TELEGRAM_BOT_TOKEN and TELEGRAM_BOT_USERNAME in Railway variables.</p>`
+        }
+      </article>
+    </section>
+  `;
 }
 
 function onboardingView() {
@@ -211,12 +275,12 @@ function faqView() {
             <p>Onboarding flow, natal route, daily route, friend compatibility route, and server API contracts.</p>
           </article>
           <article class="faq-item">
-            <h3>Where is profile stored now?</h3>
-            <p>In a server-side session keyed by the astro_sid cookie. Next step is persistent DB storage.</p>
+            <h3>How does auth work now?</h3>
+            <p>Telegram auth with server-side signature verification and session persistence.</p>
           </article>
           <article class="faq-item">
             <h3>What comes next?</h3>
-            <p>Auth (Telegram + Google), persistent DB profile, real ephemeris calculations, and notification engine.</p>
+            <p>Google login provider, DB-backed user identities, and real ephemeris calculations.</p>
           </article>
         </div>
       </article>
@@ -226,6 +290,7 @@ function faqView() {
 
 const routes = {
   "/": homeView,
+  "/login": loginView,
   "/onboarding": onboardingView,
   "/natal-chart": natalViewLoading,
   "/daily": dailyViewLoading,
@@ -301,6 +366,11 @@ async function hydrateNatal() {
       </section>
     `;
   } catch (error) {
+    if (error.status === 401) {
+      await refreshAuthState();
+      navigate("/login", { replace: true });
+      return;
+    }
     const status = document.getElementById("natalStatus");
     if (status) {
       status.textContent = `Failed to load natal report: ${error.message}`;
@@ -354,6 +424,11 @@ async function hydrateDaily() {
       </section>
     `;
   } catch (error) {
+    if (error.status === 401) {
+      await refreshAuthState();
+      navigate("/login", { replace: true });
+      return;
+    }
     const status = document.getElementById("dailyStatus");
     if (status) {
       status.textContent = `Failed to load daily insight: ${error.message}`;
@@ -380,12 +455,89 @@ async function runCompatibility(friend) {
       <p>${data.advice}</p>
     `;
   } catch (error) {
+    if (error.status === 401) {
+      await refreshAuthState();
+      navigate("/login", { replace: true });
+      return;
+    }
     result.style.display = "block";
     result.innerHTML = `<p>Failed to calculate compatibility: ${error.message}</p>`;
   }
 }
 
+function mountTelegramWidget() {
+  const mount = document.getElementById("telegramWidgetMount");
+  if (!mount || !state.telegramBotUsername) {
+    return;
+  }
+  mount.innerHTML = "";
+  const script = document.createElement("script");
+  script.async = true;
+  script.src = "https://telegram.org/js/telegram-widget.js?22";
+  script.setAttribute("data-telegram-login", state.telegramBotUsername);
+  script.setAttribute("data-size", "large");
+  script.setAttribute("data-userpic", "false");
+  script.setAttribute("data-request-access", "write");
+  script.setAttribute("data-onauth", "onTelegramAuth(user)");
+  mount.appendChild(script);
+}
+
+async function handleTelegramWidgetAuth(telegramAuth) {
+  try {
+    await fetchJson("/api/auth/telegram-widget", {
+      method: "POST",
+      body: JSON.stringify({ telegramAuth })
+    });
+    await loadSessionState();
+    navigate("/", { replace: true });
+  } catch (error) {
+    const status = document.getElementById("loginStatus");
+    if (status) {
+      status.textContent = `Login failed: ${error.message}`;
+    }
+  }
+}
+
+async function handleWebAppInitDataAuth() {
+  const status = document.getElementById("loginStatus");
+  const initData = window.Telegram?.WebApp?.initData;
+  if (!initData) {
+    if (status) {
+      status.textContent = "No Telegram WebApp initData found in this browser context.";
+    }
+    return;
+  }
+
+  try {
+    await fetchJson("/api/auth/telegram-init-data", {
+      method: "POST",
+      body: JSON.stringify({ initData })
+    });
+    await loadSessionState();
+    navigate("/", { replace: true });
+  } catch (error) {
+    if (status) {
+      status.textContent = `WebApp login failed: ${error.message}`;
+    }
+  }
+}
+
 function attachRouteHandlers(path) {
+  if (path === "/login") {
+    if (!state.authenticated && state.telegramLoginEnabled) {
+      mountTelegramWidget();
+      const webAppAuthButton = document.getElementById("webAppAuthButton");
+      webAppAuthButton?.addEventListener("click", handleWebAppInitDataAuth);
+    }
+
+    const logoutButton = document.getElementById("logoutButton");
+    logoutButton?.addEventListener("click", async () => {
+      await fetchJson("/api/auth/logout", { method: "POST", body: JSON.stringify({}) });
+      await loadSessionState();
+      navigate("/login", { replace: true });
+    });
+  }
+
   if (path === "/onboarding") {
     const form = document.getElementById("onboardingForm");
     form?.addEventListener("submit", async (event) => {
@@ -399,9 +551,13 @@ function attachRouteHandlers(path) {
         });
         state.profile = payload.profile;
         state.profileReady = payload.profileReady;
-        window.history.pushState({}, "", "/natal-chart");
-        render();
+        navigate("/natal-chart");
       } catch (error) {
+        if (error.status === 401) {
+          await refreshAuthState();
+          navigate("/login", { replace: true });
+          return;
+        }
         alert(`Failed to save profile: ${error.message}`);
       }
     });
@@ -424,6 +580,11 @@ function attachRouteHandlers(path) {
         form.reset();
         renderFriendsList();
       } catch (error) {
+        if (error.status === 401) {
+          await refreshAuthState();
+          navigate("/login", { replace: true });
+          return;
+        }
         alert(`Failed to save friend: ${error.message}`);
       }
     });
@@ -444,7 +605,25 @@ function attachRouteHandlers(path) {
   }
 }
 
+async function refreshAuthState() {
+  const auth = await fetchJson("/api/auth/status");
+  state.authRequired = Boolean(auth.authRequired);
+  state.authenticated = Boolean(auth.authenticated);
+  state.authUser = auth.user || null;
+  state.telegramLoginEnabled = Boolean(auth.telegramLoginEnabled);
+  state.telegramBotUsername = auth.telegramBotUsername || null;
+}
+
 async function loadSessionState() {
+  await refreshAuthState();
+
+  if (state.authRequired && !state.authenticated) {
+    state.profile = null;
+    state.profileReady = false;
+    state.friends = [];
+    return;
+  }
+
   const [profilePayload, friendsPayload] = await Promise.all([
     fetchJson("/api/profile"),
     fetchJson("/api/friends")
@@ -455,7 +634,12 @@ async function loadSessionState() {
 }
 
 function render() {
-  const path = window.location.pathname;
+  let path = window.location.pathname;
+  if (state.authRequired && !state.authenticated && path !== "/login") {
+    path = "/login";
+    window.history.replaceState({}, "", path);
+  }
+
   const makeView = routes[path] || homeView;
   app.innerHTML = makeView();
   markActiveNav(path);
@@ -485,6 +669,9 @@ document.addEventListener("click", (event) => {
 });
 
 window.addEventListener("popstate", render);
+window.onTelegramAuth = (user) => {
+  handleTelegramWidgetAuth(user);
+};
 
 loadSessionState()
   .catch((error) => {

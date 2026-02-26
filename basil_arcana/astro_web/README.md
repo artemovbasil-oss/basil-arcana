@@ -30,6 +30,10 @@ Open:
 
 ### API endpoints
 
+- `GET /api/auth/status`
+- `POST /api/auth/telegram-widget`
+- `POST /api/auth/telegram-init-data`
+- `POST /api/auth/logout`
 - `GET /api/profile`
 - `PUT /api/profile`
 - `GET /api/friends`
@@ -47,6 +51,9 @@ Open:
 4. Start command: `npm start`
 5. Add environment variable:
    - `DATABASE_URL` (recommended, enables persistent sessions in Postgres)
+   - `TELEGRAM_BOT_TOKEN` (enables Telegram auth verification and auth gate)
+   - `TELEGRAM_BOT_USERNAME` (required for Telegram Login Widget on `/login`)
+   - `AUTH_REQUIRED=true` (optional explicit flag; auth also becomes required automatically when bot token is set)
 6. Add custom domain: `app.basilarcana.com`
 7. In GoDaddy DNS add:
    - `CNAME` name `app` value `<railway-target>.up.railway.app`
