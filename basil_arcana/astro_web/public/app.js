@@ -377,6 +377,33 @@ function energyPointLabel(period, index) {
   return ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][index] || `M${index + 1}`;
 }
 
+function todayIndexForPeriod(period, length) {
+  const now = new Date();
+  if (period === "year") {
+    return Math.max(0, Math.min(length - 1, now.getMonth()));
+  }
+  if (period === "month") {
+    return Math.max(0, Math.min(length - 1, now.getDate() - 1));
+  }
+  const day = now.getDay();
+  const mondayBased = day === 0 ? 6 : day - 1;
+  return Math.max(0, Math.min(length - 1, mondayBased));
+}
+
+function todayMarkerValue(period) {
+  return String(new Date().getDate());
+}
+
+function starPoints(cx, cy, outer = 4.2, inner = 2.1) {
+  const points = [];
+  for (let idx = 0; idx < 8; idx += 1) {
+    const angle = (Math.PI / 4) * idx - Math.PI / 2;
+    const radius = idx % 2 === 0 ? outer : inner;
+    points.push(`${cx + Math.cos(angle) * radius},${cy + Math.sin(angle) * radius}`);
+  }
+  return points.join(" ");
+}
+
 function buildEnergySeries(profile, period, intensity) {
   const count = period === "year" ? 12 : period === "month" ? 30 : 7;
   const baseSeed = stringHash(`${profile?.name || "anon"}:${profile?.birthDate || "0000-00-00"}:${period}:${intensity}`);
@@ -452,6 +479,9 @@ function renderEnergyChart(dashboard, period) {
   const peakPoint = points[series.peakIndex];
   const dipPoint = points[series.dipIndex];
   const labelIndexes = visibleLabelIndexes(points.length, period);
+  const todayIndex = todayIndexForPeriod(period, points.length);
+  const todayPoint = points[todayIndex];
+  const todayValue = todayMarkerValue(period);
 
   return `
     <div class="energy-chart-wrap">
@@ -462,14 +492,17 @@ function renderEnergyChart(dashboard, period) {
           .join("")}
         <path class="energy-line" d="${linePath}" />
         ${points
-          .map(
-            (point, index) => `
-              <circle class="energy-node ${index === series.peakIndex ? "peak" : index === series.dipIndex ? "dip" : ""}" cx="${point.x}" cy="${point.y}" r="${index === series.peakIndex || index === series.dipIndex ? 5.4 : 3.4}" />
-            `
-          )
+          .map((point, index) => {
+            const tone = index === series.peakIndex ? "peak" : index === series.dipIndex ? "dip" : "neutral";
+            const size = tone === "neutral" ? 3.2 : 4.9;
+            return `<polygon class="energy-star ${tone}" points="${starPoints(point.x, point.y, size, size * 0.46)}" />`;
+          })
           .join("")}
         <text class="energy-label peak" x="${peakPoint.x}" y="${peakPoint.y - 10}" text-anchor="middle">▲ ${peakPoint.value}</text>
         <text class="energy-label dip" x="${dipPoint.x}" y="${dipPoint.y + 18}" text-anchor="middle">▼ ${dipPoint.value}</text>
+        <line class="energy-today-line" x1="${todayPoint.x}" y1="${padY}" x2="${todayPoint.x}" y2="${chartBottom}" />
+        <circle class="energy-today-badge" cx="${todayPoint.x}" cy="${height - 12}" r="${period === "year" ? 14 : 10}" />
+        <text class="energy-today-text" x="${todayPoint.x}" y="${height - 11}" text-anchor="middle" dominant-baseline="middle">${todayValue}</text>
         ${labelIndexes
           .map((index) => {
             const point = points[index];
@@ -567,14 +600,15 @@ function normalizedFriendScore(score, period) {
 
 function renderFriendGauge(score) {
   const pct = Math.max(0, Math.min(100, Math.round(score)));
+  const tone = pct >= 70 ? "high" : pct <= 30 ? "low" : "mid";
   const radius = 15;
   const c = 2 * Math.PI * radius;
   const progress = c - (pct / 100) * c;
   return `
     <svg class="friend-gauge" viewBox="0 0 42 42" role="img" aria-label="Compatibility ${pct}%">
       <circle class="friend-gauge-bg" cx="21" cy="21" r="${radius}" />
-      <circle class="friend-gauge-fill" cx="21" cy="21" r="${radius}" stroke-dasharray="${c}" stroke-dashoffset="${progress}" />
-      <text class="friend-gauge-text" x="21" y="22" text-anchor="middle" dominant-baseline="middle">${pct}%</text>
+      <circle class="friend-gauge-fill ${tone}" cx="21" cy="21" r="${radius}" stroke-dasharray="${c}" stroke-dashoffset="${progress}" />
+      <text class="friend-gauge-text ${tone}" x="21" y="22" text-anchor="middle" dominant-baseline="middle">${pct}%</text>
     </svg>
   `;
 }
@@ -1048,6 +1082,9 @@ function dailyViewLoading() {
 }
 
 function friendsView() {
+  const zodiacSelectOptions = zodiacOrder
+    .map((sign) => `<option value="${sign}">${sign}</option>`)
+    .join("");
   return `
     <section class="section">
       <article class="card">
@@ -1062,7 +1099,10 @@ function friendsView() {
           <input required name="friendName" placeholder="Friend name" />
         </label>
         <label>Friend sign
-          <input required name="friendSign" placeholder="e.g. Libra" />
+          <select required name="friendSign">
+            <option value="">Select sign</option>
+            ${zodiacSelectOptions}
+          </select>
         </label>
         <button class="btn primary form-submit" type="submit">Save friend</button>
       </form>

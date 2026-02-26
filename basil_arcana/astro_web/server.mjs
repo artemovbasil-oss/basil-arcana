@@ -30,6 +30,7 @@ app.set("trust proxy", 1);
 const sessionStore = new Map();
 const geoCache = new Map();
 const citySuggestCache = new Map();
+const userStore = new Map();
 let dbPool = null;
 const allowedCityCountryCodes = new Set([
   "AL",
@@ -98,6 +99,34 @@ function defaultSessionData() {
       streak: 0,
       lastDayKey: "",
       history: []
+    }
+  };
+}
+
+function defaultUserData() {
+  return {
+    profile: null,
+    friends: [],
+    daily: {
+      streak: 0,
+      lastDayKey: "",
+      history: []
+    }
+  };
+}
+
+function normalizeUserData(raw) {
+  const source = raw && typeof raw === "object" ? raw : {};
+  const profile = source.profile && typeof source.profile === "object" ? source.profile : null;
+  const friends = Array.isArray(source.friends) ? source.friends : [];
+  const dailySource = source.daily && typeof source.daily === "object" ? source.daily : {};
+  return {
+    profile,
+    friends,
+    daily: {
+      streak: Number.isFinite(Number(dailySource.streak)) ? Number(dailySource.streak) : 0,
+      lastDayKey: String(dailySource.lastDayKey || ""),
+      history: Array.isArray(dailySource.history) ? dailySource.history : []
     }
   };
 }
@@ -174,6 +203,13 @@ async function initDb() {
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )
   `);
+  await dbPool.query(`
+    CREATE TABLE IF NOT EXISTS astro_web_user_state (
+      telegram_user_id TEXT PRIMARY KEY,
+      data JSONB NOT NULL,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
 }
 
 async function loadSessionFromDb(sid) {
@@ -216,6 +252,65 @@ async function saveSessionToDb(sid, data) {
     `,
     [sid, JSON.stringify(normalized)]
   );
+}
+
+async function loadUserDataFromDb(telegramUserId) {
+  if (!dbPool) {
+    return null;
+  }
+  const result = await dbPool.query(
+    "SELECT data FROM astro_web_user_state WHERE telegram_user_id = $1 LIMIT 1",
+    [telegramUserId]
+  );
+  if (!result.rowCount) {
+    return null;
+  }
+  return normalizeUserData(result.rows[0].data);
+}
+
+async function saveUserDataToDb(telegramUserId, data) {
+  if (!dbPool) {
+    return;
+  }
+  const normalized = normalizeUserData(data);
+  await dbPool.query(
+    `
+      INSERT INTO astro_web_user_state (telegram_user_id, data, updated_at)
+      VALUES ($1, $2::jsonb, NOW())
+      ON CONFLICT (telegram_user_id)
+      DO UPDATE SET data = EXCLUDED.data, updated_at = NOW()
+    `,
+    [telegramUserId, JSON.stringify(normalized)]
+  );
+}
+
+async function deleteAllUserData() {
+  if (!dbPool) {
+    userStore.clear();
+    return;
+  }
+  await dbPool.query("DELETE FROM astro_web_user_state");
+}
+
+async function loadUserData(telegramUserId) {
+  if (!telegramUserId) {
+    return defaultUserData();
+  }
+  if (dbPool) {
+    return (await loadUserDataFromDb(telegramUserId)) || defaultUserData();
+  }
+  return normalizeUserData(userStore.get(telegramUserId) || defaultUserData());
+}
+
+async function saveUserData(telegramUserId, data) {
+  if (!telegramUserId) {
+    return;
+  }
+  if (dbPool) {
+    await saveUserDataToDb(telegramUserId, data);
+    return;
+  }
+  userStore.set(telegramUserId, normalizeUserData(data));
 }
 
 async function deleteSessionBySid(sid) {
@@ -726,14 +821,61 @@ function isAuthenticated(sessionData) {
   return Boolean(sessionData?.auth?.provider === "telegram" && sessionData?.auth?.telegramUserId);
 }
 
-function requireAuth(req, res, next) {
+function requestUserId(req) {
   if (!authRequired) {
-    return next();
+    return "dev-local-user";
   }
-  if (isAuthenticated(req.sessionData)) {
+  return String(req.sessionData?.auth?.telegramUserId || "").trim();
+}
+
+async function requireAuth(req, res, next) {
+  try {
+    if (authRequired && !isAuthenticated(req.sessionData)) {
+      return res.status(401).json({ error: "unauthorized", reason: "auth_required" });
+    }
+    const userId = requestUserId(req);
+    req.userId = userId;
+    req.userData = await loadUserData(userId);
     return next();
+  } catch (error) {
+    return next(error);
   }
-  return res.status(401).json({ error: "unauthorized", reason: "auth_required" });
+}
+
+function mergeSessionIntoUserData(userData, sessionData) {
+  const merged = normalizeUserData(userData);
+  const sessionProfile = pickProfile({ profile: sessionData?.profile });
+  if (sessionProfile && !merged.profile) {
+    merged.profile = sessionProfile;
+  }
+  const sessionFriends = Array.isArray(sessionData?.friends) ? sessionData.friends : [];
+  if (sessionFriends.length) {
+    const map = new Map();
+    [...merged.friends, ...sessionFriends].forEach((friend) => {
+      if (!friend?.id) {
+        return;
+      }
+      map.set(String(friend.id), friend);
+    });
+    merged.friends = Array.from(map.values()).slice(0, 20);
+  }
+  const sessionDaily = sessionData?.daily;
+  if (sessionDaily && typeof sessionDaily === "object") {
+    const currentStreak = Number(merged.daily?.streak || 0);
+    const nextStreak = Number(sessionDaily.streak || 0);
+    if (nextStreak > currentStreak) {
+      merged.daily.streak = nextStreak;
+    }
+    if (String(sessionDaily.lastDayKey || "") > String(merged.daily?.lastDayKey || "")) {
+      merged.daily.lastDayKey = String(sessionDaily.lastDayKey || "");
+    }
+    const history = Array.isArray(merged.daily?.history) ? merged.daily.history : [];
+    const incoming = Array.isArray(sessionDaily.history) ? sessionDaily.history : [];
+    merged.daily.history = [...incoming, ...history]
+      .filter((item, index, arr) => item?.dayKey && arr.findIndex((x) => x.dayKey === item.dayKey) === index)
+      .slice(0, 14);
+  }
+  return merged;
 }
 
 function timingSafeEqualHex(a, b) {
@@ -1030,6 +1172,10 @@ app.post("/api/auth/telegram-widget", async (req, res) => {
     via: "widget"
   };
   await persistSession(req.sessionId, req.sessionData);
+  const userId = String(validation.user.id);
+  const userData = await loadUserData(userId);
+  const mergedUserData = mergeSessionIntoUserData(userData, req.sessionData);
+  await saveUserData(userId, mergedUserData);
 
   return res.json({ ok: true, authenticated: true, user: sanitizeAuthUser(req.sessionData) });
 });
@@ -1049,6 +1195,10 @@ app.post("/api/auth/telegram-init-data", async (req, res) => {
     via: "webapp"
   };
   await persistSession(req.sessionId, req.sessionData);
+  const userId = String(validation.user.id);
+  const userData = await loadUserData(userId);
+  const mergedUserData = mergeSessionIntoUserData(userData, req.sessionData);
+  await saveUserData(userId, mergedUserData);
 
   return res.json({ ok: true, authenticated: true, user: sanitizeAuthUser(req.sessionData) });
 });
@@ -1064,7 +1214,7 @@ app.post("/api/auth/logout", async (req, res) => {
 });
 
 app.get("/api/profile", requireAuth, (req, res) => {
-  const profile = pickProfile({ profile: req.sessionData.profile });
+  const profile = pickProfile({ profile: req.userData.profile });
   res.json({ ok: true, profile, profileReady: Boolean(profile) });
 });
 
@@ -1091,13 +1241,13 @@ app.put("/api/profile", requireAuth, async (req, res) => {
     });
   }
   const profile = await ensureProfileCoordinates(rawProfile);
-  req.sessionData.profile = profile;
-  await persistSession(req.sessionId, req.sessionData);
+  req.userData.profile = profile;
+  await saveUserData(req.userId, req.userData);
   return res.json({ ok: true, profile, profileReady: true });
 });
 
 app.get("/api/friends", requireAuth, (req, res) => {
-  res.json({ ok: true, friends: req.sessionData.friends || [] });
+  res.json({ ok: true, friends: req.userData.friends || [] });
 });
 
 app.post("/api/friends", requireAuth, async (req, res) => {
@@ -1115,13 +1265,13 @@ app.post("/api/friends", requireAuth, async (req, res) => {
     friendSign,
     createdAt: Date.now()
   };
-  req.sessionData.friends = [friend, ...(req.sessionData.friends || [])].slice(0, 20);
-  await persistSession(req.sessionId, req.sessionData);
-  return res.json({ ok: true, friend, friends: req.sessionData.friends });
+  req.userData.friends = [friend, ...(req.userData.friends || [])].slice(0, 20);
+  await saveUserData(req.userId, req.userData);
+  return res.json({ ok: true, friend, friends: req.userData.friends });
 });
 
 app.post("/api/natal-report", requireAuth, (req, res) => {
-  const profile = resolveSessionProfile(req.body?.profile, req.sessionData);
+  const profile = resolveSessionProfile(req.body?.profile, req.userData);
   if (!profile) {
     return res.status(400).json({ error: "invalid_profile", message: "profile is required" });
   }
@@ -1130,7 +1280,7 @@ app.post("/api/natal-report", requireAuth, (req, res) => {
 });
 
 app.post("/api/daily-insight", requireAuth, async (req, res) => {
-  const profile = resolveSessionProfile(req.body?.profile, req.sessionData);
+  const profile = resolveSessionProfile(req.body?.profile, req.userData);
   if (!profile) {
     return res.status(400).json({
       error: "invalid_profile",
@@ -1147,7 +1297,7 @@ app.post("/api/daily-insight", requireAuth, async (req, res) => {
     day: "numeric"
   });
 
-  const sessionDaily = req.sessionData.daily || { streak: 0, lastDayKey: "", history: [] };
+  const sessionDaily = req.userData.daily || { streak: 0, lastDayKey: "", history: [] };
   if (sessionDaily.lastDayKey !== dayKey) {
     const previous = sessionDaily.lastDayKey ? new Date(`${sessionDaily.lastDayKey}T00:00:00Z`) : null;
     const current = new Date(`${dayKey}T00:00:00Z`);
@@ -1161,8 +1311,8 @@ app.post("/api/daily-insight", requireAuth, async (req, res) => {
   const step = "Before noon, send one clear note: goal, boundary, and next checkpoint.";
 
   pushDailyHistory(sessionDaily, { dayKey, focus, step });
-  req.sessionData.daily = sessionDaily;
-  await persistSession(req.sessionId, req.sessionData);
+  req.userData.daily = sessionDaily;
+  await saveUserData(req.userId, req.userData);
 
   return res.json({
     dateLabel,
@@ -1188,7 +1338,7 @@ app.post("/api/compatibility-report", requireAuth, (req, res) => {
     });
   }
 
-  const profile = resolveSessionProfile(req.body?.profile, req.sessionData);
+  const profile = resolveSessionProfile(req.body?.profile, req.userData);
   const userSign = profile ? signFromDate(profile.birthDate) : "Unknown";
   const score = Math.max(55, Math.min(95, 60 + ((friendName.length + friendSign.length) % 35)));
 
@@ -1206,7 +1356,7 @@ app.post("/api/compatibility-report", requireAuth, (req, res) => {
 app.get("/api/dashboard", requireAuth, (req, res) => {
   const requestedPeriod = String(req.query?.period || "week").trim().toLowerCase();
   const period = ["week", "month", "year"].includes(requestedPeriod) ? requestedPeriod : "week";
-  const payload = buildDashboardPayload(req.sessionData, period);
+  const payload = buildDashboardPayload(req.userData, period);
   if (!payload) {
     return res.status(400).json({ error: "profile_required", message: "Complete profile first." });
   }
