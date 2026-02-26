@@ -23,10 +23,12 @@ Open:
 ## Current MVP (v1)
 
 - Onboarding: profile capture (name, birth date/time/city/timezone) via session API
-- Natal route: `/natal-chart` (server-driven mock report)
+- Natal route: `/natal-chart` (astronomical chart + interpretation layer)
 - Daily route: `/daily` (focus/risk/step card)
 - Friends route: `/friends` (save friends + compatibility-lite score + advice)
 - Session cookie: `astro_sid` (HttpOnly, SameSite=Lax)
+- Natal engine now uses astronomical calculations (`circular-natal-horoscope-js`, Placidus, Tropical)
+- Birth city is geocoded to `latitude/longitude` (Open-Meteo geocoding API) when coordinates are missing
 
 ### API endpoints
 

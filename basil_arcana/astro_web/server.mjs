@@ -1,10 +1,13 @@
 import crypto from "node:crypto";
 import express from "express";
 import path from "node:path";
+import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import pg from "pg";
 
 const { Pool } = pg;
+const require = createRequire(import.meta.url);
+const { Origin, Horoscope } = require("circular-natal-horoscope-js/dist/index.js");
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -24,6 +27,7 @@ const MAX_TELEGRAM_AUTH_AGE_SECONDS = 60 * 60 * 24;
 app.set("trust proxy", 1);
 
 const sessionStore = new Map();
+const geoCache = new Map();
 let dbPool = null;
 
 function defaultSessionData() {
@@ -209,12 +213,24 @@ function pickProfile(body) {
   const birthTime = String(profile.birthTime || "").trim();
   const birthCity = String(profile.birthCity || "").trim();
   const timezone = String(profile.timezone || "UTC").trim();
+  const latitude = Number(profile.latitude);
+  const longitude = Number(profile.longitude);
+  const timezoneIana = String(profile.timezoneIana || "").trim();
 
   if (!name || !birthDate || !birthTime || !birthCity) {
     return null;
   }
 
-  return { name, birthDate, birthTime, birthCity, timezone };
+  return {
+    name,
+    birthDate,
+    birthTime,
+    birthCity,
+    timezone,
+    latitude: Number.isFinite(latitude) ? latitude : null,
+    longitude: Number.isFinite(longitude) ? longitude : null,
+    timezoneIana: timezoneIana || null
+  };
 }
 
 function signFromDate(dateText) {
@@ -339,53 +355,209 @@ function buildDynamicCompatibility(profile, friend, dayKey) {
 }
 
 function buildNatalDetail(profile) {
-  const sun = signFromDate(profile.birthDate);
-  const moon = moonFromDate(profile.birthDate);
-  const rising = risingFromTime(profile.birthTime);
-  const seed = hashStringToInt(`${profile.name}:${profile.birthDate}:${profile.birthTime}:${profile.birthCity}`);
-
-  const houses = [
-    "Identity", "Resources", "Communication", "Home", "Creativity", "Health",
-    "Partnership", "Power", "Beliefs", "Career", "Community", "Inner World"
-  ];
-  const planets = [
-    { key: "Sun", sign: sun, house: ((seed % 12) + 1) },
-    { key: "Moon", sign: moon, house: (((seed + 5) % 12) + 1) },
-    { key: "Mercury", sign: [sun, moon, rising][seed % 3], house: (((seed + 2) % 12) + 1) },
-    { key: "Venus", sign: [moon, rising, sun][(seed + 1) % 3], house: (((seed + 7) % 12) + 1) },
-    { key: "Mars", sign: rising, house: (((seed + 9) % 12) + 1) },
-    { key: "Jupiter", sign: sun, house: (((seed + 11) % 12) + 1) },
-    { key: "Saturn", sign: moon, house: (((seed + 3) % 12) + 1) }
-  ];
-
-  const dominantHouse = planets[0]?.house || 1;
-  const houseTheme = houses[(dominantHouse - 1 + 12) % 12];
-
-  return {
-    core: { sun, moon, rising },
-    summary: `${profile.name}, your chart emphasizes ${sun} identity with ${moon} emotional tone and ${rising} outward style.`,
+  const fallbackSun = signFromDate(profile.birthDate);
+  const fallbackMoon = moonFromDate(profile.birthDate);
+  const fallbackRising = risingFromTime(profile.birthTime);
+  const base = {
+    core: { sun: fallbackSun, moon: fallbackMoon, rising: fallbackRising },
+    summary: `${profile.name}, your chart emphasizes ${fallbackSun} identity with ${fallbackMoon} emotional tone and ${fallbackRising} outward style.`,
     blocks: {
-      strength: `${sun} supports long-range identity coherence. You can sustain direction through pressure.`,
-      blindSpot: `${moon} can overreact to relational uncertainty when signals are mixed.`,
-      action: `Use ${rising} visibility intentionally: one clear priority and one explicit boundary today.`
+      strength: `${fallbackSun} supports long-range identity coherence. You can sustain direction through pressure.`,
+      blindSpot: `${fallbackMoon} can overreact to relational uncertainty when signals are mixed.`,
+      action: `Use ${fallbackRising} visibility intentionally: one clear priority and one explicit boundary today.`
     },
-    aspects: [
-      "Sun trine Moon: internal alignment can become execution speed.",
-      "Mercury square Mars: speak slower before commitment.",
-      "Venus sextile Saturn: durable bonds grow through steady cadence.",
-      "Jupiter opposition Neptune: verify optimism with measurable steps."
-    ],
-    planets,
-    housesFocus: [
-      { house: dominantHouse, theme: houseTheme, meaning: `Current life pressure concentrates around ${houseTheme.toLowerCase()}.` },
-      { house: ((dominantHouse + 3 - 1) % 12) + 1, theme: houses[((dominantHouse + 3 - 1) % 12)], meaning: "Growth comes through deliberate structural discipline." },
-      { house: ((dominantHouse + 7 - 1) % 12) + 1, theme: houses[((dominantHouse + 7 - 1) % 12)], meaning: "Relationship clarity amplifies momentum." }
-    ],
+    aspects: [],
+    planets: [],
+    housesFocus: [],
+    housesAll: [],
     growthPlan: [
       "Define one non-negotiable boundary for the week.",
       "Convert one emotional reaction into a measurable action.",
       "Review one long-term commitment every Sunday."
-    ]
+    ],
+    calculation: {
+      mode: "fallback",
+      houseSystem: "placidus",
+      zodiac: "tropical"
+    }
+  };
+
+  if (!Number.isFinite(profile.latitude) || !Number.isFinite(profile.longitude)) {
+    return base;
+  }
+
+  try {
+    const [year, monthRaw, day] = String(profile.birthDate).split("-").map((v) => Number(v));
+    const [hour, minute] = String(profile.birthTime).split(":").map((v) => Number(v));
+    if (![year, monthRaw, day, hour, minute].every((v) => Number.isFinite(v))) {
+      return base;
+    }
+
+    const origin = new Origin({
+      year,
+      month: monthRaw - 1,
+      date: day,
+      hour,
+      minute,
+      latitude: profile.latitude,
+      longitude: profile.longitude
+    });
+    const horoscope = new Horoscope({
+      origin,
+      houseSystem: "placidus",
+      zodiac: "tropical",
+      aspectPoints: ["bodies", "points", "angles"],
+      aspectWithPoints: ["bodies", "points", "angles"],
+      aspectTypes: ["major"],
+      language: "en"
+    });
+
+    const bodyList = Array.isArray(horoscope?.CelestialBodies?.all) ? horoscope.CelestialBodies.all : [];
+    const planets = bodyList
+      .filter((body) => ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto"].includes(String(body?.key || "").toLowerCase()))
+      .map((body) => ({
+        key: body?.label || body?.key || "Planet",
+        sign: body?.Sign?.label || "Unknown",
+        house: Number(body?.House?.id) || null,
+        retrograde: Boolean(body?.isRetrograde)
+      }));
+
+    const housesAll = Array.isArray(horoscope?.Houses)
+      ? horoscope.Houses.map((house) => ({
+          house: Number(house?.id) || null,
+          sign: house?.Sign?.label || "Unknown",
+          label: house?.label || `House ${house?.id || ""}`.trim()
+        }))
+      : [];
+
+    const aspectsAll = Array.isArray(horoscope?.Aspects?.all) ? horoscope.Aspects.all : [];
+    const aspects = aspectsAll.slice(0, 10).map((aspect) => {
+      const p1 = aspect?.point1Label || aspect?.point1Key || "Point";
+      const p2 = aspect?.point2Label || aspect?.point2Key || "Point";
+      const label = aspect?.label || "Aspect";
+      const orb = Number(aspect?.orb);
+      const orbLabel = Number.isFinite(orb) ? `${orb.toFixed(2)}°` : "";
+      return `${p1} ${label} ${p2}${orbLabel ? ` (orb ${orbLabel})` : ""}.`;
+    });
+
+    const core = {
+      sun: horoscope?.CelestialBodies?.sun?.Sign?.label || fallbackSun,
+      moon: horoscope?.CelestialBodies?.moon?.Sign?.label || fallbackMoon,
+      rising: horoscope?.Ascendant?.Sign?.label || fallbackRising
+    };
+
+    const dominantHouse = planets
+      .filter((planet) => Number.isFinite(planet.house))
+      .reduce((acc, planet) => {
+        const key = String(planet.house);
+        acc[key] = (acc[key] || 0) + 1;
+        return acc;
+      }, {});
+    const dominantHouseId = Number(
+      Object.entries(dominantHouse).sort((a, b) => b[1] - a[1])[0]?.[0] || 1
+    );
+    const houseSign = housesAll.find((house) => house.house === dominantHouseId)?.sign || "Unknown";
+
+    const housesFocus = [
+      {
+        house: dominantHouseId,
+        theme: `House ${dominantHouseId}`,
+        meaning: `Primary concentration around house ${dominantHouseId} in ${houseSign}.`
+      },
+      {
+        house: ((dominantHouseId + 3 - 1) % 12) + 1,
+        theme: `House ${((dominantHouseId + 3 - 1) % 12) + 1}`,
+        meaning: "Secondary growth zone through structural discipline."
+      },
+      {
+        house: ((dominantHouseId + 7 - 1) % 12) + 1,
+        theme: `House ${((dominantHouseId + 7 - 1) % 12) + 1}`,
+        meaning: "Relational alignment amplifies outcomes."
+      }
+    ];
+
+    const lifeAreas = {
+      relationships: `Venus in ${planets.find((p) => p.key === "Venus")?.sign || "Unknown"} with focus on explicit emotional agreements.`,
+      career: `Midheaven in ${horoscope?.Midheaven?.Sign?.label || "Unknown"} favors strategic reputation over short-term bursts.`,
+      money: `House 2 in ${housesAll.find((h) => h.house === 2)?.sign || "Unknown"} rewards consistency and measured risk.`,
+      energy: `Mars in ${planets.find((p) => p.key === "Mars")?.sign || "Unknown"} indicates best output in structured sprints.`
+    };
+
+    return {
+      ...base,
+      core,
+      summary: `${profile.name}, this chart is calculated from ${profile.birthDate} ${profile.birthTime} at (${profile.latitude.toFixed(3)}, ${profile.longitude.toFixed(3)}).`,
+      aspects,
+      planets,
+      housesFocus,
+      housesAll,
+      lifeAreas,
+      growthPlan: [
+        "Set one weekly relationship boundary and communicate it early.",
+        "Define one measurable career milestone for the next 30 days.",
+        "Track energy in fixed blocks and remove one recurring drain."
+      ],
+      calculation: {
+        mode: "astronomical",
+        houseSystem: "placidus",
+        zodiac: "tropical"
+      }
+    };
+  } catch {
+    return base;
+  }
+}
+
+async function geocodeCity(cityName) {
+  const key = String(cityName || "").trim().toLowerCase();
+  if (!key) {
+    return null;
+  }
+  if (geoCache.has(key)) {
+    return geoCache.get(key);
+  }
+  const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
+    cityName
+  )}&count=1&language=en&format=json`;
+  const response = await fetch(url);
+  if (!response.ok) {
+    return null;
+  }
+  const payload = await response.json();
+  const first = Array.isArray(payload?.results) ? payload.results[0] : null;
+  if (!first) {
+    return null;
+  }
+  const latitude = Number(first.latitude);
+  const longitude = Number(first.longitude);
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+    return null;
+  }
+  const result = {
+    latitude,
+    longitude,
+    timezoneIana: String(first.timezone || "").trim() || null,
+    country: String(first.country || "").trim() || null,
+    admin1: String(first.admin1 || "").trim() || null,
+    resolvedName: String(first.name || "").trim() || cityName
+  };
+  geoCache.set(key, result);
+  return result;
+}
+
+async function ensureProfileCoordinates(profile) {
+  if (Number.isFinite(profile.latitude) && Number.isFinite(profile.longitude)) {
+    return profile;
+  }
+  const geo = await geocodeCity(profile.birthCity);
+  if (!geo) {
+    return profile;
+  }
+  return {
+    ...profile,
+    latitude: geo.latitude,
+    longitude: geo.longitude,
+    timezoneIana: profile.timezoneIana || geo.timezoneIana || null
   };
 }
 
@@ -606,9 +778,21 @@ const contracts = {
       summary: "string",
       blocks: { strength: "string", blindSpot: "string", action: "string" },
       aspects: ["string"],
-      planets: [{ key: "string", sign: "string", house: "number" }],
+      planets: [{ key: "string", sign: "string", house: "number", retrograde: "boolean" }],
       housesFocus: [{ house: "number", theme: "string", meaning: "string" }],
-      growthPlan: ["string"]
+      housesAll: [{ house: "number", sign: "string", label: "string" }],
+      lifeAreas: {
+        relationships: "string",
+        career: "string",
+        money: "string",
+        energy: "string"
+      },
+      growthPlan: ["string"],
+      calculation: {
+        mode: "astronomical|fallback",
+        houseSystem: "string",
+        zodiac: "string"
+      }
     }
   },
   daily_insight: {
@@ -761,13 +945,14 @@ app.get("/api/profile", requireAuth, (req, res) => {
 });
 
 app.put("/api/profile", requireAuth, async (req, res) => {
-  const profile = pickProfile(req.body);
-  if (!profile) {
+  const rawProfile = pickProfile(req.body);
+  if (!rawProfile) {
     return res.status(400).json({
       error: "invalid_profile",
       message: "name, birthDate, birthTime and birthCity are required"
     });
   }
+  const profile = await ensureProfileCoordinates(rawProfile);
   req.sessionData.profile = profile;
   await persistSession(req.sessionId, req.sessionData);
   return res.json({ ok: true, profile, profileReady: true });

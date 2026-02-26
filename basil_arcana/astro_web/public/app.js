@@ -396,8 +396,19 @@ async function hydrateNatal() {
         <article class="route-card">
           <h2>Planet placements</h2>
           <ul class="bullet-list">${(data.planets || [])
-            .map((item) => `<li>${item.key}: ${item.sign}, house ${item.house}</li>`)
+            .map((item) => `<li>${item.key}: ${item.sign}, house ${item.house}${item.retrograde ? " (R)" : ""}</li>`)
             .join("")}</ul>
+        </article>
+      </section>
+      <section class="section">
+        <article class="route-card">
+          <h2>Life areas</h2>
+          <ul class="bullet-list">
+            <li><strong>Relationships:</strong> ${data.lifeAreas?.relationships || "N/A"}</li>
+            <li><strong>Career:</strong> ${data.lifeAreas?.career || "N/A"}</li>
+            <li><strong>Money:</strong> ${data.lifeAreas?.money || "N/A"}</li>
+            <li><strong>Energy:</strong> ${data.lifeAreas?.energy || "N/A"}</li>
+          </ul>
         </article>
       </section>
       <section class="section">
@@ -410,8 +421,17 @@ async function hydrateNatal() {
       </section>
       <section class="section">
         <article class="route-card">
+          <h2>All houses</h2>
+          <ul class="bullet-list">${(data.housesAll || [])
+            .map((item) => `<li>House ${item.house}: ${item.sign}</li>`)
+            .join("")}</ul>
+        </article>
+      </section>
+      <section class="section">
+        <article class="route-card">
           <h2>Growth plan</h2>
           <ul class="bullet-list">${(data.growthPlan || []).map((item) => `<li>${item}</li>`).join("")}</ul>
+          <p style="margin-top:0.8rem">Calculation mode: ${data.calculation?.mode || "unknown"} · ${data.calculation?.houseSystem || "n/a"} · ${data.calculation?.zodiac || "n/a"}</p>
         </article>
       </section>
       <section class="section">
