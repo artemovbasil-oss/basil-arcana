@@ -152,6 +152,21 @@ body[data-theme="light"] .topbar {
   padding: clamp(1.1rem, 2vw, 1.8rem) 0 clamp(3rem, 7vw, 6rem);
 }
 
+.page.route-enter {
+  animation: route-enter 280ms ease both;
+}
+
+@keyframes route-enter {
+  from {
+    opacity: 0.38;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .hero {
   display: grid;
   grid-template-columns: 1.45fr 1fr;
@@ -302,6 +317,20 @@ p {
   margin-top: clamp(1.1rem, 2.8vw, 2.1rem);
 }
 
+.dashboard-name {
+  margin-bottom: 0.7rem;
+}
+
+.mask-fade {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 84%, transparent 100%);
+  mask-image: linear-gradient(90deg, #000 0%, #000 84%, transparent 100%);
+}
+
 .feature-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -405,6 +434,25 @@ p {
   gap: 0.55rem;
 }
 
+.dashboard-swap {
+  transition: opacity 0.26s ease, transform 0.26s ease;
+}
+
+.dashboard-swap.swap-in {
+  animation: dashboard-swap 280ms ease both;
+}
+
+@keyframes dashboard-swap {
+  from {
+    opacity: 0.35;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .dashboard-head {
   display: flex;
   justify-content: space-between;
@@ -441,11 +489,134 @@ p {
 .friend-score {
   text-align: right;
   max-width: 260px;
+  display: grid;
+  justify-items: end;
+  gap: 0.32rem;
 }
 
 .friend-score strong {
   display: block;
   font-size: 1.1rem;
+}
+
+.friend-gauge {
+  width: 50px;
+  height: 50px;
+  transform: rotate(-90deg);
+}
+
+.friend-gauge-bg {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 3;
+}
+
+.friend-gauge-fill {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 3.1;
+  stroke-linecap: round;
+}
+
+.friend-gauge-text {
+  fill: var(--ink);
+  font-size: 6.5px;
+  font-weight: 700;
+  transform: rotate(90deg);
+  transform-origin: center;
+}
+
+.energy-chart-wrap {
+  margin-top: 0.8rem;
+}
+
+.energy-chart {
+  width: 100%;
+  height: auto;
+  max-height: 180px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+}
+
+.energy-axis {
+  stroke: var(--line-strong);
+  stroke-width: 1;
+}
+
+.energy-line {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 2.2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.energy-node {
+  fill: #8f8f8f;
+}
+
+.energy-node.peak {
+  fill: #1f9d55;
+}
+
+.energy-node.dip {
+  fill: #d64545;
+}
+
+.energy-label {
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.energy-label.peak {
+  fill: #1f9d55;
+}
+
+.energy-label.dip {
+  fill: #d64545;
+}
+
+.energy-legend {
+  margin-top: 0.45rem;
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  color: var(--muted);
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.energy-legend .dot {
+  width: 8px;
+  height: 8px;
+  display: inline-block;
+  border-radius: 999px;
+  margin-right: 0.35rem;
+}
+
+.energy-legend .dot.peak {
+  background: #1f9d55;
+}
+
+.energy-legend .dot.dip {
+  background: #d64545;
+}
+
+.content-panel {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.editorial-grid {
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.content-card {
+  display: grid;
+  gap: 0.55rem;
 }
 
 .theme-toggle {
@@ -572,6 +743,20 @@ body[data-theme="light"] .natal-aspect-line.soft {
   stroke: #8f8f8f;
 }
 
+body[data-theme="light"] .energy-chart {
+  background: #fbfbfb;
+}
+
+body[data-theme="light"] .energy-line,
+body[data-theme="light"] .friend-gauge-text {
+  fill: #111;
+}
+
+body[data-theme="light"] .energy-line,
+body[data-theme="light"] .friend-gauge-fill {
+  stroke: #111;
+}
+
 .muted {
   color: var(--muted);
 }
@@ -592,6 +777,10 @@ body[data-theme="light"] .natal-aspect-line.soft {
   }
 
   .feature-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .editorial-grid {
     grid-template-columns: 1fr 1fr;
   }
 }
@@ -626,6 +815,10 @@ body[data-theme="light"] .natal-aspect-line.soft {
 
   .feature-grid,
   .metric-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .editorial-grid {
     grid-template-columns: 1fr;
   }
 

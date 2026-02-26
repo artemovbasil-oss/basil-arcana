@@ -335,6 +335,189 @@ function shell({ eyebrow, title, intro, primaryCta, secondaryCta, rightPanel, bo
   `;
 }
 
+function energyPointLabel(period, index) {
+  if (period === "week") {
+    return ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][index] || `D${index + 1}`;
+  }
+  if (period === "month") {
+    return `${index + 1}`;
+  }
+  return ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][index] || `M${index + 1}`;
+}
+
+function buildEnergySeries(profile, period, intensity) {
+  const count = period === "year" ? 12 : period === "month" ? 30 : 7;
+  const baseSeed = stringHash(`${profile?.name || "anon"}:${profile?.birthDate || "0000-00-00"}:${period}:${intensity}`);
+  const baseline = Math.max(28, Math.min(82, Number(intensity) || 50));
+  const values = Array.from({ length: count }, (_, index) => {
+    const waveA = Math.sin((index + 1) * 0.92 + (baseSeed % 9)) * 14;
+    const waveB = Math.cos((index + 1) * 0.37 + (baseSeed % 17)) * 8;
+    const noise = (stringHash(`${baseSeed}:${index}`) % 11) - 5;
+    const point = Math.max(8, Math.min(96, Math.round(baseline + waveA + waveB + noise)));
+    return point;
+  });
+  const peak = Math.max(...values);
+  const dip = Math.min(...values);
+  return {
+    values,
+    peakIndex: values.indexOf(peak),
+    dipIndex: values.indexOf(dip),
+    labels: values.map((_, index) => energyPointLabel(period, index))
+  };
+}
+
+function renderEnergyChart(dashboard, period) {
+  const intensity = Number(dashboard?.periodForecast?.intensity || 50);
+  const series = buildEnergySeries(dashboard?.profile, period, intensity);
+  const width = 980;
+  const height = 158;
+  const padX = 18;
+  const padY = 20;
+  const stepX = (width - padX * 2) / Math.max(1, series.values.length - 1);
+  const toY = (value) => height - padY - (value / 100) * (height - padY * 2);
+  const points = series.values.map((value, index) => ({
+    x: padX + index * stepX,
+    y: toY(value),
+    value,
+    label: series.labels[index]
+  }));
+  const polyline = points.map((point) => `${point.x},${point.y}`).join(" ");
+  const peakPoint = points[series.peakIndex];
+  const dipPoint = points[series.dipIndex];
+
+  return `
+    <div class="energy-chart-wrap">
+      <svg class="energy-chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="Energy trend chart">
+        <line class="energy-axis" x1="${padX}" y1="${height - padY}" x2="${width - padX}" y2="${height - padY}" />
+        <polyline class="energy-line" points="${polyline}" />
+        ${points
+          .map(
+            (point, index) => `
+              <circle class="energy-node ${index === series.peakIndex ? "peak" : index === series.dipIndex ? "dip" : ""}" cx="${point.x}" cy="${point.y}" r="${index === series.peakIndex || index === series.dipIndex ? 5.4 : 3.4}" />
+            `
+          )
+          .join("")}
+        <text class="energy-label peak" x="${peakPoint.x}" y="${peakPoint.y - 10}" text-anchor="middle">▲ ${peakPoint.value}</text>
+        <text class="energy-label dip" x="${dipPoint.x}" y="${dipPoint.y + 18}" text-anchor="middle">▼ ${dipPoint.value}</text>
+      </svg>
+      <div class="energy-legend">
+        <span><i class="dot peak"></i> Peak energy</span>
+        <span><i class="dot dip"></i> Energy dip</span>
+      </div>
+    </div>
+  `;
+}
+
+function normalizedFriendScore(score, period) {
+  const value = Math.max(0, Math.min(100, Number(score) || 0));
+  if (period === "month") {
+    return Math.max(0, Math.min(100, value - 3 + ((value % 5) - 2)));
+  }
+  if (period === "year") {
+    return Math.max(0, Math.min(100, value - 6 + ((value % 7) - 3)));
+  }
+  return value;
+}
+
+function renderFriendGauge(score) {
+  const pct = Math.max(0, Math.min(100, Math.round(score)));
+  const radius = 15;
+  const c = 2 * Math.PI * radius;
+  const progress = c - (pct / 100) * c;
+  return `
+    <svg class="friend-gauge" viewBox="0 0 42 42" role="img" aria-label="Compatibility ${pct}%">
+      <circle class="friend-gauge-bg" cx="21" cy="21" r="${radius}" />
+      <circle class="friend-gauge-fill" cx="21" cy="21" r="${radius}" stroke-dasharray="${c}" stroke-dashoffset="${progress}" />
+      <text class="friend-gauge-text" x="21" y="22" text-anchor="middle" dominant-baseline="middle">${pct}%</text>
+    </svg>
+  `;
+}
+
+function renderFriendsBlock(dashboard, period) {
+  const dynamicFriends = Array.isArray(dashboard?.friendsDynamic) ? dashboard.friendsDynamic : [];
+  if (!dynamicFriends.length) {
+    return `<p class="muted">No friends yet. Add friends to unlock dynamic compatibility tracking.</p>`;
+  }
+  return dynamicFriends
+    .map((friend) => {
+      const score = normalizedFriendScore(friend.score, period);
+      return `
+        <div class="friend-row">
+          <div>
+            <strong>${friend.friendName}</strong>
+            <p>${zodiacGlyph(friend.friendSign)} ${friend.friendSign} · ${friend.trend}</p>
+          </div>
+          <div class="friend-score">
+            ${renderFriendGauge(score)}
+            <p>${friend.note}</p>
+          </div>
+        </div>
+      `;
+    })
+    .join("");
+}
+
+function renderForecastSummary(dashboard, period) {
+  const periodLabel = period === "year" ? "Year" : period === "month" ? "Month" : "Week";
+  const intensity = Number(dashboard?.periodForecast?.intensity || 0);
+  return `
+    <p><strong>${periodLabel} intensity: ${intensity}/100.</strong> ${dashboard?.periodForecast?.summary || ""}</p>
+    ${renderEnergyChart(dashboard, period)}
+  `;
+}
+
+function updateHomeDynamicBlocks(dashboard, period, { animate = false } = {}) {
+  const forecastBlock = document.getElementById("homeForecastBlock");
+  const friendsBlock = document.getElementById("homeFriendsBlock");
+  if (forecastBlock) {
+    if (animate) {
+      forecastBlock.classList.remove("swap-in");
+      void forecastBlock.offsetWidth;
+      forecastBlock.classList.add("swap-in");
+    }
+    forecastBlock.innerHTML = renderForecastSummary(dashboard, period);
+  }
+  if (friendsBlock) {
+    if (animate) {
+      friendsBlock.classList.remove("swap-in");
+      void friendsBlock.offsetWidth;
+      friendsBlock.classList.add("swap-in");
+    }
+    friendsBlock.innerHTML = renderFriendsBlock(dashboard, period);
+  }
+  document.querySelectorAll(".js-period").forEach((button) => {
+    const buttonPeriod = button.getAttribute("data-period");
+    button.classList.toggle("is-active", buttonPeriod === period);
+  });
+}
+
+function bindHomePeriodHandlers() {
+  document.querySelectorAll(".js-period").forEach((button) => {
+    button.addEventListener("click", async () => {
+      const nextPeriod = button.getAttribute("data-period");
+      if (!nextPeriod || nextPeriod === state.homePeriod) {
+        return;
+      }
+      state.homePeriod = nextPeriod;
+      try {
+        const payload = await fetchJson(`/api/dashboard?period=${encodeURIComponent(state.homePeriod)}`);
+        state.dashboard = payload.dashboard;
+        updateHomeDynamicBlocks(state.dashboard, state.homePeriod, { animate: true });
+      } catch (error) {
+        if (error.status === 401) {
+          await refreshAuthState();
+          navigate("/login", { replace: true });
+          return;
+        }
+        const forecastBlock = document.getElementById("homeForecastBlock");
+        if (forecastBlock) {
+          forecastBlock.innerHTML = `<p class="muted">Failed to update forecast: ${error.message}</p>`;
+        }
+      }
+    });
+  });
+}
+
 function homeViewLoading() {
   return `
     <section class="section">
@@ -349,33 +532,14 @@ function homeViewLoading() {
 
 function renderHomeDashboard(dashboard) {
   const period = dashboard.periodForecast?.period || state.homePeriod;
-  const periodLabel = period === "year" ? "Year" : period === "month" ? "Month" : "Week";
-  const intensity = Number(dashboard.periodForecast?.intensity || 0);
-  const dynamicFriends = Array.isArray(dashboard.friendsDynamic) ? dashboard.friendsDynamic : [];
-  const friendsBlock = dynamicFriends.length
-    ? dynamicFriends
-        .map(
-          (friend) => `
-          <div class="friend-row">
-            <div>
-              <strong>${friend.friendName}</strong>
-              <p>${friend.friendSign} · ${friend.trend}</p>
-            </div>
-            <div class="friend-score">
-              <strong>${friend.score}</strong>
-              <p>${friend.note}</p>
-            </div>
-          </div>
-        `
-        )
-        .join("")
-    : `<p class="muted">No friends yet. Add friends to unlock dynamic compatibility tracking.</p>`;
+  const forecastSummary = renderForecastSummary(dashboard, period);
+  const friendsBlock = renderFriendsBlock(dashboard, period);
 
   return `
     <section class="hero">
       <article class="card">
         <span class="eyebrow">User Dashboard</span>
-        <h1>${dashboard.profile.name}</h1>
+        <h1 class="dashboard-name"><span class="mask-fade">${dashboard.profile.name}</span></h1>
         <p>${zodiacGlyph(dashboard.natalCore.sun)} ${dashboard.natalCore.sun} sun, ${zodiacGlyph(dashboard.natalCore.moon)} ${dashboard.natalCore.moon} moon, ${zodiacGlyph(dashboard.natalCore.rising)} ${dashboard.natalCore.rising} rising.</p>
         <div class="hero-actions">
           <a class="btn primary" href="/natal-chart">Natal Profile</a>
@@ -401,13 +565,13 @@ function renderHomeDashboard(dashboard) {
             <button class="btn ghost js-period ${period === "year" ? "is-active" : ""}" data-period="year" type="button">Year</button>
           </div>
         </div>
-        <p><strong>${periodLabel} intensity: ${intensity}/100.</strong> ${dashboard.periodForecast.summary}</p>
+        <div id="homeForecastBlock" class="dashboard-swap">${forecastSummary}</div>
       </article>
     </section>
     <section class="section">
       <article class="card">
         <h2>Friends dynamic compatibility</h2>
-        <div class="friends-list">${friendsBlock}</div>
+        <div id="homeFriendsBlock" class="friends-list dashboard-swap">${friendsBlock}</div>
       </article>
     </section>
   `;
@@ -543,6 +707,41 @@ function natalViewLoading() {
         <h1>Your natal report</h1>
         <p id="natalStatus">Preparing your chart...</p>
       </article>
+    </section>
+  `;
+}
+
+function buildNatalEditorial(profile, report) {
+  const sun = report?.core?.sun || "Unknown";
+  const moon = report?.core?.moon || "Unknown";
+  const rising = report?.core?.rising || "Unknown";
+  const life = report?.lifeAreas || {};
+  return `
+    <section class="section">
+      <article class="route-card content-panel">
+        <h2>Interpretation Framework</h2>
+        <p><strong>Identity axis:</strong> ${zodiacGlyph(sun)} ${sun} defines visible motivation, ${zodiacGlyph(moon)} ${moon} defines emotional processing, and ${zodiacGlyph(rising)} ${rising} defines behavioral presentation under pressure.</p>
+        <p>This reading is designed for practical planning. The goal is not prediction, but better timing, better communication, and better personal decisions.</p>
+      </article>
+    </section>
+    <section class="section">
+      <div class="editorial-grid">
+        <article class="feature-card content-card">
+          <h3>🜂 Work Strategy</h3>
+          <p>${life.career || "Career interpretation appears here based on chart geometry and planetary focus."}</p>
+          <p>Execution advice: define a single weekly strategic objective and protect two uninterrupted deep-work windows.</p>
+        </article>
+        <article class="feature-card content-card">
+          <h3>☍ Relationship Dynamics</h3>
+          <p>${life.relationships || "Relational interpretation appears here from Venus, Moon and house emphasis."}</p>
+          <p>Communication advice: state expectations early, then mirror back agreements in concrete language.</p>
+        </article>
+        <article class="feature-card content-card">
+          <h3>☿ Decision Hygiene</h3>
+          <p>When emotional load is high, convert interpretation into short measurable actions. This reduces drift and stabilizes outcomes.</p>
+          <p>Use 24-hour review cycles for decisions that impact money, commitment, and reputation.</p>
+        </article>
+      </div>
     </section>
   `;
 }
@@ -686,6 +885,8 @@ async function hydrateNatal() {
 
     const natalChartSvg = renderNatalChartSvg(data);
 
+    const editorial = buildNatalEditorial(profile, data);
+
     app.innerHTML = `
       <section class="section">
         <article class="card">
@@ -755,6 +956,7 @@ async function hydrateNatal() {
           <ul class="bullet-list">${data.aspects.map((item) => `<li>${item}</li>`).join("")}</ul>
         </article>
       </section>
+      ${editorial}
     `;
   } catch (error) {
     if (error.status === 401) {
@@ -787,18 +989,8 @@ async function hydrateHome() {
     const payload = await fetchJson(`/api/dashboard?period=${encodeURIComponent(state.homePeriod)}`);
     state.dashboard = payload.dashboard;
     app.innerHTML = renderHomeDashboard(payload.dashboard);
-    const periodButtons = app.querySelectorAll(".js-period");
-    periodButtons.forEach((button) => {
-      button.addEventListener("click", async () => {
-        const nextPeriod = button.getAttribute("data-period");
-        if (!nextPeriod || nextPeriod === state.homePeriod) {
-          return;
-        }
-        state.homePeriod = nextPeriod;
-        app.innerHTML = homeViewLoading();
-        await hydrateHome();
-      });
-    });
+    bindHomePeriodHandlers();
+    updateHomeDynamicBlocks(state.dashboard, state.homePeriod, { animate: false });
   } catch (error) {
     if (error.status === 401) {
       await refreshAuthState();
@@ -814,6 +1006,12 @@ async function hydrateHome() {
       status.textContent = `Failed to load dashboard: ${error.message}`;
     }
   }
+}
+
+function animateRouteTransition() {
+  app.classList.remove("route-enter");
+  void app.offsetWidth;
+  app.classList.add("route-enter");
 }
 
 async function hydrateDaily() {
@@ -1162,6 +1360,7 @@ function render() {
 
   const makeView = routes[path] || homeViewLoading;
   app.innerHTML = makeView();
+  animateRouteTransition();
   markActiveNav(path);
   renderProfileChip();
   attachRouteHandlers(path);
