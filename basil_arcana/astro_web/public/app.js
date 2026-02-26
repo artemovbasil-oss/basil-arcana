@@ -1,6 +1,11 @@
 const app = document.getElementById("app");
 const nav = document.getElementById("nav");
 const menuButton = document.getElementById("menuButton");
+const profileButton = document.getElementById("profileButton");
+const profileAvatar = document.getElementById("profileAvatar");
+const profileInitials = document.getElementById("profileInitials");
+const themeToggle = document.getElementById("themeToggle");
+const themeStorageKey = "astronautica_theme";
 
 const state = {
   authRequired: false,
@@ -12,11 +17,21 @@ const state = {
   profileReady: false,
   friends: [],
   dashboard: null,
-  homePeriod: "week"
+  homePeriod: "week",
+  theme: "dark"
 };
 
 menuButton.addEventListener("click", () => {
   nav.classList.toggle("open");
+});
+
+profileButton?.addEventListener("click", () => {
+  navigate(state.authenticated ? "/profile" : "/login");
+});
+
+themeToggle?.addEventListener("click", () => {
+  state.theme = state.theme === "dark" ? "light" : "dark";
+  applyTheme(state.theme);
 });
 
 function navigate(path, { replace = false } = {}) {
@@ -49,6 +64,46 @@ async function fetchJson(url, options) {
 
 function hasProfile(profile = state.profile) {
   return Boolean(profile?.name && profile?.birthDate && profile?.birthTime && profile?.birthCity);
+}
+
+function getInitials() {
+  const first = String(state.authUser?.firstName || "").trim();
+  const last = String(state.authUser?.lastName || "").trim();
+  const username = String(state.authUser?.username || "").trim();
+  if (first || last) {
+    return `${first.slice(0, 1)}${last.slice(0, 1)}`.toUpperCase() || "?";
+  }
+  if (username) {
+    return username.slice(0, 2).toUpperCase();
+  }
+  return "AU";
+}
+
+function renderProfileChip() {
+  if (!profileButton || !profileAvatar || !profileInitials) {
+    return;
+  }
+  const photoUrl = String(state.authUser?.photoUrl || "").trim();
+  if (state.authenticated && photoUrl) {
+    profileAvatar.src = photoUrl;
+    profileAvatar.classList.add("is-visible");
+    profileInitials.style.display = "none";
+  } else {
+    profileAvatar.classList.remove("is-visible");
+    profileAvatar.removeAttribute("src");
+    profileInitials.style.display = "inline-flex";
+    profileInitials.textContent = state.authenticated ? getInitials() : "?";
+  }
+}
+
+function applyTheme(nextTheme) {
+  const theme = nextTheme === "light" ? "light" : "dark";
+  state.theme = theme;
+  document.body.setAttribute("data-theme", theme);
+  window.localStorage.setItem(themeStorageKey, theme);
+  if (themeToggle) {
+    themeToggle.textContent = `Theme: ${theme}`;
+  }
 }
 
 function shell({ eyebrow, title, intro, primaryCta, secondaryCta, rightPanel, body }) {
@@ -115,7 +170,7 @@ function renderHomeDashboard(dashboard) {
         <p>${dashboard.natalCore.sun} sun, ${dashboard.natalCore.moon} moon, ${dashboard.natalCore.rising} rising.</p>
         <div class="hero-actions">
           <a class="btn primary" href="/natal-chart">Natal Profile</a>
-          <a class="btn ghost" href="/onboarding">Edit Birth Data</a>
+          <a class="btn ghost" href="/profile">Edit Birth Data</a>
         </div>
       </article>
       <aside class="card">
@@ -229,6 +284,47 @@ function onboardingView() {
   `;
 }
 
+function profileView() {
+  const profile = state.profile || {};
+  const authLabel = state.authUser?.username
+    ? `@${state.authUser.username}`
+    : [state.authUser?.firstName, state.authUser?.lastName].filter(Boolean).join(" ");
+  return `
+    <section class="section">
+      <article class="card">
+        <span class="eyebrow">Profile</span>
+        <h1>Account</h1>
+        <p>${authLabel || "Telegram user"}.</p>
+      </article>
+    </section>
+    <section class="section">
+      <form id="profileForm" class="card form-grid">
+        <label>Name
+          <input required name="name" value="${profile.name || ""}" placeholder="Your name" />
+        </label>
+        <label>Date of birth
+          <input required type="date" name="birthDate" value="${profile.birthDate || ""}" />
+        </label>
+        <label>Birth time
+          <input required type="time" name="birthTime" value="${profile.birthTime || ""}" />
+        </label>
+        <label>Birth city
+          <input required name="birthCity" value="${profile.birthCity || ""}" placeholder="City, Country" />
+        </label>
+        <label>Timezone
+          <input required name="timezone" value="${profile.timezone || "UTC"}" placeholder="UTC+3" />
+        </label>
+        <button class="btn primary form-submit" type="submit">Save profile</button>
+      </form>
+    </section>
+    <section class="section">
+      <article class="card">
+        <button id="profileLogoutButton" class="btn ghost" type="button">Logout</button>
+      </article>
+    </section>
+  `;
+}
+
 function natalViewLoading() {
   return `
     <section class="section">
@@ -326,6 +422,7 @@ const routes = {
   "/": homeViewLoading,
   "/login": loginView,
   "/onboarding": onboardingView,
+  "/profile": profileView,
   "/natal-chart": natalViewLoading,
   "/daily": dailyViewLoading,
   "/friends": friendsView,
@@ -645,6 +742,22 @@ async function handleWebAppInitDataAuth() {
   }
 }
 
+async function submitProfileForm(form, afterSavePath = null) {
+  const formData = new FormData(form);
+  const profile = Object.fromEntries(formData.entries());
+  const payload = await fetchJson("/api/profile", {
+    method: "PUT",
+    body: JSON.stringify({ profile })
+  });
+  state.profile = payload.profile;
+  state.profileReady = payload.profileReady;
+  if (afterSavePath) {
+    navigate(afterSavePath);
+  } else {
+    render();
+  }
+}
+
 function attachRouteHandlers(path) {
   if (path === "/login") {
     if (!state.authenticated && state.telegramLoginEnabled) {
@@ -665,16 +778,8 @@ function attachRouteHandlers(path) {
     const form = document.getElementById("onboardingForm");
     form?.addEventListener("submit", async (event) => {
       event.preventDefault();
-      const formData = new FormData(form);
-      const profile = Object.fromEntries(formData.entries());
       try {
-        const payload = await fetchJson("/api/profile", {
-          method: "PUT",
-          body: JSON.stringify({ profile })
-        });
-        state.profile = payload.profile;
-        state.profileReady = payload.profileReady;
-        navigate("/natal-chart");
+        await submitProfileForm(form, "/");
       } catch (error) {
         if (error.status === 401) {
           await refreshAuthState();
@@ -683,6 +788,30 @@ function attachRouteHandlers(path) {
         }
         alert(`Failed to save profile: ${error.message}`);
       }
+    });
+  }
+
+  if (path === "/profile") {
+    const profileForm = document.getElementById("profileForm");
+    profileForm?.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      try {
+        await submitProfileForm(profileForm, null);
+      } catch (error) {
+        if (error.status === 401) {
+          await refreshAuthState();
+          navigate("/login", { replace: true });
+          return;
+        }
+        alert(`Failed to save profile: ${error.message}`);
+      }
+    });
+
+    const profileLogoutButton = document.getElementById("profileLogoutButton");
+    profileLogoutButton?.addEventListener("click", async () => {
+      await fetchJson("/api/auth/logout", { method: "POST", body: JSON.stringify({}) });
+      await loadSessionState();
+      navigate("/login", { replace: true });
     });
   }
 
@@ -758,14 +887,27 @@ async function loadSessionState() {
 
 function render() {
   let path = window.location.pathname;
+  const profileExists = hasProfile();
+
   if (state.authRequired && !state.authenticated && path !== "/login") {
     path = "/login";
     window.history.replaceState({}, "", path);
   }
 
-  const makeView = routes[path] || homeView;
+  if (state.authRequired && state.authenticated && !profileExists && !["/onboarding", "/login"].includes(path)) {
+    path = "/onboarding";
+    window.history.replaceState({}, "", path);
+  }
+
+  if (state.authRequired && state.authenticated && profileExists && path === "/onboarding") {
+    path = "/";
+    window.history.replaceState({}, "", path);
+  }
+
+  const makeView = routes[path] || homeViewLoading;
   app.innerHTML = makeView();
   markActiveNav(path);
+  renderProfileChip();
   attachRouteHandlers(path);
 
   if (path === "/natal-chart") {
@@ -804,6 +946,8 @@ loadSessionState()
     console.error("Failed to initialize session state", error);
   })
   .finally(() => {
+    const storedTheme = window.localStorage.getItem(themeStorageKey);
+    applyTheme(storedTheme || state.theme);
     render();
   });
 

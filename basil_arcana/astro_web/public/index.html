@@ -16,17 +16,23 @@
     />
     <link rel="stylesheet" href="/styles.css" />
   </head>
-  <body>
+  <body data-theme="dark">
     <header class="topbar">
       <a class="brand" href="/">Astronautica</a>
-      <button id="menuButton" class="menu-btn" aria-label="Open navigation">Menu</button>
+      <div class="topbar-right">
+        <button id="menuButton" class="menu-btn" aria-label="Open navigation">Menu</button>
+        <button id="profileButton" class="profile-chip" aria-label="Open profile" type="button">
+          <img id="profileAvatar" class="profile-avatar" alt="Profile avatar" />
+          <span id="profileInitials" class="profile-initials">?</span>
+        </button>
+      </div>
       <nav id="nav" class="nav">
         <a href="/">Home</a>
-        <a href="/onboarding">Onboarding</a>
         <a href="/natal-chart">Natal Chart</a>
         <a href="/daily">Daily</a>
         <a href="/friends">Friends</a>
-        <a href="/login">Login</a>
+        <a href="/profile">Profile</a>
+        <button id="themeToggle" class="theme-toggle" type="button">Theme: dark</button>
         <a href="/faq">FAQ</a>
       </nav>
     </header>
