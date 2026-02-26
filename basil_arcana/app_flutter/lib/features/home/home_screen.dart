@@ -1468,7 +1468,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                         hasQuestion,
                                       ),
                                       backgroundColor: colorScheme.primary,
-                                      iconColor: Colors.white,
+                                      iconColor: colorScheme.onPrimary,
                                     ),
                                   ],
                                 ),

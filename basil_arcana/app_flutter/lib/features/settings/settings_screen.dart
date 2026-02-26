@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -140,8 +141,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             DropdownButtonFormField<AppLanguage>(
               key: ValueKey(settingsState.language),
               initialValue: settingsState.language,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 prefixIcon: Icon(Icons.translate_rounded),
+              ),
+              icon: Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: SvgPicture.asset(
+                  'assets/icon/chevron_down.svg',
+                  width: 16,
+                  height: 16,
+                  colorFilter: ColorFilter.mode(
+                    Theme.of(context).colorScheme.onSurface,
+                    BlendMode.srcIn,
+                  ),
+                ),
               ),
               items: <DropdownMenuItem<AppLanguage>>[
                 DropdownMenuItem(

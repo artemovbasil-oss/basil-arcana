@@ -59,6 +59,23 @@ bool _shouldShowPack(EnergyState energy, EnergyPackId packId) {
   return missing > 0 && gain <= missing;
 }
 
+String _yearPackBadgeLabel(BuildContext context) {
+  final code = Localizations.localeOf(context).languageCode;
+  if (code == 'ru') {
+    return 'Выгодно';
+  }
+  if (code == 'kk') {
+    return 'Тиімді';
+  }
+  if (code == 'fr') {
+    return 'Avantageux';
+  }
+  if (code == 'tr') {
+    return 'Avantajlı';
+  }
+  return 'Best value';
+}
+
 Future<bool> trySpendEnergyForAction(
   BuildContext context,
   WidgetRef ref,
@@ -82,6 +99,7 @@ Future<bool> trySpendEnergyForAction(
 
 Future<void> showEnergyTopUpSheet(BuildContext context, WidgetRef ref) async {
   final l10n = AppLocalizations.of(context);
+  final highContrast = ref.read(highContrastProvider);
   final energy = ref.read(energyProvider);
   final showFullPack = _shouldShowPack(energy, EnergyPackId.full);
   await showModalBottomSheet<void>(
@@ -213,9 +231,12 @@ Future<void> showEnergyTopUpSheet(BuildContext context, WidgetRef ref) async {
                       title: _packTitle(l10n, EnergyPackId.yearUnlimited),
                       stars: _displayStarsByPack[EnergyPackId.yearUnlimited]!,
                       primary: true,
-                      badgeLabel: 'Выгодно',
-                      badgeBackground: const Color(0xFF6EEBFF),
-                      badgeForeground: Colors.black,
+                      badgeLabel: _yearPackBadgeLabel(context),
+                      badgeBackground: highContrast
+                          ? const Color(0xFF111111)
+                          : const Color(0xFF6EEBFF),
+                      badgeForeground:
+                          highContrast ? Colors.white : Colors.black,
                       enabled: processingPack == null,
                       onPressed: processingPack != null
                           ? null
@@ -336,7 +357,7 @@ class _PackActionButton extends StatelessWidget {
                       (primary ? textTheme.titleMedium : textTheme.labelLarge)
                           ?.copyWith(
                     color: primary
-                        ? Colors.white
+                        ? colorScheme.onPrimary
                         : colorScheme.primary.withValues(alpha: 0.96),
                     fontWeight: FontWeight.w700,
                   ),
@@ -371,7 +392,7 @@ class _PackActionButton extends StatelessWidget {
           style: (primary ? textTheme.titleMedium : textTheme.labelLarge)
               ?.copyWith(
             color: primary
-                ? Colors.white
+                ? colorScheme.onPrimary
                 : colorScheme.primary.withValues(alpha: 0.96),
             fontWeight: FontWeight.w800,
           ),
