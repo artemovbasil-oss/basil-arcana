@@ -72,10 +72,10 @@ function shell({ eyebrow, title, intro, primaryCta, secondaryCta, rightPanel, bo
 function homeView() {
   const profileReady = hasProfile();
   return shell({
-    eyebrow: "Astrology MVP",
+    eyebrow: "Astronautica",
     title: "Natal intelligence<br/>daily engagement<br/>friend chemistry",
     intro:
-      "MVP focus: accurate birth profile, one deep natal report, daily ritual card, and lightweight friend compatibility.",
+      "A minimal operating layer for natal precision, daily rhythm and relationship context.",
     primaryCta: {
       href: profileReady ? "/natal-chart" : "/onboarding",
       label: profileReady ? "Open My Natal" : "Start Onboarding"
@@ -268,7 +268,7 @@ function faqView() {
     <section class="section">
       <article class="card">
         <span class="eyebrow">FAQ</span>
-        <h1>MVP scope</h1>
+        <h1>Astronautica scope</h1>
         <div class="faq">
           <article class="faq-item">
             <h3>What is already implemented?</h3>
