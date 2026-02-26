@@ -18,6 +18,7 @@ const sessionCookieName = "astro_sid";
 const databaseUrl = String(process.env.DATABASE_URL || "").trim();
 const telegramBotToken = String(process.env.TELEGRAM_BOT_TOKEN || "").trim();
 const telegramBotUsername = String(process.env.TELEGRAM_BOT_USERNAME || "").trim();
+const telegramBotId = Number.parseInt(String(telegramBotToken.split(":")[0] || "").trim(), 10) || null;
 const authRequired =
   String(process.env.AUTH_REQUIRED || "").trim() === "1" ||
   String(process.env.AUTH_REQUIRED || "").trim().toLowerCase() === "true" ||
@@ -158,6 +159,17 @@ async function saveSessionToDb(sid, data) {
     `,
     [sid, JSON.stringify(normalized)]
   );
+}
+
+async function deleteSessionBySid(sid) {
+  if (!sid) {
+    return;
+  }
+  if (dbPool) {
+    await dbPool.query("DELETE FROM astro_web_sessions WHERE sid = $1", [sid]);
+    return;
+  }
+  sessionStore.delete(sid);
 }
 
 async function getOrCreateSession(req, res) {
@@ -892,7 +904,8 @@ app.get("/api/auth/status", (req, res) => {
     provider: authenticated ? "telegram" : null,
     user: authenticated ? sanitizeAuthUser(req.sessionData) : null,
     telegramLoginEnabled: Boolean(telegramBotToken && telegramBotUsername),
-    telegramBotUsername: telegramBotUsername || null
+    telegramBotUsername: telegramBotUsername || null,
+    telegramBotId
   });
 });
 
@@ -934,8 +947,12 @@ app.post("/api/auth/telegram-init-data", async (req, res) => {
 });
 
 app.post("/api/auth/logout", async (req, res) => {
-  req.sessionData.auth = null;
-  await persistSession(req.sessionId, req.sessionData);
+  const oldSid = req.sessionId;
+  const sid = crypto.randomUUID();
+  const freshSession = defaultSessionData();
+  await persistSession(sid, freshSession);
+  await deleteSessionBySid(oldSid);
+  res.setHeader("Set-Cookie", buildSessionCookie(sid, req));
   res.json({ ok: true, authenticated: false });
 });
 

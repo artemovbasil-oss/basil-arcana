@@ -13,6 +13,7 @@ const state = {
   authUser: null,
   telegramLoginEnabled: false,
   telegramBotUsername: null,
+  telegramBotId: null,
   profile: null,
   profileReady: false,
   friends: [],
@@ -412,6 +413,7 @@ function loginView() {
           loginEnabled
             ? `<div id="telegramWidgetMount"></div>
                <div class="hero-actions">
+                 <button id="switchTelegramAccountButton" class="btn ghost" type="button">Login with another Telegram account</button>
                  <button id="webAppAuthButton" class="btn ghost" type="button">Login from Telegram WebApp context</button>
                </div>
                <p id="loginStatus" class="muted" style="margin-top:0.8rem"></p>`
@@ -921,6 +923,41 @@ async function handleWebAppInitDataAuth() {
   }
 }
 
+function handleSwitchTelegramAccount() {
+  const status = document.getElementById("loginStatus");
+  const botId = Number(state.telegramBotId);
+  if (!Number.isFinite(botId) || botId <= 0) {
+    if (status) {
+      status.textContent = "Telegram bot id is not configured.";
+    }
+    return;
+  }
+
+  if (window.Telegram?.Login?.auth) {
+    window.Telegram.Login.auth(
+      {
+        bot_id: botId,
+        request_access: "write"
+      },
+      (user) => {
+        if (!user) {
+          if (status) {
+            status.textContent = "Telegram account switch was cancelled.";
+          }
+          return;
+        }
+        handleTelegramWidgetAuth(user);
+      }
+    );
+    return;
+  }
+
+  const authUrl = `https://oauth.telegram.org/auth?bot_id=${encodeURIComponent(
+    String(botId)
+  )}&origin=${encodeURIComponent(window.location.origin)}&request_access=write`;
+  window.open(authUrl, "_blank", "noopener,noreferrer");
+}
+
 async function submitProfileForm(form, afterSavePath = null) {
   const formData = new FormData(form);
   const profile = Object.fromEntries(formData.entries());
@@ -943,6 +980,8 @@ function attachRouteHandlers(path) {
       mountTelegramWidget();
       const webAppAuthButton = document.getElementById("webAppAuthButton");
       webAppAuthButton?.addEventListener("click", handleWebAppInitDataAuth);
+      const switchAccountButton = document.getElementById("switchTelegramAccountButton");
+      switchAccountButton?.addEventListener("click", handleSwitchTelegramAccount);
     }
 
     const logoutButton = document.getElementById("logoutButton");
@@ -1043,6 +1082,7 @@ async function refreshAuthState() {
   state.authUser = auth.user || null;
   state.telegramLoginEnabled = Boolean(auth.telegramLoginEnabled);
   state.telegramBotUsername = auth.telegramBotUsername || null;
+  state.telegramBotId = Number(auth.telegramBotId) || null;
 }
 
 async function loadSessionState() {
