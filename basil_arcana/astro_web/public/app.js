@@ -571,6 +571,10 @@ function buildSmoothPath(points) {
   return path;
 }
 
+function isMobileViewport() {
+  return Boolean(typeof window !== "undefined" && window.matchMedia && window.matchMedia("(max-width: 760px)").matches);
+}
+
 function visibleLabelIndexes(length, period) {
   if (period === "week") {
     return Array.from({ length }, (_, idx) => idx);
@@ -589,14 +593,13 @@ function visibleLabelIndexes(length, period) {
 }
 
 function renderEnergyChart(dashboard, period) {
-  const isMobile = typeof window !== "undefined" && window.matchMedia && window.matchMedia("(max-width: 760px)").matches;
   const intensity = Number(dashboard?.periodForecast?.intensity || 50);
   const series = buildEnergySeries(dashboard?.profile, period, intensity);
   const width = 980;
-  const height = isMobile ? 340 : 220;
-  const padX = isMobile ? 22 : 18;
-  const padY = isMobile ? 22 : 18;
-  const chartBottom = height - (isMobile ? 58 : 38);
+  const height = 238;
+  const padX = 18;
+  const padY = 18;
+  const chartBottom = height - 38;
   const stepX = (width - padX * 2) / Math.max(1, series.values.length - 1);
   const toY = (value) => chartBottom - (value / 100) * (chartBottom - padY);
   const points = series.values.map((value, index) => ({
@@ -614,7 +617,7 @@ function renderEnergyChart(dashboard, period) {
   const todayValue = todayMarkerValue(period);
 
   const todayBadgeY = todayPoint.y;
-  const todayBadgeRadius = isMobile ? (period === "year" ? 14 : 13) : period === "year" ? 11 : 10;
+  const todayBadgeRadius = period === "year" ? 11 : 10;
   return `
     <div class="energy-chart-wrap">
       <svg
@@ -634,7 +637,7 @@ function renderEnergyChart(dashboard, period) {
         ${points
           .map((point, index) => {
             const tone = index === series.peakIndex ? "peak" : index === series.dipIndex ? "dip" : "neutral";
-            const size = tone === "neutral" ? (isMobile ? 6.2 : 5.1) : isMobile ? 8.4 : 7;
+            const size = tone === "neutral" ? 5.1 : 7;
             return `<polygon class="energy-star ${tone}" points="${starPoints(point.x, point.y, size, size * 0.46)}" />`;
           })
           .join("")}
@@ -654,6 +657,37 @@ function renderEnergyChart(dashboard, period) {
         <span><i class="dot peak"></i> Peak energy</span>
         <span><i class="dot dip"></i> Energy dip</span>
       </div>
+    </div>
+  `;
+}
+
+function renderEnergyCards(dashboard, period) {
+  const intensity = Number(dashboard?.periodForecast?.intensity || 50);
+  const series = buildEnergySeries(dashboard?.profile, period, intensity);
+  const todayIndex = todayIndexForPeriod(period, series.values.length);
+  const todayLabel = series.labels[todayIndex] || "Today";
+  const todayValue = series.values[todayIndex] || 0;
+  const peakValue = series.values[series.peakIndex] || 0;
+  const dipValue = series.values[series.dipIndex] || 0;
+  const periodLabel = period === "year" ? "Year" : period === "month" ? "Month" : "Week";
+  return `
+    <div class="energy-cards">
+      <article class="energy-card">
+        <span>Today (${todayLabel})</span>
+        <strong>${todayValue}</strong>
+      </article>
+      <article class="energy-card">
+        <span>Peak</span>
+        <strong class="peak">${peakValue}</strong>
+      </article>
+      <article class="energy-card">
+        <span>Dip</span>
+        <strong class="dip">${dipValue}</strong>
+      </article>
+      <article class="energy-card">
+        <span>${periodLabel} intensity</span>
+        <strong>${intensity}/100</strong>
+      </article>
     </div>
   `;
 }
@@ -806,9 +840,10 @@ function renderFriendsBlock(dashboard, period) {
 function renderForecastSummary(dashboard, period) {
   const periodLabel = period === "year" ? "Year" : period === "month" ? "Month" : "Week";
   const intensity = Number(dashboard?.periodForecast?.intensity || 0);
+  const detailBlock = isMobileViewport() ? renderEnergyCards(dashboard, period) : renderEnergyChart(dashboard, period);
   return `
     <p><strong>${periodLabel} intensity: ${intensity}/100.</strong> ${dashboard?.periodForecast?.summary || ""}</p>
-    ${renderEnergyChart(dashboard, period)}
+    ${detailBlock}
   `;
 }
 
@@ -1164,6 +1199,28 @@ function interpretPlanetPlacement(item) {
 
 function renderPlanetPlacementTable(planets) {
   const safePlanets = Array.isArray(planets) ? planets : [];
+  if (isMobileViewport()) {
+    return `
+      <div class="placement-cards">
+        ${safePlanets
+          .map((item) => {
+            const stateLabel = item.retrograde ? "Retrograde" : "Direct";
+            return `
+              <article class="placement-card">
+                <div class="placement-chip-row">
+                  <span class="placement-chip">${planetIcon(item.key)} ${item.key}</span>
+                  <span class="placement-chip">${zodiacIcon(item.sign)} ${item.sign}</span>
+                  <span class="placement-chip">House ${Number.isFinite(item.house) ? item.house : "—"}</span>
+                  <span class="placement-chip">${stateLabel}</span>
+                </div>
+                <p>${interpretPlanetPlacement(item)}</p>
+              </article>
+            `;
+          })
+          .join("")}
+      </div>
+    `;
+  }
   return `
     <div class="table-wrap">
       <table class="placement-table">
@@ -1591,6 +1648,7 @@ async function hydrateNatal() {
     `;
     bindNatalToc();
     bindNatalAsciiLogo();
+    animateHeadingTypewriter();
     window.setTimeout(() => scrollToNatalHash({ smooth: false }), 0);
   } catch (error) {
     if (error.status === 401) {
@@ -1625,6 +1683,7 @@ async function hydrateHome() {
     app.innerHTML = renderHomeDashboard(payload.dashboard);
     bindHomePeriodHandlers();
     updateHomeDynamicBlocks(state.dashboard, state.homePeriod, { animate: false });
+    animateHeadingTypewriter();
   } catch (error) {
     if (error.status === 401) {
       await refreshAuthState();
@@ -1646,6 +1705,39 @@ function animateRouteTransition() {
   app.classList.remove("route-enter");
   void app.offsetWidth;
   app.classList.add("route-enter");
+}
+
+function animateHeadingTypewriter() {
+  const heading = app.querySelector("h1");
+  if (!(heading instanceof HTMLElement) || heading.dataset.typed === "1") {
+    return;
+  }
+  const holder = heading.children.length === 1 && heading.firstElementChild instanceof HTMLElement
+    ? heading.firstElementChild
+    : heading;
+  const fullText = String(holder.textContent || "").trim();
+  if (!fullText) {
+    return;
+  }
+  heading.dataset.typed = "1";
+  heading.classList.add("typewriter-heading", "is-typing");
+  holder.textContent = "";
+  const duration = Math.max(360, Math.min(920, fullText.length * 24));
+  const start = performance.now();
+  const tick = (now) => {
+    const progress = Math.min(1, (now - start) / duration);
+    const eased = Math.pow(progress, 1.55);
+    const nextLength = Math.max(1, Math.round(fullText.length * eased));
+    holder.textContent = fullText.slice(0, nextLength);
+    if (progress < 1) {
+      window.requestAnimationFrame(tick);
+      return;
+    }
+    window.setTimeout(() => {
+      heading.classList.remove("is-typing");
+    }, 220);
+  };
+  window.requestAnimationFrame(tick);
 }
 
 async function hydrateDaily() {
@@ -1693,6 +1785,7 @@ async function hydrateDaily() {
         </article>
       </section>
     `;
+    animateHeadingTypewriter();
   } catch (error) {
     if (error.status === 401) {
       await refreshAuthState();
@@ -2083,6 +2176,7 @@ function render() {
   const makeView = routes[path] || homeViewLoading;
   app.innerHTML = makeView();
   animateRouteTransition();
+  animateHeadingTypewriter();
   markActiveNav(path);
   renderProfileChip();
   attachRouteHandlers(path);

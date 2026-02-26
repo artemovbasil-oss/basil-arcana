@@ -230,6 +230,30 @@ h1 {
   font-size: clamp(2.3rem, 8.6vw, 6.2rem);
 }
 
+.typewriter-heading {
+  position: relative;
+}
+
+.typewriter-heading.is-typing::after {
+  content: "";
+  display: inline-block;
+  width: 0.08em;
+  height: 0.88em;
+  margin-left: 0.08em;
+  background: currentColor;
+  vertical-align: -0.08em;
+  animation: type-caret 0.7s steps(1, end) infinite;
+}
+
+@keyframes type-caret {
+  0%, 48% {
+    opacity: 1;
+  }
+  49%, 100% {
+    opacity: 0;
+  }
+}
+
 h2 {
   font-size: clamp(1.35rem, 4vw, 2.4rem);
 }
@@ -503,14 +527,15 @@ p {
 }
 
 .table-wrap {
-  overflow-x: auto;
+  overflow: hidden;
   border: 1px solid var(--line);
 }
 
 .placement-table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 920px;
+  min-width: 0;
+  table-layout: fixed;
 }
 
 .placement-table th,
@@ -546,6 +571,7 @@ p {
 .placement-table td {
   font-size: 0.92rem;
   line-height: 1.35;
+  word-break: break-word;
 }
 
 .astro-inline {
@@ -676,9 +702,10 @@ p {
 }
 
 .energy-chart {
+  display: block;
   width: 100%;
   height: auto;
-  max-height: 210px;
+  max-height: none;
   border: 1px solid var(--line);
   background: var(--surface-2);
 }
@@ -799,6 +826,41 @@ p {
   background: #d64545;
 }
 
+.energy-cards {
+  margin-top: 0.7rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.55rem;
+}
+
+.energy-card {
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  padding: 0.62rem;
+  display: grid;
+  gap: 0.22rem;
+}
+
+.energy-card span {
+  color: var(--muted);
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.energy-card strong {
+  font-size: 1.04rem;
+  letter-spacing: 0.03em;
+}
+
+.energy-card strong.peak {
+  color: #1f9d55;
+}
+
+.energy-card strong.dip {
+  color: #d64545;
+}
+
 .content-panel {
   display: grid;
   gap: 0.7rem;
@@ -882,6 +944,43 @@ p {
   margin-top: 0.6rem;
   padding-top: 0.58rem;
   border-top: 1px solid var(--line);
+}
+
+.placement-cards {
+  display: grid;
+  gap: 0.58rem;
+}
+
+.placement-card {
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  padding: 0.65rem;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.placement-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.38rem;
+}
+
+.placement-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border: 1px solid var(--line-strong);
+  padding: 0.22rem 0.42rem;
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--ink);
+  background: var(--surface);
+}
+
+.placement-card p {
+  margin: 0;
+  font-size: 0.9rem;
 }
 
 .profile-readonly {
@@ -1277,52 +1376,6 @@ body[data-theme="light"] .energy-star.neutral {
     grid-template-columns: 1fr;
   }
 
-  .placement-table {
-    min-width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-  }
-
-  .placement-table thead {
-    display: none;
-  }
-
-  .placement-table,
-  .placement-table tbody,
-  .placement-table tr,
-  .placement-table td {
-    display: block;
-    width: 100%;
-  }
-
-  .placement-table tr {
-    border-bottom: 1px solid var(--line);
-    padding: 0.52rem 0;
-  }
-
-  .placement-table td {
-    border-right: 0;
-    border-bottom: 0;
-    padding: 0.32rem 0.62rem;
-    white-space: normal;
-  }
-
-  .placement-table td::before {
-    content: attr(data-label);
-    display: block;
-    font-family: var(--font-sans);
-    font-size: 0.68rem;
-    text-transform: uppercase;
-    letter-spacing: 0.07em;
-    color: var(--muted);
-    margin-bottom: 0.14rem;
-  }
-
-  .placement-table td[data-label="Planet"],
-  .placement-table td[data-label="Sign"] {
-    white-space: nowrap;
-  }
-
   .form-grid input {
     min-height: 46px;
     width: 100%;
@@ -1345,31 +1398,15 @@ body[data-theme="light"] .energy-star.neutral {
     width: 100%;
   }
 
-  .energy-chart {
-    max-height: 400px;
+  .energy-cards {
+    grid-template-columns: 1fr;
   }
 
-  .energy-label {
-    font-size: 17px;
-    stroke-width: 2.3px;
+  .placement-chip {
+    font-size: 0.7rem;
   }
 
-  .energy-x-label {
-    font-size: 14px;
-    letter-spacing: 0.025em;
-    stroke-width: 1.9px;
-  }
-
-  .energy-today-badge {
-    transform: scale(1.16);
-  }
-
-  .energy-today-text {
-    font-size: 13px;
-    stroke-width: 1.8px;
-  }
-
-  .energy-legend {
-    font-size: 0.86rem;
+  .placement-card p {
+    font-size: 0.95rem;
   }
 }
