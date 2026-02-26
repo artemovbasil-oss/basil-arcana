@@ -347,7 +347,7 @@ p {
 
 .astro-icon {
   color: var(--ink);
-  font-size: 0.86em;
+  font-size: 0.94em;
   margin-right: 0.3em;
   vertical-align: baseline;
 }
@@ -639,7 +639,7 @@ p {
 .energy-chart {
   width: 100%;
   height: auto;
-  max-height: 180px;
+  max-height: 210px;
   border: 1px solid var(--line);
   background: var(--surface-2);
 }
@@ -647,6 +647,12 @@ p {
 .energy-axis {
   stroke: var(--line-strong);
   stroke-width: 1;
+}
+
+.energy-v-grid {
+  stroke: var(--line);
+  stroke-width: 1;
+  opacity: 0.6;
 }
 
 .energy-line {
@@ -680,6 +686,13 @@ p {
 
 .energy-label.dip {
   fill: #d64545;
+}
+
+.energy-x-label {
+  fill: var(--muted);
+  font-size: 9.4px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .energy-legend {
@@ -723,6 +736,38 @@ p {
 .content-card {
   display: grid;
   gap: 0.55rem;
+}
+
+.today-panel {
+  display: grid;
+  gap: 0.68rem;
+}
+
+.today-grid {
+  display: grid;
+  gap: 0.46rem;
+  grid-template-columns: 1fr 1fr;
+}
+
+.today-item {
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  padding: 0.5rem 0.56rem;
+  display: grid;
+  gap: 0.2rem;
+}
+
+.today-item span {
+  color: var(--muted);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-family: var(--font-sans);
+}
+
+.today-item strong {
+  font-size: 0.9rem;
+  line-height: 1.25;
 }
 
 .theme-toggle {
@@ -851,7 +896,7 @@ body[data-theme="light"] .natal-aspect-line.soft {
 }
 
 body[data-theme="light"] .energy-chart {
-  background: #fbfbfb;
+  background: transparent;
 }
 
 body[data-theme="light"] .energy-line,
