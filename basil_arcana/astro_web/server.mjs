@@ -290,6 +290,147 @@ function pushDailyHistory(dailyState, entry) {
   dailyState.history = [entry, ...history.filter((item) => item.dayKey !== entry.dayKey)].slice(0, 7);
 }
 
+function hashStringToInt(value) {
+  const source = String(value || "");
+  let hash = 0;
+  for (let i = 0; i < source.length; i += 1) {
+    hash = (hash * 31 + source.charCodeAt(i)) >>> 0;
+  }
+  return hash;
+}
+
+function buildPeriodForecast(period, profile, now) {
+  const normalizedPeriod = ["week", "month", "year"].includes(period) ? period : "week";
+  const daySeed = Number(now.toISOString().slice(0, 10).replaceAll("-", ""));
+  const sign = signFromDate(profile.birthDate);
+  const base = hashStringToInt(`${profile.name}:${sign}:${normalizedPeriod}:${daySeed}`);
+  const intensity = 45 + (base % 51);
+
+  const messageByPeriod = {
+    week: `For this week, stabilize execution tempo: one strategic move per day beats reactive bursts.`,
+    month: `For this month, build structural momentum: reduce context switching and protect recurring focus windows.`,
+    year: `For this year, your best outcomes come from long-range consistency and explicit partnership boundaries.`
+  };
+
+  return {
+    period: normalizedPeriod,
+    intensity,
+    summary: messageByPeriod[normalizedPeriod]
+  };
+}
+
+function buildDynamicCompatibility(profile, friend, dayKey) {
+  const userSign = profile ? signFromDate(profile.birthDate) : "Unknown";
+  const seed = hashStringToInt(`${friend.id || friend.friendName}:${friend.friendSign}:${dayKey}:${userSign}`);
+  const score = 52 + (seed % 47);
+  return {
+    id: friend.id,
+    friendName: friend.friendName,
+    friendSign: friend.friendSign,
+    score,
+    trend: score >= 75 ? "high" : score >= 62 ? "stable" : "fragile",
+    note:
+      score >= 75
+        ? "Easy dialogue window today. Good day for co-planning."
+        : score >= 62
+          ? "Neutral dynamic. Keep communication explicit."
+          : "Sensitivity elevated. Clarify intent early."
+  };
+}
+
+function buildNatalDetail(profile) {
+  const sun = signFromDate(profile.birthDate);
+  const moon = moonFromDate(profile.birthDate);
+  const rising = risingFromTime(profile.birthTime);
+  const seed = hashStringToInt(`${profile.name}:${profile.birthDate}:${profile.birthTime}:${profile.birthCity}`);
+
+  const houses = [
+    "Identity", "Resources", "Communication", "Home", "Creativity", "Health",
+    "Partnership", "Power", "Beliefs", "Career", "Community", "Inner World"
+  ];
+  const planets = [
+    { key: "Sun", sign: sun, house: ((seed % 12) + 1) },
+    { key: "Moon", sign: moon, house: (((seed + 5) % 12) + 1) },
+    { key: "Mercury", sign: [sun, moon, rising][seed % 3], house: (((seed + 2) % 12) + 1) },
+    { key: "Venus", sign: [moon, rising, sun][(seed + 1) % 3], house: (((seed + 7) % 12) + 1) },
+    { key: "Mars", sign: rising, house: (((seed + 9) % 12) + 1) },
+    { key: "Jupiter", sign: sun, house: (((seed + 11) % 12) + 1) },
+    { key: "Saturn", sign: moon, house: (((seed + 3) % 12) + 1) }
+  ];
+
+  const dominantHouse = planets[0]?.house || 1;
+  const houseTheme = houses[(dominantHouse - 1 + 12) % 12];
+
+  return {
+    core: { sun, moon, rising },
+    summary: `${profile.name}, your chart emphasizes ${sun} identity with ${moon} emotional tone and ${rising} outward style.`,
+    blocks: {
+      strength: `${sun} supports long-range identity coherence. You can sustain direction through pressure.`,
+      blindSpot: `${moon} can overreact to relational uncertainty when signals are mixed.`,
+      action: `Use ${rising} visibility intentionally: one clear priority and one explicit boundary today.`
+    },
+    aspects: [
+      "Sun trine Moon: internal alignment can become execution speed.",
+      "Mercury square Mars: speak slower before commitment.",
+      "Venus sextile Saturn: durable bonds grow through steady cadence.",
+      "Jupiter opposition Neptune: verify optimism with measurable steps."
+    ],
+    planets,
+    housesFocus: [
+      { house: dominantHouse, theme: houseTheme, meaning: `Current life pressure concentrates around ${houseTheme.toLowerCase()}.` },
+      { house: ((dominantHouse + 3 - 1) % 12) + 1, theme: houses[((dominantHouse + 3 - 1) % 12)], meaning: "Growth comes through deliberate structural discipline." },
+      { house: ((dominantHouse + 7 - 1) % 12) + 1, theme: houses[((dominantHouse + 7 - 1) % 12)], meaning: "Relationship clarity amplifies momentum." }
+    ],
+    growthPlan: [
+      "Define one non-negotiable boundary for the week.",
+      "Convert one emotional reaction into a measurable action.",
+      "Review one long-term commitment every Sunday."
+    ]
+  };
+}
+
+function buildDashboardPayload(sessionData, period = "week") {
+  const profile = resolveSessionProfile(null, sessionData);
+  if (!profile) {
+    return null;
+  }
+
+  const now = new Date();
+  const dayKey = now.toISOString().slice(0, 10);
+  const dateLabel = now.toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric"
+  });
+  const weekday = now.toLocaleDateString("en-US", { weekday: "long" });
+
+  const natalCore = {
+    sun: signFromDate(profile.birthDate),
+    moon: moonFromDate(profile.birthDate),
+    rising: risingFromTime(profile.birthTime)
+  };
+
+  const daily = {
+    dateLabel,
+    focus: "Prioritize one conversation that prevents future misunderstanding.",
+    advice: "Before noon, send one clear note: goal, boundary, and next checkpoint.",
+    horoscopeToday: `${profile.name}, ${weekday} rewards disciplined pacing and clean boundaries in communication.`
+  };
+
+  const periodForecast = buildPeriodForecast(period, profile, now);
+  const friendsDynamic = (sessionData.friends || []).map((friend) =>
+    buildDynamicCompatibility(profile, friend, dayKey)
+  );
+
+  return {
+    profile,
+    natalCore,
+    daily,
+    periodForecast,
+    friendsDynamic
+  };
+}
+
 function isAuthenticated(sessionData) {
   return Boolean(sessionData?.auth?.provider === "telegram" && sessionData?.auth?.telegramUserId);
 }
@@ -464,7 +605,10 @@ const contracts = {
       core: { sun: "string", moon: "string", rising: "string" },
       summary: "string",
       blocks: { strength: "string", blindSpot: "string", action: "string" },
-      aspects: ["string"]
+      aspects: ["string"],
+      planets: [{ key: "string", sign: "string", house: "number" }],
+      housesFocus: [{ house: "number", theme: "string", meaning: "string" }],
+      growthPlan: ["string"]
     }
   },
   daily_insight: {
@@ -492,6 +636,34 @@ const contracts = {
       score: "number",
       highlights: ["string"],
       advice: "string"
+    }
+  },
+  dashboard: {
+    get: "GET /api/dashboard?period=week|month|year",
+    response: {
+      profile: "profile",
+      natalCore: { sun: "string", moon: "string", rising: "string" },
+      daily: {
+        dateLabel: "string",
+        focus: "string",
+        advice: "string",
+        horoscopeToday: "string"
+      },
+      periodForecast: {
+        period: "week|month|year",
+        intensity: "number",
+        summary: "string"
+      },
+      friendsDynamic: [
+        {
+          id: "string",
+          friendName: "string",
+          friendSign: "string",
+          score: "number",
+          trend: "high|stable|fragile",
+          note: "string"
+        }
+      ]
     }
   }
 };
@@ -631,25 +803,7 @@ app.post("/api/natal-report", requireAuth, (req, res) => {
     return res.status(400).json({ error: "invalid_profile", message: "profile is required" });
   }
 
-  const sun = signFromDate(profile.birthDate);
-  const moon = moonFromDate(profile.birthDate);
-  const rising = risingFromTime(profile.birthTime);
-
-  return res.json({
-    core: { sun, moon, rising },
-    summary: `${profile.name}, your chart emphasizes ${sun} identity with ${moon} emotional tone and ${rising} outward style.`,
-    blocks: {
-      strength: `${sun} supports long-range identity coherence. You can sustain direction through pressure.`,
-      blindSpot: `${moon} can overreact to relational uncertainty when signals are mixed.`,
-      action: `Use ${rising} visibility intentionally: one clear priority and one explicit boundary today.`
-    },
-    aspects: [
-      "Sun trine Moon: internal alignment can become execution speed.",
-      "Mercury square Mars: speak slower before commitment.",
-      "Venus sextile Saturn: durable bonds grow through steady cadence.",
-      "Jupiter opposition Neptune: verify optimism with measurable steps."
-    ]
-  });
+  return res.json(buildNatalDetail(profile));
 });
 
 app.post("/api/daily-insight", requireAuth, async (req, res) => {
@@ -724,6 +878,16 @@ app.post("/api/compatibility-report", requireAuth, (req, res) => {
     ],
     advice: `With ${friendName}, set one shared weekly ritual and one explicit repair rule after friction.`
   });
+});
+
+app.get("/api/dashboard", requireAuth, (req, res) => {
+  const requestedPeriod = String(req.query?.period || "week").trim().toLowerCase();
+  const period = ["week", "month", "year"].includes(requestedPeriod) ? requestedPeriod : "week";
+  const payload = buildDashboardPayload(req.sessionData, period);
+  if (!payload) {
+    return res.status(400).json({ error: "profile_required", message: "Complete profile first." });
+  }
+  return res.json({ ok: true, dashboard: payload });
 });
 
 app.get("*", (_req, res) => {

@@ -39,6 +39,7 @@ Open:
 - `GET /api/friends`
 - `POST /api/friends`
 - `GET /api/contracts`
+- `GET /api/dashboard?period=week|month|year`
 - `POST /api/natal-report`
 - `POST /api/daily-insight`
 - `POST /api/compatibility-report`

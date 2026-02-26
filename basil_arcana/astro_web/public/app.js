@@ -10,7 +10,9 @@ const state = {
   telegramBotUsername: null,
   profile: null,
   profileReady: false,
-  friends: []
+  friends: [],
+  dashboard: null,
+  homePeriod: "week"
 };
 
 menuButton.addEventListener("click", () => {
@@ -69,50 +71,82 @@ function shell({ eyebrow, title, intro, primaryCta, secondaryCta, rightPanel, bo
   `;
 }
 
-function homeView() {
-  const profileReady = hasProfile();
-  return shell({
-    eyebrow: "Astronautica",
-    title: "Natal intelligence<br/>daily engagement<br/>friend chemistry",
-    intro:
-      "A minimal operating layer for natal precision, daily rhythm and relationship context.",
-    primaryCta: {
-      href: profileReady ? "/natal-chart" : "/onboarding",
-      label: profileReady ? "Open My Natal" : "Start Onboarding"
-    },
-    secondaryCta: { href: "/daily", label: "Open Daily" },
-    rightPanel: `
-      <h2>Session</h2>
-      <div class="metric-grid">
-        <div class="metric"><strong>${state.authenticated ? "Auth" : "Guest"}</strong><p>Access</p></div>
-        <div class="metric"><strong>${profileReady ? "Ready" : "Missing"}</strong><p>Birth Profile</p></div>
-        <div class="metric"><strong>${state.friends.length}</strong><p>Saved Friends</p></div>
-      </div>
-      <ul class="bullet-list">
-        <li>Telegram auth gate is enabled when bot token is configured</li>
-        <li>Profile and friends persisted via session store</li>
-        <li>Ready for Google auth as second provider</li>
-      </ul>
-    `,
-    body: `
-      <section class="section">
-        <div class="feature-grid">
-          <article class="feature-card">
-            <h3>1. Onboarding</h3>
-            <p>Name + birth data + city + timezone quality checks.</p>
-          </article>
-          <article class="feature-card">
-            <h3>2. Natal Report</h3>
-            <p>Strengths, blind spots, and practical direction in one screen.</p>
-          </article>
-          <article class="feature-card">
-            <h3>3. Daily + Friends</h3>
-            <p>Recurring daily advice and quick compatibility pulses.</p>
-          </article>
+function homeViewLoading() {
+  return `
+    <section class="section">
+      <article class="card">
+        <span class="eyebrow">Dashboard</span>
+        <h1>Astronautica</h1>
+        <p id="homeStatus">Loading personal dashboard...</p>
+      </article>
+    </section>
+  `;
+}
+
+function renderHomeDashboard(dashboard) {
+  const period = dashboard.periodForecast?.period || state.homePeriod;
+  const periodLabel = period === "year" ? "Year" : period === "month" ? "Month" : "Week";
+  const intensity = Number(dashboard.periodForecast?.intensity || 0);
+  const dynamicFriends = Array.isArray(dashboard.friendsDynamic) ? dashboard.friendsDynamic : [];
+  const friendsBlock = dynamicFriends.length
+    ? dynamicFriends
+        .map(
+          (friend) => `
+          <div class="friend-row">
+            <div>
+              <strong>${friend.friendName}</strong>
+              <p>${friend.friendSign} · ${friend.trend}</p>
+            </div>
+            <div class="friend-score">
+              <strong>${friend.score}</strong>
+              <p>${friend.note}</p>
+            </div>
+          </div>
+        `
+        )
+        .join("")
+    : `<p class="muted">No friends yet. Add friends to unlock dynamic compatibility tracking.</p>`;
+
+  return `
+    <section class="hero">
+      <article class="card">
+        <span class="eyebrow">User Dashboard</span>
+        <h1>${dashboard.profile.name}</h1>
+        <p>${dashboard.natalCore.sun} sun, ${dashboard.natalCore.moon} moon, ${dashboard.natalCore.rising} rising.</p>
+        <div class="hero-actions">
+          <a class="btn primary" href="/natal-chart">Natal Profile</a>
+          <a class="btn ghost" href="/onboarding">Edit Birth Data</a>
         </div>
-      </section>
-    `
-  });
+      </article>
+      <aside class="card">
+        <h2>${dashboard.daily.dateLabel}</h2>
+        <ul class="bullet-list">
+          <li>${dashboard.daily.focus}</li>
+          <li>${dashboard.daily.advice}</li>
+          <li>${dashboard.daily.horoscopeToday}</li>
+        </ul>
+      </aside>
+    </section>
+    <section class="section">
+      <article class="card">
+        <div class="dashboard-head">
+          <h2>Forecast</h2>
+          <div class="period-switch">
+            <button class="btn ghost js-period ${period === "week" ? "is-active" : ""}" data-period="week" type="button">Week</button>
+            <button class="btn ghost js-period ${period === "month" ? "is-active" : ""}" data-period="month" type="button">Month</button>
+            <button class="btn ghost js-period ${period === "year" ? "is-active" : ""}" data-period="year" type="button">Year</button>
+          </div>
+        </div>
+        <p><strong>${periodLabel} intensity: ${intensity}/100.</strong> ${dashboard.periodForecast.summary}</p>
+      </article>
+    </section>
+    <section class="section">
+      <article class="card">
+        <h2>Friends dynamic compatibility</h2>
+        <div class="friends-list">${friendsBlock}</div>
+      </article>
+    </section>
+  `;
 }
 
 function loginView() {
@@ -289,7 +323,7 @@ function faqView() {
 }
 
 const routes = {
-  "/": homeView,
+  "/": homeViewLoading,
   "/login": loginView,
   "/onboarding": onboardingView,
   "/natal-chart": natalViewLoading,
@@ -360,7 +394,29 @@ async function hydrateNatal() {
       </section>
       <section class="section">
         <article class="route-card">
-          <h2>Top aspects</h2>
+          <h2>Planet placements</h2>
+          <ul class="bullet-list">${(data.planets || [])
+            .map((item) => `<li>${item.key}: ${item.sign}, house ${item.house}</li>`)
+            .join("")}</ul>
+        </article>
+      </section>
+      <section class="section">
+        <article class="route-card">
+          <h2>House focus</h2>
+          <ul class="bullet-list">${(data.housesFocus || [])
+            .map((item) => `<li>House ${item.house} (${item.theme}): ${item.meaning}</li>`)
+            .join("")}</ul>
+        </article>
+      </section>
+      <section class="section">
+        <article class="route-card">
+          <h2>Growth plan</h2>
+          <ul class="bullet-list">${(data.growthPlan || []).map((item) => `<li>${item}</li>`).join("")}</ul>
+        </article>
+      </section>
+      <section class="section">
+        <article class="route-card">
+          <h2>Major aspects</h2>
           <ul class="bullet-list">${data.aspects.map((item) => `<li>${item}</li>`).join("")}</ul>
         </article>
       </section>
@@ -374,6 +430,53 @@ async function hydrateNatal() {
     const status = document.getElementById("natalStatus");
     if (status) {
       status.textContent = `Failed to load natal report: ${error.message}`;
+    }
+  }
+}
+
+async function hydrateHome() {
+  if (!hasProfile()) {
+    app.innerHTML = shell({
+      eyebrow: "Dashboard",
+      title: "Complete onboarding first",
+      intro: "The dashboard needs birth profile data to compute natal core and forecasts.",
+      primaryCta: { href: "/onboarding", label: "Open Onboarding" },
+      secondaryCta: { href: "/login", label: "Account" },
+      rightPanel: "<h2>Next</h2><p>After onboarding, home becomes your all-in-one astrology dashboard.</p>",
+      body: ""
+    });
+    return;
+  }
+
+  try {
+    const payload = await fetchJson(`/api/dashboard?period=${encodeURIComponent(state.homePeriod)}`);
+    state.dashboard = payload.dashboard;
+    app.innerHTML = renderHomeDashboard(payload.dashboard);
+    const periodButtons = app.querySelectorAll(".js-period");
+    periodButtons.forEach((button) => {
+      button.addEventListener("click", async () => {
+        const nextPeriod = button.getAttribute("data-period");
+        if (!nextPeriod || nextPeriod === state.homePeriod) {
+          return;
+        }
+        state.homePeriod = nextPeriod;
+        app.innerHTML = homeViewLoading();
+        await hydrateHome();
+      });
+    });
+  } catch (error) {
+    if (error.status === 401) {
+      await refreshAuthState();
+      navigate("/login", { replace: true });
+      return;
+    }
+    if (error.payload?.error === "profile_required") {
+      navigate("/onboarding", { replace: true });
+      return;
+    }
+    const status = document.getElementById("homeStatus");
+    if (status) {
+      status.textContent = `Failed to load dashboard: ${error.message}`;
     }
   }
 }
@@ -650,6 +753,9 @@ function render() {
   }
   if (path === "/daily") {
     hydrateDaily();
+  }
+  if (path === "/") {
+    hydrateHome();
   }
 }
 

@@ -183,6 +183,12 @@ p {
   color: #e6e6e6;
 }
 
+.btn.is-active {
+  background: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+}
+
 .metric-grid {
   margin-top: 1rem;
   display: grid;
@@ -298,6 +304,19 @@ p {
   gap: 0.55rem;
 }
 
+.dashboard-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 0.8rem;
+}
+
+.period-switch {
+  display: flex;
+  gap: 0.35rem;
+}
+
 .friend-row {
   padding: 0.72rem;
   display: flex;
@@ -316,6 +335,16 @@ p {
 .friend-row p {
   margin-top: 0.12rem;
   font-size: 0.82rem;
+}
+
+.friend-score {
+  text-align: right;
+  max-width: 260px;
+}
+
+.friend-score strong {
+  display: block;
+  font-size: 1.1rem;
 }
 
 .muted {
