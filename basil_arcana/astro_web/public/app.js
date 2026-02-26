@@ -1740,10 +1740,11 @@ function openShareModal(payload) {
     event.preventDefault();
     const contact = String(new FormData(form).get("contact") || "").trim();
     const subject = "Compatibility check from Astronautica";
+    const shareUrl = `https://app.basilarcana.com/share.html?score=${encodeURIComponent(String(payload.score))}&sign=${encodeURIComponent(String(payload.friendSign || ""))}`;
     const summary = `I checked our compatibility on app.basilarcana.com: ${payload.score}%.`;
     const reasonText = `Why this score: ${payload.reason}.`;
-    const linkText = "View details: https://app.basilarcana.com";
-    const body = `${summary}\n${reasonText}\n\n${linkText}`;
+    const linkText = `View details: ${shareUrl}`;
+    const body = `${shareUrl}\n\n${summary}\n${reasonText}\n\n${linkText}`;
     if (looksLikeEmail(contact)) {
       window.location.href = `mailto:${encodeURIComponent(contact)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
       closeShareModal();
@@ -1754,7 +1755,7 @@ function openShareModal(payload) {
       alert("Please enter a valid email or Telegram username.");
       return;
     }
-    window.open(`https://t.me/${encodeURIComponent(handle)}?text=${encodeURIComponent(`${subject}\n\n${body}`)}`, "_blank", "noopener,noreferrer");
+    window.open(`https://t.me/${encodeURIComponent(handle)}?text=${encodeURIComponent(`${shareUrl}\n\n${subject}\n\n${summary}\n${reasonText}`)}`, "_blank", "noopener,noreferrer");
     closeShareModal();
   });
 }
