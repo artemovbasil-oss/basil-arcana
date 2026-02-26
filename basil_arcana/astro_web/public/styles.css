@@ -24,6 +24,10 @@ body {
   font-family: var(--font-sans);
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body[data-theme="light"] {
   --bg: #f4f4f4;
   --surface: #ffffff;
@@ -800,6 +804,61 @@ p {
   gap: 0.7rem;
 }
 
+.premium-panel {
+  position: relative;
+  overflow: hidden;
+}
+
+.premium-kicker {
+  font-size: 0.64rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  border-left: 1px solid var(--line-strong);
+  padding-left: 0.45rem;
+}
+
+.dropcap::first-letter {
+  float: left;
+  font-family: "Times New Roman", Georgia, serif;
+  font-size: 2.2em;
+  line-height: 0.85;
+  margin-right: 0.09em;
+  margin-top: 0.08em;
+  color: var(--ink);
+}
+
+.premium-quote {
+  margin: 0.3rem 0;
+  border-left: 2px solid var(--line-strong);
+  padding: 0.45rem 0.65rem;
+  color: color-mix(in srgb, var(--muted) 75%, var(--ink) 25%);
+  font-size: 0.9rem;
+  line-height: 1.45;
+  font-style: italic;
+  background: color-mix(in srgb, var(--surface-2) 78%, transparent 22%);
+}
+
+.premium-steps {
+  margin: 0.25rem 0 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.5rem;
+  color: var(--muted);
+}
+
+.premium-steps li {
+  line-height: 1.42;
+}
+
+.placement-notes {
+  display: grid;
+  gap: 0.28rem;
+  margin-top: 0.6rem;
+  padding-top: 0.58rem;
+  border-top: 1px solid var(--line);
+}
+
 .editorial-grid {
   display: grid;
   gap: 0.8rem;
@@ -879,6 +938,10 @@ p {
   min-width: 0;
 }
 
+.natal-main .section {
+  scroll-margin-top: 92px;
+}
+
 .natal-toc {
   display: block;
   position: sticky;
@@ -941,6 +1004,25 @@ p {
   fill: transparent;
   stroke: var(--line);
   stroke-width: 1.2;
+}
+
+.natal-center-core {
+  fill: color-mix(in srgb, var(--surface-2) 85%, transparent 15%);
+  stroke: var(--line);
+  stroke-width: 1;
+}
+
+.natal-ascii-logo {
+  pointer-events: none;
+}
+
+.ascii-char {
+  font-family: "Times New Roman", Georgia, serif;
+  font-style: italic;
+  font-size: 15px;
+  fill: color-mix(in srgb, var(--ink) 86%, var(--muted) 14%);
+  transition: transform 0.11s ease-out;
+  user-select: none;
 }
 
 .natal-house-line {

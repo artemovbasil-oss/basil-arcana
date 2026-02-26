@@ -319,6 +319,28 @@ function renderNatalChartSvg(data) {
     Neptune: "Ideals, intuition and ambiguity.",
     Pluto: "Power, transformation and deep renewal."
   };
+  const asciiLines = ["   .a.   ", "  /aaa\\  ", " (aa aa) ", "  \\aaa/  ", "   `a`   "];
+  const asciiStepX = 11.5;
+  const asciiStepY = 16;
+  const maxLen = Math.max(...asciiLines.map((line) => line.length));
+  const asciiStartX = center - ((maxLen - 1) * asciiStepX) / 2;
+  const asciiStartY = center - ((asciiLines.length - 1) * asciiStepY) / 2 + 2;
+  const asciiGlyphs = asciiLines
+    .map((line, row) =>
+      line
+        .split("")
+        .map((char, col) => {
+          if (char === " ") {
+            return "";
+          }
+          const x = asciiStartX + col * asciiStepX;
+          const y = asciiStartY + row * asciiStepY;
+          const drift = ((row + 1) * (col + 2)) % 5;
+          return `<text class="ascii-char" data-drift="${drift}" x="${x}" y="${y}" text-anchor="middle" dominant-baseline="middle">${char}</text>`;
+        })
+        .join("")
+    )
+    .join("");
 
   return `
     <div class="natal-graphic">
@@ -362,6 +384,11 @@ function renderNatalChartSvg(data) {
           })
           .join("")}
 
+        <circle class="natal-center-core" cx="${center}" cy="${center}" r="56" />
+        <g class="natal-ascii-logo" data-center-x="${center}" data-center-y="${center}">
+          ${asciiGlyphs}
+        </g>
+
         ${planets
           .map((planet) => {
             const guide = pointOnCircle(center, center, aspectRadius + 8, planet.longitude);
@@ -383,6 +410,43 @@ function renderNatalChartSvg(data) {
       <p class="muted">Outer ring: signs. Inner wheel: houses. Chords: major aspects. Markers: planetary placements.</p>
     </div>
   `;
+}
+
+function bindNatalAsciiLogo() {
+  const svg = document.querySelector(".natal-chart-svg");
+  if (!svg) {
+    return;
+  }
+  const logo = svg.querySelector(".natal-ascii-logo");
+  const chars = Array.from(svg.querySelectorAll(".ascii-char"));
+  if (!logo || !chars.length) {
+    return;
+  }
+  const centerX = Number(logo.getAttribute("data-center-x")) || 380;
+  const centerY = Number(logo.getAttribute("data-center-y")) || 380;
+  const move = (event) => {
+    const rect = svg.getBoundingClientRect();
+    const viewBox = svg.viewBox.baseVal;
+    const ratioX = viewBox && rect.width ? viewBox.width / rect.width : 1;
+    const ratioY = viewBox && rect.height ? viewBox.height / rect.height : 1;
+    const mouseX = (event.clientX - rect.left) * ratioX;
+    const mouseY = (event.clientY - rect.top) * ratioY;
+    const normX = (mouseX - centerX) / 180;
+    const normY = (mouseY - centerY) / 180;
+    chars.forEach((char, index) => {
+      const drift = Number(char.getAttribute("data-drift")) || 0;
+      const amp = 0.55 + drift * 0.22;
+      const phase = Math.sin((index + 1) * 0.7);
+      const dx = Math.max(-2, Math.min(2, normX * amp + phase * 0.12));
+      const dy = Math.max(-2, Math.min(2, normY * amp - phase * 0.1));
+      char.setAttribute("transform", `translate(${dx.toFixed(2)}, ${dy.toFixed(2)})`);
+    });
+  };
+  const reset = () => {
+    chars.forEach((char) => char.removeAttribute("transform"));
+  };
+  svg.addEventListener("mousemove", move);
+  svg.addEventListener("mouseleave", reset);
 }
 
 function shell({ eyebrow, title, intro, primaryCta, secondaryCta, rightPanel, body }) {
@@ -1080,54 +1144,70 @@ function buildNatalEditorial(profile, report) {
   const housesFocus = Array.isArray(report?.housesFocus) ? report.housesFocus : [];
   const aspects = Array.isArray(report?.aspects) ? report.aspects : [];
   const actionPlan = Array.isArray(report?.growthPlan) ? report.growthPlan : [];
+  const planets = Array.isArray(report?.planets) ? report.planets : [];
+  const topPlanets = planets.slice(0, 3).map((item) => `${item.key} in ${item.sign}`);
+  const voiceName = (profile?.name || "User").split(/\s+/).filter(Boolean)[0] || "User";
+  const framingQuote = `${sun} drives intent, ${moon} regulates reaction, ${rising} shapes first impression.`;
   return `
     <section class="section" id="natal-framework">
-      <article class="route-card content-panel">
+      <article class="route-card content-panel premium-panel">
+        <span class="premium-kicker">Context Layer</span>
         <h2>Interpretation Framework</h2>
-        <p><strong>Identity axis:</strong> ${zodiacIcon(sun)} ${sun} defines visible motivation, ${zodiacIcon(moon)} ${moon} defines emotional processing, and ${zodiacIcon(rising)} ${rising} defines behavioral presentation under pressure.</p>
-        <p>This reading is designed for practical planning. The goal is not prediction, but better timing, better communication, and better personal decisions.</p>
+        <p class="dropcap"><strong>Identity axis:</strong> ${zodiacIcon(sun)} ${sun} defines visible motivation, ${zodiacIcon(moon)} ${moon} defines emotional processing, and ${zodiacIcon(rising)} ${rising} defines behavioral presentation under pressure. In practical terms, this is your default operating model in work, relationships and recovery cycles.</p>
+        <p>This reading is structured as decision support, not fatalism. It maps repeatable tendencies so ${voiceName} can plan timing, communication style and energy allocation with higher precision.</p>
+        <blockquote class="premium-quote">“${framingQuote}”</blockquote>
+        <p class="muted">Signal stack now active: ${topPlanets.join(" · ") || "Core planetary emphasis unavailable"}.</p>
       </article>
     </section>
     <section class="section" id="natal-focus">
       <div class="editorial-grid">
-        <article class="feature-card content-card">
+        <article class="feature-card content-card premium-panel">
+          <span class="premium-kicker">Domain I</span>
           <h3>${uiIcon("briefcase")} Work Strategy</h3>
           <p>${life.career || "Career interpretation appears here based on chart geometry and planetary focus."}</p>
-          <p>Execution advice: define a single weekly strategic objective and protect two uninterrupted deep-work windows.</p>
+          <p>Execution protocol: define one strategic objective per week, lock two deep-work windows, and use low-friction tasks only in low-energy transits.</p>
         </article>
-        <article class="feature-card content-card">
+        <article class="feature-card content-card premium-panel">
+          <span class="premium-kicker">Domain II</span>
           <h3>${uiIcon("group")} Relationship Dynamics</h3>
           <p>${life.relationships || "Relational interpretation appears here from Venus, Moon and house emphasis."}</p>
-          <p>Communication advice: state expectations early, then mirror back agreements in concrete language.</p>
+          <p>Communication protocol: state expectations early, mirror agreements in concrete language, and separate “emotion” from “request” in tense conversations.</p>
         </article>
-        <article class="feature-card content-card">
+        <article class="feature-card content-card premium-panel">
+          <span class="premium-kicker">Domain III</span>
           <h3>${uiIcon("brain")} Decision Hygiene</h3>
-          <p>When emotional load is high, convert interpretation into short measurable actions. This reduces drift and stabilizes outcomes.</p>
-          <p>Use 24-hour review cycles for decisions that impact money, commitment, and reputation.</p>
+          <p>When emotional load is high, convert interpretation into measurable micro-actions. This reduces narrative drift and stabilizes outcomes.</p>
+          <p>Use a 24-hour review cycle for decisions impacting money, commitment and reputation; delay irreversible actions until signal is stable twice in a row.</p>
         </article>
       </div>
     </section>
     <section class="section" id="natal-houses">
-      <article class="route-card content-panel">
+      <article class="route-card content-panel premium-panel">
+        <span class="premium-kicker">Architecture</span>
         <h2>House Dynamics</h2>
+        <p class="dropcap">House emphasis shows where natal potential turns into measurable events. Repetition across these houses usually correlates with your strongest themes this season: where effort compounds, where conflict repeats, and where growth is easiest to operationalize.</p>
         <div class="chip-grid">
           ${housesFocus
             .map((item) => `<span class="astro-chip">House ${item.house}: ${item.meaning}</span>`)
             .join("")}
         </div>
+        <blockquote class="premium-quote">Use high-focus blocks in emphasized houses, and reserve admin work for low-signal windows.</blockquote>
       </article>
     </section>
     <section class="section" id="natal-aspects">
-      <article class="route-card content-panel">
+      <article class="route-card content-panel premium-panel">
+        <span class="premium-kicker">Geometry</span>
         <h2>Aspect Dynamics</h2>
+        <p>Aspects describe internal coordination between drives. Harmonious links make execution cheaper; frictional links require conscious sequencing and recovery hygiene.</p>
         <ul class="bullet-list">${aspects.slice(0, 8).map((item) => `<li>${item}</li>`).join("")}</ul>
       </article>
     </section>
     <section class="section" id="natal-plan">
-      <article class="route-card content-panel">
+      <article class="route-card content-panel premium-panel">
+        <span class="premium-kicker">Execution</span>
         <h2>Action Plan</h2>
-        <ul class="bullet-list">${actionPlan.map((item) => `<li>${item}</li>`).join("")}</ul>
-        <p><strong>Profile context:</strong> ${profile?.name || "User"} can use this plan as a weekly review ritual with measurable checkpoints.</p>
+        <ol class="premium-steps">${actionPlan.map((item) => `<li>${item}</li>`).join("")}</ol>
+        <p><strong>Profile context:</strong> ${profile?.name || "User"} can run this plan as a weekly ritual with measurable checkpoints and a short post-week retrospective.</p>
       </article>
     </section>
   `;
@@ -1197,9 +1277,17 @@ function bindNatalToc() {
   );
   sections.forEach((section) => observer.observe(section.element));
   links.forEach((link) => {
-    link.addEventListener("click", () => {
+    link.addEventListener("click", (event) => {
+      event.preventDefault();
       const id = link.getAttribute("data-target");
       if (id) {
+        const target = document.getElementById(id);
+        if (target) {
+          target.scrollIntoView({ behavior: "smooth", block: "start" });
+          if (history.replaceState) {
+            history.replaceState(null, "", `#${id}`);
+          }
+        }
         setActive(id);
       }
     });
@@ -1366,10 +1454,16 @@ async function hydrateNatal() {
             </article>
           </section>
           <section class="section" id="natal-placements">
-            <article class="route-card content-panel">
+            <article class="route-card content-panel premium-panel">
+              <span class="premium-kicker">Data Table + Narrative</span>
               <h2>Planet Placement Matrix</h2>
-              <p>${data.summary}</p>
+              <p class="dropcap">${data.summary}</p>
+              <blockquote class="premium-quote">Planetary placements are not labels. They are a timing and behavior map for better choices under real constraints.</blockquote>
               ${placementsTable}
+              <div class="placement-notes">
+                <p><strong>Reading method:</strong> start with personal planets (Sun, Moon, Mercury, Venus, Mars), then evaluate outer-planet pressure only where it repeats in key houses.</p>
+                <p><strong>Practical use:</strong> translate each placement into a weekly behavior experiment and track outcomes, not mood, for two cycles.</p>
+              </div>
             </article>
           </section>
           <section class="section" id="natal-core-domains">
@@ -1406,6 +1500,7 @@ async function hydrateNatal() {
       </div>
     `;
     bindNatalToc();
+    bindNatalAsciiLogo();
   } catch (error) {
     if (error.status === 401) {
       await refreshAuthState();
