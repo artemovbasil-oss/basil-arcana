@@ -293,6 +293,32 @@ function renderNatalChartSvg(data) {
 
   const aspects = buildAspectGeometry(planets);
   const houses = Array.from({ length: 12 }, (_, idx) => idx + 1);
+  const signHints = {
+    Aries: "Initiation, speed and direct action.",
+    Taurus: "Stability, material grounding and consistency.",
+    Gemini: "Learning, exchange and adaptability.",
+    Cancer: "Emotional security and care patterns.",
+    Leo: "Visibility, confidence and creative output.",
+    Virgo: "Precision, optimization and craft.",
+    Libra: "Balance, diplomacy and partnership logic.",
+    Scorpio: "Intensity, depth and strategic focus.",
+    Sagittarius: "Exploration, meaning and expansion.",
+    Capricorn: "Structure, discipline and long-term goals.",
+    Aquarius: "Systems thinking, innovation and autonomy.",
+    Pisces: "Imagination, empathy and symbolic thinking."
+  };
+  const planetHints = {
+    Sun: "Core identity, will and conscious direction.",
+    Moon: "Emotional regulation, needs and instincts.",
+    Mercury: "Thinking process and communication style.",
+    Venus: "Attraction, values and relationship style.",
+    Mars: "Action, drive and conflict response.",
+    Jupiter: "Growth, confidence and opportunity.",
+    Saturn: "Limits, duty and long-term mastery.",
+    Uranus: "Change, originality and disruption.",
+    Neptune: "Ideals, intuition and ambiguity.",
+    Pluto: "Power, transformation and deep renewal."
+  };
 
   return `
     <div class="natal-graphic">
@@ -318,7 +344,13 @@ function renderNatalChartSvg(data) {
           .map((sign, index) => {
             const degree = index * 30 + 15;
             const signPoint = pointOnCircle(center, center, signRadius, degree);
-            return `<text class="natal-sign-label" x="${signPoint.x}" y="${signPoint.y}" text-anchor="middle" dominant-baseline="middle">${sign.slice(0, 3).toUpperCase()}</text>`;
+            const hint = signHints[sign] || "Core archetypal zodiac pattern.";
+            return `
+              <text class="natal-sign-label" x="${signPoint.x}" y="${signPoint.y}" text-anchor="middle" dominant-baseline="middle">
+                <title>${sign}: ${hint}</title>
+                ${sign.slice(0, 3).toUpperCase()}
+              </text>
+            `;
           })
           .join("")}
 
@@ -334,10 +366,16 @@ function renderNatalChartSvg(data) {
           .map((planet) => {
             const guide = pointOnCircle(center, center, aspectRadius + 8, planet.longitude);
             const symbol = String(planet.key || "").slice(0, 2).toUpperCase();
+            const hint = planetHints[planet.key] || `${planet.key}: important psychological and behavioral theme.`;
             return `
               <line class="natal-planet-line" x1="${guide.x}" y1="${guide.y}" x2="${planet.dot.x}" y2="${planet.dot.y}" />
-              <circle class="natal-planet-dot" cx="${planet.dot.x}" cy="${planet.dot.y}" r="4.2" />
-              <text class="natal-planet-label" x="${planet.label.x}" y="${planet.label.y}" text-anchor="middle" dominant-baseline="middle">${symbol}</text>
+              <circle class="natal-planet-dot" cx="${planet.dot.x}" cy="${planet.dot.y}" r="4.2">
+                <title>${hint}</title>
+              </circle>
+              <text class="natal-planet-label" x="${planet.label.x}" y="${planet.label.y}" text-anchor="middle" dominant-baseline="middle">
+                <title>${hint}</title>
+                ${symbol}
+              </text>
             `;
           })
           .join("")}
@@ -483,13 +521,23 @@ function renderEnergyChart(dashboard, period) {
   const todayPoint = points[todayIndex];
   const todayValue = todayMarkerValue(period);
 
+  const todayBadgeY = chartBottom + 13;
+  const todayBadgeRadius = period === "year" ? 9 : 8;
   return `
     <div class="energy-chart-wrap">
-      <svg class="energy-chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="Energy trend chart">
+      <svg
+        class="energy-chart"
+        viewBox="0 0 ${width} ${height}"
+        role="img"
+        aria-label="Energy trend chart"
+        data-min-x="${padX}"
+        data-max-x="${width - padX}"
+      >
         <line class="energy-axis" x1="${padX}" y1="${chartBottom}" x2="${width - padX}" y2="${chartBottom}" />
         ${points
           .map((point) => `<line class="energy-v-grid" x1="${point.x}" y1="${padY}" x2="${point.x}" y2="${chartBottom}" />`)
           .join("")}
+        <line class="energy-hover-line" x1="${padX}" y1="${padY}" x2="${padX}" y2="${chartBottom}" />
         <path class="energy-line" d="${linePath}" />
         ${points
           .map((point, index) => {
@@ -501,8 +549,8 @@ function renderEnergyChart(dashboard, period) {
         <text class="energy-label peak" x="${peakPoint.x}" y="${peakPoint.y - 10}" text-anchor="middle">▲ ${peakPoint.value}</text>
         <text class="energy-label dip" x="${dipPoint.x}" y="${dipPoint.y + 18}" text-anchor="middle">▼ ${dipPoint.value}</text>
         <line class="energy-today-line" x1="${todayPoint.x}" y1="${padY}" x2="${todayPoint.x}" y2="${chartBottom}" />
-        <circle class="energy-today-badge" cx="${todayPoint.x}" cy="${height - 12}" r="${period === "year" ? 14 : 10}" />
-        <text class="energy-today-text" x="${todayPoint.x}" y="${height - 11}" text-anchor="middle" dominant-baseline="middle">${todayValue}</text>
+        <circle class="energy-today-badge" cx="${todayPoint.x}" cy="${todayBadgeY}" r="${todayBadgeRadius}" />
+        <text class="energy-today-text" x="${todayPoint.x}" y="${todayBadgeY + 0.3}" text-anchor="middle" dominant-baseline="middle">${todayValue}</text>
         ${labelIndexes
           .map((index) => {
             const point = points[index];
@@ -516,6 +564,32 @@ function renderEnergyChart(dashboard, period) {
       </div>
     </div>
   `;
+}
+
+function bindEnergyChartInteractions() {
+  document.querySelectorAll(".energy-chart").forEach((svg) => {
+    const hoverLine = svg.querySelector(".energy-hover-line");
+    if (!hoverLine) {
+      return;
+    }
+    const minX = Number(svg.getAttribute("data-min-x")) || 18;
+    const maxX = Number(svg.getAttribute("data-max-x")) || 962;
+    const move = (event) => {
+      const rect = svg.getBoundingClientRect();
+      const viewBox = svg.viewBox.baseVal;
+      const ratio = viewBox && rect.width ? viewBox.width / rect.width : 1;
+      const rawX = (event.clientX - rect.left) * ratio;
+      const x = Math.max(minX, Math.min(maxX, rawX));
+      hoverLine.setAttribute("x1", String(x));
+      hoverLine.setAttribute("x2", String(x));
+      hoverLine.classList.add("visible");
+    };
+    const hide = () => hoverLine.classList.remove("visible");
+    svg.addEventListener("mousemove", move);
+    svg.addEventListener("mouseenter", move);
+    svg.addEventListener("mouseleave", hide);
+    svg.addEventListener("touchstart", hide, { passive: true });
+  });
 }
 
 function buildTodayAstroData(profile, dashboard) {
@@ -669,6 +743,7 @@ function updateHomeDynamicBlocks(dashboard, period, { animate = false } = {}) {
     const buttonPeriod = button.getAttribute("data-period");
     button.classList.toggle("is-active", buttonPeriod === period);
   });
+  bindEnergyChartInteractions();
 }
 
 function bindHomePeriodHandlers() {
@@ -1005,14 +1080,14 @@ function buildNatalEditorial(profile, report) {
   const aspects = Array.isArray(report?.aspects) ? report.aspects : [];
   const actionPlan = Array.isArray(report?.growthPlan) ? report.growthPlan : [];
   return `
-    <section class="section">
+    <section class="section" id="natal-framework">
       <article class="route-card content-panel">
         <h2>Interpretation Framework</h2>
         <p><strong>Identity axis:</strong> ${zodiacIcon(sun)} ${sun} defines visible motivation, ${zodiacIcon(moon)} ${moon} defines emotional processing, and ${zodiacIcon(rising)} ${rising} defines behavioral presentation under pressure.</p>
         <p>This reading is designed for practical planning. The goal is not prediction, but better timing, better communication, and better personal decisions.</p>
       </article>
     </section>
-    <section class="section">
+    <section class="section" id="natal-focus">
       <div class="editorial-grid">
         <article class="feature-card content-card">
           <h3>${uiIcon("briefcase")} Work Strategy</h3>
@@ -1031,7 +1106,7 @@ function buildNatalEditorial(profile, report) {
         </article>
       </div>
     </section>
-    <section class="section">
+    <section class="section" id="natal-houses">
       <article class="route-card content-panel">
         <h2>House Dynamics</h2>
         <div class="chip-grid">
@@ -1041,13 +1116,13 @@ function buildNatalEditorial(profile, report) {
         </div>
       </article>
     </section>
-    <section class="section">
+    <section class="section" id="natal-aspects">
       <article class="route-card content-panel">
         <h2>Aspect Dynamics</h2>
         <ul class="bullet-list">${aspects.slice(0, 8).map((item) => `<li>${item}</li>`).join("")}</ul>
       </article>
     </section>
-    <section class="section">
+    <section class="section" id="natal-plan">
       <article class="route-card content-panel">
         <h2>Action Plan</h2>
         <ul class="bullet-list">${actionPlan.map((item) => `<li>${item}</li>`).join("")}</ul>
@@ -1055,6 +1130,79 @@ function buildNatalEditorial(profile, report) {
       </article>
     </section>
   `;
+}
+
+function renderNatalToc() {
+  const items = [
+    { id: "natal-wheel", label: "Natal Wheel" },
+    { id: "natal-placements", label: "Placements Matrix" },
+    { id: "natal-core-domains", label: "Life Domains" },
+    { id: "natal-framework", label: "Framework" },
+    { id: "natal-focus", label: "Strategic Focus" },
+    { id: "natal-houses", label: "House Dynamics" },
+    { id: "natal-aspects", label: "Aspect Dynamics" },
+    { id: "natal-plan", label: "Action Plan" }
+  ];
+  return `
+    <aside class="natal-toc">
+      <div class="natal-toc-sticky">
+        <span class="eyebrow">Navigation</span>
+        <nav class="natal-toc-nav">
+          ${items
+            .map(
+              (item, index) =>
+                `<a href="#${item.id}" class="js-natal-toc ${index === 0 ? "active" : ""}" data-target="${item.id}">${item.label}</a>`
+            )
+            .join("")}
+        </nav>
+      </div>
+    </aside>
+  `;
+}
+
+function bindNatalToc() {
+  const links = Array.from(document.querySelectorAll(".js-natal-toc"));
+  if (!links.length) {
+    return;
+  }
+  const sections = links
+    .map((link) => {
+      const id = link.getAttribute("data-target");
+      const element = id ? document.getElementById(id) : null;
+      return element ? { id, element } : null;
+    })
+    .filter(Boolean);
+  if (!sections.length) {
+    return;
+  }
+  const setActive = (id) => {
+    links.forEach((link) => link.classList.toggle("active", link.getAttribute("data-target") === id));
+  };
+  const observer = new IntersectionObserver(
+    (entries) => {
+      const visible = entries
+        .filter((entry) => entry.isIntersecting)
+        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+      if (!visible?.target?.id) {
+        return;
+      }
+      setActive(visible.target.id);
+    },
+    {
+      root: null,
+      threshold: [0.2, 0.45, 0.7],
+      rootMargin: "-22% 0px -58% 0px"
+    }
+  );
+  sections.forEach((section) => observer.observe(section.element));
+  links.forEach((link) => {
+    link.addEventListener("click", () => {
+      const id = link.getAttribute("data-target");
+      if (id) {
+        setActive(id);
+      }
+    });
+  });
 }
 
 function natalViewEmpty() {
@@ -1208,49 +1356,55 @@ async function hydrateNatal() {
 
     app.innerHTML = `
       ${renderNatalHeader(profile, data)}
-      <section class="section">
-        <article class="route-card">
-          <h2>Natal wheel</h2>
-          ${natalChartSvg}
-        </article>
-      </section>
-      <section class="section">
-        <article class="route-card content-panel">
-          <h2>Planet Placement Matrix</h2>
-          <p>${data.summary}</p>
-          ${placementsTable}
-        </article>
-      </section>
-      <section class="section">
-        <div class="feature-grid">
-          <article class="feature-card content-card">
-            <h3>${uiIcon("heart")} Relationships</h3>
-            <p>${life.relationships || "N/A"}</p>
-          </article>
-          <article class="feature-card content-card">
-            <h3>${uiIcon("briefcase")} Career</h3>
-            <p>${life.career || "N/A"}</p>
-          </article>
-          <article class="feature-card content-card">
-            <h3>${uiIcon("coins")} Money</h3>
-            <p>${life.money || "N/A"}</p>
-          </article>
-          <article class="feature-card content-card">
-            <h3>${uiIcon("bolt")} Energy</h3>
-            <p>${life.energy || "N/A"}</p>
-          </article>
-          <article class="feature-card content-card">
-            <h3>${uiIcon("chart")} Strength</h3>
-            <p>${data.blocks?.strength || "N/A"}</p>
-          </article>
-          <article class="feature-card content-card">
-            <h3>${uiIcon("shield")} Blind Spot</h3>
-            <p>${data.blocks?.blindSpot || "N/A"}</p>
-          </article>
+      <div class="natal-layout">
+        <div class="natal-main">
+          <section class="section" id="natal-wheel">
+            <article class="route-card">
+              <h2>Natal Wheel</h2>
+              ${natalChartSvg}
+            </article>
+          </section>
+          <section class="section" id="natal-placements">
+            <article class="route-card content-panel">
+              <h2>Planet Placement Matrix</h2>
+              <p>${data.summary}</p>
+              ${placementsTable}
+            </article>
+          </section>
+          <section class="section" id="natal-core-domains">
+            <div class="feature-grid">
+              <article class="feature-card content-card">
+                <h3>${uiIcon("heart")} Relationships</h3>
+                <p>${life.relationships || "N/A"}</p>
+              </article>
+              <article class="feature-card content-card">
+                <h3>${uiIcon("briefcase")} Career</h3>
+                <p>${life.career || "N/A"}</p>
+              </article>
+              <article class="feature-card content-card">
+                <h3>${uiIcon("coins")} Money</h3>
+                <p>${life.money || "N/A"}</p>
+              </article>
+              <article class="feature-card content-card">
+                <h3>${uiIcon("bolt")} Energy</h3>
+                <p>${life.energy || "N/A"}</p>
+              </article>
+              <article class="feature-card content-card">
+                <h3>${uiIcon("chart")} Strength</h3>
+                <p>${data.blocks?.strength || "N/A"}</p>
+              </article>
+              <article class="feature-card content-card">
+                <h3>${uiIcon("shield")} Blind Spot</h3>
+                <p>${data.blocks?.blindSpot || "N/A"}</p>
+              </article>
+            </div>
+          </section>
+          ${editorial}
         </div>
-      </section>
-      ${editorial}
+        ${renderNatalToc()}
+      </div>
     `;
+    bindNatalToc();
   } catch (error) {
     if (error.status === 401) {
       await refreshAuthState();

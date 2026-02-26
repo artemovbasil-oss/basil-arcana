@@ -690,6 +690,18 @@ p {
   opacity: 0.6;
 }
 
+.energy-hover-line {
+  stroke: var(--ink);
+  stroke-width: 1;
+  opacity: 0;
+  transition: opacity 0.12s ease;
+  pointer-events: none;
+}
+
+.energy-hover-line.visible {
+  opacity: 0.42;
+}
+
 .energy-line {
   fill: none;
   stroke: var(--ink);
@@ -737,11 +749,13 @@ p {
 
 .energy-today-badge {
   fill: #d64545;
+  transform-box: fill-box;
+  transform-origin: center;
 }
 
 .energy-today-text {
   fill: #ffffff;
-  font-size: 9px;
+  font-size: 8px;
   font-weight: 700;
 }
 
@@ -843,6 +857,59 @@ p {
   display: grid;
   justify-items: center;
   gap: 0.8rem;
+}
+
+.natal-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 240px;
+  gap: 1rem;
+  align-items: start;
+}
+
+.natal-main {
+  min-width: 0;
+}
+
+.natal-toc {
+  display: block;
+}
+
+.natal-toc-sticky {
+  position: sticky;
+  top: 92px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  padding: 0.75rem;
+}
+
+.natal-toc-nav {
+  margin-top: 0.5rem;
+  display: grid;
+  gap: 0.22rem;
+}
+
+.natal-toc-nav a {
+  display: block;
+  text-decoration: none;
+  color: var(--muted);
+  border-left: 1px solid var(--line);
+  padding: 0.35rem 0.45rem;
+  font-size: 0.73rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  transition: color 0.16s ease, border-color 0.16s ease, background-color 0.16s ease;
+}
+
+.natal-toc-nav a:hover {
+  color: var(--ink);
+  border-left-color: var(--line-strong);
+  background: var(--surface-2);
+}
+
+.natal-toc-nav a.active {
+  color: var(--ink);
+  border-left-color: var(--ink);
+  background: var(--surface-2);
 }
 
 .natal-chart-svg {
@@ -990,6 +1057,14 @@ body[data-theme="light"] .energy-star.neutral {
   .editorial-grid {
     grid-template-columns: 1fr 1fr;
   }
+
+  .natal-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .natal-toc {
+    display: none;
+  }
 }
 
 @media (max-width: 760px) {
@@ -1083,5 +1158,18 @@ body[data-theme="light"] .energy-star.neutral {
   .form-grid select {
     min-height: 46px;
     width: 100%;
+  }
+
+  .energy-chart {
+    max-height: 250px;
+  }
+
+  .energy-label {
+    font-size: 11px;
+  }
+
+  .energy-x-label {
+    font-size: 10px;
+    letter-spacing: 0.025em;
   }
 }
