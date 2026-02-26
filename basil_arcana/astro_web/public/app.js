@@ -498,13 +498,14 @@ function visibleLabelIndexes(length, period) {
 }
 
 function renderEnergyChart(dashboard, period) {
+  const isMobile = typeof window !== "undefined" && window.matchMedia && window.matchMedia("(max-width: 760px)").matches;
   const intensity = Number(dashboard?.periodForecast?.intensity || 50);
   const series = buildEnergySeries(dashboard?.profile, period, intensity);
   const width = 980;
-  const height = 190;
-  const padX = 18;
-  const padY = 18;
-  const chartBottom = height - 34;
+  const height = isMobile ? 340 : 220;
+  const padX = isMobile ? 22 : 18;
+  const padY = isMobile ? 22 : 18;
+  const chartBottom = height - (isMobile ? 58 : 38);
   const stepX = (width - padX * 2) / Math.max(1, series.values.length - 1);
   const toY = (value) => chartBottom - (value / 100) * (chartBottom - padY);
   const points = series.values.map((value, index) => ({
@@ -522,7 +523,7 @@ function renderEnergyChart(dashboard, period) {
   const todayValue = todayMarkerValue(period);
 
   const todayBadgeY = todayPoint.y;
-  const todayBadgeRadius = period === "year" ? 11 : 10;
+  const todayBadgeRadius = isMobile ? (period === "year" ? 14 : 13) : period === "year" ? 11 : 10;
   return `
     <div class="energy-chart-wrap">
       <svg
@@ -542,7 +543,7 @@ function renderEnergyChart(dashboard, period) {
         ${points
           .map((point, index) => {
             const tone = index === series.peakIndex ? "peak" : index === series.dipIndex ? "dip" : "neutral";
-            const size = tone === "neutral" ? 5.1 : 7;
+            const size = tone === "neutral" ? (isMobile ? 6.2 : 5.1) : isMobile ? 8.4 : 7;
             return `<polygon class="energy-star ${tone}" points="${starPoints(point.x, point.y, size, size * 0.46)}" />`;
           })
           .join("")}

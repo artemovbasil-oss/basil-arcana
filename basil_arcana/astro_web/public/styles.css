@@ -725,6 +725,9 @@ p {
 .energy-label {
   font-size: 10px;
   font-weight: 700;
+  paint-order: stroke;
+  stroke: color-mix(in srgb, var(--bg) 85%, transparent 15%);
+  stroke-width: 1.8px;
 }
 
 .energy-label.peak {
@@ -740,6 +743,9 @@ p {
   font-size: 9.4px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+  paint-order: stroke;
+  stroke: color-mix(in srgb, var(--bg) 90%, transparent 10%);
+  stroke-width: 1.3px;
 }
 
 .energy-today-line {
@@ -757,6 +763,9 @@ p {
   fill: #ffffff;
   font-size: 8.8px;
   font-weight: 700;
+  paint-order: stroke;
+  stroke: rgba(0, 0, 0, 0.55);
+  stroke-width: 1.2px;
 }
 
 .energy-legend {
@@ -1164,16 +1173,18 @@ body[data-theme="light"] .energy-star.neutral {
   }
 
   .energy-chart {
-    max-height: 320px;
+    max-height: 400px;
   }
 
   .energy-label {
-    font-size: 13px;
+    font-size: 17px;
+    stroke-width: 2.3px;
   }
 
   .energy-x-label {
-    font-size: 12px;
+    font-size: 14px;
     letter-spacing: 0.025em;
+    stroke-width: 1.9px;
   }
 
   .energy-today-badge {
@@ -1181,6 +1192,11 @@ body[data-theme="light"] .energy-star.neutral {
   }
 
   .energy-today-text {
-    font-size: 11px;
+    font-size: 13px;
+    stroke-width: 1.8px;
+  }
+
+  .energy-legend {
+    font-size: 0.86rem;
   }
 }
