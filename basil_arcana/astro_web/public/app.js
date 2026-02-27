@@ -228,6 +228,65 @@ const zodiacMeta = {
   }
 };
 
+const zodiacElements = {
+  Aries: "Fire",
+  Taurus: "Earth",
+  Gemini: "Air",
+  Cancer: "Water",
+  Leo: "Fire",
+  Virgo: "Earth",
+  Libra: "Air",
+  Scorpio: "Water",
+  Sagittarius: "Fire",
+  Capricorn: "Earth",
+  Aquarius: "Air",
+  Pisces: "Water"
+};
+
+const zodiacModalities = {
+  Aries: "Cardinal",
+  Taurus: "Fixed",
+  Gemini: "Mutable",
+  Cancer: "Cardinal",
+  Leo: "Fixed",
+  Virgo: "Mutable",
+  Libra: "Cardinal",
+  Scorpio: "Fixed",
+  Sagittarius: "Mutable",
+  Capricorn: "Cardinal",
+  Aquarius: "Fixed",
+  Pisces: "Mutable"
+};
+
+const elementNarratives = {
+  Fire: {
+    drive: "You recharge through movement, challenge, and visible momentum.",
+    risk: "When direction is unclear, impatience can replace strategy.",
+    practice: "Best practice: choose one bold priority and complete it before opening new loops."
+  },
+  Earth: {
+    drive: "You build confidence through consistency, craft, and measurable progress.",
+    risk: "Under pressure, over-control can slow adaptation.",
+    practice: "Best practice: lock core routines, then add change in small tested increments."
+  },
+  Air: {
+    drive: "You operate best through perspective, dialogue, and pattern recognition.",
+    risk: "Cognitive overload can create diffusion instead of decision.",
+    practice: "Best practice: compress thinking into short written decisions and immediate next actions."
+  },
+  Water: {
+    drive: "You navigate by emotional signal quality, intuition, and trust calibration.",
+    risk: "Absorbing external stress can blur boundaries and priorities.",
+    practice: "Best practice: protect energy first, then move from feeling into one concrete commitment."
+  }
+};
+
+const modalityNarratives = {
+  Cardinal: "Cardinal mode gives you strong initiation power: starting is easy, finishing requires structure.",
+  Fixed: "Fixed mode gives endurance and depth: you sustain effort well, but need flexibility checkpoints.",
+  Mutable: "Mutable mode gives adaptation and learning speed: you pivot well, but need anchor routines."
+};
+
 function resolveZodiacSign(sign) {
   const raw = String(sign || "").trim();
   if (!raw) {
@@ -254,7 +313,26 @@ function zodiacDetails(sign) {
     imageUrl: `${zodiacAssetBaseUrl}/${meta.file}`,
     brief: meta.brief,
     natal: meta.natal,
-    compact: meta.compact
+    compact: meta.compact,
+    element: zodiacElements[normalized] || "Unknown",
+    modality: zodiacModalities[normalized] || "Unknown"
+  };
+}
+
+function zodiacLongRead(sign) {
+  const details = zodiacDetails(sign);
+  const element = details.element;
+  const modality = details.modality;
+  const elementData = elementNarratives[element] || {
+    drive: "Your sign pattern has a distinct energy profile.",
+    risk: "Main risk appears when emotional and strategic signals diverge.",
+    practice: "Best practice: convert interpretation into one measurable weekly behavior."
+  };
+  const modalityLine = modalityNarratives[modality] || "Your modality defines execution rhythm and adaptation speed.";
+  return {
+    structural: `${details.sign} belongs to ${element} element and ${modality} modality. ${modalityLine}`,
+    dynamics: `${elementData.drive} ${elementData.risk}`,
+    practical: elementData.practice
   };
 }
 
@@ -1094,6 +1172,7 @@ function renderTodayAstroPanel(profile, dashboard) {
 
 function renderNatalZodiacSection(sign) {
   const details = zodiacDetails(sign);
+  const deep = zodiacLongRead(sign);
   const signLabel = details.sign === "Unknown" ? "Sign" : details.sign;
   return `
     <section class="section" id="natal-zodiac-sign">
@@ -1111,6 +1190,9 @@ function renderNatalZodiacSection(sign) {
           <div class="zodiac-sign-copy">
             <p class="dropcap">${details.natal}</p>
             <p>${details.brief}</p>
+            <p>${deep.structural}</p>
+            <p>${deep.dynamics}</p>
+            <p><strong>Operational note:</strong> ${deep.practical}</p>
           </div>
         </div>
       </article>
@@ -1120,6 +1202,7 @@ function renderNatalZodiacSection(sign) {
 
 function renderHomeZodiacCompact(sign) {
   const details = zodiacDetails(sign);
+  const deep = zodiacLongRead(sign);
   const signLabel = details.sign === "Unknown" ? "Sign" : details.sign;
   return `
     <section class="section">
@@ -1136,6 +1219,7 @@ function renderHomeZodiacCompact(sign) {
           </div>
           <div class="zodiac-sign-copy">
             <p>${details.compact}</p>
+            <p>${deep.structural}</p>
           </div>
         </div>
       </article>
@@ -1145,6 +1229,7 @@ function renderHomeZodiacCompact(sign) {
 
 function renderFriendZodiacSnippet(sign) {
   const details = zodiacDetails(sign);
+  const deep = zodiacLongRead(sign);
   const signLabel = details.sign === "Unknown" ? "Sign" : details.sign;
   return `
     <article class="friend-sign-panel">
@@ -1158,6 +1243,7 @@ function renderFriendZodiacSnippet(sign) {
       <div class="friend-sign-copy">
         <h3>${signLabel}</h3>
         <p>${details.brief}</p>
+        <p>${deep.practical}</p>
       </div>
     </article>
   `;
