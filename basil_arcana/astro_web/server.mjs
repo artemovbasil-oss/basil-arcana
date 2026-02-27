@@ -998,30 +998,68 @@ async function geocodeCity(cityName) {
   const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
     cityName
   )}&count=1&language=en&format=json`;
-  const response = await fetch(url);
+  let result = null;
+  try {
+    const response = await fetch(url);
+    if (response.ok) {
+      const payload = await response.json();
+      const first = Array.isArray(payload?.results) ? payload.results[0] : null;
+      const latitude = Number(first?.latitude);
+      const longitude = Number(first?.longitude);
+      if (Number.isFinite(latitude) && Number.isFinite(longitude)) {
+        result = {
+          latitude,
+          longitude,
+          timezoneIana: String(first.timezone || "").trim() || null,
+          country: String(first.country || "").trim() || null,
+          admin1: String(first.admin1 || "").trim() || null,
+          resolvedName: String(first.name || "").trim() || cityName
+        };
+      }
+    }
+  } catch {
+    result = null;
+  }
+  if (!result) {
+    result = await geocodeCityViaNominatim(cityName);
+  }
+  if (!result) {
+    return null;
+  }
+  geoCache.set(key, result);
+  return result;
+}
+
+async function geocodeCityViaNominatim(cityName) {
+  const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=${encodeURIComponent(cityName)}`;
+  const response = await fetch(url, {
+    headers: {
+      "User-Agent": "Astronautica/1.0 (geocoding fallback)"
+    }
+  });
   if (!response.ok) {
     return null;
   }
   const payload = await response.json();
-  const first = Array.isArray(payload?.results) ? payload.results[0] : null;
+  const first = Array.isArray(payload) ? payload[0] : null;
   if (!first) {
     return null;
   }
-  const latitude = Number(first.latitude);
-  const longitude = Number(first.longitude);
+  const latitude = Number(first.lat);
+  const longitude = Number(first.lon);
   if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
     return null;
   }
-  const result = {
+  const displayName = String(first.display_name || "").trim();
+  const parts = displayName.split(",").map((item) => item.trim()).filter(Boolean);
+  return {
     latitude,
     longitude,
-    timezoneIana: String(first.timezone || "").trim() || null,
-    country: String(first.country || "").trim() || null,
-    admin1: String(first.admin1 || "").trim() || null,
-    resolvedName: String(first.name || "").trim() || cityName
+    timezoneIana: null,
+    country: parts.at(-1) || null,
+    admin1: parts.length > 2 ? parts[parts.length - 3] : null,
+    resolvedName: parts[0] || cityName
   };
-  geoCache.set(key, result);
-  return result;
 }
 
 async function suggestCities(query, limit = 12) {
