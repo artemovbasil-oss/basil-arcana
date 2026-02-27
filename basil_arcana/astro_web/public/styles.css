@@ -162,6 +162,10 @@ body[data-theme="light"] .topbar {
   padding: clamp(1.1rem, 2vw, 1.8rem) 0 clamp(3rem, 7vw, 6rem);
 }
 
+.page > .section:first-child {
+  margin-top: 0;
+}
+
 .page.route-enter {
   animation: route-enter 280ms ease both;
 }
@@ -262,6 +266,9 @@ h1 {
 
 h2 {
   font-size: clamp(1.35rem, 4vw, 2.4rem);
+  font-family: var(--font-mono);
+  font-weight: 500;
+  letter-spacing: 0.015em;
 }
 
 h3 {
@@ -418,6 +425,7 @@ p {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.8rem;
+  align-items: start;
 }
 
 .feature-card {
@@ -1101,12 +1109,24 @@ p {
 }
 
 .premium-kicker {
+  position: relative;
+  display: block;
   font-size: 0.64rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: var(--muted);
-  border-left: 1px solid var(--line-strong);
-  padding-left: 0.45rem;
+  padding-left: 0.55rem;
+  min-height: 1.7rem;
+}
+
+.premium-kicker::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1px;
+  height: 1.7rem;
+  background: var(--line-strong);
 }
 
 .dropcap::first-letter {
@@ -1270,6 +1290,7 @@ p {
   display: grid;
   gap: 0.8rem;
   grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
 }
 
 .content-card {

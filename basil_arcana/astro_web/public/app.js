@@ -1704,7 +1704,7 @@ function friendsView() {
   return `
     <section class="hero">
       <article class="card">
-        <span class="eyebrow">Step 4 · Friends</span>
+        <span class="eyebrow">Friends</span>
         <h1>Check friends?</h1>
         <p>Fast synastry-lite view for communication quality, conflict timing and daily collaboration windows.</p>
       </article>
