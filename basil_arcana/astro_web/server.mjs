@@ -394,14 +394,17 @@ function pickProfile(body) {
     return null;
   }
 
+  const normalizedLatitude = latitude === 0 && longitude === 0 ? null : latitude;
+  const normalizedLongitude = latitude === 0 && longitude === 0 ? null : longitude;
+
   return {
     name,
     birthDate,
     birthTime,
     birthCity,
     timezone,
-    latitude,
-    longitude,
+    latitude: normalizedLatitude,
+    longitude: normalizedLongitude,
     timezoneIana: timezoneIana || null
   };
 }
@@ -995,30 +998,13 @@ async function geocodeCity(cityName) {
   if (geoCache.has(key)) {
     return geoCache.get(key);
   }
-  const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
-    cityName
-  )}&count=1&language=en&format=json`;
   let result = null;
-  try {
-    const response = await fetch(url);
-    if (response.ok) {
-      const payload = await response.json();
-      const first = Array.isArray(payload?.results) ? payload.results[0] : null;
-      const latitude = Number(first?.latitude);
-      const longitude = Number(first?.longitude);
-      if (Number.isFinite(latitude) && Number.isFinite(longitude)) {
-        result = {
-          latitude,
-          longitude,
-          timezoneIana: String(first.timezone || "").trim() || null,
-          country: String(first.country || "").trim() || null,
-          admin1: String(first.admin1 || "").trim() || null,
-          resolvedName: String(first.name || "").trim() || cityName
-        };
-      }
+  const queries = buildGeocodeQueries(cityName);
+  for (const query of queries) {
+    result = await geocodeCityViaOpenMeteo(query);
+    if (result) {
+      break;
     }
-  } catch {
-    result = null;
   }
   if (!result) {
     result = await geocodeCityViaNominatim(cityName);
@@ -1028,6 +1014,68 @@ async function geocodeCity(cityName) {
   }
   geoCache.set(key, result);
   return result;
+}
+
+function normalizeCityQuery(value) {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function buildGeocodeQueries(cityName) {
+  const raw = String(cityName || "").trim();
+  const normalized = normalizeCityQuery(raw);
+  const variants = new Set([raw, normalized]);
+  const partsRaw = raw.split(",").map((item) => item.trim()).filter(Boolean);
+  const partsNormalized = normalized.split(",").map((item) => item.trim()).filter(Boolean);
+  if (partsRaw.length) {
+    variants.add(partsRaw[0]);
+    variants.add(partsRaw.slice(0, 2).join(", "));
+  }
+  if (partsNormalized.length) {
+    variants.add(partsNormalized[0]);
+    variants.add(partsNormalized.slice(0, 2).join(", "));
+  }
+  return Array.from(variants).filter(Boolean);
+}
+
+function mapOpenMeteoResult(first, fallbackName) {
+  const latitude = Number(first?.latitude);
+  const longitude = Number(first?.longitude);
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+    return null;
+  }
+  return {
+    latitude,
+    longitude,
+    timezoneIana: String(first.timezone || "").trim() || null,
+    country: String(first.country || "").trim() || null,
+    admin1: String(first.admin1 || "").trim() || null,
+    resolvedName: String(first.name || "").trim() || fallbackName
+  };
+}
+
+async function geocodeCityViaOpenMeteo(query) {
+  const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=5&language=en&format=json`;
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      return null;
+    }
+    const payload = await response.json();
+    const results = Array.isArray(payload?.results) ? payload.results : [];
+    for (const item of results) {
+      const mapped = mapOpenMeteoResult(item, query);
+      if (mapped) {
+        return mapped;
+      }
+    }
+    return null;
+  } catch {
+    return null;
+  }
 }
 
 async function geocodeCityViaNominatim(cityName) {
