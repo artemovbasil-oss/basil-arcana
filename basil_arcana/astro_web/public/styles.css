@@ -2536,6 +2536,12 @@ body[data-theme="light"] .energy-star.neutral {
     font-size: 0.7rem;
   }
 
+  .placement-chip-planet {
+    border-color: color-mix(in srgb, #1f9d55 52%, var(--line-strong) 48%);
+    background: color-mix(in srgb, #1f9d55 20%, var(--surface) 80%);
+    color: color-mix(in srgb, #1f9d55 70%, var(--ink) 30%);
+  }
+
   .placement-card p {
     font-size: 0.95rem;
   }

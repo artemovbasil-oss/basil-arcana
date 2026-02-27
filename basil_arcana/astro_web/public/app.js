@@ -1799,6 +1799,15 @@ function interpretPlanetPlacement(item) {
   return `${base} ${houseText} ${retrograde}`.trim();
 }
 
+function emphasizeZodiacSigns(text) {
+  const source = String(text || "");
+  if (!source) {
+    return "";
+  }
+  const zodiacPattern = /\b(Aries|Taurus|Gemini|Cancer|Leo|Virgo|Libra|Scorpio|Sagittarius|Capricorn|Aquarius|Pisces)\b/g;
+  return source.replace(zodiacPattern, "<strong>$1</strong>");
+}
+
 function renderPlanetPlacementTable(planets) {
   const safePlanets = Array.isArray(planets) ? planets : [];
   if (isMobileViewport()) {
@@ -1810,12 +1819,12 @@ function renderPlanetPlacementTable(planets) {
             return `
               <article class="placement-card">
                 <div class="placement-chip-row">
-                  <span class="placement-chip">${planetIcon(item.key)} ${item.key}</span>
+                  <span class="placement-chip placement-chip-planet">${planetIcon(item.key)} ${item.key}</span>
                   <span class="placement-chip">${zodiacIcon(item.sign)} ${item.sign}</span>
                   <span class="placement-chip">House ${Number.isFinite(item.house) ? item.house : "—"}</span>
                   <span class="placement-chip">${stateLabel}</span>
                 </div>
-                <p>${interpretPlanetPlacement(item)}</p>
+                <p>${emphasizeZodiacSigns(interpretPlanetPlacement(item))}</p>
               </article>
             `;
           })
@@ -1845,7 +1854,7 @@ function renderPlanetPlacementTable(planets) {
                   <td data-label="Sign"><span class="astro-inline">${zodiacIcon(item.sign)} ${item.sign}</span></td>
                   <td data-label="House">${Number.isFinite(item.house) ? item.house : "—"}</td>
                   <td data-label="State">${stateLabel}</td>
-                  <td data-label="Meaning">${interpretPlanetPlacement(item)}</td>
+                  <td data-label="Meaning">${emphasizeZodiacSigns(interpretPlanetPlacement(item))}</td>
                 </tr>
               `;
             })
