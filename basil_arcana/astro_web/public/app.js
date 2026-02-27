@@ -2691,6 +2691,9 @@ function bindCityAutocomplete(form, cityInputId) {
   const applySelectedMeta = () => {
     const selected = citySuggestionMeta.get(cityInput.value);
     if (!selected) {
+      if (latitudeInput) latitudeInput.value = "";
+      if (longitudeInput) longitudeInput.value = "";
+      if (timezoneIanaInput) timezoneIanaInput.value = "";
       return;
     }
     if (latitudeInput) latitudeInput.value = String(selected.latitude ?? "");
@@ -2703,6 +2706,9 @@ function bindCityAutocomplete(form, cityInputId) {
 
   cityInput.addEventListener("input", () => {
     citySuggestionMeta.delete(cityInput.value);
+    if (latitudeInput) latitudeInput.value = "";
+    if (longitudeInput) longitudeInput.value = "";
+    if (timezoneIanaInput) timezoneIanaInput.value = "";
     if (citySuggestTimer) {
       window.clearTimeout(citySuggestTimer);
     }

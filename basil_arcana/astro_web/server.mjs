@@ -1650,12 +1650,24 @@ app.get("/api/cities", requireAuth, async (req, res) => {
 });
 
 app.put("/api/profile", requireAuth, async (req, res) => {
-  const rawProfile = pickProfile(req.body);
+  let rawProfile = pickProfile(req.body);
   if (!rawProfile) {
     return res.status(400).json({
       error: "invalid_profile",
       message: "name, birthDate, birthTime and birthCity are required"
     });
+  }
+  const currentProfile = pickProfile({ profile: req.userData.profile });
+  const prevCity = String(currentProfile?.birthCity || "").trim().toLowerCase();
+  const nextCity = String(rawProfile.birthCity || "").trim().toLowerCase();
+  const cityChanged = Boolean(prevCity && nextCity && prevCity !== nextCity);
+  if (cityChanged) {
+    rawProfile = {
+      ...rawProfile,
+      latitude: null,
+      longitude: null,
+      timezoneIana: null
+    };
   }
   const profile = await ensureProfileCoordinates(rawProfile);
   req.userData.profile = profile;
