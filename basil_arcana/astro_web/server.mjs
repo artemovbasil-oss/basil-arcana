@@ -105,6 +105,10 @@ function defaultSessionData() {
 
 function defaultUserData() {
   return {
+    firstSeenAt: Date.now(),
+    metrics: {
+      invitesSent: 0
+    },
     profile: null,
     friends: [],
     daily: {
@@ -120,7 +124,12 @@ function normalizeUserData(raw) {
   const profile = source.profile && typeof source.profile === "object" ? source.profile : null;
   const friends = Array.isArray(source.friends) ? source.friends : [];
   const dailySource = source.daily && typeof source.daily === "object" ? source.daily : {};
+  const metricsSource = source.metrics && typeof source.metrics === "object" ? source.metrics : {};
   return {
+    firstSeenAt: Number.isFinite(Number(source.firstSeenAt)) ? Number(source.firstSeenAt) : Date.now(),
+    metrics: {
+      invitesSent: Number.isFinite(Number(metricsSource.invitesSent)) ? Number(metricsSource.invitesSent) : 0
+    },
     profile,
     friends,
     daily: {
@@ -740,6 +749,36 @@ function buildDynamicCompatibility(profile, friend, dayKey, period, userSign) {
     friendSign: friend.friendSign,
     ...detail
   };
+}
+
+function dailyQuestPool() {
+  return [
+    { title: "Cognitive Reframe", task: "Catch one automatic negative thought and rewrite it into a testable neutral statement.", category: "psychology" },
+    { title: "Boundary Micro-step", task: "Write one clear boundary sentence and use it in a real conversation today.", category: "self-development" },
+    { title: "Attention Audit", task: "Track your context switches for one hour and remove one avoidable distraction.", category: "productivity" },
+    { title: "Emotional Naming", task: "Name your top emotion every 3 hours and note what triggered it.", category: "psychology" },
+    { title: "Relationship Repair", task: "Send one concise repair message where communication drifted this week.", category: "relationships" },
+    { title: "Body Reset", task: "Take a 15-minute walk without phone and observe breathing rhythm changes.", category: "self-development" },
+    { title: "Decision Hygiene", task: "Delay one non-urgent decision by 24h and collect one extra data point.", category: "psychology" },
+    { title: "Values Alignment", task: "Pick one action that aligns with your long-term value instead of short-term mood.", category: "self-development" },
+    { title: "Clarity Drill", task: "Rewrite one vague request into a concrete ask with owner and deadline.", category: "productivity" },
+    { title: "Stress Buffer", task: "Insert two 5-minute pauses between high-load tasks and track effect on tone.", category: "self-development" }
+  ];
+}
+
+function chooseDailyQuest(profile, natalCore, dayKey) {
+  const pool = dailyQuestPool();
+  const seed = hashStringToInt(`${profile?.name || "anon"}:${natalCore?.sun || "Unknown"}:${dayKey}`);
+  const first = pool[seed % pool.length];
+  const second = pool[(seed + 3) % pool.length];
+  const third = pool[(seed + 7) % pool.length];
+  return [first, second, third];
+}
+
+function dateAtUtcNoon(offsetDays = 0) {
+  const now = new Date();
+  const base = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 12, 0, 0));
+  return new Date(base.getTime() + offsetDays * 86400000);
 }
 
 function buildNatalDetail(profile) {
@@ -1529,12 +1568,71 @@ app.post("/api/daily-insight", requireAuth, async (req, res) => {
     sessionDaily.lastDayKey = dayKey;
   }
 
+  const natal = buildNatalDetail(profile);
+  const natalCore = natal?.core || {
+    sun: signFromDate(profile.birthDate),
+    moon: moonFromDate(profile.birthDate),
+    rising: risingFromTime(profile.birthTime)
+  };
   const focus = "Prioritize one conversation that prevents future misunderstanding.";
   const risk = "Reactive messaging can escalate small ambiguity into unnecessary conflict.";
   const step = "Before noon, send one clear note: goal, boundary, and next checkpoint.";
+  const [questPrimary, questSecondary, questOptional] = chooseDailyQuest(profile, natalCore, dayKey);
+  const dailySeries = buildRealEnergySeries(profile, "week", now, natalCore) || {
+    values: [48, 52, 50, 56, 54, 58, 55],
+    labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+    transits: []
+  };
+  const todayIndex = (() => {
+    const d = now.getUTCDay();
+    return d === 0 ? 6 : d - 1;
+  })();
+  const pickValue = (index) => dailySeries.values[Math.max(0, Math.min(dailySeries.values.length - 1, index))] || 50;
+  const dailyDelta = {
+    yesterday: pickValue(todayIndex - 1),
+    today: pickValue(todayIndex),
+    tomorrow: pickValue(todayIndex + 1)
+  };
+  const astronomy = (() => {
+    const toSnapshot = (offsetDays, label) => {
+      try {
+        const target = dateAtUtcNoon(offsetDays);
+        const origin = new Origin({
+          year: target.getUTCFullYear(),
+          month: target.getUTCMonth(),
+          date: target.getUTCDate(),
+          hour: target.getUTCHours(),
+          minute: target.getUTCMinutes(),
+          latitude: profile.latitude,
+          longitude: profile.longitude
+        });
+        const horoscope = new Horoscope({ origin, houseSystem: "placidus", zodiac: "tropical", language: "en" });
+        return {
+          label,
+          sun: horoscope?.CelestialBodies?.sun?.Sign?.label || "Unknown",
+          moon: horoscope?.CelestialBodies?.moon?.Sign?.label || "Unknown",
+          rising: horoscope?.Ascendant?.Sign?.label || "Unknown"
+        };
+      } catch {
+        return {
+          label,
+          sun: natalCore.sun,
+          moon: natalCore.moon,
+          rising: natalCore.rising
+        };
+      }
+    };
+    return [toSnapshot(-1, "Yesterday"), toSnapshot(0, "Today"), toSnapshot(1, "Tomorrow")];
+  })();
 
   pushDailyHistory(sessionDaily, { dayKey, focus, step });
   req.userData.daily = sessionDaily;
+  if (!Number.isFinite(Number(req.userData.firstSeenAt))) {
+    req.userData.firstSeenAt = Date.now();
+  }
+  if (!req.userData.metrics || typeof req.userData.metrics !== "object") {
+    req.userData.metrics = { invitesSent: 0 };
+  }
   await saveUserData(req.userId, req.userData);
 
   return res.json({
@@ -1545,8 +1643,38 @@ app.post("/api/daily-insight", requireAuth, async (req, res) => {
     step,
     streak: sessionDaily.streak,
     streakLabel: `Current streak: ${sessionDaily.streak} day${sessionDaily.streak === 1 ? "" : "s"}.`,
-    history: sessionDaily.history
+    history: sessionDaily.history,
+    dayDashboard: {
+      focus,
+      risk,
+      todayEnergy: dailyDelta.today,
+      yesterdayEnergy: dailyDelta.yesterday,
+      tomorrowEnergy: dailyDelta.tomorrow,
+      deltaFromYesterday: dailyDelta.today - dailyDelta.yesterday,
+      deltaToTomorrow: dailyDelta.tomorrow - dailyDelta.today
+    },
+    dailyQuest: {
+      primary: questPrimary,
+      secondary: questSecondary,
+      optional: questOptional
+    },
+    achievements: {
+      daysInSystem: Math.max(1, Math.floor((Date.now() - Number(req.userData.firstSeenAt || Date.now())) / 86400000) + 1),
+      streakDays: sessionDaily.streak,
+      friendsAdded: Array.isArray(req.userData.friends) ? req.userData.friends.length : 0,
+      invitesSent: Number(req.userData.metrics?.invitesSent || 0)
+    },
+    astronomy
   });
+});
+
+app.post("/api/metrics/share-invite", requireAuth, async (req, res) => {
+  if (!req.userData.metrics || typeof req.userData.metrics !== "object") {
+    req.userData.metrics = { invitesSent: 0 };
+  }
+  req.userData.metrics.invitesSent = Number(req.userData.metrics.invitesSent || 0) + 1;
+  await saveUserData(req.userId, req.userData);
+  return res.json({ ok: true, invitesSent: req.userData.metrics.invitesSent });
 });
 
 app.post("/api/compatibility-report", requireAuth, (req, res) => {

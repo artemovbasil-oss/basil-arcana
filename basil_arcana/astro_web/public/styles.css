@@ -9,6 +9,7 @@
   --button-inverse-bg: #ffffff;
   --button-inverse-ink: #000000;
   --font-sans: "IBM Plex Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", monospace;
 }
 
 * {
@@ -227,7 +228,10 @@ h2 {
 }
 
 h1 {
-  font-size: clamp(2.3rem, 8.6vw, 6.2rem);
+  font-family: var(--font-mono);
+  font-size: clamp(1.95rem, 6.6vw, 4.8rem);
+  letter-spacing: 0.015em;
+  font-weight: 500;
 }
 
 .typewriter-heading {
@@ -1276,6 +1280,158 @@ p {
   gap: 0.68rem;
 }
 
+.daily-hero-main,
+.daily-hero-side,
+.daily-quest-card,
+.daily-achievements-card,
+.daily-astronomy-card {
+  background: var(--surface);
+}
+
+.daily-kpis {
+  margin-top: 0.8rem;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.daily-kpis .metric span {
+  color: var(--muted);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.daily-delta-grid {
+  display: grid;
+  gap: 0.45rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: 0.6rem;
+}
+
+.daily-delta-card {
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  padding: 0.48rem 0.52rem;
+  display: grid;
+  gap: 0.15rem;
+}
+
+.daily-delta-card span {
+  color: var(--muted);
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.daily-delta-card strong {
+  font-size: 0.9rem;
+}
+
+.daily-achievement-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.48rem;
+}
+
+.daily-achievement-item {
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  padding: 0.5rem 0.56rem;
+  display: grid;
+  gap: 0.16rem;
+}
+
+.daily-achievement-item span {
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-size: 0.64rem;
+}
+
+.daily-achievement-item strong {
+  font-size: 1rem;
+}
+
+.daily-astro-svg {
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+}
+
+.daily-astro-axis {
+  stroke: var(--line-strong);
+  stroke-width: 1;
+}
+
+.daily-astro-grid {
+  stroke: var(--line);
+  stroke-width: 1;
+  opacity: 0.6;
+}
+
+.daily-astro-line {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  animation: daily-astro-line-in 640ms ease-out both;
+}
+
+.daily-astro-star {
+  fill: #8f8f8f;
+  transform-origin: center;
+  animation: daily-astro-star-pulse 2.9s ease-in-out infinite;
+}
+
+.daily-astro-star.today {
+  fill: #d64545;
+}
+
+.daily-astro-value {
+  fill: var(--ink);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.daily-astro-label {
+  fill: var(--ink);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.daily-astro-signs {
+  fill: var(--muted);
+  font-size: 9px;
+}
+
+@keyframes daily-astro-line-in {
+  from {
+    stroke-dasharray: 900;
+    stroke-dashoffset: 900;
+    opacity: 0.35;
+  }
+  to {
+    stroke-dasharray: 900;
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+@keyframes daily-astro-star-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+}
+
 .today-grid {
   display: grid;
   gap: 0.46rem;
@@ -1623,6 +1779,30 @@ body[data-theme="light"] .energy-star.neutral {
 
   .energy-cards {
     grid-template-columns: 1fr;
+  }
+
+  .daily-kpis {
+    grid-template-columns: 1fr;
+  }
+
+  .daily-delta-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .daily-achievement-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .daily-astro-value {
+    font-size: 13px;
+  }
+
+  .daily-astro-label {
+    font-size: 11px;
+  }
+
+  .daily-astro-signs {
+    font-size: 10px;
   }
 
   .astro-viz-row {

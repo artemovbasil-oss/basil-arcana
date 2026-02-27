@@ -1908,6 +1908,7 @@ function openShareModal(payload) {
     const linkText = `View details: ${shareUrl}`;
     const body = `${shareUrl}\n\n${summary}\n${reasonText}\n\n${linkText}`;
     if (looksLikeEmail(contact)) {
+      fetchJson("/api/metrics/share-invite", { method: "POST", body: JSON.stringify({}) }).catch(() => {});
       window.location.href = `mailto:${encodeURIComponent(contact)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
       closeShareModal();
       return;
@@ -1917,6 +1918,7 @@ function openShareModal(payload) {
       alert("Please enter a valid email or Telegram username.");
       return;
     }
+    fetchJson("/api/metrics/share-invite", { method: "POST", body: JSON.stringify({}) }).catch(() => {});
     window.open(`https://t.me/${encodeURIComponent(handle)}?text=${encodeURIComponent(`${shareUrl}\n\n${subject}\n\n${summary}\n${reasonText}`)}`, "_blank", "noopener,noreferrer");
     closeShareModal();
   });
@@ -2091,6 +2093,76 @@ function animateHeadingTypewriter() {
   window.requestAnimationFrame(tick);
 }
 
+function formatSignedDelta(value) {
+  const num = Number(value) || 0;
+  return `${num > 0 ? "+" : ""}${num}`;
+}
+
+function renderDailyAstronomySvg(astronomy, dayDashboard) {
+  const snapshots = Array.isArray(astronomy) && astronomy.length
+    ? astronomy.slice(0, 3)
+    : [
+        { label: "Yesterday", sun: "Unknown", moon: "Unknown", rising: "Unknown" },
+        { label: "Today", sun: "Unknown", moon: "Unknown", rising: "Unknown" },
+        { label: "Tomorrow", sun: "Unknown", moon: "Unknown", rising: "Unknown" }
+      ];
+  const energySeries = [
+    Number(dayDashboard?.yesterdayEnergy) || 50,
+    Number(dayDashboard?.todayEnergy) || 50,
+    Number(dayDashboard?.tomorrowEnergy) || 50
+  ];
+  const width = 1080;
+  const height = 292;
+  const leftPad = 32;
+  const rightPad = 28;
+  const topPad = 34;
+  const bottomPad = 52;
+  const usableWidth = width - leftPad - rightPad;
+  const stepX = usableWidth / 2;
+  const toY = (value) => topPad + (100 - Math.max(0, Math.min(100, value))) * ((height - topPad - bottomPad) / 100);
+  const points = energySeries.map((value, index) => ({
+    x: leftPad + index * stepX,
+    y: toY(value),
+    value
+  }));
+  const path = buildSmoothPath(points);
+
+  return `
+    <article class="route-card daily-astronomy-card">
+      <h2>Astronomy pulse</h2>
+      <svg class="daily-astro-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="Daily astronomy dynamics">
+        <line class="daily-astro-axis" x1="${leftPad}" y1="${height - bottomPad}" x2="${width - rightPad}" y2="${height - bottomPad}" />
+        ${points
+          .map(
+            (point) =>
+              `<line class="daily-astro-grid" x1="${point.x}" y1="${topPad}" x2="${point.x}" y2="${height - bottomPad}" />`
+          )
+          .join("")}
+        <path class="daily-astro-line" d="${path}" />
+        ${points
+          .map(
+            (point, index) =>
+              `<g>
+                <polygon class="daily-astro-star ${index === 1 ? "today" : ""}" points="${starPoints(point.x, point.y, 11.2, 4.6)}" />
+                <text class="daily-astro-value" x="${point.x}" y="${point.y - 14}" text-anchor="middle">${point.value}</text>
+              </g>`
+          )
+          .join("")}
+        ${snapshots
+          .map((item, index) => {
+            const x = leftPad + index * stepX;
+            return `
+              <text class="daily-astro-label" x="${x}" y="${height - 26}" text-anchor="middle">${item.label}</text>
+              <text class="daily-astro-signs" x="${x}" y="${height - 11}" text-anchor="middle">${item.sun} · ${item.moon} · ${item.rising}</text>
+            `;
+          })
+          .join("")}
+      </svg>
+      <p class="muted">Signal line tracks daily transit pressure for your profile. Labels: Sun, Moon and Rising signs for each marker.</p>
+    </article>
+  `;
+}
+
 async function hydrateDaily() {
   if (!hasProfile()) {
     app.innerHTML = shell({
@@ -2110,30 +2182,82 @@ async function hydrateDaily() {
       method: "POST",
       body: JSON.stringify({})
     });
+    const d = data?.dayDashboard || {};
+    const q = data?.dailyQuest || {};
+    const a = data?.achievements || {};
 
     app.innerHTML = `
-      <section class="section">
-        <article class="card">
+      <section class="hero">
+        <article class="card daily-hero-main">
           <span class="eyebrow">Daily Ritual</span>
           <h1>${data.dateLabel}</h1>
           <p>${data.intro}</p>
+          <div class="daily-kpis">
+            <article class="metric">
+              <strong>${d.todayEnergy ?? "--"}/100</strong>
+              <span>Today intensity</span>
+            </article>
+            <article class="metric">
+              <strong>${formatSignedDelta(d.deltaFromYesterday)}</strong>
+              <span>vs yesterday</span>
+            </article>
+            <article class="metric">
+              <strong>${formatSignedDelta(d.deltaToTomorrow)}</strong>
+              <span>to tomorrow</span>
+            </article>
+          </div>
         </article>
+        <aside class="card daily-hero-side">
+          <h2>Dynamics</h2>
+          <div class="daily-delta-grid">
+            <div class="daily-delta-card">
+              <span>Yesterday</span>
+              <strong>${d.yesterdayEnergy ?? "--"}/100</strong>
+            </div>
+            <div class="daily-delta-card">
+              <span>Today</span>
+              <strong>${d.todayEnergy ?? "--"}/100</strong>
+            </div>
+            <div class="daily-delta-card">
+              <span>Tomorrow</span>
+              <strong>${d.tomorrowEnergy ?? "--"}/100</strong>
+            </div>
+          </div>
+          <p class="muted"><strong>Focus:</strong> ${d.focus || data.focus || ""}</p>
+          <p class="muted"><strong>Risk:</strong> ${d.risk || data.risk || ""}</p>
+        </aside>
       </section>
       <section class="section">
-        <div class="feature-grid">
-          <article class="feature-card"><h3>Focus</h3><p>${data.focus}</p></article>
-          <article class="feature-card"><h3>Risk</h3><p>${data.risk}</p></article>
-          <article class="feature-card"><h3>One Step</h3><p>${data.step}</p></article>
+        <div class="editorial-grid">
+          <article class="route-card content-panel daily-quest-card">
+            <span class="premium-kicker">Daily Quest</span>
+            <h2>${q.primary?.title || "Daily quest"}</h2>
+            <p class="dropcap">${q.primary?.task || data.step}</p>
+            <blockquote class="premium-quote">${q.secondary?.title || "Secondary challenge"}: ${q.secondary?.task || ""}</blockquote>
+            <p><strong>Optional:</strong> ${q.optional?.title || "Optional stretch"} — ${q.optional?.task || ""}</p>
+          </article>
+          <article class="route-card content-panel daily-achievements-card">
+            <span class="premium-kicker">Achievements</span>
+            <h2>Your trajectory</h2>
+            <div class="daily-achievement-grid">
+              <div class="daily-achievement-item"><span>Days in system</span><strong>${a.daysInSystem ?? "--"}</strong></div>
+              <div class="daily-achievement-item"><span>Current streak</span><strong>${a.streakDays ?? data.streak ?? "--"}</strong></div>
+              <div class="daily-achievement-item"><span>Friends added</span><strong>${a.friendsAdded ?? "--"}</strong></div>
+              <div class="daily-achievement-item"><span>Invited via share</span><strong>${a.invitesSent ?? "--"}</strong></div>
+            </div>
+            <p class="muted">${data.streakLabel || ""}</p>
+          </article>
+          <article class="route-card content-panel">
+            <span class="premium-kicker">History</span>
+            <h2>Recent days</h2>
+            <ul class="bullet-list">${(data.history || [])
+              .map((item) => `<li>${item.dayKey}: ${item.focus}</li>`)
+              .join("")}</ul>
+          </article>
         </div>
       </section>
       <section class="section">
-        <article class="route-card">
-          <h2>Streak</h2>
-          <p>${data.streakLabel}</p>
-          <ul class="bullet-list">${(data.history || [])
-            .map((item) => `<li>${item.dayKey}: ${item.focus}</li>`)
-            .join("")}</ul>
-        </article>
+        ${renderDailyAstronomySvg(data.astronomy, d)}
       </section>
     `;
     animateHeadingTypewriter();
