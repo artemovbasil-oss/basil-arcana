@@ -1953,7 +1953,6 @@ body[data-theme="light"] .energy-chart {
   background: transparent;
 }
 
-body[data-theme="light"] .energy-line,
 body[data-theme="light"] .friend-gauge-text {
   fill: #111;
 }
