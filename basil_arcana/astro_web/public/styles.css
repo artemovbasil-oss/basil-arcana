@@ -1106,10 +1106,10 @@ p {
 }
 
 .astro-viz-ray {
-  stroke: var(--line);
-  stroke-width: 1.15;
-  stroke-dasharray: 2 5;
-  opacity: 0.75;
+  stroke: color-mix(in srgb, var(--line-strong) 78%, var(--ink) 22%);
+  stroke-width: 1.35;
+  stroke-dasharray: 3 6;
+  opacity: 0.95;
 }
 
 .astro-viz-ring-dashed {
@@ -1124,22 +1124,18 @@ p {
 }
 
 .astro-viz-satellite-system {
-  transform-box: fill-box;
-  animation: astro-satellite-spin linear infinite;
-}
-
-.astro-viz-satellite-system.reverse {
-  animation-direction: reverse;
+  pointer-events: none;
 }
 
 .astro-viz-sat-orbit {
   fill: none;
-  stroke: color-mix(in srgb, var(--line-strong) 80%, transparent 20%);
-  stroke-width: 0.9;
+  stroke: color-mix(in srgb, var(--line-strong) 74%, var(--ink) 26%);
+  stroke-width: 1;
+  opacity: 0.9;
 }
 
 .astro-viz-sat-dot {
-  fill: color-mix(in srgb, var(--ink) 82%, transparent 18%);
+  fill: color-mix(in srgb, var(--ink) 92%, transparent 8%);
 }
 
 .astro-viz-label {
@@ -1221,15 +1217,6 @@ p {
   }
   to {
     stroke-dashoffset: -34;
-  }
-}
-
-@keyframes astro-satellite-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
   }
 }
 

@@ -990,15 +990,37 @@ function renderCosmicStatePanel(dashboard, period) {
           ${bodies
             .map((body, i) => {
               const p = pointFromAngle(center.x, center.y, rings[i], body.angle);
-              const orbitRadius = i === 0 ? 8 : i === 1 ? 6.8 : 6;
-              const spinClass = i % 2 === 0 ? "astro-viz-satellite-system" : "astro-viz-satellite-system reverse";
+              const nodeRadius = i === 0 ? 5.6 : 4.8;
+              const orbitRadius = nodeRadius + (i === 0 ? 4.8 : 4.2);
               const spinDuration = (8 + i * 2.2).toFixed(1);
+              const vx = p.x - center.x;
+              const vy = p.y - center.y;
+              const length = Math.hypot(vx, vy) || 1;
+              const ux = vx / length;
+              const uy = vy / length;
+              const rayStartPad = 7;
+              const rayEndPad = nodeRadius + 3;
+              const rayX1 = center.x + ux * rayStartPad;
+              const rayY1 = center.y + uy * rayStartPad;
+              const rayX2 = p.x - ux * rayEndPad;
+              const rayY2 = p.y - uy * rayEndPad;
+              const from = i % 2 === 0 ? "0" : "360";
+              const to = i % 2 === 0 ? "360" : "0";
               return `
-                <circle class="astro-viz-node" cx="${p.x}" cy="${p.y}" r="${i === 0 ? 5.6 : 4.8}" style="fill:${colors[i]}" />
-                <line class="astro-viz-ray" x1="${center.x}" y1="${center.y}" x2="${p.x}" y2="${p.y}" />
-                <g class="${spinClass}" style="transform-origin:${p.x}px ${p.y}px;animation-duration:${spinDuration}s">
+                <line class="astro-viz-ray" x1="${rayX1}" y1="${rayY1}" x2="${rayX2}" y2="${rayY2}" />
+                <circle class="astro-viz-node" cx="${p.x}" cy="${p.y}" r="${nodeRadius}" style="fill:${colors[i]}" />
+                <g class="astro-viz-satellite-system">
                   <circle class="astro-viz-sat-orbit" cx="${p.x}" cy="${p.y}" r="${orbitRadius}" />
                   <circle class="astro-viz-sat-dot" cx="${p.x}" cy="${p.y - orbitRadius}" r="1.5" />
+                  <animateTransform
+                    attributeName="transform"
+                    attributeType="XML"
+                    type="rotate"
+                    from="${from} ${p.x} ${p.y}"
+                    to="${to} ${p.x} ${p.y}"
+                    dur="${spinDuration}s"
+                    repeatCount="indefinite"
+                  />
                 </g>
               `;
             })
