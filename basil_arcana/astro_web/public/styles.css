@@ -1501,18 +1501,16 @@ p {
   max-height: 640px;
 }
 
-.zodiac-natal-lead {
-  font-size: clamp(1.1rem, 2.3vw, 1.55rem);
-  line-height: 1.42;
-  color: var(--ink);
-  max-width: 940px;
-  margin: 0 auto;
-}
-
-.zodiac-natal-secondary {
+.zodiac-natal-text {
+  font-size: clamp(1rem, 1.8vw, 1.2rem);
+  line-height: 1.5;
   max-width: 920px;
   margin: 0 auto;
-  color: var(--muted);
+  color: var(--ink);
+}
+
+.zodiac-natal-chips {
+  justify-content: center;
 }
 
 .today-panel {

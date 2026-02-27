@@ -1199,11 +1199,17 @@ function renderNatalZodiacSection(sign) {
   const details = zodiacDetails(sign);
   const deep = zodiacLongRead(sign);
   const signLabel = details.sign === "Unknown" ? "Sign" : details.sign;
+  const chips = [
+    `Element: ${details.element}`,
+    `Mode: ${details.modality}`,
+    "Signal: identity"
+  ];
+  const narrative = `${details.natal} ${details.brief} ${deep.structural} ${deep.dynamics} ${deep.practical}`;
   return `
     <section class="section" id="natal-zodiac-sign">
       <article class="route-card content-panel premium-panel zodiac-natal-card">
         <span class="premium-kicker">Archetype</span>
-        <h2>${signLabel} Profile</h2>
+        <h2>${signLabel}</h2>
         <div class="zodiac-sign-image-wrap zodiac-sign-image-wrap-natal">
           ${
             details.imageUrl
@@ -1211,10 +1217,10 @@ function renderNatalZodiacSection(sign) {
               : `<div class="zodiac-sign-fallback">${zodiacIcon(signLabel)} ${signLabel}</div>`
           }
         </div>
-        <p class="zodiac-natal-lead">${details.natal}</p>
-        <p class="zodiac-natal-secondary">${deep.structural}</p>
-        <p class="zodiac-natal-secondary">${deep.dynamics}</p>
-        <p class="zodiac-natal-secondary"><strong>Operational note:</strong> ${deep.practical}</p>
+        <p class="zodiac-natal-text">${narrative}</p>
+        <div class="zodiac-chip-row zodiac-natal-chips">
+          ${chips.map((chip) => `<span class="zodiac-chip">${chip}</span>`).join("")}
+        </div>
       </article>
     </section>
   `;
