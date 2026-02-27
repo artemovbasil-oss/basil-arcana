@@ -1844,6 +1844,21 @@ function renderAspectCards(items) {
   `;
 }
 
+function actionPlanIcon(title, index = 0) {
+  const value = String(title || "").toLowerCase();
+  if (value.includes("bound")) {
+    return uiIcon("shield");
+  }
+  if (value.includes("cadence") || value.includes("execution")) {
+    return uiIcon("chart");
+  }
+  if (value.includes("integration") || value.includes("weekly")) {
+    return uiIcon("layers");
+  }
+  const fallback = [uiIcon("shield"), uiIcon("chart"), uiIcon("layers")];
+  return fallback[index % fallback.length];
+}
+
 function buildNatalEditorial(profile, report) {
   const sun = report?.core?.sun || "Unknown";
   const moon = report?.core?.moon || "Unknown";
@@ -1915,19 +1930,33 @@ function buildNatalEditorial(profile, report) {
       <article class="route-card content-panel premium-panel">
         <span class="premium-kicker">Execution</span>
         <h2>Action Plan</h2>
-        <ol class="premium-steps">
-          ${planItems
-            .map(
-              (item) => `
-                <li class="premium-step">
-                  <h4>${item.title}</h4>
-                  <p class="premium-step-action">${item.action}</p>
-                  <p class="premium-step-comment">${item.comment}</p>
-                </li>
-              `
-            )
-            .join("")}
-        </ol>
+        <div class="action-plan-layout">
+          <div class="action-plan-steps">
+            ${planItems
+              .map(
+                (item, index) => `
+                  <article class="action-step-card">
+                    <div class="action-step-head">
+                      <span class="action-step-icon">${actionPlanIcon(item.title, index)}</span>
+                      <h3>${item.title}</h3>
+                    </div>
+                    <p class="action-step-main">${item.action}</p>
+                    <p class="action-step-note">${item.comment}</p>
+                  </article>
+                `
+              )
+              .join("")}
+          </div>
+          <aside class="action-plan-visual">
+            <img
+              class="action-plan-ill"
+              src="https://basilarcana-assets.b-cdn.net/astronautica/ill1.png"
+              alt="Astronautica action plan illustration"
+              loading="lazy"
+              decoding="async"
+            />
+          </aside>
+        </div>
         <p><strong>Profile context:</strong> ${profile?.name || "User"} can run this plan as a weekly ritual with measurable checkpoints and a short post-week retrospective.</p>
       </article>
     </section>
