@@ -1355,7 +1355,9 @@ p {
 }
 
 .zodiac-sign-image-wrap.compact {
-  min-height: 320px;
+  min-height: 0;
+  height: auto;
+  align-self: start;
 }
 
 .zodiac-sign-image {
@@ -1368,6 +1370,9 @@ p {
 
 .zodiac-sign-image.compact {
   max-height: 390px;
+  width: 100%;
+  height: auto;
+  display: block;
 }
 
 .zodiac-sign-copy {
@@ -2133,7 +2138,7 @@ body[data-theme="light"] .energy-star.neutral {
 
   .zodiac-sign-image-wrap.compact,
   .zodiac-sign-image.compact {
-    min-height: 280px;
+    min-height: 0;
     height: auto;
   }
 
