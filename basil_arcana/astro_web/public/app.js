@@ -2044,20 +2044,20 @@ function faqView() {
         <h1>Astronautica method</h1>
         <div class="faq">
           <article class="faq-item">
-            <h3>How do we calculate natal data?</h3>
-            <p>We use birth date, exact time and geolocation to compute tropical zodiac placements and Placidus houses with deterministic astronomical math. Same input always returns same chart.</p>
+            <h3>How we build your natal chart</h3>
+            <p>We start with your birth date, exact birth time, and birthplace, then convert location into precise coordinates and timezone context. After that, Astronautica calculates a full tropical natal model with the Placidus house system using deterministic astronomical math. Under the hood, we use circular-natal-horoscope-js with Moshier ephemeris calculations, while city resolution and coordinate normalization are handled through Open-Meteo geocoding. The result is a reproducible chart architecture: same input always returns the same natal geometry, so interpretation remains consistent over time.</p>
           </article>
           <article class="faq-item">
-            <h3>Why this is not fortune-telling?</h3>
-            <p>Astronautica does not claim supernatural certainty. We separate calculation from interpretation and present it as structured decision support for communication, timing and self-reflection.</p>
+            <h3>Our methodology: astronomy first, interpretation second</h3>
+            <p>Our pipeline has two clear layers. First, the calculation layer: planetary and angular positions, house cusps, and core sign structure are computed from objective inputs. Second, the interpretation layer: we translate those signals into practical guidance for communication timing, emotional regulation, focus management, and relationship dynamics. This architecture keeps the product grounded and transparent: calculations are technical, while interpretations are presented as strategic decision support.</p>
           </article>
           <article class="faq-item">
             <h3>What makes this more rigorous than generic horoscope apps?</h3>
-            <p>We combine personalized chart geometry, explicit assumptions, and repeatable compatibility sub-signals. No random daily text unrelated to your profile.</p>
+            <p>Most horoscope feeds are broad content streams. Astronautica is profile-anchored: we combine your natal chart geometry, explicit logic, and repeatable compatibility sub-signals. Daily guidance is generated in context of your profile state, not generic sign-only templates. That gives you continuity: one coherent system from natal baseline to day-level decisions.</p>
           </article>
           <article class="faq-item">
             <h3>How do friend compatibility scores work?</h3>
-            <p>Score is a composite of communication sync, emotional stability and friction load. We provide domain-level explanations so you see why the score is high, medium or low.</p>
+            <p>Compatibility is modeled as a structured composite: communication sync, emotional stability, and friction load. Instead of one opaque score, we expose domain-level diagnostics and short rationale, so you can see which pattern is helping and which one needs better boundaries or clearer protocols.</p>
           </article>
           <article class="faq-item">
             <h3>Is this medical, legal or financial advice?</h3>
