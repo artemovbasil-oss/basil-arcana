@@ -788,11 +788,139 @@ function buildCompatibilityDetail({ userSign, friendSign, friendName = "Friend",
   };
 }
 
+function toBoolean(value) {
+  if (typeof value === "boolean") {
+    return value;
+  }
+  const normalized = String(value || "").trim().toLowerCase();
+  return normalized === "1" || normalized === "true" || normalized === "on" || normalized === "yes";
+}
+
+function normalizeTelegramHandle(value) {
+  const raw = String(value || "").trim();
+  if (!raw) {
+    return "";
+  }
+  const withoutUrl = raw.replace(/^https?:\/\/t\.me\//i, "");
+  const withoutAt = withoutUrl.replace(/^@/, "");
+  return withoutAt.replace(/[^a-zA-Z0-9_]/g, "");
+}
+
+function normalizeEmail(value) {
+  const email = String(value || "").trim().toLowerCase();
+  if (!email) {
+    return "";
+  }
+  const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  return isValid ? email : "";
+}
+
+async function buildFriendNatalMini(friendInput) {
+  const name = String(friendInput?.friendName || "Friend").trim() || "Friend";
+  const birthDate = String(friendInput?.friendBirthDate || "").trim();
+  const birthTime = String(friendInput?.friendBirthTime || "").trim();
+  const birthCity = String(friendInput?.friendBirthCity || "").trim();
+  const hasDate = Boolean(birthDate);
+  const hasTime = Boolean(birthTime);
+  const hasCity = Boolean(birthCity);
+
+  const sun = hasDate ? signFromDate(birthDate) : "Unknown";
+  const moon = hasDate ? moonFromDate(birthDate) : "Unknown";
+  const rising = hasTime ? risingFromTime(birthTime) : "Unknown";
+  const completeness = Number(hasDate) + Number(hasTime) + Number(hasCity);
+  const confidence = completeness === 3 ? "high" : completeness === 2 ? "medium" : "baseline";
+
+  const base = {
+    core: { sun, moon, rising },
+    confidence,
+    birthDate: birthDate || null,
+    birthTime: birthTime || null,
+    birthCity: birthCity || null,
+    summary: hasDate
+      ? `${name}: ${sun} core, ${moon} emotional profile${hasTime ? `, ${rising} rising pattern` : ""}.`
+      : `${name}: add birth date to unlock sign-based mini natal profile.`,
+    planets: []
+  };
+
+  if (!hasDate) {
+    return base;
+  }
+
+  if (!hasTime || !hasCity) {
+    return base;
+  }
+
+  const geo = await geocodeCity(birthCity);
+  if (!geo || !Number.isFinite(geo.latitude) || !Number.isFinite(geo.longitude)) {
+    return base;
+  }
+
+  try {
+    const [year, monthRaw, day] = birthDate.split("-").map((value) => Number(value));
+    const [hour, minute] = birthTime.split(":").map((value) => Number(value));
+    if (![year, monthRaw, day, hour, minute].every((value) => Number.isFinite(value))) {
+      return base;
+    }
+    const origin = new Origin({
+      year,
+      month: monthRaw - 1,
+      date: day,
+      hour,
+      minute,
+      latitude: geo.latitude,
+      longitude: geo.longitude
+    });
+    const horoscope = new Horoscope({
+      origin,
+      houseSystem: "placidus",
+      zodiac: "tropical",
+      language: "en"
+    });
+    const planets = Array.isArray(horoscope?.CelestialBodies?.all)
+      ? horoscope.CelestialBodies.all
+        .filter((body) => ["sun", "moon", "mercury", "venus", "mars"].includes(String(body?.key || "").toLowerCase()))
+        .map((body) => ({
+          key: String(body?.label || body?.key || "Planet"),
+          sign: String(body?.Sign?.label || "Unknown"),
+          house: Number(body?.House?.id) || null
+        }))
+      : [];
+    return {
+      ...base,
+      core: {
+        sun: horoscope?.CelestialBodies?.sun?.Sign?.label || sun,
+        moon: horoscope?.CelestialBodies?.moon?.Sign?.label || moon,
+        rising: horoscope?.Ascendant?.Sign?.label || rising
+      },
+      confidence: "high",
+      summary: `${name}: ${horoscope?.CelestialBodies?.sun?.Sign?.label || sun} Sun, ${horoscope?.CelestialBodies?.moon?.Sign?.label || moon} Moon, ${horoscope?.Ascendant?.Sign?.label || rising} Rising.`,
+      planets
+    };
+  } catch {
+    return base;
+  }
+}
+
 function buildDynamicCompatibility(profile, friend, dayKey, period, userSign) {
   const normalizedUserSign = String(userSign || "").trim() || (profile ? signFromDate(profile.birthDate) : "Unknown");
+  const natalMini = friend?.natalMini && typeof friend.natalMini === "object"
+    ? friend.natalMini
+    : {
+        core: {
+          sun: friend?.friendBirthDate ? signFromDate(friend.friendBirthDate) : String(friend?.friendSign || "Unknown"),
+          moon: friend?.friendBirthDate ? moonFromDate(friend.friendBirthDate) : "Unknown",
+          rising: friend?.friendBirthTime ? risingFromTime(friend.friendBirthTime) : "Unknown"
+        },
+        confidence: friend?.friendBirthDate ? "baseline" : "low",
+        birthDate: friend?.friendBirthDate || null,
+        birthTime: friend?.friendBirthTime || null,
+        birthCity: friend?.friendBirthCity || null,
+        summary: ""
+      };
+  const resolvedFriendSign = String(natalMini?.core?.sun || friend?.friendSign || "").trim() || "Unknown";
   const detail = buildCompatibilityDetail({
     userSign: normalizedUserSign,
-    friendSign: friend.friendSign,
+    friendSign: resolvedFriendSign,
     friendName: friend.friendName,
     dayKey,
     period,
@@ -801,7 +929,14 @@ function buildDynamicCompatibility(profile, friend, dayKey, period, userSign) {
   return {
     id: friend.id,
     friendName: friend.friendName,
-    friendSign: friend.friendSign,
+    friendSign: resolvedFriendSign,
+    friendTelegram: String(friend.friendTelegram || ""),
+    friendEmail: String(friend.friendEmail || ""),
+    noShareData: Boolean(friend.noShareData),
+    friendBirthDate: String(friend.friendBirthDate || ""),
+    friendBirthTime: String(friend.friendBirthTime || ""),
+    friendBirthCity: String(friend.friendBirthCity || ""),
+    natalMini,
     ...detail
   };
 }
@@ -1681,17 +1816,41 @@ app.get("/api/friends", requireAuth, (req, res) => {
 
 app.post("/api/friends", requireAuth, async (req, res) => {
   const friendName = String(req.body?.friendName || "").trim();
-  const friendSign = String(req.body?.friendSign || "").trim();
-  if (!friendName || !friendSign) {
+  const friendBirthDate = String(req.body?.friendBirthDate || "").trim();
+  const friendBirthTime = String(req.body?.friendBirthTime || "").trim();
+  const friendBirthCity = String(req.body?.friendBirthCity || "").trim();
+  const noShareData = toBoolean(req.body?.noShareData);
+  const friendTelegram = normalizeTelegramHandle(req.body?.friendTelegram);
+  const friendEmail = normalizeEmail(req.body?.friendEmail);
+  if (!friendName || !friendBirthDate) {
     return res.status(400).json({
       error: "invalid_friend",
-      message: "friendName and friendSign are required"
+      message: "friendName and friendBirthDate are required"
     });
   }
+  if (!noShareData && !friendTelegram && !friendEmail) {
+    return res.status(400).json({
+      error: "contact_required",
+      message: "Provide telegram username or email, or enable noShareData."
+    });
+  }
+  const natalMini = await buildFriendNatalMini({
+    friendName,
+    friendBirthDate,
+    friendBirthTime,
+    friendBirthCity
+  });
   const friend = {
     id: crypto.randomUUID(),
     friendName,
-    friendSign,
+    friendBirthDate,
+    friendBirthTime: friendBirthTime || null,
+    friendBirthCity: friendBirthCity || null,
+    friendSign: natalMini?.core?.sun || signFromDate(friendBirthDate),
+    friendTelegram: noShareData ? "" : friendTelegram,
+    friendEmail: noShareData ? "" : friendEmail,
+    noShareData,
+    natalMini,
     createdAt: Date.now()
   };
   req.userData.friends = [friend, ...(req.userData.friends || [])].slice(0, 20);

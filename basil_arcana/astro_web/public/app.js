@@ -1359,6 +1359,12 @@ function renderFriendAccordion(friend, { expanded = false } = {}) {
   const score = Math.max(0, Math.min(100, Math.round(Number(friend?.score) || 0)));
   const highlights = Array.isArray(friend?.highlights) ? friend.highlights : [];
   const domains = Array.isArray(friend?.domains) ? friend.domains : [];
+  const friendCore = friend?.natalMini?.core || {
+    sun: friend?.friendSign || "Unknown",
+    moon: "Unknown",
+    rising: "Unknown"
+  };
+  const shareEnabled = !friend?.noShareData && (String(friend?.friendTelegram || "").trim() || String(friend?.friendEmail || "").trim());
   const detailId = `friend-detail-${String(friend?.id || friend?.friendName || "friend").replace(/[^a-z0-9_-]/gi, "_")}`;
   return `
     <article class="friend-accordion ${expanded ? "open" : ""}" data-id="${friend.id || ""}">
@@ -1376,6 +1382,15 @@ function renderFriendAccordion(friend, { expanded = false } = {}) {
       <div id="${detailId}" class="friend-accordion-body">
         <p class="friend-premium-note">${friend.note || "Compatibility insight will appear after analysis."}</p>
         <p class="friend-rationale">${friend.rationale || ""}</p>
+        <div class="friend-mini-natal">
+          <span>${zodiacIcon(friendCore.sun)} Sun: ${friendCore.sun}</span>
+          <span>${zodiacIcon(friendCore.moon)} Moon: ${friendCore.moon}</span>
+          <span>${zodiacIcon(friendCore.rising)} Rising: ${friendCore.rising}</span>
+          <span>Birth date: ${friend.friendBirthDate || "N/A"}</span>
+          <span>Birth time: ${friend.friendBirthTime || "N/A"}</span>
+          <span>Birth place: ${friend.friendBirthCity || "N/A"}</span>
+        </div>
+        ${friend?.natalMini?.summary ? `<p class="muted">${friend.natalMini.summary}</p>` : ""}
         ${renderFriendZodiacSnippet(friend.friendSign)}
         <div class="friend-domain-grid">
           ${domains
@@ -1395,7 +1410,11 @@ function renderFriendAccordion(friend, { expanded = false } = {}) {
         </ul>
         <p>${friend.advice || ""}</p>
         <div class="friend-actions">
-          <button class="btn ghost js-share-friend" type="button" data-name="${friend.friendName}" data-sign="${friend.friendSign}" data-score="${score}">Share with friend</button>
+          ${
+            shareEnabled
+              ? `<button class="btn ghost js-share-friend" type="button" data-name="${friend.friendName}" data-sign="${friend.friendSign}" data-score="${score}" data-telegram="${friend.friendTelegram || ""}" data-email="${friend.friendEmail || ""}">Share with friend</button>`
+              : `<p class="muted">Sharing unavailable: no contact method saved.</p>`
+          }
         </div>
       </div>
     </article>
@@ -2118,9 +2137,6 @@ function dailyViewLoading() {
 }
 
 function friendsView() {
-  const zodiacSelectOptions = zodiacOrder
-    .map((sign) => `<option value="${sign}">${sign}</option>`)
-    .join("");
   return `
     <section class="hero">
       <article class="card tone-card">
@@ -2133,12 +2149,26 @@ function friendsView() {
           <label>Friend name
             <input required name="friendName" placeholder="Friend name" />
           </label>
-          <label>Friend sign
-            <select required name="friendSign">
-              <option value="">Select sign</option>
-              ${zodiacSelectOptions}
-            </select>
+          <label>Birth date
+            <input required type="date" name="friendBirthDate" />
           </label>
+          <label>Birth time (optional)
+            <input type="time" name="friendBirthTime" />
+          </label>
+          <label>Birth place (optional)
+            <input name="friendBirthCity" placeholder="City, Country" />
+          </label>
+          <label>Telegram username
+            <input id="friendTelegram" name="friendTelegram" placeholder="@username" />
+          </label>
+          <label>Email
+            <input id="friendEmail" type="email" name="friendEmail" placeholder="friend@email.com" />
+          </label>
+          <label class="friend-no-share">
+            <input id="friendNoShareData" type="checkbox" name="noShareData" />
+            <span>I don't want to share data with friends</span>
+          </label>
+          <p class="muted friend-form-note">The more complete your friend's birth data, the more accurate the compatibility calculation.</p>
           <button class="btn primary form-submit" type="submit">Add friend</button>
         </form>
       </aside>
@@ -2258,7 +2288,9 @@ function bindShareFriendButtons(root = document) {
       const friendName = target.getAttribute("data-name") || "Friend";
       const friendSign = target.getAttribute("data-sign") || "Unknown";
       const score = Number(target.getAttribute("data-score")) || 0;
-      shareFriendCompatibility(friendName, friendSign, score);
+      const telegram = target.getAttribute("data-telegram") || "";
+      const email = target.getAttribute("data-email") || "";
+      shareFriendCompatibility(friendName, friendSign, score, { telegram, email });
     });
   });
 }
@@ -2275,14 +2307,34 @@ function normalizeTelegramHandle(value) {
   return withoutAt.replace(/[^a-zA-Z0-9_]/g, "");
 }
 
-function shareFriendCompatibility(friendName, friendSign, score) {
+function normalizeEmail(value) {
+  const raw = String(value || "").trim().toLowerCase();
+  return looksLikeEmail(raw) ? raw : "";
+}
+
+function shareFriendCompatibility(friendName, friendSign, score, contact = {}) {
   const pct = Math.max(0, Math.min(100, Math.round(Number(score) || 0)));
   const reason = pct >= 75
     ? "strong communication sync and stable emotional rhythm"
     : pct >= 62
       ? "moderate alignment with clear communication requirements"
       : "higher friction load that needs explicit boundaries";
-  openShareModal({ friendName, friendSign, score: pct, reason });
+  const shareUrl = `https://app.basilarcana.com/share.html?score=${encodeURIComponent(String(pct))}&sign=${encodeURIComponent(String(friendSign || ""))}`;
+  const subject = "Compatibility check from Astronautica";
+  const summary = `I checked our compatibility on app.basilarcana.com: ${pct}%.`;
+  const reasonText = `Why this score: ${reason}.`;
+  const body = `${shareUrl}\n\n${summary}\n${reasonText}`;
+  const telegram = normalizeTelegramHandle(contact.telegram || "");
+  const email = normalizeEmail(contact.email || "");
+  if (telegram) {
+    fetchJson("/api/metrics/share-invite", { method: "POST", body: JSON.stringify({}) }).catch(() => {});
+    window.open(`https://t.me/${encodeURIComponent(telegram)}?text=${encodeURIComponent(body)}`, "_blank", "noopener,noreferrer");
+    return;
+  }
+  if (email) {
+    fetchJson("/api/metrics/share-invite", { method: "POST", body: JSON.stringify({}) }).catch(() => {});
+    window.location.href = `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  }
 }
 
 function closeShareModal() {
@@ -2980,10 +3032,27 @@ function attachRouteHandlers(path) {
     });
 
     const form = document.getElementById("friendForm");
+    const telegramInput = document.getElementById("friendTelegram");
+    const emailInput = document.getElementById("friendEmail");
+    const noShareCheckbox = document.getElementById("friendNoShareData");
+    const syncFriendContactRules = () => {
+      const noShare = Boolean(noShareCheckbox?.checked);
+      if (telegramInput) {
+        telegramInput.required = !noShare && !(emailInput?.value || "").trim();
+      }
+      if (emailInput) {
+        emailInput.required = !noShare && !(telegramInput?.value || "").trim();
+      }
+    };
+    telegramInput?.addEventListener("input", syncFriendContactRules);
+    emailInput?.addEventListener("input", syncFriendContactRules);
+    noShareCheckbox?.addEventListener("change", syncFriendContactRules);
+    syncFriendContactRules();
     form?.addEventListener("submit", async (event) => {
       event.preventDefault();
       const formData = new FormData(form);
       const friend = Object.fromEntries(formData.entries());
+      friend.noShareData = Boolean(noShareCheckbox?.checked);
       try {
         const payload = await fetchJson("/api/friends", {
           method: "POST",
@@ -2991,6 +3060,7 @@ function attachRouteHandlers(path) {
         });
         state.friends = payload.friends || [];
         form.reset();
+        syncFriendContactRules();
         await refreshFriendInsights();
         renderFriendsList();
         const list = document.getElementById("friendsList");

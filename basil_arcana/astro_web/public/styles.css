@@ -496,6 +496,27 @@ p {
   letter-spacing: 0.05em;
 }
 
+.friend-no-share {
+  grid-template-columns: 20px 1fr;
+  align-items: center;
+  gap: 0.45rem;
+  text-transform: none;
+  letter-spacing: 0.01em;
+  font-size: 0.82rem;
+  color: var(--ink);
+}
+
+.friend-no-share input[type="checkbox"] {
+  min-height: 18px;
+  width: 18px;
+  margin: 0;
+}
+
+.friend-form-note {
+  margin-top: -0.2rem;
+  font-size: 0.78rem;
+}
+
 .form-grid input {
   width: 100%;
   border: 1px solid var(--line-strong);
@@ -919,6 +940,22 @@ p {
 
 .friend-rationale {
   margin-bottom: 0.45rem;
+}
+
+.friend-mini-natal {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.32rem;
+  margin-bottom: 0.48rem;
+}
+
+.friend-mini-natal span {
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--muted);
+  padding: 0.34rem 0.42rem;
+  font-size: 0.72rem;
+  line-height: 1.3;
 }
 
 .friend-domain-grid {
@@ -2350,6 +2387,10 @@ body[data-theme="light"] .energy-star.neutral {
   }
 
   .friend-domain-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .friend-mini-natal {
     grid-template-columns: 1fr;
   }
 
