@@ -2111,54 +2111,47 @@ function renderDailyAstronomySvg(astronomy, dayDashboard) {
     Number(dayDashboard?.todayEnergy) || 50,
     Number(dayDashboard?.tomorrowEnergy) || 50
   ];
-  const width = 1080;
-  const height = 292;
-  const leftPad = 32;
-  const rightPad = 28;
-  const topPad = 34;
-  const bottomPad = 52;
-  const usableWidth = width - leftPad - rightPad;
-  const stepX = usableWidth / 2;
-  const toY = (value) => topPad + (100 - Math.max(0, Math.min(100, value))) * ((height - topPad - bottomPad) / 100);
-  const points = energySeries.map((value, index) => ({
-    x: leftPad + index * stepX,
-    y: toY(value),
-    value
-  }));
-  const path = buildSmoothPath(points);
+  const deltas = [
+    0,
+    Number(dayDashboard?.deltaFromYesterday) || 0,
+    Number(dayDashboard?.deltaToTomorrow) || 0
+  ];
+  const trend = (delta) => {
+    if (delta > 0) {
+      return { icon: "▲", cls: "up", text: `+${delta}` };
+    }
+    if (delta < 0) {
+      return { icon: "▼", cls: "down", text: `${delta}` };
+    }
+    return { icon: "■", cls: "flat", text: "0" };
+  };
 
   return `
     <article class="route-card daily-astronomy-card">
       <h2>Astronomy pulse</h2>
-      <svg class="daily-astro-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="Daily astronomy dynamics">
-        <line class="daily-astro-axis" x1="${leftPad}" y1="${height - bottomPad}" x2="${width - rightPad}" y2="${height - bottomPad}" />
-        ${points
-          .map(
-            (point) =>
-              `<line class="daily-astro-grid" x1="${point.x}" y1="${topPad}" x2="${point.x}" y2="${height - bottomPad}" />`
-          )
-          .join("")}
-        <path class="daily-astro-line" d="${path}" />
-        ${points
-          .map(
-            (point, index) =>
-              `<g>
-                <polygon class="daily-astro-star ${index === 1 ? "today" : ""}" points="${starPoints(point.x, point.y, 11.2, 4.6)}" />
-                <text class="daily-astro-value" x="${point.x}" y="${point.y - 14}" text-anchor="middle">${point.value}</text>
-              </g>`
-          )
-          .join("")}
+      <div class="daily-astro-compact-grid">
         ${snapshots
           .map((item, index) => {
-            const x = leftPad + index * stepX;
+            const t = trend(deltas[index]);
             return `
-              <text class="daily-astro-label" x="${x}" y="${height - 26}" text-anchor="middle">${item.label}</text>
-              <text class="daily-astro-signs" x="${x}" y="${height - 11}" text-anchor="middle">${item.sun} · ${item.moon} · ${item.rising}</text>
+              <article class="daily-astro-compact-item ${index === 1 ? "today" : ""}">
+                <div class="daily-astro-head">
+                  <span class="daily-astro-big-star">✦</span>
+                  <span class="daily-astro-day">${item.label}</span>
+                </div>
+                <div class="daily-astro-main-row">
+                  <strong class="daily-astro-score">${energySeries[index]}</strong>
+                  <span class="daily-astro-trend ${t.cls}" aria-label="Trend ${t.text}">
+                    ${t.icon} ${t.text}
+                  </span>
+                </div>
+                <p class="daily-astro-signs-text">${item.sun} · ${item.moon} · ${item.rising}</p>
+              </article>
             `;
           })
           .join("")}
-      </svg>
-      <p class="muted">Signal line tracks daily transit pressure for your profile. Labels: Sun, Moon and Rising signs for each marker.</p>
+      </div>
+      <p class="muted">Three-point transit snapshot: yesterday baseline, today state, tomorrow drift.</p>
     </article>
   `;
 }

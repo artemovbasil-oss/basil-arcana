@@ -1362,6 +1362,84 @@ p {
   background: var(--surface-2);
 }
 
+.daily-astro-compact-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.62rem;
+}
+
+.daily-astro-compact-item {
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  padding: 0.75rem;
+  min-width: 0;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.daily-astro-compact-item.today {
+  border-color: var(--line-strong);
+}
+
+.daily-astro-head {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.daily-astro-big-star {
+  font-size: 1.45rem;
+  line-height: 1;
+  color: var(--ink);
+}
+
+.daily-astro-day {
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.68rem;
+}
+
+.daily-astro-main-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.daily-astro-score {
+  font-size: 1.6rem;
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+
+.daily-astro-trend {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.daily-astro-trend.up {
+  color: #1f9d55;
+}
+
+.daily-astro-trend.down {
+  color: #d64545;
+}
+
+.daily-astro-trend.flat {
+  color: var(--muted);
+}
+
+.daily-astro-signs-text {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
 .daily-astro-axis {
   stroke: var(--line-strong);
   stroke-width: 1;
@@ -1793,6 +1871,23 @@ body[data-theme="light"] .energy-star.neutral {
 
   .daily-achievement-grid {
     grid-template-columns: 1fr;
+  }
+
+  .daily-astro-compact-grid {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .daily-astro-compact-item {
+    padding: 0.7rem;
+  }
+
+  .daily-astro-big-star {
+    font-size: 1.6rem;
+  }
+
+  .daily-astro-score {
+    font-size: 1.45rem;
   }
 
   .daily-astro-value {
