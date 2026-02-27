@@ -1797,6 +1797,53 @@ function renderPlanetPlacementTable(planets) {
   `;
 }
 
+function aspectVisualMeta(text) {
+  const value = String(text || "");
+  if (value.includes("Conjunction")) {
+    return { label: "Conjunction", cls: "conjunction", icon: "⊙" };
+  }
+  if (value.includes("Trine")) {
+    return { label: "Trine", cls: "trine", icon: "△" };
+  }
+  if (value.includes("Square")) {
+    return { label: "Square", cls: "square", icon: "□" };
+  }
+  if (value.includes("Opposition")) {
+    return { label: "Opposition", cls: "opposition", icon: "☍" };
+  }
+  if (value.includes("Sextile")) {
+    return { label: "Sextile", cls: "sextile", icon: "✶" };
+  }
+  return { label: "Aspect", cls: "generic", icon: "◌" };
+}
+
+function renderAspectCards(items) {
+  const safe = Array.isArray(items) ? items.slice(0, 8) : [];
+  return `
+    <div class="aspect-grid">
+      ${safe
+        .map((item) => {
+          const meta = aspectVisualMeta(item);
+          return `
+            <article class="aspect-card ${meta.cls}">
+              <span class="aspect-type">${meta.icon} ${meta.label}</span>
+              <p>${item}</p>
+              <svg class="aspect-corner" viewBox="0 0 64 64" role="img" aria-label="${meta.label} pattern">
+                <polyline points="2,2 62,2 62,62" />
+                <line x1="18" y1="18" x2="46" y2="18" />
+                <line x1="46" y1="18" x2="46" y2="46" />
+                <circle cx="18" cy="18" r="3.2" />
+                <circle cx="46" cy="18" r="3.2" />
+                <circle cx="46" cy="46" r="3.2" />
+              </svg>
+            </article>
+          `;
+        })
+        .join("")}
+    </div>
+  `;
+}
+
 function buildNatalEditorial(profile, report) {
   const sun = report?.core?.sun || "Unknown";
   const moon = report?.core?.moon || "Unknown";
@@ -1861,7 +1908,7 @@ function buildNatalEditorial(profile, report) {
         <span class="premium-kicker">Geometry</span>
         <h2>Aspect Dynamics</h2>
         <p>Aspects describe internal coordination between drives. Harmonious links make execution cheaper; frictional links require conscious sequencing and recovery hygiene.</p>
-        <ul class="bullet-list">${aspects.slice(0, 8).map((item) => `<li>${item}</li>`).join("")}</ul>
+        ${renderAspectCards(aspects)}
       </article>
     </section>
     <section class="section" id="natal-plan">
