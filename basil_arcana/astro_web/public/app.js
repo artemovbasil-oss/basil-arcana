@@ -2269,25 +2269,66 @@ function renderFriendsList() {
 }
 
 function bindFriendAccordionInteractions(root = document) {
+  const closeCard = (card) => {
+    if (!(card instanceof HTMLElement)) {
+      return;
+    }
+    const button = card.querySelector(".friend-accordion-trigger");
+    const body = card.querySelector(".friend-accordion-body");
+    card.classList.remove("open");
+    if (button instanceof HTMLElement) {
+      button.setAttribute("aria-expanded", "false");
+    }
+    if (body instanceof HTMLElement) {
+      if (body.style.maxHeight === "none") {
+        body.style.maxHeight = `${body.scrollHeight}px`;
+      }
+      window.requestAnimationFrame(() => {
+        body.style.maxHeight = "0px";
+      });
+    }
+  };
+
+  const openCard = (card) => {
+    if (!(card instanceof HTMLElement)) {
+      return;
+    }
+    const button = card.querySelector(".friend-accordion-trigger");
+    const body = card.querySelector(".friend-accordion-body");
+    card.classList.add("open");
+    if (button instanceof HTMLElement) {
+      button.setAttribute("aria-expanded", "true");
+    }
+    if (body instanceof HTMLElement) {
+      body.style.maxHeight = "0px";
+      window.requestAnimationFrame(() => {
+        body.style.maxHeight = `${body.scrollHeight + 48}px`;
+      });
+      body.addEventListener("transitionend", () => {
+        if (card.classList.contains("open")) {
+          body.style.maxHeight = "none";
+        }
+      }, { once: true });
+    }
+  };
+
   root.querySelectorAll(".friend-accordion-trigger").forEach((button) => {
     button.addEventListener("click", () => {
       const card = button.closest(".friend-accordion");
       if (!(card instanceof HTMLElement)) {
         return;
       }
-      const body = card.querySelector(".friend-accordion-body");
-      const isOpen = card.classList.toggle("open");
-      button.setAttribute("aria-expanded", isOpen ? "true" : "false");
-      if (body instanceof HTMLElement) {
-        if (isOpen) {
-          body.style.maxHeight = `${body.scrollHeight + 24}px`;
-          window.setTimeout(() => {
-            body.style.maxHeight = `${body.scrollHeight + 24}px`;
-          }, 140);
-        } else {
-          body.style.maxHeight = "0px";
+      const isAlreadyOpen = card.classList.contains("open");
+      root.querySelectorAll(".friend-accordion.open").forEach((openCardNode) => {
+        if (openCardNode !== card) {
+          closeCard(openCardNode);
         }
+      });
+      if (isAlreadyOpen) {
+        closeCard(card);
+        return;
       }
+      openCard(card);
     });
   });
 }

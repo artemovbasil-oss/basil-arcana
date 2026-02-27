@@ -969,7 +969,6 @@ p {
 }
 
 .friend-accordion.open .friend-accordion-body {
-  max-height: 0;
   opacity: 1;
   border-top: 1px solid var(--line);
   padding: 0.7rem 0.72rem 0.8rem;
