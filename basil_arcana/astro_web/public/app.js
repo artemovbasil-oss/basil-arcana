@@ -983,16 +983,23 @@ function renderCosmicStatePanel(dashboard, period) {
       </div>
       <svg class="astro-viz-svg" viewBox="0 0 420 220" role="img" aria-label="Current planetary state">
         <g class="astro-viz-core">
-          <circle class="astro-viz-scan" cx="${center.x}" cy="${center.y}" r="${rings[2] + 7}" />
+          <circle class="astro-viz-ring-dashed" cx="${center.x}" cy="${center.y}" r="${rings[2] + 7}" />
           <circle class="astro-viz-ring" cx="${center.x}" cy="${center.y}" r="${rings[2]}" />
           <circle class="astro-viz-ring" cx="${center.x}" cy="${center.y}" r="${rings[1]}" />
           <circle class="astro-viz-ring" cx="${center.x}" cy="${center.y}" r="${rings[0]}" />
           ${bodies
             .map((body, i) => {
               const p = pointFromAngle(center.x, center.y, rings[i], body.angle);
+              const orbitRadius = i === 0 ? 8 : i === 1 ? 6.8 : 6;
+              const spinClass = i % 2 === 0 ? "astro-viz-satellite-system" : "astro-viz-satellite-system reverse";
+              const spinDuration = (8 + i * 2.2).toFixed(1);
               return `
                 <circle class="astro-viz-node" cx="${p.x}" cy="${p.y}" r="${i === 0 ? 5.6 : 4.8}" style="fill:${colors[i]}" />
                 <line class="astro-viz-ray" x1="${center.x}" y1="${center.y}" x2="${p.x}" y2="${p.y}" />
+                <g class="${spinClass}" style="transform-origin:${p.x}px ${p.y}px;animation-duration:${spinDuration}s">
+                  <circle class="astro-viz-sat-orbit" cx="${p.x}" cy="${p.y}" r="${orbitRadius}" />
+                  <circle class="astro-viz-sat-dot" cx="${p.x}" cy="${p.y - orbitRadius}" r="1.5" />
+                </g>
               `;
             })
             .join("")}
@@ -1450,7 +1457,7 @@ function bindHomePeriodHandlers() {
 function homeViewLoading() {
   return `
     <section class="section">
-      <article class="card">
+      <article class="card tone-card">
         <span class="eyebrow">Dashboard</span>
         <h1>Astronautica</h1>
         <p id="homeStatus">Loading personal dashboard...</p>
@@ -1479,7 +1486,7 @@ function renderHomeDashboard(dashboard) {
 
   return `
     <section class="hero">
-      <article class="card">
+      <article class="card tone-card">
         <span class="eyebrow">User Dashboard</span>
         <h1 class="dashboard-name"><span class="${nameClass}">${displayName}</span></h1>
         <div class="chip-grid">
@@ -1525,7 +1532,7 @@ function loginView() {
   if (state.authenticated) {
     return `
       <section class="section">
-        <article class="card">
+        <article class="card tone-card">
           <span class="eyebrow">Authentication</span>
           <h1>You are signed in</h1>
           <p>Provider: Telegram ${userLabel ? `(${userLabel})` : ""}</p>
@@ -1542,7 +1549,7 @@ function loginView() {
 
   return `
     <section class="section">
-      <article class="card">
+      <article class="card tone-card">
         <span class="eyebrow">Authentication</span>
         <h1>Sign in with Telegram</h1>
         <p>This service is available only to authorized users.</p>
@@ -1572,7 +1579,7 @@ function onboardingView() {
   const resolvedName = profile.name || fallbackName;
   return `
     <section class="section">
-      <article class="card">
+      <article class="card tone-card">
         <span class="eyebrow">Step 1</span>
         <h1>Build your birth profile</h1>
         <p>Accurate date, time and place are critical for house structure and rising sign quality.</p>
@@ -1620,7 +1627,7 @@ function profileView() {
   ];
   return `
     <section class="section">
-      <article class="card">
+      <article class="card tone-card">
         <span class="eyebrow">Profile</span>
         <h1>Account</h1>
         <p>${authLabel || "Telegram user"}.</p>
@@ -1687,7 +1694,7 @@ function profileView() {
 function natalViewLoading() {
   return `
     <section class="section">
-      <article class="card">
+      <article class="card tone-card">
         <span class="eyebrow">Step 2 · Natal</span>
         <h1>Your natal report</h1>
         <p id="natalStatus">Preparing your chart...</p>
@@ -1709,7 +1716,7 @@ function renderNatalHeader(profile, report) {
 
   return `
     <section class="section">
-      <article class="card natal-head-card">
+      <article class="card natal-head-card tone-card">
         <span class="eyebrow">Natal Report</span>
         <h1 class="natal-main-name"><span class="${nameClass}">${profile?.name || "User"}</span></h1>
         <div class="chip-grid">
@@ -2079,7 +2086,7 @@ function natalViewEmpty() {
 function dailyViewLoading() {
   return `
     <section class="section">
-      <article class="card">
+      <article class="card tone-card">
         <span class="eyebrow">Step 3 · Daily</span>
         <h1>Daily focus</h1>
         <p id="dailyStatus">Building daily signal...</p>
@@ -2094,7 +2101,7 @@ function friendsView() {
     .join("");
   return `
     <section class="hero">
-      <article class="card">
+      <article class="card tone-card">
         <span class="eyebrow">Friends</span>
         <h1>Check friends?</h1>
         <p>Fast synastry-lite view for communication quality, conflict timing and daily collaboration windows.</p>
@@ -2126,7 +2133,7 @@ function friendsView() {
 function faqView() {
   return `
     <section class="section">
-      <article class="card">
+      <article class="card tone-card">
         <span class="eyebrow">FAQ</span>
         <h1>Astronautica method</h1>
         <div class="faq">
@@ -2574,7 +2581,7 @@ async function hydrateDaily() {
 
     app.innerHTML = `
       <section class="hero">
-        <article class="card daily-hero-main">
+        <article class="card daily-hero-main tone-card">
           <span class="eyebrow">Daily Ritual</span>
           <h1>${data.dateLabel}</h1>
           <p>${data.intro}</p>
