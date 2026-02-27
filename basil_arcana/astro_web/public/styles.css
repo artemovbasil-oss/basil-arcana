@@ -1342,7 +1342,7 @@ p {
 }
 
 .zodiac-sign-panel.compact {
-  grid-template-columns: 240px minmax(0, 1fr);
+  grid-template-columns: 320px minmax(0, 1fr);
 }
 
 .zodiac-sign-image-wrap {
@@ -1355,7 +1355,7 @@ p {
 }
 
 .zodiac-sign-image-wrap.compact {
-  min-height: 240px;
+  min-height: 320px;
 }
 
 .zodiac-sign-image {
@@ -1367,7 +1367,7 @@ p {
 }
 
 .zodiac-sign-image.compact {
-  max-height: 300px;
+  max-height: 390px;
 }
 
 .zodiac-sign-copy {
@@ -1390,6 +1390,92 @@ p {
 .zodiac-compact-card {
   display: grid;
   gap: 0.55rem;
+}
+
+.zodiac-home-copy {
+  gap: 0.62rem;
+}
+
+.zodiac-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.zodiac-chip {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  color: var(--ink);
+  padding: 0.26rem 0.46rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.zodiac-signal-card {
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  padding: 0.5rem 0.55rem;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.zodiac-signal-row {
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1fr);
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.zodiac-signal-row span {
+  color: var(--muted);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.zodiac-signal-track {
+  height: 6px;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface) 80%, transparent 20%);
+  position: relative;
+}
+
+.zodiac-signal-track i {
+  display: block;
+  height: 100%;
+  background: var(--ink);
+}
+
+.zodiac-natal-card {
+  text-align: center;
+  align-items: center;
+}
+
+.zodiac-sign-image-wrap-natal {
+  width: 100%;
+  min-height: 520px;
+}
+
+.zodiac-sign-image-natal {
+  width: 100%;
+  max-height: 640px;
+}
+
+.zodiac-natal-lead {
+  font-size: clamp(1.1rem, 2.3vw, 1.55rem);
+  line-height: 1.42;
+  color: var(--ink);
+  max-width: 940px;
+  margin: 0 auto;
+}
+
+.zodiac-natal-secondary {
+  max-width: 920px;
+  margin: 0 auto;
+  color: var(--muted);
 }
 
 .today-panel {
@@ -2047,8 +2133,21 @@ body[data-theme="light"] .energy-star.neutral {
 
   .zodiac-sign-image-wrap.compact,
   .zodiac-sign-image.compact {
-    min-height: 220px;
+    min-height: 280px;
     height: auto;
+  }
+
+  .zodiac-signal-row {
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
+  }
+
+  .zodiac-sign-image-wrap-natal {
+    min-height: 320px;
+  }
+
+  .zodiac-sign-image-natal {
+    max-height: 420px;
   }
 
   .placement-chip {

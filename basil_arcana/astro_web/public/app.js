@@ -336,6 +336,29 @@ function zodiacLongRead(sign) {
   };
 }
 
+function zodiacSignalModel(sign) {
+  const normalized = resolveZodiacSign(sign);
+  const index = Math.max(0, zodiacOrder.indexOf(normalized));
+  const focus = 62 + ((index * 7) % 29);
+  const adaptability = 54 + ((index * 11) % 33);
+  const social = 48 + ((index * 13) % 39);
+  return {
+    focus: Math.max(40, Math.min(96, focus)),
+    adaptability: Math.max(40, Math.min(96, adaptability)),
+    social: Math.max(40, Math.min(96, social))
+  };
+}
+
+function zodiacSignalChips(sign) {
+  const details = zodiacDetails(sign);
+  return [
+    `Element: ${details.element}`,
+    `Mode: ${details.modality}`,
+    "Core vector: identity",
+    "Timing: weekly cadence"
+  ];
+}
+
 const aspectAngles = [0, 60, 90, 120, 180];
 const zodiacIconClasses = {
   Aries: "mdi:zodiac-aries",
@@ -1176,25 +1199,20 @@ function renderNatalZodiacSection(sign) {
   const signLabel = details.sign === "Unknown" ? "Sign" : details.sign;
   return `
     <section class="section" id="natal-zodiac-sign">
-      <article class="route-card content-panel premium-panel">
+      <article class="route-card content-panel premium-panel zodiac-natal-card">
         <span class="premium-kicker">Archetype</span>
         <h2>${signLabel} Profile</h2>
-        <div class="zodiac-sign-panel">
-          <div class="zodiac-sign-image-wrap">
-            ${
-              details.imageUrl
-                ? `<img class="zodiac-sign-image" src="${details.imageUrl}" alt="${signLabel} zodiac illustration" loading="lazy" decoding="async" />`
-                : `<div class="zodiac-sign-fallback">${zodiacIcon(signLabel)} ${signLabel}</div>`
-            }
-          </div>
-          <div class="zodiac-sign-copy">
-            <p class="dropcap">${details.natal}</p>
-            <p>${details.brief}</p>
-            <p>${deep.structural}</p>
-            <p>${deep.dynamics}</p>
-            <p><strong>Operational note:</strong> ${deep.practical}</p>
-          </div>
+        <div class="zodiac-sign-image-wrap zodiac-sign-image-wrap-natal">
+          ${
+            details.imageUrl
+              ? `<img class="zodiac-sign-image zodiac-sign-image-natal" src="${details.imageUrl}" alt="${signLabel} zodiac illustration" loading="lazy" decoding="async" />`
+              : `<div class="zodiac-sign-fallback">${zodiacIcon(signLabel)} ${signLabel}</div>`
+          }
         </div>
+        <p class="zodiac-natal-lead">${details.natal}</p>
+        <p class="zodiac-natal-secondary">${deep.structural}</p>
+        <p class="zodiac-natal-secondary">${deep.dynamics}</p>
+        <p class="zodiac-natal-secondary"><strong>Operational note:</strong> ${deep.practical}</p>
       </article>
     </section>
   `;
@@ -1203,6 +1221,8 @@ function renderNatalZodiacSection(sign) {
 function renderHomeZodiacCompact(sign) {
   const details = zodiacDetails(sign);
   const deep = zodiacLongRead(sign);
+  const chips = zodiacSignalChips(sign);
+  const signals = zodiacSignalModel(sign);
   const signLabel = details.sign === "Unknown" ? "Sign" : details.sign;
   return `
     <section class="section">
@@ -1217,9 +1237,26 @@ function renderHomeZodiacCompact(sign) {
                 : `<div class="zodiac-sign-fallback">${zodiacIcon(signLabel)} ${signLabel}</div>`
             }
           </div>
-          <div class="zodiac-sign-copy">
+          <div class="zodiac-sign-copy zodiac-home-copy">
             <p>${details.compact}</p>
             <p>${deep.structural}</p>
+            <div class="zodiac-chip-row">
+              ${chips.map((chip) => `<span class="zodiac-chip">${chip}</span>`).join("")}
+            </div>
+            <div class="zodiac-signal-card" role="img" aria-label="${signLabel} signal profile">
+              <div class="zodiac-signal-row">
+                <span>Focus</span>
+                <div class="zodiac-signal-track"><i style="width:${signals.focus}%"></i></div>
+              </div>
+              <div class="zodiac-signal-row">
+                <span>Adaptability</span>
+                <div class="zodiac-signal-track"><i style="width:${signals.adaptability}%"></i></div>
+              </div>
+              <div class="zodiac-signal-row">
+                <span>Social clarity</span>
+                <div class="zodiac-signal-track"><i style="width:${signals.social}%"></i></div>
+              </div>
+            </div>
           </div>
         </div>
       </article>
