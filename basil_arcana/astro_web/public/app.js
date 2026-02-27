@@ -730,6 +730,167 @@ function renderEnergyCards(dashboard, period) {
   `;
 }
 
+function transitionSeries(dashboard, period) {
+  const series = dashboard?.periodForecast?.series;
+  if (!series || series.period !== period || !Array.isArray(series.transits)) {
+    return [];
+  }
+  return series.transits;
+}
+
+function bodyCycleData(dashboard, period) {
+  const transits = transitionSeries(dashboard, period);
+  const periodSize = period === "year" ? 12 : period === "month" ? daysInCurrentMonth() : 7;
+  const idx = todayIndexForPeriod(period, periodSize);
+  const current = transits[idx] || {};
+  const signs = [current?.sun?.sign || dashboard?.natalCore?.sun, current?.moon?.sign || dashboard?.natalCore?.moon, current?.rising?.sign || dashboard?.natalCore?.rising];
+  const realAngles = [current?.sun?.angle, current?.moon?.angle, current?.rising?.angle];
+  const names = ["Sun", "Moon", "Rising"];
+  return names.map((name, i) => {
+    const sign = String(signs[i] || "Unknown");
+    const fallback = ((zodiacIndex(sign) * 30 + 15) % 360 + 360) % 360;
+    const angle = Number.isFinite(realAngles[i]) ? realAngles[i] : fallback;
+    const value = buildEnergySeries(dashboard, period).values[(idx + i * 2) % Math.max(1, periodSize)] || 50;
+    return { name, sign, angle, value };
+  });
+}
+
+function pointFromAngle(cx, cy, radius, degrees) {
+  const a = ((degrees - 90) * Math.PI) / 180;
+  return { x: cx + Math.cos(a) * radius, y: cy + Math.sin(a) * radius };
+}
+
+function renderCosmicStatePanel(dashboard, period) {
+  const bodies = bodyCycleData(dashboard, period);
+  const center = { x: 120, y: 110 };
+  const rings = [36, 58, 80];
+  const colors = ["#f3f3f3", "#9d9d9d", "#5f5f5f"];
+  return `
+    <article class="astro-viz-card">
+      <h3>Current sky state</h3>
+      <svg class="astro-viz-svg" viewBox="0 0 420 220" role="img" aria-label="Current planetary state">
+        <g class="astro-viz-core">
+          <circle class="astro-viz-ring" cx="${center.x}" cy="${center.y}" r="${rings[2]}" />
+          <circle class="astro-viz-ring" cx="${center.x}" cy="${center.y}" r="${rings[1]}" />
+          <circle class="astro-viz-ring" cx="${center.x}" cy="${center.y}" r="${rings[0]}" />
+          ${bodies
+            .map((body, i) => {
+              const p = pointFromAngle(center.x, center.y, rings[i], body.angle);
+              return `
+                <circle class="astro-viz-node" cx="${p.x}" cy="${p.y}" r="${i === 0 ? 5.6 : 4.8}" style="fill:${colors[i]}" />
+                <line class="astro-viz-ray" x1="${center.x}" y1="${center.y}" x2="${p.x}" y2="${p.y}" />
+              `;
+            })
+            .join("")}
+        </g>
+        <g transform="translate(250 26)">
+          ${bodies
+            .map(
+              (body, i) => `
+                <text class="astro-viz-label" x="0" y="${24 + i * 54}">
+                  ${zodiacIcon(body.sign)} ${body.name} · ${body.sign}
+                </text>
+                <text class="astro-viz-value" x="0" y="${44 + i * 54}">${Math.round(body.value)}/100 phase energy</text>
+              `
+            )
+            .join("")}
+        </g>
+      </svg>
+    </article>
+  `;
+}
+
+function renderCyclePanel(dashboard, period) {
+  const transits = transitionSeries(dashboard, period);
+  if (transits.length) {
+    const width = 420;
+    const height = 220;
+    const center = { x: 136, y: 108 };
+    const bodies = [
+      { key: "sun", label: "Sun", radius: 64, color: "#f1f1f1" },
+      { key: "moon", label: "Moon", radius: 48, color: "#9c9c9c" },
+      { key: "rising", label: "Rising", radius: 34, color: "#5f5f5f" }
+    ];
+    const toPoly = (body) =>
+      transits
+        .map((step) => {
+          const raw = Number(step?.[body.key]?.angle);
+          const angle = Number.isFinite(raw) ? raw : zodiacIndex(step?.[body.key]?.sign) * 30;
+          const p = pointFromAngle(center.x, center.y, body.radius, angle);
+          return `${p.x},${p.y}`;
+        })
+        .join(" ");
+    const first = transits[0] || {};
+    const last = transits[transits.length - 1] || {};
+    return `
+      <article class="astro-viz-card">
+        <h3>Lifecycle through ${period}</h3>
+        <svg class="astro-viz-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="Planet lifecycle">
+          <circle class="astro-viz-ring" cx="${center.x}" cy="${center.y}" r="72" />
+          <circle class="astro-viz-ring" cx="${center.x}" cy="${center.y}" r="56" />
+          <circle class="astro-viz-ring" cx="${center.x}" cy="${center.y}" r="40" />
+          ${bodies
+            .map(
+              (body) => `
+                <polyline class="astro-viz-orbit ${body.key}" points="${toPoly(body)}" style="stroke:${body.color}" />
+              `
+            )
+            .join("")}
+          <g transform="translate(246 30)">
+            ${bodies
+              .map((body, i) => {
+                const startSign = first?.[body.key]?.sign || "Unknown";
+                const endSign = last?.[body.key]?.sign || "Unknown";
+                return `
+                  <text class="astro-viz-label" x="0" y="${24 + i * 54}">${body.label}</text>
+                  <text class="astro-viz-value" x="0" y="${44 + i * 54}">${startSign} → ${endSign}</text>
+                `;
+              })
+              .join("")}
+          </g>
+        </svg>
+      </article>
+    `;
+  }
+  const series = buildEnergySeries(dashboard, period);
+  const values = series.values;
+  const avg = Math.round(values.reduce((sum, v) => sum + v, 0) / Math.max(1, values.length));
+  const peak = values[series.peakIndex] || 0;
+  const dip = values[series.dipIndex] || 0;
+  const width = 420;
+  const height = 220;
+  const y = (value) => 182 - (value / 100) * 140;
+  const step = (width - 54) / Math.max(1, values.length - 1);
+  const pts = values.map((v, i) => `${28 + i * step},${y(v)}`).join(" ");
+  const markerX = 28 + todayIndexForPeriod(period, values.length) * step;
+  const duration = period === "week" ? 7 : period === "month" ? 12 : 18;
+  return `
+    <article class="astro-viz-card">
+      <h3>Cycle through ${period}</h3>
+      <svg class="astro-viz-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="Planetary cycle">
+        <polyline class="astro-viz-cycle-line" points="${pts}" />
+        <line class="astro-viz-now-line" x1="${markerX}" y1="24" x2="${markerX}" y2="186" />
+        <circle class="astro-viz-now-dot" cx="${markerX}" cy="${y(values[todayIndexForPeriod(period, values.length)] || 50)}" r="5" />
+        <g class="astro-viz-sweep" style="animation-duration:${duration}s">
+          <line x1="28" y1="186" x2="${width - 26}" y2="186" />
+        </g>
+        <text class="astro-viz-stat" x="28" y="208">avg ${avg}</text>
+        <text class="astro-viz-stat" x="140" y="208">peak ${peak}</text>
+        <text class="astro-viz-stat" x="260" y="208">dip ${dip}</text>
+      </svg>
+    </article>
+  `;
+}
+
+function renderAstroVizRow(dashboard, period) {
+  return `
+    <div class="astro-viz-row">
+      ${renderCosmicStatePanel(dashboard, period)}
+      ${renderCyclePanel(dashboard, period)}
+    </div>
+  `;
+}
+
 function bindEnergyChartInteractions() {
   document.querySelectorAll(".energy-chart").forEach((svg) => {
     const hoverLine = svg.querySelector(".energy-hover-line");
@@ -912,6 +1073,7 @@ function renderForecastSummary(dashboard, period) {
   return `
     <p><strong>${periodLabel} intensity: ${intensity}/100.</strong> ${dashboard?.periodForecast?.summary || ""}</p>
     ${detailBlock}
+    ${renderAstroVizRow(dashboard, period)}
   `;
 }
 

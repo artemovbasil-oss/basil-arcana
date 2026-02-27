@@ -491,6 +491,7 @@ function buildRealEnergySeries(profile, period, now, natalCore) {
   const month = now.getUTCMonth();
   const labels = [];
   const values = [];
+  const transits = [];
   for (let idx = 0; idx < count; idx += 1) {
     let pointDate;
     if (period === "year") {
@@ -524,6 +525,32 @@ function buildRealEnergySeries(profile, period, now, natalCore) {
       const transitSun = horoscope?.CelestialBodies?.sun?.Sign?.label || "Unknown";
       const transitMoon = horoscope?.CelestialBodies?.moon?.Sign?.label || "Unknown";
       const transitRising = horoscope?.Ascendant?.Sign?.label || "Unknown";
+      const bodyAngle = (body) => {
+        const raw = Number(body?.ChartPosition?.Ecliptic?.DecimalDegrees);
+        if (!Number.isFinite(raw)) {
+          return null;
+        }
+        const normalized = ((raw % 360) + 360) % 360;
+        return Number(normalized.toFixed(3));
+      };
+      transits.push({
+        label: labels[labels.length - 1],
+        sun: { sign: transitSun, angle: bodyAngle(horoscope?.CelestialBodies?.sun) },
+        moon: { sign: transitMoon, angle: bodyAngle(horoscope?.CelestialBodies?.moon) },
+        rising: { sign: transitRising, angle: bodyAngle(horoscope?.Ascendant) },
+        mercury: {
+          sign: horoscope?.CelestialBodies?.mercury?.Sign?.label || "Unknown",
+          angle: bodyAngle(horoscope?.CelestialBodies?.mercury)
+        },
+        venus: {
+          sign: horoscope?.CelestialBodies?.venus?.Sign?.label || "Unknown",
+          angle: bodyAngle(horoscope?.CelestialBodies?.venus)
+        },
+        mars: {
+          sign: horoscope?.CelestialBodies?.mars?.Sign?.label || "Unknown",
+          angle: bodyAngle(horoscope?.CelestialBodies?.mars)
+        }
+      });
       const natalSun = natalCore?.sun || "Unknown";
       const natalMoon = natalCore?.moon || "Unknown";
       const natalRising = natalCore?.rising || "Unknown";
@@ -538,6 +565,15 @@ function buildRealEnergySeries(profile, period, now, natalCore) {
       values.push(Math.max(8, Math.min(96, Math.round(score))));
     } catch {
       values.push(50);
+      transits.push({
+        label: labels[labels.length - 1],
+        sun: { sign: "Unknown", angle: null },
+        moon: { sign: "Unknown", angle: null },
+        rising: { sign: "Unknown", angle: null },
+        mercury: { sign: "Unknown", angle: null },
+        venus: { sign: "Unknown", angle: null },
+        mars: { sign: "Unknown", angle: null }
+      });
     }
   }
   const peak = Math.max(...values);
@@ -548,7 +584,8 @@ function buildRealEnergySeries(profile, period, now, natalCore) {
     labels,
     peakIndex: values.indexOf(peak),
     dipIndex: values.indexOf(dip),
-    source: "transit-derived"
+    source: "transit-derived",
+    transits
   };
 }
 
