@@ -423,27 +423,59 @@ function hasUsableCoordinates(profile) {
   if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
     return false;
   }
+  return true;
+}
+
+function hasMeaningfulCoordinates(profile) {
+  const latitude = Number(profile?.latitude);
+  const longitude = Number(profile?.longitude);
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+    return false;
+  }
   return !(Math.abs(latitude) < 1e-9 && Math.abs(longitude) < 1e-9);
 }
 
 function signFromDate(dateText) {
-  const date = new Date(`${dateText}T00:00:00Z`);
-  const month = Number.isFinite(date.getUTCMonth()) ? date.getUTCMonth() : 0;
-  const signs = [
-    "Capricorn",
-    "Aquarius",
-    "Pisces",
-    "Aries",
-    "Taurus",
-    "Gemini",
-    "Cancer",
-    "Leo",
-    "Virgo",
-    "Libra",
-    "Scorpio",
-    "Sagittarius"
+  const [monthRaw, dayRaw] = String(dateText || "")
+    .split("-")
+    .slice(1, 3)
+    .map((value) => Number(value));
+  const month = Number.isFinite(monthRaw) ? monthRaw : null;
+  const day = Number.isFinite(dayRaw) ? dayRaw : null;
+  if (month && day) {
+    return signFromMonthDay(month, day);
+  }
+  const fallback = new Date(`${dateText}T00:00:00Z`);
+  const fallbackMonth = Number.isFinite(fallback.getUTCMonth()) ? fallback.getUTCMonth() + 1 : 1;
+  const fallbackDay = Number.isFinite(fallback.getUTCDate()) ? fallback.getUTCDate() : 1;
+  return signFromMonthDay(fallbackMonth, fallbackDay);
+}
+
+function signFromMonthDay(month, day) {
+  const value = month * 100 + day;
+  const ranges = [
+    { sign: "Capricorn", from: 1222, to: 119, wrap: true },
+    { sign: "Aquarius", from: 120, to: 218, wrap: false },
+    { sign: "Pisces", from: 219, to: 320, wrap: false },
+    { sign: "Aries", from: 321, to: 419, wrap: false },
+    { sign: "Taurus", from: 420, to: 520, wrap: false },
+    { sign: "Gemini", from: 521, to: 620, wrap: false },
+    { sign: "Cancer", from: 621, to: 722, wrap: false },
+    { sign: "Leo", from: 723, to: 822, wrap: false },
+    { sign: "Virgo", from: 823, to: 922, wrap: false },
+    { sign: "Libra", from: 923, to: 1022, wrap: false },
+    { sign: "Scorpio", from: 1023, to: 1121, wrap: false },
+    { sign: "Sagittarius", from: 1122, to: 1221, wrap: false }
   ];
-  return signs[(month + 11) % 12];
+  for (const item of ranges) {
+    if (!item.wrap && value >= item.from && value <= item.to) {
+      return item.sign;
+    }
+    if (item.wrap && (value >= item.from || value <= item.to)) {
+      return item.sign;
+    }
+  }
+  return "Capricorn";
 }
 
 function moonFromDate(dateText) {
@@ -1043,7 +1075,7 @@ async function suggestCities(query, limit = 12) {
 }
 
 async function ensureProfileCoordinates(profile) {
-  if (hasUsableCoordinates(profile)) {
+  if (hasMeaningfulCoordinates(profile)) {
     return profile;
   }
   const geo = await geocodeCity(profile.birthCity);
