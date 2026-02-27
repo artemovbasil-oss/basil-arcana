@@ -1355,7 +1355,7 @@ function renderFriendGauge(score) {
   `;
 }
 
-function renderFriendAccordion(friend, { expanded = false } = {}) {
+function renderFriendAccordion(friend, { expanded = false, canDelete = false } = {}) {
   const score = Math.max(0, Math.min(100, Math.round(Number(friend?.score) || 0)));
   const highlights = Array.isArray(friend?.highlights) ? friend.highlights : [];
   const domains = Array.isArray(friend?.domains) ? friend.domains : [];
@@ -1414,6 +1414,11 @@ function renderFriendAccordion(friend, { expanded = false } = {}) {
             shareEnabled
               ? `<button class="btn ghost js-share-friend" type="button" data-name="${friend.friendName}" data-sign="${friend.friendSign}" data-score="${score}" data-telegram="${friend.friendTelegram || ""}" data-email="${friend.friendEmail || ""}">Share with friend</button>`
               : `<p class="muted">Sharing unavailable: no contact method saved.</p>`
+          }
+          ${
+            canDelete
+              ? `<button class="btn ghost js-delete-friend" type="button" data-id="${friend.id || ""}" data-name="${friend.friendName || "Friend"}">Remove friend</button>`
+              : ""
           }
         </div>
       </div>
@@ -2138,14 +2143,18 @@ function dailyViewLoading() {
 
 function friendsView() {
   return `
-    <section class="hero">
+    <section class="section">
       <article class="card tone-card">
         <span class="eyebrow">Friends</span>
         <h1>Check friends?</h1>
         <p>Fast synastry-lite view for communication quality, conflict timing and daily collaboration windows.</p>
       </article>
-      <aside class="card">
-        <form id="friendForm" class="form-grid">
+    </section>
+    <section class="section">
+      <article class="card friend-form-card">
+        <span class="eyebrow">Add friend</span>
+        <h2>Friend profile</h2>
+        <form id="friendForm" class="form-grid friend-form-grid">
           <label>Friend name
             <input required name="friendName" placeholder="Friend name" />
           </label>
@@ -2155,8 +2164,8 @@ function friendsView() {
           <label>Birth time (optional)
             <input type="time" name="friendBirthTime" />
           </label>
-          <label>Birth place (optional)
-            <input name="friendBirthCity" placeholder="City, Country" />
+          <label class="field-span-2">Birth place (optional)
+            <input id="friendBirthCity" name="friendBirthCity" placeholder="City, Country" list="friendCitySuggestions" autocomplete="off" />
           </label>
           <label>Telegram username
             <input id="friendTelegram" name="friendTelegram" placeholder="@username" />
@@ -2171,7 +2180,8 @@ function friendsView() {
           <p class="muted friend-form-note">The more complete your friend's birth data, the more accurate the compatibility calculation.</p>
           <button class="btn primary form-submit" type="submit">Add friend</button>
         </form>
-      </aside>
+        <datalist id="friendCitySuggestions"></datalist>
+      </article>
     </section>
     <section class="section">
       <article class="card">
@@ -2247,7 +2257,7 @@ function renderFriendsList() {
     state.friends
       .map((friend) => {
         const insight = state.friendInsights[String(friend.id)] || {};
-        return renderFriendAccordion({ ...friend, ...insight });
+        return renderFriendAccordion({ ...friend, ...insight }, { canDelete: true });
       })
       .join("")
   }</div>`;
@@ -2291,6 +2301,42 @@ function bindShareFriendButtons(root = document) {
       const telegram = target.getAttribute("data-telegram") || "";
       const email = target.getAttribute("data-email") || "";
       shareFriendCompatibility(friendName, friendSign, score, { telegram, email });
+    });
+  });
+}
+
+function bindDeleteFriendButtons(root = document, { onDeleted } = {}) {
+  root.querySelectorAll(".js-delete-friend").forEach((button) => {
+    button.addEventListener("click", async (event) => {
+      event.stopPropagation();
+      const target = event.currentTarget;
+      if (!(target instanceof HTMLElement)) {
+        return;
+      }
+      const friendId = String(target.getAttribute("data-id") || "").trim();
+      const friendName = String(target.getAttribute("data-name") || "Friend").trim();
+      if (!friendId) {
+        return;
+      }
+      const confirmed = window.confirm(`Remove ${friendName} from friends?`);
+      if (!confirmed) {
+        return;
+      }
+      try {
+        const payload = await fetchJson(`/api/friends/${encodeURIComponent(friendId)}`, { method: "DELETE" });
+        state.friends = Array.isArray(payload?.friends) ? payload.friends : [];
+        delete state.friendInsights[friendId];
+        if (typeof onDeleted === "function") {
+          await onDeleted();
+        }
+      } catch (error) {
+        if (error.status === 401) {
+          await refreshAuthState();
+          navigate("/login", { replace: true });
+          return;
+        }
+        alert(`Failed to remove friend: ${error.message}`);
+      }
     });
   });
 }
@@ -2842,9 +2888,11 @@ async function loadCitySuggestions(query) {
   return Array.isArray(payload?.cities) ? payload.cities : [];
 }
 
-function bindCityAutocomplete(form, cityInputId) {
+function bindCityAutocomplete(form, cityInputId, options = {}) {
   const cityInput = document.getElementById(cityInputId);
-  const datalist = form?.querySelector("#citySuggestions");
+  const datalistId = String(options?.datalistId || "citySuggestions");
+  const strictSelection = Boolean(options?.strictSelection);
+  const datalist = form?.querySelector(`#${datalistId}`);
   const latitudeInput = form?.querySelector('input[name="latitude"]');
   const longitudeInput = form?.querySelector('input[name="longitude"]');
   const timezoneIanaInput = form?.querySelector('input[name="timezoneIana"]');
@@ -2855,7 +2903,15 @@ function bindCityAutocomplete(form, cityInputId) {
   }
 
   const applySelectedMeta = () => {
-    const selected = citySuggestionMeta.get(cityInput.value);
+    const normalizedValue = String(cityInput.value || "").trim();
+    const selected = citySuggestionMeta.get(normalizedValue);
+    if (strictSelection) {
+      if (normalizedValue && !selected) {
+        cityInput.setCustomValidity("Select a city from suggestions.");
+      } else {
+        cityInput.setCustomValidity("");
+      }
+    }
     if (!selected) {
       if (latitudeInput) latitudeInput.value = "";
       if (longitudeInput) longitudeInput.value = "";
@@ -2871,7 +2927,12 @@ function bindCityAutocomplete(form, cityInputId) {
   };
 
   cityInput.addEventListener("input", () => {
-    citySuggestionMeta.delete(cityInput.value);
+    if (strictSelection) {
+      const currentValue = String(cityInput.value || "").trim();
+      cityInput.setCustomValidity(currentValue && !citySuggestionMeta.has(currentValue) ? "Select a city from suggestions." : "");
+    } else {
+      cityInput.setCustomValidity("");
+    }
     if (latitudeInput) latitudeInput.value = "";
     if (longitudeInput) longitudeInput.value = "";
     if (timezoneIanaInput) timezoneIanaInput.value = "";
@@ -3022,16 +3083,28 @@ function attachRouteHandlers(path) {
         state.friendInsights = {};
       }
     };
+    const bindFriendListHandlers = () => {
+      const list = document.getElementById("friendsList");
+      if (!list) {
+        return;
+      }
+      bindFriendAccordionInteractions(list);
+      bindShareFriendButtons(list);
+      bindDeleteFriendButtons(list, {
+        onDeleted: async () => {
+          await refreshFriendInsights();
+          renderFriendsList();
+          bindFriendListHandlers();
+        }
+      });
+    };
     refreshFriendInsights().finally(() => {
       renderFriendsList();
-      const list = document.getElementById("friendsList");
-      if (list) {
-        bindFriendAccordionInteractions(list);
-        bindShareFriendButtons(list);
-      }
+      bindFriendListHandlers();
     });
 
     const form = document.getElementById("friendForm");
+    bindCityAutocomplete(form, "friendBirthCity", { datalistId: "friendCitySuggestions", strictSelection: true });
     const telegramInput = document.getElementById("friendTelegram");
     const emailInput = document.getElementById("friendEmail");
     const noShareCheckbox = document.getElementById("friendNoShareData");
@@ -3050,6 +3123,9 @@ function attachRouteHandlers(path) {
     syncFriendContactRules();
     form?.addEventListener("submit", async (event) => {
       event.preventDefault();
+      if (!form.reportValidity()) {
+        return;
+      }
       const formData = new FormData(form);
       const friend = Object.fromEntries(formData.entries());
       friend.noShareData = Boolean(noShareCheckbox?.checked);
@@ -3063,11 +3139,7 @@ function attachRouteHandlers(path) {
         syncFriendContactRules();
         await refreshFriendInsights();
         renderFriendsList();
-        const list = document.getElementById("friendsList");
-        if (list) {
-          bindFriendAccordionInteractions(list);
-          bindShareFriendButtons(list);
-        }
+        bindFriendListHandlers();
       } catch (error) {
         if (error.status === 401) {
           await refreshAuthState();

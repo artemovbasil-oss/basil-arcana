@@ -1858,6 +1858,21 @@ app.post("/api/friends", requireAuth, async (req, res) => {
   return res.json({ ok: true, friend, friends: req.userData.friends });
 });
 
+app.delete("/api/friends/:id", requireAuth, async (req, res) => {
+  const friendId = String(req.params?.id || "").trim();
+  if (!friendId) {
+    return res.status(400).json({ error: "invalid_friend_id", message: "Friend id is required" });
+  }
+  const currentFriends = Array.isArray(req.userData.friends) ? req.userData.friends : [];
+  const nextFriends = currentFriends.filter((friend) => String(friend?.id || "") !== friendId);
+  if (nextFriends.length === currentFriends.length) {
+    return res.status(404).json({ error: "friend_not_found", message: "Friend not found" });
+  }
+  req.userData.friends = nextFriends;
+  await saveUserData(req.userId, req.userData);
+  return res.json({ ok: true, friends: nextFriends });
+});
+
 app.post("/api/natal-report", requireAuth, async (req, res) => {
   const requestProfile = pickProfile({ profile: req.body?.profile });
   const selectedProfile = resolveSessionProfile(req.body?.profile, req.userData);

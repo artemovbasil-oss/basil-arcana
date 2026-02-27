@@ -486,6 +486,22 @@ p {
   gap: 0.75rem;
 }
 
+.friend-form-card h2 {
+  margin-bottom: 0.7rem;
+}
+
+.friend-form-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 0.8rem;
+}
+
+.friend-form-grid .field-span-2,
+.friend-form-grid .friend-no-share,
+.friend-form-grid .friend-form-note,
+.friend-form-grid .form-submit {
+  grid-column: 1 / -1;
+}
+
 .form-grid label {
   font-family: var(--font-sans);
   display: grid;
@@ -1032,6 +1048,10 @@ p {
 
 .friend-actions {
   margin-top: 0.55rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
 }
 
 .share-modal-backdrop {
@@ -2318,6 +2338,10 @@ body[data-theme="light"] .energy-star.neutral {
   .form-grid input {
     min-height: 46px;
     width: 100%;
+  }
+
+  .friend-form-grid {
+    grid-template-columns: 1fr;
   }
 
   .form-grid select {
