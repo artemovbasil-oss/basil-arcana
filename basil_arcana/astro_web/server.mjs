@@ -386,8 +386,8 @@ function pickProfile(body) {
   const birthTime = String(profile.birthTime || "").trim();
   const birthCity = String(profile.birthCity || "").trim();
   const timezone = String(profile.timezone || "UTC").trim();
-  const latitude = Number(profile.latitude);
-  const longitude = Number(profile.longitude);
+  const latitude = toOptionalFiniteNumber(profile.latitude);
+  const longitude = toOptionalFiniteNumber(profile.longitude);
   const timezoneIana = String(profile.timezoneIana || "").trim();
 
   if (!name || !birthDate || !birthTime || !birthCity) {
@@ -400,10 +400,30 @@ function pickProfile(body) {
     birthTime,
     birthCity,
     timezone,
-    latitude: Number.isFinite(latitude) ? latitude : null,
-    longitude: Number.isFinite(longitude) ? longitude : null,
+    latitude,
+    longitude,
     timezoneIana: timezoneIana || null
   };
+}
+
+function toOptionalFiniteNumber(value) {
+  if (value === null || value === undefined) {
+    return null;
+  }
+  if (typeof value === "string" && value.trim() === "") {
+    return null;
+  }
+  const numeric = Number(value);
+  return Number.isFinite(numeric) ? numeric : null;
+}
+
+function hasUsableCoordinates(profile) {
+  const latitude = Number(profile?.latitude);
+  const longitude = Number(profile?.longitude);
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+    return false;
+  }
+  return !(Math.abs(latitude) < 1e-9 && Math.abs(longitude) < 1e-9);
 }
 
 function signFromDate(dateText) {
@@ -492,7 +512,7 @@ function monthDayCount(now) {
 }
 
 function buildRealEnergySeries(profile, period, now, natalCore) {
-  if (!Number.isFinite(profile.latitude) || !Number.isFinite(profile.longitude)) {
+  if (!hasUsableCoordinates(profile)) {
     return null;
   }
   const count = period === "year" ? 12 : period === "month" ? monthDayCount(now) : 7;
@@ -809,7 +829,7 @@ function buildNatalDetail(profile) {
     }
   };
 
-  if (!Number.isFinite(profile.latitude) || !Number.isFinite(profile.longitude)) {
+  if (!hasUsableCoordinates(profile)) {
     return base;
   }
 
@@ -1023,7 +1043,7 @@ async function suggestCities(query, limit = 12) {
 }
 
 async function ensureProfileCoordinates(profile) {
-  if (Number.isFinite(profile.latitude) && Number.isFinite(profile.longitude)) {
+  if (hasUsableCoordinates(profile)) {
     return profile;
   }
   const geo = await geocodeCity(profile.birthCity);
@@ -1036,6 +1056,22 @@ async function ensureProfileCoordinates(profile) {
     longitude: geo.longitude,
     timezoneIana: profile.timezoneIana || geo.timezoneIana || null
   };
+}
+
+async function hydrateAndPersistProfileCoordinates(req, profile, { persist = true } = {}) {
+  if (!profile) {
+    return null;
+  }
+  const hydrated = await ensureProfileCoordinates(profile);
+  const changed =
+    Number(hydrated.latitude) !== Number(profile.latitude) ||
+    Number(hydrated.longitude) !== Number(profile.longitude) ||
+    String(hydrated.timezoneIana || "") !== String(profile.timezoneIana || "");
+  if (persist && changed && req?.userData && req?.userId) {
+    req.userData.profile = hydrated;
+    await saveUserData(req.userId, req.userData);
+  }
+  return hydrated;
 }
 
 function buildDashboardPayload(sessionData, period = "week") {
@@ -1475,8 +1511,9 @@ app.post("/api/auth/logout", async (req, res) => {
   res.json({ ok: true, authenticated: false });
 });
 
-app.get("/api/profile", requireAuth, (req, res) => {
-  const profile = pickProfile({ profile: req.userData.profile });
+app.get("/api/profile", requireAuth, async (req, res) => {
+  const current = pickProfile({ profile: req.userData.profile });
+  const profile = await hydrateAndPersistProfileCoordinates(req, current);
   res.json({ ok: true, profile, profileReady: Boolean(profile) });
 });
 
@@ -1532,8 +1569,10 @@ app.post("/api/friends", requireAuth, async (req, res) => {
   return res.json({ ok: true, friend, friends: req.userData.friends });
 });
 
-app.post("/api/natal-report", requireAuth, (req, res) => {
-  const profile = resolveSessionProfile(req.body?.profile, req.userData);
+app.post("/api/natal-report", requireAuth, async (req, res) => {
+  const requestProfile = pickProfile({ profile: req.body?.profile });
+  const selectedProfile = resolveSessionProfile(req.body?.profile, req.userData);
+  const profile = await hydrateAndPersistProfileCoordinates(req, selectedProfile, { persist: !requestProfile });
   if (!profile) {
     return res.status(400).json({ error: "invalid_profile", message: "profile is required" });
   }
@@ -1542,7 +1581,9 @@ app.post("/api/natal-report", requireAuth, (req, res) => {
 });
 
 app.post("/api/daily-insight", requireAuth, async (req, res) => {
-  const profile = resolveSessionProfile(req.body?.profile, req.userData);
+  const requestProfile = pickProfile({ profile: req.body?.profile });
+  const selectedProfile = resolveSessionProfile(req.body?.profile, req.userData);
+  const profile = await hydrateAndPersistProfileCoordinates(req, selectedProfile, { persist: !requestProfile });
   if (!profile) {
     return res.status(400).json({
       error: "invalid_profile",
@@ -1707,9 +1748,11 @@ app.post("/api/compatibility-report", requireAuth, (req, res) => {
   });
 });
 
-app.get("/api/dashboard", requireAuth, (req, res) => {
+app.get("/api/dashboard", requireAuth, async (req, res) => {
   const requestedPeriod = String(req.query?.period || "week").trim().toLowerCase();
   const period = ["week", "month", "year"].includes(requestedPeriod) ? requestedPeriod : "week";
+  const current = pickProfile({ profile: req.userData.profile });
+  await hydrateAndPersistProfileCoordinates(req, current);
   const payload = buildDashboardPayload(req.userData, period);
   if (!payload) {
     return res.status(400).json({ error: "profile_required", message: "Complete profile first." });
