@@ -490,9 +490,35 @@ p {
   margin-bottom: 0.7rem;
 }
 
+.friend-form-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 0.86fr) minmax(210px, 1fr);
+  gap: 1rem;
+  align-items: stretch;
+}
+
 .friend-form-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   column-gap: 0.8rem;
+}
+
+.friend-form-art {
+  border: 1px solid var(--line);
+  background:
+    radial-gradient(circle at 65% 70%, color-mix(in srgb, var(--ink) 8%, transparent 92%) 0%, transparent 52%),
+    var(--surface-2);
+  overflow: hidden;
+  min-height: 100%;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+}
+
+.friend-form-art img {
+  height: 100%;
+  width: auto;
+  display: block;
+  object-fit: contain;
 }
 
 .friend-form-grid .field-span-2,
@@ -1069,6 +1095,35 @@ p {
 }
 
 .share-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.45rem;
+}
+
+.friend-delete-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 220;
+  background: rgba(0, 0, 0, 0.68);
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+}
+
+.friend-delete-modal {
+  width: min(520px, 100%);
+}
+
+.friend-delete-modal h2 {
+  font-size: clamp(1.2rem, 3vw, 1.7rem);
+  margin-bottom: 0.55rem;
+}
+
+.friend-delete-modal p {
+  margin-bottom: 0.8rem;
+}
+
+.friend-delete-modal-actions {
   display: flex;
   justify-content: flex-end;
   gap: 0.45rem;
@@ -2338,6 +2393,14 @@ body[data-theme="light"] .energy-star.neutral {
   .form-grid input {
     min-height: 46px;
     width: 100%;
+  }
+
+  .friend-form-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .friend-form-art {
+    display: none;
   }
 
   .friend-form-grid {

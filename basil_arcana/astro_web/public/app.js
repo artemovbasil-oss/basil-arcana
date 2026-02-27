@@ -2154,32 +2154,37 @@ function friendsView() {
       <article class="card friend-form-card">
         <span class="eyebrow">Add friend</span>
         <h2>Friend profile</h2>
-        <form id="friendForm" class="form-grid friend-form-grid">
-          <label>Friend name
-            <input required name="friendName" placeholder="Friend name" />
-          </label>
-          <label>Birth date
-            <input required type="date" name="friendBirthDate" />
-          </label>
-          <label>Birth time (optional)
-            <input type="time" name="friendBirthTime" />
-          </label>
-          <label class="field-span-2">Birth place (optional)
-            <input id="friendBirthCity" name="friendBirthCity" placeholder="City, Country" list="friendCitySuggestions" autocomplete="off" />
-          </label>
-          <label>Telegram username
-            <input id="friendTelegram" name="friendTelegram" placeholder="@username" />
-          </label>
-          <label>Email
-            <input id="friendEmail" type="email" name="friendEmail" placeholder="friend@email.com" />
-          </label>
-          <label class="friend-no-share">
-            <input id="friendNoShareData" type="checkbox" name="noShareData" />
-            <span>I don't want to share data with friends</span>
-          </label>
-          <p class="muted friend-form-note">The more complete your friend's birth data, the more accurate the compatibility calculation.</p>
-          <button class="btn primary form-submit" type="submit">Add friend</button>
-        </form>
+        <div class="friend-form-layout">
+          <form id="friendForm" class="form-grid friend-form-grid">
+            <label class="field-span-2">Friend name
+              <input required name="friendName" placeholder="Friend name" />
+            </label>
+            <label class="field-span-2">Birth date
+              <input required type="date" name="friendBirthDate" />
+            </label>
+            <label>Birth time (optional)
+              <input type="time" name="friendBirthTime" />
+            </label>
+            <label>Birth place (optional)
+              <input id="friendBirthCity" name="friendBirthCity" placeholder="City, Country" list="friendCitySuggestions" autocomplete="off" />
+            </label>
+            <label>Telegram username
+              <input id="friendTelegram" name="friendTelegram" placeholder="@username" />
+            </label>
+            <label>Email
+              <input id="friendEmail" type="email" name="friendEmail" placeholder="friend@email.com" />
+            </label>
+            <label class="friend-no-share">
+              <input id="friendNoShareData" type="checkbox" name="noShareData" />
+              <span>I don't want to share data with friends</span>
+            </label>
+            <p class="muted friend-form-note">The more complete your friend's birth data, the more accurate the compatibility calculation.</p>
+            <button class="btn primary form-submit" type="submit">Add friend</button>
+          </form>
+          <aside class="friend-form-art" aria-hidden="true">
+            <img src="https://basilarcana-assets.b-cdn.net/astronautica/hand.png" alt="" />
+          </aside>
+        </div>
         <datalist id="friendCitySuggestions"></datalist>
       </article>
     </section>
@@ -2318,7 +2323,7 @@ function bindDeleteFriendButtons(root = document, { onDeleted } = {}) {
       if (!friendId) {
         return;
       }
-      const confirmed = window.confirm(`Remove ${friendName} from friends?`);
+      const confirmed = await openFriendDeleteModal(friendName);
       if (!confirmed) {
         return;
       }
@@ -2338,6 +2343,47 @@ function bindDeleteFriendButtons(root = document, { onDeleted } = {}) {
         alert(`Failed to remove friend: ${error.message}`);
       }
     });
+  });
+}
+
+function closeFriendDeleteModal() {
+  document.querySelector(".friend-delete-modal-backdrop")?.remove();
+}
+
+function openFriendDeleteModal(friendName) {
+  return new Promise((resolve) => {
+    closeFriendDeleteModal();
+    const safeName = String(friendName || "Friend")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll("\"", "&quot;")
+      .replaceAll("'", "&#39;");
+    const modal = document.createElement("div");
+    modal.className = "friend-delete-modal-backdrop";
+    modal.innerHTML = `
+      <div class="friend-delete-modal card" role="dialog" aria-modal="true" aria-label="Remove friend">
+        <span class="eyebrow">Remove friend</span>
+        <h2>Confirm action</h2>
+        <p>Remove ${safeName} from friends list?</p>
+        <div class="friend-delete-modal-actions">
+          <button class="btn ghost js-delete-cancel" type="button">Cancel</button>
+          <button class="btn primary js-delete-confirm" type="button">Remove</button>
+        </div>
+      </div>
+    `;
+    const cleanup = (result) => {
+      closeFriendDeleteModal();
+      resolve(Boolean(result));
+    };
+    modal.addEventListener("click", (event) => {
+      if (event.target === modal) {
+        cleanup(false);
+      }
+    });
+    modal.querySelector(".js-delete-cancel")?.addEventListener("click", () => cleanup(false));
+    modal.querySelector(".js-delete-confirm")?.addEventListener("click", () => cleanup(true));
+    document.body.appendChild(modal);
   });
 }
 
