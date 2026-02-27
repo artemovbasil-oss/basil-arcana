@@ -492,9 +492,9 @@ p {
 
 .friend-form-layout {
   display: grid;
-  grid-template-columns: minmax(0, 0.86fr) minmax(210px, 1fr);
+  grid-template-columns: minmax(0, 4fr) minmax(120px, 1fr);
   gap: 1rem;
-  align-items: stretch;
+  align-items: start;
 }
 
 .friend-form-grid {
@@ -503,20 +503,19 @@ p {
 }
 
 .friend-form-art {
-  border: 1px solid var(--line);
-  background:
-    radial-gradient(circle at 65% 70%, color-mix(in srgb, var(--ink) 8%, transparent 92%) 0%, transparent 52%),
-    var(--surface-2);
-  overflow: hidden;
-  min-height: 100%;
+  border: 0;
+  background: transparent;
+  overflow: visible;
   display: flex;
-  align-items: stretch;
+  align-items: flex-start;
   justify-content: center;
+  padding-top: 0.2rem;
 }
 
 .friend-form-art img {
-  height: 100%;
-  width: auto;
+  width: 100%;
+  max-width: 170px;
+  height: auto;
   display: block;
   object-fit: contain;
 }
