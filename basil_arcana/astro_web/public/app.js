@@ -34,9 +34,11 @@ profileButton?.addEventListener("click", () => {
 themeToggle?.addEventListener("click", () => {
   state.theme = state.theme === "dark" ? "light" : "dark";
   applyTheme(state.theme);
+  nav.classList.remove("open");
 });
 
 function navigate(path, { replace = false } = {}) {
+  nav.classList.remove("open");
   if (replace) {
     window.history.replaceState({}, "", path);
   } else {
