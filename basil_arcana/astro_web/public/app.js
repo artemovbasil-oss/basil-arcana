@@ -974,11 +974,16 @@ function renderCosmicStatePanel(dashboard, period) {
   const center = { x: 120, y: 110 };
   const rings = [36, 58, 80];
   const colors = ["#f3f3f3", "#9d9d9d", "#5f5f5f"];
+  const total = Math.round(bodies.reduce((sum, body) => sum + (Number(body.value) || 0), 0) / Math.max(1, bodies.length));
   return `
-    <article class="astro-viz-card">
-      <h3>Current sky state</h3>
+    <article class="astro-viz-card astro-viz-card-current">
+      <div class="astro-viz-head">
+        <h3>Current sky state</h3>
+        <span class="astro-viz-badge">phase index ${total}/100</span>
+      </div>
       <svg class="astro-viz-svg" viewBox="0 0 420 220" role="img" aria-label="Current planetary state">
         <g class="astro-viz-core">
+          <circle class="astro-viz-scan" cx="${center.x}" cy="${center.y}" r="${rings[2] + 7}" />
           <circle class="astro-viz-ring" cx="${center.x}" cy="${center.y}" r="${rings[2]}" />
           <circle class="astro-viz-ring" cx="${center.x}" cy="${center.y}" r="${rings[1]}" />
           <circle class="astro-viz-ring" cx="${center.x}" cy="${center.y}" r="${rings[0]}" />
@@ -1000,6 +1005,7 @@ function renderCosmicStatePanel(dashboard, period) {
                   ${zodiacIcon(body.sign)} ${body.name} · ${body.sign}
                 </text>
                 <text class="astro-viz-value" x="0" y="${44 + i * 54}">${Math.round(body.value)}/100 phase energy</text>
+                <text class="astro-viz-angle" x="0" y="${58 + i * 54}">angle ${Math.round(Number(body.angle) || 0)}° · ring ${i + 1}</text>
               `
             )
             .join("")}
@@ -1845,18 +1851,15 @@ function renderAspectCards(items) {
 }
 
 function actionPlanIcon(title, index = 0) {
-  const value = String(title || "").toLowerCase();
-  if (value.includes("bound")) {
-    return uiIcon("shield");
-  }
-  if (value.includes("cadence") || value.includes("execution")) {
-    return uiIcon("chart");
-  }
-  if (value.includes("integration") || value.includes("weekly")) {
-    return uiIcon("layers");
-  }
-  const fallback = [uiIcon("shield"), uiIcon("chart"), uiIcon("layers")];
-  return fallback[index % fallback.length];
+  const sizes = [9.4, 8.4, 10.2];
+  const size = sizes[index % sizes.length];
+  const half = size / 2;
+  const points = `${half},0 ${half + 2.1},${half - 2.1} ${size},${half} ${half + 2.1},${half + 2.1} ${half},${size} ${half - 2.1},${half + 2.1} 0,${half} ${half - 2.1},${half - 2.1}`;
+  return `
+    <svg class="action-star" viewBox="0 0 ${size} ${size}" aria-hidden="true" focusable="false">
+      <polygon points="${points}" />
+    </svg>
+  `;
 }
 
 function buildNatalEditorial(profile, report) {
