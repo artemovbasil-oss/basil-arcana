@@ -552,6 +552,31 @@ p {
   table-layout: fixed;
 }
 
+.placement-table th:nth-child(1),
+.placement-table td:nth-child(1) {
+  width: 20%;
+}
+
+.placement-table th:nth-child(2),
+.placement-table td:nth-child(2) {
+  width: 16%;
+}
+
+.placement-table th:nth-child(3),
+.placement-table td:nth-child(3) {
+  width: 8%;
+}
+
+.placement-table th:nth-child(4),
+.placement-table td:nth-child(4) {
+  width: 13%;
+}
+
+.placement-table th:nth-child(5),
+.placement-table td:nth-child(5) {
+  width: 43%;
+}
+
 .placement-table th,
 .placement-table td {
   border-bottom: 1px solid var(--line);
@@ -570,6 +595,13 @@ p {
 .placement-table th:nth-child(2),
 .placement-table td:nth-child(1),
 .placement-table td:nth-child(2) {
+  white-space: nowrap;
+}
+
+.placement-table th:nth-child(3),
+.placement-table th:nth-child(4),
+.placement-table td:nth-child(3),
+.placement-table td:nth-child(4) {
   white-space: nowrap;
 }
 
