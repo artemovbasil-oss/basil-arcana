@@ -152,6 +152,112 @@ const zodiacOrder = [
   "Pisces"
 ];
 
+const zodiacAssetBaseUrl = "https://basilarcana-assets.b-cdn.net/astronautica";
+const zodiacMeta = {
+  Aries: {
+    file: "aries.png",
+    brief: "Direct, fast, and initiative-first. Aries energy works best with clear targets and short execution cycles.",
+    natal: "Aries in your core points to action as a regulation mechanism. Progress accelerates when tasks are concrete and time-boxed.",
+    compact: "You move fastest when priorities are explicit and execution starts immediately."
+  },
+  Taurus: {
+    file: "taurus.png",
+    brief: "Grounded, persistent, and stability-driven. Taurus energy compounds through routine and quality control.",
+    natal: "Taurus in your core favors consistency over volatility. Reliable habits produce better outcomes than reactive sprints.",
+    compact: "Your strongest results come from stable cadence and low-noise execution."
+  },
+  Gemini: {
+    file: "gemini.png",
+    brief: "Curious, adaptive, and communication-heavy. Gemini energy optimizes through learning and information flow.",
+    natal: "Gemini in your core rewards structured curiosity. You perform best when you convert ideas into documented next steps.",
+    compact: "Clarity and momentum rise when you turn input into concise decisions."
+  },
+  Cancer: {
+    file: "cancer.png",
+    brief: "Protective, intuitive, and emotionally precise. Cancer energy is strongest with trusted context and boundaries.",
+    natal: "Cancer in your core emphasizes emotional signal quality. Strategic protection of energy improves focus and recovery.",
+    compact: "Boundaries and emotional hygiene directly improve your execution quality."
+  },
+  Leo: {
+    file: "leo.png",
+    brief: "Creative, visible, and purpose-led. Leo energy grows through ownership and expressive leadership.",
+    natal: "Leo in your core needs meaningful output and recognition loops. Confidence rises when contribution is visible and measurable.",
+    compact: "You perform best when your role is clear and your output has visible impact."
+  },
+  Virgo: {
+    file: "virgo.png",
+    brief: "Analytical, precise, and systems-focused. Virgo energy excels through refinement and process design.",
+    natal: "Virgo in your core turns detail into leverage. Small iterative improvements create durable long-term gains.",
+    compact: "Your edge is precision: optimize the process, then scale it."
+  },
+  Libra: {
+    file: "libra.png",
+    brief: "Relational, balanced, and diplomacy-oriented. Libra energy seeks alignment and fair structure.",
+    natal: "Libra in your core improves outcomes through calibrated communication. Explicit agreements reduce friction across teams and relationships.",
+    compact: "Better agreements and cleaner communication are your highest ROI moves."
+  },
+  Scorpio: {
+    file: "scorpio.png",
+    brief: "Intense, strategic, and transformative. Scorpio energy works deeply and prefers substance over noise.",
+    natal: "Scorpio in your core drives focus under pressure. Controlled depth and selective trust are key performance factors.",
+    compact: "Depth, discretion, and strategic timing are your strongest operating modes."
+  },
+  Sagittarius: {
+    file: "sagittarius.png",
+    brief: "Expansive, exploratory, and meaning-seeking. Sagittarius energy scales through vision and experimentation.",
+    natal: "Sagittarius in your core needs direction plus freedom. You gain traction when long-range goals are tied to weekly experiments.",
+    compact: "Vision becomes effective when paired with practical weekly execution."
+  },
+  Capricorn: {
+    file: "capricorn.png",
+    brief: "Disciplined, structural, and long-term. Capricorn energy compounds through strategy and accountability.",
+    natal: "Capricorn in your core favors durable architecture: priorities, milestones, and measurable standards.",
+    compact: "Your momentum is strongest with structure, deadlines, and clear ownership."
+  },
+  Aquarius: {
+    file: "aquarius.png",
+    brief: "Independent, systemic, and innovation-driven. Aquarius energy seeks better models and future-facing frameworks.",
+    natal: "Aquarius in your core performs through systems thinking. Progress spikes when experiments are tied to clear social or product impact.",
+    compact: "You unlock speed by improving the system, not just the task."
+  },
+  Pisces: {
+    file: "pisces.png",
+    brief: "Imaginative, empathic, and symbolic. Pisces energy senses subtle patterns and emotional undercurrents.",
+    natal: "Pisces in your core needs creative channeling and clear boundaries. Ambiguity becomes useful when translated into concrete action.",
+    compact: "Intuition works best when captured in simple, testable next steps."
+  }
+};
+
+function resolveZodiacSign(sign) {
+  const raw = String(sign || "").trim();
+  if (!raw) {
+    return "Unknown";
+  }
+  const match = zodiacOrder.find((item) => item.toLowerCase() === raw.toLowerCase());
+  return match || raw;
+}
+
+function zodiacDetails(sign) {
+  const normalized = resolveZodiacSign(sign);
+  const meta = zodiacMeta[normalized];
+  if (!meta) {
+    return {
+      sign: normalized,
+      imageUrl: "",
+      brief: "Core sign context is currently unavailable.",
+      natal: "Sign-specific interpretation is currently unavailable.",
+      compact: "No sign summary available yet."
+    };
+  }
+  return {
+    sign: normalized,
+    imageUrl: `${zodiacAssetBaseUrl}/${meta.file}`,
+    brief: meta.brief,
+    natal: meta.natal,
+    compact: meta.compact
+  };
+}
+
 const aspectAngles = [0, 60, 90, 120, 180];
 const zodiacIconClasses = {
   Aries: "mdi:zodiac-aries",
@@ -986,6 +1092,77 @@ function renderTodayAstroPanel(profile, dashboard) {
   `;
 }
 
+function renderNatalZodiacSection(sign) {
+  const details = zodiacDetails(sign);
+  const signLabel = details.sign === "Unknown" ? "Sign" : details.sign;
+  return `
+    <section class="section" id="natal-zodiac-sign">
+      <article class="route-card content-panel premium-panel">
+        <span class="premium-kicker">Archetype</span>
+        <h2>${signLabel} Profile</h2>
+        <div class="zodiac-sign-panel">
+          <div class="zodiac-sign-image-wrap">
+            ${
+              details.imageUrl
+                ? `<img class="zodiac-sign-image" src="${details.imageUrl}" alt="${signLabel} zodiac illustration" loading="lazy" decoding="async" />`
+                : `<div class="zodiac-sign-fallback">${zodiacIcon(signLabel)} ${signLabel}</div>`
+            }
+          </div>
+          <div class="zodiac-sign-copy">
+            <p class="dropcap">${details.natal}</p>
+            <p>${details.brief}</p>
+          </div>
+        </div>
+      </article>
+    </section>
+  `;
+}
+
+function renderHomeZodiacCompact(sign) {
+  const details = zodiacDetails(sign);
+  const signLabel = details.sign === "Unknown" ? "Sign" : details.sign;
+  return `
+    <section class="section">
+      <article class="card zodiac-compact-card">
+        <span class="eyebrow">Zodiac focus</span>
+        <h2>${signLabel} Signal</h2>
+        <div class="zodiac-sign-panel compact">
+          <div class="zodiac-sign-image-wrap compact">
+            ${
+              details.imageUrl
+                ? `<img class="zodiac-sign-image compact" src="${details.imageUrl}" alt="${signLabel} zodiac illustration" loading="lazy" decoding="async" />`
+                : `<div class="zodiac-sign-fallback">${zodiacIcon(signLabel)} ${signLabel}</div>`
+            }
+          </div>
+          <div class="zodiac-sign-copy">
+            <p>${details.compact}</p>
+          </div>
+        </div>
+      </article>
+    </section>
+  `;
+}
+
+function renderFriendZodiacSnippet(sign) {
+  const details = zodiacDetails(sign);
+  const signLabel = details.sign === "Unknown" ? "Sign" : details.sign;
+  return `
+    <article class="friend-sign-panel">
+      <div class="friend-sign-image-wrap">
+        ${
+          details.imageUrl
+            ? `<img class="friend-sign-image" src="${details.imageUrl}" alt="${signLabel} zodiac illustration" loading="lazy" decoding="async" />`
+            : `<div class="zodiac-sign-fallback">${zodiacIcon(signLabel)} ${signLabel}</div>`
+        }
+      </div>
+      <div class="friend-sign-copy">
+        <h3>${signLabel}</h3>
+        <p>${details.brief}</p>
+      </div>
+    </article>
+  `;
+}
+
 function normalizedFriendScore(score, period) {
   const value = Math.max(0, Math.min(100, Number(score) || 0));
   if (period === "month") {
@@ -1033,6 +1210,7 @@ function renderFriendAccordion(friend, { expanded = false } = {}) {
       <div id="${detailId}" class="friend-accordion-body">
         <p class="friend-premium-note">${friend.note || "Compatibility insight will appear after analysis."}</p>
         <p class="friend-rationale">${friend.rationale || ""}</p>
+        ${renderFriendZodiacSnippet(friend.friendSign)}
         <div class="friend-domain-grid">
           ${domains
             .map(
@@ -1160,6 +1338,7 @@ function renderHomeDashboard(dashboard) {
     `${uiIcon("clock")} ${dashboard.profile?.birthTime || ""}`,
     `${uiIcon("location")} ${dashboard.profile?.birthCity || ""}`
   ].filter((item) => item.replace(/<[^>]+>/g, "").trim());
+  const zodiacCompact = renderHomeZodiacCompact(dashboard.natalCore?.sun);
 
   return `
     <section class="hero">
@@ -1191,6 +1370,7 @@ function renderHomeDashboard(dashboard) {
         <div id="homeForecastBlock" class="dashboard-swap">${forecastSummary}</div>
       </article>
     </section>
+    ${zodiacCompact}
     <section class="section">
       <article class="card">
         <h2>Friends dynamic compatibility</h2>
@@ -1581,6 +1761,7 @@ function renderNatalToc() {
     { id: "natal-wheel", label: "Natal Wheel" },
     { id: "natal-placements", label: "Placements Matrix" },
     { id: "natal-core-domains", label: "Life Domains" },
+    { id: "natal-zodiac-sign", label: "Zodiac Sign" },
     { id: "natal-framework", label: "Framework" },
     { id: "natal-focus", label: "Strategic Focus" },
     { id: "natal-houses", label: "House Dynamics" },
@@ -1942,6 +2123,7 @@ async function hydrateNatal() {
     const editorial = buildNatalEditorial(profile, data);
     const placementsTable = renderPlanetPlacementTable(data.planets || []);
     const life = data.lifeAreas || {};
+    const zodiacSection = renderNatalZodiacSection(data?.core?.sun);
 
     app.innerHTML = `
       ${renderNatalHeader(profile, data)}
@@ -1994,6 +2176,7 @@ async function hydrateNatal() {
               </article>
             </div>
           </section>
+          ${zodiacSection}
           ${editorial}
         </div>
         ${renderNatalToc()}
