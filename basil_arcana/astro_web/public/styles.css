@@ -305,6 +305,43 @@ p {
   margin: 0.85rem 0;
 }
 
+.auth-provider-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  background: color-mix(in srgb, #4fa6e8 22%, var(--surface) 78%);
+  color: #e9f6ff;
+  text-decoration: none;
+  padding: 0.45rem 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.78rem;
+  transition: transform 0.16s ease, border-color 0.18s ease, background-color 0.18s ease;
+}
+
+.auth-provider-pill:hover {
+  transform: translateY(-1px);
+  border-color: #7bc1f3;
+  background: color-mix(in srgb, #4fa6e8 30%, var(--surface) 70%);
+}
+
+.auth-provider-icon {
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.auth-provider-icon .astro-icon {
+  margin-right: 0;
+}
+
 .btn {
   font-family: var(--font-sans);
   display: inline-flex;

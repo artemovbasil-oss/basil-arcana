@@ -411,7 +411,8 @@ const uiIconClasses = {
   sunrise: "mdi:weather-sunset-up",
   sunset: "mdi:weather-sunset-down",
   season: "mdi:calendar-star",
-  transit: "mdi:orbit"
+  transit: "mdi:orbit",
+  email: "mdi:email-outline"
 };
 
 function degreeToRad(degree) {
@@ -1597,8 +1598,7 @@ function loginView() {
 
   const telegramEnabled = state.telegramLoginEnabled && state.telegramBotUsername;
   const googleEnabled = state.googleLoginEnabled;
-  const githubEnabled = state.githubLoginEnabled;
-  const anyEnabled = telegramEnabled || googleEnabled || githubEnabled;
+  const anyEnabled = telegramEnabled || googleEnabled;
 
   return `
     <section class="section">
@@ -1613,10 +1613,14 @@ function loginView() {
         ${
           anyEnabled
             ? `
-              <div class="hero-actions">
-                ${googleEnabled ? `<a class="btn ghost" href="/api/auth/google/start?returnTo=%2F">Continue with Gmail</a>` : ""}
-                ${githubEnabled ? `<a class="btn ghost" href="/api/auth/github/start?returnTo=%2F">Continue with GitHub</a>` : ""}
-              </div>
+              ${
+                googleEnabled
+                  ? `<a class="auth-provider-pill gmail" href="/api/auth/google/start?returnTo=%2F">
+                       <span class="auth-provider-icon" aria-hidden="true">${uiIcon("email")}</span>
+                       <span>Continue with Gmail</span>
+                     </a>`
+                  : ""
+              }
               ${
                 telegramEnabled
                   ? `<hr class="section-separator" />
@@ -3499,7 +3503,7 @@ document.addEventListener("click", (event) => {
     return;
   }
   const href = anchor.getAttribute("href");
-  if (!href || href.startsWith("http") || href.startsWith("mailto:")) {
+  if (!href || href.startsWith("http") || href.startsWith("mailto:") || href.startsWith("/api/")) {
     return;
   }
 
