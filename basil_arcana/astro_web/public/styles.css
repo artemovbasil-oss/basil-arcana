@@ -2262,7 +2262,7 @@ body[data-theme="light"] .auth-login-btn.telegram .auth-login-btn-icon .astro-ic
 }
 
 body[data-theme="dark"] .celeb-avatar {
-  filter: brightness(1.08) contrast(1.1) saturate(0.9);
+  filter: invert(1) brightness(1.18) contrast(1.08);
 }
 
 body[data-theme="light"] .celeb-avatar {
