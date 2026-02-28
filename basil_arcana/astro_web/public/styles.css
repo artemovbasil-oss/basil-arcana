@@ -2223,7 +2223,48 @@ body[data-theme="light"] .auth-login-btn.telegram .auth-login-btn-icon .astro-ic
   background: var(--surface-2);
   padding: 0.62rem;
   display: grid;
-  gap: 0.24rem;
+  gap: 0.4rem;
+  position: relative;
+}
+
+.celeb-card.is-male {
+  background:
+    radial-gradient(120% 120% at 0% 0%, rgba(91, 165, 235, 0.16) 0%, rgba(91, 165, 235, 0) 62%),
+    var(--surface-2);
+}
+
+.celeb-card.is-female {
+  background:
+    radial-gradient(120% 120% at 0% 0%, rgba(228, 126, 194, 0.16) 0%, rgba(228, 126, 194, 0) 62%),
+    var(--surface-2);
+}
+
+.celeb-head {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.celeb-head-copy {
+  min-width: 0;
+}
+
+.celeb-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--line) 75%, transparent 25%);
+  object-fit: cover;
+}
+
+.celeb-gender {
+  font-size: 0.92rem;
+  line-height: 1;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  padding: 0.18rem 0.34rem;
+  border-radius: 999px;
 }
 
 .celeb-card h3 {
@@ -2232,10 +2273,29 @@ body[data-theme="light"] .auth-login-btn.telegram .auth-login-btn-icon .astro-ic
 }
 
 .celeb-meta {
+  margin: 0.08rem 0 0;
   font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--muted);
+}
+
+.celeb-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.celeb-chip {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface) 88%, transparent 12%);
+  padding: 0.12rem 0.36rem;
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
 }
 
 .daily-astro-axis {

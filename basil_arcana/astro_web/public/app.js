@@ -409,6 +409,82 @@ const zodiacCelebrities = {
   ]
 };
 
+const femaleCelebrityNames = new Set([
+  "Lady Gaga",
+  "Emma Watson",
+  "Mariah Carey",
+  "Reese Witherspoon",
+  "Celine Dion",
+  "Adele",
+  "Gigi Hadid",
+  "Megan Fox",
+  "Gal Gadot",
+  "Tina Fey",
+  "Cher",
+  "Angelina Jolie",
+  "Natalie Portman",
+  "Heidi Klum",
+  "Naomi Campbell",
+  "Awkwafina",
+  "Ariana Grande",
+  "Selena Gomez",
+  "Meryl Streep",
+  "Margot Robbie",
+  "Lana Del Rey",
+  "Jennifer Lopez",
+  "Madonna",
+  "Mila Kunis",
+  "Charlize Theron",
+  "Kylie Jenner",
+  "Dua Lipa",
+  "Beyoncé",
+  "Zendaya",
+  "Blake Lively",
+  "Cameron Diaz",
+  "P!nk",
+  "Kim Kardashian",
+  "Serena Williams",
+  "Gwen Stefani",
+  "Kate Winslet",
+  "Anne Hathaway",
+  "Emma Stone",
+  "Kendall Jenner",
+  "Julia Roberts",
+  "Winona Ryder",
+  "Taylor Swift",
+  "Nicki Minaj",
+  "Britney Spears",
+  "Miley Cyrus",
+  "Christina Aguilera",
+  "Michelle Obama",
+  "Kate Middleton",
+  "Dolly Parton",
+  "Nina Dobrev",
+  "Shakira",
+  "Jennifer Aniston",
+  "Alicia Keys",
+  "Oprah Winfrey",
+  "Rihanna",
+  "Olivia Rodrigo",
+  "Drew Barrymore",
+  "Camila Cabello",
+  "Eva Mendes",
+  "Simone Biles"
+]);
+
+const celebAvatarThemes = {
+  male: [
+    { bg: "#152331", accent: "#7ac0ff", skin: "#d7b08e" },
+    { bg: "#1d1f2b", accent: "#8ba9ff", skin: "#d4a17f" },
+    { bg: "#1b2b2a", accent: "#74d5c0", skin: "#d9b598" }
+  ],
+  female: [
+    { bg: "#2a1f2a", accent: "#ff99c5", skin: "#e0b091" },
+    { bg: "#2b1f24", accent: "#ffb1d8", skin: "#ddb08c" },
+    { bg: "#262034", accent: "#d8a3ff", skin: "#d8ad90" }
+  ]
+};
+
 const elementNarratives = {
   Fire: {
     drive: "You recharge through movement, challenge, and visible momentum.",
@@ -978,6 +1054,60 @@ function escapeHtml(text) {
     .replaceAll(">", "&gt;")
     .replaceAll("\"", "&quot;")
     .replaceAll("'", "&#39;");
+}
+
+function celebrityGender(name) {
+  return femaleCelebrityNames.has(String(name || "").trim()) ? "female" : "male";
+}
+
+function celebrityBirthYear(years) {
+  const match = String(years || "").match(/(\d{4})/);
+  return match ? Number(match[1]) : null;
+}
+
+function celebrityAgeLabel(years) {
+  const birthYear = celebrityBirthYear(years);
+  if (!birthYear) {
+    return years || "";
+  }
+  const currentYear = new Date().getUTCFullYear();
+  return `Age ${Math.max(0, currentYear - birthYear)}`;
+}
+
+function zodiacPolarity(sign) {
+  const s = resolveZodiacSign(sign);
+  return ["Aries", "Gemini", "Leo", "Libra", "Sagittarius", "Aquarius"].includes(s) ? "Yang" : "Yin";
+}
+
+function celebrityAstroChips(sign, years) {
+  const s = resolveZodiacSign(sign);
+  const element = zodiacElements[s] || "Unknown";
+  const modality = zodiacModalities[s] || "Unknown";
+  const polarity = zodiacPolarity(s);
+  const age = celebrityAgeLabel(years);
+  return [`Element: ${element}`, `Mode: ${modality}`, `Polarity: ${polarity}`, age].filter(Boolean);
+}
+
+function celebrityAvatarDataUrl(name, gender) {
+  const g = gender === "female" ? "female" : "male";
+  const themes = celebAvatarThemes[g] || celebAvatarThemes.male;
+  const theme = themes[Math.abs(stringHash(`${name}:${g}`)) % themes.length];
+  const initial = (String(name || "A").trim().charAt(0) || "A").toUpperCase();
+  const stroke = g === "female" ? "#ffd9ec" : "#bfe0ff";
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'>
+    <defs>
+      <linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>
+        <stop offset='0%' stop-color='${theme.bg}'/>
+        <stop offset='100%' stop-color='${theme.accent}'/>
+      </linearGradient>
+    </defs>
+    <rect width='96' height='96' rx='20' fill='url(#g)'/>
+    <circle cx='48' cy='37' r='16' fill='${theme.skin}' opacity='0.95'/>
+    <path d='M24 82c3-15 14-24 24-24s21 9 24 24' fill='${stroke}' fill-opacity='0.35'/>
+    <circle cx='48' cy='48' r='33' fill='none' stroke='${stroke}' stroke-width='1.8' stroke-opacity='0.5'/>
+    <text x='48' y='53' text-anchor='middle' font-size='17' fill='#fff' font-family='system-ui, -apple-system, Segoe UI, sans-serif' font-weight='700'>${initial}</text>
+  </svg>`;
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 }
 
 function buildFriendEnergySeries(dashboard, period, baseSeries) {
@@ -1604,15 +1734,28 @@ function renderZodiacCelebrities(sign) {
         <p>A quick reference set of public figures born under your solar sign for inspiration, style cues, and behavioral patterns.</p>
         <div class="celeb-grid">
           ${entries
-            .map(
-              (item) => `
-                <article class="celeb-card">
-                  <h3>${item.name}</h3>
-                  <p class="celeb-meta">${item.field} · ${item.years}</p>
+            .map((item) => {
+              const gender = celebrityGender(item.name);
+              const genderIcon = gender === "female" ? "♀" : "♂";
+              const chips = celebrityAstroChips(signLabel, item.years);
+              const avatar = celebrityAvatarDataUrl(item.name, gender);
+              return `
+                <article class="celeb-card ${gender === "female" ? "is-female" : "is-male"}">
+                  <div class="celeb-head">
+                    <img class="celeb-avatar" src="${avatar}" alt="${escapeHtml(item.name)} avatar" loading="lazy" decoding="async" />
+                    <div class="celeb-head-copy">
+                      <h3>${item.name}</h3>
+                      <p class="celeb-meta">${item.field} · ${item.years}</p>
+                    </div>
+                    <span class="celeb-gender" aria-label="${gender === "female" ? "female" : "male"}">${genderIcon}</span>
+                  </div>
+                  <div class="celeb-chip-row">
+                    ${chips.map((chip) => `<span class="celeb-chip">${escapeHtml(chip)}</span>`).join("")}
+                  </div>
                   <p>${item.fact}</p>
                 </article>
-              `
-            )
+              `;
+            })
             .join("")}
         </div>
       </article>
