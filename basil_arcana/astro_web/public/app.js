@@ -262,6 +262,153 @@ const zodiacModalities = {
   Pisces: "Mutable"
 };
 
+const zodiacCelebrities = {
+  Aries: [
+    { name: "Lady Gaga", field: "Music / Performance", years: "b. 1986", fact: "Her debut era reshaped modern pop visuals and made theatrical live performance mainstream again." },
+    { name: "Robert Downey Jr.", field: "Film", years: "b. 1965", fact: "His Iron Man role launched Marvel's modern cinema universe and redefined franchise leading characters." },
+    { name: "Emma Watson", field: "Film / Advocacy", years: "b. 1990", fact: "After Harry Potter, she became a global voice for girls' education and gender equality." },
+    { name: "Pedro Pascal", field: "Film / TV", years: "b. 1975", fact: "The Mandalorian and The Last of Us made him one of streaming's most recognizable leads." },
+    { name: "Mariah Carey", field: "Music", years: "b. 1969", fact: "She set enduring vocal standards and still holds one of the most successful chart records." },
+    { name: "Elton John", field: "Music", years: "b. 1947", fact: "His touring longevity and songwriting catalog built one of the most influential pop careers ever." },
+    { name: "Reese Witherspoon", field: "Film / Production", years: "b. 1976", fact: "She scaled from actor to major producer, backing female-led stories with global mainstream impact." },
+    { name: "Jackie Chan", field: "Film / Action", years: "b. 1954", fact: "He fused stunt innovation and comedy timing, changing action cinema language across multiple decades." },
+    { name: "Pharrell Williams", field: "Music / Design", years: "b. 1973", fact: "He combined producer hitmaking with fashion leadership, shaping cross-industry culture beyond music charts." },
+    { name: "Celine Dion", field: "Music", years: "b. 1968", fact: "Her vocal consistency and residency-era success created one of the strongest global live brands." }
+  ],
+  Taurus: [
+    { name: "Adele", field: "Music", years: "b. 1988", fact: "Her album cycles repeatedly reset sales benchmarks in the streaming era with minimal overexposure." },
+    { name: "Dwayne Johnson", field: "Film / Sports Entertainment", years: "b. 1972", fact: "He transitioned from WWE to box-office anchor while building a large direct audience brand." },
+    { name: "David Beckham", field: "Football / Business", years: "b. 1975", fact: "He turned elite sports fame into a long-running global lifestyle and ownership platform." },
+    { name: "Gigi Hadid", field: "Fashion", years: "b. 1995", fact: "She became one of the defining faces of the social-first supermodel generation." },
+    { name: "George Clooney", field: "Film", years: "b. 1961", fact: "He sustained A-list relevance across acting, directing, and producing with strong critical recognition." },
+    { name: "Mark Zuckerberg", field: "Technology", years: "b. 1984", fact: "As Meta's cofounder, he helped build one of the largest social platforms in history." },
+    { name: "Megan Fox", field: "Film", years: "b. 1986", fact: "Her blockbuster visibility in the 2000s made her a defining pop-culture screen presence." },
+    { name: "Gal Gadot", field: "Film", years: "b. 1985", fact: "Her Wonder Woman role revived a major franchise and expanded women-led superhero market demand." },
+    { name: "Tina Fey", field: "Comedy / Writing", years: "b. 1970", fact: "She shaped modern TV comedy by combining showrunning, writing precision, and on-screen performance." },
+    { name: "Cher", field: "Music / Film", years: "b. 1946", fact: "Few artists sustained chart and cultural relevance across as many decades and formats." }
+  ],
+  Gemini: [
+    { name: "Angelina Jolie", field: "Film / Humanitarian Work", years: "b. 1975", fact: "She combined major studio success with high-visibility international humanitarian advocacy for years." },
+    { name: "Kanye West", field: "Music / Fashion", years: "b. 1977", fact: "His production style shifted mainstream rap sonics and influenced fashion-business crossover models." },
+    { name: "Natalie Portman", field: "Film", years: "b. 1981", fact: "From franchise films to Oscar-winning drama, she maintained rare range and critical consistency." },
+    { name: "Chris Evans", field: "Film", years: "b. 1981", fact: "His Captain America run anchored a decade of franchise storytelling and global fan loyalty." },
+    { name: "Johnny Depp", field: "Film", years: "b. 1963", fact: "He built a career on eccentric character work that repeatedly converted into major box-office." },
+    { name: "Kendrick Lamar", field: "Music", years: "b. 1987", fact: "He became a benchmark for concept-driven rap albums with broad cultural and critical impact." },
+    { name: "Tom Holland", field: "Film", years: "b. 1996", fact: "His Spider-Man era positioned him as one of the most bankable young film leads." },
+    { name: "Heidi Klum", field: "Fashion / Television", years: "b. 1973", fact: "She expanded from runway prominence into enduring mainstream hosting and production roles." },
+    { name: "Naomi Campbell", field: "Fashion", years: "b. 1970", fact: "As a supermodel pioneer, she helped define modern runway celebrity power dynamics." },
+    { name: "Awkwafina", field: "Film / Comedy", years: "b. 1988", fact: "She moved quickly from digital breakout to major film roles and award-level recognition." }
+  ],
+  Cancer: [
+    { name: "Ariana Grande", field: "Music", years: "b. 1993", fact: "Her vocal style and streaming dominance made her one of pop's strongest digital-era performers." },
+    { name: "Selena Gomez", field: "Music / TV / Business", years: "b. 1992", fact: "She built a multi-vertical brand spanning music, acting, and high-growth beauty commerce." },
+    { name: "Tom Hanks", field: "Film", years: "b. 1956", fact: "He remains one of cinema's most trusted leads, with decades of iconic dramatic roles." },
+    { name: "Meryl Streep", field: "Film", years: "b. 1949", fact: "Her nomination record and range still set an acting benchmark across generations." },
+    { name: "Margot Robbie", field: "Film / Production", years: "b. 1990", fact: "She paired blockbuster acting with production strategy, scaling from star talent to studio force." },
+    { name: "Lionel Messi", field: "Football", years: "b. 1987", fact: "His sustained elite output and World Cup win cemented one of sport's strongest legacies." },
+    { name: "Vin Diesel", field: "Film", years: "b. 1967", fact: "He turned Fast & Furious into one of the highest-grossing global action franchises." },
+    { name: "Benedict Cumberbatch", field: "Film / TV", years: "b. 1976", fact: "He balanced prestige roles and major franchises while keeping strong international audience appeal." },
+    { name: "Post Malone", field: "Music", years: "b. 1995", fact: "His genre-blending catalog produced durable streaming hits across rap, pop, and melodic rock." },
+    { name: "Lana Del Rey", field: "Music", years: "b. 1985", fact: "Her cinematic songwriting style strongly influenced alternative-pop aesthetics in the 2010s and beyond." }
+  ],
+  Leo: [
+    { name: "Barack Obama", field: "Politics / Media", years: "b. 1961", fact: "As U.S. president, he combined policy influence with unmatched modern speech communication impact." },
+    { name: "Jennifer Lopez", field: "Music / Film", years: "b. 1969", fact: "She sustained crossover success in music, film, and touring over multiple industry cycles." },
+    { name: "Madonna", field: "Music", years: "b. 1958", fact: "Her reinvention strategy became a blueprint for longevity in mainstream global pop careers." },
+    { name: "Daniel Radcliffe", field: "Film / Stage", years: "b. 1989", fact: "After Potter, he rebuilt his profile through eclectic stage and independent screen choices." },
+    { name: "Chris Hemsworth", field: "Film", years: "b. 1983", fact: "His Thor role and action portfolio made him a consistent global studio lead." },
+    { name: "Mila Kunis", field: "Film / Television", years: "b. 1983", fact: "She successfully moved from long-running TV comedy into mainstream film and voice work." },
+    { name: "Charlize Theron", field: "Film / Production", years: "b. 1975", fact: "She combined Oscar-level dramatic work with action-franchise credibility and producer leadership." },
+    { name: "Jason Momoa", field: "Film / TV", years: "b. 1979", fact: "Aquaman and TV fantasy hits turned him into a durable international action persona." },
+    { name: "Kylie Jenner", field: "Business / Media", years: "b. 1997", fact: "She converted social-media reach into one of the most visible celebrity beauty businesses." },
+    { name: "Dua Lipa", field: "Music", years: "b. 1995", fact: "Her catalog and touring scale made her a core pop headliner in the 2020s." }
+  ],
+  Virgo: [
+    { name: "Beyoncé", field: "Music / Performance", years: "b. 1981", fact: "Her visual albums and stadium tours set precision standards for modern live production." },
+    { name: "Keanu Reeves", field: "Film", years: "b. 1964", fact: "The John Wick era renewed his global profile with a highly disciplined action identity." },
+    { name: "Zendaya", field: "Film / Television", years: "b. 1996", fact: "She moved quickly from youth TV to Emmy-winning roles and major film franchises." },
+    { name: "Tom Hardy", field: "Film", years: "b. 1977", fact: "His intense character approach made him a frequent choice for high-pressure lead roles." },
+    { name: "Blake Lively", field: "Film / Entrepreneurship", years: "b. 1987", fact: "She maintained screen visibility while expanding into premium brand and product ventures." },
+    { name: "Idris Elba", field: "Film / Television", years: "b. 1972", fact: "His mix of prestige TV and franchise film work built broad multi-market recognition." },
+    { name: "Nick Jonas", field: "Music / Film", years: "b. 1992", fact: "He transitioned from teen pop roots into diversified solo, acting, and touring output." },
+    { name: "Cameron Diaz", field: "Film", years: "b. 1972", fact: "Her 1990s-2000s run made her one of the era's most bankable comedy stars." },
+    { name: "P!nk", field: "Music", years: "b. 1979", fact: "Her vocal durability and high-intensity acrobatic shows define one of touring's strongest reputations." },
+    { name: "Michael Bublé", field: "Music", years: "b. 1975", fact: "He modernized classic vocal-pop repertoire and sustained a durable global live audience." }
+  ],
+  Libra: [
+    { name: "Kim Kardashian", field: "Media / Business", years: "b. 1980", fact: "She helped define creator-era celebrity commerce through direct-to-consumer beauty and lifestyle brands." },
+    { name: "Will Smith", field: "Film / Music", years: "b. 1968", fact: "He achieved rare crossover success as both blockbuster actor and charting recording artist." },
+    { name: "Serena Williams", field: "Tennis / Business", years: "b. 1981", fact: "Her Grand Slam dominance transformed expectations around longevity and power in women's tennis." },
+    { name: "Bruno Mars", field: "Music", years: "b. 1985", fact: "He combines songwriting precision with high-energy live shows that repeatedly drive global hits." },
+    { name: "Zac Efron", field: "Film", years: "b. 1987", fact: "He evolved from teen-musical fame into mainstream comedy and dramatic streaming projects." },
+    { name: "Hugh Jackman", field: "Film / Stage", years: "b. 1968", fact: "He balanced Wolverine franchise scale with award-level musical theater and dramatic work." },
+    { name: "Snoop Dogg", field: "Music / Media", years: "b. 1971", fact: "His long media run shows rare adaptability across music, sports entertainment, and branding." },
+    { name: "Gwen Stefani", field: "Music / Fashion", years: "b. 1969", fact: "She built enduring visibility by combining pop reinvention with strong fashion positioning." },
+    { name: "Kate Winslet", field: "Film", years: "b. 1975", fact: "Her career sustained high critical credibility while retaining major mainstream audience relevance." },
+    { name: "Eminem", field: "Music", years: "b. 1972", fact: "His lyrical technicality and sales scale shaped mainstream rap metrics for two decades." }
+  ],
+  Scorpio: [
+    { name: "Leonardo DiCaprio", field: "Film / Environmental Advocacy", years: "b. 1974", fact: "He combined long-term box-office power with high-visibility climate and conservation campaigning." },
+    { name: "Ryan Gosling", field: "Film", years: "b. 1980", fact: "He maintained leading-man demand through selective roles spanning indie prestige and global blockbusters." },
+    { name: "Anne Hathaway", field: "Film", years: "b. 1982", fact: "Her transition from family films to Oscar-winning drama established broad performance range." },
+    { name: "Emma Stone", field: "Film", years: "b. 1988", fact: "She built a strong awards profile while staying commercially viable in studio projects." },
+    { name: "Drake", field: "Music", years: "b. 1986", fact: "His chart consistency and streaming numbers made him a defining artist of the era." },
+    { name: "Kendall Jenner", field: "Fashion / Media", years: "b. 1995", fact: "She became a global runway and campaign fixture while scaling cross-platform media reach." },
+    { name: "Bill Gates", field: "Technology / Philanthropy", years: "b. 1955", fact: "After Microsoft leadership, he became one of the largest private funders of global health." },
+    { name: "Gordon Ramsay", field: "Culinary / Television", years: "b. 1966", fact: "He expanded chef status into an international television and restaurant brand network." },
+    { name: "Julia Roberts", field: "Film", years: "b. 1967", fact: "Her 1990s star run and continued screen presence built one of cinema's biggest names." },
+    { name: "Winona Ryder", field: "Film / Television", years: "b. 1971", fact: "Stranger Things introduced her to a new generation while renewing her cultural relevance." }
+  ],
+  Sagittarius: [
+    { name: "Taylor Swift", field: "Music", years: "b. 1989", fact: "Her rerecording strategy and stadium demand changed artist ownership conversations at industry scale." },
+    { name: "Brad Pitt", field: "Film / Production", years: "b. 1963", fact: "He sustained A-list longevity while producing multiple award-winning films through his studio." },
+    { name: "Nicki Minaj", field: "Music", years: "b. 1982", fact: "She expanded women-led mainstream rap visibility and influenced a generation of performers." },
+    { name: "Jay-Z", field: "Music / Business", years: "b. 1969", fact: "He built one of the strongest artist-to-investor transitions in modern entertainment business." },
+    { name: "Britney Spears", field: "Music", years: "b. 1981", fact: "Her early-2000s impact helped define the global teen-pop template and performance style." },
+    { name: "Miley Cyrus", field: "Music / Television", years: "b. 1992", fact: "She repeatedly reinvented her sound while keeping strong mainstream attention across cycles." },
+    { name: "Samuel L. Jackson", field: "Film", years: "b. 1948", fact: "His prolific output made him one of the highest-grossing actors in film history." },
+    { name: "Ben Stiller", field: "Film / Direction", years: "b. 1965", fact: "He combined comedy acting and directing into durable commercial and critical television success." },
+    { name: "Christina Aguilera", field: "Music", years: "b. 1980", fact: "Her vocal power and era-defining singles established long-term influence in pop performance." },
+    { name: "Billie Eilish", field: "Music", years: "b. 2001", fact: "She reached global scale early with a minimalist sonic identity and strong award trajectory." }
+  ],
+  Capricorn: [
+    { name: "Denzel Washington", field: "Film", years: "b. 1954", fact: "He remains a benchmark for dramatic authority and consistency across several decades." },
+    { name: "LeBron James", field: "Basketball / Media", years: "b. 1984", fact: "His on-court longevity and off-court media ventures set a modern athlete-business template." },
+    { name: "Michelle Obama", field: "Public Leadership", years: "b. 1964", fact: "She built one of the strongest modern civic influence platforms beyond formal office." },
+    { name: "Bradley Cooper", field: "Film", years: "b. 1975", fact: "He transitioned from comedic roles into critically acclaimed directing and dramatic performance work." },
+    { name: "Timothée Chalamet", field: "Film", years: "b. 1995", fact: "He became a rare young actor balancing indie prestige and major studio franchise scale." },
+    { name: "Kate Middleton", field: "Public Figure", years: "b. 1982", fact: "Her sustained public profile shapes modern royal communications and philanthropy visibility." },
+    { name: "Dolly Parton", field: "Music / Philanthropy", years: "b. 1946", fact: "Her songwriting legacy pairs with large literacy philanthropy and strong multi-generation cultural reach." },
+    { name: "John Legend", field: "Music", years: "b. 1978", fact: "He combines acclaimed songwriting with broad television and live-performance visibility." },
+    { name: "Jim Carrey", field: "Film / Comedy", years: "b. 1962", fact: "His physical comedy style changed 1990s mainstream humor and remains widely referenced." },
+    { name: "Nina Dobrev", field: "Television / Film", years: "b. 1989", fact: "Her TV franchise visibility translated into sustained global fan engagement and screen presence." }
+  ],
+  Aquarius: [
+    { name: "Shakira", field: "Music", years: "b. 1977", fact: "Her bilingual catalog and touring power made her one of Latin music's biggest globals." },
+    { name: "Harry Styles", field: "Music / Film", years: "b. 1994", fact: "He successfully transitioned from boy-band fame into solo arena-level artist status." },
+    { name: "Jennifer Aniston", field: "Television / Film", years: "b. 1969", fact: "Friends-era visibility evolved into lasting film and streaming lead relevance." },
+    { name: "Cristiano Ronaldo", field: "Football", years: "b. 1985", fact: "His goal records and brand scale set one of modern sport's largest personal platforms." },
+    { name: "Alicia Keys", field: "Music", years: "b. 1981", fact: "She built a long-running catalog anchored by songwriting craft and live vocal credibility." },
+    { name: "Ed Sheeran", field: "Music", years: "b. 1991", fact: "His songwriting pipeline repeatedly produced global hits across pop and acoustic formats." },
+    { name: "Oprah Winfrey", field: "Media / Business", years: "b. 1954", fact: "Her media empire reshaped talk-format influence and long-form audience trust economics." },
+    { name: "Michael Jordan", field: "Basketball / Business", years: "b. 1963", fact: "His competitive legacy and brand partnerships still define modern athlete commercial scale." },
+    { name: "The Weeknd", field: "Music", years: "b. 1990", fact: "He merged cinematic pop and dark R&B into one of streaming's biggest catalogs." },
+    { name: "Ashton Kutcher", field: "Film / Technology Investing", years: "b. 1978", fact: "He moved from TV stardom into early-stage tech investing with notable exits." }
+  ],
+  Pisces: [
+    { name: "Rihanna", field: "Music / Business", years: "b. 1988", fact: "She expanded from chart dominance into a global beauty and fashion business empire." },
+    { name: "Justin Bieber", field: "Music", years: "b. 1994", fact: "His long career from teen breakout to adult pop star remains unusually resilient." },
+    { name: "Bad Bunny", field: "Music", years: "b. 1994", fact: "He proved Spanish-language releases can lead global charts without format compromise." },
+    { name: "Olivia Rodrigo", field: "Music / Acting", years: "b. 2003", fact: "Her debut songwriting impact made her one of the fastest global pop breakouts." },
+    { name: "Drew Barrymore", field: "Film / Television", years: "b. 1975", fact: "She built one of entertainment's longest careers, spanning child acting to daytime hosting." },
+    { name: "Camila Cabello", field: "Music", years: "b. 1997", fact: "Her solo transition produced major global singles and sustained cross-market audience reach." },
+    { name: "Eva Mendes", field: "Film / Business", years: "b. 1974", fact: "She combined mainstream film work with commercial partnerships in fashion and home categories." },
+    { name: "Daniel Craig", field: "Film", years: "b. 1968", fact: "His Bond era reset the franchise tone with a grounded and physical character style." },
+    { name: "Shaquille O'Neal", field: "Basketball / Media", years: "b. 1972", fact: "He translated dominant sports fame into durable broadcasting and business entertainment presence." },
+    { name: "Simone Biles", field: "Gymnastics", years: "b. 1997", fact: "Her difficulty level and medal record redefined the ceiling for modern gymnastics performance." }
+  ]
+};
+
 const elementNarratives = {
   Fire: {
     drive: "You recharge through movement, challenge, and visible momentum.",
@@ -1312,6 +1459,36 @@ function renderHomeZodiacCompact(sign) {
   `;
 }
 
+function renderZodiacCelebrities(sign) {
+  const signLabel = resolveZodiacSign(sign);
+  const entries = Array.isArray(zodiacCelebrities[signLabel]) ? zodiacCelebrities[signLabel] : [];
+  if (!entries.length) {
+    return "";
+  }
+  return `
+    <section class="section">
+      <article class="card celeb-block">
+        <span class="eyebrow">Zodiac network</span>
+        <h2>Famous ${signLabel} Profiles</h2>
+        <p>A quick reference set of public figures born under your solar sign for inspiration, style cues, and behavioral patterns.</p>
+        <div class="celeb-grid">
+          ${entries
+            .map(
+              (item) => `
+                <article class="celeb-card">
+                  <h3>${item.name}</h3>
+                  <p class="celeb-meta">${item.field} · ${item.years}</p>
+                  <p>${item.fact}</p>
+                </article>
+              `
+            )
+            .join("")}
+        </div>
+      </article>
+    </section>
+  `;
+}
+
 function renderFriendZodiacSnippet(sign) {
   const details = zodiacDetails(sign);
   const deep = zodiacLongRead(sign);
@@ -1534,6 +1711,7 @@ function renderHomeDashboard(dashboard) {
     `${uiIcon("location")} ${dashboard.profile?.birthCity || ""}`
   ].filter((item) => item.replace(/<[^>]+>/g, "").trim());
   const zodiacCompact = renderHomeZodiacCompact(dashboard.natalCore?.sun);
+  const zodiacCelebBlock = renderZodiacCelebrities(dashboard.natalCore?.sun);
 
   return `
     <section class="hero">
@@ -1566,6 +1744,7 @@ function renderHomeDashboard(dashboard) {
       </article>
     </section>
     ${zodiacCompact}
+    ${zodiacCelebBlock}
     <section class="section">
       <article class="card">
         <h2>Friends dynamic compatibility</h2>

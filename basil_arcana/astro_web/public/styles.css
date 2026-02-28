@@ -2129,6 +2129,37 @@ body[data-theme="light"] .auth-login-btn.telegram .auth-login-btn-icon .astro-ic
   overflow-wrap: anywhere;
 }
 
+.celeb-block {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.celeb-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.58rem;
+}
+
+.celeb-card {
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  padding: 0.62rem;
+  display: grid;
+  gap: 0.24rem;
+}
+
+.celeb-card h3 {
+  margin: 0;
+  font-size: 0.86rem;
+}
+
+.celeb-meta {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
 .daily-astro-axis {
   stroke: var(--line-strong);
   stroke-width: 1;
@@ -2630,6 +2661,10 @@ body[data-theme="light"] .energy-star.neutral {
   }
 
   .daily-achievement-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .celeb-grid {
     grid-template-columns: 1fr;
   }
 
