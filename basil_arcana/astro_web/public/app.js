@@ -472,19 +472,6 @@ const femaleCelebrityNames = new Set([
   "Simone Biles"
 ]);
 
-const celebLineArtIcons = {
-  male: [
-    "<svg viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'><path d='M8 7.5c0-2.1 1.7-3.5 4-3.5s4 1.4 4 3.5c0 2.3-1.4 3.8-4 3.8s-4-1.5-4-3.8Z' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/><path d='M6 19c1.1-2.8 3.1-4.2 6-4.2s4.9 1.4 6 4.2' stroke='currentColor' stroke-width='1.4' stroke-linecap='round'/><path d='M7.2 8.4c.6-2.4 2.4-3.7 4.8-3.7 2.3 0 4.1 1.2 4.8 3.5' stroke='currentColor' stroke-width='1.4' stroke-linecap='round'/></svg>",
-    "<svg viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'><circle cx='12' cy='12' r='9' stroke='currentColor' stroke-width='1.3'/><path d='M8.2 10.1c0-2 1.6-3.3 3.8-3.3 2.2 0 3.8 1.3 3.8 3.3 0 2.1-1.3 3.4-3.8 3.4-2.5 0-3.8-1.3-3.8-3.4Z' stroke='currentColor' stroke-width='1.3'/><path d='M8 16.8c1-1.8 2.3-2.6 4-2.6 1.7 0 3 .8 4 2.6' stroke='currentColor' stroke-width='1.3' stroke-linecap='round'/><path d='M8.7 9.3h6.6' stroke='currentColor' stroke-width='1.3' stroke-linecap='round'/></svg>",
-    "<svg viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'><path d='M9 9.2c0-2.1 1.3-3.5 3-3.5s3 1.4 3 3.5c0 1.9-1 3.3-3 3.3s-3-1.4-3-3.3Z' stroke='currentColor' stroke-width='1.35'/><path d='M6.3 18.5c1.1-2.6 3-3.9 5.7-3.9 2.8 0 4.6 1.3 5.7 3.9' stroke='currentColor' stroke-width='1.35' stroke-linecap='round'/><path d='M7.8 8.8c.8-2 2.3-3 4.2-3 1.9 0 3.4 1 4.2 3' stroke='currentColor' stroke-width='1.35' stroke-linecap='round'/><path d='M4 20h16' stroke='currentColor' stroke-width='1.2' stroke-linecap='round' opacity='0.7'/></svg>"
-  ],
-  female: [
-    "<svg viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'><path d='M7.5 10.2c0-2.2 1.9-3.8 4.5-3.8s4.5 1.6 4.5 3.8c0 2.2-1.7 3.8-4.5 3.8-2.8 0-4.5-1.6-4.5-3.8Z' stroke='currentColor' stroke-width='1.35'/><path d='M6.2 19c1.2-2.8 3.1-4.1 5.8-4.1s4.6 1.3 5.8 4.1' stroke='currentColor' stroke-width='1.35' stroke-linecap='round'/><path d='M7 9.4c.4-2.8 2.4-4.5 5-4.5s4.6 1.7 5 4.5' stroke='currentColor' stroke-width='1.35' stroke-linecap='round'/><path d='M6.8 11.3c-.5.5-.8 1.1-.8 1.8' stroke='currentColor' stroke-width='1.2' stroke-linecap='round'/><path d='M17.2 11.3c.5.5.8 1.1.8 1.8' stroke='currentColor' stroke-width='1.2' stroke-linecap='round'/></svg>",
-    "<svg viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'><circle cx='12' cy='12' r='9' stroke='currentColor' stroke-width='1.3'/><path d='M8.3 10.4c0-2.1 1.5-3.5 3.7-3.5s3.7 1.4 3.7 3.5-1.4 3.5-3.7 3.5-3.7-1.4-3.7-3.5Z' stroke='currentColor' stroke-width='1.3'/><path d='M8 16.9c1.1-1.8 2.4-2.6 4-2.6s2.9.8 4 2.6' stroke='currentColor' stroke-width='1.3' stroke-linecap='round'/><path d='M8.1 9.7c.7-2 2.1-3.1 3.9-3.1 1.8 0 3.2 1.1 3.9 3.1' stroke='currentColor' stroke-width='1.3' stroke-linecap='round'/></svg>",
-    "<svg viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'><path d='M8.8 10.1c0-2.1 1.3-3.5 3.2-3.5s3.2 1.4 3.2 3.5c0 2-1.1 3.5-3.2 3.5s-3.2-1.5-3.2-3.5Z' stroke='currentColor' stroke-width='1.35'/><path d='M6.4 18.7c1.2-2.7 3-4 5.6-4s4.4 1.3 5.6 4' stroke='currentColor' stroke-width='1.35' stroke-linecap='round'/><path d='M7.6 10.2c-.8-2.8.7-5 4.4-5 3.7 0 5.2 2.2 4.4 5' stroke='currentColor' stroke-width='1.35' stroke-linecap='round'/><path d='M7.3 20h9.4' stroke='currentColor' stroke-width='1.2' stroke-linecap='round' opacity='0.7'/></svg>"
-  ]
-};
-
 const elementNarratives = {
   Fire: {
     drive: "You recharge through movement, challenge, and visible momentum.",
@@ -1090,9 +1077,11 @@ function celebrityAstroChips(sign, years) {
 
 function celebrityAvatarDataUrl(name, gender) {
   const g = gender === "female" ? "female" : "male";
-  const icons = celebLineArtIcons[g] || celebLineArtIcons.male;
-  const hash = Math.abs(stringHash(`${name}:${g}`));
-  return icons[hash % icons.length];
+  const seed = encodeURIComponent(String(name || "User").trim() || "User");
+  const radius = 50;
+  const style = "notionists";
+  const base = "https://api.dicebear.com/9.x";
+  return `${base}/${style}/svg?seed=${seed}&radius=${radius}&size=64&flip=${g === "female" ? "false" : "true"}`;
 }
 
 function buildFriendEnergySeries(dashboard, period, baseSeries) {
@@ -1727,7 +1716,7 @@ function renderZodiacCelebrities(sign) {
               return `
                 <article class="celeb-card ${gender === "female" ? "is-female" : "is-male"}">
                   <div class="celeb-head">
-                    <span class="celeb-avatar" aria-hidden="true">${avatar}</span>
+                    <img class="celeb-avatar" src="${avatar}" alt="${escapeHtml(item.name)} avatar" loading="lazy" decoding="async" />
                     <div class="celeb-head-copy">
                       <h3>${item.name}</h3>
                       <p class="celeb-meta">${item.field} · ${item.years}</p>

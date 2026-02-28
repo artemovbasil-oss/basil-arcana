@@ -2253,16 +2253,10 @@ body[data-theme="light"] .auth-login-btn.telegram .auth-login-btn-icon .astro-ic
 .celeb-avatar {
   width: 48px;
   height: 48px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: color-mix(in srgb, var(--ink) 82%, var(--muted) 18%);
-}
-
-.celeb-avatar svg {
-  width: 44px;
-  height: 44px;
-  display: block;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--line) 72%, transparent 28%);
+  object-fit: cover;
+  background: transparent;
 }
 
 .celeb-gender {
