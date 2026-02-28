@@ -1078,10 +1078,9 @@ function celebrityAstroChips(sign, years) {
 function celebrityAvatarDataUrl(name, gender) {
   const g = gender === "female" ? "female" : "male";
   const seed = encodeURIComponent(String(name || "User").trim() || "User");
-  const radius = 50;
-  const style = "notionists";
+  const style = "lorelei-neutral";
   const base = "https://api.dicebear.com/9.x";
-  return `${base}/${style}/svg?seed=${seed}&radius=${radius}&size=64&flip=${g === "female" ? "false" : "true"}`;
+  return `${base}/${style}/svg?seed=${seed}&size=64&flip=${g === "female" ? "false" : "true"}`;
 }
 
 function buildFriendEnergySeries(dashboard, period, baseSeries) {

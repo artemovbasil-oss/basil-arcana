@@ -2251,12 +2251,22 @@ body[data-theme="light"] .auth-login-btn.telegram .auth-login-btn-icon .astro-ic
 }
 
 .celeb-avatar {
-  width: 48px;
-  height: 48px;
-  border-radius: 10px;
-  border: 1px solid color-mix(in srgb, var(--line) 72%, transparent 28%);
+  width: 54px;
+  height: 54px;
+  border-radius: 0;
+  border: 0;
   object-fit: cover;
   background: transparent;
+  display: block;
+  filter: contrast(1.08) saturate(0.9);
+}
+
+body[data-theme="dark"] .celeb-avatar {
+  filter: brightness(1.08) contrast(1.1) saturate(0.9);
+}
+
+body[data-theme="light"] .celeb-avatar {
+  filter: brightness(0.92) contrast(1.18) saturate(0.86);
 }
 
 .celeb-gender {
