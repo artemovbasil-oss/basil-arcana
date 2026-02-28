@@ -381,6 +381,10 @@ p {
   color: #12324f;
 }
 
+.auth-login-btn.gmail .auth-login-btn-icon .astro-icon {
+  color: #1a73e8;
+}
+
 .auth-login-btn.gmail:hover {
   border-color: #8eb5d8;
   background: #cde3f6;
@@ -389,6 +393,10 @@ p {
 .auth-login-btn.telegram {
   border-color: #1559a8;
   background: #1a73e8;
+  color: #ffffff;
+}
+
+.auth-login-btn.telegram .auth-login-btn-icon .astro-icon {
   color: #ffffff;
 }
 
@@ -416,6 +424,14 @@ body[data-theme="light"] .auth-login-btn.gmail {
   border-color: #8eb5d8;
   background: #d4e8f9;
   color: #102e4a;
+}
+
+body[data-theme="light"] .auth-login-btn.gmail .auth-login-btn-icon .astro-icon {
+  color: #1a73e8;
+}
+
+body[data-theme="light"] .auth-login-btn.telegram .auth-login-btn-icon .astro-icon {
+  color: #ffffff;
 }
 
 .btn {
@@ -2495,7 +2511,12 @@ body[data-theme="light"] .energy-star.neutral {
   }
 
   .login-visual {
-    display: none;
+    display: flex;
+    margin-top: 0.35rem;
+  }
+
+  .login-visual img {
+    max-width: 640px;
   }
 
   .feature-grid {
