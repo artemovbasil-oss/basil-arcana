@@ -1091,9 +1091,29 @@ function celebrityAstroChips(sign, years) {
 function celebrityAvatarDataUrl(name, gender) {
   const g = gender === "female" ? "female" : "male";
   const themes = celebAvatarThemes[g] || celebAvatarThemes.male;
-  const theme = themes[Math.abs(stringHash(`${name}:${g}`)) % themes.length];
-  const initial = (String(name || "A").trim().charAt(0) || "A").toUpperCase();
+  const hash = Math.abs(stringHash(`${name}:${g}`));
+  const variant = hash % 3;
+  const theme = themes[hash % themes.length];
   const stroke = g === "female" ? "#ffd9ec" : "#bfe0ff";
+  const hair = g === "female" ? "#11131a" : "#14161d";
+  const cloth = g === "female" ? "#2b1f33" : "#1f2a33";
+  const beard = g === "female" ? "" : `<path d='M39 51c2 4 7 7 9 7s7-3 9-7' fill='none' stroke='#2a1f19' stroke-width='2' stroke-linecap='round' opacity='${variant === 2 ? "0.85" : "0"}'/>`;
+  const hairShape =
+    g === "female"
+      ? variant === 0
+        ? "<path d='M28 34c0-12 9-20 20-20s20 8 20 20c0 10-5 15-5 22H33c0-8-5-13-5-22z' fill='" + hair + "'/>"
+        : variant === 1
+          ? "<path d='M24 36c0-14 10-24 24-24s24 10 24 24c0 12-8 17-8 24H32c0-7-8-12-8-24z' fill='" + hair + "'/>"
+          : "<path d='M29 33c2-11 10-18 19-18 12 0 20 9 20 21 0 8-3 13-6 18H34c-3-5-7-11-5-21z' fill='" + hair + "'/>"
+      : variant === 0
+        ? "<path d='M30 34c2-10 10-16 18-16 10 0 17 6 19 16l-7 2c-2-6-6-9-12-9s-10 3-12 9z' fill='" + hair + "'/>"
+        : variant === 1
+          ? "<path d='M28 35c0-11 9-18 20-18s20 7 20 18v5H28z' fill='" + hair + "'/>"
+          : "<path d='M31 33c2-9 9-15 17-15 10 0 18 7 19 17l-6 1c-2-6-6-9-13-9-6 0-10 3-12 8z' fill='" + hair + "'/>";
+  const accessories =
+    variant === 1
+      ? "<circle cx='41' cy='40' r='5' fill='none' stroke='#d4d8de' stroke-width='1.4'/><circle cx='55' cy='40' r='5' fill='none' stroke='#d4d8de' stroke-width='1.4'/><line x1='46' y1='40' x2='50' y2='40' stroke='#d4d8de' stroke-width='1.2'/>"
+      : "";
   const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'>
     <defs>
       <linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>
@@ -1102,10 +1122,16 @@ function celebrityAvatarDataUrl(name, gender) {
       </linearGradient>
     </defs>
     <rect width='96' height='96' rx='20' fill='url(#g)'/>
-    <circle cx='48' cy='37' r='16' fill='${theme.skin}' opacity='0.95'/>
-    <path d='M24 82c3-15 14-24 24-24s21 9 24 24' fill='${stroke}' fill-opacity='0.35'/>
+    <rect x='10' y='10' width='76' height='76' rx='16' fill='none' stroke='${stroke}' stroke-opacity='0.22'/>
+    ${hairShape}
+    <path d='M28 83c4-14 12-22 20-22s16 8 20 22' fill='${cloth}' opacity='0.82'/>
+    <circle cx='48' cy='42' r='14' fill='${theme.skin}' opacity='0.96'/>
+    <circle cx='43' cy='41' r='1.35' fill='#1f2228'/>
+    <circle cx='53' cy='41' r='1.35' fill='#1f2228'/>
+    <path d='M44 47c1.3 1.5 2.6 2.2 4 2.2s2.7-.7 4-2.2' fill='none' stroke='#352822' stroke-width='1.4' stroke-linecap='round'/>
+    ${accessories}
+    ${beard}
     <circle cx='48' cy='48' r='33' fill='none' stroke='${stroke}' stroke-width='1.8' stroke-opacity='0.5'/>
-    <text x='48' y='53' text-anchor='middle' font-size='17' fill='#fff' font-family='system-ui, -apple-system, Segoe UI, sans-serif' font-weight='700'>${initial}</text>
   </svg>`;
   return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 }
