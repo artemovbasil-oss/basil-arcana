@@ -299,6 +299,12 @@ p {
   margin-top: 1rem;
 }
 
+.section-separator {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: 0.85rem 0;
+}
+
 .btn {
   font-family: var(--font-sans);
   display: inline-flex;
@@ -2325,8 +2331,45 @@ body[data-theme="light"] .energy-star.neutral {
   font-size: 0.74rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  text-align: center;
   padding: 1rem 0.8rem 1.6rem;
+}
+
+.footer-inner {
+  width: min(1180px, calc(100% - 2rem));
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.footer-left {
+  margin: 0;
+}
+
+.footer-right {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.footer-right a {
+  text-decoration: none;
+  color: var(--muted);
+  transition: color 0.18s ease;
+}
+
+.footer-right a:hover {
+  color: var(--ink);
+}
+
+.legal-doc p,
+.legal-doc li {
+  font-size: 0.88rem;
+}
+
+.legal-doc h3 {
+  font-size: 0.84rem;
 }
 
 @media (max-width: 980px) {
@@ -2420,6 +2463,16 @@ body[data-theme="light"] .energy-star.neutral {
 
   .profile-actions #profileUpdateButton {
     width: 100%;
+  }
+
+  .footer-inner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .footer-right {
+    gap: 0.65rem;
+    flex-wrap: wrap;
   }
 
   .energy-cards {

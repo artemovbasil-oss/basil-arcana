@@ -19,11 +19,19 @@ const databaseUrl = String(process.env.DATABASE_URL || "").trim();
 const telegramBotToken = String(process.env.TELEGRAM_BOT_TOKEN || "").trim();
 const telegramBotUsername = String(process.env.TELEGRAM_BOT_USERNAME || "").trim();
 const telegramBotId = Number.parseInt(String(telegramBotToken.split(":")[0] || "").trim(), 10) || null;
+const appBaseUrlEnv = String(process.env.APP_BASE_URL || "").trim().replace(/\/+$/, "");
+const googleClientId = String(process.env.GOOGLE_CLIENT_ID || "").trim();
+const googleClientSecret = String(process.env.GOOGLE_CLIENT_SECRET || "").trim();
+const githubClientId = String(process.env.GITHUB_CLIENT_ID || "").trim();
+const githubClientSecret = String(process.env.GITHUB_CLIENT_SECRET || "").trim();
+const googleLoginEnabled = Boolean(googleClientId && googleClientSecret);
+const githubLoginEnabled = Boolean(githubClientId && githubClientSecret);
 const authRequired =
   String(process.env.AUTH_REQUIRED || "").trim() === "1" ||
   String(process.env.AUTH_REQUIRED || "").trim().toLowerCase() === "true" ||
-  Boolean(telegramBotToken);
+  Boolean(telegramBotToken || googleLoginEnabled || githubLoginEnabled);
 const MAX_TELEGRAM_AUTH_AGE_SECONDS = 60 * 60 * 24;
+const MAX_OAUTH_STATE_AGE_MS = 10 * 60 * 1000;
 
 app.set("trust proxy", 1);
 
@@ -93,6 +101,7 @@ function defaultSessionData() {
   return {
     createdAt: Date.now(),
     auth: null,
+    oauthFlow: null,
     profile: null,
     friends: [],
     daily: {
@@ -146,11 +155,22 @@ function normalizeSessionData(raw) {
   const friends = Array.isArray(source.friends) ? source.friends : [];
   const dailySource = source.daily && typeof source.daily === "object" ? source.daily : {};
   const authSource = source.auth && typeof source.auth === "object" ? source.auth : null;
+  const oauthFlowSource = source.oauthFlow && typeof source.oauthFlow === "object" ? source.oauthFlow : null;
 
   const auth = authSource
     ? {
         provider: String(authSource.provider || ""),
+        userKey: String(
+          authSource.userKey
+          || (authSource.provider && authSource.externalUserId ? `${authSource.provider}:${authSource.externalUserId}` : "")
+          || (authSource.provider === "telegram" && authSource.telegramUserId ? `telegram:${authSource.telegramUserId}` : "")
+        ),
+        externalUserId: String(authSource.externalUserId || authSource.telegramUserId || ""),
         telegramUserId: String(authSource.telegramUserId || ""),
+        user:
+          authSource.user && typeof authSource.user === "object"
+            ? authSource.user
+            : null,
         telegramUser:
           authSource.telegramUser && typeof authSource.telegramUser === "object"
             ? authSource.telegramUser
@@ -161,10 +181,19 @@ function normalizeSessionData(raw) {
         via: String(authSource.via || "")
       }
     : null;
+  const oauthFlow = oauthFlowSource
+    ? {
+        provider: String(oauthFlowSource.provider || ""),
+        state: String(oauthFlowSource.state || ""),
+        createdAt: Number.isFinite(Number(oauthFlowSource.createdAt)) ? Number(oauthFlowSource.createdAt) : Date.now(),
+        returnTo: String(oauthFlowSource.returnTo || "/")
+      }
+    : null;
 
   return {
     createdAt: Number.isFinite(Number(source.createdAt)) ? Number(source.createdAt) : Date.now(),
     auth,
+    oauthFlow,
     profile,
     friends,
     daily: {
@@ -1369,14 +1398,14 @@ function buildDashboardPayload(sessionData, period = "week") {
 }
 
 function isAuthenticated(sessionData) {
-  return Boolean(sessionData?.auth?.provider === "telegram" && sessionData?.auth?.telegramUserId);
+  return Boolean(String(sessionData?.auth?.provider || "").trim() && String(sessionData?.auth?.userKey || "").trim());
 }
 
 function requestUserId(req) {
   if (!authRequired) {
     return "dev-local-user";
   }
-  return String(req.sessionData?.auth?.telegramUserId || "").trim();
+  return String(req.sessionData?.auth?.userKey || "").trim();
 }
 
 async function requireAuth(req, res, next) {
@@ -1547,16 +1576,191 @@ function validateTelegramInitData(initData, botToken) {
   }
 }
 
+function oauthCallbackUrl(req, provider) {
+  const base =
+    appBaseUrlEnv ||
+    `${String(req.headers["x-forwarded-proto"] || "").toLowerCase().includes("https") ? "https" : req.protocol}://${req.get("host")}`;
+  return `${base}/api/auth/${provider}/callback`;
+}
+
+function normalizeReturnToPath(value) {
+  const text = String(value || "").trim();
+  if (!text || !text.startsWith("/")) {
+    return "/";
+  }
+  if (text.startsWith("//")) {
+    return "/";
+  }
+  return text;
+}
+
+function upsertOauthFlow(sessionData, provider, returnTo = "/") {
+  sessionData.oauthFlow = {
+    provider,
+    state: crypto.randomUUID(),
+    createdAt: Date.now(),
+    returnTo: normalizeReturnToPath(returnTo)
+  };
+  return sessionData.oauthFlow;
+}
+
+function consumeOauthFlow(sessionData, provider, state) {
+  const flow = sessionData?.oauthFlow && typeof sessionData.oauthFlow === "object" ? sessionData.oauthFlow : null;
+  sessionData.oauthFlow = null;
+  if (!flow) {
+    return { ok: false, reason: "missing_oauth_state" };
+  }
+  const age = Date.now() - Number(flow.createdAt || 0);
+  if (age < 0 || age > MAX_OAUTH_STATE_AGE_MS) {
+    return { ok: false, reason: "expired_oauth_state" };
+  }
+  if (String(flow.provider || "") !== String(provider || "")) {
+    return { ok: false, reason: "provider_mismatch" };
+  }
+  if (String(flow.state || "") !== String(state || "")) {
+    return { ok: false, reason: "invalid_oauth_state" };
+  }
+  return { ok: true, returnTo: normalizeReturnToPath(flow.returnTo || "/") };
+}
+
+async function finalizeAuthLogin(req, provider, profile, via) {
+  const externalId = String(profile?.id || "").trim();
+  if (!externalId) {
+    throw new Error("missing_external_user_id");
+  }
+  const user = {
+    id: externalId,
+    first_name: String(profile?.first_name || "").trim(),
+    last_name: String(profile?.last_name || "").trim(),
+    username: String(profile?.username || "").trim(),
+    email: String(profile?.email || "").trim().toLowerCase(),
+    photo_url: String(profile?.photo_url || "").trim()
+  };
+  const userKey = `${provider}:${externalId}`;
+  req.sessionData.auth = {
+    provider,
+    userKey,
+    externalUserId: externalId,
+    telegramUserId: provider === "telegram" ? externalId : "",
+    user,
+    telegramUser: provider === "telegram" ? user : null,
+    authenticatedAt: Date.now(),
+    via: String(via || "")
+  };
+  await persistSession(req.sessionId, req.sessionData);
+  const userData = await loadUserData(userKey);
+  const mergedUserData = mergeSessionIntoUserData(userData, req.sessionData);
+  await saveUserData(userKey, mergedUserData);
+  return sanitizeAuthUser(req.sessionData);
+}
+
+async function exchangeGoogleCodeForProfile(req, code) {
+  const redirectUri = oauthCallbackUrl(req, "google");
+  const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      code: String(code || ""),
+      client_id: googleClientId,
+      client_secret: googleClientSecret,
+      redirect_uri: redirectUri,
+      grant_type: "authorization_code"
+    })
+  });
+  const tokenPayload = await tokenResponse.json().catch(() => ({}));
+  if (!tokenResponse.ok || !tokenPayload?.access_token) {
+    return { ok: false, reason: "google_token_exchange_failed", details: tokenPayload };
+  }
+  const userInfoResponse = await fetch("https://openidconnect.googleapis.com/v1/userinfo", {
+    headers: { Authorization: `Bearer ${tokenPayload.access_token}` }
+  });
+  const userInfo = await userInfoResponse.json().catch(() => ({}));
+  if (!userInfoResponse.ok || !userInfo?.sub) {
+    return { ok: false, reason: "google_profile_fetch_failed", details: userInfo };
+  }
+  return {
+    ok: true,
+    profile: {
+      id: String(userInfo.sub),
+      first_name: String(userInfo.given_name || "").trim(),
+      last_name: String(userInfo.family_name || "").trim(),
+      username: String(userInfo.email || "").split("@")[0] || "",
+      email: String(userInfo.email || "").trim().toLowerCase(),
+      photo_url: String(userInfo.picture || "").trim()
+    }
+  };
+}
+
+async function exchangeGithubCodeForProfile(req, code) {
+  const redirectUri = oauthCallbackUrl(req, "github");
+  const tokenResponse = await fetch("https://github.com/login/oauth/access_token", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      Accept: "application/json"
+    },
+    body: new URLSearchParams({
+      code: String(code || ""),
+      client_id: githubClientId,
+      client_secret: githubClientSecret,
+      redirect_uri: redirectUri
+    })
+  });
+  const tokenPayload = await tokenResponse.json().catch(() => ({}));
+  if (!tokenResponse.ok || !tokenPayload?.access_token) {
+    return { ok: false, reason: "github_token_exchange_failed", details: tokenPayload };
+  }
+  const userResponse = await fetch("https://api.github.com/user", {
+    headers: {
+      Accept: "application/vnd.github+json",
+      Authorization: `Bearer ${tokenPayload.access_token}`,
+      "User-Agent": "astronautica-auth"
+    }
+  });
+  const userInfo = await userResponse.json().catch(() => ({}));
+  if (!userResponse.ok || !Number.isFinite(Number(userInfo?.id))) {
+    return { ok: false, reason: "github_profile_fetch_failed", details: userInfo };
+  }
+  const emailsResponse = await fetch("https://api.github.com/user/emails", {
+    headers: {
+      Accept: "application/vnd.github+json",
+      Authorization: `Bearer ${tokenPayload.access_token}`,
+      "User-Agent": "astronautica-auth"
+    }
+  });
+  const emailsPayload = await emailsResponse.json().catch(() => []);
+  const emails = Array.isArray(emailsPayload) ? emailsPayload : [];
+  const primaryEmail = emails.find((entry) => entry?.primary && entry?.verified)?.email
+    || emails.find((entry) => entry?.verified)?.email
+    || "";
+  const fullName = String(userInfo?.name || "").trim();
+  const [firstName = "", ...rest] = fullName.split(/\s+/).filter(Boolean);
+  return {
+    ok: true,
+    profile: {
+      id: String(userInfo.id),
+      first_name: firstName,
+      last_name: rest.join(" "),
+      username: String(userInfo?.login || "").trim(),
+      email: String(primaryEmail || "").trim().toLowerCase(),
+      photo_url: String(userInfo?.avatar_url || "").trim()
+    }
+  };
+}
+
 function sanitizeAuthUser(sessionData) {
-  const user = sessionData?.auth?.telegramUser;
+  const auth = sessionData?.auth;
+  const user = auth?.user || auth?.telegramUser;
   if (!user || typeof user !== "object") {
     return null;
   }
   return {
-    id: Number(user.id),
+    id: String(user.id || ""),
+    provider: String(auth?.provider || ""),
     firstName: String(user.first_name || ""),
     lastName: String(user.last_name || ""),
     username: String(user.username || ""),
+    email: String(user.email || ""),
     photoUrl: String(user.photo_url || "")
   };
 }
@@ -1566,6 +1770,10 @@ const contracts = {
     status: "GET /api/auth/status",
     loginWidget: "POST /api/auth/telegram-widget",
     loginInitData: "POST /api/auth/telegram-init-data",
+    googleStart: "GET /api/auth/google/start",
+    googleCallback: "GET /api/auth/google/callback",
+    githubStart: "GET /api/auth/github/start",
+    githubCallback: "GET /api/auth/github/callback",
     logout: "POST /api/auth/logout"
   },
   session_profile: {
@@ -1697,13 +1905,16 @@ app.get("/api/contracts", (_req, res) => {
 
 app.get("/api/auth/status", (req, res) => {
   const authenticated = isAuthenticated(req.sessionData);
+  const provider = authenticated ? String(req.sessionData?.auth?.provider || "") : null;
   res.json({
     ok: true,
     authRequired,
     authenticated,
-    provider: authenticated ? "telegram" : null,
+    provider: provider || null,
     user: authenticated ? sanitizeAuthUser(req.sessionData) : null,
     telegramLoginEnabled: Boolean(telegramBotToken && telegramBotUsername),
+    googleLoginEnabled,
+    githubLoginEnabled,
     telegramBotUsername: telegramBotUsername || null,
     telegramBotId
   });
@@ -1714,21 +1925,8 @@ app.post("/api/auth/telegram-widget", async (req, res) => {
   if (!validation.ok) {
     return res.status(401).json({ error: "unauthorized", reason: validation.error });
   }
-
-  req.sessionData.auth = {
-    provider: "telegram",
-    telegramUserId: String(validation.user.id),
-    telegramUser: validation.user,
-    authenticatedAt: Date.now(),
-    via: "widget"
-  };
-  await persistSession(req.sessionId, req.sessionData);
-  const userId = String(validation.user.id);
-  const userData = await loadUserData(userId);
-  const mergedUserData = mergeSessionIntoUserData(userData, req.sessionData);
-  await saveUserData(userId, mergedUserData);
-
-  return res.json({ ok: true, authenticated: true, user: sanitizeAuthUser(req.sessionData) });
+  const user = await finalizeAuthLogin(req, "telegram", validation.user, "widget");
+  return res.json({ ok: true, authenticated: true, user });
 });
 
 app.post("/api/auth/telegram-init-data", async (req, res) => {
@@ -1738,20 +1936,80 @@ app.post("/api/auth/telegram-init-data", async (req, res) => {
     return res.status(401).json({ error: "unauthorized", reason: validation.error });
   }
 
-  req.sessionData.auth = {
-    provider: "telegram",
-    telegramUserId: String(validation.user.id),
-    telegramUser: validation.user,
-    authenticatedAt: Date.now(),
-    via: "webapp"
-  };
-  await persistSession(req.sessionId, req.sessionData);
-  const userId = String(validation.user.id);
-  const userData = await loadUserData(userId);
-  const mergedUserData = mergeSessionIntoUserData(userData, req.sessionData);
-  await saveUserData(userId, mergedUserData);
+  const user = await finalizeAuthLogin(req, "telegram", validation.user, "webapp");
+  return res.json({ ok: true, authenticated: true, user });
+});
 
-  return res.json({ ok: true, authenticated: true, user: sanitizeAuthUser(req.sessionData) });
+app.get("/api/auth/google/start", async (req, res) => {
+  if (!googleLoginEnabled) {
+    return res.status(503).json({ error: "google_auth_not_configured" });
+  }
+  const returnTo = normalizeReturnToPath(req.query?.returnTo || "/");
+  const flow = upsertOauthFlow(req.sessionData, "google", returnTo);
+  await persistSession(req.sessionId, req.sessionData);
+  const authorizeUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
+  authorizeUrl.searchParams.set("client_id", googleClientId);
+  authorizeUrl.searchParams.set("redirect_uri", oauthCallbackUrl(req, "google"));
+  authorizeUrl.searchParams.set("response_type", "code");
+  authorizeUrl.searchParams.set("scope", "openid email profile");
+  authorizeUrl.searchParams.set("state", flow.state);
+  authorizeUrl.searchParams.set("prompt", "select_account");
+  res.redirect(authorizeUrl.toString());
+});
+
+app.get("/api/auth/google/callback", async (req, res) => {
+  const state = String(req.query?.state || "").trim();
+  const code = String(req.query?.code || "").trim();
+  const denied = String(req.query?.error || "").trim();
+  const flowCheck = consumeOauthFlow(req.sessionData, "google", state);
+  await persistSession(req.sessionId, req.sessionData);
+  if (!flowCheck.ok) {
+    return res.redirect("/login");
+  }
+  if (denied || !code) {
+    return res.redirect("/login");
+  }
+  const exchanged = await exchangeGoogleCodeForProfile(req, code);
+  if (!exchanged.ok) {
+    return res.redirect("/login");
+  }
+  await finalizeAuthLogin(req, "google", exchanged.profile, "oauth");
+  return res.redirect(flowCheck.returnTo || "/");
+});
+
+app.get("/api/auth/github/start", async (req, res) => {
+  if (!githubLoginEnabled) {
+    return res.status(503).json({ error: "github_auth_not_configured" });
+  }
+  const returnTo = normalizeReturnToPath(req.query?.returnTo || "/");
+  const flow = upsertOauthFlow(req.sessionData, "github", returnTo);
+  await persistSession(req.sessionId, req.sessionData);
+  const authorizeUrl = new URL("https://github.com/login/oauth/authorize");
+  authorizeUrl.searchParams.set("client_id", githubClientId);
+  authorizeUrl.searchParams.set("redirect_uri", oauthCallbackUrl(req, "github"));
+  authorizeUrl.searchParams.set("scope", "read:user user:email");
+  authorizeUrl.searchParams.set("state", flow.state);
+  res.redirect(authorizeUrl.toString());
+});
+
+app.get("/api/auth/github/callback", async (req, res) => {
+  const state = String(req.query?.state || "").trim();
+  const code = String(req.query?.code || "").trim();
+  const denied = String(req.query?.error || "").trim();
+  const flowCheck = consumeOauthFlow(req.sessionData, "github", state);
+  await persistSession(req.sessionId, req.sessionData);
+  if (!flowCheck.ok) {
+    return res.redirect("/login");
+  }
+  if (denied || !code) {
+    return res.redirect("/login");
+  }
+  const exchanged = await exchangeGithubCodeForProfile(req, code);
+  if (!exchanged.ok) {
+    return res.redirect("/login");
+  }
+  await finalizeAuthLogin(req, "github", exchanged.profile, "oauth");
+  return res.redirect(flowCheck.returnTo || "/");
 });
 
 app.post("/api/auth/logout", async (req, res) => {
@@ -2087,6 +2345,7 @@ initDb()
       console.log("astro-web db disabled (DATABASE_URL missing)");
     }
     console.log(`astro-web authRequired=${authRequired}`);
+    console.log(`astro-web auth providers telegram=${Boolean(telegramBotToken && telegramBotUsername)} google=${googleLoginEnabled} github=${githubLoginEnabled}`);
     app.listen(port, "0.0.0.0", () => {
       console.log(`astro-web listening on :${port}`);
     });

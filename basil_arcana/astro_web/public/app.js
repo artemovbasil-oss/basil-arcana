@@ -13,6 +13,8 @@ const state = {
   telegramLoginEnabled: false,
   telegramBotUsername: null,
   telegramBotId: null,
+  googleLoginEnabled: false,
+  githubLoginEnabled: false,
   profile: null,
   profileReady: false,
   friends: [],
@@ -1573,7 +1575,9 @@ function renderHomeDashboard(dashboard) {
 function loginView() {
   const userLabel = state.authUser?.username
     ? `@${state.authUser.username}`
-    : state.authUser?.firstName || "";
+    : state.authUser?.email || state.authUser?.firstName || "";
+  const provider = String(state.authUser?.provider || "").trim();
+  const providerLabel = provider ? provider.charAt(0).toUpperCase() + provider.slice(1) : "Unknown";
 
   if (state.authenticated) {
     return `
@@ -1581,7 +1585,7 @@ function loginView() {
         <article class="card tone-card">
           <span class="eyebrow">Authentication</span>
           <h1>You are signed in</h1>
-          <p>Provider: Telegram ${userLabel ? `(${userLabel})` : ""}</p>
+          <p>Provider: ${providerLabel} ${userLabel ? `(${userLabel})` : ""}</p>
           <div class="hero-actions">
             <a class="btn primary" href="/">Continue</a>
             <button id="logoutButton" class="btn ghost" type="button">Logout</button>
@@ -1591,27 +1595,42 @@ function loginView() {
     `;
   }
 
-  const loginEnabled = state.telegramLoginEnabled && state.telegramBotUsername;
+  const telegramEnabled = state.telegramLoginEnabled && state.telegramBotUsername;
+  const googleEnabled = state.googleLoginEnabled;
+  const githubEnabled = state.githubLoginEnabled;
+  const anyEnabled = telegramEnabled || googleEnabled || githubEnabled;
 
   return `
     <section class="section">
       <article class="card tone-card">
         <span class="eyebrow">Authentication</span>
-        <h1>Sign in with Telegram</h1>
+        <h1>Sign in</h1>
         <p>This service is available only to authorized users.</p>
       </article>
     </section>
     <section class="section">
       <article class="card">
         ${
-          loginEnabled
-            ? `<div id="telegramWidgetMount"></div>
-               <div class="hero-actions">
-                 <button id="switchTelegramAccountButton" class="btn ghost" type="button">Login with another Telegram account</button>
-                 <button id="webAppAuthButton" class="btn ghost" type="button">Login from Telegram WebApp context</button>
-               </div>
-               <p id="loginStatus" class="muted" style="margin-top:0.8rem"></p>`
-            : `<p>Telegram login is not configured yet. Set TELEGRAM_BOT_TOKEN and TELEGRAM_BOT_USERNAME in Railway variables.</p>`
+          anyEnabled
+            ? `
+              <div class="hero-actions">
+                ${googleEnabled ? `<a class="btn ghost" href="/api/auth/google/start?returnTo=%2F">Continue with Gmail</a>` : ""}
+                ${githubEnabled ? `<a class="btn ghost" href="/api/auth/github/start?returnTo=%2F">Continue with GitHub</a>` : ""}
+              </div>
+              ${
+                telegramEnabled
+                  ? `<hr class="section-separator" />
+                     <p class="muted">Telegram login</p>
+                     <div id="telegramWidgetMount"></div>
+                     <div class="hero-actions">
+                       <button id="switchTelegramAccountButton" class="btn ghost" type="button">Login with another Telegram account</button>
+                       <button id="webAppAuthButton" class="btn ghost" type="button">Login from Telegram WebApp context</button>
+                     </div>
+                     <p id="loginStatus" class="muted" style="margin-top:0.8rem"></p>`
+                  : ""
+              }
+            `
+            : `<p>No login providers configured yet. Configure Telegram, Google or GitHub credentials in environment variables.</p>`
         }
       </article>
     </section>
@@ -1676,7 +1695,7 @@ function profileView() {
       <article class="card tone-card">
         <span class="eyebrow">Profile</span>
         <h1>Account</h1>
-        <p>${authLabel || "Telegram user"}.</p>
+        <p>${authLabel || "Authorized user"}.</p>
       </article>
     </section>
     <section class="section">
@@ -2239,6 +2258,133 @@ function faqView() {
   `;
 }
 
+function privacyPolicyView() {
+  return `
+    <section class="section">
+      <article class="card tone-card">
+        <span class="eyebrow">Legal</span>
+        <h1>Privacy Policy</h1>
+        <p>Effective date: February 28, 2026. This policy explains how Astronautica processes personal data for users in the European Economic Area (EEA), the UK and Switzerland.</p>
+      </article>
+    </section>
+    <section class="section">
+      <article class="card faq legal-doc">
+        <article class="faq-item">
+          <h3>1. Data controller</h3>
+          <p>Astronautica is operated by Basilarcana. For privacy requests, contact us at <a href="mailto:privacy@basilarcana.com">privacy@basilarcana.com</a>.</p>
+        </article>
+        <article class="faq-item">
+          <h3>2. What data we collect</h3>
+          <p>We may process account data (name, username, email), authentication data (Telegram, GitHub or Google login identifiers), profile data (birth date, birth time, birth place, timezone), friends data you add, and technical logs required for security and service reliability.</p>
+        </article>
+        <article class="faq-item">
+          <h3>3. Why we process data (GDPR legal bases)</h3>
+          <ul class="bullet-list">
+            <li>Contract performance (Article 6(1)(b)): to provide the app, generate natal analytics, daily insights and friend compatibility features.</li>
+            <li>Legitimate interests (Article 6(1)(f)): fraud prevention, abuse prevention, platform security and service quality diagnostics.</li>
+            <li>Legal obligations (Article 6(1)(c)): compliance with applicable laws and regulatory obligations.</li>
+            <li>Consent (Article 6(1)(a)), where required: optional communications and optional product analytics/cookies.</li>
+          </ul>
+        </article>
+        <article class="faq-item">
+          <h3>4. Sensitive data and user responsibility</h3>
+          <p>Birth and relationship-related data can be sensitive in context. Please add only data you are authorized to share. You are responsible for obtaining your friends’ permission before entering their personal data in the service.</p>
+        </article>
+        <article class="faq-item">
+          <h3>5. Data retention</h3>
+          <p>We keep account and profile data while your account is active. We delete or anonymize data when it is no longer necessary for the original purpose, unless longer retention is required by law (for example, security, tax, accounting, or dispute resolution requirements).</p>
+        </article>
+        <article class="faq-item">
+          <h3>6. International data transfers</h3>
+          <p>If we transfer personal data outside the EEA/UK/Switzerland, we apply appropriate safeguards, including Standard Contractual Clauses (SCCs) where applicable, and additional technical and organizational protections.</p>
+        </article>
+        <article class="faq-item">
+          <h3>7. Your rights in Europe</h3>
+          <ul class="bullet-list">
+            <li>Right of access, rectification and erasure.</li>
+            <li>Right to restriction and right to object to certain processing.</li>
+            <li>Right to data portability where applicable.</li>
+            <li>Right to withdraw consent at any time for consent-based processing.</li>
+            <li>Right to lodge a complaint with your local data protection authority.</li>
+          </ul>
+        </article>
+        <article class="faq-item">
+          <h3>8. Security</h3>
+          <p>We use organizational and technical measures to protect personal data, including access controls, transport security, and monitoring. No system is perfectly secure, so users should protect account credentials and report suspected abuse immediately.</p>
+        </article>
+        <article class="faq-item">
+          <h3>9. Automated processing</h3>
+          <p>Astronautica generates automated analytical outputs based on user-provided data and deterministic computation models. Outputs are informational and planning-oriented and are not intended as medical, legal, or financial advice.</p>
+        </article>
+        <article class="faq-item">
+          <h3>10. Contact and updates</h3>
+          <p>For privacy requests, contact <a href="mailto:privacy@basilarcana.com">privacy@basilarcana.com</a>. We may update this policy from time to time; material updates will be reflected by a revised effective date.</p>
+        </article>
+      </article>
+    </section>
+  `;
+}
+
+function termsOfServiceView() {
+  return `
+    <section class="section">
+      <article class="card tone-card">
+        <span class="eyebrow">Legal</span>
+        <h1>Terms of Service</h1>
+        <p>Effective date: February 28, 2026. These Terms govern your use of Astronautica in the EEA, UK and Switzerland.</p>
+      </article>
+    </section>
+    <section class="section">
+      <article class="card faq legal-doc">
+        <article class="faq-item">
+          <h3>1. Agreement and eligibility</h3>
+          <p>By using Astronautica, you agree to these Terms. You must be legally able to enter into a binding agreement under applicable law. If you use the service on behalf of an organization, you confirm authority to bind that organization.</p>
+        </article>
+        <article class="faq-item">
+          <h3>2. Service scope</h3>
+          <p>Astronautica provides astrology-based analytical tools, profile features, daily insights, and compatibility workflows. The service is informational and reflective; it does not replace professional medical, legal, financial, or mental health advice.</p>
+        </article>
+        <article class="faq-item">
+          <h3>3. Accounts and access</h3>
+          <p>Accounts may be created through Telegram, GitHub, or Google authentication. You are responsible for account activity, security of connected identities, and accuracy of data provided in your profile and friend entries.</p>
+        </article>
+        <article class="faq-item">
+          <h3>4. Acceptable use</h3>
+          <ul class="bullet-list">
+            <li>No unlawful use, harassment, fraud, or abuse of the service.</li>
+            <li>No attempts to bypass security, reverse engineer restricted components, or overload infrastructure.</li>
+            <li>No submission of personal data you are not authorized to share.</li>
+          </ul>
+        </article>
+        <article class="faq-item">
+          <h3>5. User content and permissions</h3>
+          <p>You retain rights to content and data you submit, while granting Astronautica a limited license to process that data for service delivery, security, and improvement. You can delete your profile/friends data from the app interface where available.</p>
+        </article>
+        <article class="faq-item">
+          <h3>6. Fees and changes</h3>
+          <p>Unless explicitly stated otherwise, current features are provided without guaranteed paid SLA. We may change, improve, or discontinue features to maintain product quality, security, and legal compliance.</p>
+        </article>
+        <article class="faq-item">
+          <h3>7. Suspension and termination</h3>
+          <p>We may suspend or terminate access for material violations of these Terms, security risk, abuse, or legal necessity. You may stop using the service at any time.</p>
+        </article>
+        <article class="faq-item">
+          <h3>8. Warranties and liability</h3>
+          <p>The service is provided on an “as is” and “as available” basis to the extent permitted by law. We do not guarantee uninterrupted availability or specific outcomes. Nothing in these Terms excludes liability that cannot be excluded under applicable consumer or data protection law.</p>
+        </article>
+        <article class="faq-item">
+          <h3>9. Governing law and disputes</h3>
+          <p>These Terms are governed by the laws of the operator’s country of establishment, without prejudice to mandatory consumer protections in your country of residence within the EEA/UK/Switzerland.</p>
+        </article>
+        <article class="faq-item">
+          <h3>10. Contact</h3>
+          <p>For legal requests, contact <a href="mailto:legal@basilarcana.com">legal@basilarcana.com</a>. For privacy matters, see the Privacy Policy and contact <a href="mailto:privacy@basilarcana.com">privacy@basilarcana.com</a>.</p>
+        </article>
+      </article>
+    </section>
+  `;
+}
+
 const routes = {
   "/": () => (state.dashboard ? renderHomeDashboard(state.dashboard) : homeViewLoading()),
   "/login": loginView,
@@ -2247,7 +2393,9 @@ const routes = {
   "/natal-chart": () => `<section class="section"><article class="card"><p class="muted">Loading...</p></article></section>`,
   "/daily": () => `<section class="section"><article class="card"><p class="muted">Loading...</p></article></section>`,
   "/friends": friendsView,
-  "/faq": faqView
+  "/faq": faqView,
+  "/privacy-policy": privacyPolicyView,
+  "/terms-of-service": termsOfServiceView
 };
 
 function markActiveNav(path) {
@@ -3083,7 +3231,7 @@ function attachRouteHandlers(path) {
   }
 
   if (path === "/login") {
-    if (!state.authenticated && state.telegramLoginEnabled) {
+    if (!state.authenticated && state.telegramLoginEnabled && state.telegramBotUsername) {
       mountTelegramWidget();
       const webAppAuthButton = document.getElementById("webAppAuthButton");
       webAppAuthButton?.addEventListener("click", handleWebAppInitDataAuth);
@@ -3256,6 +3404,8 @@ async function refreshAuthState() {
   state.telegramLoginEnabled = Boolean(auth.telegramLoginEnabled);
   state.telegramBotUsername = auth.telegramBotUsername || null;
   state.telegramBotId = Number(auth.telegramBotId) || null;
+  state.googleLoginEnabled = Boolean(auth.googleLoginEnabled);
+  state.githubLoginEnabled = Boolean(auth.githubLoginEnabled);
 }
 
 async function loadSessionState() {
