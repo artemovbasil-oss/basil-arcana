@@ -19,7 +19,7 @@ const databaseUrl = String(process.env.DATABASE_URL || "").trim();
 const telegramBotToken = String(process.env.TELEGRAM_BOT_TOKEN || "").trim();
 const telegramBotUsername = String(process.env.TELEGRAM_BOT_USERNAME || "").trim();
 const telegramBotId = Number.parseInt(String(telegramBotToken.split(":")[0] || "").trim(), 10) || null;
-const appBaseUrlEnv = String(process.env.APP_BASE_URL || "").trim().replace(/\/+$/, "");
+const appBaseUrlEnvRaw = String(process.env.APP_BASE_URL || "").trim();
 const googleClientId = String(process.env.GOOGLE_CLIENT_ID || "").trim();
 const googleClientSecret = String(process.env.GOOGLE_CLIENT_SECRET || "").trim();
 const githubClientId = String(process.env.GITHUB_CLIENT_ID || "").trim();
@@ -32,6 +32,22 @@ const authRequired =
   Boolean(telegramBotToken || googleLoginEnabled || githubLoginEnabled);
 const MAX_TELEGRAM_AUTH_AGE_SECONDS = 60 * 60 * 24;
 const MAX_OAUTH_STATE_AGE_MS = 10 * 60 * 1000;
+
+function normalizeBaseUrl(raw) {
+  const value = String(raw || "").trim();
+  if (!value) {
+    return "";
+  }
+  const withScheme = /^https?:\/\//i.test(value) ? value : `https://${value}`;
+  try {
+    const parsed = new URL(withScheme);
+    return `${parsed.protocol}//${parsed.host}`;
+  } catch {
+    return "";
+  }
+}
+
+const appBaseUrlEnv = normalizeBaseUrl(appBaseUrlEnvRaw);
 
 app.set("trust proxy", 1);
 
