@@ -1613,26 +1613,22 @@ function loginView() {
         ${
           anyEnabled
             ? `
-              ${
-                googleEnabled
-                  ? `<a class="auth-provider-pill gmail" href="/api/auth/google/start?returnTo=%2F">
-                       <span class="auth-provider-icon" aria-hidden="true">${uiIcon("email")}</span>
-                       <span>Continue with Gmail</span>
-                     </a>`
-                  : ""
-              }
-              ${
-                telegramEnabled
-                  ? `<hr class="section-separator" />
-                     <p class="muted">Telegram login</p>
-                     <div id="telegramWidgetMount"></div>
-                     <div class="hero-actions">
-                       <button id="switchTelegramAccountButton" class="btn ghost" type="button">Login with another Telegram account</button>
-                       <button id="webAppAuthButton" class="btn ghost" type="button">Login from Telegram WebApp context</button>
-                     </div>
-                     <p id="loginStatus" class="muted" style="margin-top:0.8rem"></p>`
-                  : ""
-              }
+              <div class="auth-provider-row">
+                ${
+                  googleEnabled
+                    ? `<a class="auth-provider-pill gmail" href="/api/auth/google/start?returnTo=%2F">
+                         <span class="auth-provider-icon" aria-hidden="true">${uiIcon("email")}</span>
+                         <span>Continue with Gmail</span>
+                       </a>`
+                    : ""
+                }
+                ${
+                  telegramEnabled
+                    ? `<div class="auth-provider-widget"><div id="telegramWidgetMount"></div></div>`
+                    : ""
+                }
+              </div>
+              <p id="loginStatus" class="muted" style="margin-top:0.8rem"></p>
             `
             : `<p>No login providers configured yet. Configure Telegram, Google or GitHub credentials in environment variables.</p>`
         }
@@ -3046,6 +3042,7 @@ function mountTelegramWidget() {
   script.src = "https://telegram.org/js/telegram-widget.js?22";
   script.setAttribute("data-telegram-login", state.telegramBotUsername);
   script.setAttribute("data-size", "large");
+  script.setAttribute("data-radius", "999");
   script.setAttribute("data-userpic", "false");
   script.setAttribute("data-request-access", "write");
   script.setAttribute("data-onauth", "onTelegramAuth(user)");
@@ -3237,10 +3234,6 @@ function attachRouteHandlers(path) {
   if (path === "/login") {
     if (!state.authenticated && state.telegramLoginEnabled && state.telegramBotUsername) {
       mountTelegramWidget();
-      const webAppAuthButton = document.getElementById("webAppAuthButton");
-      webAppAuthButton?.addEventListener("click", handleWebAppInitDataAuth);
-      const switchAccountButton = document.getElementById("switchTelegramAccountButton");
-      switchAccountButton?.addEventListener("click", handleSwitchTelegramAccount);
     }
 
     const logoutButton = document.getElementById("logoutButton");
@@ -3454,17 +3447,18 @@ async function loadSessionState() {
 
 function render() {
   let path = window.location.pathname;
+  const publicPaths = new Set(["/login", "/faq", "/privacy-policy", "/terms-of-service"]);
   if (path !== "/profile") {
     state.profileEditMode = false;
   }
   const profileExists = hasProfile();
 
-  if (state.authRequired && !state.authenticated && path !== "/login") {
+  if (state.authRequired && !state.authenticated && !publicPaths.has(path)) {
     path = "/login";
     window.history.replaceState({}, "", path);
   }
 
-  if (state.authRequired && state.authenticated && !profileExists && !["/onboarding", "/login"].includes(path)) {
+  if (state.authRequired && state.authenticated && !profileExists && !["/onboarding", ...publicPaths].includes(path)) {
     path = "/onboarding";
     window.history.replaceState({}, "", path);
   }

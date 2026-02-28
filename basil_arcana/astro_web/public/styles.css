@@ -9,6 +9,7 @@
   --button-inverse-bg: #ffffff;
   --button-inverse-ink: #000000;
   --font-sans: "IBM Plex Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-display: "Space Grotesk", "IBM Plex Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --font-mono: "IBM Plex Mono", "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", monospace;
 }
 
@@ -233,16 +234,16 @@ h1,
 h2 {
   margin: 0.6rem 0 0.95rem;
   line-height: 0.9;
-  font-family: "Archivo Black", "Arial Black", "IBM Plex Sans", sans-serif;
+  font-family: var(--font-display);
   text-transform: uppercase;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.02em;
 }
 
 h1 {
-  font-family: var(--font-mono);
+  font-family: var(--font-display);
   font-size: clamp(1.95rem, 6.6vw, 4.8rem);
-  letter-spacing: 0.015em;
-  font-weight: 500;
+  letter-spacing: 0.01em;
+  font-weight: 600;
 }
 
 .typewriter-heading {
@@ -273,9 +274,9 @@ h1 {
 
 h2 {
   font-size: clamp(1.35rem, 4vw, 2.4rem);
-  font-family: var(--font-mono);
-  font-weight: 500;
-  letter-spacing: 0.015em;
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0.01em;
 }
 
 h3 {
@@ -305,15 +306,22 @@ p {
   margin: 0.85rem 0;
 }
 
+.auth-provider-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.62rem;
+}
+
 .auth-provider-pill {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   min-height: 44px;
   border-radius: 999px;
-  border: 1px solid var(--line-strong);
-  background: color-mix(in srgb, #4fa6e8 22%, var(--surface) 78%);
-  color: #e9f6ff;
+  border: 1px solid #1559a8;
+  background: #1a73e8;
+  color: #ffffff;
   text-decoration: none;
   padding: 0.45rem 0.95rem;
   text-transform: uppercase;
@@ -324,8 +332,8 @@ p {
 
 .auth-provider-pill:hover {
   transform: translateY(-1px);
-  border-color: #7bc1f3;
-  background: color-mix(in srgb, #4fa6e8 30%, var(--surface) 70%);
+  border-color: #0f4f98;
+  background: #155fbd;
 }
 
 .auth-provider-icon {
@@ -340,6 +348,17 @@ p {
 
 .auth-provider-icon .astro-icon {
   margin-right: 0;
+}
+
+.auth-provider-widget {
+  display: inline-flex;
+  align-items: center;
+}
+
+body[data-theme="light"] .auth-provider-pill {
+  border-color: #1559a8;
+  background: #1a73e8;
+  color: #ffffff;
 }
 
 .btn {
