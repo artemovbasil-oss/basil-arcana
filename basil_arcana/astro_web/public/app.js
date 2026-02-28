@@ -472,16 +472,16 @@ const femaleCelebrityNames = new Set([
   "Simone Biles"
 ]);
 
-const celebAvatarThemes = {
+const celebLineArtIcons = {
   male: [
-    { bg: "#152331", accent: "#7ac0ff", skin: "#d7b08e" },
-    { bg: "#1d1f2b", accent: "#8ba9ff", skin: "#d4a17f" },
-    { bg: "#1b2b2a", accent: "#74d5c0", skin: "#d9b598" }
+    "<svg viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'><path d='M8 7.5c0-2.1 1.7-3.5 4-3.5s4 1.4 4 3.5c0 2.3-1.4 3.8-4 3.8s-4-1.5-4-3.8Z' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/><path d='M6 19c1.1-2.8 3.1-4.2 6-4.2s4.9 1.4 6 4.2' stroke='currentColor' stroke-width='1.4' stroke-linecap='round'/><path d='M7.2 8.4c.6-2.4 2.4-3.7 4.8-3.7 2.3 0 4.1 1.2 4.8 3.5' stroke='currentColor' stroke-width='1.4' stroke-linecap='round'/></svg>",
+    "<svg viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'><circle cx='12' cy='12' r='9' stroke='currentColor' stroke-width='1.3'/><path d='M8.2 10.1c0-2 1.6-3.3 3.8-3.3 2.2 0 3.8 1.3 3.8 3.3 0 2.1-1.3 3.4-3.8 3.4-2.5 0-3.8-1.3-3.8-3.4Z' stroke='currentColor' stroke-width='1.3'/><path d='M8 16.8c1-1.8 2.3-2.6 4-2.6 1.7 0 3 .8 4 2.6' stroke='currentColor' stroke-width='1.3' stroke-linecap='round'/><path d='M8.7 9.3h6.6' stroke='currentColor' stroke-width='1.3' stroke-linecap='round'/></svg>",
+    "<svg viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'><path d='M9 9.2c0-2.1 1.3-3.5 3-3.5s3 1.4 3 3.5c0 1.9-1 3.3-3 3.3s-3-1.4-3-3.3Z' stroke='currentColor' stroke-width='1.35'/><path d='M6.3 18.5c1.1-2.6 3-3.9 5.7-3.9 2.8 0 4.6 1.3 5.7 3.9' stroke='currentColor' stroke-width='1.35' stroke-linecap='round'/><path d='M7.8 8.8c.8-2 2.3-3 4.2-3 1.9 0 3.4 1 4.2 3' stroke='currentColor' stroke-width='1.35' stroke-linecap='round'/><path d='M4 20h16' stroke='currentColor' stroke-width='1.2' stroke-linecap='round' opacity='0.7'/></svg>"
   ],
   female: [
-    { bg: "#2a1f2a", accent: "#ff99c5", skin: "#e0b091" },
-    { bg: "#2b1f24", accent: "#ffb1d8", skin: "#ddb08c" },
-    { bg: "#262034", accent: "#d8a3ff", skin: "#d8ad90" }
+    "<svg viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'><path d='M7.5 10.2c0-2.2 1.9-3.8 4.5-3.8s4.5 1.6 4.5 3.8c0 2.2-1.7 3.8-4.5 3.8-2.8 0-4.5-1.6-4.5-3.8Z' stroke='currentColor' stroke-width='1.35'/><path d='M6.2 19c1.2-2.8 3.1-4.1 5.8-4.1s4.6 1.3 5.8 4.1' stroke='currentColor' stroke-width='1.35' stroke-linecap='round'/><path d='M7 9.4c.4-2.8 2.4-4.5 5-4.5s4.6 1.7 5 4.5' stroke='currentColor' stroke-width='1.35' stroke-linecap='round'/><path d='M6.8 11.3c-.5.5-.8 1.1-.8 1.8' stroke='currentColor' stroke-width='1.2' stroke-linecap='round'/><path d='M17.2 11.3c.5.5.8 1.1.8 1.8' stroke='currentColor' stroke-width='1.2' stroke-linecap='round'/></svg>",
+    "<svg viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'><circle cx='12' cy='12' r='9' stroke='currentColor' stroke-width='1.3'/><path d='M8.3 10.4c0-2.1 1.5-3.5 3.7-3.5s3.7 1.4 3.7 3.5-1.4 3.5-3.7 3.5-3.7-1.4-3.7-3.5Z' stroke='currentColor' stroke-width='1.3'/><path d='M8 16.9c1.1-1.8 2.4-2.6 4-2.6s2.9.8 4 2.6' stroke='currentColor' stroke-width='1.3' stroke-linecap='round'/><path d='M8.1 9.7c.7-2 2.1-3.1 3.9-3.1 1.8 0 3.2 1.1 3.9 3.1' stroke='currentColor' stroke-width='1.3' stroke-linecap='round'/></svg>",
+    "<svg viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'><path d='M8.8 10.1c0-2.1 1.3-3.5 3.2-3.5s3.2 1.4 3.2 3.5c0 2-1.1 3.5-3.2 3.5s-3.2-1.5-3.2-3.5Z' stroke='currentColor' stroke-width='1.35'/><path d='M6.4 18.7c1.2-2.7 3-4 5.6-4s4.4 1.3 5.6 4' stroke='currentColor' stroke-width='1.35' stroke-linecap='round'/><path d='M7.6 10.2c-.8-2.8.7-5 4.4-5 3.7 0 5.2 2.2 4.4 5' stroke='currentColor' stroke-width='1.35' stroke-linecap='round'/><path d='M7.3 20h9.4' stroke='currentColor' stroke-width='1.2' stroke-linecap='round' opacity='0.7'/></svg>"
   ]
 };
 
@@ -1090,50 +1090,9 @@ function celebrityAstroChips(sign, years) {
 
 function celebrityAvatarDataUrl(name, gender) {
   const g = gender === "female" ? "female" : "male";
-  const themes = celebAvatarThemes[g] || celebAvatarThemes.male;
+  const icons = celebLineArtIcons[g] || celebLineArtIcons.male;
   const hash = Math.abs(stringHash(`${name}:${g}`));
-  const variant = hash % 3;
-  const theme = themes[hash % themes.length];
-  const stroke = g === "female" ? "#ffd9ec" : "#bfe0ff";
-  const hair = g === "female" ? "#11131a" : "#14161d";
-  const cloth = g === "female" ? "#2b1f33" : "#1f2a33";
-  const beard = g === "female" ? "" : `<path d='M39 51c2 4 7 7 9 7s7-3 9-7' fill='none' stroke='#2a1f19' stroke-width='2' stroke-linecap='round' opacity='${variant === 2 ? "0.85" : "0"}'/>`;
-  const hairShape =
-    g === "female"
-      ? variant === 0
-        ? "<path d='M28 34c0-12 9-20 20-20s20 8 20 20c0 10-5 15-5 22H33c0-8-5-13-5-22z' fill='" + hair + "'/>"
-        : variant === 1
-          ? "<path d='M24 36c0-14 10-24 24-24s24 10 24 24c0 12-8 17-8 24H32c0-7-8-12-8-24z' fill='" + hair + "'/>"
-          : "<path d='M29 33c2-11 10-18 19-18 12 0 20 9 20 21 0 8-3 13-6 18H34c-3-5-7-11-5-21z' fill='" + hair + "'/>"
-      : variant === 0
-        ? "<path d='M30 34c2-10 10-16 18-16 10 0 17 6 19 16l-7 2c-2-6-6-9-12-9s-10 3-12 9z' fill='" + hair + "'/>"
-        : variant === 1
-          ? "<path d='M28 35c0-11 9-18 20-18s20 7 20 18v5H28z' fill='" + hair + "'/>"
-          : "<path d='M31 33c2-9 9-15 17-15 10 0 18 7 19 17l-6 1c-2-6-6-9-13-9-6 0-10 3-12 8z' fill='" + hair + "'/>";
-  const accessories =
-    variant === 1
-      ? "<circle cx='41' cy='40' r='5' fill='none' stroke='#d4d8de' stroke-width='1.4'/><circle cx='55' cy='40' r='5' fill='none' stroke='#d4d8de' stroke-width='1.4'/><line x1='46' y1='40' x2='50' y2='40' stroke='#d4d8de' stroke-width='1.2'/>"
-      : "";
-  const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'>
-    <defs>
-      <linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>
-        <stop offset='0%' stop-color='${theme.bg}'/>
-        <stop offset='100%' stop-color='${theme.accent}'/>
-      </linearGradient>
-    </defs>
-    <rect width='96' height='96' rx='20' fill='url(#g)'/>
-    <rect x='10' y='10' width='76' height='76' rx='16' fill='none' stroke='${stroke}' stroke-opacity='0.22'/>
-    ${hairShape}
-    <path d='M28 83c4-14 12-22 20-22s16 8 20 22' fill='${cloth}' opacity='0.82'/>
-    <circle cx='48' cy='42' r='14' fill='${theme.skin}' opacity='0.96'/>
-    <circle cx='43' cy='41' r='1.35' fill='#1f2228'/>
-    <circle cx='53' cy='41' r='1.35' fill='#1f2228'/>
-    <path d='M44 47c1.3 1.5 2.6 2.2 4 2.2s2.7-.7 4-2.2' fill='none' stroke='#352822' stroke-width='1.4' stroke-linecap='round'/>
-    ${accessories}
-    ${beard}
-    <circle cx='48' cy='48' r='33' fill='none' stroke='${stroke}' stroke-width='1.8' stroke-opacity='0.5'/>
-  </svg>`;
-  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+  return icons[hash % icons.length];
 }
 
 function buildFriendEnergySeries(dashboard, period, baseSeries) {
@@ -1768,7 +1727,7 @@ function renderZodiacCelebrities(sign) {
               return `
                 <article class="celeb-card ${gender === "female" ? "is-female" : "is-male"}">
                   <div class="celeb-head">
-                    <img class="celeb-avatar" src="${avatar}" alt="${escapeHtml(item.name)} avatar" loading="lazy" decoding="async" />
+                    <span class="celeb-avatar" aria-hidden="true">${avatar}</span>
                     <div class="celeb-head-copy">
                       <h3>${item.name}</h3>
                       <p class="celeb-meta">${item.field} · ${item.years}</p>
