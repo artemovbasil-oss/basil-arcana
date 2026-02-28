@@ -971,6 +971,49 @@ function buildSmoothPath(points) {
   return path;
 }
 
+function escapeHtml(text) {
+  return String(text || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll("\"", "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function buildFriendEnergySeries(dashboard, period, baseSeries) {
+  const friends = Array.isArray(dashboard?.friendsDynamic) ? dashboard.friendsDynamic : [];
+  if (!friends.length) {
+    return [];
+  }
+  const values = Array.isArray(baseSeries?.values) ? baseSeries.values : [];
+  const count = values.length;
+  if (!count) {
+    return [];
+  }
+  return friends.map((friend, index) => {
+    const friendName = String(friend?.friendName || `Friend ${index + 1}`).trim() || `Friend ${index + 1}`;
+    const score = Math.max(0, Math.min(100, Number(friend?.score) || 50));
+    const trend = String(friend?.trend || "stable").trim().toLowerCase();
+    const trendBias = trend === "high" ? 2.2 : trend === "fragile" ? -2.6 : 0;
+    const seed = stringHash(`${friend?.id || friendName}:${period}:${score}`);
+    const friendValues = values.map((userValue, pointIndex) => {
+      const waveA = Math.sin((pointIndex + 1) * 0.91 + (seed % 17)) * 6.3;
+      const waveB = Math.cos((pointIndex + 1) * 0.47 + (seed % 11)) * 4.1;
+      const micro = ((seed + pointIndex * 13) % 7) - 3;
+      const anchor = userValue * 0.24 + score * 0.76;
+      return Math.max(8, Math.min(96, Math.round(anchor + waveA + waveB + trendBias + micro * 0.65)));
+    });
+    const avg = Math.round(friendValues.reduce((sum, value) => sum + value, 0) / Math.max(1, friendValues.length));
+    return {
+      id: String(friend?.id || friendName),
+      name: friendName,
+      values: friendValues,
+      today: friendValues[todayIndexForPeriod(period, friendValues.length)] || friendValues[0] || 0,
+      avg
+    };
+  });
+}
+
 function isMobileViewport() {
   return Boolean(typeof window !== "undefined" && window.matchMedia && window.matchMedia("(max-width: 760px)").matches);
 }
@@ -1014,6 +1057,18 @@ function renderEnergyChart(dashboard, period) {
   const todayIndex = todayIndexForPeriod(period, points.length);
   const todayPoint = points[todayIndex];
   const todayValue = todayMarkerValue(period);
+  const friendSeries = buildFriendEnergySeries(dashboard, period, series);
+  const friendPaths = friendSeries.map((friend) => {
+    const friendPoints = friend.values.map((value, index) => ({
+      x: padX + index * stepX,
+      y: toY(value)
+    }));
+    return {
+      id: friend.id,
+      name: friend.name,
+      path: buildSmoothPath(friendPoints)
+    };
+  });
 
   const todayBadgeY = todayPoint.y;
   const todayBadgeRadius = period === "year" ? 11 : 10;
@@ -1030,6 +1085,14 @@ function renderEnergyChart(dashboard, period) {
         <line class="energy-axis" x1="${padX}" y1="${chartBottom}" x2="${width - padX}" y2="${chartBottom}" />
         ${points
           .map((point) => `<line class="energy-v-grid" x1="${point.x}" y1="${padY}" x2="${point.x}" y2="${chartBottom}" />`)
+          .join("")}
+        ${friendPaths
+          .map(
+            (friend) => `
+              <path class="energy-friend-line" d="${friend.path}" />
+              <path class="energy-friend-hit" d="${friend.path}" data-friend-name="${escapeHtml(friend.name)}" />
+            `
+          )
           .join("")}
         <line class="energy-hover-line" x1="${padX}" y1="${padY}" x2="${padX}" y2="${chartBottom}" />
         <path class="energy-line" d="${linePath}" />
@@ -1055,7 +1118,9 @@ function renderEnergyChart(dashboard, period) {
       <div class="energy-legend">
         <span><i class="dot peak"></i> Peak energy</span>
         <span><i class="dot dip"></i> Energy dip</span>
+        ${friendPaths.length ? `<span><i class="dot friend"></i> Friend trajectories</span>` : ""}
       </div>
+      <div class="energy-friend-tooltip" aria-hidden="true"></div>
     </div>
   `;
 }
@@ -1087,6 +1152,42 @@ function renderEnergyCards(dashboard, period) {
         <span>${periodLabel} intensity</span>
         <strong>${intensity}/100</strong>
       </article>
+    </div>
+    ${renderFriendEnergyTable(dashboard, period, series)}
+  `;
+}
+
+function renderFriendEnergyTable(dashboard, period, baseSeries = null) {
+  const series = baseSeries || buildEnergySeries(dashboard, period);
+  const friendSeries = buildFriendEnergySeries(dashboard, period, series);
+  if (!friendSeries.length) {
+    return "";
+  }
+  return `
+    <div class="friend-energy-table-wrap">
+      <h3>Friend trends</h3>
+      <table class="friend-energy-table">
+        <thead>
+          <tr>
+            <th>Friend</th>
+            <th>Today</th>
+            <th>Avg</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${friendSeries
+            .map(
+              (friend) => `
+                <tr>
+                  <td>${escapeHtml(friend.name)}</td>
+                  <td>${friend.today}</td>
+                  <td>${friend.avg}</td>
+                </tr>
+              `
+            )
+            .join("")}
+        </tbody>
+      </table>
     </div>
   `;
 }
@@ -1310,6 +1411,36 @@ function bindEnergyChartInteractions() {
     svg.addEventListener("mouseenter", move);
     svg.addEventListener("mouseleave", hide);
     svg.addEventListener("touchstart", hide, { passive: true });
+
+    const wrap = svg.closest(".energy-chart-wrap");
+    const tooltip = wrap?.querySelector(".energy-friend-tooltip");
+    if (!(tooltip instanceof HTMLElement) || !(wrap instanceof HTMLElement)) {
+      return;
+    }
+    const showFriendTooltip = (event, name) => {
+      tooltip.textContent = name;
+      tooltip.style.opacity = "1";
+      tooltip.style.transform = "translate(-50%, -130%)";
+      const rect = wrap.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+      tooltip.style.left = `${x}px`;
+      tooltip.style.top = `${y}px`;
+    };
+    const hideFriendTooltip = () => {
+      tooltip.style.opacity = "0";
+    };
+    svg.querySelectorAll(".energy-friend-hit").forEach((path) => {
+      path.addEventListener("mouseenter", (event) => {
+        const name = path.getAttribute("data-friend-name") || "Friend";
+        showFriendTooltip(event, name);
+      });
+      path.addEventListener("mousemove", (event) => {
+        const name = path.getAttribute("data-friend-name") || "Friend";
+        showFriendTooltip(event, name);
+      });
+      path.addEventListener("mouseleave", hideFriendTooltip);
+    });
   });
 }
 

@@ -949,6 +949,7 @@ body[data-theme="light"] .auth-login-btn.telegram .auth-login-btn-icon .astro-ic
 
 .energy-chart-wrap {
   margin-top: 0.8rem;
+  position: relative;
 }
 
 .energy-chart {
@@ -981,6 +982,20 @@ body[data-theme="light"] .auth-login-btn.telegram .auth-login-btn-icon .astro-ic
 
 .energy-hover-line.visible {
   opacity: 0.42;
+}
+
+.energy-friend-line {
+  fill: none;
+  stroke: color-mix(in srgb, var(--ink) 55%, transparent 45%);
+  stroke-width: 1.05;
+  opacity: 0.34;
+}
+
+.energy-friend-hit {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 12;
+  cursor: pointer;
 }
 
 .energy-line {
@@ -1074,6 +1089,69 @@ body[data-theme="light"] .auth-login-btn.telegram .auth-login-btn-icon .astro-ic
 
 .energy-legend .dot.dip {
   background: #d64545;
+}
+
+.energy-legend .dot.friend {
+  background: color-mix(in srgb, var(--ink) 62%, transparent 38%);
+}
+
+.energy-friend-tooltip {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, -128%);
+  transition: opacity 0.12s ease, transform 0.12s ease;
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  padding: 0.28rem 0.42rem;
+  white-space: nowrap;
+}
+
+.friend-energy-table-wrap {
+  margin-top: 0.65rem;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  padding: 0.55rem;
+}
+
+.friend-energy-table-wrap h3 {
+  margin: 0 0 0.4rem;
+}
+
+.friend-energy-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.friend-energy-table th,
+.friend-energy-table td {
+  border-top: 1px solid var(--line);
+  padding: 0.38rem 0.28rem;
+  font-size: 0.78rem;
+  text-align: left;
+}
+
+.friend-energy-table th {
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-size: 0.64rem;
+}
+
+.friend-energy-table td:nth-child(2),
+.friend-energy-table td:nth-child(3),
+.friend-energy-table th:nth-child(2),
+.friend-energy-table th:nth-child(3) {
+  width: 62px;
+  text-align: right;
 }
 
 .friends-accordion-list {
@@ -2474,6 +2552,11 @@ body[data-theme="light"] .friend-gauge-text {
 body[data-theme="light"] .energy-line,
 body[data-theme="light"] .friend-gauge-fill {
   stroke: #111;
+}
+
+body[data-theme="light"] .energy-friend-line {
+  stroke: #111;
+  opacity: 0.28;
 }
 
 body[data-theme="light"] .energy-star.neutral {
