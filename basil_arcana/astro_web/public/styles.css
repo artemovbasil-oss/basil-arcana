@@ -306,6 +306,33 @@ p {
   margin: 0.85rem 0;
 }
 
+.login-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(340px, 1.05fr);
+  gap: 1rem;
+  align-items: stretch;
+}
+
+.login-left {
+  display: grid;
+  gap: 1rem;
+}
+
+.login-visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem 0;
+}
+
+.login-visual img {
+  width: 100%;
+  max-width: 860px;
+  height: auto;
+  display: block;
+  object-fit: contain;
+}
+
 .auth-provider-row {
   display: flex;
   align-items: center;
@@ -313,52 +340,82 @@ p {
   gap: 0.62rem;
 }
 
-.auth-provider-pill {
+.auth-login-btn {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   min-height: 44px;
   border-radius: 999px;
-  border: 1px solid #1559a8;
-  background: #1a73e8;
-  color: #ffffff;
+  border: 1px solid transparent;
   text-decoration: none;
   padding: 0.45rem 0.95rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   font-size: 0.78rem;
-  transition: transform 0.16s ease, border-color 0.18s ease, background-color 0.18s ease;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: transform 0.16s ease, border-color 0.18s ease, background-color 0.18s ease, color 0.18s ease;
 }
 
-.auth-provider-pill:hover {
+.auth-login-btn:hover {
   transform: translateY(-1px);
-  border-color: #0f4f98;
-  background: #155fbd;
 }
 
-.auth-provider-icon {
+.auth-login-btn-icon {
   width: 1.4rem;
   height: 1.4rem;
   border-radius: 999px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.18);
 }
 
-.auth-provider-icon .astro-icon {
+.auth-login-btn-icon .astro-icon {
   margin-right: 0;
 }
 
-.auth-provider-widget {
-  display: inline-flex;
-  align-items: center;
+.auth-login-btn.gmail {
+  border-color: #b9d5ef;
+  background: #deecf8;
+  color: #12324f;
 }
 
-body[data-theme="light"] .auth-provider-pill {
+.auth-login-btn.gmail:hover {
+  border-color: #8eb5d8;
+  background: #cde3f6;
+}
+
+.auth-login-btn.telegram {
   border-color: #1559a8;
   background: #1a73e8;
   color: #ffffff;
+}
+
+.auth-login-btn.telegram:hover {
+  border-color: #0f4f98;
+  background: #155fbd;
+}
+
+.login-copy {
+  margin-top: 0.78rem;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.telegram-widget-mount-hidden {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0;
+}
+
+body[data-theme="light"] .auth-login-btn.gmail {
+  border-color: #8eb5d8;
+  background: #d4e8f9;
+  color: #102e4a;
 }
 
 .btn {
@@ -2431,6 +2488,14 @@ body[data-theme="light"] .energy-star.neutral {
 @media (max-width: 980px) {
   .hero {
     grid-template-columns: 1fr;
+  }
+
+  .login-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .login-visual {
+    display: none;
   }
 
   .feature-grid {

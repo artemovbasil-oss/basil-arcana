@@ -412,7 +412,9 @@ const uiIconClasses = {
   sunset: "mdi:weather-sunset-down",
   season: "mdi:calendar-star",
   transit: "mdi:orbit",
-  email: "mdi:email-outline"
+  email: "mdi:email-outline",
+  google: "mdi:google",
+  telegram: "mdi:telegram"
 };
 
 function degreeToRad(degree) {
@@ -1601,38 +1603,49 @@ function loginView() {
   const anyEnabled = telegramEnabled || googleEnabled;
 
   return `
-    <section class="section">
-      <article class="card tone-card">
-        <span class="eyebrow">Authentication</span>
-        <h1>Sign in</h1>
-        <p>This service is available only to authorized users.</p>
-      </article>
-    </section>
-    <section class="section">
-      <article class="card">
-        ${
-          anyEnabled
-            ? `
-              <div class="auth-provider-row">
-                ${
-                  googleEnabled
-                    ? `<a class="auth-provider-pill gmail" href="/api/auth/google/start?returnTo=%2F">
-                         <span class="auth-provider-icon" aria-hidden="true">${uiIcon("email")}</span>
-                         <span>Continue with Gmail</span>
-                       </a>`
-                    : ""
-                }
-                ${
-                  telegramEnabled
-                    ? `<div class="auth-provider-widget"><div id="telegramWidgetMount"></div></div>`
-                    : ""
-                }
-              </div>
-              <p id="loginStatus" class="muted" style="margin-top:0.8rem"></p>
-            `
-            : `<p>No login providers configured yet. Configure Telegram, Google or GitHub credentials in environment variables.</p>`
-        }
-      </article>
+    <section class="section login-shell">
+      <div class="login-left">
+        <article class="card tone-card">
+          <span class="eyebrow">Authentication</span>
+          <h1>Sign in</h1>
+          <p>This service is available only to authorized users.</p>
+        </article>
+        <article class="card">
+          ${
+            anyEnabled
+              ? `
+                <div class="auth-provider-row">
+                  ${
+                    googleEnabled
+                      ? `<a class="auth-login-btn gmail" href="/api/auth/google/start?returnTo=%2F">
+                           <span class="auth-login-btn-icon" aria-hidden="true">${uiIcon("google")}</span>
+                           <span>Continue with Gmail</span>
+                         </a>`
+                      : ""
+                  }
+                  ${
+                    telegramEnabled
+                      ? `<button id="telegramLoginButton" class="auth-login-btn telegram" type="button">
+                           <span class="auth-login-btn-icon" aria-hidden="true">${uiIcon("telegram")}</span>
+                           <span>Continue with Telegram</span>
+                         </button>
+                         <div id="telegramWidgetMount" class="telegram-widget-mount-hidden"></div>`
+                      : ""
+                  }
+                </div>
+                <div class="login-copy">
+                  <p>Astronautica is a precision astrology interface that turns natal geometry into practical daily decisions, relationship timing, and communication strategy.</p>
+                  <p>Your profile anchors the model, so forecasts, compatibility and action guidance stay coherent over time instead of feeling like generic horoscope feed content.</p>
+                </div>
+                <p id="loginStatus" class="muted" style="margin-top:0.8rem"></p>
+              `
+              : `<p>No login providers configured yet. Configure Telegram or Google credentials in environment variables.</p>`
+          }
+        </article>
+      </div>
+      <aside class="login-visual" aria-hidden="true">
+        <img src="https://basilarcana-assets.b-cdn.net/astronautica/app.png" alt="" loading="lazy" decoding="async" />
+      </aside>
     </section>
   `;
 }
@@ -3234,6 +3247,8 @@ function attachRouteHandlers(path) {
   if (path === "/login") {
     if (!state.authenticated && state.telegramLoginEnabled && state.telegramBotUsername) {
       mountTelegramWidget();
+      const telegramLoginButton = document.getElementById("telegramLoginButton");
+      telegramLoginButton?.addEventListener("click", handleSwitchTelegramAccount);
     }
 
     const logoutButton = document.getElementById("logoutButton");
