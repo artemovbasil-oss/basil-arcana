@@ -2136,6 +2136,7 @@ function renderSolarSystemBlock(dashboard, period) {
         <div class="solar-system-layout" id="solarSystemWidget">
           <div class="solar-canvas-wrap" id="solarCanvasWrap">
             <canvas id="solarSystemCanvas" class="solar-canvas" aria-label="Interactive solar system view"></canvas>
+            <div class="solar-starfield" aria-hidden="true"></div>
             <div id="solarSystemTooltip" class="solar-tooltip" aria-hidden="true"></div>
             <div id="solarFocusBadge" class="solar-focus-badge">Focus: The whole system</div>
             <div id="solarHouseOverlay" class="solar-house-overlay"></div>
@@ -2813,8 +2814,8 @@ async function initSolarSystemWidget(dashboard, period) {
       const x = ((projected.x + 1) / 2) * wrap.clientWidth + 10;
       const y = ((-projected.y + 1) / 2) * wrap.clientHeight - 8;
       const sign = zodiacFromAngle(angleDeg);
-      const glyph = zodiacGlyphs[sign] || "◌";
-      label.textContent = `${key} · ${glyph} ${sign}`;
+      const iconClass = zodiacIconClasses[sign] || "mdi:circle-outline";
+      label.innerHTML = `<iconify-icon icon="${iconClass}" class="solar-zodiac-icon" aria-hidden="true"></iconify-icon><span>${key} · ${sign}</span>`;
       label.style.opacity = visible ? "0.9" : "0";
       label.style.transform = `translate(${Math.round(x)}px, ${Math.round(y)}px)`;
       label.classList.toggle("is-active", key === selectedKey);
