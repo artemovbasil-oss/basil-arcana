@@ -2353,6 +2353,20 @@ body[data-theme="light"] .celeb-avatar {
   transition: opacity 0.12s ease;
 }
 
+.solar-focus-badge {
+  position: absolute;
+  right: 0.6rem;
+  top: 0.6rem;
+  z-index: 3;
+  border: 1px solid var(--line-strong);
+  background: color-mix(in srgb, var(--surface) 88%, transparent 12%);
+  color: var(--ink);
+  padding: 0.2rem 0.38rem;
+  font-size: 0.66rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
 .solar-aspect-panel {
   border: 1px solid var(--line);
   background: var(--surface-2);
@@ -2364,6 +2378,13 @@ body[data-theme="light"] .celeb-avatar {
 
 .solar-aspect-panel h3 {
   margin: 0;
+}
+
+.solar-focus-mode {
+  font-size: 0.64rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
 }
 
 .solar-aspect-score-row {
