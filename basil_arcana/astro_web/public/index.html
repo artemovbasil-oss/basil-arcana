@@ -42,11 +42,19 @@
         <a href="/natal-chart">Natal Chart</a>
         <a href="/daily">Daily</a>
         <a href="/friends">Friends</a>
-        <button id="themeToggle" class="theme-toggle" type="button">Theme: dark</button>
         <a href="/faq">FAQ</a>
-        <button id="profileButton" class="profile-chip" aria-label="Open profile" type="button">
-          <span id="profileInitials" class="profile-initials">?</span>
-        </button>
+        <div class="nav-tool nav-tool-theme">
+          <button id="themeToggle" class="theme-toggle" type="button" aria-label="Toggle theme">
+            <iconify-icon icon="mdi:moon-waning-crescent" aria-hidden="true"></iconify-icon>
+          </button>
+          <span class="nav-tool-label">theme</span>
+        </div>
+        <div class="nav-tool nav-tool-account">
+          <button id="profileButton" class="profile-chip" aria-label="Open profile" type="button">
+            <span id="profileInitials" class="profile-initials">?</span>
+          </button>
+          <span class="nav-tool-label">account</span>
+        </div>
       </nav>
     </header>
 

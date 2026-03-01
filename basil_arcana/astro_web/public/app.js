@@ -141,7 +141,11 @@ function applyTheme(nextTheme) {
   document.body.setAttribute("data-theme", theme);
   window.localStorage.setItem(themeStorageKey, theme);
   if (themeToggle) {
-    themeToggle.textContent = `Theme: ${theme}`;
+    const icon = theme === "dark" ? "mdi:moon-waning-crescent" : "mdi:white-balance-sunny";
+    const target = theme === "dark" ? "light" : "dark";
+    themeToggle.innerHTML = `<iconify-icon icon="${icon}" aria-hidden="true"></iconify-icon>`;
+    themeToggle.setAttribute("aria-label", `Switch to ${target} theme`);
+    themeToggle.setAttribute("title", `Switch to ${target} theme`);
   }
 }
 
@@ -2602,8 +2606,10 @@ async function initSolarSystemWidget(dashboard, period) {
       const trailSeed = Array.from({ length: trailResolution }, () => new THREE.Vector3(0, 0, 0));
       const trailLine = new THREE.Line(
         new THREE.BufferGeometry().setFromPoints(trailSeed),
-        new THREE.LineBasicMaterial({
+        new THREE.LineDashedMaterial({
           color: planet.key === "Earth" ? ink : muted,
+          dashSize: planet.key === "Moon" ? 0.085 : 0.14,
+          gapSize: planet.key === "Moon" ? 0.065 : 0.11,
           transparent: true,
           opacity: 0,
           depthWrite: false
@@ -2795,6 +2801,7 @@ async function initSolarSystemWidget(dashboard, period) {
           const curve = new THREE.CatmullRomCurve3(trail.points, false, "centripetal", 0.22);
           const smoothed = curve.getPoints(Math.max(6, trail.resolution - 1));
           line.geometry.setFromPoints(smoothed);
+          line.computeLineDistances();
           line.material.opacity = planet.key === selectedKey
             ? (planet.key === "Moon" ? 0.9 : 0.82)
             : (planet.key === "Moon" ? 0.5 : 0.44);

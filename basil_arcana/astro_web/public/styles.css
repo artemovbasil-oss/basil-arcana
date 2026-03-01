@@ -137,6 +137,22 @@ body[data-theme="light"] .topbar {
   margin-left: 0.3rem;
 }
 
+.nav-tool {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.36rem;
+}
+
+.nav-tool-label {
+  display: none;
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  line-height: 1;
+}
+
 .profile-chip:hover {
   transform: translateY(-1px);
   border-color: var(--ink);
@@ -2746,21 +2762,28 @@ body[data-theme="light"] .solar-starfield {
 
 .theme-toggle {
   font-family: var(--font-sans);
+  width: 34px;
+  height: 34px;
   border: 1px solid var(--line-strong);
-  background: transparent;
-  color: var(--muted);
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  padding: 0.35rem 0.5rem;
-  border-radius: 0;
-  transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+  background: var(--surface-2);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.16s ease, background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+
+.theme-toggle iconify-icon {
+  font-size: 0.95rem;
 }
 
 .theme-toggle:hover {
-  color: var(--ink);
+  transform: translateY(-1px);
   border-color: var(--ink);
-  background: var(--surface-2);
+  background: var(--ink);
+  color: var(--bg);
 }
 
 .natal-graphic {
@@ -3079,6 +3102,19 @@ body[data-theme="light"] .energy-star.neutral {
 
   .nav .profile-chip {
     margin-left: 0;
+  }
+
+  .nav .theme-toggle {
+    margin-left: 0;
+  }
+
+  .nav-tool {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .nav-tool-label {
+    display: inline;
   }
 
   .nav.open {
