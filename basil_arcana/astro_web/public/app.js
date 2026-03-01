@@ -3812,6 +3812,195 @@ function faqView() {
   `;
 }
 
+const astrologyHubArticles = [
+  {
+    slug: "astrology-and-astronomy-shared-roots-modern-paths",
+    title: "Astrology and Astronomy: Ancient Roots, Modern Paths",
+    excerpt: "From early sky-watchers to the era of telescopes and space missions: where the disciplines diverged and why both still matter today.",
+    readTime: "12 min",
+    publishedAt: "2026-03-01",
+    category: "History",
+    seoDescription: "A concise history of astrology and astronomy from antiquity to modern times: shared origins, methodological split, and current relevance.",
+    content: `
+      <p class="article-lead">The relationship between astrology and astronomy is the story of two languages that once shared the same grammar. In early civilizations, reading the sky meant both precise observation and meaning-making: seasons, rituals, governance, and navigation were all tied to celestial cycles.</p>
+      <h2>A shared foundation: observation and calendars</h2>
+      <p>In Mesopotamia, Egypt, India, China, and the classical Mediterranean world, tracking planetary and stellar motion was mission-critical for agriculture, travel, and state planning. The same records were also interpreted symbolically. At that stage, there was no hard boundary between computational sky practice and cultural interpretation.</p>
+      <p>The zodiac, ephemerides, and early planetary tables emerged as tools of systematization. This was already a sophisticated data culture: measuring cycles, comparing error, and refining periodic models.</p>
+      <h2>The split: mathematical physics changes everything</h2>
+      <p>Copernicus, Kepler, Galileo, and Newton transformed astronomy into a discipline centered on physical laws, testability, and predictive precision. The key criterion became empirical verification.</p>
+      <p>Astrology moved in a different direction: from physical cosmology to symbolic and psychological interpretation. It preserved the language of cycles, timing, and archetypal patterns, but it no longer operated as physics.</p>
+      <h2>How both fields coexist today</h2>
+      <p>Today, astronomy and astrology serve different aims. Astronomy asks how the universe works and relies on scientific method. Astrology asks how humans organize meaning, attention, and timing in lived experience.</p>
+      <p>At Astronautica, we keep those layers explicit. The calculation layer is deterministic: date, time, location, and geometric computation. The interpretation layer translates that structure into practical behavioral signals: focus load, stress rhythm, communication timing, and recovery cadence.</p>
+      <h2>Practical takeaway</h2>
+      <p>The productive question is not who “wins forever,” but where each tool belongs. Use astronomy to measure external reality. Use structured astrology, if useful, to reflect on patterns, decisions, and self-regulation. What matters most is methodological transparency and clear boundaries.</p>
+    `
+  },
+  {
+    slug: "how-to-avoid-astrology-scams",
+    title: "How to Avoid Astrology Scams",
+    excerpt: "A practical red-flag checklist: from fear-based manipulation to opaque upsells. How to choose practitioners and services safely.",
+    readTime: "9 min",
+    publishedAt: "2026-03-01",
+    category: "Safety",
+    seoDescription: "How to spot astrology scams: clear red flags, safe selection criteria, and practical due-diligence questions before any consultation.",
+    content: `
+      <p class="article-lead">The astrology market is large, global, and highly uneven in quality. Next to thoughtful analysts, you will also find actors who monetize anxiety. The good news: scam patterns are repetitive, and you can identify them early.</p>
+      <h2>Red flags you should never ignore</h2>
+      <ul class="bullet-list">
+        <li><strong>Fear selling:</strong> “you are cursed,” “urgent ritual needed,” “catastrophe is coming unless you pay now.”</li>
+        <li><strong>Guaranteed outcomes:</strong> “I will bring your partner back in 7 days,” “100% business success.”</li>
+        <li><strong>Opaque method:</strong> no clear explanation of inputs, calculations, or reasoning.</li>
+        <li><strong>Payment pressure:</strong> countdown tactics, guilt manipulation, and immediate transfer demands.</li>
+        <li><strong>Boundary violations:</strong> requests for sensitive data that are not operationally necessary.</li>
+      </ul>
+      <h2>What professional work looks like</h2>
+      <p>A serious practitioner does not sell miracles. They frame hypotheses, acknowledge uncertainty, provide testable recommendations, and do not replace legal, medical, or financial professionals.</p>
+      <p>A reliable product or consultant can explain data inputs, calculation logic, and output structure. If you cannot understand what was calculated and why, pause immediately.</p>
+      <h2>Questions to ask before booking</h2>
+      <ul class="bullet-list">
+        <li>Which data do you use, and why?</li>
+        <li>How is the chart calculated (house system, geocoding source, time validation)?</li>
+        <li>What are the boundaries of your service, and what do you explicitly not provide?</li>
+        <li>Can I receive a written structure of findings and recommendations?</li>
+        <li>What is your refund and privacy policy?</li>
+      </ul>
+      <h2>Digital safety baseline</h2>
+      <p>Never share ID scans, banking credentials, one-time SMS codes, or messenger access under “astrology verification” pretexts. Use secure payment channels and keep sensitive communication behind two-factor authentication.</p>
+      <h2>The Astronautica position</h2>
+      <p>We intentionally design against scam mechanics: transparent methodology, explicit limits, no fear-based upsells, and a focus on behavioral self-observation. Astrology should increase clarity, not dependency.</p>
+    `
+  },
+  {
+    slug: "astrology-for-self-knowledge-and-growth",
+    title: "Astrology for Self-Knowledge and Growth: The Astronautica View",
+    excerpt: "Why we treat astrology as a map of behavioral patterns, not a deterministic verdict, and how signals become actionable protocols.",
+    readTime: "11 min",
+    publishedAt: "2026-03-01",
+    category: "Methodology",
+    seoDescription: "A modern Astronautica framework: astrology as a tool for self-knowledge, focus management, and practical behavioral development.",
+    content: `
+      <p class="article-lead">In a modern context, astrology is most useful not as fate prediction but as pattern literacy. Used correctly, it helps you identify where energy leaks happen, where stress scripts repeat, and where better structure can unlock better outcomes.</p>
+      <h2>From labels to processes</h2>
+      <p>The biggest weakness of mass-market astrology is identity labeling. Astronautica uses a process model instead: not “who you are forever,” but “which mechanisms activate under stress, intimacy, responsibility, and overload.”</p>
+      <p>This shift removes fatalism. A chart becomes an operating map: where structure is needed, where boundaries protect energy, where recovery must be scheduled, and where communication protocols reduce friction.</p>
+      <h2>The Astronautica operating stack</h2>
+      <ul class="bullet-list">
+        <li><strong>Computation:</strong> deterministic geometry from date, time, and birthplace.</li>
+        <li><strong>Signals:</strong> interpretable models for focus, emotional regulation, social load, and execution rhythm.</li>
+        <li><strong>Decisions:</strong> concise action protocols that can be tested in real life.</li>
+        <li><strong>Review:</strong> cycle tracking and behavioral adjustment without mystification.</li>
+      </ul>
+      <h2>How to apply this in practice</h2>
+      <p>Use one weekly signal, convert it into one measurable behavior, and review outcomes. For example: replace “be calmer” with a concrete communication rule, fixed windows for hard conversations, and one daily recovery marker.</p>
+      <p>Within 2-4 weeks, the key shift appears: you stop thinking in “good or bad days” and start seeing your own regulation mechanics. That is what practical self-knowledge looks like.</p>
+      <h2>Ethics and limits</h2>
+      <p>Astronautica does not position astrology as a substitute for professional advice. It is a meta-navigation layer: where you are stable, where you are vulnerable, and where better architecture is needed. Agency always remains with the person, not with the symbol.</p>
+      <p>Modern astrology is valuable when it increases clarity, discipline, and freedom of action. That is exactly the standard we apply.</p>
+    `
+  }
+];
+
+const astrologyHubBySlug = astrologyHubArticles.reduce((acc, article) => {
+  acc[article.slug] = article;
+  return acc;
+}, {});
+
+function astrologyHubView() {
+  return `
+    <section class="section">
+      <article class="card tone-card">
+        <span class="eyebrow">Astrology Hub</span>
+        <h1>Research + insight journal</h1>
+        <p>Public long-form pieces from Astronautica: method, history, safety standards, and practical models for reflective decision-making.</p>
+      </article>
+    </section>
+    <section class="section">
+      <div class="hub-grid">
+        ${astrologyHubArticles
+          .map((article) => `
+            <article class="card hub-card">
+              <div class="hub-card-head">
+                <span class="hub-chip">${article.category}</span>
+                <span class="hub-meta">${article.readTime}</span>
+              </div>
+              <h2>${article.title}</h2>
+              <p>${article.excerpt}</p>
+              <div class="hub-card-footer">
+                <time datetime="${article.publishedAt}">${new Date(article.publishedAt).toLocaleDateString("en-US", { day: "2-digit", month: "long", year: "numeric" })}</time>
+                <a class="hub-link" href="/astrology-hub/${article.slug}">Read article</a>
+              </div>
+            </article>
+          `)
+          .join("")}
+      </div>
+    </section>
+  `;
+}
+
+function astrologyHubArticleView(slug) {
+  const article = astrologyHubBySlug[slug];
+  if (!article) {
+    return `
+      <section class="section">
+        <article class="card">
+          <h1>Article not found</h1>
+          <p class="muted">This article is unavailable. Return to <a href="/astrology-hub">Astrology Hub</a>.</p>
+        </article>
+      </section>
+    `;
+  }
+  const related = astrologyHubArticles.filter((item) => item.slug !== slug).slice(0, 2);
+  return `
+    <section class="section">
+      <article class="card tone-card article-hero">
+        <span class="eyebrow">Astrology Hub</span>
+        <h1>${article.title}</h1>
+        <div class="hub-card-footer">
+          <span class="hub-chip">${article.category}</span>
+          <time datetime="${article.publishedAt}">${new Date(article.publishedAt).toLocaleDateString("en-US", { day: "2-digit", month: "long", year: "numeric" })}</time>
+          <span class="hub-meta">${article.readTime}</span>
+        </div>
+      </article>
+    </section>
+    <section class="section">
+      <article class="card article-body">
+        ${article.content}
+      </article>
+    </section>
+    <section class="section">
+      <article class="card">
+        <h2>Related Articles</h2>
+        <div class="hub-grid related-grid">
+          ${related
+            .map((item) => `
+              <article class="hub-card">
+                <div class="hub-card-head">
+                  <span class="hub-chip">${item.category}</span>
+                  <span class="hub-meta">${item.readTime}</span>
+                </div>
+                <h2>${item.title}</h2>
+                <p>${item.excerpt}</p>
+                <div class="hub-card-footer">
+                  <time datetime="${item.publishedAt}">${new Date(item.publishedAt).toLocaleDateString("en-US", { day: "2-digit", month: "long", year: "numeric" })}</time>
+                  <a class="hub-link" href="/astrology-hub/${item.slug}">Read article</a>
+                </div>
+              </article>
+            `)
+            .join("")}
+        </div>
+      </article>
+    </section>
+    <section class="section">
+      <article class="card article-cta">
+        <h2>Explore more from Astrology Hub</h2>
+        <p class="muted">Continue reading: history, safety, and practical frameworks for modern reflective astrology.</p>
+        <a class="btn ghost" href="/astrology-hub">Back to all articles</a>
+      </article>
+    </section>
+  `;
+}
+
 function privacyPolicyView() {
   return `
     <section class="section">
@@ -3948,14 +4137,106 @@ const routes = {
   "/daily": () => `<section class="section"><article class="card"><p class="muted">Loading...</p></article></section>`,
   "/friends": friendsView,
   "/faq": faqView,
+  "/astrology-hub": astrologyHubView,
+  "/astrology-hub/astrology-and-astronomy-shared-roots-modern-paths": () => astrologyHubArticleView("astrology-and-astronomy-shared-roots-modern-paths"),
+  "/astrology-hub/how-to-avoid-astrology-scams": () => astrologyHubArticleView("how-to-avoid-astrology-scams"),
+  "/astrology-hub/astrology-for-self-knowledge-and-growth": () => astrologyHubArticleView("astrology-for-self-knowledge-and-growth"),
   "/privacy-policy": privacyPolicyView,
   "/terms-of-service": termsOfServiceView
 };
 
+function applySeoMeta(path) {
+  const defaultMeta = {
+    title: "Astronautica",
+    description: "Astronautica: precision natal intelligence, daily guidance and compatibility insights."
+  };
+  const pageMeta = {
+    "/faq": {
+      title: "FAQ - Astronautica",
+      description: "Astronautica FAQ: methodology, natal chart calculations, compatibility logic and product boundaries."
+    },
+    "/astrology-hub": {
+      title: "Astrology Hub - Astronautica",
+      description: "Astrology Hub by Astronautica: long-form articles on history, methodology, safety and modern applied astrology."
+    },
+    "/astrology-hub/astrology-and-astronomy-shared-roots-modern-paths": {
+      title: "Astrology and Astronomy: Ancient Roots, Modern Paths - Astrology Hub",
+      description: astrologyHubBySlug["astrology-and-astronomy-shared-roots-modern-paths"]?.seoDescription || defaultMeta.description
+    },
+    "/astrology-hub/how-to-avoid-astrology-scams": {
+      title: "How to Avoid Astrology Scams - Astrology Hub",
+      description: astrologyHubBySlug["how-to-avoid-astrology-scams"]?.seoDescription || defaultMeta.description
+    },
+    "/astrology-hub/astrology-for-self-knowledge-and-growth": {
+      title: "Astrology for Self-Knowledge and Growth - Astrology Hub",
+      description: astrologyHubBySlug["astrology-for-self-knowledge-and-growth"]?.seoDescription || defaultMeta.description
+    },
+    "/privacy-policy": {
+      title: "Privacy Policy - Astronautica",
+      description: "Astronautica Privacy Policy for EEA, UK and Switzerland users."
+    },
+    "/terms-of-service": {
+      title: "Terms of Service - Astronautica",
+      description: "Astronautica Terms of Service for EEA, UK and Switzerland users."
+    }
+  };
+  const meta = pageMeta[path] || defaultMeta;
+  document.title = meta.title;
+
+  const setMeta = (selector, content) => {
+    const element = document.querySelector(selector);
+    if (element) {
+      element.setAttribute("content", content);
+    }
+  };
+  setMeta('meta[name="description"]', meta.description);
+  setMeta('meta[property="og:title"]', meta.title);
+  setMeta('meta[property="og:description"]', meta.description);
+  setMeta('meta[name="twitter:title"]', meta.title);
+  setMeta('meta[name="twitter:description"]', meta.description);
+
+  const canonical = document.querySelector('link[rel="canonical"]');
+  const canonicalUrl = `https://app.basilarcana.com${path === "/" ? "/" : path}`;
+  if (canonical) {
+    canonical.setAttribute("href", canonicalUrl);
+  }
+  setMeta('meta[property="og:url"]', canonicalUrl);
+
+  const schemaId = "page-structured-data";
+  document.getElementById(schemaId)?.remove();
+  const articleSlug = path.startsWith("/astrology-hub/") ? path.replace("/astrology-hub/", "") : null;
+  const article = articleSlug ? astrologyHubBySlug[articleSlug] : null;
+  if (article) {
+    const script = document.createElement("script");
+    script.id = schemaId;
+    script.type = "application/ld+json";
+    script.textContent = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Article",
+      headline: article.title,
+      description: article.seoDescription,
+      datePublished: article.publishedAt,
+      dateModified: article.publishedAt,
+      inLanguage: "en",
+      author: {
+        "@type": "Organization",
+        name: "Astronautica"
+      },
+      publisher: {
+        "@type": "Organization",
+        name: "Astronautica"
+      },
+      mainEntityOfPage: canonicalUrl
+    });
+    document.head.appendChild(script);
+  }
+}
+
 function markActiveNav(path) {
   document.querySelectorAll(".nav a").forEach((link) => {
     const href = link.getAttribute("href");
-    link.classList.toggle("active", href === path);
+    const isHub = href === "/astrology-hub" && path.startsWith("/astrology-hub");
+    link.classList.toggle("active", href === path || isHub);
   });
 }
 
@@ -5003,7 +5284,16 @@ async function loadSessionState() {
 
 function render() {
   let path = window.location.pathname;
-  const publicPaths = new Set(["/login", "/faq", "/privacy-policy", "/terms-of-service"]);
+  const publicPaths = new Set([
+    "/login",
+    "/faq",
+    "/astrology-hub",
+    "/astrology-hub/astrology-and-astronomy-shared-roots-modern-paths",
+    "/astrology-hub/how-to-avoid-astrology-scams",
+    "/astrology-hub/astrology-for-self-knowledge-and-growth",
+    "/privacy-policy",
+    "/terms-of-service"
+  ]);
   if (path !== "/profile") {
     state.profileEditMode = false;
   }
@@ -5030,6 +5320,7 @@ function render() {
 
   const makeView = routes[path] || homeViewLoading;
   app.innerHTML = makeView();
+  applySeoMeta(path);
   animateRouteTransition();
   animateHeadingTypewriter();
   markActiveNav(path);
