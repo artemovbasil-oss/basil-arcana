@@ -565,9 +565,15 @@ function zodiacDetails(sign) {
 }
 
 function syncZodiacThemeImages(theme = state.theme) {
-  const isLight = theme === "light";
+  const desiredSuffix = theme === "light" ? "-white.png" : "-black.png";
   document.querySelectorAll("img[data-zodiac-light][data-zodiac-dark]").forEach((img) => {
-    const next = isLight ? img.getAttribute("data-zodiac-light") : img.getAttribute("data-zodiac-dark");
+    const light = img.getAttribute("data-zodiac-light") || "";
+    const dark = img.getAttribute("data-zodiac-dark") || "";
+    const current = img.getAttribute("src") || "";
+    const pool = [light, dark, current].filter(Boolean);
+    const bySuffix = pool.find((url) => url.toLowerCase().endsWith(desiredSuffix));
+    const fallback = theme === "light" ? light : dark;
+    const next = bySuffix || fallback;
     if (next && img.getAttribute("src") !== next) {
       img.setAttribute("src", next);
     }
@@ -5338,6 +5344,7 @@ function render() {
 
   const makeView = routes[path] || homeViewLoading;
   app.innerHTML = makeView();
+  syncZodiacThemeImages(state.theme);
   applySeoMeta(path);
   animateRouteTransition();
   animateHeadingTypewriter();
