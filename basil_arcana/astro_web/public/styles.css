@@ -2309,6 +2309,114 @@ body[data-theme="light"] .celeb-avatar {
   white-space: nowrap;
 }
 
+.solar-system-card {
+  display: grid;
+  gap: 0.72rem;
+}
+
+.solar-system-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+  gap: 0.72rem;
+  align-items: stretch;
+}
+
+.solar-canvas-wrap {
+  border: 1px solid var(--line);
+  background:
+    radial-gradient(120% 120% at 15% 10%, color-mix(in srgb, var(--ink) 11%, transparent 89%) 0%, transparent 54%),
+    var(--surface-2);
+  min-height: 360px;
+  position: relative;
+  overflow: hidden;
+}
+
+.solar-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.solar-tooltip {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 4;
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  color: var(--ink);
+  padding: 0.2rem 0.36rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: opacity 0.12s ease;
+}
+
+.solar-aspect-panel {
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  padding: 0.8rem;
+  display: grid;
+  align-content: start;
+  gap: 0.48rem;
+}
+
+.solar-aspect-panel h3 {
+  margin: 0;
+}
+
+.solar-aspect-score-row {
+  display: grid;
+  gap: 0.1rem;
+}
+
+.solar-aspect-score-row strong {
+  font-size: 1.28rem;
+  line-height: 1;
+}
+
+.solar-aspect-score-row span {
+  color: var(--muted);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.solar-aspect-desc {
+  margin: 0;
+  color: var(--muted);
+}
+
+.solar-mobile-matrix {
+  display: flex;
+  gap: 0.38rem;
+  flex-wrap: wrap;
+}
+
+.solar-mobile-pill {
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--ink);
+  padding: 0.28rem 0.4rem;
+  display: inline-flex;
+  gap: 0.36rem;
+  align-items: center;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.64rem;
+}
+
+.solar-mobile-pill strong {
+  font-size: 0.72rem;
+}
+
+.solar-mobile-pill.is-active {
+  border-color: var(--line-strong);
+  background: color-mix(in srgb, var(--ink) 10%, transparent 90%);
+}
+
 .daily-astro-axis {
   stroke: var(--line-strong);
   stroke-width: 1;
@@ -2820,6 +2928,14 @@ body[data-theme="light"] .energy-star.neutral {
 
   .celeb-grid {
     grid-template-columns: 1fr;
+  }
+
+  .solar-system-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .solar-canvas-wrap {
+    display: none;
   }
 
   .daily-astro-compact-grid {

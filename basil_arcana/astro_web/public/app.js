@@ -22,7 +22,8 @@ const state = {
   dashboard: null,
   homePeriod: "week",
   theme: "dark",
-  profileEditMode: false
+  profileEditMode: false,
+  solarSystem: null
 };
 
 menuButton.addEventListener("click", () => {
@@ -37,6 +38,9 @@ themeToggle?.addEventListener("click", () => {
   state.theme = state.theme === "dark" ? "light" : "dark";
   applyTheme(state.theme);
   nav.classList.remove("open");
+  if (window.location.pathname === "/" && state.dashboard) {
+    initSolarSystemWidget(state.dashboard, state.homePeriod);
+  }
 });
 
 function navigate(path, { replace = false } = {}) {
@@ -1874,6 +1878,488 @@ function renderForecastSummary(dashboard, period) {
   `;
 }
 
+const solarPlanetModel = [
+  { key: "Sun", label: "Sun", periodDays: Infinity, phase: 0, radius: 0, size: 0.36 },
+  { key: "Mercury", label: "Mercury", periodDays: 87.97, phase: 252.25, radius: 1.25, size: 0.11 },
+  { key: "Venus", label: "Venus", periodDays: 224.7, phase: 181.97, radius: 1.8, size: 0.13 },
+  { key: "Earth", label: "Earth", periodDays: 365.25, phase: 100.46, radius: 2.4, size: 0.14 },
+  { key: "Moon", label: "Moon", periodDays: 27.32, phase: 38.0, radius: 0.38, size: 0.055, parent: "Earth" },
+  { key: "Mars", label: "Mars", periodDays: 686.98, phase: 355.45, radius: 3.15, size: 0.12 },
+  { key: "Jupiter", label: "Jupiter", periodDays: 4332.59, phase: 34.4, radius: 4.25, size: 0.2 },
+  { key: "Saturn", label: "Saturn", periodDays: 10759.22, phase: 49.94, radius: 5.2, size: 0.18 },
+  { key: "Uranus", label: "Uranus", periodDays: 30688.5, phase: 313.23, radius: 6.05, size: 0.16 },
+  { key: "Neptune", label: "Neptune", periodDays: 60182, phase: 304.88, radius: 6.9, size: 0.16 }
+];
+
+let threeRuntimePromise = null;
+
+function clampScore(value) {
+  return Math.max(0, Math.min(100, Math.round(Number(value) || 0)));
+}
+
+function daysSinceJ2000(date = new Date()) {
+  const epoch = Date.UTC(2000, 0, 1, 12, 0, 0);
+  return (date.getTime() - epoch) / 86400000;
+}
+
+function meanPlanetAngle(days, periodDays, phase) {
+  if (!Number.isFinite(periodDays) || periodDays <= 0) {
+    return 0;
+  }
+  const cycle = ((days / periodDays) * 360 + phase) % 360;
+  return ((cycle + 360) % 360) * (Math.PI / 180);
+}
+
+function solarPositionsAt(date = new Date()) {
+  const days = daysSinceJ2000(date);
+  const byKey = {};
+  solarPlanetModel.forEach((planet) => {
+    if (planet.key === "Sun") {
+      byKey[planet.key] = { x: 0, z: 0, angle: 0 };
+      return;
+    }
+    if (planet.parent === "Earth") {
+      const earth = byKey.Earth || { x: 0, z: 0 };
+      const a = meanPlanetAngle(days, planet.periodDays, planet.phase);
+      byKey[planet.key] = {
+        x: earth.x + Math.cos(a) * planet.radius,
+        z: earth.z + Math.sin(a) * planet.radius,
+        angle: a
+      };
+      return;
+    }
+    const a = meanPlanetAngle(days, planet.periodDays, planet.phase);
+    byKey[planet.key] = {
+      x: Math.cos(a) * planet.radius,
+      z: Math.sin(a) * planet.radius,
+      angle: a
+    };
+  });
+  return byKey;
+}
+
+function solarAspectBlueprint() {
+  return {
+    Sun: { title: "Core Identity", desc: "Primary will, visibility, and central priorities." },
+    Mercury: { title: "Communication", desc: "Decision framing, messaging quality, and timing precision." },
+    Venus: { title: "Relationships", desc: "Attraction patterns, value alignment, and social ease." },
+    Earth: { title: "Stability", desc: "Grounding, body rhythm, and practical continuity." },
+    Moon: { title: "Emotional Signal", desc: "Mood bandwidth, intuition clarity, and reactivity load." },
+    Mars: { title: "Execution Drive", desc: "Action speed, courage under pressure, and conflict heat." },
+    Jupiter: { title: "Expansion", desc: "Opportunity bandwidth, growth appetite, and confidence." },
+    Saturn: { title: "Structure", desc: "Discipline, boundaries, and long-cycle reliability." },
+    Uranus: { title: "Innovation", desc: "Experiment rate, disruption tolerance, and originality." },
+    Neptune: { title: "Meaning Field", desc: "Imagination, symbolic patterning, and narrative coherence." }
+  };
+}
+
+function buildSolarAspectModel(dashboard, period) {
+  const base = solarAspectBlueprint();
+  const series = buildEnergySeries(dashboard, period);
+  const values = Array.isArray(series?.values) ? series.values : [50];
+  const today = values[todayIndexForPeriod(period, values.length)] || 50;
+  const peak = values[series?.peakIndex ?? 0] || today;
+  const dip = values[series?.dipIndex ?? 0] || today;
+  const intensity = Number(dashboard?.periodForecast?.intensity || today);
+  const friendScores = (Array.isArray(dashboard?.friendsDynamic) ? dashboard.friendsDynamic : [])
+    .map((item) => Number(item?.score))
+    .filter((num) => Number.isFinite(num));
+  const friendAvg = friendScores.length
+    ? friendScores.reduce((sum, num) => sum + num, 0) / friendScores.length
+    : intensity;
+  const sun = dashboard?.natalCore?.sun || "Unknown";
+  const moon = dashboard?.natalCore?.moon || "Unknown";
+  const rising = dashboard?.natalCore?.rising || "Unknown";
+
+  return {
+    Sun: {
+      ...base.Sun,
+      score: clampScore(intensity * 0.68 + peak * 0.32),
+      pulse: `${sun} signal driving this cycle`,
+      detail: `Your core axis is anchored by ${sun}. High-value moves today come from visible ownership and clear intent.`
+    },
+    Mercury: {
+      ...base.Mercury,
+      score: clampScore(today * 0.6 + friendAvg * 0.2 + (100 - Math.abs(peak - dip)) * 0.2),
+      pulse: `${sun} wording strategy`,
+      detail: `Use concise, testable language. Communication is strongest when you compress ideas into one next action.`
+    },
+    Venus: {
+      ...base.Venus,
+      score: clampScore(friendAvg * 0.62 + today * 0.38),
+      pulse: `${moon} trust calibration`,
+      detail: `Relational quality improves through pace-matching and explicit expectations, especially in close collaboration.`
+    },
+    Earth: {
+      ...base.Earth,
+      score: clampScore((today + intensity) / 2),
+      pulse: `${rising} operational posture`,
+      detail: `Grounding is your throughput multiplier today: structure blocks before responding to external noise.`
+    },
+    Moon: {
+      ...base.Moon,
+      score: clampScore(today * 0.7 + dip * 0.3),
+      pulse: `${moon} emotional bandwidth`,
+      detail: `Emotional load is manageable when transitions are intentional. Protect recovery windows between major tasks.`
+    },
+    Mars: {
+      ...base.Mars,
+      score: clampScore(peak * 0.7 + today * 0.3),
+      pulse: `${sun} drive expression`,
+      detail: `Execution velocity is available. Start from one difficult move early, then keep cadence stable.`
+    },
+    Jupiter: {
+      ...base.Jupiter,
+      score: clampScore(intensity * 0.55 + peak * 0.25 + friendAvg * 0.2),
+      pulse: `${rising} expansion vector`,
+      detail: `Expansion is favorable when tied to a measurable upside, not open-ended exploration.`
+    },
+    Saturn: {
+      ...base.Saturn,
+      score: clampScore((100 - Math.abs(peak - dip)) * 0.6 + intensity * 0.4),
+      pulse: `${sun} discipline frame`,
+      detail: `Structure quality decides outcomes today: define constraints first, then execute inside them.`
+    },
+    Uranus: {
+      ...base.Uranus,
+      score: clampScore((peak - dip + 50) * 0.55 + today * 0.45),
+      pulse: `${moon} adaptation threshold`,
+      detail: `Innovation works best in bounded experiments. Keep risk local and feedback loops fast.`
+    },
+    Neptune: {
+      ...base.Neptune,
+      score: clampScore(today * 0.35 + dip * 0.25 + (100 - Math.abs(today - intensity)) * 0.4),
+      pulse: `${moon} symbolic coherence`,
+      detail: `Intuition is useful today, but only after translation into concrete operational language.`
+    }
+  };
+}
+
+function renderSolarAspectPanel(aspect, planetLabel) {
+  if (!aspect) {
+    return `<div class="solar-aspect-empty">Hover a planet to inspect your life axis for today.</div>`;
+  }
+  return `
+    <span class="eyebrow">Live aspect</span>
+    <h3>${planetLabel} · ${aspect.title}</h3>
+    <div class="solar-aspect-score-row">
+      <strong>${aspect.score}/100</strong>
+      <span>${aspect.pulse}</span>
+    </div>
+    <p class="solar-aspect-desc">${aspect.desc}</p>
+    <p>${aspect.detail}</p>
+  `;
+}
+
+function renderSolarMobileMatrix(aspects, selectedKey = "Earth") {
+  const keys = ["Sun", "Mercury", "Venus", "Earth", "Moon", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune"];
+  return `
+    <div class="solar-mobile-matrix">
+      ${keys
+        .map((key) => {
+          const a = aspects[key];
+          if (!a) {
+            return "";
+          }
+          return `<button class="solar-mobile-pill ${key === selectedKey ? "is-active" : ""}" type="button" data-solar-planet="${key}">
+            <span>${key}</span>
+            <strong>${a.score}</strong>
+          </button>`;
+        })
+        .join("")}
+    </div>
+  `;
+}
+
+function renderSolarSystemBlock(dashboard, period) {
+  const aspects = buildSolarAspectModel(dashboard, period);
+  const selected = "Earth";
+  return `
+    <section class="section">
+      <article class="card solar-system-card">
+        <span class="eyebrow">Heliocentric map</span>
+        <div class="dashboard-head">
+          <h2>Solar System State</h2>
+          <p class="muted">Live planetary geometry mapped to today's life domains.</p>
+        </div>
+        <div class="solar-system-layout" id="solarSystemWidget">
+          <div class="solar-canvas-wrap" id="solarCanvasWrap">
+            <canvas id="solarSystemCanvas" class="solar-canvas" aria-label="Interactive solar system view"></canvas>
+            <div id="solarSystemTooltip" class="solar-tooltip" aria-hidden="true"></div>
+          </div>
+          <aside class="solar-aspect-panel" id="solarAspectPanel">
+            ${renderSolarAspectPanel(aspects[selected], selected)}
+          </aside>
+        </div>
+        <div id="solarMobileMatrixWrap">
+          ${renderSolarMobileMatrix(aspects, selected)}
+        </div>
+      </article>
+    </section>
+  `;
+}
+
+async function ensureThreeRuntime() {
+  if (!threeRuntimePromise) {
+    threeRuntimePromise = import("https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js");
+  }
+  return threeRuntimePromise;
+}
+
+function destroySolarSystemWidget() {
+  const runtime = state.solarSystem;
+  if (!runtime) {
+    return;
+  }
+  if (runtime.frameId) {
+    window.cancelAnimationFrame(runtime.frameId);
+  }
+  if (runtime.resizeHandler) {
+    window.removeEventListener("resize", runtime.resizeHandler);
+  }
+  if (runtime.canvas) {
+    runtime.canvas.onpointermove = null;
+    runtime.canvas.onpointerleave = null;
+    runtime.canvas.onclick = null;
+  }
+  runtime.renderer?.dispose?.();
+  state.solarSystem = null;
+}
+
+function bindSolarMobileInteractions(aspects) {
+  const panel = document.getElementById("solarAspectPanel");
+  const matrixWrap = document.getElementById("solarMobileMatrixWrap");
+  if (!panel || !matrixWrap) {
+    return;
+  }
+  matrixWrap.querySelectorAll("[data-solar-planet]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const key = button.getAttribute("data-solar-planet") || "Earth";
+      panel.innerHTML = renderSolarAspectPanel(aspects[key], key);
+      matrixWrap.querySelectorAll(".solar-mobile-pill").forEach((pill) => pill.classList.remove("is-active"));
+      button.classList.add("is-active");
+    });
+  });
+}
+
+async function initSolarSystemWidget(dashboard, period) {
+  const canvas = document.getElementById("solarSystemCanvas");
+  const wrap = document.getElementById("solarCanvasWrap");
+  const panel = document.getElementById("solarAspectPanel");
+  const tooltip = document.getElementById("solarSystemTooltip");
+  const matrixWrap = document.getElementById("solarMobileMatrixWrap");
+  if (!canvas || !wrap || !panel || !tooltip || !matrixWrap) {
+    destroySolarSystemWidget();
+    return;
+  }
+  const aspects = buildSolarAspectModel(dashboard, period);
+  matrixWrap.innerHTML = renderSolarMobileMatrix(aspects, "Earth");
+  bindSolarMobileInteractions(aspects);
+  panel.innerHTML = renderSolarAspectPanel(aspects.Earth, "Earth");
+
+  const preferReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+  const smallViewport = window.matchMedia?.("(max-width: 900px)")?.matches;
+  if (smallViewport) {
+    destroySolarSystemWidget();
+    return;
+  }
+
+  destroySolarSystemWidget();
+
+  let THREE;
+  try {
+    THREE = await ensureThreeRuntime();
+  } catch {
+    return;
+  }
+  if (!document.body.contains(canvas)) {
+    return;
+  }
+
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 200);
+  camera.position.set(0, 9.5, 11);
+  camera.lookAt(0, 0, 0);
+
+  const isDark = state.theme === "dark";
+  const ink = isDark ? 0xf2f2f2 : 0x121417;
+  const muted = isDark ? 0x848992 : 0x5a6068;
+  const dim = isDark ? 0x3d424a : 0xb8bec7;
+
+  const ambient = new THREE.AmbientLight(isDark ? 0xffffff : 0xf8f9fb, 0.85);
+  scene.add(ambient);
+  const keyLight = new THREE.PointLight(isDark ? 0xffffff : 0x111111, 0.65, 80, 2);
+  keyLight.position.set(0, 8, 0);
+  scene.add(keyLight);
+
+  const sun = solarPlanetModel.find((p) => p.key === "Sun");
+  const sunMesh = new THREE.Mesh(
+    new THREE.SphereGeometry(sun.size, 28, 28),
+    new THREE.MeshBasicMaterial({ color: ink })
+  );
+  sunMesh.userData = { key: "Sun", label: "Sun" };
+  scene.add(sunMesh);
+
+  const orbitLines = [];
+  solarPlanetModel
+    .filter((planet) => planet.key !== "Sun" && planet.parent !== "Earth")
+    .forEach((planet) => {
+      const pts = [];
+      for (let i = 0; i <= 128; i += 1) {
+        const a = (i / 128) * Math.PI * 2;
+        pts.push(new THREE.Vector3(Math.cos(a) * planet.radius, 0, Math.sin(a) * planet.radius));
+      }
+      const orbitGeometry = new THREE.BufferGeometry().setFromPoints(pts);
+      const orbitMaterial = new THREE.LineBasicMaterial({
+        color: dim,
+        transparent: true,
+        opacity: planet.key === "Earth" ? 0.52 : 0.34
+      });
+      const orbitLine = new THREE.Line(orbitGeometry, orbitMaterial);
+      orbitLine.rotation.x = Math.PI * 0.04;
+      scene.add(orbitLine);
+      orbitLines.push(orbitLine);
+    });
+
+  const moonOrbitPts = [];
+  for (let i = 0; i <= 96; i += 1) {
+    const a = (i / 96) * Math.PI * 2;
+    moonOrbitPts.push(new THREE.Vector3(Math.cos(a) * 0.38, 0, Math.sin(a) * 0.38));
+  }
+  const moonOrbitLine = new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints(moonOrbitPts),
+    new THREE.LineDashedMaterial({ color: muted, dashSize: 0.08, gapSize: 0.06, transparent: true, opacity: 0.65 })
+  );
+  moonOrbitLine.computeLineDistances();
+  scene.add(moonOrbitLine);
+
+  const planetMeshes = [];
+  solarPlanetModel
+    .filter((planet) => planet.key !== "Sun")
+    .forEach((planet) => {
+      const mesh = new THREE.Mesh(
+        new THREE.SphereGeometry(planet.size, 24, 24),
+        new THREE.MeshStandardMaterial({
+          color: planet.key === "Earth" ? ink : muted,
+          roughness: 0.72,
+          metalness: 0.04
+        })
+      );
+      mesh.userData = { key: planet.key, label: planet.label };
+      scene.add(mesh);
+      planetMeshes.push({ planet, mesh });
+    });
+
+  const raycaster = new THREE.Raycaster();
+  const pointer = new THREE.Vector2();
+  let selectedKey = "Earth";
+  let hoveredKey = null;
+
+  const setPanelPlanet = (key) => {
+    if (!aspects[key]) {
+      return;
+    }
+    panel.innerHTML = renderSolarAspectPanel(aspects[key], key);
+    matrixWrap.querySelectorAll(".solar-mobile-pill").forEach((pill) => {
+      pill.classList.toggle("is-active", pill.getAttribute("data-solar-planet") === key);
+    });
+  };
+
+  const resize = () => {
+    const rect = wrap.getBoundingClientRect();
+    const width = Math.max(240, Math.round(rect.width));
+    const height = Math.max(280, Math.round(rect.height));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setSize(width, height, false);
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+  };
+  resize();
+  window.addEventListener("resize", resize);
+
+  canvas.onpointermove = (event) => {
+    const rect = canvas.getBoundingClientRect();
+    pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+    raycaster.setFromCamera(pointer, camera);
+    const hits = raycaster.intersectObjects([sunMesh, ...planetMeshes.map((item) => item.mesh)], false);
+    if (!hits.length) {
+      hoveredKey = null;
+      tooltip.style.opacity = "0";
+      setPanelPlanet(selectedKey);
+      return;
+    }
+    const key = hits[0]?.object?.userData?.key || null;
+    if (!key) {
+      return;
+    }
+    hoveredKey = key;
+    tooltip.textContent = key;
+    tooltip.style.left = `${event.clientX - rect.left + 12}px`;
+    tooltip.style.top = `${event.clientY - rect.top + 12}px`;
+    tooltip.style.opacity = "1";
+    setPanelPlanet(key);
+  };
+
+  canvas.onpointerleave = () => {
+    hoveredKey = null;
+    tooltip.style.opacity = "0";
+    setPanelPlanet(selectedKey);
+  };
+
+  canvas.onclick = () => {
+    if (!hoveredKey) {
+      return;
+    }
+    selectedKey = hoveredKey;
+    setPanelPlanet(selectedKey);
+  };
+
+  const start = performance.now();
+  const runtime = {
+    renderer,
+    scene,
+    camera,
+    canvas,
+    resizeHandler: resize,
+    frameId: 0
+  };
+
+  const tick = (now) => {
+    if (state.solarSystem !== runtime) {
+      return;
+    }
+    const elapsedSec = (now - start) / 1000;
+    const simDays = daysSinceJ2000(new Date()) + elapsedSec * (preferReducedMotion ? 0.12 : 1.5);
+    const positions = solarPositionsAt(new Date(Date.UTC(2000, 0, 1, 12, 0, 0) + simDays * 86400000));
+
+    planetMeshes.forEach(({ planet, mesh }) => {
+      const p = positions[planet.key];
+      if (!p) {
+        return;
+      }
+      mesh.position.set(p.x, 0, p.z);
+    });
+
+    if (positions.Earth) {
+      moonOrbitLine.position.set(positions.Earth.x, 0, positions.Earth.z);
+    }
+
+    orbitLines.forEach((line, idx) => {
+      const pulse = 0.94 + Math.sin(elapsedSec * 0.23 + idx * 0.5) * 0.06;
+      line.material.opacity = Math.max(0.18, Math.min(0.55, line.material.opacity * 0.97 + pulse * 0.03));
+    });
+
+    scene.rotation.y = Math.sin(elapsedSec * 0.08) * 0.05;
+    renderer.render(scene, camera);
+    runtime.frameId = window.requestAnimationFrame(tick);
+  };
+
+  runtime.frameId = window.requestAnimationFrame(tick);
+  state.solarSystem = runtime;
+}
+
 function updateHomeDynamicBlocks(dashboard, period, { animate = false } = {}) {
   const forecastBlock = document.getElementById("homeForecastBlock");
   const friendsBlock = document.getElementById("homeFriendsBlock");
@@ -1900,6 +2386,7 @@ function updateHomeDynamicBlocks(dashboard, period, { animate = false } = {}) {
     button.classList.toggle("is-active", buttonPeriod === period);
   });
   bindEnergyChartInteractions();
+  initSolarSystemWidget(dashboard, period);
 }
 
 function bindHomePeriodHandlers() {
@@ -1959,6 +2446,7 @@ function renderHomeDashboard(dashboard) {
   ].filter((item) => item.replace(/<[^>]+>/g, "").trim());
   const zodiacCompact = renderHomeZodiacCompact(dashboard.natalCore?.sun);
   const zodiacCelebBlock = renderZodiacCelebrities(dashboard.natalCore?.sun);
+  const solarSystemBlock = renderSolarSystemBlock(dashboard, period);
 
   return `
     <section class="hero">
@@ -1990,6 +2478,7 @@ function renderHomeDashboard(dashboard) {
         <div id="homeForecastBlock" class="dashboard-swap">${forecastSummary}</div>
       </article>
     </section>
+    ${solarSystemBlock}
     ${zodiacCompact}
     ${zodiacCelebBlock}
     <section class="section">
@@ -3907,6 +4396,10 @@ function render() {
   if (state.authRequired && state.authenticated && profileExists && path === "/onboarding") {
     path = "/";
     window.history.replaceState({}, "", path);
+  }
+
+  if (path !== "/") {
+    destroySolarSystemWidget();
   }
 
   const makeView = routes[path] || homeViewLoading;
