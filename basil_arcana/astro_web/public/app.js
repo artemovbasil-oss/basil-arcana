@@ -159,6 +159,20 @@ const zodiacOrder = [
   "Aquarius",
   "Pisces"
 ];
+const zodiacGlyphs = {
+  Aries: "♈",
+  Taurus: "♉",
+  Gemini: "♊",
+  Cancer: "♋",
+  Leo: "♌",
+  Virgo: "♍",
+  Libra: "♎",
+  Scorpio: "♏",
+  Sagittarius: "♐",
+  Capricorn: "♑",
+  Aquarius: "♒",
+  Pisces: "♓"
+};
 
 const zodiacAssetBaseUrl = "https://basilarcana-assets.b-cdn.net/astronautica";
 const zodiacMeta = {
@@ -670,6 +684,12 @@ function zodiacIndex(sign) {
   const normalized = String(sign || "").trim();
   const index = zodiacOrder.indexOf(normalized);
   return index >= 0 ? index : 0;
+}
+
+function zodiacFromAngle(angleDeg) {
+  const norm = normalizeAngle(angleDeg);
+  const idx = Math.floor(norm / 30) % 12;
+  return zodiacOrder[idx] || "Aries";
 }
 
 function zodiacIcon(sign) {
@@ -2104,7 +2124,7 @@ function renderSolarSceneInfo(dashboard, period) {
 
 function renderSolarSystemBlock(dashboard, period) {
   const aspects = buildSolarAspectModel(dashboard, period);
-  const selected = "Earth";
+  const selected = "__all__";
   return `
     <section class="section">
       <article class="card solar-system-card">
@@ -2117,8 +2137,9 @@ function renderSolarSystemBlock(dashboard, period) {
           <div class="solar-canvas-wrap" id="solarCanvasWrap">
             <canvas id="solarSystemCanvas" class="solar-canvas" aria-label="Interactive solar system view"></canvas>
             <div id="solarSystemTooltip" class="solar-tooltip" aria-hidden="true"></div>
-            <div id="solarFocusBadge" class="solar-focus-badge">Focus: Earth</div>
+            <div id="solarFocusBadge" class="solar-focus-badge">Focus: The whole system</div>
             <div id="solarHouseOverlay" class="solar-house-overlay"></div>
+            <div id="solarObjectOverlay" class="solar-object-overlay"></div>
             <aside class="solar-aspect-panel solar-scene-panel" id="solarAspectPanel">
               ${renderSolarAspectPanel(aspects[selected], selected, { focused: true })}
             </aside>
@@ -2162,8 +2183,12 @@ function destroySolarSystemWidget() {
     runtime.focusGrid.material?.dispose?.();
   }
   const houseOverlay = document.getElementById("solarHouseOverlay");
+  const objectOverlay = document.getElementById("solarObjectOverlay");
   if (houseOverlay) {
     houseOverlay.innerHTML = "";
+  }
+  if (objectOverlay) {
+    objectOverlay.innerHTML = "";
   }
   runtime.renderer?.dispose?.();
   state.solarSystem = null;
@@ -2310,8 +2335,9 @@ async function initSolarSystemWidget(dashboard, period) {
   const tooltip = document.getElementById("solarSystemTooltip");
   const focusBadge = document.getElementById("solarFocusBadge");
   const houseOverlay = document.getElementById("solarHouseOverlay");
+  const objectOverlay = document.getElementById("solarObjectOverlay");
   const matrixWrap = document.getElementById("solarMobileMatrixWrap");
-  if (!canvas || !wrap || !panel || !tooltip || !matrixWrap || !focusBadge || !houseOverlay) {
+  if (!canvas || !wrap || !panel || !tooltip || !matrixWrap || !focusBadge || !houseOverlay || !objectOverlay) {
     destroySolarSystemWidget();
     return;
   }
@@ -2328,6 +2354,7 @@ async function initSolarSystemWidget(dashboard, period) {
 
   const preferReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
   const canHover = window.matchMedia?.("(hover: hover)")?.matches;
+  const isMobileScene = window.matchMedia?.("(max-width: 900px)")?.matches;
 
   destroySolarSystemWidget();
 
@@ -2371,24 +2398,24 @@ async function initSolarSystemWidget(dashboard, period) {
       map: glowTexture,
       color: isDark ? 0xffffff : 0x1a1d22,
       transparent: true,
-      opacity: isDark ? 0.34 : 0.2,
+      opacity: isDark ? 0.52 : 0.3,
       blending: THREE.AdditiveBlending,
       depthWrite: false
     })
   );
-  sunGlowInner.scale.setScalar(sun.size * 9.2);
+  sunGlowInner.scale.setScalar(sun.size * 11.6);
   scene.add(sunGlowInner);
   const sunGlowOuter = new THREE.Sprite(
     new THREE.SpriteMaterial({
       map: glowTexture,
       color: isDark ? 0xffffff : 0x1c2027,
       transparent: true,
-      opacity: isDark ? 0.2 : 0.12,
+      opacity: isDark ? 0.34 : 0.2,
       blending: THREE.AdditiveBlending,
       depthWrite: false
     })
   );
-  sunGlowOuter.scale.setScalar(sun.size * 14.8);
+  sunGlowOuter.scale.setScalar(sun.size * 18.2);
   scene.add(sunGlowOuter);
 
   const orbitLines = [];
@@ -2463,9 +2490,15 @@ async function initSolarSystemWidget(dashboard, period) {
 
   const hitTargets = [sunMesh];
   const planetMeshes = [];
+  const objectLabels = new Map();
   const trailMap = new Map();
   const ringMap = new Map();
   const themeKey = isDark ? "dark" : "light";
+  objectOverlay.innerHTML = "";
+  const sunLabel = document.createElement("span");
+  sunLabel.className = "solar-object-label";
+  objectOverlay.appendChild(sunLabel);
+  objectLabels.set("Sun", sunLabel);
   solarPlanetModel
     .filter((planet) => planet.key !== "Sun")
     .forEach((planet) => {
@@ -2489,12 +2522,16 @@ async function initSolarSystemWidget(dashboard, period) {
       scene.add(hitProxy);
       hitTargets.push(hitProxy);
       planetMeshes.push({ planet, mesh, hitProxy });
+      const label = document.createElement("span");
+      label.className = "solar-object-label";
+      objectOverlay.appendChild(label);
+      objectLabels.set(planet.key, label);
 
       const trailMax = planet.key === "Moon" ? 70 : 110;
       const trailNodes = [];
-      for (let i = 0; i < 24; i += 1) {
+      for (let i = 0; i < 34; i += 1) {
         const dot = new THREE.Mesh(
-          new THREE.SphereGeometry(Math.max(planet.size * 0.42, 0.015), 10, 10),
+          new THREE.SphereGeometry(Math.max(planet.size * 0.52, 0.02), 10, 10),
           new THREE.MeshBasicMaterial({
             color: planet.key === "Earth" ? ink : muted,
             transparent: true,
@@ -2510,7 +2547,7 @@ async function initSolarSystemWidget(dashboard, period) {
         max: trailMax,
         lastSampleTs: 0,
         nodes: trailNodes,
-        baseSize: Math.max(planet.size * 0.62, 0.03)
+        baseSize: Math.max(planet.size * 0.8, 0.05)
       });
 
       if (planet.key !== "Moon") {
@@ -2699,7 +2736,7 @@ async function initSolarSystemWidget(dashboard, period) {
           const trailFade = Math.pow(1 - t, 1.65);
           const scale = trail.baseSize * (0.45 + trailFade * 0.95);
           node.scale.setScalar(scale);
-          node.material.opacity = (planet.key === "Moon" ? 0.18 : 0.34) * trailFade;
+          node.material.opacity = (planet.key === "Moon" ? 0.34 : 0.58) * trailFade;
         }
       }
 
@@ -2733,11 +2770,17 @@ async function initSolarSystemWidget(dashboard, period) {
     const boostT = Math.max(0, (now - focusBoostStartedAt) / 1000);
     const boost = Math.exp(-boostT * 3.2) * Math.sin(boostT * 13) * 0.18;
     const desiredCamera = focusTarget.clone().add(
-      baseOffset.clone().normalize().multiplyScalar(focusDistance * (1 + boost)).add(new THREE.Vector3(0, focusDistance * (0.48 + boost * 0.5), 0))
+      baseOffset.clone().normalize().multiplyScalar(focusDistance * (1 + boost)).add(
+        new THREE.Vector3(0, focusDistance * (isMobileScene ? 0.62 : (0.48 + boost * 0.5)), 0)
+      )
     );
     cameraTarget.lerp(desiredCamera, preferReducedMotion ? 0.08 : 0.14);
     camera.position.lerp(cameraTarget, preferReducedMotion ? 0.1 : 0.18);
-    camera.lookAt(focusTarget);
+    const framedLookTarget = focusTarget.clone();
+    if (isMobileScene && selectedKey !== "__all__") {
+      framedLookTarget.y -= focusDistance * 0.26;
+    }
+    camera.lookAt(framedLookTarget);
 
     orbitLines.forEach((line, idx) => {
       const pulse = 0.94 + Math.sin(elapsedSec * 0.23 + idx * 0.5) * 0.06;
@@ -2758,6 +2801,29 @@ async function initSolarSystemWidget(dashboard, period) {
       const y = ((-projected.y + 1) / 2) * wrap.clientHeight;
       label.style.opacity = visible ? "0.88" : "0";
       label.style.transform = `translate(${Math.round(x)}px, ${Math.round(y)}px)`;
+    });
+
+    const placeObjectLabel = (key, vec3, angleDeg) => {
+      const label = objectLabels.get(key);
+      if (!label || !vec3) {
+        return;
+      }
+      const projected = vec3.clone().project(camera);
+      const visible = projected.z < 1;
+      const x = ((projected.x + 1) / 2) * wrap.clientWidth + 10;
+      const y = ((-projected.y + 1) / 2) * wrap.clientHeight - 8;
+      const sign = zodiacFromAngle(angleDeg);
+      const glyph = zodiacGlyphs[sign] || "◌";
+      label.textContent = `${key} · ${glyph} ${sign}`;
+      label.style.opacity = visible ? "0.9" : "0";
+      label.style.transform = `translate(${Math.round(x)}px, ${Math.round(y)}px)`;
+      label.classList.toggle("is-active", key === selectedKey);
+    };
+    const sunAngle = normalizeAngle((simDays / 365.25) * 360 + 280);
+    placeObjectLabel("Sun", sunMesh.position, sunAngle);
+    planetMeshes.forEach(({ planet, mesh }) => {
+      const a = normalizeAngle((Math.atan2(mesh.position.z, mesh.position.x) * 180) / Math.PI);
+      placeObjectLabel(planet.key, mesh.position, a);
     });
 
     const focusMesh = planetMeshes.find((item) => item.planet.key === selectedKey)?.mesh || sunMesh;

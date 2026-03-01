@@ -2321,6 +2321,9 @@ body[data-theme="light"] .celeb-avatar {
 .solar-canvas-wrap {
   border: 1px solid var(--line);
   background:
+    radial-gradient(circle at 18% 14%, color-mix(in srgb, var(--ink) 13%, transparent 87%) 0 18%, transparent 48%),
+    radial-gradient(circle at 76% 28%, color-mix(in srgb, var(--ink) 9%, transparent 91%) 0 14%, transparent 42%),
+    radial-gradient(circle at 42% 82%, color-mix(in srgb, var(--ink) 7%, transparent 93%) 0 12%, transparent 40%),
     radial-gradient(120% 120% at 15% 10%, color-mix(in srgb, var(--ink) 11%, transparent 89%) 0%, transparent 54%),
     var(--surface-2);
   min-height: 460px;
@@ -2328,10 +2331,43 @@ body[data-theme="light"] .celeb-avatar {
   overflow: hidden;
 }
 
+.solar-canvas-wrap::before,
+.solar-canvas-wrap::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.solar-canvas-wrap::before {
+  background:
+    radial-gradient(1px 1px at 9% 21%, rgba(255, 255, 255, 0.42), transparent 60%),
+    radial-gradient(1.1px 1.1px at 21% 38%, rgba(255, 255, 255, 0.35), transparent 62%),
+    radial-gradient(1px 1px at 34% 74%, rgba(255, 255, 255, 0.32), transparent 62%),
+    radial-gradient(1.2px 1.2px at 56% 19%, rgba(255, 255, 255, 0.33), transparent 62%),
+    radial-gradient(1px 1px at 67% 57%, rgba(255, 255, 255, 0.28), transparent 60%),
+    radial-gradient(1.1px 1.1px at 79% 81%, rgba(255, 255, 255, 0.34), transparent 62%),
+    radial-gradient(1px 1px at 89% 33%, rgba(255, 255, 255, 0.3), transparent 60%);
+  opacity: 0.35;
+  animation: solar-star-twinkle 4.6s ease-in-out infinite alternate;
+  z-index: 0;
+}
+
+.solar-canvas-wrap::after {
+  background:
+    repeating-linear-gradient(110deg, transparent 0 32px, color-mix(in srgb, var(--ink) 6%, transparent 94%) 32px 33px),
+    repeating-linear-gradient(20deg, transparent 0 40px, color-mix(in srgb, var(--ink) 5%, transparent 95%) 40px 41px);
+  opacity: 0.11;
+  animation: solar-star-drift 18s linear infinite;
+  z-index: 0;
+}
+
 .solar-canvas {
   width: 100%;
   height: 100%;
   display: block;
+  position: relative;
+  z-index: 1;
 }
 
 .solar-tooltip {
@@ -2354,7 +2390,7 @@ body[data-theme="light"] .celeb-avatar {
   position: absolute;
   right: 0.6rem;
   top: 0.6rem;
-  z-index: 3;
+  z-index: 4;
   border: 1px solid var(--line-strong);
   background: color-mix(in srgb, var(--surface) 88%, transparent 12%);
   color: var(--ink);
@@ -2365,6 +2401,13 @@ body[data-theme="light"] .celeb-avatar {
 }
 
 .solar-house-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.solar-object-overlay {
   position: absolute;
   inset: 0;
   pointer-events: none;
@@ -2388,11 +2431,33 @@ body[data-theme="light"] .celeb-avatar {
   transition: opacity 0.12s ease;
 }
 
+.solar-object-label {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: translate(-1000px, -1000px);
+  opacity: 0;
+  border: 1px solid color-mix(in srgb, var(--line) 70%, transparent 30%);
+  background: color-mix(in srgb, var(--surface-2) 82%, transparent 18%);
+  color: var(--ink);
+  font-size: 0.53rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.1rem 0.2rem;
+  white-space: nowrap;
+  transition: opacity 0.12s ease;
+}
+
+.solar-object-label.is-active {
+  border-color: var(--line-strong);
+  background: color-mix(in srgb, var(--ink) 14%, transparent 86%);
+}
+
 .solar-scene-meta {
   position: absolute;
   left: 0.6rem;
   bottom: 0.56rem;
-  z-index: 3;
+  z-index: 4;
   display: flex;
   gap: 0.38rem;
   flex-wrap: wrap;
@@ -2411,6 +2476,16 @@ body[data-theme="light"] .celeb-avatar {
   white-space: nowrap;
 }
 
+@keyframes solar-star-twinkle {
+  0% { opacity: 0.22; }
+  100% { opacity: 0.45; }
+}
+
+@keyframes solar-star-drift {
+  0% { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-12px, 8px, 0); }
+}
+
 .solar-aspect-panel {
   border: 1px solid var(--line);
   background: var(--surface-2);
@@ -2425,7 +2500,7 @@ body[data-theme="light"] .celeb-avatar {
   right: 0.72rem;
   top: 2.4rem;
   width: min(340px, calc(100% - 1.44rem));
-  z-index: 3;
+  z-index: 4;
   background: color-mix(in srgb, var(--surface) 84%, transparent 16%);
   backdrop-filter: blur(8px);
 }
@@ -3028,6 +3103,11 @@ body[data-theme="light"] .energy-star.neutral {
   .solar-house-label {
     font-size: 0.5rem;
     padding: 0.1rem 0.16rem;
+  }
+
+  .solar-object-label {
+    font-size: 0.48rem;
+    padding: 0.08rem 0.14rem;
   }
 
   .solar-scene-meta {
