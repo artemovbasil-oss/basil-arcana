@@ -2489,6 +2489,74 @@ async function initSolarSystemWidget(dashboard, period) {
   moonOrbitLine.computeLineDistances();
   scene.add(moonOrbitLine);
 
+  const driftObjects = [];
+  const driftCount = 44;
+  for (let i = 0; i < driftCount; i += 1) {
+    const radius = 3.25 + (i % 17) * 0.19 + ((i * 13) % 10) * 0.035;
+    const size = 0.008 + (i % 5) * 0.003;
+    const speed = 0.035 + (i % 11) * 0.0042;
+    const phase = (i * 0.81) % (Math.PI * 2);
+    const wobble = 0.02 + (i % 7) * 0.01;
+    const mesh = new THREE.Mesh(
+      new THREE.SphereGeometry(size, 8, 8),
+      new THREE.MeshBasicMaterial({
+        color: i % 3 === 0 ? ink : muted,
+        transparent: true,
+        opacity: isDark ? 0.24 : 0.2,
+        depthWrite: false
+      })
+    );
+    scene.add(mesh);
+    driftObjects.push({ mesh, radius, speed, phase, wobble });
+  }
+
+  const earthSatellites = [];
+  const satelliteRings = [];
+  const shellRadii = [0.28, 0.36, 0.45];
+  shellRadii.forEach((r, ringIdx) => {
+    const ringPoints = [];
+    for (let i = 0; i <= 96; i += 1) {
+      const a = (i / 96) * Math.PI * 2;
+      const y = Math.sin(a * 0.65 + ringIdx) * 0.012;
+      ringPoints.push(new THREE.Vector3(Math.cos(a) * r, y, Math.sin(a) * r));
+    }
+    const ring = new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints(ringPoints),
+      new THREE.LineDashedMaterial({
+        color: isDark ? 0xcfd4de : 0x3f4652,
+        dashSize: 0.05,
+        gapSize: 0.04,
+        transparent: true,
+        opacity: 0,
+        depthWrite: false
+      })
+    );
+    ring.computeLineDistances();
+    scene.add(ring);
+    satelliteRings.push({ ring, radius: r, idx: ringIdx });
+  });
+
+  const satelliteCount = 54;
+  for (let i = 0; i < satelliteCount; i += 1) {
+    const shell = shellRadii[i % shellRadii.length];
+    const speed = 0.9 + (i % 9) * 0.11;
+    const phase = ((i * 17) % 360) * (Math.PI / 180);
+    const incline = ((i * 23) % 40 - 20) * (Math.PI / 180);
+    const sat = new THREE.Mesh(
+      new THREE.SphereGeometry(0.006 + (i % 3) * 0.0015, 8, 8),
+      new THREE.MeshBasicMaterial({
+        color: isDark ? 0xf2f5fa : 0x1f2630,
+        transparent: true,
+        opacity: 0,
+        depthWrite: false
+      })
+    );
+    sat.renderOrder = 3;
+    scene.add(sat);
+    earthSatellites.push({ mesh: sat, shell, speed, phase, incline });
+  }
+  let earthFocusMix = 0;
+
   const hitTargets = [sunMesh];
   const planetMeshes = [];
   const objectLabels = new Map();
@@ -2757,6 +2825,48 @@ async function initSolarSystemWidget(dashboard, period) {
     if (positions.Earth) {
       moonOrbitLine.position.set(positions.Earth.x, 0, positions.Earth.z);
     }
+
+    driftObjects.forEach((obj, idx) => {
+      const a = elapsedSec * obj.speed + obj.phase;
+      const y = Math.sin(a * 1.9 + idx * 0.17) * obj.wobble;
+      obj.mesh.position.set(
+        Math.cos(a) * obj.radius,
+        y,
+        Math.sin(a) * obj.radius
+      );
+    });
+
+    const earthVisible = Boolean(positions.Earth);
+    const targetEarthFocusMix = selectedKey === "Earth" ? 1 : 0;
+    earthFocusMix += (targetEarthFocusMix - earthFocusMix) * (preferReducedMotion ? 0.08 : 0.12);
+    if (earthVisible) {
+      const earthPos = positions.Earth;
+      satelliteRings.forEach(({ ring, idx }) => {
+        ring.position.set(earthPos.x, 0, earthPos.z);
+        ring.rotation.y = elapsedSec * (0.15 + idx * 0.08);
+        ring.rotation.x = Math.PI * 0.16 + idx * 0.06;
+        ring.material.opacity = 0.08 + earthFocusMix * 0.58;
+      });
+      earthSatellites.forEach((sat, idx) => {
+        const t = elapsedSec * sat.speed + sat.phase;
+        const x = Math.cos(t) * sat.shell;
+        const z = Math.sin(t) * sat.shell;
+        const y = Math.sin(t * 1.7 + idx * 0.23) * sat.shell * 0.14;
+        const cosI = Math.cos(sat.incline);
+        const sinI = Math.sin(sat.incline);
+        const rx = x * cosI - y * sinI;
+        const ry = x * sinI + y * cosI;
+        sat.mesh.position.set(earthPos.x + rx, ry, earthPos.z + z);
+        sat.mesh.material.opacity = (0.08 + earthFocusMix * 0.86) * (0.78 + Math.sin(t * 2.3 + idx) * 0.14);
+      });
+    } else {
+      satelliteRings.forEach(({ ring }) => {
+        ring.material.opacity = 0;
+      });
+      earthSatellites.forEach((sat) => {
+        sat.mesh.material.opacity = 0;
+      });
+    }
     sunGlowInner.scale.setScalar(1 + Math.sin(elapsedSec * 1.5) * 0.035);
     sunGlowOuter.scale.setScalar(1 + Math.sin(elapsedSec * 0.9 + 1.1) * 0.07);
 
@@ -2767,6 +2877,8 @@ async function initSolarSystemWidget(dashboard, period) {
       ? 12.8
       : focusPlanet?.key === "Sun"
         ? 8.8
+        : focusPlanet?.key === "Earth"
+          ? (isMobileScene ? 2.2 : 1.62)
         : Math.max(3.6, 2.3 + (focusPlanet?.size || 0.12) * 18);
     const boostT = Math.max(0, (now - focusBoostStartedAt) / 1000);
     const boost = Math.exp(-boostT * 3.2) * Math.sin(boostT * 13) * 0.18;
