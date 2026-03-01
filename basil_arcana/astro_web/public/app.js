@@ -2602,26 +2602,29 @@ async function initSolarSystemWidget(dashboard, period) {
       objectLabels.set(planet.key, label);
 
       const trailMax = planet.key === "Moon" ? 78 : 122;
-      const trailResolution = planet.key === "Moon" ? 54 : 68;
-      const trailSeed = Array.from({ length: trailResolution }, () => new THREE.Vector3(0, 0, 0));
-      const trailLine = new THREE.Line(
-        new THREE.BufferGeometry().setFromPoints(trailSeed),
-        new THREE.LineDashedMaterial({
-          color: planet.key === "Earth" ? ink : muted,
-          dashSize: planet.key === "Moon" ? 0.085 : 0.14,
-          gapSize: planet.key === "Moon" ? 0.065 : 0.11,
-          transparent: true,
-          opacity: 0,
-          depthWrite: false
-        })
-      );
-      scene.add(trailLine);
+      const trailResolution = planet.key === "Moon" ? 64 : 78;
+      const trailNodeCount = planet.key === "Moon" ? 18 : 24;
+      const trailNodes = [];
+      for (let i = 0; i < trailNodeCount; i += 1) {
+        const dot = new THREE.Mesh(
+          new THREE.SphereGeometry(Math.max(planet.size * 0.3, 0.014), 10, 10),
+          new THREE.MeshBasicMaterial({
+            color: planet.key === "Earth" ? ink : muted,
+            transparent: true,
+            opacity: 0,
+            depthWrite: false
+          })
+        );
+        scene.add(dot);
+        trailNodes.push(dot);
+      }
       trailMap.set(planet.key, {
         points: [],
         max: trailMax,
         lastSampleTs: 0,
-        line: trailLine,
-        resolution: trailResolution
+        nodes: trailNodes,
+        resolution: trailResolution,
+        baseSize: Math.max(planet.size * 1.02, 0.03)
       });
 
       if (planet.key !== "Moon") {
@@ -2796,17 +2799,30 @@ async function initSolarSystemWidget(dashboard, period) {
         }
       }
       if (trail) {
-        const line = trail.line;
-        if (trail.points.length > 3 && line) {
+        const nodes = trail.nodes;
+        if (trail.points.length > 3 && Array.isArray(nodes) && nodes.length) {
           const curve = new THREE.CatmullRomCurve3(trail.points, false, "centripetal", 0.22);
           const smoothed = curve.getPoints(Math.max(6, trail.resolution - 1));
-          line.geometry.setFromPoints(smoothed);
-          line.computeLineDistances();
-          line.material.opacity = planet.key === selectedKey
-            ? (planet.key === "Moon" ? 0.9 : 0.82)
-            : (planet.key === "Moon" ? 0.5 : 0.44);
-        } else if (line) {
-          line.material.opacity = 0;
+          const focusAlpha = planet.key === selectedKey
+            ? (planet.key === "Moon" ? 0.95 : 0.88)
+            : (planet.key === "Moon" ? 0.56 : 0.48);
+          const last = smoothed.length - 1;
+          for (let i = 0; i < nodes.length; i += 1) {
+            const node = nodes[i];
+            const t = i / Math.max(1, nodes.length - 1);
+            const idx = Math.max(0, last - Math.round(t * last));
+            const pt = smoothed[idx];
+            node.position.copy(pt);
+            const sizeFade = Math.pow(1 - t, 0.72);
+            const alphaFade = Math.pow(1 - t, 1.28);
+            const scale = trail.baseSize * (0.34 + sizeFade * 1.2);
+            node.scale.setScalar(scale);
+            node.material.opacity = focusAlpha * alphaFade;
+          }
+        } else if (Array.isArray(nodes)) {
+          nodes.forEach((node) => {
+            node.material.opacity = 0;
+          });
         }
       }
 
