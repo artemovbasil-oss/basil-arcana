@@ -548,8 +548,8 @@ function zodiacDetails(sign) {
     };
   }
   const signAsset = String(normalized || "").toLowerCase();
-  const imageUrlDark = `${zodiacAssetBaseUrl}/${signAsset}-white.png`;
-  const imageUrlLight = `${zodiacAssetBaseUrl}/${signAsset}-black.png`;
+  const imageUrlDark = `${zodiacAssetBaseUrl}/${signAsset}-black.png`;
+  const imageUrlLight = `${zodiacAssetBaseUrl}/${signAsset}-white.png`;
   const model = {
     sign: normalized,
     imageUrl: state.theme === "light" ? imageUrlLight : imageUrlDark,
