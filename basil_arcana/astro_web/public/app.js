@@ -526,7 +526,7 @@ function zodiacDetails(sign) {
       compact: "No sign summary available yet."
     };
   }
-  return {
+  const model = {
     sign: normalized,
     imageUrl: `${zodiacAssetBaseUrl}/${meta.file}`,
     brief: meta.brief,
@@ -535,6 +535,7 @@ function zodiacDetails(sign) {
     element: zodiacElements[normalized] || "Unknown",
     modality: zodiacModalities[normalized] || "Unknown"
   };
+  return model;
 }
 
 function zodiacLongRead(sign) {
@@ -2033,15 +2034,26 @@ function buildSolarAspectModel(dashboard, period) {
       detail: `Intuition is useful today, but only after translation into concrete operational language.`
     }
   };
+  const scores = Object.values(model).map((item) => Number(item.score) || 0);
+  const avg = clampScore(scores.reduce((sum, v) => sum + v, 0) / Math.max(1, scores.length));
+  model.__all__ = {
+    title: "System Overview",
+    desc: "Macro coherence across the full solar map.",
+    score: avg,
+    pulse: `${rising} global orchestration`,
+    detail: `Use this mode to read the system as one field. Prioritize sequences that align execution, recovery, and communication in one cadence.`
+  };
+  return model;
 }
 
 function renderSolarAspectPanel(aspect, planetLabel, { focused = false } = {}) {
   if (!aspect) {
     return `<div class="solar-aspect-empty">Hover a planet to inspect your life axis for today.</div>`;
   }
+  const label = planetLabel === "__all__" ? "The whole system" : planetLabel;
   return `
     <span class="eyebrow">Live aspect</span>
-    <h3>${planetLabel} · ${aspect.title}</h3>
+    <h3>${label} · ${aspect.title}</h3>
     <span class="solar-focus-mode">${focused ? "Focus locked" : "Preview"}</span>
     <div class="solar-aspect-score-row">
       <strong>${aspect.score}/100</strong>
@@ -2053,17 +2065,17 @@ function renderSolarAspectPanel(aspect, planetLabel, { focused = false } = {}) {
 }
 
 function renderSolarMobileMatrix(aspects, selectedKey = "Earth") {
-  const keys = ["Sun", "Mercury", "Venus", "Earth", "Moon", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune"];
+  const keys = ["__all__", "Sun", "Mercury", "Venus", "Earth", "Moon", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune"];
   return `
     <div class="solar-mobile-matrix">
       ${keys
         .map((key) => {
-          const a = aspects[key];
+          const a = key === "__all__" ? aspects.__all__ : aspects[key];
           if (!a) {
             return "";
           }
           return `<button class="solar-mobile-pill ${key === selectedKey ? "is-active" : ""}" type="button" data-solar-planet="${key}">
-            <span>${key}</span>
+            <span>${key === "__all__" ? "The whole system" : key}</span>
             <strong>${a.score}</strong>
           </button>`;
         })
@@ -2107,11 +2119,11 @@ function renderSolarSystemBlock(dashboard, period) {
             <div id="solarSystemTooltip" class="solar-tooltip" aria-hidden="true"></div>
             <div id="solarFocusBadge" class="solar-focus-badge">Focus: Earth</div>
             <div id="solarHouseOverlay" class="solar-house-overlay"></div>
+            <aside class="solar-aspect-panel solar-scene-panel" id="solarAspectPanel">
+              ${renderSolarAspectPanel(aspects[selected], selected, { focused: true })}
+            </aside>
             ${renderSolarSceneInfo(dashboard, period)}
           </div>
-          <aside class="solar-aspect-panel" id="solarAspectPanel">
-            ${renderSolarAspectPanel(aspects[selected], selected, { focused: true })}
-          </aside>
         </div>
         <div id="solarMobileMatrixWrap">
           ${renderSolarMobileMatrix(aspects, selected)}
@@ -2143,6 +2155,7 @@ function destroySolarSystemWidget() {
     runtime.canvas.onpointermove = null;
     runtime.canvas.onpointerleave = null;
     runtime.canvas.onclick = null;
+    runtime.canvas.onpointerdown = null;
   }
   if (runtime.focusGrid) {
     runtime.focusGrid.geometry?.dispose?.();
@@ -2167,8 +2180,9 @@ function bindSolarMobileInteractions(aspects, onSelect = null) {
     button.addEventListener("click", () => {
       const key = button.getAttribute("data-solar-planet") || "Earth";
       panel.innerHTML = renderSolarAspectPanel(aspects[key], key, { focused: true });
+      animateSolarPanelText(panel);
       if (focusBadge) {
-        focusBadge.textContent = `Focus: ${key}`;
+        focusBadge.textContent = key === "__all__" ? "Focus: The whole system" : `Focus: ${key}`;
       }
       matrixWrap.querySelectorAll(".solar-mobile-pill").forEach((pill) => pill.classList.remove("is-active"));
       button.classList.add("is-active");
@@ -2176,6 +2190,31 @@ function bindSolarMobileInteractions(aspects, onSelect = null) {
         onSelect(key);
       }
     });
+  });
+}
+
+function animateSolarPanelText(panel) {
+  if (!(panel instanceof HTMLElement)) {
+    return;
+  }
+  const targets = panel.querySelectorAll("h3, .solar-focus-mode, .solar-aspect-score-row span, .solar-aspect-desc, p:last-of-type");
+  targets.forEach((node) => {
+    const full = String(node.textContent || "");
+    if (!full.trim()) {
+      return;
+    }
+    node.textContent = "";
+    const duration = Math.max(180, Math.min(520, full.length * 14));
+    const start = performance.now();
+    const tick = (now) => {
+      const t = Math.min(1, (now - start) / duration);
+      const length = Math.max(1, Math.round(full.length * (t * t)));
+      node.textContent = full.slice(0, length);
+      if (t < 1) {
+        window.requestAnimationFrame(tick);
+      }
+    };
+    window.requestAnimationFrame(tick);
   });
 }
 
@@ -2244,6 +2283,26 @@ function createPlanetTexture(THREE, key, theme = "dark") {
   return texture;
 }
 
+function createGlowTexture(THREE, color = "#ffffff") {
+  const c = document.createElement("canvas");
+  c.width = 256;
+  c.height = 256;
+  const ctx = c.getContext("2d");
+  if (!ctx) {
+    return null;
+  }
+  const g = ctx.createRadialGradient(128, 128, 10, 128, 128, 128);
+  g.addColorStop(0, color);
+  g.addColorStop(0.25, "rgba(255,255,255,0.75)");
+  g.addColorStop(0.55, "rgba(255,255,255,0.25)");
+  g.addColorStop(1, "rgba(255,255,255,0)");
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 256, 256);
+  const tx = new THREE.CanvasTexture(c);
+  tx.needsUpdate = true;
+  return tx;
+}
+
 async function initSolarSystemWidget(dashboard, period) {
   const canvas = document.getElementById("solarSystemCanvas");
   const wrap = document.getElementById("solarCanvasWrap");
@@ -2257,21 +2316,18 @@ async function initSolarSystemWidget(dashboard, period) {
     return;
   }
   const aspects = buildSolarAspectModel(dashboard, period);
-  matrixWrap.innerHTML = renderSolarMobileMatrix(aspects, "Earth");
-  let selectedKey = "Earth";
+  matrixWrap.innerHTML = renderSolarMobileMatrix(aspects, "__all__");
+  let selectedKey = "__all__";
   let focusBoostStartedAt = performance.now();
   bindSolarMobileInteractions(aspects, (key) => {
     selectedKey = key;
     focusBoostStartedAt = performance.now();
   });
-  panel.innerHTML = renderSolarAspectPanel(aspects.Earth, "Earth", { focused: true });
+  panel.innerHTML = renderSolarAspectPanel(aspects.__all__, "__all__", { focused: true });
+  focusBadge.textContent = "Focus: The whole system";
 
   const preferReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
-  const smallViewport = window.matchMedia?.("(max-width: 900px)")?.matches;
-  if (smallViewport) {
-    destroySolarSystemWidget();
-    return;
-  }
+  const canHover = window.matchMedia?.("(hover: hover)")?.matches;
 
   destroySolarSystemWidget();
 
@@ -2309,27 +2365,30 @@ async function initSolarSystemWidget(dashboard, period) {
   );
   sunMesh.userData = { key: "Sun", label: "Sun" };
   scene.add(sunMesh);
-  const sunGlowInner = new THREE.Mesh(
-    new THREE.SphereGeometry(sun.size * 1.85, 28, 28),
-    new THREE.MeshBasicMaterial({
-      color: isDark ? 0xffffff : 0x101114,
+  const glowTexture = createGlowTexture(THREE, "#ffffff");
+  const sunGlowInner = new THREE.Sprite(
+    new THREE.SpriteMaterial({
+      map: glowTexture,
+      color: isDark ? 0xffffff : 0x1a1d22,
+      transparent: true,
+      opacity: isDark ? 0.34 : 0.2,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    })
+  );
+  sunGlowInner.scale.setScalar(sun.size * 9.2);
+  scene.add(sunGlowInner);
+  const sunGlowOuter = new THREE.Sprite(
+    new THREE.SpriteMaterial({
+      map: glowTexture,
+      color: isDark ? 0xffffff : 0x1c2027,
       transparent: true,
       opacity: isDark ? 0.2 : 0.12,
       blending: THREE.AdditiveBlending,
       depthWrite: false
     })
   );
-  scene.add(sunGlowInner);
-  const sunGlowOuter = new THREE.Mesh(
-    new THREE.SphereGeometry(sun.size * 2.65, 28, 28),
-    new THREE.MeshBasicMaterial({
-      color: isDark ? 0xffffff : 0x16181d,
-      transparent: true,
-      opacity: isDark ? 0.11 : 0.06,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false
-    })
-  );
+  sunGlowOuter.scale.setScalar(sun.size * 14.8);
   scene.add(sunGlowOuter);
 
   const orbitLines = [];
@@ -2481,7 +2540,8 @@ async function initSolarSystemWidget(dashboard, period) {
       return;
     }
     panel.innerHTML = renderSolarAspectPanel(aspects[key], key, { focused });
-    focusBadge.textContent = `Focus: ${key}`;
+    animateSolarPanelText(panel);
+    focusBadge.textContent = key === "__all__" ? "Focus: The whole system" : `Focus: ${key}`;
     matrixWrap.querySelectorAll(".solar-mobile-pill").forEach((pill) => {
       pill.classList.toggle("is-active", pill.getAttribute("data-solar-planet") === key);
     });
@@ -2500,6 +2560,9 @@ async function initSolarSystemWidget(dashboard, period) {
   window.addEventListener("resize", resize);
 
   canvas.onpointermove = (event) => {
+    if (!canHover) {
+      return;
+    }
     const rect = canvas.getBoundingClientRect();
     pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
     pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
@@ -2528,6 +2591,9 @@ async function initSolarSystemWidget(dashboard, period) {
   };
 
   canvas.onpointerleave = () => {
+    if (!canHover) {
+      return;
+    }
     if (hoveredKey) {
       hoveredKey = null;
       setPanelPlanet(selectedKey, { focused: true });
@@ -2536,10 +2602,28 @@ async function initSolarSystemWidget(dashboard, period) {
   };
 
   canvas.onclick = () => {
+    if (!canHover) {
+      return;
+    }
     if (!hoveredKey) {
       return;
     }
     selectedKey = hoveredKey;
+    focusBoostStartedAt = performance.now();
+    setPanelPlanet(selectedKey, { focused: true });
+  };
+
+  canvas.onpointerdown = (event) => {
+    if (canHover) {
+      return;
+    }
+    const rect = canvas.getBoundingClientRect();
+    pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+    raycaster.setFromCamera(pointer, camera);
+    const hits = raycaster.intersectObjects(hitTargets, false);
+    const key = hits[0]?.object?.userData?.key || "__all__";
+    selectedKey = key;
     focusBoostStartedAt = performance.now();
     setPanelPlanet(selectedKey, { focused: true });
   };
@@ -2574,6 +2658,25 @@ async function initSolarSystemWidget(dashboard, period) {
       mesh.rotation.z += 0.0015;
 
       const trail = trailMap.get(planet.key);
+      if (trail && trail.points.length === 0) {
+        const baseAngle = Math.atan2(mesh.position.z, mesh.position.x);
+        for (let i = 0; i < Math.min(28, trail.max); i += 1) {
+          const back = i * 0.035;
+          if (planet.key === "Moon" && positions.Earth) {
+            const a = (p.angle || baseAngle) - back;
+            trail.points.unshift(
+              new THREE.Vector3(
+                positions.Earth.x + Math.cos(a) * planet.radius,
+                0,
+                positions.Earth.z + Math.sin(a) * planet.radius
+              )
+            );
+          } else {
+            const a = baseAngle - back;
+            trail.points.unshift(new THREE.Vector3(Math.cos(a) * planet.radius, 0, Math.sin(a) * planet.radius));
+          }
+        }
+      }
       if (trail && now - trail.lastSampleTs > (planet.key === "Moon" ? 45 : 90)) {
         trail.lastSampleTs = now;
         trail.points.push(mesh.position.clone());
@@ -2619,12 +2722,14 @@ async function initSolarSystemWidget(dashboard, period) {
     sunGlowInner.scale.setScalar(1 + Math.sin(elapsedSec * 1.5) * 0.035);
     sunGlowOuter.scale.setScalar(1 + Math.sin(elapsedSec * 0.9 + 1.1) * 0.07);
 
-    const focusSource = positions[selectedKey] || { x: 0, z: 0 };
+    const focusSource = selectedKey === "__all__" ? { x: 0, z: 0 } : (positions[selectedKey] || { x: 0, z: 0 });
     focusTarget.set(focusSource.x, 0, focusSource.z);
     const focusPlanet = solarPlanetModel.find((p) => p.key === selectedKey);
-    const focusDistance = focusPlanet?.key === "Sun"
-      ? 8.8
-      : Math.max(3.6, 2.3 + (focusPlanet?.size || 0.12) * 18);
+    const focusDistance = selectedKey === "__all__"
+      ? 12.8
+      : focusPlanet?.key === "Sun"
+        ? 8.8
+        : Math.max(3.6, 2.3 + (focusPlanet?.size || 0.12) * 18);
     const boostT = Math.max(0, (now - focusBoostStartedAt) / 1000);
     const boost = Math.exp(-boostT * 3.2) * Math.sin(boostT * 13) * 0.18;
     const desiredCamera = focusTarget.clone().add(
@@ -2656,12 +2761,14 @@ async function initSolarSystemWidget(dashboard, period) {
     });
 
     const focusMesh = planetMeshes.find((item) => item.planet.key === selectedKey)?.mesh || sunMesh;
-    if (runtime.focusGrid) {
+    if (runtime.focusGrid && selectedKey !== "__all__") {
       runtime.focusGrid.position.copy(focusMesh.position);
       const size = (focusPlanet?.size || sun.size) * 1.32;
       runtime.focusGrid.scale.setScalar(size);
       runtime.focusGrid.rotation.y += 0.006;
       runtime.focusGrid.material.opacity = 0.42 + Math.sin(elapsedSec * 2.2) * 0.12;
+    } else if (runtime.focusGrid) {
+      runtime.focusGrid.material.opacity = 0;
     }
     renderer.render(scene, camera);
     runtime.frameId = window.requestAnimationFrame(tick);

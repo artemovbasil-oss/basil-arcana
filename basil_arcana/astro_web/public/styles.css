@@ -2315,10 +2315,7 @@ body[data-theme="light"] .celeb-avatar {
 }
 
 .solar-system-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
-  gap: 0.72rem;
-  align-items: stretch;
+  display: block;
 }
 
 .solar-canvas-wrap {
@@ -2326,7 +2323,7 @@ body[data-theme="light"] .celeb-avatar {
   background:
     radial-gradient(120% 120% at 15% 10%, color-mix(in srgb, var(--ink) 11%, transparent 89%) 0%, transparent 54%),
     var(--surface-2);
-  min-height: 360px;
+  min-height: 460px;
   position: relative;
   overflow: hidden;
 }
@@ -2423,6 +2420,16 @@ body[data-theme="light"] .celeb-avatar {
   gap: 0.48rem;
 }
 
+.solar-scene-panel {
+  position: absolute;
+  right: 0.72rem;
+  top: 2.4rem;
+  width: min(340px, calc(100% - 1.44rem));
+  z-index: 3;
+  background: color-mix(in srgb, var(--surface) 84%, transparent 16%);
+  backdrop-filter: blur(8px);
+}
+
 .solar-aspect-panel h3 {
   margin: 0;
 }
@@ -2474,6 +2481,7 @@ body[data-theme="light"] .celeb-avatar {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-size: 0.64rem;
+  max-width: 100%;
 }
 
 .solar-mobile-pill strong {
@@ -3003,7 +3011,33 @@ body[data-theme="light"] .energy-star.neutral {
   }
 
   .solar-canvas-wrap {
-    display: none;
+    display: block;
+    min-height: 68vh;
+  }
+
+  .solar-scene-panel {
+    top: auto;
+    bottom: 3.4rem;
+    right: 0.48rem;
+    left: 0.48rem;
+    width: auto;
+    max-height: 44vh;
+    overflow: auto;
+  }
+
+  .solar-house-label {
+    font-size: 0.5rem;
+    padding: 0.1rem 0.16rem;
+  }
+
+  .solar-scene-meta {
+    left: 0.48rem;
+    right: 0.48rem;
+    max-width: none;
+  }
+
+  .solar-scene-meta span {
+    font-size: 0.5rem;
   }
 
   .daily-astro-compact-grid {
