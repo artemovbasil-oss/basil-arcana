@@ -147,6 +147,7 @@ function applyTheme(nextTheme) {
     themeToggle.setAttribute("aria-label", `Switch to ${target} theme`);
     themeToggle.setAttribute("title", `Switch to ${target} theme`);
   }
+  syncZodiacThemeImages(theme);
 }
 
 const zodiacOrder = [
@@ -539,14 +540,21 @@ function zodiacDetails(sign) {
     return {
       sign: normalized,
       imageUrl: "",
+      imageUrlLight: "",
+      imageUrlDark: "",
       brief: "Core sign context is currently unavailable.",
       natal: "Sign-specific interpretation is currently unavailable.",
       compact: "No sign summary available yet."
     };
   }
+  const signAsset = String(normalized || "").toLowerCase();
+  const imageUrlDark = `${zodiacAssetBaseUrl}/${signAsset}-white.png`;
+  const imageUrlLight = `${zodiacAssetBaseUrl}/${signAsset}-black.png`;
   const model = {
     sign: normalized,
-    imageUrl: `${zodiacAssetBaseUrl}/${meta.file}`,
+    imageUrl: state.theme === "light" ? imageUrlLight : imageUrlDark,
+    imageUrlLight,
+    imageUrlDark,
     brief: meta.brief,
     natal: meta.natal,
     compact: meta.compact,
@@ -554,6 +562,16 @@ function zodiacDetails(sign) {
     modality: zodiacModalities[normalized] || "Unknown"
   };
   return model;
+}
+
+function syncZodiacThemeImages(theme = state.theme) {
+  const isLight = theme === "light";
+  document.querySelectorAll("img[data-zodiac-light][data-zodiac-dark]").forEach((img) => {
+    const next = isLight ? img.getAttribute("data-zodiac-light") : img.getAttribute("data-zodiac-dark");
+    if (next && img.getAttribute("src") !== next) {
+      img.setAttribute("src", next);
+    }
+  });
 }
 
 function zodiacLongRead(sign) {
@@ -1663,7 +1681,7 @@ function renderNatalZodiacSection(sign) {
         <div class="zodiac-sign-image-wrap zodiac-sign-image-wrap-natal">
           ${
             details.imageUrl
-              ? `<img class="zodiac-sign-image zodiac-sign-image-natal" src="${details.imageUrl}" alt="${signLabel} zodiac illustration" loading="lazy" decoding="async" />`
+              ? `<img class="zodiac-sign-image zodiac-sign-image-natal" src="${details.imageUrl}" data-zodiac-light="${details.imageUrlLight}" data-zodiac-dark="${details.imageUrlDark}" alt="${signLabel} zodiac illustration" loading="lazy" decoding="async" />`
               : `<div class="zodiac-sign-fallback">${zodiacIcon(signLabel)} ${signLabel}</div>`
           }
         </div>
@@ -1691,7 +1709,7 @@ function renderHomeZodiacCompact(sign) {
           <div class="zodiac-sign-image-wrap compact">
             ${
               details.imageUrl
-                ? `<img class="zodiac-sign-image compact" src="${details.imageUrl}" alt="${signLabel} zodiac illustration" loading="lazy" decoding="async" />`
+                ? `<img class="zodiac-sign-image compact" src="${details.imageUrl}" data-zodiac-light="${details.imageUrlLight}" data-zodiac-dark="${details.imageUrlDark}" alt="${signLabel} zodiac illustration" loading="lazy" decoding="async" />`
                 : `<div class="zodiac-sign-fallback">${zodiacIcon(signLabel)} ${signLabel}</div>`
             }
           </div>
@@ -1774,7 +1792,7 @@ function renderFriendZodiacSnippet(sign) {
       <div class="friend-sign-image-wrap">
         ${
           details.imageUrl
-            ? `<img class="friend-sign-image" src="${details.imageUrl}" alt="${signLabel} zodiac illustration" loading="lazy" decoding="async" />`
+            ? `<img class="friend-sign-image" src="${details.imageUrl}" data-zodiac-light="${details.imageUrlLight}" data-zodiac-dark="${details.imageUrlDark}" alt="${signLabel} zodiac illustration" loading="lazy" decoding="async" />`
             : `<div class="zodiac-sign-fallback">${zodiacIcon(signLabel)} ${signLabel}</div>`
         }
       </div>

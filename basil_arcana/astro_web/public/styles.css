@@ -1393,15 +1393,16 @@ body[data-theme="light"] .auth-login-btn.telegram .auth-login-btn-icon .astro-ic
   background: transparent;
   min-height: 92px;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
 }
 
 .friend-sign-image {
   display: block;
-  width: 100%;
+  width: min(100%, 128px);
   height: auto;
   object-fit: contain;
+  object-position: center;
 }
 
 .friend-sign-copy h3 {
@@ -2043,7 +2044,7 @@ body[data-theme="light"] .auth-login-btn.telegram .auth-login-btn-icon .astro-ic
   background: transparent;
   min-height: 340px;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
 }
 
@@ -2055,15 +2056,16 @@ body[data-theme="light"] .auth-login-btn.telegram .auth-login-btn-icon .astro-ic
 
 .zodiac-sign-image {
   display: block;
-  width: 100%;
+  width: min(100%, 520px);
   height: auto;
   max-height: 460px;
   object-fit: contain;
+  object-position: center;
 }
 
 .zodiac-sign-image.compact {
   max-height: 390px;
-  width: 100%;
+  width: min(100%, 460px);
   height: auto;
   display: block;
 }
@@ -2155,11 +2157,16 @@ body[data-theme="light"] .auth-login-btn.telegram .auth-login-btn-icon .astro-ic
 .zodiac-sign-image-wrap-natal {
   width: 100%;
   min-height: 520px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .zodiac-sign-image-natal {
-  width: 100%;
+  width: min(100%, 920px);
   max-height: 640px;
+  object-fit: contain;
+  object-position: center;
 }
 
 .zodiac-natal-text {
