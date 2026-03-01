@@ -2128,9 +2128,10 @@ function destroySolarSystemWidget() {
   state.solarSystem = null;
 }
 
-function bindSolarMobileInteractions(aspects) {
+function bindSolarMobileInteractions(aspects, onSelect = null) {
   const panel = document.getElementById("solarAspectPanel");
   const matrixWrap = document.getElementById("solarMobileMatrixWrap");
+  const focusBadge = document.getElementById("solarFocusBadge");
   if (!panel || !matrixWrap) {
     return;
   }
@@ -2138,10 +2139,71 @@ function bindSolarMobileInteractions(aspects) {
     button.addEventListener("click", () => {
       const key = button.getAttribute("data-solar-planet") || "Earth";
       panel.innerHTML = renderSolarAspectPanel(aspects[key], key, { focused: true });
+      if (focusBadge) {
+        focusBadge.textContent = `Focus: ${key}`;
+      }
       matrixWrap.querySelectorAll(".solar-mobile-pill").forEach((pill) => pill.classList.remove("is-active"));
       button.classList.add("is-active");
+      if (typeof onSelect === "function") {
+        onSelect(key);
+      }
     });
   });
+}
+
+function planetTexturePalette(key) {
+  const map = {
+    Sun: ["#f2f2f2", "#d8d8d8", "#a3a3a3"],
+    Mercury: ["#8f949d", "#c3c8d1", "#686d77"],
+    Venus: ["#b9aaa0", "#e7ded4", "#8f7f73"],
+    Earth: ["#7a8ca3", "#d6dee8", "#475569"],
+    Moon: ["#b8b8bb", "#e5e5e8", "#808087"],
+    Mars: ["#9b7f74", "#d2beb6", "#6e564e"],
+    Jupiter: ["#b8a088", "#e1d2c2", "#88735f"],
+    Saturn: ["#b09c7a", "#e0d4bf", "#7f6c51"],
+    Uranus: ["#7ea3a6", "#cde1e2", "#4c7074"],
+    Neptune: ["#6f87a8", "#c7d6e9", "#3f5678"]
+  };
+  return map[key] || ["#8f8f8f", "#d5d5d5", "#656565"];
+}
+
+function createPlanetTexture(THREE, key, theme = "dark") {
+  const canvas = document.createElement("canvas");
+  canvas.width = 256;
+  canvas.height = 256;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) {
+    return null;
+  }
+  const [c1, c2, c3] = planetTexturePalette(key);
+  const g = ctx.createLinearGradient(0, 0, 0, canvas.height);
+  g.addColorStop(0, c1);
+  g.addColorStop(0.55, c2);
+  g.addColorStop(1, c3);
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  const seed = Math.abs(stringHash(`${key}:${theme}`));
+  const bandCount = 8 + (seed % 7);
+  for (let i = 0; i < bandCount; i += 1) {
+    const y = ((i + 1) / (bandCount + 1)) * canvas.height;
+    const h = 6 + ((seed + i * 13) % 16);
+    const alpha = 0.08 + ((seed + i * 17) % 20) / 200;
+    ctx.fillStyle = `rgba(255,255,255,${alpha.toFixed(3)})`;
+    ctx.fillRect(0, y, canvas.width, h);
+  }
+  for (let i = 0; i < 42; i += 1) {
+    const x = (seed * (i + 3) * 17) % canvas.width;
+    const y = (seed * (i + 7) * 19) % canvas.height;
+    const r = ((seed + i * 11) % 5) + 1;
+    const alpha = 0.03 + ((seed + i * 5) % 10) / 220;
+    ctx.beginPath();
+    ctx.fillStyle = `rgba(0,0,0,${alpha.toFixed(3)})`;
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.needsUpdate = true;
+  return texture;
 }
 
 async function initSolarSystemWidget(dashboard, period) {
@@ -2157,7 +2219,10 @@ async function initSolarSystemWidget(dashboard, period) {
   }
   const aspects = buildSolarAspectModel(dashboard, period);
   matrixWrap.innerHTML = renderSolarMobileMatrix(aspects, "Earth");
-  bindSolarMobileInteractions(aspects);
+  let selectedKey = "Earth";
+  bindSolarMobileInteractions(aspects, (key) => {
+    selectedKey = key;
+  });
   panel.innerHTML = renderSolarAspectPanel(aspects.Earth, "Earth", { focused: true });
 
   const preferReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
@@ -2190,9 +2255,9 @@ async function initSolarSystemWidget(dashboard, period) {
   const muted = isDark ? 0x848992 : 0x5a6068;
   const dim = isDark ? 0x3d424a : 0xb8bec7;
 
-  const ambient = new THREE.AmbientLight(isDark ? 0xffffff : 0xf8f9fb, 0.85);
+  const ambient = new THREE.AmbientLight(isDark ? 0xffffff : 0xf8f9fb, 0.9);
   scene.add(ambient);
-  const keyLight = new THREE.PointLight(isDark ? 0xffffff : 0x111111, 0.65, 80, 2);
+  const keyLight = new THREE.PointLight(isDark ? 0xffffff : 0x111111, 0.78, 90, 2);
   keyLight.position.set(0, 8, 0);
   scene.add(keyLight);
 
@@ -2265,28 +2330,74 @@ async function initSolarSystemWidget(dashboard, period) {
   moonOrbitLine.computeLineDistances();
   scene.add(moonOrbitLine);
 
+  const hitTargets = [sunMesh];
   const planetMeshes = [];
+  const trailMap = new Map();
+  const ringMap = new Map();
+  const themeKey = isDark ? "dark" : "light";
   solarPlanetModel
     .filter((planet) => planet.key !== "Sun")
     .forEach((planet) => {
+      const texture = createPlanetTexture(THREE, planet.key, themeKey);
       const mesh = new THREE.Mesh(
         new THREE.SphereGeometry(planet.size, 24, 24),
         new THREE.MeshStandardMaterial({
-          color: planet.key === "Earth" ? ink : muted,
-          roughness: 0.72,
-          metalness: 0.04
+          color: 0xffffff,
+          map: texture || null,
+          roughness: 0.62,
+          metalness: 0.08
         })
       );
       mesh.userData = { key: planet.key, label: planet.label };
       scene.add(mesh);
-      planetMeshes.push({ planet, mesh });
+      const hitProxy = new THREE.Mesh(
+        new THREE.SphereGeometry(Math.max(planet.size * 2.3, 0.18), 12, 12),
+        new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false })
+      );
+      hitProxy.userData = { key: planet.key, label: planet.label };
+      scene.add(hitProxy);
+      hitTargets.push(hitProxy);
+      planetMeshes.push({ planet, mesh, hitProxy });
+
+      const trailMax = planet.key === "Moon" ? 70 : 110;
+      const trailAttr = new THREE.BufferAttribute(new Float32Array(trailMax * 3), 3);
+      const trailGeom = new THREE.BufferGeometry();
+      trailGeom.setAttribute("position", trailAttr);
+      trailGeom.setDrawRange(0, 0);
+      const trail = new THREE.Line(
+        trailGeom,
+        new THREE.LineBasicMaterial({
+          color: planet.key === "Earth" ? ink : muted,
+          transparent: true,
+          opacity: planet.key === "Moon" ? 0.2 : 0.26
+        })
+      );
+      scene.add(trail);
+      trailMap.set(planet.key, {
+        line: trail,
+        points: [],
+        max: trailMax,
+        lastSampleTs: 0
+      });
+
+      if (planet.key !== "Moon") {
+        const ringPts = Array.from({ length: 129 }, () => new THREE.Vector3(0, 0, 0));
+        const ringLine = new THREE.Line(
+          new THREE.BufferGeometry().setFromPoints(ringPts),
+          new THREE.LineBasicMaterial({
+            color: planet.key === "Earth" ? ink : muted,
+            transparent: true,
+            opacity: 0.34
+          })
+        );
+        scene.add(ringLine);
+        ringMap.set(planet.key, { line: ringLine, points: ringPts });
+      }
     });
 
   const raycaster = new THREE.Raycaster();
   const pointer = new THREE.Vector2();
-  let selectedKey = "Earth";
   let hoveredKey = null;
-  let activeKey = "Earth";
   const focusTarget = new THREE.Vector3(0, 0, 0);
   const cameraTarget = new THREE.Vector3(0, 9.5, 11);
   const baseOffset = new THREE.Vector3(0, 9.5, 11);
@@ -2319,32 +2430,35 @@ async function initSolarSystemWidget(dashboard, period) {
     pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
     pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
     raycaster.setFromCamera(pointer, camera);
-    const hits = raycaster.intersectObjects([sunMesh, ...planetMeshes.map((item) => item.mesh)], false);
+    const hits = raycaster.intersectObjects(hitTargets, false);
     if (!hits.length) {
-      hoveredKey = null;
+      if (hoveredKey) {
+        hoveredKey = null;
+        setPanelPlanet(selectedKey, { focused: true });
+      }
       tooltip.style.opacity = "0";
-      activeKey = selectedKey;
-      setPanelPlanet(selectedKey, { focused: true });
       return;
     }
     const key = hits[0]?.object?.userData?.key || null;
     if (!key) {
       return;
     }
-    hoveredKey = key;
-    activeKey = key;
+    if (hoveredKey !== key) {
+      hoveredKey = key;
+      setPanelPlanet(key, { focused: false });
+    }
     tooltip.textContent = key;
     tooltip.style.left = `${event.clientX - rect.left + 12}px`;
     tooltip.style.top = `${event.clientY - rect.top + 12}px`;
     tooltip.style.opacity = "1";
-    setPanelPlanet(key, { focused: false });
   };
 
   canvas.onpointerleave = () => {
-    hoveredKey = null;
+    if (hoveredKey) {
+      hoveredKey = null;
+      setPanelPlanet(selectedKey, { focused: true });
+    }
     tooltip.style.opacity = "0";
-    activeKey = selectedKey;
-    setPanelPlanet(selectedKey, { focused: true });
   };
 
   canvas.onclick = () => {
@@ -2352,7 +2466,6 @@ async function initSolarSystemWidget(dashboard, period) {
       return;
     }
     selectedKey = hoveredKey;
-    activeKey = selectedKey;
     setPanelPlanet(selectedKey, { focused: true });
   };
 
@@ -2371,26 +2484,62 @@ async function initSolarSystemWidget(dashboard, period) {
       return;
     }
     const elapsedSec = (now - start) / 1000;
-    const simDays = daysSinceJ2000(new Date()) + elapsedSec * (preferReducedMotion ? 0.12 : 1.5);
+    const simDays = daysSinceJ2000(new Date()) + elapsedSec * (preferReducedMotion ? 0.18 : 3.4);
     const positions = solarPositionsAt(new Date(Date.UTC(2000, 0, 1, 12, 0, 0) + simDays * 86400000));
 
-    planetMeshes.forEach(({ planet, mesh }) => {
+    planetMeshes.forEach(({ planet, mesh, hitProxy }) => {
       const p = positions[planet.key];
       if (!p) {
         return;
       }
       mesh.position.set(p.x, 0, p.z);
+      hitProxy.position.copy(mesh.position);
+      mesh.rotation.y += planet.key === "Moon" ? 0.008 : 0.004;
+      mesh.rotation.z += 0.0015;
+
+      const trail = trailMap.get(planet.key);
+      if (trail && now - trail.lastSampleTs > (planet.key === "Moon" ? 45 : 90)) {
+        trail.lastSampleTs = now;
+        trail.points.push(mesh.position.clone());
+        if (trail.points.length > trail.max) {
+          trail.points.shift();
+        }
+        const attr = trail.line.geometry.getAttribute("position");
+        trail.points.forEach((pt, idx) => {
+          attr.setXYZ(idx, pt.x, pt.y, pt.z);
+        });
+        trail.line.geometry.setDrawRange(0, trail.points.length);
+        attr.needsUpdate = true;
+      }
+
+      const ring = ringMap.get(planet.key);
+      if (ring && planet.radius > 0) {
+        const angle = Math.atan2(mesh.position.z, mesh.position.x);
+        for (let i = 0; i < ring.points.length; i += 1) {
+          const t = i / (ring.points.length - 1);
+          const a = angle - Math.PI * 2 * t;
+          ring.points[i].set(Math.cos(a) * planet.radius, 0, Math.sin(a) * planet.radius);
+        }
+        ring.line.geometry.setFromPoints(ring.points);
+        ring.line.rotation.x = Math.PI * 0.04;
+      }
     });
 
     if (positions.Earth) {
       moonOrbitLine.position.set(positions.Earth.x, 0, positions.Earth.z);
     }
 
-    const focusSource = positions[activeKey] || { x: 0, z: 0 };
+    const focusSource = positions[selectedKey] || { x: 0, z: 0 };
     focusTarget.set(focusSource.x, 0, focusSource.z);
-    const desiredCamera = focusTarget.clone().add(baseOffset);
-    cameraTarget.lerp(desiredCamera, preferReducedMotion ? 0.06 : 0.08);
-    camera.position.lerp(cameraTarget, preferReducedMotion ? 0.08 : 0.11);
+    const focusPlanet = solarPlanetModel.find((p) => p.key === selectedKey);
+    const focusDistance = focusPlanet?.key === "Sun"
+      ? 8.8
+      : Math.max(3.6, 2.3 + (focusPlanet?.size || 0.12) * 18);
+    const desiredCamera = focusTarget.clone().add(
+      baseOffset.clone().normalize().multiplyScalar(focusDistance).add(new THREE.Vector3(0, focusDistance * 0.48, 0))
+    );
+    cameraTarget.lerp(desiredCamera, preferReducedMotion ? 0.05 : 0.075);
+    camera.position.lerp(cameraTarget, preferReducedMotion ? 0.075 : 0.11);
     camera.lookAt(focusTarget);
 
     orbitLines.forEach((line, idx) => {
