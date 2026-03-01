@@ -2084,7 +2084,7 @@ function renderSolarAspectPanel(aspect, planetLabel, { focused = false } = {}) {
   `;
 }
 
-function renderSolarMobileMatrix(aspects, selectedKey = "Earth") {
+function renderSolarMobileMatrix(aspects, selectedKey = "__all__") {
   const keys = ["__all__", "Sun", "Mercury", "Venus", "Earth", "Moon", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune"];
   return `
     <div class="solar-mobile-matrix">
@@ -2204,7 +2204,7 @@ function bindSolarMobileInteractions(aspects, onSelect = null) {
   }
   matrixWrap.querySelectorAll("[data-solar-planet]").forEach((button) => {
     button.addEventListener("click", () => {
-      const key = button.getAttribute("data-solar-planet") || "Earth";
+      const key = button.getAttribute("data-solar-planet") || "__all__";
       panel.innerHTML = renderSolarAspectPanel(aspects[key], key, { focused: true });
       animateSolarPanelText(panel);
       if (focusBadge) {
@@ -2536,10 +2536,10 @@ async function initSolarSystemWidget(dashboard, period) {
     satelliteRings.push({ ring, radius: r, idx: ringIdx });
   });
 
-  const satelliteCount = 54;
+  const satelliteCount = 24;
   for (let i = 0; i < satelliteCount; i += 1) {
     const shell = shellRadii[i % shellRadii.length];
-    const speed = 0.9 + (i % 9) * 0.11;
+    const speed = 0.28 + (i % 7) * 0.045;
     const phase = ((i * 17) % 360) * (Math.PI / 180);
     const incline = ((i * 23) % 40 - 20) * (Math.PI / 180);
     const sat = new THREE.Mesh(
@@ -2843,7 +2843,7 @@ async function initSolarSystemWidget(dashboard, period) {
       const earthPos = positions.Earth;
       satelliteRings.forEach(({ ring, idx }) => {
         ring.position.set(earthPos.x, 0, earthPos.z);
-        ring.rotation.y = elapsedSec * (0.15 + idx * 0.08);
+        ring.rotation.y = elapsedSec * (0.05 + idx * 0.03);
         ring.rotation.x = Math.PI * 0.16 + idx * 0.06;
         ring.material.opacity = 0.08 + earthFocusMix * 0.58;
       });
