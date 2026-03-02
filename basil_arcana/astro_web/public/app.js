@@ -4136,6 +4136,63 @@ const coreHubArticles = [
       <p>Combined with Astrology Hub insights, Tarot becomes a second lens for reflection: astrology maps pattern architecture, Tarot sharpens present-tense awareness.</p>
       <p>Continue with <a href="/astrology-hub/how-to-use-astronautica-complete-practical-guide">How to Use Astronautica: A Complete Practical Guide</a>.</p>
     `
+  },
+  {
+    slug: "solar-system-planets-astrology-and-the-battlestar-galactica-inspiration",
+    title: "Solar System Planets, Astrology, and the Battlestar Galactica Spark Behind Astronautica",
+    excerpt: "A deep longread on planetary symbolism, practical astrology, and the science-fiction inspiration that shaped Astronautica's product vision.",
+    readTime: "22 min",
+    publishedAt: "2026-03-02",
+    category: "Longread",
+    seoDescription: "A long-form guide to Solar System planets and their astrological meaning, plus the Battlestar Galactica inspiration behind the Astronautica product vision.",
+    content: `
+      <p class="article-lead">The Solar System can be read in two complementary ways. Astronomy gives us physical reality: mass, orbit, velocity, magnetic field, temperature, distance. Astrology gives us symbolic reality: identity, regulation, desire, structure, expansion, disruption, and meaning. Astronautica exists at that intersection, and this longread explains why.</p>
+      <h2>Why planets still matter in modern product thinking</h2>
+      <p>In product work, we constantly model systems: user behavior, decision latency, friction points, momentum curves, failure loops. Planetary language maps surprisingly well to this systems thinking. Not as literal causation, but as a shared symbolic grammar for pattern recognition.</p>
+      <p>That is the design philosophy behind Astronautica: deterministic computation for chart geometry, then structured interpretation for actionable behavior.</p>
+      <h2>Sun: identity, direction, and core signal</h2>
+      <p>Astronomically, the Sun is the central energy source of the Solar System. Astrologically, it maps to core will, identity coherence, and directional force. In practical usage, Sun-sign intelligence answers one question: what kind of goal architecture keeps your motivation stable over time?</p>
+      <p>In Astronautica, we treat Sun signals as strategic orientation, not personality slogans.</p>
+      <h2>Moon: regulation, rhythm, and recovery</h2>
+      <p>The Moon's physical pull affects tides; symbolically it maps to emotional cycles and regulation bandwidth. Productively, Moon patterns help answer: when does your clarity degrade, and what recovery protocol restores signal quality?</p>
+      <p>This is why Daily timing and recovery windows are central in our system.</p>
+      <h2>Mercury and Venus: communication + values</h2>
+      <p>Mercury governs framing, language precision, and decision speed. Venus maps to preferences, attraction patterns, and relational economics. Together, they are crucial for how teams align and how relationships avoid unnecessary friction.</p>
+      <p>In the Friends module, this becomes practical: communication sync, emotional stability, and friction load are not abstractions, they are coordination metrics.</p>
+      <h2>Mars: action, risk, and conflict heat</h2>
+      <p>Mars is execution pressure. High Mars phases can produce fast output or avoidable conflict, depending on process quality. The practical question is not “is Mars good or bad?”, but “what constraints make action efficient and non-destructive?”.</p>
+      <h2>Jupiter and Saturn: expansion vs. structure</h2>
+      <p>Jupiter represents scaling, confidence, and opportunity appetite. Saturn represents boundaries, discipline, and reliability under long cycles. Every serious strategy needs both: expansion without structure burns out; structure without expansion stagnates.</p>
+      <p>A strong weekly routine balances Jupiter-style exploration with Saturn-style completion criteria.</p>
+      <h2>Uranus, Neptune, Pluto: change, meaning, transformation</h2>
+      <p>These outer planets are slower and often felt through long-cycle themes. Uranus is system disruption and innovation. Neptune is narrative, imagination, and ambiguity management. Pluto is deep transformation, power dynamics, and irreversible transitions.</p>
+      <p>In product terms, these are architecture-level forces, not day-level tactics.</p>
+      <h2>Astronomy and astrology are not enemies here</h2>
+      <p>Astronomy gives us precision coordinates and orbital truth. Astrology gives us a symbolic interface for human pattern interpretation. We deliberately keep both layers separate and explicit. Inputs and calculations are deterministic. Interpretations are operational guidance, validated through behavior and outcomes.</p>
+      <p>If you want the broader history, continue with <a href="/astrology-hub/astrology-and-astronomy-shared-roots-modern-paths">Astrology and Astronomy: Ancient Roots, Modern Paths</a>.</p>
+      <h2>The Battlestar Galactica moment</h2>
+      <p>Now the personal part. The spark behind this product came from one source: <em>Battlestar Galactica</em>. Not because it is “about astrology,” but because it is one of the strongest narratives ever built around systems under pressure, identity under uncertainty, and decisions made with incomplete information.</p>
+      <p>That series repeatedly asks the same product question we ask in Astronautica: how do humans maintain agency, coherence, and ethics when signal is noisy and stakes are high?</p>
+      <p>That mindset shaped the core: build tools that reduce noise, surface structure, and help people decide better in real life.</p>
+      <h2>How this inspiration became product decisions</h2>
+      <ul class="bullet-list">
+        <li><strong>Deterministic core:</strong> no opaque “magic score,” clear computation from input data.</li>
+        <li><strong>Operational outputs:</strong> every insight should convert into a protocol, not a mood.</li>
+        <li><strong>Weekly cadence:</strong> behavior changes through loops, not one-time revelations.</li>
+        <li><strong>Human agency first:</strong> symbols guide reflection; decisions remain yours.</li>
+      </ul>
+      <h2>How to read planets inside Astronautica today</h2>
+      <p>Use a three-step routine:</p>
+      <ul class="bullet-list">
+        <li><strong>Map:</strong> identify active planetary patterns in Natal + Daily.</li>
+        <li><strong>Translate:</strong> choose one behavior protocol for the week.</li>
+        <li><strong>Review:</strong> track whether conflict, clarity, or completion improved.</li>
+      </ul>
+      <p>This creates a closed loop from symbolism to action to measurable feedback.</p>
+      <h2>Final note</h2>
+      <p>Astronautica is our attempt to build a world-class astrology/astronomy companion that treats users like thinking adults: transparent methods, high signal, and practical outcomes.</p>
+      <p>Continue with <a href="/astrology-hub/how-to-use-astronautica-complete-practical-guide">How to Use Astronautica: A Complete Practical Guide</a> and <a href="/astrology-hub/astrology-for-self-knowledge-and-growth">Astrology for Self-Knowledge and Growth</a>.</p>
+    `
   }
 ];
 
