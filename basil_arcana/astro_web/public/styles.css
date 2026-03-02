@@ -1760,22 +1760,23 @@ body[data-theme="light"] .auth-login-btn.telegram .auth-login-btn-icon .astro-ic
 
 .premium-kicker {
   position: relative;
-  display: block;
+  display: inline-block;
   font-size: 0.64rem;
+  line-height: 1.1;
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: var(--muted);
   padding-left: 0.55rem;
-  min-height: 1.7rem;
 }
 
 .premium-kicker::before {
   content: "";
   position: absolute;
   left: 0;
-  top: 0;
+  top: 50%;
   width: 1px;
-  height: 1.7rem;
+  height: 1em;
+  transform: translateY(-50%);
   background: var(--line-strong);
 }
 
