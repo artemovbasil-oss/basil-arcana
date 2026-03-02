@@ -1658,8 +1658,13 @@ function buildDashboardPayload(sessionData, period = "week") {
     id: `celeb:${item.id}`,
     celebrityId: item.id,
     isHistoricalCompanion: true,
+    isVirtual: true,
+    virtualSource: "celebrity",
     friendName: item.name,
     friendSign: item.sign,
+    friendBirthDate: historicalCelebritiesById.get(item.id)?.birthDate || null,
+    friendBirthTime: historicalCelebritiesById.get(item.id)?.birthTime || null,
+    friendBirthCity: historicalCelebritiesById.get(item.id)?.birthCity || null,
     score: item.score,
     trend: item.trend,
     note: item.note,
@@ -1667,6 +1672,15 @@ function buildDashboardPayload(sessionData, period = "week") {
     advice: item.fact,
     rationale: item.fact,
     domains: [],
+    noShareData: true,
+    natalMini: {
+      core: {
+        sun: item.sign || "Unknown",
+        moon: "Unknown",
+        rising: "Unknown"
+      },
+      summary: item.fact
+    },
     userSign: natalCore.sun,
     period
   }));

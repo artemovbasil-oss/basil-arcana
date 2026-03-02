@@ -1993,7 +1993,7 @@ function renderFriendAccordion(friend, { expanded = false, canDelete = false } =
           ${
             shareEnabled
               ? `<button class="btn ghost js-share-friend" type="button" data-name="${friend.friendName}" data-sign="${friend.friendSign}" data-score="${score}" data-telegram="${friend.friendTelegram || ""}" data-email="${friend.friendEmail || ""}">Share with friend</button>`
-              : `<p class="muted">Sharing unavailable: no contact method saved.</p>`
+              : (historicalCompanion ? "" : `<p class="muted">Sharing unavailable: no contact method saved.</p>`)
           }
           ${
             canDelete
@@ -5117,17 +5117,64 @@ function renderFriendsList() {
   if (!container) {
     return;
   }
-  if (!state.friends.length) {
+  const baseFriends = Array.isArray(state.friends) ? state.friends : [];
+  const storedHistoricalIds = new Set(
+    baseFriends
+      .filter((friend) => friend?.isVirtual && friend?.virtualSource === "celebrity")
+      .map((friend) => String(friend?.celebrityId || "").trim())
+      .filter(Boolean)
+  );
+  const selectedFromProfile = Array.isArray(state.profile?.selectedCelebrityIds)
+    ? state.profile.selectedCelebrityIds
+    : [];
+  const syntheticHistorical = selectedFromProfile
+    .map((id) => String(id || "").trim())
+    .filter(Boolean)
+    .filter((id) => !storedHistoricalIds.has(id))
+    .map((id) => {
+      const celeb = state.celebrities.find((item) => String(item.id || "").trim() === id);
+      if (!celeb) {
+        return null;
+      }
+      return {
+        id: `celeb:${id}`,
+        celebrityId: id,
+        isHistoricalCompanion: true,
+        isVirtual: true,
+        virtualSource: "celebrity",
+        friendName: celeb.name,
+        friendSign: celeb.sign,
+        friendBirthDate: celeb.birthDate || "N/A",
+        friendBirthTime: celeb.birthTime || "N/A",
+        friendBirthCity: celeb.birthCity || "N/A",
+        noShareData: true,
+        natalMini: {
+          core: { sun: celeb.sign || "Unknown", moon: "Unknown", rising: "Unknown" },
+          summary: celeb.fact || ""
+        },
+        advice: celeb.fact || "",
+        rationale: celeb.fact || ""
+      };
+    })
+    .filter(Boolean);
+
+  const allFriends = [...baseFriends, ...syntheticHistorical];
+  if (!allFriends.length) {
     container.innerHTML = "<p class=\"muted\">No friends saved yet.</p>";
     return;
   }
 
+  const mergeFriendInsight = (friend) => {
+    const insight = state.friendInsights[String(friend.id)] || {};
+    const cleanedInsight = Object.fromEntries(
+      Object.entries(insight).filter(([, value]) => value !== undefined && value !== null && value !== "")
+    );
+    return { ...friend, ...cleanedInsight };
+  };
+
   container.innerHTML = `<div class="friends-accordion-list">${
-    state.friends
-      .map((friend) => {
-        const insight = state.friendInsights[String(friend.id)] || {};
-        return renderFriendAccordion({ ...friend, ...insight }, { canDelete: true });
-      })
+    allFriends
+      .map((friend) => renderFriendAccordion(mergeFriendInsight(friend), { canDelete: true }))
       .join("")
   }</div>`;
 }
@@ -5233,9 +5280,41 @@ function bindDeleteFriendButtons(root = document, { onDeleted } = {}) {
         return;
       }
       try {
-        const payload = await fetchJson(`/api/friends/${encodeURIComponent(friendId)}`, { method: "DELETE" });
-        state.friends = Array.isArray(payload?.friends) ? payload.friends : [];
-        delete state.friendInsights[friendId];
+        if (friendId.startsWith("celeb:")) {
+          const celebrityId = friendId.replace(/^celeb:/, "");
+          const current = state.profile || {};
+          const selected = Array.isArray(current.selectedCelebrityIds) ? current.selectedCelebrityIds : [];
+          const nextSelected = selected.filter((id) => String(id || "").trim() !== celebrityId);
+          const payload = await fetchJson("/api/profile", {
+            method: "PUT",
+            body: JSON.stringify({
+              profile: {
+                ...current,
+                selectedCelebrityIds: nextSelected
+              }
+            })
+          });
+          state.profile = payload.profile || state.profile;
+          state.profileReady = Boolean(payload.profileReady);
+          const removableStored = (Array.isArray(state.friends) ? state.friends : [])
+            .filter((friend) => String(friend?.celebrityId || "").trim() === celebrityId)
+            .map((friend) => String(friend?.id || "").trim())
+            .filter(Boolean);
+          for (const id of removableStored) {
+            try {
+              const removed = await fetchJson(`/api/friends/${encodeURIComponent(id)}`, { method: "DELETE" });
+              state.friends = Array.isArray(removed?.friends) ? removed.friends : state.friends;
+              delete state.friendInsights[id];
+            } catch {
+              // best effort cleanup
+            }
+          }
+          delete state.friendInsights[friendId];
+        } else {
+          const payload = await fetchJson(`/api/friends/${encodeURIComponent(friendId)}`, { method: "DELETE" });
+          state.friends = Array.isArray(payload?.friends) ? payload.friends : [];
+          delete state.friendInsights[friendId];
+        }
         if (typeof onDeleted === "function") {
           await onDeleted();
         }
