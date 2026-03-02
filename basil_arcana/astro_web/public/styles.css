@@ -1178,6 +1178,22 @@ body[data-theme="dark"] .onboarding-celeb-card input {
   background: color-mix(in srgb, #ffffff 8%, var(--surface) 92%);
 }
 
+body[data-theme="dark"] .onboarding-celeb-card:has(input:checked) input {
+  background: color-mix(in srgb, #ffffff 14%, var(--surface) 86%);
+  border-color: #ffffff;
+}
+
+body[data-theme="dark"] .onboarding-celeb-card:has(input:checked) input::after {
+  border-left-color: #ffffff;
+  border-bottom-color: #ffffff;
+}
+
+body[data-theme="dark"] .form-grid input[type="date"]::-webkit-calendar-picker-indicator,
+body[data-theme="dark"] .form-grid input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) brightness(1.15);
+  opacity: 1;
+}
+
 .onboarding-celeb-name {
   font-weight: 700;
   font-size: 0.88rem;
