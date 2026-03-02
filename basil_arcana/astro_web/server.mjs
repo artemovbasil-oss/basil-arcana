@@ -2512,7 +2512,8 @@ app.get("/api/referral", requireAuth, async (req, res) => {
   });
 });
 
-app.get("/api/friends", requireAuth, (req, res) => {
+app.get("/api/friends", requireAuth, async (req, res) => {
+  req.userData = await finalizeReferralSocialConnectionIfReady(req.userId, req.userData);
   res.json({ ok: true, friends: req.userData.friends || [] });
 });
 
