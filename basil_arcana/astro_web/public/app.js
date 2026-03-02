@@ -4020,8 +4020,20 @@ function friendsView() {
       </article>
     </section>
     <section class="section">
-      <article class="card">
-        <span class="eyebrow">Social Circle</span>
+      <article class="card social-circle-card">
+        <div class="friends-social-head">
+          <span class="eyebrow">Social Circle</span>
+          <div class="social-circle-metrics" aria-label="Invite stats">
+            <span class="social-circle-metric">
+              <strong>${invitedRegistrations}</strong>
+              <em>Joined via your link</em>
+            </span>
+            <span class="social-circle-metric">
+              <strong>${shareInvitesSent}</strong>
+              <em>Shared invitations</em>
+            </span>
+          </div>
+        </div>
         <h2>Bring friends into your rhythm</h2>
         <div class="referral-box premium-panel">
           <div class="referral-layout">
@@ -4035,16 +4047,6 @@ function friendsView() {
               <p class="muted">Friends who join through your link can track life rhythm with you and unlock shared social astrology when both sides agree to share profile data.</p>
               <p id="friendsReferralStatus" class="muted"></p>
             </div>
-            <aside class="referral-stats">
-              <article class="ref-stat">
-                <strong>${invitedRegistrations}</strong>
-                <span>Joined via your link</span>
-              </article>
-              <article class="ref-stat">
-                <strong>${shareInvitesSent}</strong>
-                <span>Shared invitations</span>
-              </article>
-            </aside>
           </div>
         </div>
       </article>

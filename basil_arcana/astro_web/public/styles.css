@@ -984,6 +984,66 @@ body[data-theme="dark"] .celeb-archive-thumb-link {
 }
 
 .referral-box::before {
+  content: none;
+}
+
+.referral-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.9rem;
+  align-items: start;
+}
+
+.friends-social-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
+.social-circle-metrics {
+  display: inline-flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.social-circle-metric {
+  display: grid;
+  gap: 0.1rem;
+  justify-items: end;
+  line-height: 1.05;
+  text-align: right;
+}
+
+.social-circle-metric strong {
+  font-family: var(--font-sans);
+  font-size: 1.05rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--ink) 76%, transparent 24%);
+  font-weight: 600;
+}
+
+.social-circle-metric em {
+  margin: 0;
+  font-style: normal;
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.social-circle-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.social-circle-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.social-circle-card::before {
   content: "";
   position: absolute;
   inset: -1px;
@@ -991,29 +1051,22 @@ body[data-theme="dark"] .celeb-archive-thumb-link {
   padding: 1px;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.3;
+  opacity: 0.34;
   background: linear-gradient(
-    120deg,
+    112deg,
     transparent 0%,
-    transparent 30%,
-    rgba(255, 99, 132, 0.22) 42%,
-    rgba(255, 211, 102, 0.22) 50%,
-    rgba(132, 211, 255, 0.24) 58%,
-    transparent 72%,
+    transparent 28%,
+    rgba(255, 108, 163, 0.2) 43%,
+    rgba(255, 214, 122, 0.2) 50%,
+    rgba(126, 196, 255, 0.22) 58%,
+    transparent 74%,
     transparent 100%
   );
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask-composite: exclude;
-  animation: referral-border-sheen 9.2s ease-in-out infinite;
-}
-
-.referral-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 230px;
-  gap: 0.9rem;
-  align-items: start;
+  animation: social-card-border-sheen 11s ease-in-out infinite;
 }
 
 .referral-main {
@@ -1099,8 +1152,33 @@ body[data-theme="dark"] .celeb-archive-thumb-link {
   }
 }
 
+@keyframes social-card-border-sheen {
+  0% {
+    transform: translateX(-128%);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.22;
+  }
+  38% {
+    transform: translateX(112%);
+    opacity: 0.28;
+  }
+  48% {
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(112%);
+    opacity: 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .referral-box::before {
+    animation: none;
+  }
+
+  .social-circle-card::before {
     animation: none;
   }
 }
@@ -3864,6 +3942,24 @@ body[data-theme="light"] .energy-star.neutral {
 
   .referral-layout {
     grid-template-columns: 1fr;
+  }
+
+  .friends-social-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.36rem;
+  }
+
+  .social-circle-metrics {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 0.44rem 0.66rem;
+  }
+
+  .social-circle-metric {
+    justify-items: start;
+    text-align: left;
   }
 
   .virtual-celeb-grid {
