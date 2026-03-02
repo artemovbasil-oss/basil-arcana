@@ -6189,6 +6189,9 @@ function attachRouteHandlers(path) {
       if (!confirmed) {
         return;
       }
+      const originalText = profileDeleteButton.textContent;
+      profileDeleteButton.disabled = true;
+      profileDeleteButton.textContent = "Deleting...";
       try {
         await fetchJson("/api/profile", { method: "DELETE", body: JSON.stringify({}) });
         state.profile = null;
@@ -6205,6 +6208,9 @@ function attachRouteHandlers(path) {
           return;
         }
         alert(`Failed to delete profile: ${error.message}`);
+      } finally {
+        profileDeleteButton.disabled = false;
+        profileDeleteButton.textContent = originalText || "Delete profile forever";
       }
     });
   }
@@ -6414,7 +6420,11 @@ async function loadSessionState() {
 }
 
 function render() {
-  let path = window.location.pathname;
+  let path = String(window.location.pathname || "/");
+  if (path.length > 1 && path.endsWith("/")) {
+    path = path.replace(/\/+$/, "") || "/";
+    window.history.replaceState({}, "", `${path}${window.location.search}${window.location.hash}`);
+  }
   const hubSlug = path.startsWith("/astrology-hub/") ? path.replace("/astrology-hub/", "") : "";
   const isPublicHubArticle = Boolean(hubSlug && astrologyHubBySlug[hubSlug]);
   const celebritySlug = path.startsWith("/celebrities/") ? path.replace("/celebrities/", "") : "";
