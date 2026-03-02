@@ -2526,6 +2526,10 @@ body[data-theme="light"] .celeb-avatar {
   display: block;
 }
 
+.solar-focus-controls {
+  margin-bottom: 0.5rem;
+}
+
 .solar-canvas-wrap {
   border: 1px solid var(--line);
   background:
@@ -2537,6 +2541,15 @@ body[data-theme="light"] .celeb-avatar {
   min-height: 460px;
   position: relative;
   overflow: hidden;
+}
+
+body[data-theme="dark"] .solar-canvas-wrap {
+  background:
+    radial-gradient(circle at 18% 14%, rgba(242, 242, 242, 0.08) 0 16%, transparent 48%),
+    radial-gradient(circle at 76% 28%, rgba(242, 242, 242, 0.05) 0 13%, transparent 42%),
+    radial-gradient(circle at 42% 82%, rgba(242, 242, 242, 0.04) 0 12%, transparent 40%),
+    radial-gradient(130% 130% at 10% 8%, rgba(242, 242, 242, 0.08) 0%, transparent 52%),
+    #07080b;
 }
 
 .solar-canvas-wrap::before,
@@ -2591,6 +2604,10 @@ body[data-theme="light"] .celeb-avatar {
     radial-gradient(1.1px 1.1px at 92% 22%, color-mix(in srgb, var(--ink) 82%, transparent 18%) 0 38%, transparent 72%),
     radial-gradient(1.3px 1.3px at 88% 86%, color-mix(in srgb, var(--ink) 88%, transparent 12%) 0 38%, transparent 70%);
   animation: solar-starfield-twinkle 6.2s ease-in-out infinite alternate;
+}
+
+body[data-theme="dark"] .solar-starfield {
+  opacity: 0.5;
 }
 
 body[data-theme="light"] .solar-starfield {
@@ -2648,6 +2665,41 @@ body[data-theme="light"] .solar-starfield {
   inset: 0;
   pointer-events: none;
   z-index: 3;
+}
+
+.solar-focus-compass {
+  position: absolute;
+  left: -9999px;
+  top: -9999px;
+  z-index: 4;
+  width: calc(var(--compass-r, 58px) * 2);
+  height: calc(var(--compass-r, 58px) * 2);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.22s ease;
+}
+
+.solar-focus-compass-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--line-strong) 80%, transparent 20%);
+  box-shadow:
+    inset 0 0 18px color-mix(in srgb, var(--ink) 14%, transparent 86%),
+    0 0 18px color-mix(in srgb, var(--ink) 12%, transparent 88%);
+}
+
+.solar-focus-compass-marker {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  border: 1px solid var(--line-strong);
+  background: rgba(0, 0, 0, 0.9);
+  color: #ffffff;
+  font-size: 0.52rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.1rem 0.2rem;
+  white-space: nowrap;
 }
 
 .solar-house-label {
@@ -2708,10 +2760,15 @@ body[data-theme="light"] .solar-starfield {
 }
 
 .solar-scene-meta {
+  position: absolute;
+  left: 0.6rem;
+  bottom: 0.56rem;
+  z-index: 4;
   display: flex;
   gap: 0.38rem;
   flex-wrap: wrap;
-  margin-bottom: 0.5rem;
+  max-width: calc(100% - 1.2rem);
+  pointer-events: none;
 }
 
 .solar-scene-meta span {
@@ -3428,8 +3485,10 @@ body[data-theme="light"] .energy-star.neutral {
   }
 
   .solar-scene-meta {
+    left: 0.48rem;
+    right: 0.48rem;
+    max-width: none;
     gap: 0.32rem;
-    margin-bottom: 0.42rem;
   }
 
   .solar-scene-meta span {

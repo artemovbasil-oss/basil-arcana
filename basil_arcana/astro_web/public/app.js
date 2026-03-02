@@ -2209,7 +2209,9 @@ function renderSolarSystemBlock(dashboard, period) {
           <h2>Solar System State</h2>
         </div>
         <div class="solar-system-layout" id="solarSystemWidget">
-          ${renderSolarSceneInfo(dashboard, period)}
+          <div id="solarMobileMatrixWrap" class="solar-focus-controls">
+            ${renderSolarMobileMatrix(aspects, selected)}
+          </div>
           <div class="solar-canvas-wrap" id="solarCanvasWrap">
             <canvas id="solarSystemCanvas" class="solar-canvas" aria-label="Interactive solar system view"></canvas>
             <div class="solar-starfield" aria-hidden="true"></div>
@@ -2217,13 +2219,12 @@ function renderSolarSystemBlock(dashboard, period) {
             <div id="solarFocusBadge" class="solar-focus-badge">Focus: The whole system</div>
             <div id="solarHouseOverlay" class="solar-house-overlay"></div>
             <div id="solarObjectOverlay" class="solar-object-overlay"></div>
+            <div id="solarFocusCompass" class="solar-focus-compass" aria-hidden="true"></div>
             <aside class="solar-aspect-panel solar-scene-panel" id="solarAspectPanel">
               ${renderSolarAspectPanel(aspects[selected], selected, { focused: true })}
             </aside>
+            ${renderSolarSceneInfo(dashboard, period)}
           </div>
-        </div>
-        <div id="solarMobileMatrixWrap">
-          ${renderSolarMobileMatrix(aspects, selected)}
         </div>
       </article>
     </section>
@@ -2412,8 +2413,9 @@ async function initSolarSystemWidget(dashboard, period) {
   const focusBadge = document.getElementById("solarFocusBadge");
   const houseOverlay = document.getElementById("solarHouseOverlay");
   const objectOverlay = document.getElementById("solarObjectOverlay");
+  const focusCompass = document.getElementById("solarFocusCompass");
   const matrixWrap = document.getElementById("solarMobileMatrixWrap");
-  if (!canvas || !wrap || !panel || !tooltip || !matrixWrap || !focusBadge || !houseOverlay || !objectOverlay) {
+  if (!canvas || !wrap || !panel || !tooltip || !matrixWrap || !focusBadge || !houseOverlay || !objectOverlay || !focusCompass) {
     destroySolarSystemWidget();
     return;
   }
@@ -2520,6 +2522,8 @@ async function initSolarSystemWidget(dashboard, period) {
       .filter((planet) => planet.key !== "Sun" && planet.parent !== "Earth")
       .map((planet) => planet.radius)
   );
+  const sunSign = dashboard?.natalCore?.sun || "Aries";
+  const sunSignAngle = ((zodiacIndex(sunSign) * 30) * Math.PI) / 180;
   const risingSign = dashboard?.natalCore?.rising || "Aries";
   const sectorOffset = ((zodiacIndex(risingSign) * 30 + 90) * Math.PI) / 180;
   const sectorGroup = new THREE.Group();
@@ -2640,6 +2644,13 @@ async function initSolarSystemWidget(dashboard, period) {
   const ringMap = new Map();
   const themeKey = isDark ? "dark" : "light";
   objectOverlay.innerHTML = "";
+  focusCompass.innerHTML = `
+    <div class="solar-focus-compass-ring"></div>
+    <span class="solar-focus-compass-marker solar-focus-compass-sun"><b>SUN</b></span>
+    <span class="solar-focus-compass-marker solar-focus-compass-sign"><b>${sunSign.toUpperCase()}</b></span>
+  `;
+  const compassSunMarker = focusCompass.querySelector(".solar-focus-compass-sun");
+  const compassSignMarker = focusCompass.querySelector(".solar-focus-compass-sign");
   const sunLabel = document.createElement("span");
   sunLabel.className = "solar-object-label";
   objectOverlay.appendChild(sunLabel);
@@ -3036,6 +3047,49 @@ async function initSolarSystemWidget(dashboard, period) {
       runtime.focusGrid.material.opacity = 0.42 + Math.sin(elapsedSec * 2.2) * 0.12;
     } else if (runtime.focusGrid) {
       runtime.focusGrid.material.opacity = 0;
+    }
+    if (selectedKey !== "__all__" && compassSunMarker && compassSignMarker) {
+      const centerProjected = focusMesh.position.clone().project(camera);
+      const isVisible = centerProjected.z < 1;
+      const cx = ((centerProjected.x + 1) / 2) * wrap.clientWidth;
+      const cy = ((-centerProjected.y + 1) / 2) * wrap.clientHeight;
+      const compassRadius = selectedKey === "Earth"
+        ? (isMobileScene ? 52 : 64)
+        : (isMobileScene ? 46 : 58);
+
+      const sunScreen = selectedKey === "Sun"
+        ? { x: cx + 1, y: cy - 1 }
+        : (() => {
+            const p = sunMesh.position.clone().project(camera);
+            return {
+              x: ((p.x + 1) / 2) * wrap.clientWidth,
+              y: ((-p.y + 1) / 2) * wrap.clientHeight
+            };
+          })();
+      const sunTheta = Math.atan2(sunScreen.y - cy, sunScreen.x - cx);
+
+      const signAnchorWorld = new THREE.Vector3(
+        Math.cos(sunSignAngle) * (maxOrbit + 0.9),
+        0,
+        Math.sin(sunSignAngle) * (maxOrbit + 0.9)
+      );
+      const signProjected = signAnchorWorld.project(camera);
+      const signX = ((signProjected.x + 1) / 2) * wrap.clientWidth;
+      const signY = ((-signProjected.y + 1) / 2) * wrap.clientHeight;
+      const signTheta = Math.atan2(signY - cy, signX - cx);
+
+      focusCompass.style.opacity = isVisible ? "1" : "0";
+      focusCompass.style.left = `${Math.round(cx)}px`;
+      focusCompass.style.top = `${Math.round(cy)}px`;
+      focusCompass.style.setProperty("--compass-r", `${Math.round(compassRadius)}px`);
+      focusCompass.style.transform = `translate(-50%, -50%) rotate(${(elapsedSec * 2.5) % 360}deg)`;
+
+      compassSunMarker.style.left = `${Math.round(Math.cos(sunTheta) * compassRadius)}px`;
+      compassSunMarker.style.top = `${Math.round(Math.sin(sunTheta) * compassRadius)}px`;
+      compassSignMarker.style.left = `${Math.round(Math.cos(signTheta) * compassRadius)}px`;
+      compassSignMarker.style.top = `${Math.round(Math.sin(signTheta) * compassRadius)}px`;
+    } else {
+      focusCompass.style.opacity = "0";
     }
     renderer.render(scene, camera);
     runtime.frameId = window.requestAnimationFrame(tick);
