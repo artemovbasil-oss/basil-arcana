@@ -2473,6 +2473,53 @@ app.post("/api/friends", requireAuth, async (req, res) => {
   });
 });
 
+app.post("/api/friends/virtual-celebrity", requireAuth, async (req, res) => {
+  const celebrityId = String(req.body?.celebrityId || "").trim();
+  if (!celebrityId) {
+    return res.status(400).json({ error: "invalid_celebrity_id", message: "celebrityId is required." });
+  }
+  const item = historicalCelebritiesById.get(celebrityId);
+  if (!item) {
+    return res.status(404).json({ error: "celebrity_not_found" });
+  }
+  const currentFriends = Array.isArray(req.userData.friends) ? req.userData.friends : [];
+  if (currentFriends.length > 0) {
+    return res.status(409).json({
+      error: "virtual_friend_only_when_empty",
+      message: "Virtual celebrity friend can be added only when you have no social connections yet."
+    });
+  }
+  const duplicate = currentFriends.find((friend) => String(friend?.friendName || "").trim() === item.name);
+  if (duplicate) {
+    return res.json({ ok: true, friend: duplicate, friends: currentFriends });
+  }
+  const natalMini = await buildFriendNatalMini({
+    friendName: item.name,
+    friendBirthDate: item.birthDate,
+    friendBirthTime: item.birthTime,
+    friendBirthCity: item.birthCity
+  });
+  const friend = {
+    id: crypto.randomUUID(),
+    friendName: item.name,
+    friendBirthDate: item.birthDate,
+    friendBirthTime: item.birthTime,
+    friendBirthCity: item.birthCity,
+    friendSign: item.sign,
+    friendTelegram: "",
+    friendEmail: "",
+    noShareData: true,
+    natalMini,
+    createdAt: Date.now(),
+    isVirtual: true,
+    virtualSource: "celebrity",
+    celebrityId: item.id
+  };
+  req.userData.friends = [friend];
+  await saveUserData(req.userId, req.userData);
+  return res.json({ ok: true, friend, friends: req.userData.friends });
+});
+
 app.get("/api/celebrities", (req, res) => {
   const sign = String(req.query?.sign || "").trim();
   const items = sign

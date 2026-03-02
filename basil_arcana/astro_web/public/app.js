@@ -3949,20 +3949,28 @@ function friendsView() {
   const safeReferralLink = referralLink || "#";
   const invitedRegistrations = Number(ref.invitedRegistrations || 0);
   const shareInvitesSent = Number(ref.shareInvitesSent || 0);
+  const hasFriends = Array.isArray(state.friends) && state.friends.length > 0;
+  const selectedSign = state.dashboard?.natalCore?.sun || signFromDate(state.profile?.birthDate || "");
+  const celebCandidates = state.celebrities
+    .filter((item) => !selectedSign || item.sign === selectedSign)
+    .slice(0, 10);
+  const virtualFriendOptions = celebCandidates
+    .map((item) => `<option value="${item.id}">${item.name} · ${item.sign} · ${item.years}</option>`)
+    .join("");
   return `
     <section class="section">
       <article class="card tone-card">
         <span class="eyebrow">Friends</span>
-        <h1>Referral network</h1>
-        <p>Invite people via your personal link. New registrations are counted automatically; social links are built only with explicit consent.</p>
+        <h1>Social rhythm</h1>
+        <p>Astronautica becomes more useful with trusted people around you: shared timing, clearer communication windows, and better day-to-day coordination.</p>
       </article>
     </section>
     <section class="section">
       <article class="card">
-        <span class="eyebrow">Invite link</span>
-        <h2>Grow your circle</h2>
-        <div class="referral-box">
-          <label>Personal referral URL
+        <span class="eyebrow">Social Circle</span>
+        <h2>Bring friends into your rhythm</h2>
+        <div class="referral-box premium-panel">
+          <label>Your private invite link
             <input id="referralLinkInput" readonly value="${referralLink}" />
           </label>
           <div class="hero-actions">
@@ -3970,13 +3978,34 @@ function friendsView() {
             <a class="btn ghost" href="${safeReferralLink}" target="_blank" rel="noopener noreferrer">Open link</a>
           </div>
           <div class="chip-grid">
-            <span class="astro-chip">Registered via link: ${invitedRegistrations}</span>
-            <span class="astro-chip">Share actions: ${shareInvitesSent}</span>
+            <span class="astro-chip">Joined via your link: ${invitedRegistrations}</span>
+            <span class="astro-chip">Shared invitations: ${shareInvitesSent}</span>
           </div>
+          <p class="muted">When people join through your link, they can track daily rhythm with you and unlock a shared social astrology layer where timing becomes easier to coordinate.</p>
           <p id="friendsReferralStatus" class="muted"></p>
         </div>
       </article>
     </section>
+    ${
+      !hasFriends
+        ? `<section class="section">
+            <article class="card">
+              <span class="eyebrow">Starter mode</span>
+              <h2>Add one virtual historical friend</h2>
+              <p class="muted">Until your real social circle joins, you can compare your dynamics with one historical profile.</p>
+              <div class="form-grid">
+                <label>Choose profile
+                  <select id="virtualCelebritySelect">
+                    <option value="">Select a profile</option>
+                    ${virtualFriendOptions}
+                  </select>
+                </label>
+                <button id="addVirtualFriendButton" class="btn ghost" type="button">Add virtual friend</button>
+              </div>
+            </article>
+          </section>`
+        : ""
+    }
     <section class="section">
       <article class="card">
         <h2>Your friends</h2>
@@ -4561,24 +4590,36 @@ function celebritiesHubView() {
     <section class="section">
       <article class="card tone-card">
         <span class="eyebrow">Celebrities</span>
-        <h1>Historical natal archive</h1>
-        <p>Public archive of historical personalities (5 per zodiac sign) with birth date, time, place and computed natal chart snapshots.</p>
+        <h1>Legendary lives by zodiac sign</h1>
+        <p>A curated public atlas of historical figures: each profile includes verified birth context, full natal structure, and applied interpretation in Astronautica style.</p>
       </article>
     </section>
     <section class="section">
       <article class="card">
-        <div class="hub-grid">
+        <div class="celeb-archive-grid">
           ${grouped
             .map((group) => `
-              <article class="hub-card">
-                <div class="hub-card-head">
+              <article class="hub-card celeb-archive-sign-card" id="sign-${String(group.sign).toLowerCase()}">
+                <div class="hub-card-head celeb-archive-sign-head">
                   <span class="hub-chip">${group.sign}</span>
-                  <span class="hub-meta">${group.items.length} profiles</span>
+                  <span class="hub-meta">${group.items.length} curated profiles</span>
                 </div>
-                <h2>${group.sign} Historical Profiles</h2>
-                <ul class="bullet-list">
+                <a class="hub-sign-thumb-link celeb-archive-thumb-link" href="/astrology-hub/${String(group.sign).toLowerCase()}-zodiac-sign-guide">
+                  <img
+                    class="hub-sign-thumb celeb-archive-thumb"
+                    src="${state.theme === "light" ? zodiacDetails(group.sign).imageUrlLight : zodiacDetails(group.sign).imageUrlDark}"
+                    data-zodiac-light="${zodiacDetails(group.sign).imageUrlLight}"
+                    data-zodiac-dark="${zodiacDetails(group.sign).imageUrlDark}"
+                    alt="${group.sign} zodiac illustration"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </a>
+                <h2>${group.sign} historical profiles</h2>
+                <p>${zodiacDetails(group.sign).brief}</p>
+                <ul class="bullet-list celeb-archive-list">
                   ${group.items
-                    .map((item) => `<li><a class="hub-link" href="/celebrities/${item.slug || item.id}">${item.name}</a> · ${item.years}</li>`)
+                    .map((item) => `<li><a class="hub-link" href="/celebrities/${item.slug || item.id}">${item.name}</a> <span class="muted">· ${item.field} · ${item.years}</span></li>`)
                     .join("")}
                 </ul>
               </article>
@@ -4602,6 +4643,142 @@ function celebrityProfileLoadingView(slug) {
     </section>
     <section class="section">
       <article class="card"><p class="muted" id="celebrityProfileStatus">Loading profile data...</p></article>
+    </section>
+  `;
+}
+
+function renderCelebrityNatalPage(celeb, natal) {
+  const profile = {
+    name: celeb.name,
+    birthDate: celeb.birthDate,
+    birthTime: celeb.birthTime,
+    birthCity: celeb.birthCity
+  };
+  const chartSvg = renderNatalChartSvg(natal);
+  const placementsTable = renderPlanetPlacementTable(natal?.planets || []);
+  const life = natal?.lifeAreas || {};
+  const zodiacSection = renderNatalZodiacSection(natal?.core?.sun);
+  const editorial = buildNatalEditorial(profile, natal);
+  const keyAspects = Array.isArray(natal?.aspects) ? natal.aspects.slice(0, 6) : [];
+  const keyPlanets = Array.isArray(natal?.planets) ? natal.planets.slice(0, 6) : [];
+  const focusHouses = Array.isArray(natal?.housesFocus) ? natal.housesFocus : [];
+  const interpretationStack = [
+    `Solar style in ${natal?.core?.sun || celeb.sign || "Unknown"} with emotional baseline in ${natal?.core?.moon || "Unknown"}.`,
+    `Presentation axis through ${natal?.core?.rising || "Unknown"} sets social first impression and pacing style.`,
+    `Calculated with ${String(natal?.calculation?.zodiac || "tropical").toUpperCase()} zodiac and ${String(natal?.calculation?.houseSystem || "placidus").toUpperCase()} houses.`
+  ];
+  const related = state.celebrities
+    .filter((item) => item.sign === celeb.sign && item.id !== celeb.id)
+    .slice(0, 4);
+  return `
+    ${renderNatalHeader(profile, natal)}
+    <section class="section">
+      <article class="card celeb-profile-hero premium-panel">
+        <span class="eyebrow">Historical Context</span>
+        <h2>${celeb.field} · ${celeb.years}</h2>
+        <p>${celeb.fact}</p>
+        <div class="chip-grid">
+          <span class="astro-chip">${zodiacIcon(celeb.sign)} ${celeb.sign}</span>
+          <span class="astro-chip">${uiIcon("calendar")} ${celeb.birthDate}</span>
+          <span class="astro-chip">${uiIcon("clock")} ${celeb.birthTime}</span>
+          <span class="astro-chip">${uiIcon("location")} ${celeb.birthCity}</span>
+        </div>
+      </article>
+    </section>
+    <section class="section">
+      <article class="card celeb-profile-intro premium-panel">
+        <div class="celeb-profile-intro-grid">
+          <div>
+            <span class="eyebrow">Chart Signature</span>
+            <h2>${celeb.name} at a glance</h2>
+            <p>${natal?.summary || ""}</p>
+            <ul class="bullet-list">
+              ${interpretationStack.map((line) => `<li>${line}</li>`).join("")}
+            </ul>
+          </div>
+          <div class="celeb-profile-facts">
+            <h3>High-signal markers</h3>
+            <div class="chip-grid">
+              ${keyPlanets
+                .map((planet) => `<span class="astro-chip">${planet.key}: ${planet.sign}${planet.house ? ` · H${planet.house}` : ""}${planet.retrograde ? " · Rx" : ""}</span>`)
+                .join("")}
+            </div>
+            <h3>Dominant houses</h3>
+            <ul class="bullet-list">
+              ${focusHouses.length
+                ? focusHouses.map((item) => `<li><strong>H${item.house}</strong> · ${item.meaning}</li>`).join("")
+                : "<li>House geometry not available for this profile.</li>"}
+            </ul>
+          </div>
+        </div>
+      </article>
+    </section>
+    <section class="section" id="natal-wheel">
+      <article class="route-card">
+        <h2>Natal Wheel</h2>
+        ${chartSvg}
+      </article>
+    </section>
+    <section class="section" id="natal-placements">
+      <article class="route-card content-panel premium-panel">
+        <span class="premium-kicker">Data Table + Narrative</span>
+        <h2>Planet Placement Matrix</h2>
+        <p class="dropcap">${natal?.summary || ""}</p>
+        <blockquote class="premium-quote">Historical chart interpretation is presented as behavioral architecture, not identity labeling.</blockquote>
+        ${placementsTable}
+      </article>
+    </section>
+    <section class="section" id="natal-core-domains">
+      <div class="feature-grid">
+        <article class="feature-card content-card">
+          <h3>${uiIcon("heart")} Relationships</h3>
+          <p>${life.relationships || "N/A"}</p>
+        </article>
+        <article class="feature-card content-card">
+          <h3>${uiIcon("briefcase")} Career</h3>
+          <p>${life.career || "N/A"}</p>
+        </article>
+        <article class="feature-card content-card">
+          <h3>${uiIcon("coins")} Money</h3>
+          <p>${life.money || "N/A"}</p>
+        </article>
+        <article class="feature-card content-card">
+          <h3>${uiIcon("bolt")} Energy</h3>
+          <p>${life.energy || "N/A"}</p>
+        </article>
+      </div>
+    </section>
+    <section class="section" id="natal-aspects">
+      <article class="card premium-panel">
+        <span class="eyebrow">Aspect Architecture</span>
+        <h2>Primary dynamic links</h2>
+        <p>These links summarize high-impact internal coordination patterns in the natal geometry.</p>
+        <ul class="bullet-list">
+          ${keyAspects.length ? keyAspects.map((aspect) => `<li>${aspect}</li>`).join("") : "<li>No major aspects available.</li>"}
+        </ul>
+      </article>
+    </section>
+    ${zodiacSection}
+    ${editorial}
+    <section class="section">
+      <article class="card">
+        <h2>More ${celeb.sign} profiles</h2>
+        <div class="hub-grid related-grid">
+          ${related
+            .map((item) => `
+              <article class="hub-card">
+                <h3>${item.name}</h3>
+                <p class="hub-meta">${item.field} · ${item.years}</p>
+                <p>${item.fact}</p>
+                <a class="hub-link" href="/celebrities/${item.slug || item.id}">Open profile</a>
+              </article>
+            `)
+            .join("")}
+        </div>
+        <div class="hero-actions">
+          <a class="btn ghost" href="/celebrities">Back to all historical profiles</a>
+        </div>
+      </article>
     </section>
   `;
 }
@@ -5890,6 +6067,31 @@ function attachRouteHandlers(path) {
         }
       }
     });
+    const addVirtualFriendButton = document.getElementById("addVirtualFriendButton");
+    const virtualCelebritySelect = document.getElementById("virtualCelebritySelect");
+    addVirtualFriendButton?.addEventListener("click", async () => {
+      const celebrityId = String(virtualCelebritySelect?.value || "").trim();
+      if (!celebrityId) {
+        alert("Choose one historical profile first.");
+        return;
+      }
+      try {
+        const payload = await fetchJson("/api/friends/virtual-celebrity", {
+          method: "POST",
+          body: JSON.stringify({ celebrityId })
+        });
+        state.friends = Array.isArray(payload?.friends) ? payload.friends : [];
+        await refreshFriendInsights();
+        render();
+      } catch (error) {
+        if (error.status === 401) {
+          await refreshAuthState();
+          navigate("/login", { replace: true });
+          return;
+        }
+        alert(`Failed to add virtual friend: ${error.message}`);
+      }
+    });
   }
 
   if (path.startsWith("/celebrities/")) {
@@ -5905,57 +6107,11 @@ function attachRouteHandlers(path) {
           }
           return;
         }
-        const container = app;
-        if (!container) {
-          return;
-        }
-        container.innerHTML = `
-          <section class="section">
-            <article class="card tone-card">
-              <span class="eyebrow">Celebrities</span>
-              <h1>${celeb.name}</h1>
-              <p>${celeb.field} · ${celeb.years} · ${celeb.birthDate} ${celeb.birthTime} · ${celeb.birthCity}</p>
-            </article>
-          </section>
-          <section class="section">
-            <article class="card">
-              <span class="eyebrow">Natal Core</span>
-              <h2>${natal?.core?.sun || "Unknown"} · ${natal?.core?.moon || "Unknown"} · ${natal?.core?.rising || "Unknown"}</h2>
-              <p>${celeb.fact}</p>
-              <p>${natal?.summary || ""}</p>
-            </article>
-          </section>
-          <section class="section">
-            <article class="card">
-              <h2>Planet Placement Matrix</h2>
-              <div class="table-wrap">
-                <table>
-                  <thead>
-                    <tr><th>Planet</th><th>Sign</th><th>House</th><th>State</th><th>Meaning</th></tr>
-                  </thead>
-                  <tbody>
-                    ${(Array.isArray(natal?.planets) ? natal.planets : [])
-                      .map((planet) => `
-                        <tr>
-                          <td>${planet.label || planet.key || "Planet"}</td>
-                          <td>${planet.sign || "Unknown"}</td>
-                          <td>${planet.house || "—"}</td>
-                          <td>${planet.state || "Direct"}</td>
-                          <td>${planet.meaning || "Interpretive meaning unavailable."}</td>
-                        </tr>
-                      `)
-                      .join("")}
-                  </tbody>
-                </table>
-              </div>
-              <div class="hero-actions">
-                <a class="btn ghost" href="/celebrities">Back to Celebrities</a>
-              </div>
-            </article>
-          </section>
-        `;
+        app.innerHTML = renderCelebrityNatalPage(celeb, natal);
         syncZodiacThemeImages(state.theme);
         markActiveNav(path);
+        bindNatalAsciiLogo();
+        animateHeadingTypewriter();
       })
       .catch((error) => {
         if (status) {
