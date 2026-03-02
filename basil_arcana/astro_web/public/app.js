@@ -2646,18 +2646,18 @@ async function initSolarSystemWidget(dashboard, period) {
   objectOverlay.innerHTML = "";
   const sunSignIcon = zodiacIconClasses[sunSign] || "mdi:circle-outline";
   focusCompass.innerHTML = `
-    <div class="solar-focus-compass-row">
-      <span class="solar-focus-chip"><b>SUN</b></span>
+    <span class="solar-focus-chip solar-focus-chip-sun">
+      <b>SUN</b>
       <span class="solar-focus-arrow solar-focus-arrow-sun" aria-hidden="true"></span>
-    </div>
-    <div class="solar-focus-compass-row">
-      <span class="solar-focus-chip">
-        <iconify-icon icon="${sunSignIcon}" class="solar-focus-sign-icon" aria-hidden="true"></iconify-icon>
-        <b>${sunSign.toUpperCase()}</b>
-      </span>
+    </span>
+    <span class="solar-focus-chip solar-focus-chip-sign">
+      <iconify-icon icon="${sunSignIcon}" class="solar-focus-sign-icon" aria-hidden="true"></iconify-icon>
+      <b>${sunSign.toUpperCase()}</b>
       <span class="solar-focus-arrow solar-focus-arrow-sign" aria-hidden="true"></span>
-    </div>
+    </span>
   `;
+  const compassSunChip = focusCompass.querySelector(".solar-focus-chip-sun");
+  const compassSignChip = focusCompass.querySelector(".solar-focus-chip-sign");
   const compassSunArrow = focusCompass.querySelector(".solar-focus-arrow-sun");
   const compassSignArrow = focusCompass.querySelector(".solar-focus-arrow-sign");
   const sunLabel = document.createElement("span");
@@ -2834,6 +2834,11 @@ async function initSolarSystemWidget(dashboard, period) {
   };
 
   const start = performance.now();
+  const compassTrack = {
+    sun: { x: 0, y: 0, a: 0, ready: false },
+    sign: { x: 0, y: 0, a: 0, ready: false }
+  };
+  const smoothAngle = (from, to, alpha) => from + Math.atan2(Math.sin(to - from), Math.cos(to - from)) * alpha;
   const runtime = {
     renderer,
     scene,
@@ -3057,7 +3062,7 @@ async function initSolarSystemWidget(dashboard, period) {
     } else if (runtime.focusGrid) {
       runtime.focusGrid.material.opacity = 0;
     }
-    if (selectedKey !== "__all__" && compassSunArrow && compassSignArrow) {
+    if (selectedKey !== "__all__" && selectedKey !== "Sun" && compassSunChip && compassSignChip && compassSunArrow && compassSignArrow) {
       const centerProjected = focusMesh.position.clone().project(camera);
       const isVisible = centerProjected.z < 1;
       const cx = ((centerProjected.x + 1) / 2) * wrap.clientWidth;
@@ -3083,28 +3088,50 @@ async function initSolarSystemWidget(dashboard, period) {
       const signX = ((signProjected.x + 1) / 2) * wrap.clientWidth;
       const signY = ((-signProjected.y + 1) / 2) * wrap.clientHeight;
       const signTheta = Math.atan2(signY - cy, signX - cx);
-      const sunDeg = (sunTheta * 180) / Math.PI;
-      const signDeg = (signTheta * 180) / Math.PI;
-      const panelW = isMobileScene ? 134 : 148;
-      const panelH = 58;
-      const panelX = Math.min(
-        wrap.clientWidth - panelW - 8,
-        Math.max(8, cx + (isMobileScene ? 26 : 34))
-      );
-      const panelY = Math.min(
-        wrap.clientHeight - panelH - 8,
-        Math.max(8, cy - (isMobileScene ? 54 : 62))
-      );
+
+      const sunW = compassSunChip.offsetWidth || (isMobileScene ? 78 : 84);
+      const signW = compassSignChip.offsetWidth || (isMobileScene ? 118 : 128);
+      const chipH = compassSunChip.offsetHeight || 24;
+      const minGap = 8;
+      const leftTargetX = Math.max(minGap, Math.min(wrap.clientWidth - sunW - minGap, cx - (isMobileScene ? 126 : 144)));
+      const leftTargetY = Math.max(minGap, Math.min(wrap.clientHeight - chipH - minGap, cy - (isMobileScene ? 20 : 24)));
+      const rightTargetX = Math.max(minGap, Math.min(wrap.clientWidth - signW - minGap, cx + (isMobileScene ? 18 : 24)));
+      const rightTargetY = Math.max(minGap, Math.min(wrap.clientHeight - chipH - minGap, cy + (isMobileScene ? 4 : 8)));
+
+      const sunCenterX = leftTargetX + sunW * 0.5;
+      const sunCenterY = leftTargetY + chipH * 0.5;
+      const signCenterX = rightTargetX + signW * 0.5;
+      const signCenterY = rightTargetY + chipH * 0.5;
+      const sunArrowAngle = Math.atan2(sunScreen.y - sunCenterY, sunScreen.x - sunCenterX);
+      const signArrowAngle = Math.atan2(signY - signCenterY, signX - signCenterX);
 
       focusCompass.style.opacity = isVisible ? "1" : "0";
-      focusCompass.style.left = `${Math.round(panelX)}px`;
-      focusCompass.style.top = `${Math.round(panelY)}px`;
-      focusCompass.style.transform = "none";
+      const blend = preferReducedMotion ? 0.26 : 0.2;
+      if (!compassTrack.sun.ready) {
+        compassTrack.sun = { x: leftTargetX, y: leftTargetY, a: sunArrowAngle, ready: true };
+      } else {
+        compassTrack.sun.x += (leftTargetX - compassTrack.sun.x) * blend;
+        compassTrack.sun.y += (leftTargetY - compassTrack.sun.y) * blend;
+        compassTrack.sun.a = smoothAngle(compassTrack.sun.a, sunArrowAngle, blend);
+      }
+      if (!compassTrack.sign.ready) {
+        compassTrack.sign = { x: rightTargetX, y: rightTargetY, a: signArrowAngle, ready: true };
+      } else {
+        compassTrack.sign.x += (rightTargetX - compassTrack.sign.x) * blend;
+        compassTrack.sign.y += (rightTargetY - compassTrack.sign.y) * blend;
+        compassTrack.sign.a = smoothAngle(compassTrack.sign.a, signArrowAngle, blend);
+      }
 
-      compassSunArrow.style.transform = `rotate(${sunDeg.toFixed(2)}deg)`;
-      compassSignArrow.style.transform = `rotate(${signDeg.toFixed(2)}deg)`;
+      compassSunChip.style.left = `${compassTrack.sun.x.toFixed(2)}px`;
+      compassSunChip.style.top = `${compassTrack.sun.y.toFixed(2)}px`;
+      compassSignChip.style.left = `${compassTrack.sign.x.toFixed(2)}px`;
+      compassSignChip.style.top = `${compassTrack.sign.y.toFixed(2)}px`;
+      compassSunArrow.style.transform = `rotate(${((compassTrack.sun.a * 180) / Math.PI).toFixed(2)}deg)`;
+      compassSignArrow.style.transform = `rotate(${((compassTrack.sign.a * 180) / Math.PI).toFixed(2)}deg)`;
     } else {
       focusCompass.style.opacity = "0";
+      compassTrack.sun.ready = false;
+      compassTrack.sign.ready = false;
     }
     renderer.render(scene, camera);
     runtime.frameId = window.requestAnimationFrame(tick);
