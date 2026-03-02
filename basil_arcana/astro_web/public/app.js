@@ -2646,20 +2646,15 @@ async function initSolarSystemWidget(dashboard, period) {
   objectOverlay.innerHTML = "";
   const sunSignIcon = zodiacIconClasses[sunSign] || "mdi:circle-outline";
   focusCompass.innerHTML = `
-    <span class="solar-focus-chip solar-focus-chip-sun">
-      <b>SUN</b>
-      <span class="solar-focus-arrow solar-focus-arrow-sun" aria-hidden="true"></span>
-    </span>
-    <span class="solar-focus-chip solar-focus-chip-sign">
-      <iconify-icon icon="${sunSignIcon}" class="solar-focus-sign-icon" aria-hidden="true"></iconify-icon>
-      <b>${sunSign.toUpperCase()}</b>
-      <span class="solar-focus-arrow solar-focus-arrow-sign" aria-hidden="true"></span>
+    <span class="solar-sign-indicator" aria-hidden="true">
+      <span class="solar-sign-indicator-core">
+        <iconify-icon icon="${sunSignIcon}" class="solar-sign-indicator-icon" aria-hidden="true"></iconify-icon>
+      </span>
+      <span class="solar-sign-indicator-pointer"></span>
     </span>
   `;
-  const compassSunChip = focusCompass.querySelector(".solar-focus-chip-sun");
-  const compassSignChip = focusCompass.querySelector(".solar-focus-chip-sign");
-  const compassSunArrow = focusCompass.querySelector(".solar-focus-arrow-sun");
-  const compassSignArrow = focusCompass.querySelector(".solar-focus-arrow-sign");
+  const compassSignIndicator = focusCompass.querySelector(".solar-sign-indicator");
+  const compassSignPointer = focusCompass.querySelector(".solar-sign-indicator-pointer");
   const sunLabel = document.createElement("span");
   sunLabel.className = "solar-object-label";
   objectOverlay.appendChild(sunLabel);
@@ -2834,10 +2829,8 @@ async function initSolarSystemWidget(dashboard, period) {
   };
 
   const start = performance.now();
-  const compassTrack = {
-    sun: { x: 0, y: 0, a: 0, ready: false },
-    sign: { x: 0, y: 0, a: 0, ready: false }
-  };
+  const compassTrack = { x: 0, y: 0, a: 0, ready: false };
+  const objectLabelTrack = new Map();
   const smoothAngle = (from, to, alpha) => from + Math.atan2(Math.sin(to - from), Math.cos(to - from)) * alpha;
   const runtime = {
     renderer,
@@ -3042,7 +3035,25 @@ async function initSolarSystemWidget(dashboard, period) {
       const iconClass = zodiacIconClasses[sign] || "mdi:circle-outline";
       label.innerHTML = `<iconify-icon icon="${iconClass}" class="solar-zodiac-icon" aria-hidden="true"></iconify-icon><span>${key} · ${sign}</span>`;
       label.style.opacity = visible ? "0.9" : "0";
-      label.style.transform = `translate(${Math.round(x)}px, ${Math.round(y)}px)`;
+      const blend = preferReducedMotion ? 0.28 : 0.2;
+      const prev = objectLabelTrack.get(key);
+      let sx = x;
+      let sy = y;
+      if (!prev || !prev.ready) {
+        objectLabelTrack.set(key, { x, y, ready: true });
+      } else {
+        prev.x += (x - prev.x) * blend;
+        prev.y += (y - prev.y) * blend;
+        sx = prev.x;
+        sy = prev.y;
+      }
+      if (!visible) {
+        const t = objectLabelTrack.get(key);
+        if (t) {
+          t.ready = false;
+        }
+      }
+      label.style.transform = `translate(${sx.toFixed(2)}px, ${sy.toFixed(2)}px)`;
       label.classList.toggle("is-active", key === selectedKey);
     };
     const sunAngle = normalizeAngle((simDays / 365.25) * 360 + 280);
@@ -3062,22 +3073,11 @@ async function initSolarSystemWidget(dashboard, period) {
     } else if (runtime.focusGrid) {
       runtime.focusGrid.material.opacity = 0;
     }
-    if (selectedKey !== "__all__" && selectedKey !== "Sun" && compassSunChip && compassSignChip && compassSunArrow && compassSignArrow) {
+    if (selectedKey !== "__all__" && selectedKey !== "Sun" && compassSignIndicator && compassSignPointer) {
       const centerProjected = focusMesh.position.clone().project(camera);
       const isVisible = centerProjected.z < 1;
       const cx = ((centerProjected.x + 1) / 2) * wrap.clientWidth;
       const cy = ((-centerProjected.y + 1) / 2) * wrap.clientHeight;
-
-      const sunScreen = selectedKey === "Sun"
-        ? { x: cx + 1, y: cy - 1 }
-        : (() => {
-            const p = sunMesh.position.clone().project(camera);
-            return {
-              x: ((p.x + 1) / 2) * wrap.clientWidth,
-              y: ((-p.y + 1) / 2) * wrap.clientHeight
-            };
-          })();
-      const sunTheta = Math.atan2(sunScreen.y - cy, sunScreen.x - cx);
 
       const signAnchorWorld = new THREE.Vector3(
         Math.cos(sunSignAngle) * (maxOrbit + 0.9),
@@ -3087,51 +3087,32 @@ async function initSolarSystemWidget(dashboard, period) {
       const signProjected = signAnchorWorld.project(camera);
       const signX = ((signProjected.x + 1) / 2) * wrap.clientWidth;
       const signY = ((-signProjected.y + 1) / 2) * wrap.clientHeight;
-      const signTheta = Math.atan2(signY - cy, signX - cx);
-
-      const sunW = compassSunChip.offsetWidth || (isMobileScene ? 78 : 84);
-      const signW = compassSignChip.offsetWidth || (isMobileScene ? 118 : 128);
-      const chipH = compassSunChip.offsetHeight || 24;
+      const indicatorSize = compassSignIndicator.offsetWidth || (isMobileScene ? 44 : 48);
       const minGap = 8;
-      const leftTargetX = Math.max(minGap, Math.min(wrap.clientWidth - sunW - minGap, cx - (isMobileScene ? 126 : 144)));
-      const leftTargetY = Math.max(minGap, Math.min(wrap.clientHeight - chipH - minGap, cy - (isMobileScene ? 20 : 24)));
-      const rightTargetX = Math.max(minGap, Math.min(wrap.clientWidth - signW - minGap, cx + (isMobileScene ? 18 : 24)));
-      const rightTargetY = Math.max(minGap, Math.min(wrap.clientHeight - chipH - minGap, cy + (isMobileScene ? 4 : 8)));
-
-      const sunCenterX = leftTargetX + sunW * 0.5;
-      const sunCenterY = leftTargetY + chipH * 0.5;
-      const signCenterX = rightTargetX + signW * 0.5;
-      const signCenterY = rightTargetY + chipH * 0.5;
-      const sunArrowAngle = Math.atan2(sunScreen.y - sunCenterY, sunScreen.x - sunCenterX);
-      const signArrowAngle = Math.atan2(signY - signCenterY, signX - signCenterX);
+      const targetX = Math.max(minGap + indicatorSize * 0.5, Math.min(wrap.clientWidth - indicatorSize * 0.5 - minGap, cx + (isMobileScene ? 54 : 68)));
+      const targetY = Math.max(minGap + indicatorSize * 0.5, Math.min(wrap.clientHeight - indicatorSize * 0.5 - minGap, cy - (isMobileScene ? 34 : 40)));
 
       focusCompass.style.opacity = isVisible ? "1" : "0";
-      const blend = preferReducedMotion ? 0.26 : 0.2;
-      if (!compassTrack.sun.ready) {
-        compassTrack.sun = { x: leftTargetX, y: leftTargetY, a: sunArrowAngle, ready: true };
+      const blend = preferReducedMotion ? 0.24 : 0.18;
+      if (!compassTrack.ready) {
+        const a0 = Math.atan2(signY - targetY, signX - targetX);
+        compassTrack.x = targetX;
+        compassTrack.y = targetY;
+        compassTrack.a = a0;
+        compassTrack.ready = true;
       } else {
-        compassTrack.sun.x += (leftTargetX - compassTrack.sun.x) * blend;
-        compassTrack.sun.y += (leftTargetY - compassTrack.sun.y) * blend;
-        compassTrack.sun.a = smoothAngle(compassTrack.sun.a, sunArrowAngle, blend);
-      }
-      if (!compassTrack.sign.ready) {
-        compassTrack.sign = { x: rightTargetX, y: rightTargetY, a: signArrowAngle, ready: true };
-      } else {
-        compassTrack.sign.x += (rightTargetX - compassTrack.sign.x) * blend;
-        compassTrack.sign.y += (rightTargetY - compassTrack.sign.y) * blend;
-        compassTrack.sign.a = smoothAngle(compassTrack.sign.a, signArrowAngle, blend);
+        compassTrack.x += (targetX - compassTrack.x) * blend;
+        compassTrack.y += (targetY - compassTrack.y) * blend;
+        const nextA = Math.atan2(signY - compassTrack.y, signX - compassTrack.x);
+        compassTrack.a = smoothAngle(compassTrack.a, nextA, blend);
       }
 
-      compassSunChip.style.left = `${compassTrack.sun.x.toFixed(2)}px`;
-      compassSunChip.style.top = `${compassTrack.sun.y.toFixed(2)}px`;
-      compassSignChip.style.left = `${compassTrack.sign.x.toFixed(2)}px`;
-      compassSignChip.style.top = `${compassTrack.sign.y.toFixed(2)}px`;
-      compassSunArrow.style.transform = `rotate(${((compassTrack.sun.a * 180) / Math.PI).toFixed(2)}deg)`;
-      compassSignArrow.style.transform = `rotate(${((compassTrack.sign.a * 180) / Math.PI).toFixed(2)}deg)`;
+      compassSignIndicator.style.left = `${compassTrack.x.toFixed(2)}px`;
+      compassSignIndicator.style.top = `${compassTrack.y.toFixed(2)}px`;
+      compassSignPointer.style.transform = `translate(-50%, -50%) rotate(${((compassTrack.a * 180) / Math.PI).toFixed(2)}deg) translateX(18px)`;
     } else {
       focusCompass.style.opacity = "0";
-      compassTrack.sun.ready = false;
-      compassTrack.sign.ready = false;
+      compassTrack.ready = false;
     }
     renderer.render(scene, camera);
     runtime.frameId = window.requestAnimationFrame(tick);
