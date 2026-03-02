@@ -3427,16 +3427,28 @@ function onboardingView() {
   const selectedCelebrityIds = Array.isArray(profile?.selectedCelebrityIds) ? profile.selectedCelebrityIds : [];
   const referredByCode = String(state.referralContext?.code || "").trim();
   const referralConsentChecked = state.referralContext?.shareBirthDataConsent !== false;
-  const celebCards = state.celebrities
+  const selectedSet = new Set(selectedCelebrityIds.map((id) => String(id || "").trim()).filter(Boolean));
+  const preferred = state.celebrities.filter((item) => selectedSet.has(String(item.id || "").trim()));
+  const remaining = state.celebrities.filter((item) => !selectedSet.has(String(item.id || "").trim()));
+  for (let i = remaining.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [remaining[i], remaining[j]] = [remaining[j], remaining[i]];
+  }
+  const onboardingCelebPool = [...preferred, ...remaining].slice(0, 3);
+  const celebCards = onboardingCelebPool
     .map((item) => {
       const id = String(item.id || "");
       const checked = selectedCelebrityIds.includes(id) ? "checked" : "";
       return `
         <label class="onboarding-celeb-card">
-          <input type="checkbox" class="js-onboarding-celeb-check" value="${id}" ${checked} />
-          <span class="onboarding-celeb-name">${item.name}</span>
-          <span class="onboarding-celeb-meta">${item.sign} · ${item.field}</span>
-          <span class="onboarding-celeb-years">${item.years}</span>
+          <span class="onboarding-celeb-content">
+            <span class="onboarding-celeb-name">${item.name}</span>
+            <span class="onboarding-celeb-meta">${item.sign} · ${item.field}</span>
+            <span class="onboarding-celeb-years">${item.years}</span>
+          </span>
+          <span class="onboarding-celeb-checkrail">
+            <input type="checkbox" class="js-onboarding-celeb-check" value="${id}" ${checked} />
+          </span>
         </label>
       `;
     })
@@ -3467,8 +3479,8 @@ function onboardingView() {
           <input required name="timezone" value="${profile.timezone || "UTC"}" placeholder="UTC+3" />
         </label>
         <fieldset class="field-span-2 onboarding-celeb-fieldset">
-          <legend>Compare with historical profiles (up to 3)</legend>
-          <p class="muted">Pick up to three figures to compare your chart dynamics after onboarding.</p>
+          <legend>Compare with historical profiles</legend>
+          <p class="muted">Pick from these 3 curated figures to compare chart dynamics after onboarding.</p>
           <p class="muted">Selected: <strong id="onboardingCelebCount">${Math.min(3, selectedCelebrityIds.length)}/3</strong></p>
           <div id="onboardingCelebGrid" class="onboarding-celeb-grid">
             ${celebCards}
@@ -3486,11 +3498,9 @@ function onboardingView() {
         <input type="hidden" name="longitude" value="${Number.isFinite(Number(profile.longitude)) ? Number(profile.longitude) : ""}" />
         <input type="hidden" name="timezoneIana" value="${profile.timezoneIana || ""}" />
         <datalist id="citySuggestions"></datalist>
+        <button class="btn primary form-submit" type="submit">Save and continue</button>
       </form>
     </section>
-    <div class="onboarding-submit-dock" role="region" aria-label="Save profile">
-      <button class="btn primary onboarding-submit-btn" type="submit" form="onboardingForm">Save and continue</button>
-    </div>
   `;
 }
 
