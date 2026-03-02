@@ -1935,6 +1935,11 @@ function renderFriendAccordion(friend, { expanded = false, canDelete = false } =
     rising: "Unknown"
   };
   const shareEnabled = !friend?.noShareData && (String(friend?.friendTelegram || "").trim() || String(friend?.friendEmail || "").trim());
+  const historicalCompanion = Boolean(friend?.isHistoricalCompanion || friend?.isVirtual || String(friend?.id || "").startsWith("celeb:"));
+  const historicalSlug = String(
+    friend?.celebrityId
+    || (String(friend?.id || "").startsWith("celeb:") ? String(friend.id).replace(/^celeb:/, "") : "")
+  ).trim();
   const detailId = `friend-detail-${String(friend?.id || friend?.friendName || "friend").replace(/[^a-z0-9_-]/gi, "_")}`;
   return `
     <article class="friend-accordion ${expanded ? "open" : ""}" data-id="${friend.id || ""}">
@@ -1942,7 +1947,7 @@ function renderFriendAccordion(friend, { expanded = false, canDelete = false } =
         <div class="friend-row">
           <div>
             <strong>${friend.friendName}</strong>
-            <p>${zodiacIcon(friend.friendSign)} ${friend.friendSign} · ${friend.trend || "stable"}</p>
+            <p>${zodiacIcon(friend.friendSign)} ${friend.friendSign} · ${friend.trend || "stable"} ${historicalCompanion ? `<span class="friend-historical-tag">HISTORICAL COMPANION</span>` : ""}</p>
           </div>
           <div class="friend-score">
             ${renderFriendGauge(score)}
@@ -1980,6 +1985,11 @@ function renderFriendAccordion(friend, { expanded = false, canDelete = false } =
         </ul>
         <p>${friend.advice || ""}</p>
         <div class="friend-actions">
+          ${
+            historicalCompanion && historicalSlug
+              ? `<a class="btn ghost" href="/celebrities/${historicalSlug}">Open historical profile</a>`
+              : ""
+          }
           ${
             shareEnabled
               ? `<button class="btn ghost js-share-friend" type="button" data-name="${friend.friendName}" data-sign="${friend.friendSign}" data-score="${score}" data-telegram="${friend.friendTelegram || ""}" data-email="${friend.friendEmail || ""}">Share with friend</button>`
@@ -3260,7 +3270,6 @@ function renderHomeDashboard(dashboard) {
   ].filter((item) => item.replace(/<[^>]+>/g, "").trim());
   const zodiacCompact = renderHomeZodiacCompact(dashboard.natalCore?.sun);
   const zodiacCelebBlock = renderZodiacCelebrities(dashboard.natalCore?.sun);
-  const celebrityComparisons = Array.isArray(dashboard?.celebrityComparisons) ? dashboard.celebrityComparisons : [];
   const solarSystemBlock = renderSolarSystemBlock(dashboard, period);
 
   return `
@@ -3294,33 +3303,6 @@ function renderHomeDashboard(dashboard) {
       </article>
     </section>
     ${solarSystemBlock}
-    ${
-      celebrityComparisons.length
-        ? `<section class="section">
-            <article class="card">
-              <span class="eyebrow">Historical Sync</span>
-              <h2>Your selected historical comparisons</h2>
-              <div class="celeb-grid">
-                ${celebrityComparisons
-                  .map((item) => `
-                    <article class="celeb-card">
-                      <h3>${item.name}</h3>
-                      <p class="celeb-meta">${item.field} · ${item.years}</p>
-                      <div class="celeb-chip-row">
-                        <span class="celeb-chip">Sign: ${item.sign}</span>
-                        <span class="celeb-chip">Sync: ${item.score}%</span>
-                        <span class="celeb-chip">${item.trend}</span>
-                      </div>
-                      <p>${item.note}</p>
-                      <a class="hub-link" href="/celebrities/${item.id}">Open natal profile</a>
-                    </article>
-                  `)
-                  .join("")}
-              </div>
-            </article>
-          </section>`
-        : ""
-    }
     ${zodiacCompact}
     ${zodiacCelebBlock}
     <section class="section">
@@ -4000,14 +3982,25 @@ function friendsView() {
   const allFriends = Array.isArray(state.friends) ? state.friends : [];
   const hasFriends = allFriends.length > 0;
   const hasRealFriends = allFriends.some((friend) => !friend?.isVirtual);
+  const selectedFromProfile = Array.isArray(state.profile?.selectedCelebrityIds)
+    ? state.profile.selectedCelebrityIds
+    : [];
   const selectedVirtualIds = new Set(
-    allFriends
-      .filter((friend) => friend?.isVirtual && friend?.virtualSource === "celebrity")
-      .map((friend) => String(friend?.celebrityId || "").trim())
+    [
+      ...selectedFromProfile,
+      ...allFriends
+        .filter((friend) => friend?.isVirtual && friend?.virtualSource === "celebrity")
+        .map((friend) => String(friend?.celebrityId || "").trim())
+    ]
+      .map((value) => String(value || "").trim())
       .filter(Boolean)
   );
   const canChooseVirtual = !hasRealFriends && selectedVirtualIds.size < 3;
-  const virtualPool = state.celebrities;
+  const missingVirtualSlots = !hasRealFriends ? Math.max(0, 3 - selectedVirtualIds.size) : 0;
+  const virtualPool = state.celebrities
+    .filter((item) => !selectedVirtualIds.has(String(item.id || "").trim()))
+    .sort(() => Math.random() - 0.5)
+    .slice(0, missingVirtualSlots);
   const selectedCount = selectedVirtualIds.size;
   return `
     <section class="section">
@@ -4052,16 +4045,15 @@ function friendsView() {
         ? `<section class="section">
             <article class="card">
               <span class="eyebrow">Starter mode</span>
-              <h2>Select up to 3 historical companions</h2>
-              <p class="muted">Until your real social circle joins, pick up to three historical profiles to compare rhythm and communication patterns.</p>
-              <p class="muted">Selected: <strong>${selectedCount}/3</strong></p>
+              <h2>Add historical companions</h2>
+              <p class="muted">Connected historical companions: <strong>${selectedCount}/3</strong>.</p>
+              <p class="muted">Pick ${missingVirtualSlots} suggested profile${missingVirtualSlots === 1 ? "" : "s"} to complete your comparison set.</p>
               <div id="virtualCelebrityPicker" class="virtual-celeb-grid">
                 ${virtualPool
                   .map((item) => {
-                    const isChecked = selectedVirtualIds.has(String(item.id || ""));
                     return `
-                      <label class="virtual-celeb-card ${isChecked ? "is-locked" : ""}">
-                        <input type="checkbox" class="js-virtual-celeb-check" value="${item.id}" ${isChecked ? "checked disabled" : ""} />
+                      <label class="virtual-celeb-card">
+                        <input type="checkbox" class="js-virtual-celeb-check" value="${item.id}" />
                         <span class="virtual-celeb-name">${item.name}</span>
                         <span class="virtual-celeb-meta">${item.sign} · ${item.field}</span>
                         <span class="virtual-celeb-years">${item.years}</span>
@@ -4071,7 +4063,7 @@ function friendsView() {
                   .join("")}
               </div>
               <div class="hero-actions">
-                <button id="addVirtualFriendButton" class="btn ghost" type="button">Add selected profiles</button>
+                <button id="addVirtualFriendButton" class="btn ghost" type="button" data-max-add="${missingVirtualSlots}">Add selected profiles</button>
               </div>
             </article>
           </section>`
@@ -6202,11 +6194,13 @@ function attachRouteHandlers(path) {
     const syncVirtualPicker = () => {
       const checks = Array.from(document.querySelectorAll(".js-virtual-celeb-check:not([disabled])"));
       const selected = checks.filter((input) => input instanceof HTMLInputElement && input.checked);
+      const addButton = document.getElementById("addVirtualFriendButton");
+      const maxAdd = Math.max(1, Math.min(3, Number(addButton?.getAttribute("data-max-add") || 3)));
       checks.forEach((input) => {
         if (!(input instanceof HTMLInputElement)) {
           return;
         }
-        input.disabled = !input.checked && selected.length >= 3;
+        input.disabled = !input.checked && selected.length >= maxAdd;
       });
     };
     document.querySelectorAll(".js-virtual-celeb-check").forEach((input) => {
@@ -6216,11 +6210,12 @@ function attachRouteHandlers(path) {
 
     const addVirtualFriendButton = document.getElementById("addVirtualFriendButton");
     addVirtualFriendButton?.addEventListener("click", async () => {
+      const maxAdd = Math.max(1, Math.min(3, Number(addVirtualFriendButton.getAttribute("data-max-add") || 3)));
       const selectedIds = Array.from(document.querySelectorAll(".js-virtual-celeb-check"))
         .filter((input) => input instanceof HTMLInputElement && input.checked && !input.disabled)
         .map((input) => String(input.value || "").trim())
         .filter(Boolean)
-        .slice(0, 3);
+        .slice(0, maxAdd);
       if (!selectedIds.length) {
         alert("Choose at least one historical profile.");
         return;

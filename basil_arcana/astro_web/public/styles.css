@@ -1453,6 +1453,17 @@ body[data-theme="dark"] .form-grid input[type="time"]::-webkit-calendar-picker-i
   font-size: 0.82rem;
 }
 
+.friend-historical-tag {
+  display: inline-block;
+  margin-left: 0.38rem;
+  padding: 0.08rem 0.28rem;
+  border: 1px solid var(--line-strong);
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
 .friend-score {
   text-align: right;
   max-width: 260px;

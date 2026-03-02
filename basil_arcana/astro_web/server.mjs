@@ -1656,6 +1656,8 @@ function buildDashboardPayload(sessionData, period = "week") {
     });
   const celebrityDynamic = celebrityComparisons.map((item) => ({
     id: `celeb:${item.id}`,
+    celebrityId: item.id,
+    isHistoricalCompanion: true,
     friendName: item.name,
     friendSign: item.sign,
     score: item.score,
