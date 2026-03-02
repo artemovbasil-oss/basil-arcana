@@ -2207,9 +2207,9 @@ function renderSolarSystemBlock(dashboard, period) {
         <span class="eyebrow">Heliocentric map</span>
         <div class="dashboard-head">
           <h2>Solar System State</h2>
-          <p class="muted">Live planetary geometry mapped to today's life domains.</p>
         </div>
         <div class="solar-system-layout" id="solarSystemWidget">
+          ${renderSolarSceneInfo(dashboard, period)}
           <div class="solar-canvas-wrap" id="solarCanvasWrap">
             <canvas id="solarSystemCanvas" class="solar-canvas" aria-label="Interactive solar system view"></canvas>
             <div class="solar-starfield" aria-hidden="true"></div>
@@ -2220,7 +2220,6 @@ function renderSolarSystemBlock(dashboard, period) {
             <aside class="solar-aspect-panel solar-scene-panel" id="solarAspectPanel">
               ${renderSolarAspectPanel(aspects[selected], selected, { focused: true })}
             </aside>
-            ${renderSolarSceneInfo(dashboard, period)}
           </div>
         </div>
         <div id="solarMobileMatrixWrap">

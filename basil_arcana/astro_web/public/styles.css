@@ -2705,15 +2705,10 @@ body[data-theme="light"] .solar-starfield {
 }
 
 .solar-scene-meta {
-  position: absolute;
-  left: 0.6rem;
-  bottom: 0.56rem;
-  z-index: 4;
   display: flex;
   gap: 0.38rem;
   flex-wrap: wrap;
-  max-width: calc(100% - 1.2rem);
-  pointer-events: none;
+  margin-bottom: 0.5rem;
 }
 
 .solar-scene-meta span {
@@ -3430,9 +3425,8 @@ body[data-theme="light"] .energy-star.neutral {
   }
 
   .solar-scene-meta {
-    left: 0.48rem;
-    right: 0.48rem;
-    max-width: none;
+    gap: 0.32rem;
+    margin-bottom: 0.42rem;
   }
 
   .solar-scene-meta span {
