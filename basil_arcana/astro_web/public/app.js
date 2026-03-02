@@ -1639,6 +1639,11 @@ function buildTodayAstroData(profile, dashboard) {
 
 function renderTodayAstroPanel(profile, dashboard) {
   const info = buildTodayAstroData(profile, dashboard);
+  const dailyFocus = personalizedDailyLine(dashboard?.daily?.focus || "", {
+    dayKey: new Date().toISOString().slice(0, 10),
+    core: dashboard?.natalCore,
+    profile
+  });
   return `
     <div class="today-panel">
       <h2>${info.dateLabel}</h2>
@@ -1664,9 +1669,52 @@ function renderTodayAstroPanel(profile, dashboard) {
           <strong>${info.transitIntensity}/100</strong>
         </div>
       </div>
-      <p class="muted">${dashboard?.daily?.focus || ""}</p>
+      <p class="muted">${dailyFocus}</p>
     </div>
   `;
+}
+
+function profileFirstName(profile) {
+  const name = String(profile?.name || "").trim();
+  return name.split(/\s+/).filter(Boolean)[0] || "You";
+}
+
+function personalizedDailyLine(baseText, { dayKey = "", core = null, profile = null } = {}) {
+  const cleanedBase = String(baseText || "").trim();
+  const sun = resolveZodiacSign(core?.sun || "Sun");
+  const moon = resolveZodiacSign(core?.moon || "Moon");
+  const rising = resolveZodiacSign(core?.rising || "Rising");
+  const who = profileFirstName(profile);
+  const seed = Math.abs(stringHash(`${dayKey}:${sun}:${moon}:${rising}:${cleanedBase}`));
+  const openers = [
+    `${who}, start with one high-friction conversation before noon and lock next steps in writing.`,
+    `${who}, protect signal quality first: clarify one unclear expectation before starting execution.`,
+    `${who}, run one decisive dialogue today that prevents a week of background tension.`,
+    `${who}, choose precision over speed in communication: one clear message can save multiple loops.`,
+    `${who}, anchor today's social load with one proactive check-in and one explicit boundary.`
+  ];
+  const bridges = [
+    `Use ${sun} direction for intent, ${moon} for tone, and ${rising} for timing.`,
+    `${sun} supports leadership framing, while ${moon} helps regulate emotional bandwidth.`,
+    `With ${rising} active in your behavior layer, concise language will outperform long explanations.`,
+    `${moon} asks for cleaner boundaries, and ${sun} asks for explicit ownership.`,
+    `${sun}/${moon}/${rising} alignment is strongest when commitment and timeline are both named.`
+  ];
+  const opener = openers[seed % openers.length];
+  const bridge = bridges[(seed >> 3) % bridges.length];
+  return cleanedBase ? `${opener} ${bridge}` : `${opener}`;
+}
+
+function personalizeDailyHistory(history, { core = null, profile = null } = {}) {
+  const list = Array.isArray(history) ? history : [];
+  return list.map((item, index) => {
+    const dayKey = String(item?.dayKey || "").trim() || `day-${index}`;
+    return {
+      ...item,
+      dayKey,
+      focus: personalizedDailyLine(item?.focus || "", { dayKey: `${dayKey}:${index}`, core, profile })
+    };
+  });
 }
 
 function renderNatalZodiacSection(sign) {
@@ -3107,7 +3155,7 @@ function renderHomeDashboard(dashboard) {
           ${chips.map((chip) => `<span class="astro-chip">${chip}</span>`).join("")}
         </div>
         <div class="hero-actions">
-          <a class="btn primary" href="/natal-chart">Natal Profile</a>
+          <a class="btn primary btn-natal-flicker" href="/natal-chart">Natal Profile</a>
           <a class="btn ghost" href="/profile">Edit Birth Data</a>
         </div>
       </article>
@@ -5136,6 +5184,11 @@ async function hydrateDaily() {
     const q = data?.dailyQuest || {};
     const a = data?.achievements || {};
 
+    const personalizedHistory = personalizeDailyHistory(data.history, {
+      core: state.dashboard?.natalCore,
+      profile: state.profile
+    });
+
     app.innerHTML = `
       <section class="hero">
         <article class="card daily-hero-main tone-card">
@@ -5200,7 +5253,7 @@ async function hydrateDaily() {
           <article class="route-card content-panel">
             <span class="premium-kicker">History</span>
             <h2>Recent days</h2>
-            <ul class="bullet-list">${(data.history || [])
+            <ul class="bullet-list">${personalizedHistory
               .map((item) => `<li>${item.dayKey}: ${item.focus}</li>`)
               .join("")}</ul>
           </article>
