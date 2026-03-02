@@ -520,7 +520,7 @@ async function findUserKeyByReferralCode(code) {
   return "";
 }
 
-async function buildFriendRecordFromProfile(profile, fallbackName = "Friend") {
+async function buildFriendRecordFromProfile(profile, fallbackName = "Friend", sourceUserKey = "") {
   if (!profile || typeof profile !== "object") {
     return null;
   }
@@ -539,6 +539,7 @@ async function buildFriendRecordFromProfile(profile, fallbackName = "Friend") {
   });
   return {
     id: crypto.randomUUID(),
+    sourceUserKey: String(sourceUserKey || "").trim() || null,
     friendName,
     friendBirthDate,
     friendBirthTime: friendBirthTime || null,
@@ -567,19 +568,88 @@ async function ensureMutualFriendLink(userAKey, userAData, userBKey, userBData) 
   const bHasA = (b.friends || []).some((friend) => String(friend?.friendName || "").trim() === aName);
 
   if (!aHasB) {
-    const friendB = await buildFriendRecordFromProfile(b.profile, bName);
+    const friendB = await buildFriendRecordFromProfile(b.profile, bName, userBKey);
     if (friendB) {
       a.friends = [friendB, ...(a.friends || [])].slice(0, 50);
     }
   }
   if (!bHasA) {
-    const friendA = await buildFriendRecordFromProfile(a.profile, aName);
+    const friendA = await buildFriendRecordFromProfile(a.profile, aName, userAKey);
     if (friendA) {
       b.friends = [friendA, ...(b.friends || [])].slice(0, 50);
     }
   }
   await saveUserData(userAKey, a);
   await saveUserData(userBKey, b);
+}
+
+async function listAllUserStateEntries() {
+  if (dbPool) {
+    const result = await dbPool.query("SELECT telegram_user_id, data FROM astro_web_user_state");
+    return (result.rows || []).map((row) => ({
+      userKey: String(row.telegram_user_id || "").trim(),
+      data: normalizeUserData(row.data)
+    })).filter((entry) => entry.userKey);
+  }
+  return Array.from(userStore.entries()).map(([userKey, raw]) => ({
+    userKey: String(userKey || "").trim(),
+    data: normalizeUserData(raw)
+  })).filter((entry) => entry.userKey);
+}
+
+function shouldRemoveFriendLink(friend, deletedUserKey, deletedName, deletedBirthDate) {
+  const sourceUserKey = String(friend?.sourceUserKey || "").trim();
+  if (sourceUserKey && sourceUserKey === deletedUserKey) {
+    return true;
+  }
+  const friendName = String(friend?.friendName || "").trim().toLowerCase();
+  const friendBirthDate = String(friend?.friendBirthDate || "").trim();
+  if (!deletedName || friendName !== deletedName) {
+    return false;
+  }
+  if (!deletedBirthDate || !friendBirthDate) {
+    return true;
+  }
+  return friendBirthDate === deletedBirthDate;
+}
+
+async function removeDeletedUserFromSocialGraph(deletedUserKey, deletedUserData) {
+  const userKey = String(deletedUserKey || "").trim();
+  if (!userKey) {
+    return;
+  }
+  const profile = deletedUserData?.profile && typeof deletedUserData.profile === "object"
+    ? deletedUserData.profile
+    : null;
+  const deletedName = String(profile?.name || "").trim().toLowerCase();
+  const deletedBirthDate = String(profile?.birthDate || "").trim();
+  const allUsers = await listAllUserStateEntries();
+  for (const entry of allUsers) {
+    if (!entry.userKey || entry.userKey === userKey) {
+      continue;
+    }
+    const data = normalizeUserData(entry.data);
+    const friends = Array.isArray(data.friends) ? data.friends : [];
+    const nextFriends = friends.filter((friend) => !shouldRemoveFriendLink(friend, userKey, deletedName, deletedBirthDate));
+    let changed = nextFriends.length !== friends.length;
+
+    const referral = data.referral && typeof data.referral === "object" ? data.referral : null;
+    if (referral && String(referral.referredByUserKey || "").trim() === userKey) {
+      data.referral = {
+        ...referral,
+        referredByCode: "",
+        referredByUserKey: "",
+        socialConnectionCompleted: false
+      };
+      changed = true;
+    }
+
+    if (!changed) {
+      continue;
+    }
+    data.friends = nextFriends;
+    await saveUserData(entry.userKey, data);
+  }
 }
 
 async function finalizeReferralSocialConnectionIfReady(userKey, userData) {
@@ -2474,6 +2544,8 @@ app.delete("/api/profile", requireAuth, async (req, res) => {
   if (!userId) {
     return res.status(400).json({ error: "invalid_user_id" });
   }
+  const userDataBeforeDelete = await loadUserData(userId);
+  await removeDeletedUserFromSocialGraph(userId, userDataBeforeDelete);
   await deleteUserData(userId);
   const oldSid = req.sessionId;
   const sid = crypto.randomUUID();
