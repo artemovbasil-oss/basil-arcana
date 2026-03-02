@@ -6075,6 +6075,41 @@ async function submitProfileForm(form, afterSavePath = null) {
   }
 }
 
+async function deleteCurrentProfile(button) {
+  const confirmed = window.confirm("Delete your profile forever? This will remove account data, friends and history.");
+  if (!confirmed) {
+    return;
+  }
+  const targetButton = button instanceof HTMLButtonElement ? button : null;
+  const originalText = targetButton?.textContent || "Delete profile forever";
+  if (targetButton) {
+    targetButton.disabled = true;
+    targetButton.textContent = "Deleting...";
+  }
+  try {
+    await fetchJson("/api/profile", { method: "DELETE" });
+    state.profile = null;
+    state.profileReady = false;
+    state.friends = [];
+    state.dashboard = null;
+    state.friendInsights = {};
+    await loadSessionState();
+    navigate("/login", { replace: true });
+  } catch (error) {
+    if (error.status === 401) {
+      await refreshAuthState();
+      navigate("/login", { replace: true });
+      return;
+    }
+    alert(`Failed to delete profile: ${error.message}`);
+  } finally {
+    if (targetButton) {
+      targetButton.disabled = false;
+      targetButton.textContent = originalText || "Delete profile forever";
+    }
+  }
+}
+
 function attachRouteHandlers(path) {
   if (path === "/") {
     const homeFriends = document.getElementById("homeFriendsBlock");
@@ -6183,36 +6218,6 @@ function attachRouteHandlers(path) {
       render();
     });
 
-    const profileDeleteButton = document.getElementById("profileDeleteButton");
-    profileDeleteButton?.addEventListener("click", async () => {
-      const confirmed = window.confirm("Delete your profile forever? This will remove account data, friends and history.");
-      if (!confirmed) {
-        return;
-      }
-      const originalText = profileDeleteButton.textContent;
-      profileDeleteButton.disabled = true;
-      profileDeleteButton.textContent = "Deleting...";
-      try {
-        await fetchJson("/api/profile", { method: "DELETE", body: JSON.stringify({}) });
-        state.profile = null;
-        state.profileReady = false;
-        state.friends = [];
-        state.dashboard = null;
-        state.friendInsights = {};
-        await loadSessionState();
-        navigate("/login", { replace: true });
-      } catch (error) {
-        if (error.status === 401) {
-          await refreshAuthState();
-          navigate("/login", { replace: true });
-          return;
-        }
-        alert(`Failed to delete profile: ${error.message}`);
-      } finally {
-        profileDeleteButton.disabled = false;
-        profileDeleteButton.textContent = originalText || "Delete profile forever";
-      }
-    });
   }
 
   if (path === "/friends") {
@@ -6488,6 +6493,12 @@ function render() {
 document.addEventListener("click", (event) => {
   const target = event.target;
   if (!(target instanceof Element)) {
+    return;
+  }
+  const profileDeleteBtn = target.closest("#profileDeleteButton");
+  if (profileDeleteBtn instanceof HTMLButtonElement) {
+    event.preventDefault();
+    deleteCurrentProfile(profileDeleteBtn);
     return;
   }
   const anchor = target.closest("a");
