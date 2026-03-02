@@ -4036,6 +4036,106 @@ const coreHubArticles = [
       <p>Modern astrology is valuable when it increases clarity, discipline, and freedom of action. That is exactly the standard we apply.</p>
       <p>Next: explore our sign deep-dives starting with <a href="/astrology-hub/aries-zodiac-sign-guide">Aries</a>.</p>
     `
+  },
+  {
+    slug: "how-to-use-astronautica-complete-practical-guide",
+    title: "How to Use Astronautica: A Complete Practical Guide",
+    excerpt: "A detailed walkthrough of every major module in Astronautica, with real usage scenarios, routines, and decision workflows.",
+    readTime: "18 min",
+    publishedAt: "2026-03-02",
+    category: "Product Guide",
+    seoDescription: "Complete guide to Astronautica: onboarding, natal chart, daily signals, friends compatibility, and practical weekly usage workflows.",
+    content: `
+      <p class="article-lead">Astronautica is designed as a decision-support system, not a passive horoscope feed. This guide shows exactly how to use each module and combine them into a weekly operating rhythm that improves clarity, communication quality, and execution consistency.</p>
+      <h2>1. Start with profile precision</h2>
+      <p>Your profile is the computational foundation: birth date, time, and place. Accurate inputs produce stable geometry, and stable geometry means stable interpretation. If the birth time is uncertain, keep it explicit and update later when verified.</p>
+      <p>Best practice: after onboarding, check your birth location and timezone assumptions once more. Input quality is the highest-leverage action in the whole product.</p>
+      <h2>2. Read the Natal Chart as an operating map</h2>
+      <p>In the natal view, avoid trying to interpret everything at once. Start with core axes (Sun, Moon, Rising), then use the matrix and life-domain blocks to map where behavior tends to compound. The objective is not identity labeling, but scenario preparation.</p>
+      <ul class="bullet-list">
+        <li><strong>Sun:</strong> visible motivation and strategic will.</li>
+        <li><strong>Moon:</strong> emotional regulation pattern.</li>
+        <li><strong>Rising:</strong> behavior under pressure and social response style.</li>
+      </ul>
+      <p>Then move to placements and houses: ask “where will this show up in real life?” rather than “what does this mean abstractly?”.</p>
+      <h2>3. Use Daily as your execution dashboard</h2>
+      <p>The daily module is strongest when used for timing and load management. Treat it like a tactical panel:</p>
+      <ul class="bullet-list">
+        <li>Schedule complex conversations in higher-clarity windows.</li>
+        <li>Place demanding work in periods with stronger execution signals.</li>
+        <li>Use lower-energy windows for admin, review, and recovery tasks.</li>
+      </ul>
+      <p>Do not use Daily as a fatalistic “good/bad day” verdict. Use it as a context layer to sequence actions with less friction.</p>
+      <h2>4. Use Friends for communication architecture</h2>
+      <p>The Friends module gives practical compatibility diagnostics: communication sync, emotional stability, and friction load. In expanded cards, read the domain-level details and convert them into protocol-level agreements.</p>
+      <p>Example: if communication sync is high but friction load increases under deadlines, define async check-ins and explicit ownership before sprint starts. Compatibility is useful only when translated into shared operating rules.</p>
+      <h2>5. Build a weekly loop (the highest-ROI flow)</h2>
+      <p>A simple loop used by power users:</p>
+      <ul class="bullet-list">
+        <li><strong>Monday:</strong> review Daily + choose one strategic focus signal.</li>
+        <li><strong>Midweek:</strong> check Friends dynamics for key interactions.</li>
+        <li><strong>Friday:</strong> compare planned vs. executed decisions.</li>
+        <li><strong>Sunday:</strong> update one protocol for next week.</li>
+      </ul>
+      <p>Over 4-6 weeks, this loop reveals your real pattern mechanics and improves decision quality faster than random intuition alone.</p>
+      <h2>6. Common mistakes to avoid</h2>
+      <ul class="bullet-list">
+        <li>Reading symbolism without converting it into behavior.</li>
+        <li>Changing too many variables at once.</li>
+        <li>Using compatibility as a label instead of a protocol input.</li>
+        <li>Ignoring recovery windows while optimizing only output windows.</li>
+      </ul>
+      <h2>7. A practical template you can copy</h2>
+      <p>Each week, write three lines:</p>
+      <ul class="bullet-list">
+        <li><strong>Signal:</strong> what pattern is active?</li>
+        <li><strong>Action:</strong> what one measurable behavior will you run?</li>
+        <li><strong>Review:</strong> what changed in clarity, conflict, or completion?</li>
+      </ul>
+      <p>That is the core of Astronautica usage: insight -> protocol -> measurable outcome.</p>
+      <h2>Where to continue</h2>
+      <p>Next, read <a href="/astrology-hub/astrology-for-self-knowledge-and-growth">Astrology for Self-Knowledge and Growth</a> and browse the 12 sign guides in <a href="/astrology-hub">Astrology Hub</a> to tune your model further.</p>
+    `
+  },
+  {
+    slug: "tarot-for-self-discovery-modern-practice-and-basilarcana-app",
+    title: "Tarot for Self-Discovery: A Modern Practice and the Basilarcana App",
+    excerpt: "A practical, non-mystifying way to use Tarot for reflection, decision framing, and emotional clarity — and where to start in the Basilarcana app.",
+    readTime: "14 min",
+    publishedAt: "2026-03-02",
+    category: "Tarot",
+    seoDescription: "Learn how to use Tarot for self-discovery with practical prompts and routines, and discover the Basilarcana Tarot app at basilarcana.com.",
+    content: `
+      <p class="article-lead">Tarot can be used as a powerful reflective interface: not fortune telling, but a structured prompt system for attention, emotional literacy, and better decisions. This article explains the modern approach and how to start with the Basilarcana Tarot app.</p>
+      <h2>Tarot as a cognitive mirror</h2>
+      <p>When used well, a spread helps you externalize hidden assumptions. Cards create distance from immediate emotion and allow clearer naming of fear, desire, conflict, and next action. The value is not in magical certainty; it is in better questions.</p>
+      <h2>A practical 3-step Tarot method</h2>
+      <ul class="bullet-list">
+        <li><strong>Context:</strong> define one concrete question (“What blocks this decision?”).</li>
+        <li><strong>Structure:</strong> use a fixed spread format (e.g., Situation -> Friction -> Action).</li>
+        <li><strong>Translation:</strong> convert symbolic insight into one behavioral experiment.</li>
+      </ul>
+      <p>This method keeps Tarot grounded and measurable. If you cannot name an action after a reading, the reading is incomplete.</p>
+      <h2>What makes a reading useful</h2>
+      <p>Useful readings are specific, time-bound, and emotionally honest. They reduce ambiguity rather than inflate it. A strong reading ends with one decision, one boundary, and one review point.</p>
+      <h2>What to avoid</h2>
+      <ul class="bullet-list">
+        <li>Using Tarot to avoid responsibility (“the card told me, so I have no choice”).</li>
+        <li>Repeating the same question many times until anxiety drops.</li>
+        <li>Treating symbolic language as literal prediction.</li>
+      </ul>
+      <h2>How Basilarcana approaches Tarot</h2>
+      <p>Our Tarot product focuses on self-discovery and behavioral clarity. We design spreads and interpretations to help users reflect, decide, and act. The product now also includes multilingual support, so users can work in the language that feels natural for deeper reflection.</p>
+      <p>If you want to explore it directly, visit <a href="https://basilarcana.com" target="_blank" rel="noopener noreferrer">basilarcana.com</a>.</p>
+      <h2>Suggested weekly Tarot routine</h2>
+      <ul class="bullet-list">
+        <li><strong>Monday:</strong> one card for strategic focus.</li>
+        <li><strong>Midweek:</strong> three-card spread for conflict resolution.</li>
+        <li><strong>Weekend:</strong> retrospective spread (what worked / what drained / what to adjust).</li>
+      </ul>
+      <p>Combined with Astrology Hub insights, Tarot becomes a second lens for reflection: astrology maps pattern architecture, Tarot sharpens present-tense awareness.</p>
+      <p>Continue with <a href="/astrology-hub/how-to-use-astronautica-complete-practical-guide">How to Use Astronautica: A Complete Practical Guide</a>.</p>
+    `
   }
 ];
 
