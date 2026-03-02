@@ -598,6 +598,9 @@ async function listAllUserStateEntries() {
 }
 
 function shouldRemoveFriendLink(friend, deletedUserKey, deletedName, deletedBirthDate) {
+  if (!friend || typeof friend !== "object") {
+    return false;
+  }
   const sourceUserKey = String(friend?.sourceUserKey || "").trim();
   if (sourceUserKey && sourceUserKey === deletedUserKey) {
     return true;
@@ -2564,10 +2567,18 @@ app.delete("/api/profile", requireAuth, async (req, res) => {
   }
   const userDataBeforeDelete = await loadUserData(userId);
   const inviterUserKey = String(userDataBeforeDelete?.referral?.referredByUserKey || "").trim();
-  await removeDeletedUserFromSocialGraph(userId, userDataBeforeDelete);
+  try {
+    await removeDeletedUserFromSocialGraph(userId, userDataBeforeDelete);
+  } catch (error) {
+    console.error("profile_delete_social_cleanup_failed", error);
+  }
   await deleteUserData(userId);
   if (inviterUserKey) {
-    await recomputeInvitedRegistrationsForUser(inviterUserKey);
+    try {
+      await recomputeInvitedRegistrationsForUser(inviterUserKey);
+    } catch (error) {
+      console.error("profile_delete_recompute_invites_failed", error);
+    }
   }
   const oldSid = req.sessionId;
   const sid = crypto.randomUUID();
