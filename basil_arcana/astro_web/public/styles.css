@@ -2430,15 +2430,18 @@ body[data-theme="light"] .auth-login-btn.telegram .auth-login-btn-icon .astro-ic
   display: grid;
   gap: 0.4rem;
   position: relative;
+  transition: background 0.2s ease, border-color 0.2s ease;
 }
 
-.celeb-card.is-male {
+.celeb-card.is-male:hover,
+.celeb-card.is-male:focus-within {
   background:
     radial-gradient(120% 120% at 0% 0%, rgba(91, 165, 235, 0.16) 0%, rgba(91, 165, 235, 0) 62%),
     var(--surface-2);
 }
 
-.celeb-card.is-female {
+.celeb-card.is-female:hover,
+.celeb-card.is-female:focus-within {
   background:
     radial-gradient(120% 120% at 0% 0%, rgba(228, 126, 194, 0.16) 0%, rgba(228, 126, 194, 0) 62%),
     var(--surface-2);
