@@ -1121,14 +1121,36 @@ body[data-theme="light"] .auth-login-btn.telegram .auth-login-btn-icon .astro-ic
   width: 1.18rem;
   height: 1.18rem;
   margin: 0;
-  accent-color: var(--ink);
+  appearance: none;
+  -webkit-appearance: none;
   border: 1px solid color-mix(in srgb, var(--line-strong) 82%, transparent 18%);
-  background: transparent;
+  background: color-mix(in srgb, var(--surface) 88%, transparent 12%);
   border-radius: 0;
-  display: inline-block;
-  transition: transform 0.14s ease;
+  display: inline-grid;
+  place-items: center;
+  position: relative;
+  transition: transform 0.14s ease, border-color 0.14s ease, background-color 0.14s ease;
   pointer-events: none;
   flex: 0 0 auto;
+}
+
+.onboarding-celeb-card input::after {
+  content: "";
+  width: 0.52rem;
+  height: 0.3rem;
+  border-left: 2px solid transparent;
+  border-bottom: 2px solid transparent;
+  transform: rotate(-45deg) translateY(-0.02rem);
+}
+
+.onboarding-celeb-card:has(input:checked) input {
+  background: #ffffff;
+  border-color: #ffffff;
+}
+
+.onboarding-celeb-card:has(input:checked) input::after {
+  border-left-color: #000000;
+  border-bottom-color: #000000;
 }
 
 .onboarding-celeb-card:hover {
@@ -1152,9 +1174,8 @@ body[data-theme="light"] .auth-login-btn.telegram .auth-login-btn-icon .astro-ic
 }
 
 body[data-theme="dark"] .onboarding-celeb-card input {
-  color-scheme: dark;
-  accent-color: #ffffff;
-  filter: invert(1) contrast(1.2);
+  border-color: color-mix(in srgb, #ffffff 42%, var(--line) 58%);
+  background: color-mix(in srgb, #ffffff 8%, var(--surface) 92%);
 }
 
 .onboarding-celeb-name {
