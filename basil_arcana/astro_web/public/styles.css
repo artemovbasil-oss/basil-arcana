@@ -2669,37 +2669,65 @@ body[data-theme="light"] .solar-starfield {
 
 .solar-focus-compass {
   position: absolute;
-  left: -9999px;
-  top: -9999px;
+  left: 0;
+  top: 0;
   z-index: 4;
-  width: calc(var(--compass-r, 58px) * 2);
-  height: calc(var(--compass-r, 58px) * 2);
+  width: 148px;
+  display: grid;
+  gap: 0.24rem;
+  border: 1px solid color-mix(in srgb, var(--line-strong) 84%, transparent 16%);
+  background: rgba(0, 0, 0, 0.84);
+  padding: 0.24rem;
+  backdrop-filter: blur(3px);
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.22s ease;
 }
 
-.solar-focus-compass-ring {
-  position: absolute;
-  inset: 0;
-  border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--line-strong) 80%, transparent 20%);
-  box-shadow:
-    inset 0 0 18px color-mix(in srgb, var(--ink) 14%, transparent 86%),
-    0 0 18px color-mix(in srgb, var(--ink) 12%, transparent 88%);
+.solar-focus-compass-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.28rem;
 }
 
-.solar-focus-compass-marker {
-  position: absolute;
-  transform: translate(-50%, -50%);
+.solar-focus-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
   border: 1px solid var(--line-strong);
-  background: rgba(0, 0, 0, 0.9);
+  background: #000000;
   color: #ffffff;
   font-size: 0.52rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   padding: 0.1rem 0.2rem;
   white-space: nowrap;
+}
+
+.solar-focus-sign-icon {
+  font-size: 0.64rem;
+  opacity: 0.9;
+}
+
+.solar-focus-arrow {
+  position: relative;
+  width: 18px;
+  height: 2px;
+  background: #ffffff;
+  transform-origin: 2px 1px;
+  transition: transform 0.18s ease;
+}
+
+.solar-focus-arrow::after {
+  content: "";
+  position: absolute;
+  right: -1px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-left: 5px solid #ffffff;
+  border-top: 3px solid transparent;
+  border-bottom: 3px solid transparent;
 }
 
 .solar-house-label {

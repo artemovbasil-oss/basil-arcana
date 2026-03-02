@@ -2644,13 +2644,22 @@ async function initSolarSystemWidget(dashboard, period) {
   const ringMap = new Map();
   const themeKey = isDark ? "dark" : "light";
   objectOverlay.innerHTML = "";
+  const sunSignIcon = zodiacIconClasses[sunSign] || "mdi:circle-outline";
   focusCompass.innerHTML = `
-    <div class="solar-focus-compass-ring"></div>
-    <span class="solar-focus-compass-marker solar-focus-compass-sun"><b>SUN</b></span>
-    <span class="solar-focus-compass-marker solar-focus-compass-sign"><b>${sunSign.toUpperCase()}</b></span>
+    <div class="solar-focus-compass-row">
+      <span class="solar-focus-chip"><b>SUN</b></span>
+      <span class="solar-focus-arrow solar-focus-arrow-sun" aria-hidden="true"></span>
+    </div>
+    <div class="solar-focus-compass-row">
+      <span class="solar-focus-chip">
+        <iconify-icon icon="${sunSignIcon}" class="solar-focus-sign-icon" aria-hidden="true"></iconify-icon>
+        <b>${sunSign.toUpperCase()}</b>
+      </span>
+      <span class="solar-focus-arrow solar-focus-arrow-sign" aria-hidden="true"></span>
+    </div>
   `;
-  const compassSunMarker = focusCompass.querySelector(".solar-focus-compass-sun");
-  const compassSignMarker = focusCompass.querySelector(".solar-focus-compass-sign");
+  const compassSunArrow = focusCompass.querySelector(".solar-focus-arrow-sun");
+  const compassSignArrow = focusCompass.querySelector(".solar-focus-arrow-sign");
   const sunLabel = document.createElement("span");
   sunLabel.className = "solar-object-label";
   objectOverlay.appendChild(sunLabel);
@@ -3048,14 +3057,11 @@ async function initSolarSystemWidget(dashboard, period) {
     } else if (runtime.focusGrid) {
       runtime.focusGrid.material.opacity = 0;
     }
-    if (selectedKey !== "__all__" && compassSunMarker && compassSignMarker) {
+    if (selectedKey !== "__all__" && compassSunArrow && compassSignArrow) {
       const centerProjected = focusMesh.position.clone().project(camera);
       const isVisible = centerProjected.z < 1;
       const cx = ((centerProjected.x + 1) / 2) * wrap.clientWidth;
       const cy = ((-centerProjected.y + 1) / 2) * wrap.clientHeight;
-      const compassRadius = selectedKey === "Earth"
-        ? (isMobileScene ? 52 : 64)
-        : (isMobileScene ? 46 : 58);
 
       const sunScreen = selectedKey === "Sun"
         ? { x: cx + 1, y: cy - 1 }
@@ -3077,17 +3083,26 @@ async function initSolarSystemWidget(dashboard, period) {
       const signX = ((signProjected.x + 1) / 2) * wrap.clientWidth;
       const signY = ((-signProjected.y + 1) / 2) * wrap.clientHeight;
       const signTheta = Math.atan2(signY - cy, signX - cx);
+      const sunDeg = (sunTheta * 180) / Math.PI;
+      const signDeg = (signTheta * 180) / Math.PI;
+      const panelW = isMobileScene ? 134 : 148;
+      const panelH = 58;
+      const panelX = Math.min(
+        wrap.clientWidth - panelW - 8,
+        Math.max(8, cx + (isMobileScene ? 26 : 34))
+      );
+      const panelY = Math.min(
+        wrap.clientHeight - panelH - 8,
+        Math.max(8, cy - (isMobileScene ? 54 : 62))
+      );
 
       focusCompass.style.opacity = isVisible ? "1" : "0";
-      focusCompass.style.left = `${Math.round(cx)}px`;
-      focusCompass.style.top = `${Math.round(cy)}px`;
-      focusCompass.style.setProperty("--compass-r", `${Math.round(compassRadius)}px`);
-      focusCompass.style.transform = `translate(-50%, -50%) rotate(${(elapsedSec * 2.5) % 360}deg)`;
+      focusCompass.style.left = `${Math.round(panelX)}px`;
+      focusCompass.style.top = `${Math.round(panelY)}px`;
+      focusCompass.style.transform = "none";
 
-      compassSunMarker.style.left = `${Math.round(Math.cos(sunTheta) * compassRadius)}px`;
-      compassSunMarker.style.top = `${Math.round(Math.sin(sunTheta) * compassRadius)}px`;
-      compassSignMarker.style.left = `${Math.round(Math.cos(signTheta) * compassRadius)}px`;
-      compassSignMarker.style.top = `${Math.round(Math.sin(signTheta) * compassRadius)}px`;
+      compassSunArrow.style.transform = `rotate(${sunDeg.toFixed(2)}deg)`;
+      compassSignArrow.style.transform = `rotate(${signDeg.toFixed(2)}deg)`;
     } else {
       focusCompass.style.opacity = "0";
     }
