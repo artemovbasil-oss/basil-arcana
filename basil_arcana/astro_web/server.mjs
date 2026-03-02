@@ -1667,19 +1667,20 @@ function buildDashboardPayload(sessionData, period = "week") {
     friendBirthCity: historicalCelebritiesById.get(item.id)?.birthCity || null,
     score: item.score,
     trend: item.trend,
-    note: item.note,
+    note: "",
     highlights: [],
-    advice: item.fact,
+    advice: "",
     rationale: item.fact,
+    biography: item.fact,
     domains: [],
     noShareData: true,
     natalMini: {
       core: {
         sun: item.sign || "Unknown",
-        moon: "Unknown",
-        rising: "Unknown"
+        moon: moonFromDate(historicalCelebritiesById.get(item.id)?.birthDate || "") || "Unknown",
+        rising: risingFromTime(historicalCelebritiesById.get(item.id)?.birthTime || "") || "Unknown"
       },
-      summary: item.fact
+      summary: ""
     },
     userSign: natalCore.sun,
     period

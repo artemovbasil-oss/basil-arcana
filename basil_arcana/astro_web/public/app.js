@@ -1940,6 +1940,15 @@ function renderFriendAccordion(friend, { expanded = false, canDelete = false } =
     friend?.celebrityId
     || (String(friend?.id || "").startsWith("celeb:") ? String(friend.id).replace(/^celeb:/, "") : "")
   ).trim();
+  const primaryNarrative = historicalCompanion
+    ? String(friend?.biography || friend?.rationale || friend?.advice || friend?.natalMini?.summary || "").trim()
+    : String(friend?.note || "Compatibility insight will appear after analysis.").trim();
+  const secondaryNarrative = historicalCompanion
+    ? ""
+    : String(friend?.rationale || "").trim();
+  const tailAdvice = historicalCompanion
+    ? ""
+    : String(friend?.advice || "").trim();
   const detailId = `friend-detail-${String(friend?.id || friend?.friendName || "friend").replace(/[^a-z0-9_-]/gi, "_")}`;
   return `
     <article class="friend-accordion ${expanded ? "open" : ""}" data-id="${friend.id || ""}">
@@ -1955,8 +1964,8 @@ function renderFriendAccordion(friend, { expanded = false, canDelete = false } =
         </div>
       </button>
       <div id="${detailId}" class="friend-accordion-body">
-        <p class="friend-premium-note">${friend.note || "Compatibility insight will appear after analysis."}</p>
-        <p class="friend-rationale">${friend.rationale || ""}</p>
+        ${primaryNarrative ? `<p class="friend-premium-note">${primaryNarrative}</p>` : ""}
+        ${secondaryNarrative ? `<p class="friend-rationale">${secondaryNarrative}</p>` : ""}
         <div class="friend-mini-natal">
           <span>${zodiacIcon(friendCore.sun)} Sun: ${friendCore.sun}</span>
           <span>${zodiacIcon(friendCore.moon)} Moon: ${friendCore.moon}</span>
@@ -1965,7 +1974,7 @@ function renderFriendAccordion(friend, { expanded = false, canDelete = false } =
           <span>Birth time: ${friend.friendBirthTime || "N/A"}</span>
           <span>Birth place: ${friend.friendBirthCity || "N/A"}</span>
         </div>
-        ${friend?.natalMini?.summary ? `<p class="muted">${friend.natalMini.summary}</p>` : ""}
+        ${friend?.natalMini?.summary && !historicalCompanion ? `<p class="muted">${friend.natalMini.summary}</p>` : ""}
         ${renderFriendZodiacSnippet(friend.friendSign)}
         <div class="friend-domain-grid">
           ${domains
@@ -1983,7 +1992,7 @@ function renderFriendAccordion(friend, { expanded = false, canDelete = false } =
         <ul class="bullet-list friend-highlights">
           ${highlights.map((item) => `<li>${item}</li>`).join("")}
         </ul>
-        <p>${friend.advice || ""}</p>
+        ${tailAdvice ? `<p>${tailAdvice}</p>` : ""}
         <div class="friend-actions">
           ${
             historicalCompanion && historicalSlug
@@ -5150,10 +5159,11 @@ function renderFriendsList() {
         noShareData: true,
         natalMini: {
           core: { sun: celeb.sign || "Unknown", moon: "Unknown", rising: "Unknown" },
-          summary: celeb.fact || ""
+          summary: ""
         },
-        advice: celeb.fact || "",
-        rationale: celeb.fact || ""
+        advice: "",
+        rationale: celeb.fact || "",
+        biography: celeb.fact || ""
       };
     })
     .filter(Boolean);
