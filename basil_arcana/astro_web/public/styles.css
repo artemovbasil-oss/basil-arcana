@@ -1070,6 +1070,68 @@ body[data-theme="light"] .auth-login-btn.telegram .auth-login-btn-icon .astro-ic
   color: var(--muted);
 }
 
+.onboarding-celeb-fieldset {
+  border: 1px solid var(--line);
+  padding: 0.7rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.onboarding-celeb-fieldset legend {
+  padding: 0 0.3rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.onboarding-celeb-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.52rem;
+}
+
+.onboarding-celeb-card {
+  display: grid;
+  gap: 0.24rem;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface) 88%, transparent 12%);
+  padding: 0.56rem;
+  cursor: pointer;
+  transition: border-color 0.18s ease, background-color 0.18s ease, opacity 0.18s ease;
+}
+
+.onboarding-celeb-card:has(input:checked) {
+  border-color: var(--ink);
+  background: color-mix(in srgb, var(--surface) 76%, transparent 24%);
+}
+
+.onboarding-celeb-card:has(input:disabled:not(:checked)) {
+  opacity: 0.56;
+}
+
+.onboarding-celeb-card input {
+  margin: 0 0 0.1rem;
+}
+
+.onboarding-celeb-name {
+  font-weight: 700;
+  font-size: 0.88rem;
+  line-height: 1.2;
+}
+
+.onboarding-celeb-meta {
+  font-size: 0.75rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.onboarding-celeb-years {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
 .profile-delete-btn {
   border-color: color-mix(in srgb, #b93030 40%, var(--line) 60%);
   color: color-mix(in srgb, #d04646 82%, var(--ink) 18%);
@@ -3627,6 +3689,10 @@ body[data-theme="light"] .energy-star.neutral {
   }
 
   .virtual-celeb-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .onboarding-celeb-grid {
     grid-template-columns: 1fr;
   }
 

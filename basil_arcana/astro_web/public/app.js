@@ -3427,11 +3427,18 @@ function onboardingView() {
   const selectedCelebrityIds = Array.isArray(profile?.selectedCelebrityIds) ? profile.selectedCelebrityIds : [];
   const referredByCode = String(state.referralContext?.code || "").trim();
   const referralConsentChecked = state.referralContext?.shareBirthDataConsent !== false;
-  const celebOptions = state.celebrities
+  const celebCards = state.celebrities
     .map((item) => {
       const id = String(item.id || "");
-      const selected = selectedCelebrityIds.includes(id) ? "selected" : "";
-      return `<option value="${id}" ${selected}>${item.name} · ${item.sign} · ${item.years}</option>`;
+      const checked = selectedCelebrityIds.includes(id) ? "checked" : "";
+      return `
+        <label class="onboarding-celeb-card">
+          <input type="checkbox" class="js-onboarding-celeb-check" value="${id}" ${checked} />
+          <span class="onboarding-celeb-name">${item.name}</span>
+          <span class="onboarding-celeb-meta">${item.sign} · ${item.field}</span>
+          <span class="onboarding-celeb-years">${item.years}</span>
+        </label>
+      `;
     })
     .join("");
   return `
@@ -3459,11 +3466,14 @@ function onboardingView() {
         <label>Timezone
           <input required name="timezone" value="${profile.timezone || "UTC"}" placeholder="UTC+3" />
         </label>
-        <label class="field-span-2">Compare with historical profiles (up to 3)
-          <select id="selectedCelebrityIds" name="selectedCelebrityIds" multiple size="8">
-            ${celebOptions}
-          </select>
-        </label>
+        <fieldset class="field-span-2 onboarding-celeb-fieldset">
+          <legend>Compare with historical profiles (up to 3)</legend>
+          <p class="muted">Pick up to three figures to compare your chart dynamics after onboarding.</p>
+          <p class="muted">Selected: <strong id="onboardingCelebCount">${Math.min(3, selectedCelebrityIds.length)}/3</strong></p>
+          <div id="onboardingCelebGrid" class="onboarding-celeb-grid">
+            ${celebCards}
+          </div>
+        </fieldset>
         ${
           referredByCode
             ? `<label class="field-span-2 friend-no-share">
@@ -5954,13 +5964,11 @@ function bindCityAutocomplete(form, cityInputId, options = {}) {
 async function submitProfileForm(form, afterSavePath = null) {
   const formData = new FormData(form);
   const profile = Object.fromEntries(formData.entries());
-  const celebSelect = form.querySelector("#selectedCelebrityIds");
-  if (celebSelect instanceof HTMLSelectElement) {
-    profile.selectedCelebrityIds = Array.from(celebSelect.selectedOptions)
-      .map((option) => String(option.value || "").trim())
-      .filter(Boolean)
-      .slice(0, 3);
-  }
+  profile.selectedCelebrityIds = Array.from(form.querySelectorAll(".js-onboarding-celeb-check"))
+    .filter((input) => input instanceof HTMLInputElement && input.checked)
+    .map((input) => String(input.value || "").trim())
+    .filter(Boolean)
+    .slice(0, 3);
   const referralCode = referralCodeFromUrl() || String(state.referralContext?.code || "").trim();
   if (referralCode) {
     const consentCheckbox = form.querySelector("#onboardingReferralConsent");
@@ -6013,15 +6021,24 @@ function attachRouteHandlers(path) {
   if (path === "/onboarding") {
     const form = document.getElementById("onboardingForm");
     bindCityAutocomplete(form, "onboardingBirthCity");
-    const celebsSelect = document.getElementById("selectedCelebrityIds");
-    celebsSelect?.addEventListener("change", () => {
-      const selected = Array.from(celebsSelect.selectedOptions || []);
-      if (selected.length <= 3) {
-        return;
+    const celebChecks = Array.from(document.querySelectorAll(".js-onboarding-celeb-check"));
+    const celebCount = document.getElementById("onboardingCelebCount");
+    const syncCelebPicker = () => {
+      const selected = celebChecks.filter((input) => input instanceof HTMLInputElement && input.checked);
+      celebChecks.forEach((input) => {
+        if (!(input instanceof HTMLInputElement)) {
+          return;
+        }
+        input.disabled = !input.checked && selected.length >= 3;
+      });
+      if (celebCount) {
+        celebCount.textContent = `${selected.length}/3`;
       }
-      selected[selected.length - 1].selected = false;
-      alert("You can select up to 3 historical profiles.");
+    };
+    celebChecks.forEach((input) => {
+      input.addEventListener("change", syncCelebPicker);
     });
+    syncCelebPicker();
     form?.addEventListener("submit", async (event) => {
       event.preventDefault();
       try {
