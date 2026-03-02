@@ -3836,7 +3836,118 @@ function faqView() {
   `;
 }
 
-const astrologyHubArticles = [
+const zodiacHubProfiles = {
+  Aries: {
+    title: "Aries Zodiac Guide: Momentum, Courage, and Clean Starts",
+    excerpt: "How Aries creates momentum, where impatience appears, and how to convert raw drive into strategic wins.",
+    seoDescription: "Aries zodiac guide: strengths, challenges, relationships, career patterns, and practical growth protocols.",
+    angle: "Aries energy starts fast. The upgrade is to pair speed with finish architecture.",
+    strengths: "High activation energy, direct communication, willingness to initiate under uncertainty.",
+    risk: "Impatience, premature conflict, and overcommitting before the system is ready.",
+    protocol: "Use 72-hour sprint cycles with explicit completion criteria before opening new fronts."
+  },
+  Taurus: {
+    title: "Taurus Zodiac Guide: Stability, Value, and Durable Execution",
+    excerpt: "Why Taurus compounds results through consistency, and how to avoid getting stuck in comfort loops.",
+    seoDescription: "Taurus zodiac guide with practical frameworks for stability, decision quality, and long-term outcomes.",
+    angle: "Taurus builds trust through consistency. The upgrade is adaptive consistency, not rigidity.",
+    strengths: "Patience, reliability, sensory intelligence, and strong value filters.",
+    risk: "Resistance to change, delayed decisions, and staying too long in suboptimal structures.",
+    protocol: "Review commitments weekly and set one controlled experiment to keep strategy adaptive."
+  },
+  Gemini: {
+    title: "Gemini Zodiac Guide: Curiosity, Communication, and Pattern Speed",
+    excerpt: "Gemini's edge is synthesis and movement. Learn to turn ideas into shipped outcomes.",
+    seoDescription: "Gemini zodiac guide on communication style, focus management, and practical execution systems.",
+    angle: "Gemini is strongest when curiosity is operationalized into decisions.",
+    strengths: "Fast learning loops, verbal agility, context-switching, and social intelligence.",
+    risk: "Fragmentation, over-analysis, and high input with low output.",
+    protocol: "For every three new inputs, publish one written decision and one next action."
+  },
+  Cancer: {
+    title: "Cancer Zodiac Guide: Emotional Precision and Protective Leadership",
+    excerpt: "Cancer excels at emotional signal quality. The key is boundaries that preserve energy.",
+    seoDescription: "Cancer zodiac guide with modern strategies for boundaries, relationships, and emotional regulation.",
+    angle: "Cancer translates emotional data into care architecture and loyalty.",
+    strengths: "Intuition, long memory, protective instinct, and deep relational commitment.",
+    risk: "Mood-driven reactivity, overprotection, and indirect communication under stress.",
+    protocol: "Use boundary scripts in advance: what you can give, what you cannot, and by when."
+  },
+  Leo: {
+    title: "Leo Zodiac Guide: Visibility, Creative Power, and Responsible Leadership",
+    excerpt: "Leo shines through ownership and expression. Turn recognition needs into contribution systems.",
+    seoDescription: "Leo zodiac guide for leadership, creative execution, and healthy visibility in work and relationships.",
+    angle: "Leo performs best when visibility is tied to measurable contribution.",
+    strengths: "Presence, charisma, creative authority, and morale-building leadership.",
+    risk: "Ego volatility, approval dependence, and avoiding unglamorous but critical tasks.",
+    protocol: "Define impact metrics before launch so recognition follows outcomes, not noise."
+  },
+  Virgo: {
+    title: "Virgo Zodiac Guide: Precision, Systems, and Quiet Mastery",
+    excerpt: "Virgo creates leverage through refinement. Learn to avoid perfection traps and ship consistently.",
+    seoDescription: "Virgo zodiac guide covering analytical strengths, stress patterns, and high-leverage growth routines.",
+    angle: "Virgo turns complexity into repeatable quality through process discipline.",
+    strengths: "Detail accuracy, optimization instinct, reliability under constraints.",
+    risk: "Perfection paralysis, chronic self-critique, and over-focusing on minor defects.",
+    protocol: "Time-box refinement and publish versioned outputs: v1 shipped beats perfect drafts."
+  },
+  Libra: {
+    title: "Libra Zodiac Guide: Balance, Agreements, and Social Architecture",
+    excerpt: "Libra thrives through calibrated agreements and relational design. Clarity is your force multiplier.",
+    seoDescription: "Libra zodiac guide with practical methods for decision balance, communication, and partnership quality.",
+    angle: "Libra creates durable outcomes when fairness is translated into explicit agreements.",
+    strengths: "Diplomacy, perspective-taking, aesthetic judgment, and conflict de-escalation.",
+    risk: "Decision delay, people-pleasing, and avoiding necessary tension.",
+    protocol: "Use decision deadlines and written trade-offs to reduce ambiguity fatigue."
+  },
+  Scorpio: {
+    title: "Scorpio Zodiac Guide: Depth, Strategy, and Transformational Focus",
+    excerpt: "Scorpio works through depth and precision. Learn how to channel intensity into long-term power.",
+    seoDescription: "Scorpio zodiac guide for strategic focus, trust dynamics, and sustainable high-intensity performance.",
+    angle: "Scorpio is strongest when intensity is paired with emotional governance.",
+    strengths: "Strategic depth, resilience, investigative thinking, and commitment under pressure.",
+    risk: "Control dynamics, mistrust loops, and all-or-nothing behavior.",
+    protocol: "Create explicit trust criteria and phased commitments instead of binary decisions."
+  },
+  Sagittarius: {
+    title: "Sagittarius Zodiac Guide: Vision, Expansion, and Meaningful Risk",
+    excerpt: "Sagittarius expands through exploration. The upgrade is translating vision into execution cadence.",
+    seoDescription: "Sagittarius zodiac guide with frameworks for growth, exploration, and disciplined experimentation.",
+    angle: "Sagittarius scales best when vision has a weekly operating rhythm.",
+    strengths: "Optimism, philosophical clarity, exploratory courage, and strategic storytelling.",
+    risk: "Overextension, under-detailing, and abandoning projects after initial excitement.",
+    protocol: "Tie long-range goals to one measurable weekly experiment and one review checkpoint."
+  },
+  Capricorn: {
+    title: "Capricorn Zodiac Guide: Structure, Ambition, and Long-Game Mastery",
+    excerpt: "Capricorn compounds through discipline and architecture. Build systems that outlast mood.",
+    seoDescription: "Capricorn zodiac guide for career architecture, resilience, and practical long-term strategy.",
+    angle: "Capricorn wins by converting ambition into durable systems.",
+    strengths: "Strategic discipline, accountability, delayed gratification, and strong execution ethics.",
+    risk: "Overwork identity, emotional suppression, and rigid success metrics.",
+    protocol: "Track recovery as seriously as output to preserve long-term performance quality."
+  },
+  Aquarius: {
+    title: "Aquarius Zodiac Guide: Systems Thinking, Innovation, and Social Future",
+    excerpt: "Aquarius sees patterns at system level. Turn originality into deployable frameworks.",
+    seoDescription: "Aquarius zodiac guide on innovation style, social intelligence, and practical implementation.",
+    angle: "Aquarius delivers outsized value by redesigning systems, not just tasks.",
+    strengths: "Independent thinking, strategic abstraction, and community-scale perspective.",
+    risk: "Emotional distance, contrarian reflexes, and execution gaps after ideation.",
+    protocol: "Pair every innovation thesis with an implementation owner and timeline."
+  },
+  Pisces: {
+    title: "Pisces Zodiac Guide: Intuition, Imagination, and Grounded Sensitivity",
+    excerpt: "Pisces reads subtle signals early. Build boundaries so sensitivity becomes strategic clarity.",
+    seoDescription: "Pisces zodiac guide with practical tools for intuition, boundaries, and creative execution.",
+    angle: "Pisces performs best when imagination is translated into clear structure.",
+    strengths: "Empathy, symbolic intelligence, creative synthesis, and emotional depth.",
+    risk: "Diffuse focus, boundary blur, and escapist coping when overloaded.",
+    protocol: "Use simple structure: one priority, one boundary, one completion per day."
+  }
+};
+
+const coreHubArticles = [
   {
     slug: "astrology-and-astronomy-shared-roots-modern-paths",
     title: "Astrology and Astronomy: Ancient Roots, Modern Paths",
@@ -3858,6 +3969,7 @@ const astrologyHubArticles = [
       <p>At Astronautica, we keep those layers explicit. The calculation layer is deterministic: date, time, location, and geometric computation. The interpretation layer translates that structure into practical behavioral signals: focus load, stress rhythm, communication timing, and recovery cadence.</p>
       <h2>Practical takeaway</h2>
       <p>The productive question is not who “wins forever,” but where each tool belongs. Use astronomy to measure external reality. Use structured astrology, if useful, to reflect on patterns, decisions, and self-regulation. What matters most is methodological transparency and clear boundaries.</p>
+      <p>Continue with <a href="/astrology-hub/how-to-avoid-astrology-scams">How to Avoid Astrology Scams</a> and <a href="/astrology-hub/astrology-for-self-knowledge-and-growth">Astrology for Self-Knowledge and Growth</a>.</p>
     `
   },
   {
@@ -3893,6 +4005,7 @@ const astrologyHubArticles = [
       <p>Never share ID scans, banking credentials, one-time SMS codes, or messenger access under “astrology verification” pretexts. Use secure payment channels and keep sensitive communication behind two-factor authentication.</p>
       <h2>The Astronautica position</h2>
       <p>We intentionally design against scam mechanics: transparent methodology, explicit limits, no fear-based upsells, and a focus on behavioral self-observation. Astrology should increase clarity, not dependency.</p>
+      <p>Then read <a href="/astrology-hub/astrology-for-self-knowledge-and-growth">Astrology for Self-Knowledge and Growth</a>.</p>
     `
   },
   {
@@ -3921,9 +4034,51 @@ const astrologyHubArticles = [
       <h2>Ethics and limits</h2>
       <p>Astronautica does not position astrology as a substitute for professional advice. It is a meta-navigation layer: where you are stable, where you are vulnerable, and where better architecture is needed. Agency always remains with the person, not with the symbol.</p>
       <p>Modern astrology is valuable when it increases clarity, discipline, and freedom of action. That is exactly the standard we apply.</p>
+      <p>Next: explore our sign deep-dives starting with <a href="/astrology-hub/aries-zodiac-sign-guide">Aries</a>.</p>
     `
   }
 ];
+
+function buildSignHubArticle(sign) {
+  const idx = zodiacOrder.indexOf(sign);
+  const prev = zodiacOrder[(idx + zodiacOrder.length - 1) % zodiacOrder.length];
+  const next = zodiacOrder[(idx + 1) % zodiacOrder.length];
+  const opposite = zodiacOrder[(idx + 6) % zodiacOrder.length];
+  const profile = zodiacHubProfiles[sign];
+  const details = zodiacDetails(sign);
+  const slug = `${String(sign).toLowerCase()}-zodiac-sign-guide`;
+  return {
+    slug,
+    title: profile.title,
+    excerpt: profile.excerpt,
+    readTime: "8 min",
+    publishedAt: "2026-03-02",
+    category: "Sign Guide",
+    seoDescription: profile.seoDescription,
+    sign,
+    imageLight: details.imageUrlLight,
+    imageDark: details.imageUrlDark,
+    content: `
+      <p class="article-lead">${profile.angle}</p>
+      <h2>Core operating pattern</h2>
+      <p>${sign} belongs to ${details.element} element and ${details.modality} mode. In practical terms, this means your default strategy is shaped by how you start, stabilize, and adapt under pressure. The best outcomes appear when this pattern is named explicitly and converted into rituals.</p>
+      <h2>Strength profile</h2>
+      <p>${profile.strengths}</p>
+      <h2>Where friction usually appears</h2>
+      <p>${profile.risk}</p>
+      <h2>Execution protocol for this sign</h2>
+      <p>${profile.protocol}</p>
+      <h2>Relationship and collaboration note</h2>
+      <p>In teams and relationships, ${sign} works best with transparent commitments and time boundaries. If your default style is understood and communicated early, conflict cost goes down and trust speed goes up.</p>
+      <h2>Cross-sign navigation</h2>
+      <p>For contrast and growth, compare this profile with <a href="/astrology-hub/${String(opposite).toLowerCase()}-zodiac-sign-guide">${opposite}</a>. For sequence reading, continue with <a href="/astrology-hub/${String(next).toLowerCase()}-zodiac-sign-guide">${next}</a> or review <a href="/astrology-hub/${String(prev).toLowerCase()}-zodiac-sign-guide">${prev}</a>.</p>
+      <p>Also read: <a href="/astrology-hub/how-to-avoid-astrology-scams">How to Avoid Astrology Scams</a>.</p>
+    `
+  };
+}
+
+const signHubArticles = zodiacOrder.map((sign) => buildSignHubArticle(sign));
+const astrologyHubArticles = [...coreHubArticles, ...signHubArticles];
 
 const astrologyHubBySlug = astrologyHubArticles.reduce((acc, article) => {
   acc[article.slug] = article;
@@ -3944,6 +4099,21 @@ function astrologyHubView() {
         ${astrologyHubArticles
           .map((article) => `
             <article class="card hub-card">
+              ${
+                article.sign
+                  ? `<a class="hub-sign-thumb-link" href="/astrology-hub/${article.slug}">
+                      <img
+                        class="hub-sign-thumb"
+                        src="${state.theme === "light" ? article.imageLight : article.imageDark}"
+                        data-zodiac-light="${article.imageLight}"
+                        data-zodiac-dark="${article.imageDark}"
+                        alt="${article.sign} zodiac illustration"
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    </a>`
+                  : ""
+              }
               <div class="hub-card-head">
                 <span class="hub-chip">${article.category}</span>
                 <span class="hub-meta">${article.readTime}</span>
@@ -3978,12 +4148,29 @@ function astrologyHubArticleView(slug) {
   return `
     <section class="section">
       <article class="card tone-card article-hero">
-        <span class="eyebrow">Astrology Hub</span>
-        <h1>${article.title}</h1>
-        <div class="hub-card-footer">
-          <span class="hub-chip">${article.category}</span>
-          <time datetime="${article.publishedAt}">${new Date(article.publishedAt).toLocaleDateString("en-US", { day: "2-digit", month: "long", year: "numeric" })}</time>
-          <span class="hub-meta">${article.readTime}</span>
+        <div class="article-hero-grid">
+          <div class="article-hero-copy">
+            <span class="eyebrow">Astrology Hub</span>
+            <h1>${article.title}</h1>
+            <div class="hub-card-footer">
+              <span class="hub-chip">${article.category}</span>
+              <time datetime="${article.publishedAt}">${new Date(article.publishedAt).toLocaleDateString("en-US", { day: "2-digit", month: "long", year: "numeric" })}</time>
+              <span class="hub-meta">${article.readTime}</span>
+            </div>
+          </div>
+          ${
+            article.sign
+              ? `<img
+                  class="article-sign-hero"
+                  src="${state.theme === "light" ? article.imageLight : article.imageDark}"
+                  data-zodiac-light="${article.imageLight}"
+                  data-zodiac-dark="${article.imageDark}"
+                  alt="${article.sign} zodiac illustration"
+                  loading="lazy"
+                  decoding="async"
+                />`
+              : ""
+          }
         </div>
       </article>
     </section>
@@ -4162,9 +4349,6 @@ const routes = {
   "/friends": friendsView,
   "/faq": faqView,
   "/astrology-hub": astrologyHubView,
-  "/astrology-hub/astrology-and-astronomy-shared-roots-modern-paths": () => astrologyHubArticleView("astrology-and-astronomy-shared-roots-modern-paths"),
-  "/astrology-hub/how-to-avoid-astrology-scams": () => astrologyHubArticleView("how-to-avoid-astrology-scams"),
-  "/astrology-hub/astrology-for-self-knowledge-and-growth": () => astrologyHubArticleView("astrology-for-self-knowledge-and-growth"),
   "/privacy-policy": privacyPolicyView,
   "/terms-of-service": termsOfServiceView
 };
@@ -4181,19 +4365,7 @@ function applySeoMeta(path) {
     },
     "/astrology-hub": {
       title: "Astrology Hub - Astronautica",
-      description: "Astrology Hub by Astronautica: long-form articles on history, methodology, safety and modern applied astrology."
-    },
-    "/astrology-hub/astrology-and-astronomy-shared-roots-modern-paths": {
-      title: "Astrology and Astronomy: Ancient Roots, Modern Paths - Astrology Hub",
-      description: astrologyHubBySlug["astrology-and-astronomy-shared-roots-modern-paths"]?.seoDescription || defaultMeta.description
-    },
-    "/astrology-hub/how-to-avoid-astrology-scams": {
-      title: "How to Avoid Astrology Scams - Astrology Hub",
-      description: astrologyHubBySlug["how-to-avoid-astrology-scams"]?.seoDescription || defaultMeta.description
-    },
-    "/astrology-hub/astrology-for-self-knowledge-and-growth": {
-      title: "Astrology for Self-Knowledge and Growth - Astrology Hub",
-      description: astrologyHubBySlug["astrology-for-self-knowledge-and-growth"]?.seoDescription || defaultMeta.description
+      description: "Astrology Hub by Astronautica: in-depth sign guides, method papers, safety standards, and applied astrological strategy."
     },
     "/privacy-policy": {
       title: "Privacy Policy - Astronautica",
@@ -4204,7 +4376,14 @@ function applySeoMeta(path) {
       description: "Astronautica Terms of Service for EEA, UK and Switzerland users."
     }
   };
-  const meta = pageMeta[path] || defaultMeta;
+  const articleSlug = path.startsWith("/astrology-hub/") ? path.replace("/astrology-hub/", "") : null;
+  const article = articleSlug ? astrologyHubBySlug[articleSlug] : null;
+  const meta = article
+    ? {
+        title: `${article.title} - Astrology Hub`,
+        description: article.seoDescription || defaultMeta.description
+      }
+    : (pageMeta[path] || defaultMeta);
   document.title = meta.title;
 
   const setMeta = (selector, content) => {
@@ -4228,8 +4407,6 @@ function applySeoMeta(path) {
 
   const schemaId = "page-structured-data";
   document.getElementById(schemaId)?.remove();
-  const articleSlug = path.startsWith("/astrology-hub/") ? path.replace("/astrology-hub/", "") : null;
-  const article = articleSlug ? astrologyHubBySlug[articleSlug] : null;
   if (article) {
     const script = document.createElement("script");
     script.id = schemaId;
@@ -5308,13 +5485,12 @@ async function loadSessionState() {
 
 function render() {
   let path = window.location.pathname;
+  const hubSlug = path.startsWith("/astrology-hub/") ? path.replace("/astrology-hub/", "") : "";
+  const isPublicHubArticle = Boolean(hubSlug && astrologyHubBySlug[hubSlug]);
   const publicPaths = new Set([
     "/login",
     "/faq",
     "/astrology-hub",
-    "/astrology-hub/astrology-and-astronomy-shared-roots-modern-paths",
-    "/astrology-hub/how-to-avoid-astrology-scams",
-    "/astrology-hub/astrology-for-self-knowledge-and-growth",
     "/privacy-policy",
     "/terms-of-service"
   ]);
@@ -5323,12 +5499,12 @@ function render() {
   }
   const profileExists = hasProfile();
 
-  if (state.authRequired && !state.authenticated && !publicPaths.has(path)) {
+  if (state.authRequired && !state.authenticated && !publicPaths.has(path) && !isPublicHubArticle) {
     path = "/login";
     window.history.replaceState({}, "", path);
   }
 
-  if (state.authRequired && state.authenticated && !profileExists && !["/onboarding", ...publicPaths].includes(path)) {
+  if (state.authRequired && state.authenticated && !profileExists && !["/onboarding", ...publicPaths].includes(path) && !isPublicHubArticle) {
     path = "/onboarding";
     window.history.replaceState({}, "", path);
   }
@@ -5342,7 +5518,7 @@ function render() {
     destroySolarSystemWidget();
   }
 
-  const makeView = routes[path] || homeViewLoading;
+  const makeView = routes[path] || (isPublicHubArticle ? () => astrologyHubArticleView(hubSlug) : homeViewLoading);
   app.innerHTML = makeView();
   syncZodiacThemeImages(state.theme);
   applySeoMeta(path);

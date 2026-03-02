@@ -649,6 +649,19 @@ body[data-theme="light"] .auth-login-btn.telegram .auth-login-btn-icon .astro-ic
     var(--surface);
 }
 
+.hub-sign-thumb-link {
+  display: block;
+  text-decoration: none;
+}
+
+.hub-sign-thumb {
+  display: block;
+  width: 100%;
+  max-height: 220px;
+  object-fit: contain;
+  object-position: center;
+}
+
 .hub-card h2 {
   margin: 0;
   font-size: clamp(1.1rem, 2.2vw, 1.7rem);
@@ -713,6 +726,26 @@ body[data-theme="light"] .auth-login-btn.telegram .auth-login-btn-icon .astro-ic
     var(--surface);
 }
 
+.article-hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 360px);
+  gap: 1rem;
+  align-items: center;
+}
+
+.article-hero-copy {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.article-sign-hero {
+  width: 100%;
+  max-height: 320px;
+  object-fit: contain;
+  object-position: center;
+  justify-self: end;
+}
+
 .article-body {
   padding: clamp(1rem, 2.4vw, 1.6rem);
 }
@@ -744,6 +777,10 @@ body[data-theme="light"] .auth-login-btn.telegram .auth-login-btn-icon .astro-ic
   display: grid;
   gap: 0.5rem;
   justify-items: start;
+}
+
+.related-grid {
+  margin-top: 0.75rem;
 }
 
 .form-grid {
@@ -3249,6 +3286,19 @@ body[data-theme="light"] .energy-star.neutral {
 
   .hub-grid {
     grid-template-columns: 1fr;
+  }
+
+  .article-hero-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .article-sign-hero {
+    justify-self: center;
+    max-height: 260px;
+  }
+
+  .hub-sign-thumb {
+    max-height: 180px;
   }
 
   .editorial-grid {
