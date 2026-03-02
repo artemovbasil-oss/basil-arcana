@@ -1577,6 +1577,7 @@ async function ensureProfileCoordinates(profile) {
     ...profile,
     latitude: geo.latitude,
     longitude: geo.longitude,
+    timezone: String(profile.timezone || "").trim() || String(geo.timezoneIana || "UTC"),
     timezoneIana: profile.timezoneIana || geo.timezoneIana || null
   };
 }

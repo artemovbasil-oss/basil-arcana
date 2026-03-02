@@ -1153,6 +1153,11 @@ body[data-theme="light"] .auth-login-btn.telegram .auth-login-btn-icon .astro-ic
   border-bottom-color: #000000;
 }
 
+body[data-theme="light"] .onboarding-celeb-card:has(input:checked) input {
+  border-color: #111111;
+  box-shadow: inset 0 0 0 1px #111111;
+}
+
 .onboarding-celeb-card:hover {
   border-color: color-mix(in srgb, var(--ink) 52%, var(--line) 48%);
 }

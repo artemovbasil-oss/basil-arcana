@@ -3475,9 +3475,6 @@ function onboardingView() {
         <label>Birth city
           <input id="onboardingBirthCity" required name="birthCity" value="${profile.birthCity || ""}" placeholder="City, Country" list="citySuggestions" autocomplete="off" />
         </label>
-        <label>Timezone
-          <input required name="timezone" value="${profile.timezone || "UTC"}" placeholder="UTC+3" />
-        </label>
         <fieldset class="field-span-2 onboarding-celeb-fieldset">
           <legend>Compare with historical profiles</legend>
           <p class="muted">Pick from these 3 curated figures to compare chart dynamics after onboarding.</p>
@@ -3542,9 +3539,6 @@ function profileView() {
                 </label>
                 <label>Birth city
                   <input id="profileBirthCity" required name="birthCity" value="${profile.birthCity || ""}" placeholder="City, Country" list="citySuggestions" autocomplete="off" />
-                </label>
-                <label>Timezone
-                  <input required name="timezone" value="${profile.timezone || "UTC"}" placeholder="UTC+3" />
                 </label>
                 <input type="hidden" name="latitude" value="${Number.isFinite(Number(profile.latitude)) ? Number(profile.latitude) : ""}" />
                 <input type="hidden" name="longitude" value="${Number.isFinite(Number(profile.longitude)) ? Number(profile.longitude) : ""}" />
