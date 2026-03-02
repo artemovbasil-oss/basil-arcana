@@ -705,6 +705,11 @@ body[data-theme="light"] .auth-login-btn.telegram .auth-login-btn-icon .astro-ic
   z-index: 1;
 }
 
+body[data-theme="dark"] .celeb-archive-thumb-link {
+  background: #000000;
+  border-color: color-mix(in srgb, #000000 70%, var(--line) 30%);
+}
+
 .celeb-archive-thumb {
   max-height: 240px;
 }
@@ -949,6 +954,17 @@ body[data-theme="light"] .auth-login-btn.telegram .auth-login-btn-icon .astro-ic
   padding: 0.62rem;
   display: grid;
   gap: 0.5rem;
+}
+
+.referral-login-box {
+  border: 0;
+  background: color-mix(in srgb, var(--surface-2) 62%, transparent 38%);
+  padding: 0.55rem 0.6rem;
+  margin-bottom: 0.9rem;
+}
+
+.referral-login-box + .auth-provider-row {
+  margin-top: 0.35rem;
 }
 
 .referral-box {
