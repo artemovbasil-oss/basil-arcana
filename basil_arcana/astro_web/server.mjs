@@ -652,6 +652,24 @@ async function removeDeletedUserFromSocialGraph(deletedUserKey, deletedUserData)
   }
 }
 
+async function recomputeInvitedRegistrationsForUser(referrerUserKey) {
+  const userKey = String(referrerUserKey || "").trim();
+  if (!userKey) {
+    return;
+  }
+  const allUsers = await listAllUserStateEntries();
+  const invitedCount = allUsers.reduce((acc, entry) => {
+    const referredBy = String(entry?.data?.referral?.referredByUserKey || "").trim();
+    return acc + (referredBy === userKey ? 1 : 0);
+  }, 0);
+  const referrerData = await loadUserData(userKey);
+  if (!referrerData.metrics || typeof referrerData.metrics !== "object") {
+    referrerData.metrics = { invitesSent: 0, invitedRegistrations: 0 };
+  }
+  referrerData.metrics.invitedRegistrations = invitedCount;
+  await saveUserData(userKey, referrerData);
+}
+
 async function finalizeReferralSocialConnectionIfReady(userKey, userData) {
   if (!userKey) {
     return normalizeUserData(userData);
@@ -2545,8 +2563,12 @@ app.delete("/api/profile", requireAuth, async (req, res) => {
     return res.status(400).json({ error: "invalid_user_id" });
   }
   const userDataBeforeDelete = await loadUserData(userId);
+  const inviterUserKey = String(userDataBeforeDelete?.referral?.referredByUserKey || "").trim();
   await removeDeletedUserFromSocialGraph(userId, userDataBeforeDelete);
   await deleteUserData(userId);
+  if (inviterUserKey) {
+    await recomputeInvitedRegistrationsForUser(inviterUserKey);
+  }
   const oldSid = req.sessionId;
   const sid = crypto.randomUUID();
   const freshSession = defaultSessionData();

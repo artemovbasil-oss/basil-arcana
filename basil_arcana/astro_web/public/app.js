@@ -3987,7 +3987,6 @@ function friendsView() {
   const referralLink = String(ref.link || "").trim();
   const safeReferralLink = referralLink || "#";
   const invitedRegistrations = Number(ref.invitedRegistrations || 0);
-  const shareInvitesSent = Number(ref.shareInvitesSent || 0);
   const allFriends = Array.isArray(state.friends) ? state.friends : [];
   const hasFriends = allFriends.length > 0;
   const hasRealFriends = allFriends.some((friend) => !friend?.isVirtual);
@@ -4023,16 +4022,7 @@ function friendsView() {
       <article class="card social-circle-card">
         <div class="friends-social-head">
           <span class="eyebrow">Social Circle</span>
-          <div class="social-circle-metrics" aria-label="Invite stats">
-            <span class="social-circle-metric">
-              <strong>${invitedRegistrations}</strong>
-              <em>Joined via your link</em>
-            </span>
-            <span class="social-circle-metric">
-              <strong>${shareInvitesSent}</strong>
-              <em>Shared invitations</em>
-            </span>
-          </div>
+          <span class="social-circle-statline" aria-label="Invite stats">Joined via your link: <strong>${invitedRegistrations}</strong></span>
         </div>
         <h2>Bring friends into your rhythm</h2>
         <div class="referral-box premium-panel">
