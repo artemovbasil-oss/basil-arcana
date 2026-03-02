@@ -890,6 +890,15 @@ body[data-theme="light"] .auth-login-btn.telegram .auth-login-btn-icon .astro-ic
   font-size: 0.78rem;
 }
 
+.referral-login-box,
+.referral-box {
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  padding: 0.62rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
 .form-grid input {
   width: 100%;
   border: 1px solid var(--line-strong);

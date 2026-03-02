@@ -15,6 +15,10 @@ const state = {
   telegramBotId: null,
   googleLoginEnabled: false,
   githubLoginEnabled: false,
+  referralContext: null,
+  referral: null,
+  celebrities: [],
+  celebrityProfile: null,
   profile: null,
   profileReady: false,
   friends: [],
@@ -25,6 +29,11 @@ const state = {
   profileEditMode: false,
   solarSystem: null
 };
+
+function referralCodeFromUrl() {
+  const params = new URLSearchParams(window.location.search || "");
+  return String(params.get("ref") || "").toUpperCase().trim();
+}
 
 menuButton.addEventListener("click", () => {
   nav.classList.toggle("open");
@@ -3220,6 +3229,7 @@ function renderHomeDashboard(dashboard) {
   ].filter((item) => item.replace(/<[^>]+>/g, "").trim());
   const zodiacCompact = renderHomeZodiacCompact(dashboard.natalCore?.sun);
   const zodiacCelebBlock = renderZodiacCelebrities(dashboard.natalCore?.sun);
+  const celebrityComparisons = Array.isArray(dashboard?.celebrityComparisons) ? dashboard.celebrityComparisons : [];
   const solarSystemBlock = renderSolarSystemBlock(dashboard, period);
 
   return `
@@ -3253,6 +3263,33 @@ function renderHomeDashboard(dashboard) {
       </article>
     </section>
     ${solarSystemBlock}
+    ${
+      celebrityComparisons.length
+        ? `<section class="section">
+            <article class="card">
+              <span class="eyebrow">Historical Sync</span>
+              <h2>Your selected historical comparisons</h2>
+              <div class="celeb-grid">
+                ${celebrityComparisons
+                  .map((item) => `
+                    <article class="celeb-card">
+                      <h3>${item.name}</h3>
+                      <p class="celeb-meta">${item.field} · ${item.years}</p>
+                      <div class="celeb-chip-row">
+                        <span class="celeb-chip">Sign: ${item.sign}</span>
+                        <span class="celeb-chip">Sync: ${item.score}%</span>
+                        <span class="celeb-chip">${item.trend}</span>
+                      </div>
+                      <p>${item.note}</p>
+                      <a class="hub-link" href="/celebrities/${item.id}">Open natal profile</a>
+                    </article>
+                  `)
+                  .join("")}
+              </div>
+            </article>
+          </section>`
+        : ""
+    }
     ${zodiacCompact}
     ${zodiacCelebBlock}
     <section class="section">
@@ -3290,6 +3327,8 @@ function loginView() {
   const telegramEnabled = state.telegramLoginEnabled && state.telegramBotUsername;
   const googleEnabled = state.googleLoginEnabled;
   const anyEnabled = telegramEnabled || googleEnabled;
+  const referralCode = referralCodeFromUrl() || String(state.referralContext?.code || "").trim();
+  const referralConsent = state.referralContext?.shareBirthDataConsent !== false;
 
   return `
     <section class="section login-shell">
@@ -3303,13 +3342,23 @@ function loginView() {
           ${
             anyEnabled
               ? `
+                ${referralCode ? `
+                  <div class="referral-login-box">
+                    <span class="eyebrow">Referral Registration</span>
+                    <p>You are joining via invite code <strong>${referralCode}</strong>.</p>
+                    <label class="friend-no-share">
+                      <input id="referralConsentCheckbox" type="checkbox" ${referralConsent ? "checked" : ""} />
+                      <span>Allow sharing my birth data (date, time, place) to build social links in Astronautica.</span>
+                    </label>
+                  </div>
+                ` : ""}
                 <div class="auth-provider-row">
                   ${
                     googleEnabled
-                      ? `<a class="auth-login-btn gmail" href="/api/auth/google/start?returnTo=%2F">
+                      ? `<button id="googleLoginButton" class="auth-login-btn gmail" type="button">
                            <span class="auth-login-btn-icon" aria-hidden="true">${uiIcon("google")}</span>
                            <span>Continue with Gmail</span>
-                         </a>`
+                         </button>`
                       : ""
                   }
                   ${
@@ -3344,6 +3393,16 @@ function onboardingView() {
   const fallbackName = [state.authUser?.firstName, state.authUser?.lastName].filter(Boolean).join(" ").trim()
     || String(state.authUser?.username || "").trim();
   const resolvedName = profile.name || fallbackName;
+  const selectedCelebrityIds = Array.isArray(profile?.selectedCelebrityIds) ? profile.selectedCelebrityIds : [];
+  const referredByCode = String(state.referralContext?.code || "").trim();
+  const referralConsentChecked = state.referralContext?.shareBirthDataConsent !== false;
+  const celebOptions = state.celebrities
+    .map((item) => {
+      const id = String(item.id || "");
+      const selected = selectedCelebrityIds.includes(id) ? "selected" : "";
+      return `<option value="${id}" ${selected}>${item.name} · ${item.sign} · ${item.years}</option>`;
+    })
+    .join("");
   return `
     <section class="section">
       <article class="card tone-card">
@@ -3369,6 +3428,19 @@ function onboardingView() {
         <label>Timezone
           <input required name="timezone" value="${profile.timezone || "UTC"}" placeholder="UTC+3" />
         </label>
+        <label class="field-span-2">Compare with historical profiles (up to 3)
+          <select id="selectedCelebrityIds" name="selectedCelebrityIds" multiple size="8">
+            ${celebOptions}
+          </select>
+        </label>
+        ${
+          referredByCode
+            ? `<label class="field-span-2 friend-no-share">
+                <input id="onboardingReferralConsent" type="checkbox" ${referralConsentChecked ? "checked" : ""} />
+                <span>Allow sharing my birth data with inviter (${referredByCode}) for social links in Astronautica.</span>
+              </label>`
+            : ""
+        }
         <input type="hidden" name="latitude" value="${Number.isFinite(Number(profile.latitude)) ? Number(profile.latitude) : ""}" />
         <input type="hidden" name="longitude" value="${Number.isFinite(Number(profile.longitude)) ? Number(profile.longitude) : ""}" />
         <input type="hidden" name="timezoneIana" value="${profile.timezoneIana || ""}" />
@@ -3872,50 +3944,37 @@ function dailyViewLoading() {
 }
 
 function friendsView() {
+  const ref = state.referral || {};
+  const referralLink = String(ref.link || "").trim();
+  const safeReferralLink = referralLink || "#";
+  const invitedRegistrations = Number(ref.invitedRegistrations || 0);
+  const shareInvitesSent = Number(ref.shareInvitesSent || 0);
   return `
     <section class="section">
       <article class="card tone-card">
         <span class="eyebrow">Friends</span>
-        <h1>Check friends?</h1>
-        <p>Fast synastry-lite view for communication quality, conflict timing and daily collaboration windows.</p>
+        <h1>Referral network</h1>
+        <p>Invite people via your personal link. New registrations are counted automatically; social links are built only with explicit consent.</p>
       </article>
     </section>
     <section class="section">
-      <article class="card friend-form-card">
-        <span class="eyebrow">Add friend</span>
-        <h2>Friend profile</h2>
-        <div class="friend-form-layout">
-          <form id="friendForm" class="form-grid friend-form-grid">
-            <label class="field-span-2">Friend name
-              <input required name="friendName" placeholder="Friend name" />
-            </label>
-            <label class="field-span-2">Birth date
-              <input required type="date" name="friendBirthDate" />
-            </label>
-            <label>Birth time (optional)
-              <input type="time" name="friendBirthTime" />
-            </label>
-            <label>Birth place (optional)
-              <input id="friendBirthCity" name="friendBirthCity" placeholder="City, Country" list="friendCitySuggestions" autocomplete="off" />
-            </label>
-            <label>Telegram username
-              <input id="friendTelegram" name="friendTelegram" placeholder="@username" />
-            </label>
-            <label>Email
-              <input id="friendEmail" type="email" name="friendEmail" placeholder="friend@email.com" />
-            </label>
-            <label class="friend-no-share">
-              <input id="friendNoShareData" type="checkbox" name="noShareData" />
-              <span>I don't want to share data with friends</span>
-            </label>
-            <p class="muted friend-form-note">The more complete your friend's birth data, the more accurate the compatibility calculation.</p>
-            <button class="btn primary form-submit" type="submit">Add friend</button>
-          </form>
-          <aside class="friend-form-art" aria-hidden="true">
-            <img src="https://basilarcana-assets.b-cdn.net/astronautica/hand.png" alt="" />
-          </aside>
+      <article class="card">
+        <span class="eyebrow">Invite link</span>
+        <h2>Grow your circle</h2>
+        <div class="referral-box">
+          <label>Personal referral URL
+            <input id="referralLinkInput" readonly value="${referralLink}" />
+          </label>
+          <div class="hero-actions">
+            <button id="copyReferralButton" class="btn primary" type="button">Copy link</button>
+            <a class="btn ghost" href="${safeReferralLink}" target="_blank" rel="noopener noreferrer">Open link</a>
+          </div>
+          <div class="chip-grid">
+            <span class="astro-chip">Registered via link: ${invitedRegistrations}</span>
+            <span class="astro-chip">Share actions: ${shareInvitesSent}</span>
+          </div>
+          <p id="friendsReferralStatus" class="muted"></p>
         </div>
-        <datalist id="friendCitySuggestions"></datalist>
       </article>
     </section>
     <section class="section">
@@ -4493,6 +4552,60 @@ function astrologyHubArticleView(slug) {
   `;
 }
 
+function celebritiesHubView() {
+  const grouped = zodiacOrder.map((sign) => ({
+    sign,
+    items: state.celebrities.filter((item) => String(item.sign || "") === sign).slice(0, 5)
+  }));
+  return `
+    <section class="section">
+      <article class="card tone-card">
+        <span class="eyebrow">Celebrities</span>
+        <h1>Historical natal archive</h1>
+        <p>Public archive of historical personalities (5 per zodiac sign) with birth date, time, place and computed natal chart snapshots.</p>
+      </article>
+    </section>
+    <section class="section">
+      <article class="card">
+        <div class="hub-grid">
+          ${grouped
+            .map((group) => `
+              <article class="hub-card">
+                <div class="hub-card-head">
+                  <span class="hub-chip">${group.sign}</span>
+                  <span class="hub-meta">${group.items.length} profiles</span>
+                </div>
+                <h2>${group.sign} Historical Profiles</h2>
+                <ul class="bullet-list">
+                  ${group.items
+                    .map((item) => `<li><a class="hub-link" href="/celebrities/${item.slug || item.id}">${item.name}</a> · ${item.years}</li>`)
+                    .join("")}
+                </ul>
+              </article>
+            `)
+            .join("")}
+        </div>
+      </article>
+    </section>
+  `;
+}
+
+function celebrityProfileLoadingView(slug) {
+  const celeb = state.celebrities.find((item) => String(item.slug || item.id) === String(slug || "").trim());
+  return `
+    <section class="section">
+      <article class="card tone-card">
+        <span class="eyebrow">Celebrities</span>
+        <h1>${celeb?.name || "Historical profile"}</h1>
+        <p>Loading natal chart...</p>
+      </article>
+    </section>
+    <section class="section">
+      <article class="card"><p class="muted" id="celebrityProfileStatus">Loading profile data...</p></article>
+    </section>
+  `;
+}
+
 function privacyPolicyView() {
   return `
     <section class="section">
@@ -4630,6 +4743,7 @@ const routes = {
   "/friends": friendsView,
   "/faq": faqView,
   "/astrology-hub": astrologyHubView,
+  "/celebrities": celebritiesHubView,
   "/privacy-policy": privacyPolicyView,
   "/terms-of-service": termsOfServiceView
 };
@@ -4648,6 +4762,10 @@ function applySeoMeta(path) {
       title: "Astrology Hub - Astronautica",
       description: "Astrology Hub by Astronautica: in-depth sign guides, method papers, safety standards, and applied astrological strategy."
     },
+    "/celebrities": {
+      title: "Celebrities - Astronautica",
+      description: "Historical celebrities by zodiac sign with public natal chart snapshots and structured astrological context."
+    },
     "/privacy-policy": {
       title: "Privacy Policy - Astronautica",
       description: "Astronautica Privacy Policy for EEA, UK and Switzerland users."
@@ -4659,11 +4777,18 @@ function applySeoMeta(path) {
   };
   const articleSlug = path.startsWith("/astrology-hub/") ? path.replace("/astrology-hub/", "") : null;
   const article = articleSlug ? astrologyHubBySlug[articleSlug] : null;
+  const celebSlug = path.startsWith("/celebrities/") ? path.replace("/celebrities/", "") : null;
+  const celebMeta = celebSlug ? state.celebrities.find((item) => String(item.slug || item.id) === celebSlug) : null;
   const meta = article
     ? {
         title: `${article.title} - Astrology Hub`,
         description: article.seoDescription || defaultMeta.description
       }
+    : celebMeta
+      ? {
+          title: `${celebMeta.name} Natal Profile - Astronautica`,
+          description: `${celebMeta.name} (${celebMeta.years}) natal profile: ${celebMeta.sign} historical chart context and interpretation.`
+        }
     : (pageMeta[path] || defaultMeta);
   document.title = meta.title;
 
@@ -4718,7 +4843,8 @@ function markActiveNav(path) {
   document.querySelectorAll(".nav a").forEach((link) => {
     const href = link.getAttribute("href");
     const isHub = href === "/astrology-hub" && path.startsWith("/astrology-hub");
-    link.classList.toggle("active", href === path || isHub);
+    const isCelebrities = href === "/celebrities" && path.startsWith("/celebrities");
+    link.classList.toggle("active", href === path || isHub || isCelebrities);
   });
 }
 
@@ -5371,8 +5497,48 @@ function mountTelegramWidget() {
   mount.appendChild(script);
 }
 
+function referralConsentPayload() {
+  const code = referralCodeFromUrl();
+  if (!code) {
+    return null;
+  }
+  const checkbox = document.getElementById("referralConsentCheckbox");
+  return {
+    code,
+    shareBirthDataConsent: checkbox ? Boolean(checkbox.checked) : true
+  };
+}
+
+async function persistReferralContextFromUi() {
+  const payload = referralConsentPayload();
+  if (!payload) {
+    return;
+  }
+  await fetchJson("/api/auth/referral-context", {
+    method: "POST",
+    body: JSON.stringify(payload)
+  });
+  state.referralContext = {
+    code: payload.code,
+    shareBirthDataConsent: payload.shareBirthDataConsent
+  };
+}
+
+async function handleGoogleLoginStart() {
+  const status = document.getElementById("loginStatus");
+  try {
+    await persistReferralContextFromUi();
+    window.location.assign("/api/auth/google/start?returnTo=%2F");
+  } catch (error) {
+    if (status) {
+      status.textContent = `Google login init failed: ${error.message}`;
+    }
+  }
+}
+
 async function handleTelegramWidgetAuth(telegramAuth) {
   try {
+    await persistReferralContextFromUi();
     await fetchJson("/api/auth/telegram-widget", {
       method: "POST",
       body: JSON.stringify({ telegramAuth })
@@ -5398,6 +5564,7 @@ async function handleWebAppInitDataAuth() {
   }
 
   try {
+    await persistReferralContextFromUi();
     await fetchJson("/api/auth/telegram-init-data", {
       method: "POST",
       body: JSON.stringify({ initData })
@@ -5531,6 +5698,23 @@ function bindCityAutocomplete(form, cityInputId, options = {}) {
 async function submitProfileForm(form, afterSavePath = null) {
   const formData = new FormData(form);
   const profile = Object.fromEntries(formData.entries());
+  const celebSelect = form.querySelector("#selectedCelebrityIds");
+  if (celebSelect instanceof HTMLSelectElement) {
+    profile.selectedCelebrityIds = Array.from(celebSelect.selectedOptions)
+      .map((option) => String(option.value || "").trim())
+      .filter(Boolean)
+      .slice(0, 3);
+  }
+  const referralCode = referralCodeFromUrl() || String(state.referralContext?.code || "").trim();
+  if (referralCode) {
+    const consentCheckbox = form.querySelector("#onboardingReferralConsent");
+    const shareBirthDataConsent = consentCheckbox instanceof HTMLInputElement ? Boolean(consentCheckbox.checked) : true;
+    await fetchJson("/api/auth/referral-context", {
+      method: "POST",
+      body: JSON.stringify({ code: referralCode, shareBirthDataConsent })
+    });
+    state.referralContext = { code: referralCode, shareBirthDataConsent };
+  }
   const payload = await fetchJson("/api/profile", {
     method: "PUT",
     body: JSON.stringify({ profile })
@@ -5559,6 +5743,8 @@ function attachRouteHandlers(path) {
       const telegramLoginButton = document.getElementById("telegramLoginButton");
       telegramLoginButton?.addEventListener("click", handleSwitchTelegramAccount);
     }
+    const googleLoginButton = document.getElementById("googleLoginButton");
+    googleLoginButton?.addEventListener("click", handleGoogleLoginStart);
 
     const logoutButton = document.getElementById("logoutButton");
     logoutButton?.addEventListener("click", async () => {
@@ -5571,6 +5757,15 @@ function attachRouteHandlers(path) {
   if (path === "/onboarding") {
     const form = document.getElementById("onboardingForm");
     bindCityAutocomplete(form, "onboardingBirthCity");
+    const celebsSelect = document.getElementById("selectedCelebrityIds");
+    celebsSelect?.addEventListener("change", () => {
+      const selected = Array.from(celebsSelect.selectedOptions || []);
+      if (selected.length <= 3) {
+        return;
+      }
+      selected[selected.length - 1].selected = false;
+      alert("You can select up to 3 historical profiles.");
+    });
     form?.addEventListener("submit", async (event) => {
       event.preventDefault();
       try {
@@ -5634,6 +5829,15 @@ function attachRouteHandlers(path) {
   }
 
   if (path === "/friends") {
+    fetchJson("/api/referral")
+      .then((payload) => {
+        state.referral = payload || null;
+        const referralInput = document.getElementById("referralLinkInput");
+        if (referralInput && payload?.link) {
+          referralInput.value = payload.link;
+        }
+      })
+      .catch(() => {});
     const refreshFriendInsights = async () => {
       try {
         const payload = await fetchJson("/api/dashboard?period=week");
@@ -5667,53 +5871,97 @@ function attachRouteHandlers(path) {
       renderFriendsList();
       bindFriendListHandlers();
     });
-
-    const form = document.getElementById("friendForm");
-    bindCityAutocomplete(form, "friendBirthCity", { datalistId: "friendCitySuggestions", strictSelection: true });
-    const telegramInput = document.getElementById("friendTelegram");
-    const emailInput = document.getElementById("friendEmail");
-    const noShareCheckbox = document.getElementById("friendNoShareData");
-    const syncFriendContactRules = () => {
-      const noShare = Boolean(noShareCheckbox?.checked);
-      if (telegramInput) {
-        telegramInput.required = !noShare && !(emailInput?.value || "").trim();
-      }
-      if (emailInput) {
-        emailInput.required = !noShare && !(telegramInput?.value || "").trim();
-      }
-    };
-    telegramInput?.addEventListener("input", syncFriendContactRules);
-    emailInput?.addEventListener("input", syncFriendContactRules);
-    noShareCheckbox?.addEventListener("change", syncFriendContactRules);
-    syncFriendContactRules();
-    form?.addEventListener("submit", async (event) => {
-      event.preventDefault();
-      if (!form.reportValidity()) {
+    const copyBtn = document.getElementById("copyReferralButton");
+    const referralInput = document.getElementById("referralLinkInput");
+    const referralStatus = document.getElementById("friendsReferralStatus");
+    copyBtn?.addEventListener("click", async () => {
+      const value = String(referralInput?.value || "").trim();
+      if (!value) {
         return;
       }
-      const formData = new FormData(form);
-      const friend = Object.fromEntries(formData.entries());
-      friend.noShareData = Boolean(noShareCheckbox?.checked);
       try {
-        const payload = await fetchJson("/api/friends", {
-          method: "POST",
-          body: JSON.stringify(friend)
-        });
-        state.friends = payload.friends || [];
-        form.reset();
-        syncFriendContactRules();
-        await refreshFriendInsights();
-        renderFriendsList();
-        bindFriendListHandlers();
-      } catch (error) {
-        if (error.status === 401) {
-          await refreshAuthState();
-          navigate("/login", { replace: true });
-          return;
+        await navigator.clipboard.writeText(value);
+        if (referralStatus) {
+          referralStatus.textContent = "Referral link copied.";
         }
-        alert(`Failed to save friend: ${error.message}`);
+      } catch {
+        if (referralStatus) {
+          referralStatus.textContent = "Copy failed. You can copy the link manually.";
+        }
       }
     });
+  }
+
+  if (path.startsWith("/celebrities/")) {
+    const slug = path.replace("/celebrities/", "");
+    const status = document.getElementById("celebrityProfileStatus");
+    fetchJson(`/api/celebrities/${encodeURIComponent(slug)}`)
+      .then((payload) => {
+        const celeb = payload?.celebrity;
+        const natal = payload?.natal;
+        if (!celeb || !natal) {
+          if (status) {
+            status.textContent = "Profile unavailable.";
+          }
+          return;
+        }
+        const container = app;
+        if (!container) {
+          return;
+        }
+        container.innerHTML = `
+          <section class="section">
+            <article class="card tone-card">
+              <span class="eyebrow">Celebrities</span>
+              <h1>${celeb.name}</h1>
+              <p>${celeb.field} · ${celeb.years} · ${celeb.birthDate} ${celeb.birthTime} · ${celeb.birthCity}</p>
+            </article>
+          </section>
+          <section class="section">
+            <article class="card">
+              <span class="eyebrow">Natal Core</span>
+              <h2>${natal?.core?.sun || "Unknown"} · ${natal?.core?.moon || "Unknown"} · ${natal?.core?.rising || "Unknown"}</h2>
+              <p>${celeb.fact}</p>
+              <p>${natal?.summary || ""}</p>
+            </article>
+          </section>
+          <section class="section">
+            <article class="card">
+              <h2>Planet Placement Matrix</h2>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr><th>Planet</th><th>Sign</th><th>House</th><th>State</th><th>Meaning</th></tr>
+                  </thead>
+                  <tbody>
+                    ${(Array.isArray(natal?.planets) ? natal.planets : [])
+                      .map((planet) => `
+                        <tr>
+                          <td>${planet.label || planet.key || "Planet"}</td>
+                          <td>${planet.sign || "Unknown"}</td>
+                          <td>${planet.house || "—"}</td>
+                          <td>${planet.state || "Direct"}</td>
+                          <td>${planet.meaning || "Interpretive meaning unavailable."}</td>
+                        </tr>
+                      `)
+                      .join("")}
+                  </tbody>
+                </table>
+              </div>
+              <div class="hero-actions">
+                <a class="btn ghost" href="/celebrities">Back to Celebrities</a>
+              </div>
+            </article>
+          </section>
+        `;
+        syncZodiacThemeImages(state.theme);
+        markActiveNav(path);
+      })
+      .catch((error) => {
+        if (status) {
+          status.textContent = `Failed to load profile: ${error.message}`;
+        }
+      });
   }
 }
 
@@ -5727,27 +5975,37 @@ async function refreshAuthState() {
   state.telegramBotId = Number(auth.telegramBotId) || null;
   state.googleLoginEnabled = Boolean(auth.googleLoginEnabled);
   state.githubLoginEnabled = Boolean(auth.githubLoginEnabled);
+  state.referralContext = auth.referralContext || null;
 }
 
 async function loadSessionState() {
   await refreshAuthState();
+  try {
+    const celebPayload = await fetchJson("/api/celebrities");
+    state.celebrities = Array.isArray(celebPayload?.celebrities) ? celebPayload.celebrities : [];
+  } catch {
+    state.celebrities = [];
+  }
 
   if (state.authRequired && !state.authenticated) {
     state.profile = null;
     state.profileReady = false;
     state.friends = [];
     state.friendInsights = {};
+    state.referral = null;
     state.dashboard = null;
     return;
   }
 
-  const [profilePayload, friendsPayload] = await Promise.all([
+  const [profilePayload, friendsPayload, referralPayload] = await Promise.all([
     fetchJson("/api/profile"),
-    fetchJson("/api/friends")
+    fetchJson("/api/friends"),
+    fetchJson("/api/referral")
   ]);
   state.profile = profilePayload.profile || null;
   state.profileReady = Boolean(profilePayload.profileReady);
   state.friends = friendsPayload.friends || [];
+  state.referral = referralPayload || null;
   if (state.profileReady) {
     try {
       const payload = await fetchJson(`/api/dashboard?period=${encodeURIComponent(state.homePeriod)}`);
@@ -5773,10 +6031,13 @@ function render() {
   let path = window.location.pathname;
   const hubSlug = path.startsWith("/astrology-hub/") ? path.replace("/astrology-hub/", "") : "";
   const isPublicHubArticle = Boolean(hubSlug && astrologyHubBySlug[hubSlug]);
+  const celebritySlug = path.startsWith("/celebrities/") ? path.replace("/celebrities/", "") : "";
+  const isPublicCelebrityProfile = Boolean(celebritySlug);
   const publicPaths = new Set([
     "/login",
     "/faq",
     "/astrology-hub",
+    "/celebrities",
     "/privacy-policy",
     "/terms-of-service"
   ]);
@@ -5785,12 +6046,12 @@ function render() {
   }
   const profileExists = hasProfile();
 
-  if (state.authRequired && !state.authenticated && !publicPaths.has(path) && !isPublicHubArticle) {
+  if (state.authRequired && !state.authenticated && !publicPaths.has(path) && !isPublicHubArticle && !isPublicCelebrityProfile) {
     path = "/login";
     window.history.replaceState({}, "", path);
   }
 
-  if (state.authRequired && state.authenticated && !profileExists && !["/onboarding", ...publicPaths].includes(path) && !isPublicHubArticle) {
+  if (state.authRequired && state.authenticated && !profileExists && !["/onboarding", ...publicPaths].includes(path) && !isPublicHubArticle && !isPublicCelebrityProfile) {
     path = "/onboarding";
     window.history.replaceState({}, "", path);
   }
@@ -5804,7 +6065,10 @@ function render() {
     destroySolarSystemWidget();
   }
 
-  const makeView = routes[path] || (isPublicHubArticle ? () => astrologyHubArticleView(hubSlug) : homeViewLoading);
+  const makeView = routes[path]
+    || (isPublicHubArticle
+      ? () => astrologyHubArticleView(hubSlug)
+      : (isPublicCelebrityProfile ? () => celebrityProfileLoadingView(celebritySlug) : homeViewLoading));
   app.innerHTML = makeView();
   syncZodiacThemeImages(state.theme);
   applySeoMeta(path);

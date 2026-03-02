@@ -113,11 +113,98 @@ const allowedCityCountryCodes = new Set([
   "XK"
 ]);
 
+function slugify(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+const historicalCelebrities = [
+  { sign: "Aries", name: "Leonardo da Vinci", birthDate: "1452-04-15", birthTime: "22:30", birthCity: "Vinci, Italy", field: "Art / Science", years: "1452-1519", fact: "Renaissance polymath whose notebooks linked artistic anatomy with engineering systems." },
+  { sign: "Aries", name: "Vincent van Gogh", birthDate: "1853-03-30", birthTime: "11:00", birthCity: "Zundert, Netherlands", field: "Art", years: "1853-1890", fact: "Post-Impressionist painter whose color language reshaped modern visual expression." },
+  { sign: "Aries", name: "Charlie Chaplin", birthDate: "1889-04-16", birthTime: "20:00", birthCity: "London, England", field: "Film", years: "1889-1977", fact: "Created one of cinema's most enduring characters while building a global studio legacy." },
+  { sign: "Aries", name: "Francisco Goya", birthDate: "1746-03-30", birthTime: "10:00", birthCity: "Fuendetodos, Spain", field: "Art", years: "1746-1828", fact: "Painter-printmaker whose work bridged court portraiture and modern political critique." },
+  { sign: "Aries", name: "Johann Sebastian Bach", birthDate: "1685-03-31", birthTime: "08:00", birthCity: "Eisenach, Germany", field: "Music", years: "1685-1750", fact: "Composer whose harmonic architecture became a foundation for Western music training." },
+
+  { sign: "Taurus", name: "William Shakespeare", birthDate: "1564-04-23", birthTime: "03:00", birthCity: "Stratford-upon-Avon, England", field: "Literature / Theatre", years: "1564-1616", fact: "Playwright whose language and character psychology still shape global storytelling." },
+  { sign: "Taurus", name: "Karl Marx", birthDate: "1818-05-05", birthTime: "02:00", birthCity: "Trier, Germany", field: "Philosophy / Economics", years: "1818-1883", fact: "Political economist whose critique of industrial systems influenced modern social theory." },
+  { sign: "Taurus", name: "Sigmund Freud", birthDate: "1856-05-06", birthTime: "18:30", birthCity: "Pribor, Czechia", field: "Psychology", years: "1856-1939", fact: "Founded psychoanalysis and introduced enduring models of motive and unconscious process." },
+  { sign: "Taurus", name: "Salvador Dali", birthDate: "1904-05-11", birthTime: "08:45", birthCity: "Figueres, Spain", field: "Art", years: "1904-1989", fact: "Surrealist icon who fused theatrical self-branding with technical draftsmanship." },
+  { sign: "Taurus", name: "Audrey Hepburn", birthDate: "1929-05-04", birthTime: "03:00", birthCity: "Brussels, Belgium", field: "Film / Humanitarian", years: "1929-1993", fact: "Actor and UNICEF ambassador recognized for both screen craft and global advocacy." },
+
+  { sign: "Gemini", name: "Marilyn Monroe", birthDate: "1926-06-01", birthTime: "09:30", birthCity: "Los Angeles, California, USA", field: "Film", years: "1926-1962", fact: "Built one of the most recognizable media personas in twentieth-century cinema." },
+  { sign: "Gemini", name: "John F. Kennedy", birthDate: "1917-05-29", birthTime: "15:00", birthCity: "Brookline, Massachusetts, USA", field: "Politics", years: "1917-1963", fact: "US president associated with Cold War crisis management and moonshot-era ambition." },
+  { sign: "Gemini", name: "Federico Garcia Lorca", birthDate: "1898-06-05", birthTime: "06:00", birthCity: "Fuente Vaqueros, Spain", field: "Poetry / Theatre", years: "1898-1936", fact: "Poet-dramatist whose symbolic language transformed modern Spanish literature." },
+  { sign: "Gemini", name: "Allen Ginsberg", birthDate: "1926-06-03", birthTime: "18:03", birthCity: "Newark, New Jersey, USA", field: "Poetry", years: "1926-1997", fact: "Beat poet who challenged postwar conformity through radical literary voice." },
+  { sign: "Gemini", name: "Paul Gauguin", birthDate: "1848-06-07", birthTime: "06:00", birthCity: "Paris, France", field: "Art", years: "1848-1903", fact: "Painter who helped transition European art toward symbolic and modernist form." },
+
+  { sign: "Cancer", name: "Frida Kahlo", birthDate: "1907-07-06", birthTime: "08:30", birthCity: "Coyoacan, Mexico", field: "Art", years: "1907-1954", fact: "Artist known for autobiographical symbolism and cross-cultural visual identity." },
+  { sign: "Cancer", name: "Ernest Hemingway", birthDate: "1899-07-21", birthTime: "08:00", birthCity: "Oak Park, Illinois, USA", field: "Literature", years: "1899-1961", fact: "Nobel-winning novelist whose concise prose model influenced modern fiction." },
+  { sign: "Cancer", name: "Nikola Tesla", birthDate: "1856-07-10", birthTime: "00:00", birthCity: "Smiljan, Croatia", field: "Engineering / Physics", years: "1856-1943", fact: "Inventor whose AC power systems became the backbone of modern electricity grids." },
+  { sign: "Cancer", name: "Franz Kafka", birthDate: "1883-07-03", birthTime: "03:00", birthCity: "Prague, Czechia", field: "Literature", years: "1883-1924", fact: "Writer whose existential bureaucratic themes entered global political vocabulary." },
+  { sign: "Cancer", name: "Gustav Mahler", birthDate: "1860-07-07", birthTime: "07:30", birthCity: "Kalischte, Czechia", field: "Music", years: "1860-1911", fact: "Composer-conductor who expanded symphonic scale and emotional orchestral narrative." },
+
+  { sign: "Leo", name: "Napoleon Bonaparte", birthDate: "1769-08-15", birthTime: "11:30", birthCity: "Ajaccio, France", field: "Politics / Military", years: "1769-1821", fact: "State-builder and strategist whose legal reforms outlived imperial collapse." },
+  { sign: "Leo", name: "Alfred Hitchcock", birthDate: "1899-08-13", birthTime: "13:20", birthCity: "London, England", field: "Film", years: "1899-1980", fact: "Director who operationalized suspense as a repeatable cinematic system." },
+  { sign: "Leo", name: "Coco Chanel", birthDate: "1883-08-19", birthTime: "06:00", birthCity: "Saumur, France", field: "Fashion", years: "1883-1971", fact: "Designer who transformed luxury fashion into modern minimalist codes." },
+  { sign: "Leo", name: "Benito Mussolini", birthDate: "1883-07-29", birthTime: "14:00", birthCity: "Predappio, Italy", field: "Politics", years: "1883-1945", fact: "Italian political leader whose regime became a key case in twentieth-century authoritarian history." },
+  { sign: "Leo", name: "Alexander Fleming", birthDate: "1881-08-06", birthTime: "20:00", birthCity: "Lochfield, Scotland", field: "Medicine", years: "1881-1955", fact: "Discovered penicillin, catalyzing the antibiotic era in clinical medicine." },
+
+  { sign: "Virgo", name: "Leo Tolstoy", birthDate: "1828-09-09", birthTime: "01:00", birthCity: "Yasnaya Polyana, Russia", field: "Literature", years: "1828-1910", fact: "Novelist whose social-scale narratives redefined psychological realism." },
+  { sign: "Virgo", name: "Johann Wolfgang von Goethe", birthDate: "1749-08-28", birthTime: "12:00", birthCity: "Frankfurt, Germany", field: "Literature / Science", years: "1749-1832", fact: "Writer-scientist whose work bridged poetry, philosophy, and natural inquiry." },
+  { sign: "Virgo", name: "Freddie Mercury", birthDate: "1946-09-05", birthTime: "08:45", birthCity: "Stone Town, Tanzania", field: "Music", years: "1946-1991", fact: "Frontman whose vocal range and stage architecture transformed arena performance." },
+  { sign: "Virgo", name: "Agatha Christie", birthDate: "1890-09-15", birthTime: "04:00", birthCity: "Torquay, England", field: "Literature", years: "1890-1976", fact: "Detective novelist whose plotting structures became a genre benchmark." },
+  { sign: "Virgo", name: "Queen Elizabeth I", birthDate: "1533-09-07", birthTime: "15:00", birthCity: "Greenwich, England", field: "Monarchy / Statecraft", years: "1533-1603", fact: "Monarch associated with administrative consolidation and cultural expansion." },
+
+  { sign: "Libra", name: "Mahatma Gandhi", birthDate: "1869-10-02", birthTime: "07:11", birthCity: "Porbandar, India", field: "Political Ethics", years: "1869-1948", fact: "Led nonviolent mass mobilization and influenced civil resistance worldwide." },
+  { sign: "Libra", name: "Oscar Wilde", birthDate: "1854-10-16", birthTime: "03:00", birthCity: "Dublin, Ireland", field: "Literature", years: "1854-1900", fact: "Playwright and critic whose wit and social satire endure in modern theatre." },
+  { sign: "Libra", name: "Friedrich Nietzsche", birthDate: "1844-10-15", birthTime: "10:00", birthCity: "Rocken, Germany", field: "Philosophy", years: "1844-1900", fact: "Philosopher who challenged moral absolutism and influenced modern thought." },
+  { sign: "Libra", name: "Eleanor Roosevelt", birthDate: "1884-10-11", birthTime: "11:00", birthCity: "New York City, USA", field: "Diplomacy / Human Rights", years: "1884-1962", fact: "UN delegate and public intellectual central to modern human-rights discourse." },
+  { sign: "Libra", name: "Dmitri Shostakovich", birthDate: "1906-09-25", birthTime: "13:00", birthCity: "Saint Petersburg, Russia", field: "Music", years: "1906-1975", fact: "Composer whose symphonies encoded political tension and artistic resistance." },
+
+  { sign: "Scorpio", name: "Marie Curie", birthDate: "1867-11-07", birthTime: "23:30", birthCity: "Warsaw, Poland", field: "Science", years: "1867-1934", fact: "Double Nobel laureate whose radioactivity research changed physics and medicine." },
+  { sign: "Scorpio", name: "Fyodor Dostoevsky", birthDate: "1821-11-11", birthTime: "13:00", birthCity: "Moscow, Russia", field: "Literature", years: "1821-1881", fact: "Novelist of moral conflict whose characters shaped modern psychological fiction." },
+  { sign: "Scorpio", name: "Pablo Picasso", birthDate: "1881-10-25", birthTime: "23:15", birthCity: "Malaga, Spain", field: "Art", years: "1881-1973", fact: "Painter and sculptor whose formal experimentation transformed modern art." },
+  { sign: "Scorpio", name: "Indira Gandhi", birthDate: "1917-11-19", birthTime: "23:11", birthCity: "Allahabad, India", field: "Politics", years: "1917-1984", fact: "Indian prime minister known for centralized power and major geopolitical decisions." },
+  { sign: "Scorpio", name: "George Eliot", birthDate: "1819-11-22", birthTime: "05:30", birthCity: "Nuneaton, England", field: "Literature", years: "1819-1880", fact: "Novelist whose social realism and moral complexity expanded the English novel." },
+
+  { sign: "Sagittarius", name: "Ludwig van Beethoven", birthDate: "1770-12-16", birthTime: "06:00", birthCity: "Bonn, Germany", field: "Music", years: "1770-1827", fact: "Composer who pushed classical form toward romantic-scale emotional narrative." },
+  { sign: "Sagittarius", name: "Winston Churchill", birthDate: "1874-11-30", birthTime: "01:30", birthCity: "Woodstock, England", field: "Politics", years: "1874-1965", fact: "British wartime leader whose rhetoric shaped alliance-era morale." },
+  { sign: "Sagittarius", name: "Mark Twain", birthDate: "1835-11-30", birthTime: "00:30", birthCity: "Florida, Missouri, USA", field: "Literature", years: "1835-1910", fact: "American satirist whose vernacular style redefined literary voice." },
+  { sign: "Sagittarius", name: "Walt Disney", birthDate: "1901-12-05", birthTime: "00:35", birthCity: "Chicago, Illinois, USA", field: "Animation / Media", years: "1901-1966", fact: "Built studio systems that industrialized character-driven storytelling." },
+  { sign: "Sagittarius", name: "Jane Austen", birthDate: "1775-12-16", birthTime: "11:00", birthCity: "Steventon, England", field: "Literature", years: "1775-1817", fact: "Novelist whose social observation and irony remain core to English prose." },
+
+  { sign: "Capricorn", name: "Isaac Newton", birthDate: "1643-01-04", birthTime: "01:45", birthCity: "Woolsthorpe, England", field: "Physics / Mathematics", years: "1643-1727", fact: "Formulated classical mechanics and calculus frameworks central to science." },
+  { sign: "Capricorn", name: "Martin Luther King Jr.", birthDate: "1929-01-15", birthTime: "12:00", birthCity: "Atlanta, Georgia, USA", field: "Civil Rights", years: "1929-1968", fact: "Civil-rights leader whose nonviolent strategy transformed US law and culture." },
+  { sign: "Capricorn", name: "Elvis Presley", birthDate: "1935-01-08", birthTime: "04:35", birthCity: "Tupelo, Mississippi, USA", field: "Music", years: "1935-1977", fact: "Recording artist who scaled rock-and-roll into mass global culture." },
+  { sign: "Capricorn", name: "Edgar Allan Poe", birthDate: "1809-01-19", birthTime: "01:00", birthCity: "Boston, Massachusetts, USA", field: "Literature", years: "1809-1849", fact: "Writer whose horror and detective structures influenced modern genre fiction." },
+  { sign: "Capricorn", name: "Simone de Beauvoir", birthDate: "1908-01-09", birthTime: "04:30", birthCity: "Paris, France", field: "Philosophy / Literature", years: "1908-1986", fact: "Existentialist thinker whose feminist analysis reshaped modern social theory." },
+
+  { sign: "Aquarius", name: "Charles Darwin", birthDate: "1809-02-12", birthTime: "03:00", birthCity: "Shrewsbury, England", field: "Science", years: "1809-1882", fact: "Naturalist whose evolutionary model changed biology and modern worldview." },
+  { sign: "Aquarius", name: "Thomas Edison", birthDate: "1847-02-11", birthTime: "02:57", birthCity: "Milan, Ohio, USA", field: "Engineering / Industry", years: "1847-1931", fact: "Inventor-entrepreneur who scaled industrial R&D and electrical productization." },
+  { sign: "Aquarius", name: "Abraham Lincoln", birthDate: "1809-02-12", birthTime: "06:54", birthCity: "Hodgenville, Kentucky, USA", field: "Politics", years: "1809-1865", fact: "US president who led during Civil War and ended chattel slavery." },
+  { sign: "Aquarius", name: "Jules Verne", birthDate: "1828-02-08", birthTime: "12:00", birthCity: "Nantes, France", field: "Literature", years: "1828-1905", fact: "Novelist whose speculative adventures anticipated modern science fiction motifs." },
+  { sign: "Aquarius", name: "Galileo Galilei", birthDate: "1564-02-15", birthTime: "15:00", birthCity: "Pisa, Italy", field: "Astronomy / Physics", years: "1564-1642", fact: "Astronomer whose observations accelerated the scientific revolution." },
+
+  { sign: "Pisces", name: "Albert Einstein", birthDate: "1879-03-14", birthTime: "11:30", birthCity: "Ulm, Germany", field: "Physics", years: "1879-1955", fact: "Physicist whose relativity framework changed modern space-time models." },
+  { sign: "Pisces", name: "Michelangelo", birthDate: "1475-03-06", birthTime: "04:00", birthCity: "Caprese, Italy", field: "Art / Architecture", years: "1475-1564", fact: "Renaissance master across sculpture, painting, and monumental design." },
+  { sign: "Pisces", name: "Frederic Chopin", birthDate: "1810-03-01", birthTime: "18:00", birthCity: "Zelazowa Wola, Poland", field: "Music", years: "1810-1849", fact: "Composer-pianist whose harmonic nuance transformed piano repertoire." },
+  { sign: "Pisces", name: "Victor Hugo", birthDate: "1802-02-26", birthTime: "22:00", birthCity: "Besancon, France", field: "Literature", years: "1802-1885", fact: "French writer and statesman whose novels shaped European social imagination." },
+  { sign: "Pisces", name: "Rudolf Steiner", birthDate: "1861-02-27", birthTime: "23:15", birthCity: "Donji Kraljevec, Croatia", field: "Philosophy / Education", years: "1861-1925", fact: "Public intellectual whose lectures influenced education, agriculture, and alternative medicine movements." }
+].map((item) => ({
+  id: slugify(`${item.name}-${item.birthDate}`),
+  ...item
+}));
+
+const historicalCelebritiesById = new Map(historicalCelebrities.map((item) => [item.id, item]));
+
 function defaultSessionData() {
   return {
     createdAt: Date.now(),
     auth: null,
     oauthFlow: null,
+    referralContext: null,
     profile: null,
     friends: [],
     daily: {
@@ -132,7 +219,15 @@ function defaultUserData() {
   return {
     firstSeenAt: Date.now(),
     metrics: {
-      invitesSent: 0
+      invitesSent: 0,
+      invitedRegistrations: 0
+    },
+    referral: {
+      code: "",
+      referredByCode: "",
+      referredByUserKey: "",
+      shareBirthDataConsent: true,
+      socialConnectionCompleted: false
     },
     profile: null,
     friends: [],
@@ -150,10 +245,19 @@ function normalizeUserData(raw) {
   const friends = Array.isArray(source.friends) ? source.friends : [];
   const dailySource = source.daily && typeof source.daily === "object" ? source.daily : {};
   const metricsSource = source.metrics && typeof source.metrics === "object" ? source.metrics : {};
+  const referralSource = source.referral && typeof source.referral === "object" ? source.referral : {};
   return {
     firstSeenAt: Number.isFinite(Number(source.firstSeenAt)) ? Number(source.firstSeenAt) : Date.now(),
     metrics: {
-      invitesSent: Number.isFinite(Number(metricsSource.invitesSent)) ? Number(metricsSource.invitesSent) : 0
+      invitesSent: Number.isFinite(Number(metricsSource.invitesSent)) ? Number(metricsSource.invitesSent) : 0,
+      invitedRegistrations: Number.isFinite(Number(metricsSource.invitedRegistrations)) ? Number(metricsSource.invitedRegistrations) : 0
+    },
+    referral: {
+      code: String(referralSource.code || ""),
+      referredByCode: String(referralSource.referredByCode || ""),
+      referredByUserKey: String(referralSource.referredByUserKey || ""),
+      shareBirthDataConsent: referralSource.shareBirthDataConsent !== false,
+      socialConnectionCompleted: toBoolean(referralSource.socialConnectionCompleted)
     },
     profile,
     friends,
@@ -172,6 +276,7 @@ function normalizeSessionData(raw) {
   const dailySource = source.daily && typeof source.daily === "object" ? source.daily : {};
   const authSource = source.auth && typeof source.auth === "object" ? source.auth : null;
   const oauthFlowSource = source.oauthFlow && typeof source.oauthFlow === "object" ? source.oauthFlow : null;
+  const referralContextSource = source.referralContext && typeof source.referralContext === "object" ? source.referralContext : null;
 
   const auth = authSource
     ? {
@@ -205,11 +310,19 @@ function normalizeSessionData(raw) {
         returnTo: String(oauthFlowSource.returnTo || "/")
       }
     : null;
+  const referralContext = referralContextSource
+    ? {
+        code: String(referralContextSource.code || "").toUpperCase().trim(),
+        shareBirthDataConsent: referralContextSource.shareBirthDataConsent !== false,
+        capturedAt: Number.isFinite(Number(referralContextSource.capturedAt)) ? Number(referralContextSource.capturedAt) : Date.now()
+      }
+    : null;
 
   return {
     createdAt: Number.isFinite(Number(source.createdAt)) ? Number(source.createdAt) : Date.now(),
     auth,
     oauthFlow,
+    referralContext,
     profile,
     friends,
     daily: {
@@ -367,6 +480,97 @@ async function saveUserData(telegramUserId, data) {
   userStore.set(telegramUserId, normalizeUserData(data));
 }
 
+function generateReferralCode(userKey) {
+  const digest = crypto.createHash("sha1").update(String(userKey || "").trim()).digest("hex").toUpperCase();
+  return `ASTRO-${digest.slice(0, 8)}`;
+}
+
+async function findUserKeyByReferralCode(code) {
+  const normalizedCode = String(code || "").toUpperCase().trim();
+  if (!normalizedCode) {
+    return "";
+  }
+  if (dbPool) {
+    const result = await dbPool.query(
+      `SELECT telegram_user_id FROM astro_web_user_state WHERE UPPER(COALESCE(data->'referral'->>'code', '')) = $1 LIMIT 1`,
+      [normalizedCode]
+    );
+    if (result.rowCount) {
+      return String(result.rows[0].telegram_user_id || "");
+    }
+    return "";
+  }
+  for (const [userKey, raw] of userStore.entries()) {
+    const data = normalizeUserData(raw);
+    if (String(data?.referral?.code || "").toUpperCase() === normalizedCode) {
+      return String(userKey || "");
+    }
+  }
+  return "";
+}
+
+async function buildFriendRecordFromProfile(profile, fallbackName = "Friend") {
+  if (!profile || typeof profile !== "object") {
+    return null;
+  }
+  const friendName = String(profile.name || fallbackName).trim() || fallbackName;
+  const friendBirthDate = String(profile.birthDate || "").trim();
+  const friendBirthTime = String(profile.birthTime || "").trim();
+  const friendBirthCity = String(profile.birthCity || "").trim();
+  if (!friendBirthDate) {
+    return null;
+  }
+  const natalMini = await buildFriendNatalMini({
+    friendName,
+    friendBirthDate,
+    friendBirthTime,
+    friendBirthCity
+  });
+  return {
+    id: crypto.randomUUID(),
+    friendName,
+    friendBirthDate,
+    friendBirthTime: friendBirthTime || null,
+    friendBirthCity: friendBirthCity || null,
+    friendSign: natalMini?.core?.sun || signFromDate(friendBirthDate),
+    friendTelegram: "",
+    friendEmail: "",
+    noShareData: false,
+    natalMini,
+    createdAt: Date.now()
+  };
+}
+
+async function ensureMutualFriendLink(userAKey, userAData, userBKey, userBData) {
+  if (!userAKey || !userBKey || userAKey === userBKey) {
+    return;
+  }
+  const a = normalizeUserData(userAData);
+  const b = normalizeUserData(userBData);
+  const aName = String(a?.profile?.name || "").trim();
+  const bName = String(b?.profile?.name || "").trim();
+  if (!a.profile || !b.profile || !aName || !bName) {
+    return;
+  }
+  const aHasB = (a.friends || []).some((friend) => String(friend?.friendName || "").trim() === bName);
+  const bHasA = (b.friends || []).some((friend) => String(friend?.friendName || "").trim() === aName);
+
+  if (!aHasB) {
+    const friendB = await buildFriendRecordFromProfile(b.profile, bName);
+    if (friendB) {
+      a.friends = [friendB, ...(a.friends || [])].slice(0, 50);
+    }
+  }
+  if (!bHasA) {
+    const friendA = await buildFriendRecordFromProfile(a.profile, aName);
+    if (friendA) {
+      b.friends = [friendA, ...(b.friends || [])].slice(0, 50);
+    }
+  }
+  await saveUserData(userAKey, a);
+  await saveUserData(userBKey, b);
+}
+
 async function deleteSessionBySid(sid) {
   if (!sid) {
     return;
@@ -434,6 +638,15 @@ function pickProfile(body) {
   const latitude = toOptionalFiniteNumber(profile.latitude);
   const longitude = toOptionalFiniteNumber(profile.longitude);
   const timezoneIana = String(profile.timezoneIana || "").trim();
+  const selectedCelebrityIdsRaw = Array.isArray(profile.selectedCelebrityIds)
+    ? profile.selectedCelebrityIds
+    : typeof profile.selectedCelebrityIds === "string"
+      ? profile.selectedCelebrityIds.split(",")
+      : [];
+  const selectedCelebrityIds = selectedCelebrityIdsRaw
+    .map((value) => String(value || "").trim())
+    .filter(Boolean)
+    .slice(0, 3);
 
   if (!name || !birthDate || !birthTime || !birthCity) {
     return null;
@@ -450,7 +663,8 @@ function pickProfile(body) {
     timezone,
     latitude: normalizedLatitude,
     longitude: normalizedLongitude,
-    timezoneIana: timezoneIana || null
+    timezoneIana: timezoneIana || null,
+    selectedCelebrityIds
   };
 }
 
@@ -1403,13 +1617,53 @@ function buildDashboardPayload(sessionData, period = "week") {
 
   const periodForecast = buildPeriodForecast(period, profile, now, natalCore);
   const friendsDynamic = (sessionData.friends || []).map((friend) => buildDynamicCompatibility(profile, friend, dayKey, period, natalCore.sun));
+  const selectedCelebrityIds = Array.isArray(profile.selectedCelebrityIds) ? profile.selectedCelebrityIds.slice(0, 3) : [];
+  const celebrityComparisons = selectedCelebrityIds
+    .map((id) => historicalCelebritiesById.get(String(id || "").trim()))
+    .filter(Boolean)
+    .map((celeb) => {
+      const detail = buildCompatibilityDetail({
+        userSign: natalCore.sun,
+        friendSign: celeb.sign,
+        friendName: celeb.name,
+        dayKey,
+        period,
+        seedKey: celeb.id
+      });
+      return {
+        id: celeb.id,
+        name: celeb.name,
+        sign: celeb.sign,
+        field: celeb.field,
+        years: celeb.years,
+        fact: celeb.fact,
+        score: detail.score,
+        trend: detail.trend,
+        note: detail.note
+      };
+    });
+  const celebrityDynamic = celebrityComparisons.map((item) => ({
+    id: `celeb:${item.id}`,
+    friendName: item.name,
+    friendSign: item.sign,
+    score: item.score,
+    trend: item.trend,
+    note: item.note,
+    highlights: [],
+    advice: item.fact,
+    rationale: item.fact,
+    domains: [],
+    userSign: natalCore.sun,
+    period
+  }));
 
   return {
     profile,
     natalCore,
     daily,
     periodForecast,
-    friendsDynamic
+    friendsDynamic: [...friendsDynamic, ...celebrityDynamic],
+    celebrityComparisons
   };
 }
 
@@ -1664,9 +1918,64 @@ async function finalizeAuthLogin(req, provider, profile, via) {
     via: String(via || "")
   };
   await persistSession(req.sessionId, req.sessionData);
-  const userData = await loadUserData(userKey);
-  const mergedUserData = mergeSessionIntoUserData(userData, req.sessionData);
+  const existingUserData = await loadUserData(userKey);
+  const mergedUserData = mergeSessionIntoUserData(existingUserData, req.sessionData);
+  if (!mergedUserData.referral || typeof mergedUserData.referral !== "object") {
+    mergedUserData.referral = {
+      code: "",
+      referredByCode: "",
+      referredByUserKey: "",
+      shareBirthDataConsent: true,
+      socialConnectionCompleted: false
+    };
+  }
+  if (!mergedUserData.referral.code) {
+    mergedUserData.referral.code = generateReferralCode(userKey);
+  }
+  if (!mergedUserData.metrics || typeof mergedUserData.metrics !== "object") {
+    mergedUserData.metrics = { invitesSent: 0, invitedRegistrations: 0 };
+  }
+  if (!Number.isFinite(Number(mergedUserData.metrics.invitedRegistrations))) {
+    mergedUserData.metrics.invitedRegistrations = 0;
+  }
+  const referralContext = req.sessionData?.referralContext;
+  const hasExistingReferral = Boolean(String(mergedUserData.referral.referredByUserKey || "").trim());
+  if (referralContext?.code && !hasExistingReferral) {
+    const code = String(referralContext.code || "").toUpperCase().trim();
+    const shareBirthDataConsent = referralContext.shareBirthDataConsent !== false;
+    const referrerUserKey = await findUserKeyByReferralCode(code);
+    if (referrerUserKey && referrerUserKey !== userKey) {
+      mergedUserData.referral.referredByCode = code;
+      mergedUserData.referral.referredByUserKey = referrerUserKey;
+      mergedUserData.referral.shareBirthDataConsent = shareBirthDataConsent;
+      mergedUserData.referral.socialConnectionCompleted = false;
+
+      const referrerData = await loadUserData(referrerUserKey);
+      if (!referrerData.metrics || typeof referrerData.metrics !== "object") {
+        referrerData.metrics = { invitesSent: 0, invitedRegistrations: 0 };
+      }
+      referrerData.metrics.invitedRegistrations = Number(referrerData.metrics.invitedRegistrations || 0) + 1;
+      await saveUserData(referrerUserKey, referrerData);
+    }
+    req.sessionData.referralContext = null;
+    await persistSession(req.sessionId, req.sessionData);
+  }
   await saveUserData(userKey, mergedUserData);
+
+  if (
+    mergedUserData.referral?.shareBirthDataConsent &&
+    mergedUserData.profile &&
+    mergedUserData.referral?.referredByUserKey
+    && !mergedUserData.referral?.socialConnectionCompleted
+  ) {
+    const referrerUserKey = String(mergedUserData.referral.referredByUserKey || "");
+    const referrerData = await loadUserData(referrerUserKey);
+    if (referrerData?.profile) {
+      await ensureMutualFriendLink(userKey, mergedUserData, referrerUserKey, referrerData);
+      mergedUserData.referral.socialConnectionCompleted = true;
+      await saveUserData(userKey, mergedUserData);
+    }
+  }
   return sanitizeAuthUser(req.sessionData);
 }
 
@@ -1932,8 +2241,26 @@ app.get("/api/auth/status", (req, res) => {
     googleLoginEnabled,
     githubLoginEnabled,
     telegramBotUsername: telegramBotUsername || null,
-    telegramBotId
+    telegramBotId,
+    referralContext: req.sessionData?.referralContext || null
   });
+});
+
+app.post("/api/auth/referral-context", async (req, res) => {
+  const code = String(req.body?.code || "").toUpperCase().trim();
+  const shareBirthDataConsent = req.body?.shareBirthDataConsent !== false;
+  if (!code) {
+    req.sessionData.referralContext = null;
+    await persistSession(req.sessionId, req.sessionData);
+    return res.json({ ok: true, referralContext: null });
+  }
+  req.sessionData.referralContext = {
+    code,
+    shareBirthDataConsent,
+    capturedAt: Date.now()
+  };
+  await persistSession(req.sessionId, req.sessionData);
+  return res.json({ ok: true, referralContext: req.sessionData.referralContext });
 });
 
 app.post("/api/auth/telegram-widget", async (req, res) => {
@@ -2080,8 +2407,59 @@ app.put("/api/profile", requireAuth, async (req, res) => {
   }
   const profile = await ensureProfileCoordinates(rawProfile);
   req.userData.profile = profile;
+  if (!req.userData.referral || typeof req.userData.referral !== "object") {
+    req.userData.referral = {
+      code: generateReferralCode(req.userId),
+      referredByCode: "",
+      referredByUserKey: "",
+      shareBirthDataConsent: true,
+      socialConnectionCompleted: false
+    };
+  }
+  if (!req.userData.referral.code) {
+    req.userData.referral.code = generateReferralCode(req.userId);
+  }
+  if (
+    req.userData.referral?.referredByUserKey
+    && req.userData.referral?.shareBirthDataConsent
+    && !req.userData.referral?.socialConnectionCompleted
+  ) {
+    const referrerUserKey = String(req.userData.referral.referredByUserKey || "");
+    const referrerData = await loadUserData(referrerUserKey);
+    if (referrerData?.profile) {
+      await ensureMutualFriendLink(req.userId, req.userData, referrerUserKey, referrerData);
+      req.userData.referral.socialConnectionCompleted = true;
+    }
+  }
   await saveUserData(req.userId, req.userData);
   return res.json({ ok: true, profile, profileReady: true });
+});
+
+app.get("/api/referral", requireAuth, async (req, res) => {
+  if (!req.userData.referral || typeof req.userData.referral !== "object") {
+    req.userData.referral = {
+      code: "",
+      referredByCode: "",
+      referredByUserKey: "",
+      shareBirthDataConsent: true,
+      socialConnectionCompleted: false
+    };
+  }
+  if (!req.userData.referral.code) {
+    req.userData.referral.code = generateReferralCode(req.userId);
+    await saveUserData(req.userId, req.userData);
+  }
+  const base =
+    appBaseUrlEnv ||
+    `${String(req.headers["x-forwarded-proto"] || "").toLowerCase().includes("https") ? "https" : req.protocol}://${req.get("host")}`;
+  const link = `${base}/login?ref=${encodeURIComponent(req.userData.referral.code)}`;
+  return res.json({
+    ok: true,
+    code: req.userData.referral.code,
+    link,
+    invitedRegistrations: Number(req.userData.metrics?.invitedRegistrations || 0),
+    shareInvitesSent: Number(req.userData.metrics?.invitesSent || 0)
+  });
 });
 
 app.get("/api/friends", requireAuth, (req, res) => {
@@ -2089,47 +2467,68 @@ app.get("/api/friends", requireAuth, (req, res) => {
 });
 
 app.post("/api/friends", requireAuth, async (req, res) => {
-  const friendName = String(req.body?.friendName || "").trim();
-  const friendBirthDate = String(req.body?.friendBirthDate || "").trim();
-  const friendBirthTime = String(req.body?.friendBirthTime || "").trim();
-  const friendBirthCity = String(req.body?.friendBirthCity || "").trim();
-  const noShareData = toBoolean(req.body?.noShareData);
-  const friendTelegram = normalizeTelegramHandle(req.body?.friendTelegram);
-  const friendEmail = normalizeEmail(req.body?.friendEmail);
-  if (!friendName || !friendBirthDate) {
-    return res.status(400).json({
-      error: "invalid_friend",
-      message: "friendName and friendBirthDate are required"
-    });
-  }
-  if (!noShareData && !friendTelegram && !friendEmail) {
-    return res.status(400).json({
-      error: "contact_required",
-      message: "Provide telegram username or email, or enable noShareData."
-    });
-  }
-  const natalMini = await buildFriendNatalMini({
-    friendName,
-    friendBirthDate,
-    friendBirthTime,
-    friendBirthCity
+  return res.status(410).json({
+    error: "manual_friend_add_disabled",
+    message: "Manual friend creation is disabled. Invite via your referral link from /friends."
   });
-  const friend = {
-    id: crypto.randomUUID(),
-    friendName,
-    friendBirthDate,
-    friendBirthTime: friendBirthTime || null,
-    friendBirthCity: friendBirthCity || null,
-    friendSign: natalMini?.core?.sun || signFromDate(friendBirthDate),
-    friendTelegram: noShareData ? "" : friendTelegram,
-    friendEmail: noShareData ? "" : friendEmail,
-    noShareData,
-    natalMini,
-    createdAt: Date.now()
+});
+
+app.get("/api/celebrities", (req, res) => {
+  const sign = String(req.query?.sign || "").trim();
+  const items = sign
+    ? historicalCelebrities.filter((item) => String(item.sign || "").toLowerCase() === sign.toLowerCase())
+    : historicalCelebrities;
+  return res.json({
+    ok: true,
+    celebrities: items.map((item) => ({
+      id: item.id,
+      slug: item.id,
+      name: item.name,
+      sign: item.sign,
+      field: item.field,
+      years: item.years,
+      fact: item.fact,
+      birthDate: item.birthDate,
+      birthTime: item.birthTime,
+      birthCity: item.birthCity
+    }))
+  });
+});
+
+app.get("/api/celebrities/:slug", async (req, res) => {
+  const slug = String(req.params?.slug || "").trim();
+  const item = historicalCelebritiesById.get(slug);
+  if (!item) {
+    return res.status(404).json({ error: "celebrity_not_found" });
+  }
+  const profile = {
+    name: item.name,
+    birthDate: item.birthDate,
+    birthTime: item.birthTime,
+    birthCity: item.birthCity,
+    timezone: "UTC",
+    latitude: null,
+    longitude: null,
+    timezoneIana: null
   };
-  req.userData.friends = [friend, ...(req.userData.friends || [])].slice(0, 20);
-  await saveUserData(req.userId, req.userData);
-  return res.json({ ok: true, friend, friends: req.userData.friends });
+  const hydrated = await ensureProfileCoordinates(profile);
+  const natal = buildNatalDetail(hydrated);
+  return res.json({
+    ok: true,
+    celebrity: {
+      id: item.id,
+      slug: item.id,
+      name: item.name,
+      sign: item.sign,
+      field: item.field,
+      years: item.years,
+      fact: item.fact,
+      birthDate: item.birthDate,
+      birthTime: item.birthTime,
+      birthCity: item.birthCity
+    },
+    natal
+  });
 });
 
 app.delete("/api/friends/:id", requireAuth, async (req, res) => {
