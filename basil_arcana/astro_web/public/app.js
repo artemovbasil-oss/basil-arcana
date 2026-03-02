@@ -3450,7 +3450,7 @@ function onboardingView() {
       </article>
     </section>
     <section class="section">
-      <form id="onboardingForm" class="card form-grid">
+      <form id="onboardingForm" class="card form-grid onboarding-form">
         <label>Name
           <input required name="name" value="${resolvedName || ""}" placeholder="Your name" />
         </label>
@@ -3486,9 +3486,11 @@ function onboardingView() {
         <input type="hidden" name="longitude" value="${Number.isFinite(Number(profile.longitude)) ? Number(profile.longitude) : ""}" />
         <input type="hidden" name="timezoneIana" value="${profile.timezoneIana || ""}" />
         <datalist id="citySuggestions"></datalist>
-        <button class="btn primary form-submit" type="submit">Save and continue</button>
       </form>
     </section>
+    <div class="onboarding-submit-dock" role="region" aria-label="Save profile">
+      <button class="btn primary onboarding-submit-btn" type="submit" form="onboardingForm">Save and continue</button>
+    </div>
   `;
 }
 
