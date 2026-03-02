@@ -679,16 +679,19 @@ async function finalizeReferralSocialConnectionIfReady(userKey, userData) {
   }
   const normalized = normalizeUserData(userData);
   const referral = normalized?.referral && typeof normalized.referral === "object" ? normalized.referral : null;
-  if (
-    !referral
-    || !referral.referredByUserKey
-    || referral.shareBirthDataConsent === false
-    || referral.socialConnectionCompleted
-    || !normalized.profile
-  ) {
+  if (!referral || referral.shareBirthDataConsent === false || referral.socialConnectionCompleted || !normalized.profile) {
     return normalized;
   }
-  const referrerUserKey = String(referral.referredByUserKey || "").trim();
+  let referrerUserKey = String(referral.referredByUserKey || "").trim();
+  if (!referrerUserKey) {
+    const fallbackCode = String(referral.referredByCode || "").trim();
+    if (fallbackCode) {
+      referrerUserKey = await findUserKeyByReferralCode(fallbackCode);
+      if (referrerUserKey && referrerUserKey !== userKey) {
+        normalized.referral.referredByUserKey = referrerUserKey;
+      }
+    }
+  }
   if (!referrerUserKey || referrerUserKey === userKey) {
     return normalized;
   }

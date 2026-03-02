@@ -4049,15 +4049,19 @@ function friendsView() {
               <h2>Add historical companions</h2>
               <p class="muted">Connected historical companions: <strong>${selectedCount}/3</strong>.</p>
               <p class="muted">Pick ${missingVirtualSlots} suggested profile${missingVirtualSlots === 1 ? "" : "s"} to complete your comparison set.</p>
-              <div id="virtualCelebrityPicker" class="virtual-celeb-grid">
+              <div id="virtualCelebrityPicker" class="onboarding-celeb-grid">
                 ${virtualPool
                   .map((item) => {
                     return `
-                      <label class="virtual-celeb-card">
-                        <input type="checkbox" class="js-virtual-celeb-check" value="${item.id}" />
-                        <span class="virtual-celeb-name">${item.name}</span>
-                        <span class="virtual-celeb-meta">${item.sign} · ${item.field}</span>
-                        <span class="virtual-celeb-years">${item.years}</span>
+                      <label class="onboarding-celeb-card">
+                        <span class="onboarding-celeb-content">
+                          <span class="onboarding-celeb-name">${item.name}</span>
+                          <span class="onboarding-celeb-meta">${item.sign} · ${item.field}</span>
+                          <span class="onboarding-celeb-years">${item.years}</span>
+                        </span>
+                        <span class="onboarding-celeb-checkrail">
+                          <input type="checkbox" class="js-virtual-celeb-check" value="${item.id}" />
+                        </span>
                       </label>
                     `;
                   })
