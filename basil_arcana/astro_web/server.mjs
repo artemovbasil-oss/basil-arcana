@@ -582,6 +582,35 @@ async function ensureMutualFriendLink(userAKey, userAData, userBKey, userBData) 
   await saveUserData(userBKey, b);
 }
 
+async function finalizeReferralSocialConnectionIfReady(userKey, userData) {
+  if (!userKey) {
+    return normalizeUserData(userData);
+  }
+  const normalized = normalizeUserData(userData);
+  const referral = normalized?.referral && typeof normalized.referral === "object" ? normalized.referral : null;
+  if (
+    !referral
+    || !referral.referredByUserKey
+    || referral.shareBirthDataConsent === false
+    || referral.socialConnectionCompleted
+    || !normalized.profile
+  ) {
+    return normalized;
+  }
+  const referrerUserKey = String(referral.referredByUserKey || "").trim();
+  if (!referrerUserKey || referrerUserKey === userKey) {
+    return normalized;
+  }
+  const referrerData = await loadUserData(referrerUserKey);
+  if (!referrerData?.profile) {
+    return normalized;
+  }
+  await ensureMutualFriendLink(userKey, normalized, referrerUserKey, referrerData);
+  normalized.referral.socialConnectionCompleted = true;
+  await saveUserData(userKey, normalized);
+  return normalized;
+}
+
 async function deleteSessionBySid(sid) {
   if (!sid) {
     return;
@@ -1991,20 +2020,7 @@ async function finalizeAuthLogin(req, provider, profile, via) {
   }
   await saveUserData(userKey, mergedUserData);
 
-  if (
-    mergedUserData.referral?.shareBirthDataConsent &&
-    mergedUserData.profile &&
-    mergedUserData.referral?.referredByUserKey
-    && !mergedUserData.referral?.socialConnectionCompleted
-  ) {
-    const referrerUserKey = String(mergedUserData.referral.referredByUserKey || "");
-    const referrerData = await loadUserData(referrerUserKey);
-    if (referrerData?.profile) {
-      await ensureMutualFriendLink(userKey, mergedUserData, referrerUserKey, referrerData);
-      mergedUserData.referral.socialConnectionCompleted = true;
-      await saveUserData(userKey, mergedUserData);
-    }
-  }
+  await finalizeReferralSocialConnectionIfReady(userKey, mergedUserData);
   return sanitizeAuthUser(req.sessionData);
 }
 
@@ -2448,18 +2464,7 @@ app.put("/api/profile", requireAuth, async (req, res) => {
   if (!req.userData.referral.code) {
     req.userData.referral.code = generateReferralCode(req.userId);
   }
-  if (
-    req.userData.referral?.referredByUserKey
-    && req.userData.referral?.shareBirthDataConsent
-    && !req.userData.referral?.socialConnectionCompleted
-  ) {
-    const referrerUserKey = String(req.userData.referral.referredByUserKey || "");
-    const referrerData = await loadUserData(referrerUserKey);
-    if (referrerData?.profile) {
-      await ensureMutualFriendLink(req.userId, req.userData, referrerUserKey, referrerData);
-      req.userData.referral.socialConnectionCompleted = true;
-    }
-  }
+  req.userData = await finalizeReferralSocialConnectionIfReady(req.userId, req.userData);
   await saveUserData(req.userId, req.userData);
   return res.json({ ok: true, profile, profileReady: true });
 });
@@ -2480,6 +2485,7 @@ app.delete("/api/profile", requireAuth, async (req, res) => {
 });
 
 app.get("/api/referral", requireAuth, async (req, res) => {
+  req.userData = await finalizeReferralSocialConnectionIfReady(req.userId, req.userData);
   if (!req.userData.referral || typeof req.userData.referral !== "object") {
     req.userData.referral = {
       code: "",

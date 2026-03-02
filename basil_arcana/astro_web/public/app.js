@@ -4037,12 +4037,12 @@ function friendsView() {
             </div>
             <aside class="referral-stats">
               <article class="ref-stat">
-                <span>Joined via your link</span>
                 <strong>${invitedRegistrations}</strong>
+                <span>Joined via your link</span>
               </article>
               <article class="ref-stat">
-                <span>Shared invitations</span>
                 <strong>${shareInvitesSent}</strong>
+                <span>Shared invitations</span>
               </article>
             </aside>
           </div>
