@@ -480,6 +480,17 @@ async function saveUserData(telegramUserId, data) {
   userStore.set(telegramUserId, normalizeUserData(data));
 }
 
+async function deleteUserData(telegramUserId) {
+  if (!telegramUserId) {
+    return;
+  }
+  if (dbPool) {
+    await dbPool.query("DELETE FROM astro_web_user_state WHERE telegram_user_id = $1", [telegramUserId]);
+    return;
+  }
+  userStore.delete(telegramUserId);
+}
+
 function generateReferralCode(userKey) {
   const digest = crypto.createHash("sha1").update(String(userKey || "").trim()).digest("hex").toUpperCase();
   return `ASTRO-${digest.slice(0, 8)}`;
@@ -2435,6 +2446,21 @@ app.put("/api/profile", requireAuth, async (req, res) => {
   return res.json({ ok: true, profile, profileReady: true });
 });
 
+app.delete("/api/profile", requireAuth, async (req, res) => {
+  const userId = String(req.userId || "").trim();
+  if (!userId) {
+    return res.status(400).json({ error: "invalid_user_id" });
+  }
+  await deleteUserData(userId);
+  const oldSid = req.sessionId;
+  const sid = crypto.randomUUID();
+  const freshSession = defaultSessionData();
+  await persistSession(sid, freshSession);
+  await deleteSessionBySid(oldSid);
+  res.setHeader("Set-Cookie", buildSessionCookie(sid, req));
+  return res.json({ ok: true, deleted: true, authenticated: false });
+});
+
 app.get("/api/referral", requireAuth, async (req, res) => {
   if (!req.userData.referral || typeof req.userData.referral !== "object") {
     req.userData.referral = {
@@ -2474,50 +2500,84 @@ app.post("/api/friends", requireAuth, async (req, res) => {
 });
 
 app.post("/api/friends/virtual-celebrity", requireAuth, async (req, res) => {
-  const celebrityId = String(req.body?.celebrityId || "").trim();
-  if (!celebrityId) {
-    return res.status(400).json({ error: "invalid_celebrity_id", message: "celebrityId is required." });
-  }
-  const item = historicalCelebritiesById.get(celebrityId);
-  if (!item) {
-    return res.status(404).json({ error: "celebrity_not_found" });
+  const celebrityIdsRaw = Array.isArray(req.body?.celebrityIds)
+    ? req.body.celebrityIds
+    : [req.body?.celebrityId];
+  const requestedIds = Array.from(
+    new Set(
+      celebrityIdsRaw
+        .map((value) => String(value || "").trim())
+        .filter(Boolean)
+    )
+  );
+  if (!requestedIds.length) {
+    return res.status(400).json({ error: "invalid_celebrity_id", message: "celebrityIds is required." });
   }
   const currentFriends = Array.isArray(req.userData.friends) ? req.userData.friends : [];
-  if (currentFriends.length > 0) {
+  const hasRealFriends = currentFriends.some((friend) => !friend?.isVirtual);
+  if (hasRealFriends) {
     return res.status(409).json({
       error: "virtual_friend_only_when_empty",
-      message: "Virtual celebrity friend can be added only when you have no social connections yet."
+      message: "Virtual celebrity profiles can be added only when there are no real social friends."
     });
   }
-  const duplicate = currentFriends.find((friend) => String(friend?.friendName || "").trim() === item.name);
-  if (duplicate) {
-    return res.json({ ok: true, friend: duplicate, friends: currentFriends });
+  const existingVirtualIds = new Set(
+    currentFriends
+      .filter((friend) => friend?.isVirtual && friend?.virtualSource === "celebrity")
+      .map((friend) => String(friend?.celebrityId || "").trim())
+      .filter(Boolean)
+  );
+  const remainingSlots = Math.max(0, 3 - existingVirtualIds.size);
+  if (!remainingSlots) {
+    return res.status(409).json({
+      error: "virtual_friend_limit_reached",
+      message: "You can add up to 3 virtual historical profiles."
+    });
   }
-  const natalMini = await buildFriendNatalMini({
-    friendName: item.name,
-    friendBirthDate: item.birthDate,
-    friendBirthTime: item.birthTime,
-    friendBirthCity: item.birthCity
-  });
-  const friend = {
-    id: crypto.randomUUID(),
-    friendName: item.name,
-    friendBirthDate: item.birthDate,
-    friendBirthTime: item.birthTime,
-    friendBirthCity: item.birthCity,
-    friendSign: item.sign,
-    friendTelegram: "",
-    friendEmail: "",
-    noShareData: true,
-    natalMini,
-    createdAt: Date.now(),
-    isVirtual: true,
-    virtualSource: "celebrity",
-    celebrityId: item.id
-  };
-  req.userData.friends = [friend];
+
+  const addableIds = requestedIds
+    .filter((id) => !existingVirtualIds.has(id))
+    .filter((id) => historicalCelebritiesById.has(id))
+    .slice(0, remainingSlots);
+
+  const addedFriends = [];
+  for (const id of addableIds) {
+    const item = historicalCelebritiesById.get(id);
+    if (!item) {
+      continue;
+    }
+    const natalMini = await buildFriendNatalMini({
+      friendName: item.name,
+      friendBirthDate: item.birthDate,
+      friendBirthTime: item.birthTime,
+      friendBirthCity: item.birthCity
+    });
+    const friend = {
+      id: crypto.randomUUID(),
+      friendName: item.name,
+      friendBirthDate: item.birthDate,
+      friendBirthTime: item.birthTime,
+      friendBirthCity: item.birthCity,
+      friendSign: item.sign,
+      friendTelegram: "",
+      friendEmail: "",
+      noShareData: true,
+      natalMini,
+      createdAt: Date.now(),
+      isVirtual: true,
+      virtualSource: "celebrity",
+      celebrityId: item.id
+    };
+    addedFriends.push(friend);
+  }
+
+  if (!addedFriends.length) {
+    return res.json({ ok: true, added: [], friends: currentFriends });
+  }
+
+  req.userData.friends = [...currentFriends, ...addedFriends];
   await saveUserData(req.userId, req.userData);
-  return res.json({ ok: true, friend, friends: req.userData.friends });
+  return res.json({ ok: true, added: addedFriends, friends: req.userData.friends });
 });
 
 app.get("/api/celebrities", (req, res) => {

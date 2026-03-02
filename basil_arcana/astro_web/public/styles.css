@@ -956,19 +956,123 @@ body[data-theme="light"] .auth-login-btn.telegram .auth-login-btn-icon .astro-ic
     radial-gradient(circle at 8% 16%, color-mix(in srgb, var(--ink) 10%, transparent 90%) 0%, transparent 34%),
     radial-gradient(circle at 92% 84%, color-mix(in srgb, var(--ink) 7%, transparent 93%) 0%, transparent 42%),
     var(--surface-2);
-  border: 1px solid var(--line-strong);
+  border: 1px solid var(--line);
   padding: 0.88rem;
 }
 
-.referral-box label {
+.referral-layout {
   display: grid;
-  gap: 0.34rem;
+  grid-template-columns: minmax(0, 1fr) 230px;
+  gap: 0.9rem;
+  align-items: start;
 }
 
-.referral-box input[readonly] {
-  background: color-mix(in srgb, var(--surface) 84%, transparent 16%);
-  border: 1px solid var(--line-strong);
-  font-variant-numeric: tabular-nums;
+.referral-main {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.referral-label {
+  margin: 0;
+  font-size: 0.86rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.referral-link-display {
+  display: block;
+  margin: 0;
+  color: var(--ink);
+  text-decoration: none;
+  word-break: break-all;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  border: 1px solid color-mix(in srgb, var(--line-strong) 60%, transparent 40%);
+  background: color-mix(in srgb, var(--surface) 82%, transparent 18%);
+  padding: 0.58rem 0.62rem;
+}
+
+.referral-link-display:hover {
+  border-color: var(--ink);
+}
+
+.referral-stats {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.ref-stat {
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface) 88%, transparent 12%);
+  padding: 0.6rem;
+  display: grid;
+  gap: 0.26rem;
+}
+
+.ref-stat span {
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.ref-stat strong {
+  font-size: 1.5rem;
+  line-height: 1;
+  letter-spacing: 0.01em;
+}
+
+.virtual-celeb-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.virtual-celeb-card {
+  display: grid;
+  gap: 0.24rem;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface) 88%, transparent 12%);
+  padding: 0.58rem;
+  cursor: pointer;
+  transition: border-color 0.18s ease, background-color 0.18s ease;
+}
+
+.virtual-celeb-card:has(input:checked) {
+  border-color: var(--ink);
+  background: color-mix(in srgb, var(--surface) 76%, transparent 24%);
+}
+
+.virtual-celeb-card.is-locked {
+  opacity: 0.82;
+}
+
+.virtual-celeb-card input {
+  margin: 0 0 0.1rem;
+}
+
+.virtual-celeb-name {
+  font-weight: 700;
+  font-size: 0.9rem;
+  line-height: 1.2;
+}
+
+.virtual-celeb-meta {
+  font-size: 0.76rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.virtual-celeb-years {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.profile-delete-btn {
+  border-color: color-mix(in srgb, #b93030 40%, var(--line) 60%);
+  color: color-mix(in srgb, #d04646 82%, var(--ink) 18%);
 }
 
 .celeb-profile-hero {
@@ -3515,6 +3619,14 @@ body[data-theme="light"] .energy-star.neutral {
   }
 
   .celeb-archive-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .referral-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .virtual-celeb-grid {
     grid-template-columns: 1fr;
   }
 

@@ -1757,6 +1757,37 @@ function renderNatalZodiacSection(sign) {
   `;
 }
 
+function renderCelebrityZodiacSection(sign, name) {
+  const details = zodiacDetails(sign);
+  const deep = zodiacLongRead(sign);
+  const signLabel = details.sign === "Unknown" ? "Sign" : details.sign;
+  const chips = [
+    `Element: ${details.element}`,
+    `Mode: ${details.modality}`,
+    `Archetype: ${signLabel}`
+  ];
+  const narrative = `${name}'s chart expresses ${signLabel} signal through ${details.brief.toLowerCase()} ${deep.structural} ${deep.dynamics} ${deep.practical}`;
+  return `
+    <section class="section" id="celebrity-zodiac-signature">
+      <article class="route-card content-panel premium-panel zodiac-natal-card">
+        <span class="premium-kicker">Zodiac Signature</span>
+        <h2>${name} · ${signLabel}</h2>
+        <div class="zodiac-sign-image-wrap zodiac-sign-image-wrap-natal">
+          ${
+            details.imageUrl
+              ? `<img class="zodiac-sign-image zodiac-sign-image-natal" src="${details.imageUrl}" data-zodiac-light="${details.imageUrlLight}" data-zodiac-dark="${details.imageUrlDark}" alt="${signLabel} zodiac illustration" loading="lazy" decoding="async" />`
+              : `<div class="zodiac-sign-fallback">${zodiacIcon(signLabel)} ${signLabel}</div>`
+          }
+        </div>
+        <p class="zodiac-natal-text">${narrative}</p>
+        <div class="zodiac-chip-row zodiac-natal-chips">
+          ${chips.map((chip) => `<span class="zodiac-chip">${chip}</span>`).join("")}
+        </div>
+      </article>
+    </section>
+  `;
+}
+
 function renderHomeZodiacCompact(sign) {
   const details = zodiacDetails(sign);
   const deep = zodiacLongRead(sign);
@@ -3522,6 +3553,7 @@ function profileView() {
           <div class="profile-actions-left">
             <button id="profileLogoutButton" class="btn ghost" type="button">Logout</button>
             <button id="profileEditButton" class="btn ghost" type="button">${isEditing ? "Cancel edit" : "Edit"}</button>
+            <button id="profileDeleteButton" class="btn ghost profile-delete-btn" type="button">Delete profile forever</button>
           </div>
           <button id="profileUpdateButton" class="btn primary profile-update-btn" type="button" style="display:none">Update data</button>
         </div>
@@ -3949,14 +3981,18 @@ function friendsView() {
   const safeReferralLink = referralLink || "#";
   const invitedRegistrations = Number(ref.invitedRegistrations || 0);
   const shareInvitesSent = Number(ref.shareInvitesSent || 0);
-  const hasFriends = Array.isArray(state.friends) && state.friends.length > 0;
-  const selectedSign = state.dashboard?.natalCore?.sun || signFromDate(state.profile?.birthDate || "");
-  const celebCandidates = state.celebrities
-    .filter((item) => !selectedSign || item.sign === selectedSign)
-    .slice(0, 10);
-  const virtualFriendOptions = celebCandidates
-    .map((item) => `<option value="${item.id}">${item.name} · ${item.sign} · ${item.years}</option>`)
-    .join("");
+  const allFriends = Array.isArray(state.friends) ? state.friends : [];
+  const hasFriends = allFriends.length > 0;
+  const hasRealFriends = allFriends.some((friend) => !friend?.isVirtual);
+  const selectedVirtualIds = new Set(
+    allFriends
+      .filter((friend) => friend?.isVirtual && friend?.virtualSource === "celebrity")
+      .map((friend) => String(friend?.celebrityId || "").trim())
+      .filter(Boolean)
+  );
+  const canChooseVirtual = !hasRealFriends && selectedVirtualIds.size < 3;
+  const virtualPool = state.celebrities;
+  const selectedCount = selectedVirtualIds.size;
   return `
     <section class="section">
       <article class="card tone-card">
@@ -3970,37 +4006,56 @@ function friendsView() {
         <span class="eyebrow">Social Circle</span>
         <h2>Bring friends into your rhythm</h2>
         <div class="referral-box premium-panel">
-          <label>Your private invite link
-            <input id="referralLinkInput" readonly value="${referralLink}" />
-          </label>
-          <div class="hero-actions">
-            <button id="copyReferralButton" class="btn primary" type="button">Copy link</button>
-            <a class="btn ghost" href="${safeReferralLink}" target="_blank" rel="noopener noreferrer">Open link</a>
+          <div class="referral-layout">
+            <div class="referral-main">
+              <p class="referral-label">Your private invite link</p>
+              <a id="referralLinkAnchor" class="referral-link-display" href="${safeReferralLink}" target="_blank" rel="noopener noreferrer">${referralLink || "Link unavailable right now"}</a>
+              <div class="hero-actions">
+                <button id="copyReferralButton" class="btn primary" type="button">Copy link</button>
+                <a class="btn ghost" href="${safeReferralLink}" target="_blank" rel="noopener noreferrer">Open link</a>
+              </div>
+              <p class="muted">Friends who join through your link can track life rhythm with you and unlock shared social astrology when both sides agree to share profile data.</p>
+              <p id="friendsReferralStatus" class="muted"></p>
+            </div>
+            <aside class="referral-stats">
+              <article class="ref-stat">
+                <span>Joined via your link</span>
+                <strong>${invitedRegistrations}</strong>
+              </article>
+              <article class="ref-stat">
+                <span>Shared invitations</span>
+                <strong>${shareInvitesSent}</strong>
+              </article>
+            </aside>
           </div>
-          <div class="chip-grid">
-            <span class="astro-chip">Joined via your link: ${invitedRegistrations}</span>
-            <span class="astro-chip">Shared invitations: ${shareInvitesSent}</span>
-          </div>
-          <p class="muted">When people join through your link, they can track daily rhythm with you and unlock a shared social astrology layer where timing becomes easier to coordinate.</p>
-          <p id="friendsReferralStatus" class="muted"></p>
         </div>
       </article>
     </section>
     ${
-      !hasFriends
+      canChooseVirtual
         ? `<section class="section">
             <article class="card">
               <span class="eyebrow">Starter mode</span>
-              <h2>Add one virtual historical friend</h2>
-              <p class="muted">Until your real social circle joins, you can compare your dynamics with one historical profile.</p>
-              <div class="form-grid">
-                <label>Choose profile
-                  <select id="virtualCelebritySelect">
-                    <option value="">Select a profile</option>
-                    ${virtualFriendOptions}
-                  </select>
-                </label>
-                <button id="addVirtualFriendButton" class="btn ghost" type="button">Add virtual friend</button>
+              <h2>Select up to 3 historical companions</h2>
+              <p class="muted">Until your real social circle joins, pick up to three historical profiles to compare rhythm and communication patterns.</p>
+              <p class="muted">Selected: <strong>${selectedCount}/3</strong></p>
+              <div id="virtualCelebrityPicker" class="virtual-celeb-grid">
+                ${virtualPool
+                  .map((item) => {
+                    const isChecked = selectedVirtualIds.has(String(item.id || ""));
+                    return `
+                      <label class="virtual-celeb-card ${isChecked ? "is-locked" : ""}">
+                        <input type="checkbox" class="js-virtual-celeb-check" value="${item.id}" ${isChecked ? "checked disabled" : ""} />
+                        <span class="virtual-celeb-name">${item.name}</span>
+                        <span class="virtual-celeb-meta">${item.sign} · ${item.field}</span>
+                        <span class="virtual-celeb-years">${item.years}</span>
+                      </label>
+                    `;
+                  })
+                  .join("")}
+              </div>
+              <div class="hero-actions">
+                <button id="addVirtualFriendButton" class="btn ghost" type="button">Add selected profiles</button>
               </div>
             </article>
           </section>`
@@ -4657,8 +4712,7 @@ function renderCelebrityNatalPage(celeb, natal) {
   const chartSvg = renderNatalChartSvg(natal);
   const placementsTable = renderPlanetPlacementTable(natal?.planets || []);
   const life = natal?.lifeAreas || {};
-  const zodiacSection = renderNatalZodiacSection(natal?.core?.sun);
-  const editorial = buildNatalEditorial(profile, natal);
+  const zodiacSection = renderCelebrityZodiacSection(natal?.core?.sun || celeb.sign, celeb.name);
   const keyAspects = Array.isArray(natal?.aspects) ? natal.aspects.slice(0, 6) : [];
   const keyPlanets = Array.isArray(natal?.planets) ? natal.planets.slice(0, 6) : [];
   const focusHouses = Array.isArray(natal?.housesFocus) ? natal.housesFocus : [];
@@ -4698,10 +4752,10 @@ function renderCelebrityNatalPage(celeb, natal) {
           </div>
           <div class="celeb-profile-facts">
             <h3>High-signal markers</h3>
-            <div class="chip-grid">
-              ${keyPlanets
-                .map((planet) => `<span class="astro-chip">${planet.key}: ${planet.sign}${planet.house ? ` · H${planet.house}` : ""}${planet.retrograde ? " · Rx" : ""}</span>`)
-                .join("")}
+        <div class="chip-grid">
+          ${keyPlanets
+            .map((planet) => `<span class="astro-chip">${planet.key}: ${planet.sign}${planet.house ? ` · H${planet.house}` : ""}${planet.retrograde ? " · Rx" : ""}</span>`)
+            .join("")}
             </div>
             <h3>Dominant houses</h3>
             <ul class="bullet-list">
@@ -4732,19 +4786,19 @@ function renderCelebrityNatalPage(celeb, natal) {
       <div class="feature-grid">
         <article class="feature-card content-card">
           <h3>${uiIcon("heart")} Relationships</h3>
-          <p>${life.relationships || "N/A"}</p>
+          <p>${life.relationships ? life.relationships.replace(/^Venus in /, `${celeb.name}'s Venus in `) : "N/A"}</p>
         </article>
         <article class="feature-card content-card">
           <h3>${uiIcon("briefcase")} Career</h3>
-          <p>${life.career || "N/A"}</p>
+          <p>${life.career ? life.career.replace(/^Midheaven in /, `${celeb.name}'s Midheaven in `) : "N/A"}</p>
         </article>
         <article class="feature-card content-card">
           <h3>${uiIcon("coins")} Money</h3>
-          <p>${life.money || "N/A"}</p>
+          <p>${life.money ? life.money.replace(/^House 2 in /, `House 2 in `) : "N/A"}</p>
         </article>
         <article class="feature-card content-card">
           <h3>${uiIcon("bolt")} Energy</h3>
-          <p>${life.energy || "N/A"}</p>
+          <p>${life.energy ? life.energy.replace(/^Mars in /, `${celeb.name}'s Mars in `) : "N/A"}</p>
         </article>
       </div>
     </section>
@@ -4759,7 +4813,6 @@ function renderCelebrityNatalPage(celeb, natal) {
       </article>
     </section>
     ${zodiacSection}
-    ${editorial}
     <section class="section">
       <article class="card">
         <h2>More ${celeb.sign} profiles</h2>
@@ -5011,6 +5064,32 @@ function applySeoMeta(path) {
         name: "Astronautica"
       },
       mainEntityOfPage: canonicalUrl
+    });
+    document.head.appendChild(script);
+    return;
+  }
+  if (celebMeta) {
+    const script = document.createElement("script");
+    script.id = schemaId;
+    script.type = "application/ld+json";
+    script.textContent = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "ProfilePage",
+      name: `${celebMeta.name} natal profile`,
+      description: `${celebMeta.name} (${celebMeta.years}), ${celebMeta.sign} natal profile with chart and historical interpretation.`,
+      mainEntity: {
+        "@type": "Person",
+        name: celebMeta.name,
+        description: `${celebMeta.field} · ${celebMeta.years}`,
+        birthDate: celebMeta.birthDate || undefined,
+        knowsAbout: ["Astrology", "Natal chart", celebMeta.sign]
+      },
+      mainEntityOfPage: canonicalUrl,
+      inLanguage: "en",
+      publisher: {
+        "@type": "Organization",
+        name: "Astronautica"
+      }
     });
     document.head.appendChild(script);
   }
@@ -6003,15 +6082,41 @@ function attachRouteHandlers(path) {
       state.profileEditMode = !state.profileEditMode;
       render();
     });
+
+    const profileDeleteButton = document.getElementById("profileDeleteButton");
+    profileDeleteButton?.addEventListener("click", async () => {
+      const confirmed = window.confirm("Delete your profile forever? This will remove account data, friends and history.");
+      if (!confirmed) {
+        return;
+      }
+      try {
+        await fetchJson("/api/profile", { method: "DELETE", body: JSON.stringify({}) });
+        state.profile = null;
+        state.profileReady = false;
+        state.friends = [];
+        state.dashboard = null;
+        state.friendInsights = {};
+        await loadSessionState();
+        navigate("/login", { replace: true });
+      } catch (error) {
+        if (error.status === 401) {
+          await refreshAuthState();
+          navigate("/login", { replace: true });
+          return;
+        }
+        alert(`Failed to delete profile: ${error.message}`);
+      }
+    });
   }
 
   if (path === "/friends") {
     fetchJson("/api/referral")
       .then((payload) => {
         state.referral = payload || null;
-        const referralInput = document.getElementById("referralLinkInput");
-        if (referralInput && payload?.link) {
-          referralInput.value = payload.link;
+        const referralAnchor = document.getElementById("referralLinkAnchor");
+        if (referralAnchor && payload?.link) {
+          referralAnchor.setAttribute("href", payload.link);
+          referralAnchor.textContent = payload.link;
         }
       })
       .catch(() => {});
@@ -6049,17 +6154,20 @@ function attachRouteHandlers(path) {
       bindFriendListHandlers();
     });
     const copyBtn = document.getElementById("copyReferralButton");
-    const referralInput = document.getElementById("referralLinkInput");
+    const referralAnchor = document.getElementById("referralLinkAnchor");
     const referralStatus = document.getElementById("friendsReferralStatus");
     copyBtn?.addEventListener("click", async () => {
-      const value = String(referralInput?.value || "").trim();
-      if (!value) {
+      const value = String(referralAnchor?.getAttribute("href") || "").trim();
+      if (!value || !/^https?:\/\//i.test(value)) {
+        if (referralStatus) {
+          referralStatus.textContent = "Invite link is not ready yet.";
+        }
         return;
       }
       try {
         await navigator.clipboard.writeText(value);
         if (referralStatus) {
-          referralStatus.textContent = "Referral link copied.";
+          referralStatus.textContent = "Invite link copied.";
         }
       } catch {
         if (referralStatus) {
@@ -6067,18 +6175,37 @@ function attachRouteHandlers(path) {
         }
       }
     });
+
+    const syncVirtualPicker = () => {
+      const checks = Array.from(document.querySelectorAll(".js-virtual-celeb-check:not([disabled])"));
+      const selected = checks.filter((input) => input instanceof HTMLInputElement && input.checked);
+      checks.forEach((input) => {
+        if (!(input instanceof HTMLInputElement)) {
+          return;
+        }
+        input.disabled = !input.checked && selected.length >= 3;
+      });
+    };
+    document.querySelectorAll(".js-virtual-celeb-check").forEach((input) => {
+      input.addEventListener("change", syncVirtualPicker);
+    });
+    syncVirtualPicker();
+
     const addVirtualFriendButton = document.getElementById("addVirtualFriendButton");
-    const virtualCelebritySelect = document.getElementById("virtualCelebritySelect");
     addVirtualFriendButton?.addEventListener("click", async () => {
-      const celebrityId = String(virtualCelebritySelect?.value || "").trim();
-      if (!celebrityId) {
-        alert("Choose one historical profile first.");
+      const selectedIds = Array.from(document.querySelectorAll(".js-virtual-celeb-check"))
+        .filter((input) => input instanceof HTMLInputElement && input.checked && !input.disabled)
+        .map((input) => String(input.value || "").trim())
+        .filter(Boolean)
+        .slice(0, 3);
+      if (!selectedIds.length) {
+        alert("Choose at least one historical profile.");
         return;
       }
       try {
         const payload = await fetchJson("/api/friends/virtual-celebrity", {
           method: "POST",
-          body: JSON.stringify({ celebrityId })
+          body: JSON.stringify({ celebrityIds: selectedIds })
         });
         state.friends = Array.isArray(payload?.friends) ? payload.friends : [];
         await refreshFriendInsights();
