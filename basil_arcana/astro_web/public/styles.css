@@ -1128,6 +1128,7 @@ body[data-theme="light"] .auth-login-btn.telegram .auth-login-btn-icon .astro-ic
   display: inline-block;
   transition: transform 0.14s ease;
   pointer-events: none;
+  flex: 0 0 auto;
 }
 
 .onboarding-celeb-card:hover {
@@ -1142,9 +1143,18 @@ body[data-theme="light"] .auth-login-btn.telegram .auth-login-btn-icon .astro-ic
 
 .onboarding-celeb-checkrail {
   border-left: 1px solid color-mix(in srgb, var(--line) 84%, transparent 16%);
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   align-self: stretch;
+  box-sizing: border-box;
+  padding-inline: 0.5rem;
+}
+
+body[data-theme="dark"] .onboarding-celeb-card input {
+  color-scheme: dark;
+  accent-color: #ffffff;
+  filter: invert(1) contrast(1.2);
 }
 
 .onboarding-celeb-name {
