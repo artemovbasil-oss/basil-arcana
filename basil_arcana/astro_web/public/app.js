@@ -30,6 +30,7 @@ const state = {
   theme: "dark",
   profileEditMode: false,
   solarSystem: null,
+  homeOrbitWidgets: null,
   lastRenderedRouteKey: ""
 };
 
@@ -52,6 +53,7 @@ themeToggle?.addEventListener("click", () => {
   nav.classList.remove("open");
   if (window.location.pathname === "/" && state.dashboard) {
     initSolarSystemWidget(state.dashboard, state.homePeriod);
+    initHomeOrbitWidgets(state.dashboard, state.homePeriod);
   }
 });
 
@@ -1580,6 +1582,318 @@ function renderAstroVizRow(dashboard, period) {
   `;
 }
 
+function renderOrbitalInsightFloor(dashboard, period) {
+  const bodies = bodyCycleData(dashboard, period);
+  const phaseIndex = Math.round(
+    bodies.reduce((sum, body) => sum + (Number(body.value) || 0), 0) / Math.max(1, bodies.length)
+  );
+  const transits = transitionSeries(dashboard, period);
+  const first = transits[0] || {};
+  const last = transits[transits.length - 1] || {};
+  const lifecycleRows = [
+    { key: "sun", label: "Sun" },
+    { key: "moon", label: "Moon" },
+    { key: "rising", label: "Rising" }
+  ].map((item) => ({
+    label: item.label,
+    from: first?.[item.key]?.sign || dashboard?.natalCore?.[item.key] || "Unknown",
+    to: last?.[item.key]?.sign || dashboard?.natalCore?.[item.key] || "Unknown"
+  }));
+  return `
+    <div class="home-orbit-floor" id="homeOrbitFloor">
+      <article class="card home-orbit-card home-orbit-card-current">
+          <div class="home-orbit-head">
+            <h3>Current sky state</h3>
+            <span class="home-orbit-badge">phase index ${phaseIndex}/100</span>
+          </div>
+          <div class="home-orbit-body">
+            <div class="home-orbit-canvas-wrap">
+              <canvas id="homeOrbitCurrentCanvas" class="home-orbit-canvas" aria-label="Current sky state 3D view"></canvas>
+            </div>
+            <div class="home-orbit-copy">
+              ${bodies
+                .map(
+                  (body, idx) => `
+                    <p class="home-orbit-line">
+                      <strong>${body.name} · ${body.sign}</strong>
+                      <span>${Math.round(Number(body.value) || 0)}/100 phase energy</span>
+                      <span>Angle ${Math.round(Number(body.angle) || 0)}° · Ring ${idx + 1}</span>
+                    </p>
+                  `
+                )
+                .join("")}
+            </div>
+          </div>
+      </article>
+      <article class="card home-orbit-card home-orbit-card-lifecycle">
+          <div class="home-orbit-head">
+            <h3>Lifecycle through ${period}</h3>
+          </div>
+          <div class="home-orbit-body">
+            <div class="home-orbit-canvas-wrap">
+              <canvas id="homeOrbitLifecycleCanvas" class="home-orbit-canvas" aria-label="Lifecycle 3D view"></canvas>
+            </div>
+            <div class="home-orbit-copy">
+              ${lifecycleRows
+                .map(
+                  (row) => `
+                    <p class="home-orbit-line">
+                      <strong>${row.label}</strong>
+                      <span>${row.from} → ${row.to}</span>
+                    </p>
+                  `
+                )
+                .join("")}
+            </div>
+          </div>
+      </article>
+    </div>
+  `;
+}
+
+function destroyHomeOrbitWidgets() {
+  const runtime = state.homeOrbitWidgets;
+  if (!runtime) {
+    return;
+  }
+  if (runtime.frameId) {
+    window.cancelAnimationFrame(runtime.frameId);
+  }
+  if (runtime.resizeHandler) {
+    window.removeEventListener("resize", runtime.resizeHandler);
+  }
+  if (Array.isArray(runtime.scenes)) {
+    runtime.scenes.forEach((entry) => {
+      try {
+        entry.renderer?.dispose?.();
+      } catch {
+        // ignore dispose errors for detached canvases
+      }
+    });
+  }
+  state.homeOrbitWidgets = null;
+}
+
+function buildMiniOrbitScene(THREE, canvas, wrap, type, dataset, isDark) {
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 80);
+  camera.position.set(0, 2.4, 4.5);
+  camera.lookAt(0, 0, 0);
+
+  scene.add(new THREE.AmbientLight(0xffffff, isDark ? 0.9 : 0.82));
+  const keyLight = new THREE.PointLight(isDark ? 0xffffff : 0x161a22, isDark ? 0.9 : 0.66, 40, 2);
+  keyLight.position.set(0, 3.5, 0);
+  scene.add(keyLight);
+
+  const ringColor = isDark ? 0x565c66 : 0x8f97a2;
+  const lineColor = isDark ? 0xb8bfca : 0x4f5865;
+  const axisTilt = Math.PI * 0.1;
+  const ringRadii = [0.82, 1.22, 1.62];
+  ringRadii.forEach((radius, idx) => {
+    const points = [];
+    for (let i = 0; i <= 96; i += 1) {
+      const a = (i / 96) * Math.PI * 2;
+      points.push(new THREE.Vector3(Math.cos(a) * radius, 0, Math.sin(a) * radius));
+    }
+    const ring = new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints(points),
+      new THREE.LineBasicMaterial({
+        color: ringColor,
+        transparent: true,
+        opacity: idx === 2 ? 0.42 : 0.34
+      })
+    );
+    ring.rotation.x = axisTilt;
+    scene.add(ring);
+  });
+
+  const core = new THREE.Mesh(
+    new THREE.SphereGeometry(0.16, 20, 20),
+    new THREE.MeshBasicMaterial({ color: isDark ? 0xf5f6f8 : 0x20242c })
+  );
+  scene.add(core);
+
+  const bodies = [];
+  if (type === "current") {
+    const lineGeometry = new THREE.BufferGeometry();
+    const linePositions = new Float32Array(6 * 3);
+    lineGeometry.setAttribute("position", new THREE.BufferAttribute(linePositions, 3));
+    const links = new THREE.LineSegments(
+      lineGeometry,
+      new THREE.LineDashedMaterial({
+        color: lineColor,
+        dashSize: 0.08,
+        gapSize: 0.08,
+        transparent: true,
+        opacity: 0.6
+      })
+    );
+    links.computeLineDistances();
+    scene.add(links);
+
+    const colorSet = [
+      isDark ? 0xf4f5f7 : 0x232830,
+      isDark ? 0xb4bac5 : 0x4b5562,
+      isDark ? 0x8e96a4 : 0x66707d
+    ];
+    (dataset?.bodies || []).slice(0, 3).forEach((body, idx) => {
+      const mesh = new THREE.Mesh(
+        new THREE.SphereGeometry(idx === 0 ? 0.145 : 0.118, 18, 18),
+        new THREE.MeshStandardMaterial({
+          color: colorSet[idx] || colorSet[2],
+          roughness: 0.45,
+          metalness: 0.1
+        })
+      );
+      scene.add(mesh);
+      bodies.push({
+        mesh,
+        radius: ringRadii[idx] || ringRadii[2],
+        angle: ((Number(body.angle) || 0) * Math.PI) / 180,
+        speed: 0.06 + idx * 0.022
+      });
+    });
+    return { renderer, scene, camera, bodies, links, type };
+  }
+
+  const lifecycle = Array.isArray(dataset?.lifecycle) ? dataset.lifecycle : [];
+  const colorSet = [
+    isDark ? 0xf4f5f7 : 0x222831,
+    isDark ? 0xc5ccd8 : 0x4f5967,
+    isDark ? 0x9ea7b6 : 0x687180
+  ];
+  lifecycle.slice(0, 3).forEach((item, idx) => {
+    const mesh = new THREE.Mesh(
+      new THREE.SphereGeometry(0.11, 18, 18),
+      new THREE.MeshStandardMaterial({
+        color: colorSet[idx] || colorSet[2],
+        roughness: 0.52,
+        metalness: 0.1
+      })
+    );
+    scene.add(mesh);
+    const startDeg = zodiacIndex(item.from) * 30 + 15;
+    const endDeg = zodiacIndex(item.to) * 30 + 15;
+    const start = (startDeg * Math.PI) / 180;
+    const end = (endDeg * Math.PI) / 180;
+    const radius = ringRadii[idx] || ringRadii[2];
+    const points = [];
+    const steps = 32;
+    const arcDelta = Math.atan2(Math.sin(end - start), Math.cos(end - start));
+    for (let i = 0; i <= steps; i += 1) {
+      const t = i / steps;
+      const a = start + arcDelta * t;
+      points.push(new THREE.Vector3(Math.cos(a) * radius, 0, Math.sin(a) * radius));
+    }
+    const arc = new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints(points),
+      new THREE.LineDashedMaterial({
+        color: colorSet[idx] || colorSet[2],
+        dashSize: 0.08,
+        gapSize: 0.08,
+        transparent: true,
+        opacity: 0.54
+      })
+    );
+    arc.computeLineDistances();
+    arc.rotation.x = axisTilt;
+    scene.add(arc);
+    bodies.push({
+      mesh,
+      radius,
+      angle: start,
+      speed: 0.05 + idx * 0.017
+    });
+  });
+  return { renderer, scene, camera, bodies, type };
+}
+
+async function initHomeOrbitWidgets(dashboard, period) {
+  const currentCanvas = document.getElementById("homeOrbitCurrentCanvas");
+  const lifecycleCanvas = document.getElementById("homeOrbitLifecycleCanvas");
+  const currentWrap = currentCanvas?.closest(".home-orbit-canvas-wrap");
+  const lifecycleWrap = lifecycleCanvas?.closest(".home-orbit-canvas-wrap");
+  if (!currentCanvas || !lifecycleCanvas || !currentWrap || !lifecycleWrap) {
+    destroyHomeOrbitWidgets();
+    return;
+  }
+  destroyHomeOrbitWidgets();
+  let THREE;
+  try {
+    THREE = await ensureThreeRuntime();
+  } catch {
+    return;
+  }
+  if (!document.body.contains(currentCanvas) || !document.body.contains(lifecycleCanvas)) {
+    return;
+  }
+
+  const transits = transitionSeries(dashboard, period);
+  const first = transits[0] || {};
+  const last = transits[transits.length - 1] || {};
+  const lifecycle = [
+    { from: first?.sun?.sign || dashboard?.natalCore?.sun || "Unknown", to: last?.sun?.sign || dashboard?.natalCore?.sun || "Unknown" },
+    { from: first?.moon?.sign || dashboard?.natalCore?.moon || "Unknown", to: last?.moon?.sign || dashboard?.natalCore?.moon || "Unknown" },
+    { from: first?.rising?.sign || dashboard?.natalCore?.rising || "Unknown", to: last?.rising?.sign || dashboard?.natalCore?.rising || "Unknown" }
+  ];
+  const isDark = state.theme === "dark";
+  const scenes = [
+    buildMiniOrbitScene(THREE, currentCanvas, currentWrap, "current", { bodies: bodyCycleData(dashboard, period) }, isDark),
+    buildMiniOrbitScene(THREE, lifecycleCanvas, lifecycleWrap, "lifecycle", { lifecycle }, isDark)
+  ];
+
+  const resize = () => {
+    scenes.forEach((entry, idx) => {
+      const wrap = idx === 0 ? currentWrap : lifecycleWrap;
+      const width = Math.max(220, Math.round(wrap.clientWidth));
+      const height = Math.max(230, Math.round(wrap.clientHeight));
+      entry.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      entry.renderer.setSize(width, height, false);
+      entry.camera.aspect = width / height;
+      entry.camera.updateProjectionMatrix();
+    });
+  };
+  resize();
+  window.addEventListener("resize", resize);
+
+  const start = performance.now();
+  const runtime = { frameId: 0, resizeHandler: resize, scenes };
+  const loop = (now) => {
+    if (state.homeOrbitWidgets !== runtime) {
+      return;
+    }
+    const elapsed = (now - start) / 1000;
+    scenes.forEach((entry) => {
+      const linkPositions = [];
+      entry.bodies.forEach((body) => {
+        body.angle += body.speed * 0.01;
+        const x = Math.cos(body.angle + elapsed * body.speed) * body.radius;
+        const z = Math.sin(body.angle + elapsed * body.speed) * body.radius;
+        body.mesh.position.set(x, 0, z);
+        if (entry.type === "current") {
+          const pad = 0.2;
+          const vx = x;
+          const vz = z;
+          const mag = Math.hypot(vx, vz) || 1;
+          linkPositions.push((vx / mag) * pad, 0, (vz / mag) * pad, x, 0, z);
+        }
+      });
+      if (entry.links && linkPositions.length >= 18) {
+        const attr = entry.links.geometry.getAttribute("position");
+        attr.array.set(linkPositions.slice(0, attr.array.length));
+        attr.needsUpdate = true;
+        entry.links.computeLineDistances();
+      }
+      entry.camera.lookAt(0, 0, 0);
+      entry.renderer.render(entry.scene, entry.camera);
+    });
+    runtime.frameId = window.requestAnimationFrame(loop);
+  };
+  runtime.frameId = window.requestAnimationFrame(loop);
+  state.homeOrbitWidgets = runtime;
+}
+
 function bindEnergyChartInteractions() {
   document.querySelectorAll(".energy-chart").forEach((svg) => {
     const hoverLine = svg.querySelector(".energy-hover-line");
@@ -2057,7 +2371,6 @@ function renderForecastSummary(dashboard, period) {
   return `
     <p><strong>${periodLabel} intensity: ${intensity}/100.</strong> ${dashboard?.periodForecast?.summary || ""}</p>
     ${detailBlock}
-    ${renderAstroVizRow(dashboard, period)}
   `;
 }
 
@@ -3223,6 +3536,7 @@ async function initSolarSystemWidget(dashboard, period) {
 function updateHomeDynamicBlocks(dashboard, period, { animate = false } = {}) {
   const forecastBlock = document.getElementById("homeForecastBlock");
   const friendsBlock = document.getElementById("homeFriendsBlock");
+  const orbitFloorBlock = document.getElementById("homeOrbitFloorBlock");
   if (forecastBlock) {
     if (animate) {
       forecastBlock.classList.remove("swap-in");
@@ -3230,6 +3544,9 @@ function updateHomeDynamicBlocks(dashboard, period, { animate = false } = {}) {
       forecastBlock.classList.add("swap-in");
     }
     forecastBlock.innerHTML = renderForecastSummary(dashboard, period);
+  }
+  if (orbitFloorBlock) {
+    orbitFloorBlock.innerHTML = renderOrbitalInsightFloor(dashboard, period);
   }
   if (friendsBlock) {
     if (animate) {
@@ -3247,6 +3564,7 @@ function updateHomeDynamicBlocks(dashboard, period, { animate = false } = {}) {
   });
   bindEnergyChartInteractions();
   initSolarSystemWidget(dashboard, period);
+  initHomeOrbitWidgets(dashboard, period);
 }
 
 function bindHomePeriodHandlers() {
@@ -3356,6 +3674,7 @@ function renderHomeDashboard(dashboard) {
   const zodiacCompact = renderHomeZodiacCompact(dashboard.natalCore?.sun);
   const zodiacCelebBlock = renderZodiacCelebrities(dashboard.natalCore?.sun);
   const solarSystemBlock = renderSolarSystemBlock(dashboard, period);
+  const orbitInsightFloor = renderOrbitalInsightFloor(dashboard, period);
 
   return `
     <section class="hero">
@@ -3387,8 +3706,11 @@ function renderHomeDashboard(dashboard) {
         <div id="homeForecastBlock" class="dashboard-swap">${forecastSummary}</div>
       </article>
     </section>
-    ${zodiacCompact}
     ${solarSystemBlock}
+    ${zodiacCompact}
+    <section class="section">
+      <div id="homeOrbitFloorBlock" class="dashboard-swap">${orbitInsightFloor}</div>
+    </section>
     ${zodiacCelebBlock}
     <section class="section">
       <article class="card">
@@ -6616,6 +6938,7 @@ function render() {
 
   if (path !== "/") {
     destroySolarSystemWidget();
+    destroyHomeOrbitWidgets();
   }
 
   const makeView = routes[path]

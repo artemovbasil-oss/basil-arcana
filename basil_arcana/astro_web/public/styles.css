@@ -3174,6 +3174,114 @@ body[data-theme="light"] .celeb-avatar {
   display: block;
 }
 
+.home-orbit-floor {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.72rem;
+}
+
+.home-orbit-card {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.home-orbit-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.home-orbit-head h3 {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.86rem;
+}
+
+.home-orbit-badge {
+  border: 1px solid var(--line);
+  padding: 0.18rem 0.42rem;
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--surface) 90%, transparent 10%);
+}
+
+.home-orbit-body {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(200px, 1fr);
+  gap: 0.62rem;
+  align-items: stretch;
+}
+
+.home-orbit-canvas-wrap {
+  border: 1px solid var(--line);
+  background:
+    radial-gradient(circle at 16% 18%, color-mix(in srgb, var(--ink) 12%, transparent 88%) 0 18%, transparent 54%),
+    radial-gradient(circle at 78% 22%, color-mix(in srgb, var(--ink) 7%, transparent 93%) 0 16%, transparent 46%),
+    radial-gradient(circle at 48% 86%, color-mix(in srgb, var(--ink) 6%, transparent 94%) 0 14%, transparent 44%),
+    var(--surface-2);
+  position: relative;
+  min-height: 240px;
+  overflow: hidden;
+}
+
+body[data-theme="dark"] .home-orbit-canvas-wrap {
+  background:
+    radial-gradient(circle at 16% 18%, rgba(242, 242, 242, 0.08) 0 16%, transparent 52%),
+    radial-gradient(circle at 78% 22%, rgba(242, 242, 242, 0.05) 0 14%, transparent 44%),
+    radial-gradient(circle at 48% 86%, rgba(242, 242, 242, 0.04) 0 12%, transparent 42%),
+    #08090c;
+}
+
+.home-orbit-canvas-wrap::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.34;
+  background:
+    radial-gradient(1px 1px at 12% 24%, rgba(255, 255, 255, 0.34), transparent 65%),
+    radial-gradient(1px 1px at 28% 73%, rgba(255, 255, 255, 0.28), transparent 65%),
+    radial-gradient(1.1px 1.1px at 43% 31%, rgba(255, 255, 255, 0.3), transparent 65%),
+    radial-gradient(1px 1px at 61% 64%, rgba(255, 255, 255, 0.26), transparent 64%),
+    radial-gradient(1.1px 1.1px at 75% 44%, rgba(255, 255, 255, 0.3), transparent 66%),
+    radial-gradient(1px 1px at 88% 18%, rgba(255, 255, 255, 0.28), transparent 64%);
+}
+
+.home-orbit-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  position: relative;
+  z-index: 1;
+}
+
+.home-orbit-copy {
+  display: grid;
+  gap: 0.46rem;
+}
+
+.home-orbit-line {
+  margin: 0;
+  display: grid;
+  gap: 0.1rem;
+}
+
+.home-orbit-line strong {
+  font-size: 0.84rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.home-orbit-line span {
+  font-size: 0.74rem;
+  color: var(--muted);
+}
+
 .solar-focus-controls {
   margin-bottom: 0.5rem;
 }
@@ -4165,6 +4273,18 @@ body[data-theme="light"] .energy-star.neutral {
 
   .solar-system-layout {
     grid-template-columns: 1fr;
+  }
+
+  .home-orbit-floor {
+    grid-template-columns: 1fr;
+  }
+
+  .home-orbit-body {
+    grid-template-columns: 1fr;
+  }
+
+  .home-orbit-canvas-wrap {
+    min-height: 220px;
   }
 
   .solar-canvas-wrap {
