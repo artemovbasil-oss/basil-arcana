@@ -948,32 +948,6 @@ function renderNatalChartSvg(data) {
   `;
 }
 
-const natalDistanceAu = {
-  Sun: 0,
-  Moon: 0.00257,
-  Mercury: 0.39,
-  Venus: 0.72,
-  Earth: 1,
-  Mars: 1.52,
-  Jupiter: 5.2,
-  Saturn: 9.58,
-  Uranus: 19.2,
-  Neptune: 30.05,
-  Pluto: 39.48
-};
-
-function auToLightYears(au) {
-  return (Number(au) || 0) * 0.0000158125;
-}
-
-function formatLightYears(value) {
-  const n = Math.max(0, Number(value) || 0);
-  if (n < 0.0001) {
-    return n.toFixed(6);
-  }
-  return n.toFixed(4);
-}
-
 function renderNatalChart3D(data) {
   return `
     <div class="natal-3d-wrap" id="natal3dWrap">
@@ -981,7 +955,21 @@ function renderNatalChart3D(data) {
         <canvas id="natal3dCanvas" class="natal-3d-canvas" aria-label="3D natal chart"></canvas>
         <div id="natal3dOverlay" class="natal-3d-overlay" aria-hidden="true"></div>
       </div>
-      <p class="natal-3d-copy">Static natal composition: placements, aspect geometry, zodiac vectors, and constellation distance markers.</p>
+      <div class="natal-3d-tools">
+        <button id="natal3dDownload" type="button" class="btn ghost">Download PNG</button>
+        <button id="natal3dShare" type="button" class="btn ghost">Share</button>
+      </div>
+      <div class="natal-3d-legendbar" aria-label="Natal chart legend">
+        <span class="natal-legend-title">Legend</span>
+        <span class="natal-legend-item"><i class="natal-legend-line conjunction"></i> Conjunction</span>
+        <span class="natal-legend-item"><i class="natal-legend-line opposition"></i> Opposition</span>
+        <span class="natal-legend-item"><i class="natal-legend-line trine"></i> Trine</span>
+        <span class="natal-legend-item"><i class="natal-legend-line square"></i> Square</span>
+        <span class="natal-legend-item"><i class="natal-legend-line sextile"></i> Sextile</span>
+        <span class="natal-legend-item"><i class="natal-legend-dot"></i> Planet marker</span>
+        <span class="natal-legend-item"><i class="natal-legend-ring"></i> Signs/Houses ring</span>
+      </div>
+      <p class="natal-3d-copy">Classic wheel geometry with textured 3D planets, standard aspect line types, and readability-first labeling.</p>
     </div>
   `;
 }
@@ -997,6 +985,13 @@ function destroyNatal3DChart() {
   if (runtime.resizeHandler) {
     window.removeEventListener("resize", runtime.resizeHandler);
   }
+  if (Array.isArray(runtime.detach)) {
+    runtime.detach.forEach((fn) => {
+      try {
+        fn?.();
+      } catch {}
+    });
+  }
   runtime.renderer?.dispose?.();
   state.natal3d = null;
 }
@@ -1005,7 +1000,9 @@ async function initNatal3DChart(data) {
   const canvas = document.getElementById("natal3dCanvas");
   const canvasWrap = document.querySelector(".natal-3d-canvas-wrap");
   const overlay = document.getElementById("natal3dOverlay");
-  if (!canvas || !canvasWrap || !overlay) {
+  const downloadBtn = document.getElementById("natal3dDownload");
+  const shareBtn = document.getElementById("natal3dShare");
+  if (!canvas || !canvasWrap || !overlay || !downloadBtn || !shareBtn) {
     destroyNatal3DChart();
     return;
   }
@@ -1024,7 +1021,7 @@ async function initNatal3DChart(data) {
   const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 140);
-  camera.position.set(0, 7.6, 9.2);
+  camera.position.set(0, 7.35, 9);
   camera.lookAt(0, 0, 0);
 
   scene.add(new THREE.AmbientLight(isDark ? 0xffffff : 0x111111, isDark ? 0.84 : 0.7));
@@ -1038,24 +1035,11 @@ async function initNatal3DChart(data) {
   );
   scene.add(core);
 
-  const outerRing = 4.25;
-  const houseRing = 3.22;
+  const outerRing = 4.18;
+  const signRing = 3.62;
+  const houseRing = 3.1;
   const planetRing = 2.72;
   const aspectRing = 2.36;
-  const zodiacDistanceLy = {
-    Aries: 65,
-    Taurus: 147,
-    Gemini: 34,
-    Cancer: 173,
-    Leo: 79,
-    Virgo: 250,
-    Libra: 77,
-    Scorpio: 550,
-    Sagittarius: 75,
-    Capricorn: 39,
-    Aquarius: 150,
-    Pisces: 294
-  };
 
   const ringMaterial = new THREE.LineBasicMaterial({
     color: isDark ? 0x4f5865 : 0x7f8b98,
@@ -1073,6 +1057,7 @@ async function initNatal3DChart(data) {
     scene.add(line);
   };
   makeRing(outerRing);
+  makeRing(signRing);
   makeRing(houseRing);
   makeRing(aspectRing);
 
@@ -1097,8 +1082,7 @@ async function initNatal3DChart(data) {
   const rayTargets = [];
   const zodiacLabels = [];
   const planetLabels = [];
-  const distanceLabels = [];
-  const aspectLines = [];
+  const aspectVisuals = [];
   overlay.innerHTML = "";
 
   zodiacOrder.forEach((sign, idx) => {
@@ -1106,36 +1090,8 @@ async function initNatal3DChart(data) {
     node.className = "natal-3d-zodiac-label";
     node.innerHTML = `${zodiacIcon(sign)}<span>${sign.slice(0, 3).toUpperCase()}</span>`;
     overlay.appendChild(node);
-    const distanceNode = document.createElement("span");
-    distanceNode.className = "natal-3d-distance-label";
-    distanceNode.textContent = `${zodiacDistanceLy[sign] || 120} ly`;
-    overlay.appendChild(distanceNode);
     const theta = ((idx * 30 + 15) * Math.PI) / 180;
-    const vector = new THREE.Vector3(Math.cos(theta) * (outerRing - 0.04), 0, Math.sin(theta) * (outerRing - 0.04));
-    const target = new THREE.Vector3(Math.cos(theta) * (outerRing + 0.75), 0, Math.sin(theta) * (outerRing + 0.75));
-    const vectorLine = new THREE.Line(
-      new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), target]),
-      new THREE.LineDashedMaterial({
-        color: isDark ? 0xbec5cf : 0x515a68,
-        dashSize: 0.09,
-        gapSize: 0.08,
-        transparent: true,
-        opacity: 0.32
-      })
-    );
-    vectorLine.computeLineDistances();
-    vectorLine.rotation.x = Math.PI * 0.08;
-    scene.add(vectorLine);
-    const arrowHead = new THREE.Mesh(
-      new THREE.ConeGeometry(0.05, 0.16, 8),
-      new THREE.MeshBasicMaterial({ color: isDark ? 0xcfd5dd : 0x444d5a })
-    );
-    arrowHead.position.copy(target);
-    arrowHead.rotation.x = -Math.PI / 2 + Math.PI * 0.08;
-    arrowHead.rotation.z = -theta;
-    scene.add(arrowHead);
     zodiacLabels.push({ node, theta, sign });
-    distanceLabels.push({ node: distanceNode, theta, mid: vector.clone().lerp(target, 0.62) });
   });
 
   const planetPoints = new Map();
@@ -1204,7 +1160,7 @@ async function initNatal3DChart(data) {
     label.className = "natal-3d-planet-label";
     label.textContent = String(planet.key || "").slice(0, 2).toUpperCase();
     overlay.appendChild(label);
-    planetLabels.push({ node: label, planetKey: planet.key, distanceLy: formatLightYears(auToLightYears(natalDistanceAu[planet.key] ?? (0.4 + index * 0.7))) });
+    planetLabels.push({ node: label, planetKey: planet.key });
   });
 
   const aspects = buildAspectGeometry(
@@ -1213,26 +1169,47 @@ async function initNatal3DChart(data) {
       longitude: planetLongitude(planet, idx)
     }))
   );
+  const aspectStyleMap = {
+    conjunction: { dashed: false, colorDark: 0xcdd4de, colorLight: 0x384150, opacity: 0.58 },
+    opposition: { dashed: true, dashSize: 0.22, gapSize: 0.12, colorDark: 0xd1d8e2, colorLight: 0x343e4d, opacity: 0.56 },
+    trine: { dashed: true, dashSize: 0.12, gapSize: 0.08, colorDark: 0x9ba8b6, colorLight: 0x5a6676, opacity: 0.48 },
+    square: { dashed: true, dashSize: 0.08, gapSize: 0.16, colorDark: 0xb3beca, colorLight: 0x495564, opacity: 0.48 },
+    sextile: { dashed: true, dashSize: 0.03, gapSize: 0.11, colorDark: 0x8995a3, colorLight: 0x6b7786, opacity: 0.42 }
+  };
   aspects.forEach((aspect) => {
     const left = planetPoints.get(aspect.left.key);
     const right = planetPoints.get(aspect.right.key);
     if (!left || !right) {
       return;
     }
+    const style = aspectStyleMap[aspect.styleClass] || aspectStyleMap.sextile;
     const line = new THREE.Line(
       new THREE.BufferGeometry().setFromPoints([left, right]),
-      new THREE.LineDashedMaterial({
-        color: aspect.type === "soft" ? (isDark ? 0x808994 : 0x636c7a) : (isDark ? 0xc6ccd4 : 0x464f5d),
-        dashSize: aspect.type === "soft" ? 0.07 : 0.11,
-        gapSize: 0.08,
-        transparent: true,
-        opacity: aspect.type === "soft" ? 0.32 : 0.44
-      })
+      style.dashed
+        ? new THREE.LineDashedMaterial({
+            color: isDark ? style.colorDark : style.colorLight,
+            dashSize: style.dashSize,
+            gapSize: style.gapSize,
+            transparent: true,
+            opacity: style.opacity
+          })
+        : new THREE.LineBasicMaterial({
+            color: isDark ? style.colorDark : style.colorLight,
+            transparent: true,
+            opacity: style.opacity
+          })
     );
-    line.computeLineDistances();
+    if (style.dashed && typeof line.computeLineDistances === "function") {
+      line.computeLineDistances();
+    }
     line.rotation.x = Math.PI * 0.08;
     scene.add(line);
-    aspectLines.push(line);
+    aspectVisuals.push({
+      line,
+      leftKey: aspect.left.key,
+      rightKey: aspect.right.key,
+      baseOpacity: style.opacity
+    });
   });
 
   const raycaster = new THREE.Raycaster();
@@ -1278,12 +1255,61 @@ async function initNatal3DChart(data) {
     };
   };
 
-  const runtime = { renderer, resizeHandler: resize, frameId: 0 };
+  const detach = [];
+  const triggerDownload = () => {
+    try {
+      const dataUrl = canvas.toDataURL("image/png");
+      const a = document.createElement("a");
+      a.href = dataUrl;
+      a.download = `astronautica-natal-${new Date().toISOString().slice(0, 10)}.png`;
+      a.click();
+    } catch {}
+  };
+  const triggerShare = async () => {
+    const shareTitle = "Astronautica Natal Chart";
+    const shareText = "My natal chart from Astronautica.";
+    try {
+      if (navigator.share && canvas.toBlob) {
+        const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+        if (blob) {
+          const file = new File([blob], "astronautica-natal.png", { type: "image/png" });
+          if (!navigator.canShare || navigator.canShare({ files: [file] })) {
+            await navigator.share({ title: shareTitle, text: shareText, files: [file] });
+            return;
+          }
+        }
+      }
+      if (navigator.share) {
+        await navigator.share({ title: shareTitle, text: shareText, url: window.location.href });
+        return;
+      }
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(window.location.href);
+      }
+    } catch {}
+  };
+  downloadBtn.addEventListener("click", triggerDownload);
+  shareBtn.addEventListener("click", triggerShare);
+  detach.push(() => downloadBtn.removeEventListener("click", triggerDownload));
+  detach.push(() => shareBtn.removeEventListener("click", triggerShare));
+
+  const runtime = { renderer, resizeHandler: resize, frameId: 0, detach };
   const animate = (now) => {
     if (state.natal3d !== runtime) {
       return;
     }
-    const centerScreen = projectToScreen(new THREE.Vector3(0, 0, 0));
+    const occupied = [];
+    const isFree = (x, y, minDistance = 26) => {
+      for (let i = 0; i < occupied.length; i += 1) {
+        const o = occupied[i];
+        const dx = o.x - x;
+        const dy = o.y - y;
+        if ((dx * dx + dy * dy) < (minDistance * minDistance)) {
+          return false;
+        }
+      }
+      return true;
+    };
     objects.forEach((item, idx) => {
       item.mesh.position.copy(item.basePos);
       item.hit.position.copy(item.basePos);
@@ -1296,26 +1322,30 @@ async function initNatal3DChart(data) {
       const screen = projectToScreen(item.basePos.clone().add(new THREE.Vector3(0, 0.23, 0)));
       const labelItem = planetLabels[idx];
       if (labelItem) {
-        labelItem.node.style.opacity = screen.visible ? (hoverMix ? "1" : "0.8") : "0";
+        const visible = screen.visible && (hoverMix || isFree(screen.x, screen.y, 24));
+        labelItem.node.style.opacity = visible ? (hoverMix ? "1" : "0.82") : "0";
         labelItem.node.style.transform = `translate(${screen.x.toFixed(2)}px, ${screen.y.toFixed(2)}px)`;
+        if (visible) {
+          occupied.push({ x: screen.x, y: screen.y });
+        }
       }
+    });
+    const hasHover = Boolean(hoveredKey);
+    aspectVisuals.forEach((item) => {
+      const related = item.leftKey === hoveredKey || item.rightKey === hoveredKey;
+      const nextOpacity = !hasHover ? item.baseOpacity : related ? Math.min(0.82, item.baseOpacity + 0.24) : Math.max(0.1, item.baseOpacity * 0.32);
+      item.line.material.opacity = nextOpacity;
     });
 
     zodiacLabels.forEach((entry) => {
       const p = orbitPoint3D(outerRing + 0.92, entry.theta, 0, Math.PI * 0.08, 0);
       const end = new THREE.Vector3(p.x, p.y, p.z);
       const screen = projectToScreen(end);
-      entry.node.style.opacity = screen.visible ? "0.78" : "0";
+      const visible = screen.visible && isFree(screen.x, screen.y, 20);
+      entry.node.style.opacity = visible ? "0.76" : "0";
       entry.node.style.transform = `translate(${screen.x.toFixed(2)}px, ${screen.y.toFixed(2)}px)`;
-    });
-    distanceLabels.forEach((entry) => {
-      const screen = projectToScreen(entry.mid.clone());
-      entry.node.style.opacity = screen.visible ? "0.68" : "0";
-      if (screen.visible && centerScreen.visible) {
-        const angle = Math.atan2(screen.y - centerScreen.y, screen.x - centerScreen.x);
-        entry.node.style.transform = `translate(${screen.x.toFixed(2)}px, ${screen.y.toFixed(2)}px) rotate(${angle.toFixed(3)}rad)`;
-      } else {
-        entry.node.style.transform = `translate(${screen.x.toFixed(2)}px, ${screen.y.toFixed(2)}px)`;
+      if (visible) {
+        occupied.push({ x: screen.x, y: screen.y });
       }
     });
     camera.lookAt(0, 0, 0);

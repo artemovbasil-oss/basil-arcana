@@ -3996,6 +3996,18 @@ body[data-theme="dark"] .natal-3d-wrap {
   z-index: 3;
 }
 
+.natal-3d-tools {
+  display: flex;
+  gap: 0.42rem;
+  padding: 0.32rem 0.55rem 0;
+}
+
+.natal-3d-tools .btn {
+  padding: 0.28rem 0.48rem;
+  font-size: 0.64rem;
+  letter-spacing: 0.06em;
+}
+
 .natal-3d-planet-label,
 .natal-3d-zodiac-label {
   position: absolute;
@@ -4020,8 +4032,8 @@ body[data-theme="dark"] .natal-3d-wrap {
 }
 
 .natal-3d-zodiac-label span {
-  font-size: 0.58rem;
-  opacity: 0.84;
+  font-size: 0.6rem;
+  opacity: 0.88;
 }
 
 .natal-3d-planet-label {
@@ -4038,24 +4050,80 @@ body[data-theme="dark"] .natal-3d-wrap {
   opacity: 0.72;
 }
 
-.natal-3d-distance-label {
-  position: absolute;
-  transform: translate(-50%, -50%);
-  transform-origin: center;
-  font-size: 0.52rem;
-  letter-spacing: 0.045em;
+.natal-3d-legendbar {
+  border-top: 1px solid var(--line);
+  margin-top: 0.18rem;
+  padding: 0.45rem 0.64rem 0.35rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.42rem 0.8rem;
+  align-items: center;
+}
+
+.natal-legend-title {
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--muted);
-  opacity: 0;
-  white-space: nowrap;
-  pointer-events: none;
-  text-shadow: 0 1px 1px color-mix(in srgb, var(--bg) 80%, transparent 20%);
+}
+
+.natal-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.33rem;
+  font-size: 0.62rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.natal-legend-line {
+  width: 26px;
+  height: 0;
+  border-top: 1px solid color-mix(in srgb, var(--ink) 64%, transparent 36%);
+  display: inline-block;
+}
+
+.natal-legend-line.opposition {
+  border-top-style: dashed;
+  border-top-width: 2px;
+}
+
+.natal-legend-line.trine {
+  border-top-style: dashed;
+  border-top-color: color-mix(in srgb, var(--ink) 52%, transparent 48%);
+}
+
+.natal-legend-line.square {
+  border-top-style: dotted;
+  border-top-width: 2px;
+}
+
+.natal-legend-line.sextile {
+  border-top-style: dotted;
+  border-top-color: color-mix(in srgb, var(--ink) 40%, transparent 60%);
+}
+
+.natal-legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--ink);
+  display: inline-block;
+}
+
+.natal-legend-ring {
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  display: inline-block;
 }
 
 .natal-3d-copy {
   margin: 0;
-  padding: 0.45rem 0.65rem 0.62rem;
-  font-size: 0.68rem;
+  padding: 0.1rem 0.65rem 0.62rem;
+  font-size: 0.64rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--muted);
@@ -4350,6 +4418,10 @@ body[data-theme="light"] .energy-star.neutral {
 
   .natal-3d-wrap {
     grid-template-columns: 1fr;
+  }
+
+  .natal-3d-legendbar {
+    gap: 0.36rem 0.6rem;
   }
 
   .natal-toc {
@@ -4688,5 +4760,19 @@ body[data-theme="light"] .energy-star.neutral {
 
   .placement-card p {
     font-size: 0.95rem;
+  }
+
+  .natal-3d-tools {
+    padding-top: 0.4rem;
+  }
+
+  .natal-3d-legendbar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+
+  .natal-legend-title {
+    grid-column: 1 / -1;
   }
 }
