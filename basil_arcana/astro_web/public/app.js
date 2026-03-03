@@ -975,41 +975,13 @@ function formatLightYears(value) {
 }
 
 function renderNatalChart3D(data) {
-  const planets = (data?.planets || []).slice(0, 10);
-  const planetCount = Math.max(1, planets.length);
-  const legend = planets
-    .map((planet, index) => {
-      const sign = String(planet.sign || "Aries");
-      const longitude = planetLongitude(planet, index);
-      const distanceLy = formatLightYears(auToLightYears(natalDistanceAu[planet.key] ?? (0.4 + index * 0.7)));
-      return `
-        <span
-          class="natal-3d-legend-item"
-          data-planet="${planet.key}"
-          data-angle="${Math.round(longitude)}"
-          data-sign="${sign}"
-          data-distance="${distanceLy}"
-        >
-          ${zodiacIcon(sign)}
-          <strong>${planet.key}</strong>
-          <small>${distanceLy} ly</small>
-        </span>
-      `;
-    })
-    .join("");
-
   return `
-    <div class="natal-3d-wrap" id="natal3dWrap" data-count="${planetCount}">
+    <div class="natal-3d-wrap" id="natal3dWrap">
       <div class="natal-3d-canvas-wrap">
         <canvas id="natal3dCanvas" class="natal-3d-canvas" aria-label="3D natal chart"></canvas>
         <div id="natal3dOverlay" class="natal-3d-overlay" aria-hidden="true"></div>
       </div>
-      <div class="natal-3d-meta">
-        <p class="natal-3d-copy">Interactive natal map: textured planets, zodiac-sector vectors, and distance annotations in light-years for scientific context.</p>
-        <div class="natal-3d-legend" id="natal3dLegend">
-          ${legend}
-        </div>
-      </div>
+      <p class="natal-3d-copy">Static natal composition: placements, aspect geometry, zodiac vectors, and constellation distance markers.</p>
     </div>
   `;
 }
@@ -1031,11 +1003,9 @@ function destroyNatal3DChart() {
 
 async function initNatal3DChart(data) {
   const canvas = document.getElementById("natal3dCanvas");
-  const wrap = document.getElementById("natal3dWrap");
   const canvasWrap = document.querySelector(".natal-3d-canvas-wrap");
   const overlay = document.getElementById("natal3dOverlay");
-  const legendRoot = document.getElementById("natal3dLegend");
-  if (!canvas || !wrap || !canvasWrap || !overlay || !legendRoot) {
+  if (!canvas || !canvasWrap || !overlay) {
     destroyNatal3DChart();
     return;
   }
@@ -1068,47 +1038,113 @@ async function initNatal3DChart(data) {
   );
   scene.add(core);
 
-  const radiusBase = 2.2;
-  const step = 0.34;
+  const outerRing = 4.25;
+  const houseRing = 3.22;
+  const planetRing = 2.72;
+  const aspectRing = 2.36;
+  const zodiacDistanceLy = {
+    Aries: 65,
+    Taurus: 147,
+    Gemini: 34,
+    Cancer: 173,
+    Leo: 79,
+    Virgo: 250,
+    Libra: 77,
+    Scorpio: 550,
+    Sagittarius: 75,
+    Capricorn: 39,
+    Aquarius: 150,
+    Pisces: 294
+  };
+
+  const ringMaterial = new THREE.LineBasicMaterial({
+    color: isDark ? 0x4f5865 : 0x7f8b98,
+    transparent: true,
+    opacity: 0.38
+  });
+  const makeRing = (radius) => {
+    const points = [];
+    for (let i = 0; i <= 180; i += 1) {
+      const a = (i / 180) * Math.PI * 2;
+      points.push(new THREE.Vector3(Math.cos(a) * radius, 0, Math.sin(a) * radius));
+    }
+    const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints(points), ringMaterial.clone());
+    line.rotation.x = Math.PI * 0.08;
+    scene.add(line);
+  };
+  makeRing(outerRing);
+  makeRing(houseRing);
+  makeRing(aspectRing);
+
+  for (let house = 1; house <= 12; house += 1) {
+    const angle = ((house - 1) * 30 * Math.PI) / 180;
+    const s = new THREE.Vector3(Math.cos(angle) * aspectRing, 0, Math.sin(angle) * aspectRing);
+    const e = new THREE.Vector3(Math.cos(angle) * outerRing, 0, Math.sin(angle) * outerRing);
+    const line = new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints([s, e]),
+      new THREE.LineBasicMaterial({
+        color: isDark ? 0x4a5260 : 0x87919e,
+        transparent: true,
+        opacity: 0.32
+      })
+    );
+    line.rotation.x = Math.PI * 0.08;
+    scene.add(line);
+  }
+
   const planets = (data?.planets || []).slice(0, 10);
   const objects = [];
   const rayTargets = [];
   const zodiacLabels = [];
+  const planetLabels = [];
+  const distanceLabels = [];
+  const aspectLines = [];
   overlay.innerHTML = "";
 
-  const signSet = new Set();
-  planets.forEach((planet) => signSet.add(String(planet.sign || "Aries")));
-  Array.from(signSet).slice(0, 8).forEach((sign, idx) => {
+  zodiacOrder.forEach((sign, idx) => {
     const node = document.createElement("span");
     node.className = "natal-3d-zodiac-label";
-    node.innerHTML = `${zodiacIcon(sign)}<strong>${sign}</strong>`;
+    node.innerHTML = `${zodiacIcon(sign)}<span>${sign.slice(0, 3).toUpperCase()}</span>`;
     overlay.appendChild(node);
-    const theta = ((idx / Math.max(1, signSet.size)) * Math.PI * 2) + Math.PI / 12;
-    zodiacLabels.push({ node, theta, sign });
-  });
-
-  planets.forEach((planet, index) => {
-    const longitude = planetLongitude(planet, index) * (Math.PI / 180);
-    const radius = radiusBase + index * step;
-    const inclination = ((zodiacIndex(planet.sign) % 6) - 3) * (Math.PI / 90);
-    const node = ((index * 41 + zodiacIndex(planet.sign) * 7) % 360) * (Math.PI / 180);
-    const eccentricity = 0.03 + ((stringHash(`${planet.key}:${planet.sign}`) % 8) / 100);
-
-    const orbitPts = [];
-    for (let i = 0; i <= 128; i += 1) {
-      const a = (i / 128) * Math.PI * 2;
-      const p = orbitPoint3D(radius, a, node, inclination, eccentricity);
-      orbitPts.push(new THREE.Vector3(p.x, p.y, p.z));
-    }
-    const orbit = new THREE.Line(
-      new THREE.BufferGeometry().setFromPoints(orbitPts),
-      new THREE.LineBasicMaterial({
-        color: isDark ? 0x505864 : 0x8c96a3,
+    const distanceNode = document.createElement("span");
+    distanceNode.className = "natal-3d-distance-label";
+    distanceNode.textContent = `${zodiacDistanceLy[sign] || 120} ly`;
+    overlay.appendChild(distanceNode);
+    const theta = ((idx * 30 + 15) * Math.PI) / 180;
+    const vector = new THREE.Vector3(Math.cos(theta) * (outerRing - 0.04), 0, Math.sin(theta) * (outerRing - 0.04));
+    const target = new THREE.Vector3(Math.cos(theta) * (outerRing + 0.75), 0, Math.sin(theta) * (outerRing + 0.75));
+    const vectorLine = new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), target]),
+      new THREE.LineDashedMaterial({
+        color: isDark ? 0xbec5cf : 0x515a68,
+        dashSize: 0.09,
+        gapSize: 0.08,
         transparent: true,
-        opacity: 0.34
+        opacity: 0.32
       })
     );
-    scene.add(orbit);
+    vectorLine.computeLineDistances();
+    vectorLine.rotation.x = Math.PI * 0.08;
+    scene.add(vectorLine);
+    const arrowHead = new THREE.Mesh(
+      new THREE.ConeGeometry(0.05, 0.16, 8),
+      new THREE.MeshBasicMaterial({ color: isDark ? 0xcfd5dd : 0x444d5a })
+    );
+    arrowHead.position.copy(target);
+    arrowHead.rotation.x = -Math.PI / 2 + Math.PI * 0.08;
+    arrowHead.rotation.z = -theta;
+    scene.add(arrowHead);
+    zodiacLabels.push({ node, theta, sign });
+    distanceLabels.push({ node: distanceNode, theta, mid: vector.clone().lerp(target, 0.62) });
+  });
+
+  const planetPoints = new Map();
+  planets.forEach((planet, index) => {
+    const longitude = planetLongitude(planet, index) * (Math.PI / 180);
+    const radius = planetRing + ((Number(planet.house) - 1 || index) * 0.028);
+    const inclination = (((zodiacIndex(planet.sign) % 5) - 2) * Math.PI) / 210;
+    const node = ((zodiacIndex(planet.sign) * 30 + 9) * Math.PI) / 180;
+    const eccentricity = 0.025 + ((stringHash(`${planet.key}:${planet.sign}`) % 7) / 100);
 
     const texture = createPlanetTexture(THREE, planet.key, isDark ? "dark" : "light");
     const size = 0.14 + (index === 0 ? 0.05 : 0) + (index > 5 ? 0.01 : 0);
@@ -1125,24 +1161,22 @@ async function initNatal3DChart(data) {
     );
     scene.add(mesh);
 
-    const guide = new THREE.Line(
-      new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, 0)]),
+    const pos = orbitPoint3D(radius, longitude, node, inclination, eccentricity);
+    mesh.position.set(pos.x, pos.y, pos.z);
+
+    const radial = new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), mesh.position.clone()]),
       new THREE.LineDashedMaterial({
-        color: isDark ? 0xbbc2ce : 0x4d5766,
-        dashSize: 0.12,
-        gapSize: 0.08,
+        color: isDark ? 0xbec5cf : 0x4a5565,
+        dashSize: 0.08,
+        gapSize: 0.07,
         transparent: true,
-        opacity: 0.5
+        opacity: 0.42
       })
     );
-    guide.computeLineDistances();
-    scene.add(guide);
-
-    const label = document.createElement("span");
-    label.className = "natal-3d-planet-label";
-    const distLy = formatLightYears(auToLightYears(natalDistanceAu[planet.key] ?? (0.4 + index * 0.7)));
-    label.innerHTML = `${zodiacIcon(planet.sign)}<strong>${planet.key}</strong><small>${distLy} ly</small>`;
-    overlay.appendChild(label);
+    radial.computeLineDistances();
+    radial.rotation.x = Math.PI * 0.08;
+    scene.add(radial);
 
     const hit = new THREE.Mesh(
       new THREE.SphereGeometry(Math.max(0.2, size * 2.2), 12, 12),
@@ -1155,32 +1189,62 @@ async function initNatal3DChart(data) {
       planet,
       mesh,
       hit,
-      guide,
-      label,
-      theta: longitude,
+      radial,
       radius,
       node,
       inclination,
       eccentricity,
-      speed: 0.045 + index * 0.009,
       spin: 0.003 + index * 0.0008,
-      hover: 0
+      hover: 0,
+      basePos: new THREE.Vector3(pos.x, pos.y, pos.z)
     });
+
+    planetPoints.set(planet.key, new THREE.Vector3(pos.x, pos.y, pos.z));
+    const label = document.createElement("span");
+    label.className = "natal-3d-planet-label";
+    label.textContent = String(planet.key || "").slice(0, 2).toUpperCase();
+    overlay.appendChild(label);
+    planetLabels.push({ node: label, planetKey: planet.key, distanceLy: formatLightYears(auToLightYears(natalDistanceAu[planet.key] ?? (0.4 + index * 0.7))) });
+  });
+
+  const aspects = buildAspectGeometry(
+    planets.map((planet, idx) => ({
+      key: planet.key,
+      longitude: planetLongitude(planet, idx)
+    }))
+  );
+  aspects.forEach((aspect) => {
+    const left = planetPoints.get(aspect.left.key);
+    const right = planetPoints.get(aspect.right.key);
+    if (!left || !right) {
+      return;
+    }
+    const line = new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints([left, right]),
+      new THREE.LineDashedMaterial({
+        color: aspect.type === "soft" ? (isDark ? 0x808994 : 0x636c7a) : (isDark ? 0xc6ccd4 : 0x464f5d),
+        dashSize: aspect.type === "soft" ? 0.07 : 0.11,
+        gapSize: 0.08,
+        transparent: true,
+        opacity: aspect.type === "soft" ? 0.32 : 0.44
+      })
+    );
+    line.computeLineDistances();
+    line.rotation.x = Math.PI * 0.08;
+    scene.add(line);
+    aspectLines.push(line);
   });
 
   const raycaster = new THREE.Raycaster();
   const pointer = new THREE.Vector2();
   let hoveredKey = "";
-  const legendItems = Array.from(legendRoot.querySelectorAll(".natal-3d-legend-item"));
 
   const setHovered = (key) => {
     hoveredKey = key || "";
     objects.forEach((item) => {
       item.hover = item.planet.key === hoveredKey ? 1 : 0;
     });
-    legendItems.forEach((el) => {
-      el.classList.toggle("is-active", el.getAttribute("data-planet") === hoveredKey);
-    });
+    planetLabels.forEach((item) => item.node.classList.toggle("is-active", item.planetKey === hoveredKey));
   };
 
   canvas.onpointermove = (event) => {
@@ -1193,11 +1257,6 @@ async function initNatal3DChart(data) {
     setHovered(key);
   };
   canvas.onpointerleave = () => setHovered("");
-
-  legendItems.forEach((item) => {
-    item.addEventListener("mouseenter", () => setHovered(item.getAttribute("data-planet") || ""));
-    item.addEventListener("mouseleave", () => setHovered(""));
-  });
 
   const resize = () => {
     const width = Math.max(260, Math.round(canvasWrap.clientWidth));
@@ -1219,46 +1278,46 @@ async function initNatal3DChart(data) {
     };
   };
 
-  const start = performance.now();
   const runtime = { renderer, resizeHandler: resize, frameId: 0 };
   const animate = (now) => {
     if (state.natal3d !== runtime) {
       return;
     }
-    const t = (now - start) / 1000;
+    const centerScreen = projectToScreen(new THREE.Vector3(0, 0, 0));
     objects.forEach((item, idx) => {
-      const phase = item.theta + t * item.speed;
-      const pos = orbitPoint3D(item.radius, phase, item.node, item.inclination, item.eccentricity);
-      item.mesh.position.set(pos.x, pos.y, pos.z);
-      item.hit.position.copy(item.mesh.position);
+      item.mesh.position.copy(item.basePos);
+      item.hit.position.copy(item.basePos);
       const hoverMix = item.planet.key === hoveredKey ? 1 : 0;
-      item.mesh.rotation.y += item.spin + hoverMix * 0.04;
-      item.mesh.rotation.x += item.spin * 0.34 + hoverMix * 0.018;
+      item.mesh.rotation.y += item.spin + hoverMix * 0.028;
+      item.mesh.rotation.x += item.spin * 0.34 + hoverMix * 0.012;
       const scale = 1 + hoverMix * 0.22;
       item.mesh.scale.setScalar(scale);
-
-      const line = [new THREE.Vector3(0, 0, 0), item.mesh.position.clone()];
-      item.guide.geometry.setFromPoints(line);
-      item.guide.computeLineDistances();
-      item.guide.material.opacity = 0.35 + hoverMix * 0.45;
-
-      const screen = projectToScreen(item.mesh.position.clone().add(new THREE.Vector3(0, 0.25, 0)));
-      item.label.style.opacity = screen.visible ? (hoverMix ? "1" : "0.78") : "0";
-      item.label.style.transform = `translate(${screen.x.toFixed(2)}px, ${screen.y.toFixed(2)}px)`;
+      item.radial.material.opacity = 0.32 + hoverMix * 0.35;
+      const screen = projectToScreen(item.basePos.clone().add(new THREE.Vector3(0, 0.23, 0)));
+      const labelItem = planetLabels[idx];
+      if (labelItem) {
+        labelItem.node.style.opacity = screen.visible ? (hoverMix ? "1" : "0.8") : "0";
+        labelItem.node.style.transform = `translate(${screen.x.toFixed(2)}px, ${screen.y.toFixed(2)}px)`;
+      }
     });
 
-    zodiacLabels.forEach((entry, idx) => {
-      const r = 4.5;
-      const wobble = Math.sin(t * 0.28 + idx * 0.7) * 0.06;
-      const p = orbitPoint3D(r, entry.theta + wobble, 0, Math.PI * 0.06, 0);
+    zodiacLabels.forEach((entry) => {
+      const p = orbitPoint3D(outerRing + 0.92, entry.theta, 0, Math.PI * 0.08, 0);
       const end = new THREE.Vector3(p.x, p.y, p.z);
       const screen = projectToScreen(end);
       entry.node.style.opacity = screen.visible ? "0.78" : "0";
       entry.node.style.transform = `translate(${screen.x.toFixed(2)}px, ${screen.y.toFixed(2)}px)`;
     });
-
-    camera.position.x = Math.sin(t * 0.08) * 0.18;
-    camera.position.z = 9.2 + Math.cos(t * 0.07) * 0.12;
+    distanceLabels.forEach((entry) => {
+      const screen = projectToScreen(entry.mid.clone());
+      entry.node.style.opacity = screen.visible ? "0.68" : "0";
+      if (screen.visible && centerScreen.visible) {
+        const angle = Math.atan2(screen.y - centerScreen.y, screen.x - centerScreen.x);
+        entry.node.style.transform = `translate(${screen.x.toFixed(2)}px, ${screen.y.toFixed(2)}px) rotate(${angle.toFixed(3)}rad)`;
+      } else {
+        entry.node.style.transform = `translate(${screen.x.toFixed(2)}px, ${screen.y.toFixed(2)}px)`;
+      }
+    });
     camera.lookAt(0, 0, 0);
     renderer.render(scene, camera);
     runtime.frameId = window.requestAnimationFrame(animate);
