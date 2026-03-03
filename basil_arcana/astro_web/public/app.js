@@ -1609,20 +1609,30 @@ function renderOrbitalInsightFloor(dashboard, period) {
           <div class="home-orbit-body">
             <div class="home-orbit-canvas-wrap">
               <canvas id="homeOrbitCurrentCanvas" class="home-orbit-canvas" aria-label="Current sky state 3D view"></canvas>
-              <div id="homeOrbitCurrentOverlay" class="home-orbit-overlay" aria-hidden="true"></div>
+              <div id="homeOrbitCurrentCompass" class="home-orbit-compass" aria-hidden="true">
+                <div class="home-orbit-compass-ring">
+                  <span class="home-orbit-needle home-orbit-needle-sun"></span>
+                  <span class="home-orbit-needle home-orbit-needle-sign"></span>
+                </div>
+                <div class="home-orbit-compass-meta">
+                  <span>SUN</span>
+                  <span>SIGN</span>
+                </div>
+              </div>
             </div>
-            <div class="home-orbit-copy">
-              ${bodies
-                .map(
-                  (body, idx) => `
-                    <p class="home-orbit-line">
-                      <strong>${body.name} · ${body.sign}</strong>
-                      <span>${Math.round(Number(body.value) || 0)}/100 phase energy</span>
-                      <span>Angle ${Math.round(Number(body.angle) || 0)}° · Ring ${idx + 1}</span>
-                    </p>
-                  `
-                )
-                .join("")}
+            <div id="homeOrbitCurrentTelemetry" class="home-orbit-copy">
+              ${renderHomeOrbitCurrentTelemetry(
+                bodies.map((body, idx) => ({
+                  name: body.name,
+                  sign: body.sign,
+                  energy: Math.round(Number(body.value) || 0),
+                  angle: Math.round(Number(body.angle) || 0),
+                  ring: idx + 1,
+                  inclination: idx === 0 ? 7 : idx === 1 ? 13 : 18,
+                  eccentricity: (idx === 0 ? 0.08 : idx === 1 ? 0.11 : 0.14).toFixed(2)
+                })),
+                phaseIndex
+              )}
             </div>
           </div>
       </article>
@@ -1633,19 +1643,37 @@ function renderOrbitalInsightFloor(dashboard, period) {
           <div class="home-orbit-body">
             <div class="home-orbit-canvas-wrap">
               <canvas id="homeOrbitLifecycleCanvas" class="home-orbit-canvas" aria-label="Lifecycle 3D view"></canvas>
-              <div id="homeOrbitLifecycleOverlay" class="home-orbit-overlay" aria-hidden="true"></div>
+              <div id="homeOrbitLifecycleCompass" class="home-orbit-compass" aria-hidden="true">
+                <div class="home-orbit-compass-ring">
+                  <span class="home-orbit-needle home-orbit-needle-sun"></span>
+                  <span class="home-orbit-needle home-orbit-needle-sign"></span>
+                </div>
+                <div class="home-orbit-compass-meta">
+                  <span>PATH</span>
+                  <span>TARGET</span>
+                </div>
+              </div>
             </div>
-            <div class="home-orbit-copy">
-              ${lifecycleRows
-                .map(
-                  (row) => `
-                    <p class="home-orbit-line">
-                      <strong>${row.label}</strong>
-                      <span>${row.from} → ${row.to}</span>
-                    </p>
-                  `
-                )
-                .join("")}
+            <div id="homeOrbitLifecycleTelemetry" class="home-orbit-copy">
+              ${renderHomeOrbitLifecycleTelemetry(
+                lifecycleRows.map((row, idx) => ({
+                  label: row.label,
+                  from: row.from,
+                  to: row.to,
+                  delta: Math.round(
+                    Math.abs(
+                      (Math.atan2(
+                        Math.sin(((zodiacIndex(row.to) * 30 + 15) * Math.PI) / 180 - ((zodiacIndex(row.from) * 30 + 15) * Math.PI) / 180),
+                        Math.cos(((zodiacIndex(row.to) * 30 + 15) * Math.PI) / 180 - ((zodiacIndex(row.from) * 30 + 15) * Math.PI) / 180)
+                      ) * 180) /
+                        Math.PI
+                    )
+                  ),
+                  speed: (0.22 + idx * 0.08).toFixed(2),
+                  inclination: idx === 0 ? 8 : idx === 1 ? 12 : 16
+                })),
+                period
+              )}
             </div>
           </div>
       </article>
@@ -1699,7 +1727,49 @@ function orbitPoint3D(radius, theta, node, inclination, eccentricity = 0) {
   return { x: x1, y, z };
 }
 
-function buildMiniOrbitScene(THREE, canvas, wrap, overlay, type, dataset, isDark, period) {
+function renderHomeOrbitCurrentTelemetry(rows, phaseIndex) {
+  const safeRows = Array.isArray(rows) ? rows : [];
+  return `
+    <div class="home-orbit-stats-grid">
+      ${safeRows
+        .map(
+          (row) => `
+            <article class="home-orbit-stat">
+              <h4>${row.name} · ${row.sign}</h4>
+              <p>${row.energy}/100 phase energy</p>
+              <p>angle ${row.angle}° · ring ${row.ring}</p>
+              <p>plane ${row.inclination}° · e=${row.eccentricity}</p>
+            </article>
+          `
+        )
+        .join("")}
+    </div>
+    <p class="home-orbit-stat-note">Live index ${phaseIndex}/100. Values update continuously.</p>
+  `;
+}
+
+function renderHomeOrbitLifecycleTelemetry(rows, period) {
+  const safeRows = Array.isArray(rows) ? rows : [];
+  return `
+    <div class="home-orbit-stats-grid">
+      ${safeRows
+        .map(
+          (row) => `
+            <article class="home-orbit-stat">
+              <h4>${row.label}</h4>
+              <p>${row.from} → ${row.to}</p>
+              <p>delta ${row.delta}° · speed ${row.speed}</p>
+              <p>inclination ${row.inclination}°</p>
+            </article>
+          `
+        )
+        .join("")}
+    </div>
+    <p class="home-orbit-stat-note">Orbital transition model for ${period} cadence.</p>
+  `;
+}
+
+function buildMiniOrbitScene(THREE, canvas, wrap, type, dataset, isDark, period) {
   const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 80);
@@ -1741,19 +1811,7 @@ function buildMiniOrbitScene(THREE, canvas, wrap, overlay, type, dataset, isDark
   scene.add(core);
 
   const bodies = [];
-  const labels = [];
-  const ringLabelAnchors = [];
-  const labelLayer = overlay instanceof HTMLElement ? overlay : null;
-  if (labelLayer) {
-    labelLayer.innerHTML = "";
-  }
-  ringRadii.forEach((radius, idx) => {
-    const el = document.createElement("span");
-    el.className = "home-orbit-label home-orbit-label-ring";
-    el.textContent = `RING ${idx + 1}`;
-    labelLayer?.appendChild(el);
-    ringLabelAnchors.push({ radius, el, theta: (28 + idx * 42) * (Math.PI / 180) });
-  });
+  const glowTexture = createGlowTexture(THREE, "#ffffff");
   if (type === "current") {
     const lineGeometry = new THREE.BufferGeometry();
     const linePositions = new Float32Array(6 * 3);
@@ -1778,35 +1836,46 @@ function buildMiniOrbitScene(THREE, canvas, wrap, overlay, type, dataset, isDark
     ];
     (dataset?.bodies || []).slice(0, 3).forEach((body, idx) => {
       const mesh = new THREE.Mesh(
-        new THREE.SphereGeometry(idx === 0 ? 0.145 : 0.118, 18, 18),
+        new THREE.SphereGeometry(idx === 0 ? 0.16 : 0.128, 24, 24),
         new THREE.MeshStandardMaterial({
           color: colorSet[idx] || colorSet[2],
-          roughness: 0.45,
-          metalness: 0.1
+          roughness: 0.34,
+          metalness: 0.2,
+          emissive: isDark ? 0x0f1117 : 0xffffff,
+          emissiveIntensity: isDark ? 0.28 : 0.04
         })
       );
       scene.add(mesh);
+      const glow = new THREE.Sprite(
+        new THREE.SpriteMaterial({
+          map: glowTexture,
+          color: isDark ? 0xffffff : 0x242a34,
+          transparent: true,
+          opacity: isDark ? 0.24 : 0.12,
+          depthWrite: false
+        })
+      );
+      scene.add(glow);
       const node = ((22 + idx * 57) * Math.PI) / 180;
       const inclination = ((idx === 0 ? 7 : idx === 1 ? 13 : 18) * Math.PI) / 180;
       const eccentricity = idx === 0 ? 0.08 : idx === 1 ? 0.11 : 0.14;
       const startAngle = ((Number(body.angle) || 0) * Math.PI) / 180;
+      const baseValue = Math.max(0, Math.min(100, Math.round(Number(body.value) || 0)));
       bodies.push({
         mesh,
+        glow,
         radius: ringRadii[idx] || ringRadii[2],
         angle: startAngle,
-        speed: (0.34 + idx * 0.11) * speedScale,
+        speed: (0.24 + (baseValue / 100) * 0.22 + idx * 0.07) * speedScale,
         node,
         inclination,
         eccentricity,
-        label: String(body.name || `Body ${idx + 1}`)
+        label: String(body.name || `Body ${idx + 1}`),
+        sign: String(body.sign || "Unknown"),
+        baseValue
       });
-      const el = document.createElement("span");
-      el.className = "home-orbit-label home-orbit-label-body";
-      el.textContent = `${String(body.name || "Body").toUpperCase()} ${Math.round(Number(body.angle) || 0)}°`;
-      labelLayer?.appendChild(el);
-      labels.push({ el, bodyIndex: idx, mode: "current" });
     });
-    return { renderer, scene, camera, bodies, links, type, labels, ringLabelAnchors };
+    return { renderer, scene, camera, bodies, links, type };
   }
 
   const lifecycle = Array.isArray(dataset?.lifecycle) ? dataset.lifecycle : [];
@@ -1817,14 +1886,26 @@ function buildMiniOrbitScene(THREE, canvas, wrap, overlay, type, dataset, isDark
   ];
   lifecycle.slice(0, 3).forEach((item, idx) => {
     const mesh = new THREE.Mesh(
-      new THREE.SphereGeometry(0.11, 18, 18),
+      new THREE.SphereGeometry(0.118, 24, 24),
       new THREE.MeshStandardMaterial({
         color: colorSet[idx] || colorSet[2],
-        roughness: 0.52,
-        metalness: 0.1
+        roughness: 0.4,
+        metalness: 0.16,
+        emissive: isDark ? 0x10131a : 0xffffff,
+        emissiveIntensity: isDark ? 0.2 : 0.04
       })
     );
     scene.add(mesh);
+    const glow = new THREE.Sprite(
+      new THREE.SpriteMaterial({
+        map: glowTexture,
+        color: isDark ? 0xffffff : 0x1f2530,
+        transparent: true,
+        opacity: isDark ? 0.2 : 0.1,
+        depthWrite: false
+      })
+    );
+    scene.add(glow);
     const startDeg = zodiacIndex(item.from) * 30 + 15;
     const endDeg = zodiacIndex(item.to) * 30 + 15;
     const start = (startDeg * Math.PI) / 180;
@@ -1862,6 +1943,7 @@ function buildMiniOrbitScene(THREE, canvas, wrap, overlay, type, dataset, isDark
     const eccentricity = idx === 0 ? 0.05 : idx === 1 ? 0.08 : 0.1;
     bodies.push({
       mesh,
+      glow,
       radius,
       angle: start,
       speed: (0.22 + idx * 0.08) * speedScale,
@@ -1870,26 +1952,24 @@ function buildMiniOrbitScene(THREE, canvas, wrap, overlay, type, dataset, isDark
       eccentricity,
       start,
       delta,
-      label: ["SUN", "MOON", "RISING"][idx] || `BODY ${idx + 1}`
+      label: ["SUN", "MOON", "RISING"][idx] || `BODY ${idx + 1}`,
+      from: String(item.from || "Unknown"),
+      to: String(item.to || "Unknown")
     });
-    const el = document.createElement("span");
-    el.className = "home-orbit-label home-orbit-label-body";
-    const deltaDeg = Math.round(Math.abs((delta * 180) / Math.PI));
-    el.textContent = `${(["SUN", "MOON", "RISING"][idx] || "BODY")} Δ${deltaDeg}°`;
-    labelLayer?.appendChild(el);
-    labels.push({ el, bodyIndex: idx, mode: "lifecycle" });
   });
-  return { renderer, scene, camera, bodies, type, labels, ringLabelAnchors };
+  return { renderer, scene, camera, bodies, type };
 }
 
 async function initHomeOrbitWidgets(dashboard, period) {
   const currentCanvas = document.getElementById("homeOrbitCurrentCanvas");
   const lifecycleCanvas = document.getElementById("homeOrbitLifecycleCanvas");
-  const currentOverlay = document.getElementById("homeOrbitCurrentOverlay");
-  const lifecycleOverlay = document.getElementById("homeOrbitLifecycleOverlay");
+  const currentTelemetry = document.getElementById("homeOrbitCurrentTelemetry");
+  const lifecycleTelemetry = document.getElementById("homeOrbitLifecycleTelemetry");
+  const currentCompass = document.getElementById("homeOrbitCurrentCompass");
+  const lifecycleCompass = document.getElementById("homeOrbitLifecycleCompass");
   const currentWrap = currentCanvas?.closest(".home-orbit-canvas-wrap");
   const lifecycleWrap = lifecycleCanvas?.closest(".home-orbit-canvas-wrap");
-  if (!currentCanvas || !lifecycleCanvas || !currentWrap || !lifecycleWrap || !currentOverlay || !lifecycleOverlay) {
+  if (!currentCanvas || !lifecycleCanvas || !currentWrap || !lifecycleWrap || !currentTelemetry || !lifecycleTelemetry || !currentCompass || !lifecycleCompass) {
     destroyHomeOrbitWidgets();
     return;
   }
@@ -1912,10 +1992,45 @@ async function initHomeOrbitWidgets(dashboard, period) {
     { from: first?.moon?.sign || dashboard?.natalCore?.moon || "Unknown", to: last?.moon?.sign || dashboard?.natalCore?.moon || "Unknown" },
     { from: first?.rising?.sign || dashboard?.natalCore?.rising || "Unknown", to: last?.rising?.sign || dashboard?.natalCore?.rising || "Unknown" }
   ];
+  const currentBodies = bodyCycleData(dashboard, period);
+  const initialPhase = Math.round(
+    currentBodies.reduce((sum, item) => sum + Math.max(0, Math.min(100, Number(item.value) || 0)), 0) / Math.max(1, currentBodies.length)
+  );
+  currentTelemetry.innerHTML = renderHomeOrbitCurrentTelemetry(
+    currentBodies.map((item, idx) => ({
+      name: item.name,
+      sign: item.sign,
+      energy: Math.round(Number(item.value) || 0),
+      angle: Math.round(Number(item.angle) || 0),
+      ring: idx + 1,
+      inclination: idx === 0 ? 7 : idx === 1 ? 13 : 18,
+      eccentricity: (idx === 0 ? 0.08 : idx === 1 ? 0.11 : 0.14).toFixed(2)
+    })),
+    initialPhase
+  );
+  lifecycleTelemetry.innerHTML = renderHomeOrbitLifecycleTelemetry(
+    lifecycle.map((item, idx) => ({
+      label: ["Sun", "Moon", "Rising"][idx] || `Body ${idx + 1}`,
+      from: item.from,
+      to: item.to,
+      delta: Math.round(
+        Math.abs(
+          (Math.atan2(
+            Math.sin(((zodiacIndex(item.to) * 30 + 15) * Math.PI) / 180 - ((zodiacIndex(item.from) * 30 + 15) * Math.PI) / 180),
+            Math.cos(((zodiacIndex(item.to) * 30 + 15) * Math.PI) / 180 - ((zodiacIndex(item.from) * 30 + 15) * Math.PI) / 180)
+          ) * 180) /
+            Math.PI
+        )
+      ),
+      speed: (0.22 + idx * 0.08).toFixed(2),
+      inclination: idx === 0 ? 8 : idx === 1 ? 12 : 16
+    })),
+    period
+  );
   const isDark = state.theme === "dark";
   const scenes = [
-    buildMiniOrbitScene(THREE, currentCanvas, currentWrap, currentOverlay, "current", { bodies: bodyCycleData(dashboard, period) }, isDark, period),
-    buildMiniOrbitScene(THREE, lifecycleCanvas, lifecycleWrap, lifecycleOverlay, "lifecycle", { lifecycle }, isDark, period)
+    buildMiniOrbitScene(THREE, currentCanvas, currentWrap, "current", { bodies: currentBodies }, isDark, period),
+    buildMiniOrbitScene(THREE, lifecycleCanvas, lifecycleWrap, "lifecycle", { lifecycle }, isDark, period)
   ];
 
   const resize = () => {
@@ -1933,28 +2048,23 @@ async function initHomeOrbitWidgets(dashboard, period) {
   window.addEventListener("resize", resize);
 
   const start = performance.now();
-  const runtime = { frameId: 0, resizeHandler: resize, scenes };
-  const projectLabel = (entry, wrap, worldVec, el, active = false) => {
-    if (!(el instanceof HTMLElement)) {
-      return;
-    }
-    const v = worldVec.clone().project(entry.camera);
-    if (v.z >= 1) {
-      el.style.opacity = "0";
-      return;
-    }
-    const x = ((v.x + 1) / 2) * wrap.clientWidth;
-    const y = ((-v.y + 1) / 2) * wrap.clientHeight;
-    el.style.opacity = active ? "0.98" : "0.78";
-    el.style.transform = `translate(${x.toFixed(2)}px, ${y.toFixed(2)}px)`;
-  };
+  const runtime = { frameId: 0, resizeHandler: resize, scenes, lastTelemetryTs: 0 };
+  const currentNeedleSun = currentCompass.querySelector(".home-orbit-needle-sun");
+  const currentNeedleSign = currentCompass.querySelector(".home-orbit-needle-sign");
+  const lifecycleNeedleSun = lifecycleCompass.querySelector(".home-orbit-needle-sun");
+  const lifecycleNeedleSign = lifecycleCompass.querySelector(".home-orbit-needle-sign");
+  const natalSignAngle = ((zodiacIndex(dashboard?.natalCore?.sun || "Aries") * 30 + 15) * Math.PI) / 180;
   const loop = (now) => {
     if (state.homeOrbitWidgets !== runtime) {
       return;
     }
     const elapsed = (now - start) / 1000;
+    const currentRows = [];
+    const lifecycleRowsLive = [];
+    let currentSunTheta = 0;
+    let lifecycleMeanTheta = 0;
+    let lifecycleSignTheta = natalSignAngle;
     scenes.forEach((entry, entryIdx) => {
-      const wrap = entryIdx === 0 ? currentWrap : lifecycleWrap;
       const linkPositions = [];
       entry.bodies.forEach((body, bodyIdx) => {
         let theta = body.angle + elapsed * body.speed;
@@ -1965,6 +2075,12 @@ async function initHomeOrbitWidgets(dashboard, period) {
         const p = orbitPoint3D(body.radius, theta, body.node || 0, body.inclination || 0, body.eccentricity || 0);
         body.mesh.position.set(p.x, p.y, p.z);
         body.mesh.rotation.y += 0.01 + bodyIdx * 0.003;
+        if (body.glow) {
+          body.glow.position.copy(body.mesh.position);
+          const pulse = 0.88 + Math.sin(elapsed * (1.2 + bodyIdx * 0.32)) * 0.18;
+          body.glow.scale.setScalar((bodyIdx === 0 ? 0.72 : 0.58) * pulse);
+          body.glow.material.opacity = (isDark ? 0.2 : 0.11) * pulse;
+        }
         if (entry.type === "current") {
           const pad = 0.2;
           const vx = p.x;
@@ -1972,20 +2088,33 @@ async function initHomeOrbitWidgets(dashboard, period) {
           const vz = p.z;
           const mag = Math.hypot(vx, vz) || 1;
           linkPositions.push((vx / mag) * pad, (vy / Math.max(1, mag)) * (pad * 0.5), (vz / mag) * pad, p.x, p.y, p.z);
-        }
-        const labelMeta = entry.labels.find((item) => item.bodyIndex === bodyIdx);
-        if (labelMeta?.el) {
-          const labelAnchor = new THREE.Vector3(p.x, p.y + 0.18, p.z);
-          projectLabel(entry, wrap, labelAnchor, labelMeta.el, true);
-          if (entry.type === "current") {
-            const deg = normalizeAngle((theta * 180) / Math.PI);
-            labelMeta.el.textContent = `${body.label} ${Math.round(deg)}°`;
+          const deg = normalizeAngle((theta * 180) / Math.PI);
+          if (bodyIdx === 0) {
+            currentSunTheta = theta;
           }
+          currentRows.push({
+            name: body.label,
+            sign: body.sign,
+            energy: Math.max(0, Math.min(100, Math.round(body.baseValue + Math.sin(elapsed * (0.9 + bodyIdx * 0.25)) * 6))),
+            angle: Math.round(deg),
+            ring: bodyIdx + 1,
+            inclination: Math.round(((body.inclination || 0) * 180) / Math.PI),
+            eccentricity: Number(body.eccentricity || 0).toFixed(2)
+          });
+        } else {
+          lifecycleMeanTheta += theta;
+          if (bodyIdx === 0) {
+            lifecycleSignTheta = theta;
+          }
+          lifecycleRowsLive.push({
+            label: body.label,
+            from: body.from,
+            to: body.to,
+            delta: Math.round(Math.abs(((body.delta || 0) * 180) / Math.PI)),
+            speed: Number(body.speed || 0).toFixed(2),
+            inclination: Math.round(((body.inclination || 0) * 180) / Math.PI)
+          });
         }
-      });
-      entry.ringLabelAnchors?.forEach((anchor) => {
-        const world = orbitPoint3D(anchor.radius, anchor.theta + elapsed * 0.02, 0, Math.PI * 0.1, 0);
-        projectLabel(entry, wrap, new THREE.Vector3(world.x, world.y + 0.08, world.z), anchor.el, false);
       });
       if (entry.links && linkPositions.length >= 18) {
         const attr = entry.links.geometry.getAttribute("position");
@@ -1996,6 +2125,28 @@ async function initHomeOrbitWidgets(dashboard, period) {
       entry.camera.lookAt(0, 0.04, 0);
       entry.renderer.render(entry.scene, entry.camera);
     });
+    if (now - runtime.lastTelemetryTs > 900) {
+      runtime.lastTelemetryTs = now;
+      const phaseIndex = Math.round(
+        currentRows.reduce((sum, row) => sum + (Number(row.energy) || 0), 0) / Math.max(1, currentRows.length)
+      );
+      currentTelemetry.innerHTML = renderHomeOrbitCurrentTelemetry(currentRows, phaseIndex);
+      lifecycleTelemetry.innerHTML = renderHomeOrbitLifecycleTelemetry(lifecycleRowsLive, period);
+    }
+    const toDeg = (rad) => normalizeAngle((rad * 180) / Math.PI);
+    if (currentNeedleSun) {
+      currentNeedleSun.style.transform = `translate(-50%, -100%) rotate(${toDeg(currentSunTheta)}deg)`;
+    }
+    if (currentNeedleSign) {
+      currentNeedleSign.style.transform = `translate(-50%, -100%) rotate(${toDeg(natalSignAngle)}deg)`;
+    }
+    if (lifecycleNeedleSun) {
+      const avg = lifecycleMeanTheta / 3 || 0;
+      lifecycleNeedleSun.style.transform = `translate(-50%, -100%) rotate(${toDeg(avg)}deg)`;
+    }
+    if (lifecycleNeedleSign) {
+      lifecycleNeedleSign.style.transform = `translate(-50%, -100%) rotate(${toDeg(lifecycleSignTheta)}deg)`;
+    }
     runtime.frameId = window.requestAnimationFrame(loop);
   };
   runtime.frameId = window.requestAnimationFrame(loop);
