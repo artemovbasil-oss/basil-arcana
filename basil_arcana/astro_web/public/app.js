@@ -3287,6 +3287,27 @@ function homeViewLoading() {
   `;
 }
 
+function renderProfessionalReadingCta(sectionId = "") {
+  const idAttr = sectionId ? ` id="${sectionId}"` : "";
+  return `
+    <section class="section"${idAttr}>
+      <article class="card premium-panel professional-reading-cta">
+        <span class="eyebrow">Extended Reading</span>
+        <h2>Unlock professional interpretations</h2>
+        <p>Subscribe to get expanded natal readings for your chart and your friends’ charts, with deeper timing context and applied guidance from $5/month.</p>
+        <a class="professional-reading-link" href="https://www.buymeacoffee.com/brickbuilders" target="_blank" rel="noopener noreferrer nofollow">
+          <img
+            src="https://img.buymeacoffee.com/button-api/?text=Get professional reading&emoji=⭐&slug=brickbuilders&button_colour=e32400&font_colour=ffffff&font_family=Arial&outline_colour=ffffff&coffee_colour=FFDD00"
+            alt="Get professional reading"
+            loading="lazy"
+            decoding="async"
+          />
+        </a>
+      </article>
+    </section>
+  `;
+}
+
 function renderHomeDashboard(dashboard) {
   const period = dashboard.periodForecast?.period || state.homePeriod;
   const forecastSummary = renderForecastSummary(dashboard, period);
@@ -3346,6 +3367,7 @@ function renderHomeDashboard(dashboard) {
         <div id="homeFriendsBlock" class="friends-list dashboard-swap">${friendsBlock}</div>
       </article>
     </section>
+    ${renderProfessionalReadingCta()}
   `;
 }
 
@@ -3895,7 +3917,8 @@ function renderNatalToc() {
     { id: "natal-focus", label: "Strategic Focus" },
     { id: "natal-houses", label: "House Dynamics" },
     { id: "natal-aspects", label: "Aspect Dynamics" },
-    { id: "natal-plan", label: "Action Plan" }
+    { id: "natal-plan", label: "Action Plan" },
+    { id: "natal-upgrade", label: "Extended Reading" }
   ];
   return `
     <aside class="natal-toc">
@@ -4671,6 +4694,7 @@ function astrologyHubArticleView(slug) {
         <a class="btn ghost" href="/astrology-hub">Back to all articles</a>
       </article>
     </section>
+    ${renderProfessionalReadingCta()}
   `;
 }
 
@@ -5576,6 +5600,7 @@ async function hydrateNatal() {
           </section>
           ${zodiacSection}
           ${editorial}
+          ${renderProfessionalReadingCta("natal-upgrade")}
         </div>
         ${renderNatalToc()}
       </div>

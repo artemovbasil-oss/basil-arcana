@@ -867,6 +867,29 @@ body[data-theme="dark"] .celeb-archive-thumb-link {
   justify-items: start;
 }
 
+.professional-reading-cta {
+  display: grid;
+  gap: 0.7rem;
+  align-items: start;
+}
+
+.professional-reading-cta p {
+  margin: 0;
+  color: var(--muted);
+  max-width: 72ch;
+}
+
+.professional-reading-link {
+  display: inline-flex;
+  text-decoration: none;
+}
+
+.professional-reading-link img {
+  display: block;
+  max-width: min(100%, 340px);
+  height: auto;
+}
+
 .related-grid {
   margin-top: 0.75rem;
 }
