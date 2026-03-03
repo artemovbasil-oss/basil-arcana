@@ -2234,7 +2234,7 @@ function renderSolarAspectPanel(aspect, planetLabel, { focused = false } = {}) {
   }
   const label = planetLabel === "__all__" ? "The whole system" : planetLabel;
   return `
-    <span class="eyebrow">Live aspect</span>
+    <span class="eyebrow">Orbital telemetry</span>
     <h3>${label} · ${aspect.title}</h3>
     <span class="solar-focus-mode">${focused ? "Focus locked" : "Preview"}</span>
     <div class="solar-aspect-score-row">
@@ -2292,7 +2292,7 @@ function renderSolarSystemBlock(dashboard, period) {
       <article class="card solar-system-card">
         <span class="eyebrow">Heliocentric map</span>
         <div class="dashboard-head">
-          <h2>Solar System State</h2>
+          <h2>Current Sky State</h2>
         </div>
         <div class="solar-system-layout" id="solarSystemWidget">
           <div id="solarMobileMatrixWrap" class="solar-focus-controls">
@@ -3387,8 +3387,8 @@ function renderHomeDashboard(dashboard) {
         <div id="homeForecastBlock" class="dashboard-swap">${forecastSummary}</div>
       </article>
     </section>
-    ${solarSystemBlock}
     ${zodiacCompact}
+    ${solarSystemBlock}
     ${zodiacCelebBlock}
     <section class="section">
       <article class="card">
