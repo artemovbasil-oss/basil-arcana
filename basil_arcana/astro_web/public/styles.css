@@ -3967,7 +3967,7 @@ body[data-theme="light"] .solar-starfield {
     var(--surface-2);
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  min-height: 520px;
+  min-height: 650px;
 }
 
 body[data-theme="dark"] .natal-3d-wrap {
@@ -3979,8 +3979,68 @@ body[data-theme="dark"] .natal-3d-wrap {
 
 .natal-3d-canvas-wrap {
   position: relative;
-  min-height: 520px;
+  min-height: 650px;
   overflow: hidden;
+}
+
+.natal-3d-canvas-wrap::before,
+.natal-3d-canvas-wrap::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.natal-3d-canvas-wrap::before {
+  background:
+    radial-gradient(1px 1px at 9% 21%, rgba(255, 255, 255, 0.36), transparent 60%),
+    radial-gradient(1px 1px at 21% 38%, rgba(255, 255, 255, 0.3), transparent 62%),
+    radial-gradient(1px 1px at 34% 74%, rgba(255, 255, 255, 0.28), transparent 62%),
+    radial-gradient(1px 1px at 56% 19%, rgba(255, 255, 255, 0.3), transparent 62%),
+    radial-gradient(1px 1px at 67% 57%, rgba(255, 255, 255, 0.24), transparent 60%),
+    radial-gradient(1px 1px at 79% 81%, rgba(255, 255, 255, 0.26), transparent 62%),
+    radial-gradient(1px 1px at 89% 33%, rgba(255, 255, 255, 0.23), transparent 60%);
+  opacity: 0.28;
+  animation: solar-star-twinkle 5.6s ease-in-out infinite alternate;
+  z-index: 1;
+}
+
+.natal-3d-canvas-wrap::after {
+  background:
+    repeating-linear-gradient(110deg, transparent 0 34px, color-mix(in srgb, var(--ink) 5%, transparent 95%) 34px 35px),
+    repeating-linear-gradient(20deg, transparent 0 42px, color-mix(in srgb, var(--ink) 4%, transparent 96%) 42px 43px);
+  opacity: 0.09;
+  animation: solar-star-drift 22s linear infinite;
+  z-index: 1;
+}
+
+.natal-starfield {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0.54;
+  mix-blend-mode: screen;
+  background:
+    radial-gradient(1.2px 1.2px at 8% 17%, color-mix(in srgb, var(--ink) 88%, transparent 12%) 0 40%, transparent 72%),
+    radial-gradient(1px 1px at 14% 62%, color-mix(in srgb, var(--ink) 82%, transparent 18%) 0 38%, transparent 72%),
+    radial-gradient(1.5px 1.5px at 23% 41%, color-mix(in srgb, var(--ink) 94%, transparent 6%) 0 40%, transparent 74%),
+    radial-gradient(1.1px 1.1px at 33% 26%, color-mix(in srgb, var(--ink) 86%, transparent 14%) 0 38%, transparent 70%),
+    radial-gradient(1.2px 1.2px at 42% 78%, color-mix(in srgb, var(--ink) 84%, transparent 16%) 0 36%, transparent 70%),
+    radial-gradient(1px 1px at 51% 54%, color-mix(in srgb, var(--ink) 80%, transparent 20%) 0 36%, transparent 70%),
+    radial-gradient(1.3px 1.3px at 61% 16%, color-mix(in srgb, var(--ink) 92%, transparent 8%) 0 40%, transparent 74%),
+    radial-gradient(1px 1px at 71% 69%, color-mix(in srgb, var(--ink) 79%, transparent 21%) 0 36%, transparent 70%),
+    radial-gradient(1.4px 1.4px at 81% 45%, color-mix(in srgb, var(--ink) 90%, transparent 10%) 0 40%, transparent 74%),
+    radial-gradient(1px 1px at 90% 28%, color-mix(in srgb, var(--ink) 83%, transparent 17%) 0 36%, transparent 70%);
+  animation: solar-starfield-twinkle 6.6s ease-in-out infinite alternate;
+}
+
+body[data-theme="dark"] .natal-starfield {
+  opacity: 0.66;
+}
+
+body[data-theme="light"] .natal-starfield {
+  opacity: 0.36;
 }
 
 .natal-3d-canvas {
@@ -4370,8 +4430,8 @@ body[data-theme="light"] .energy-star.neutral {
 }
 
 .footer-mark {
-  width: 22px;
-  height: 22px;
+  width: 30px;
+  height: 30px;
   display: block;
   object-fit: contain;
   opacity: 0.86;
@@ -4440,6 +4500,11 @@ body[data-theme="light"] .energy-star.neutral {
 
   .natal-3d-wrap {
     grid-template-columns: 1fr;
+    min-height: 560px;
+  }
+
+  .natal-3d-canvas-wrap {
+    min-height: 560px;
   }
 
   .natal-3d-legendbar {
@@ -4791,6 +4856,14 @@ body[data-theme="light"] .energy-star.neutral {
 
   .natal-3d-tools {
     padding-top: 0.4rem;
+  }
+
+  .natal-3d-wrap {
+    min-height: 520px;
+  }
+
+  .natal-3d-canvas-wrap {
+    min-height: 520px;
   }
 
   .natal-3d-legendbar {

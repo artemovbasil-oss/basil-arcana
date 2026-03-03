@@ -953,6 +953,7 @@ function renderNatalChart3D(data) {
     <div class="natal-3d-wrap" id="natal3dWrap">
       <div class="natal-3d-canvas-wrap">
         <canvas id="natal3dCanvas" class="natal-3d-canvas" aria-label="3D natal chart"></canvas>
+        <div class="natal-starfield" aria-hidden="true"></div>
         <div id="natal3dOverlay" class="natal-3d-overlay" aria-hidden="true"></div>
       </div>
       <div class="natal-3d-tools">
@@ -1020,8 +1021,8 @@ async function initNatal3DChart(data) {
   const isDark = state.theme === "dark";
   const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 140);
-  camera.position.set(0, 11.2, 0.01);
+  const camera = new THREE.PerspectiveCamera(44, 1, 0.1, 180);
+  camera.position.set(0, 14.8, 0.01);
   camera.lookAt(0, 0, 0);
 
   scene.add(new THREE.AmbientLight(isDark ? 0xffffff : 0x111111, isDark ? 0.84 : 0.7));
