@@ -1020,8 +1020,8 @@ async function initNatal3DChart(data) {
   const isDark = state.theme === "dark";
   const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 140);
-  camera.position.set(0, 7.35, 9);
+  const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 140);
+  camera.position.set(0, 11.2, 0.01);
   camera.lookAt(0, 0, 0);
 
   scene.add(new THREE.AmbientLight(isDark ? 0xffffff : 0x111111, isDark ? 0.84 : 0.7));
@@ -1053,7 +1053,6 @@ async function initNatal3DChart(data) {
       points.push(new THREE.Vector3(Math.cos(a) * radius, 0, Math.sin(a) * radius));
     }
     const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints(points), ringMaterial.clone());
-    line.rotation.x = Math.PI * 0.08;
     scene.add(line);
   };
   makeRing(outerRing);
@@ -1073,7 +1072,6 @@ async function initNatal3DChart(data) {
         opacity: 0.32
       })
     );
-    line.rotation.x = Math.PI * 0.08;
     scene.add(line);
   }
 
@@ -1122,16 +1120,12 @@ async function initNatal3DChart(data) {
 
     const radial = new THREE.Line(
       new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), mesh.position.clone()]),
-      new THREE.LineDashedMaterial({
+      new THREE.LineBasicMaterial({
         color: isDark ? 0xbec5cf : 0x4a5565,
-        dashSize: 0.08,
-        gapSize: 0.07,
         transparent: true,
-        opacity: 0.42
+        opacity: 0.56
       })
     );
-    radial.computeLineDistances();
-    radial.rotation.x = Math.PI * 0.08;
     scene.add(radial);
 
     const hit = new THREE.Mesh(
@@ -1170,11 +1164,11 @@ async function initNatal3DChart(data) {
     }))
   );
   const aspectStyleMap = {
-    conjunction: { dashed: false, colorDark: 0xcdd4de, colorLight: 0x384150, opacity: 0.58 },
-    opposition: { dashed: true, dashSize: 0.22, gapSize: 0.12, colorDark: 0xd1d8e2, colorLight: 0x343e4d, opacity: 0.56 },
-    trine: { dashed: true, dashSize: 0.12, gapSize: 0.08, colorDark: 0x9ba8b6, colorLight: 0x5a6676, opacity: 0.48 },
-    square: { dashed: true, dashSize: 0.08, gapSize: 0.16, colorDark: 0xb3beca, colorLight: 0x495564, opacity: 0.48 },
-    sextile: { dashed: true, dashSize: 0.03, gapSize: 0.11, colorDark: 0x8995a3, colorLight: 0x6b7786, opacity: 0.42 }
+    conjunction: { colorDark: 0xd7dde6, colorLight: 0x374251, opacity: 0.74, primary: true },
+    opposition: { colorDark: 0xd2d9e3, colorLight: 0x3a4555, opacity: 0.7, primary: true },
+    trine: { colorDark: 0xb8c3cf, colorLight: 0x505d6f, opacity: 0.66, primary: true },
+    square: { colorDark: 0xc2ccd8, colorLight: 0x475365, opacity: 0.68, primary: true },
+    sextile: { colorDark: 0x9aa6b4, colorLight: 0x607083, opacity: 0.5, primary: false }
   };
   aspects.forEach((aspect) => {
     const left = planetPoints.get(aspect.left.key);
@@ -1185,24 +1179,12 @@ async function initNatal3DChart(data) {
     const style = aspectStyleMap[aspect.styleClass] || aspectStyleMap.sextile;
     const line = new THREE.Line(
       new THREE.BufferGeometry().setFromPoints([left, right]),
-      style.dashed
-        ? new THREE.LineDashedMaterial({
-            color: isDark ? style.colorDark : style.colorLight,
-            dashSize: style.dashSize,
-            gapSize: style.gapSize,
-            transparent: true,
-            opacity: style.opacity
-          })
-        : new THREE.LineBasicMaterial({
-            color: isDark ? style.colorDark : style.colorLight,
-            transparent: true,
-            opacity: style.opacity
-          })
+      new THREE.LineBasicMaterial({
+        color: isDark ? style.colorDark : style.colorLight,
+        transparent: true,
+        opacity: style.opacity
+      })
     );
-    if (style.dashed && typeof line.computeLineDistances === "function") {
-      line.computeLineDistances();
-    }
-    line.rotation.x = Math.PI * 0.08;
     scene.add(line);
     aspectVisuals.push({
       line,
@@ -1210,6 +1192,26 @@ async function initNatal3DChart(data) {
       rightKey: aspect.right.key,
       baseOpacity: style.opacity
     });
+    if (style.primary) {
+      const accent = new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints([
+          left.clone().add(new THREE.Vector3(0, 0.0008, 0)),
+          right.clone().add(new THREE.Vector3(0, 0.0008, 0))
+        ]),
+        new THREE.LineBasicMaterial({
+          color: isDark ? 0xffffff : 0x2f3948,
+          transparent: true,
+          opacity: Math.min(0.36, style.opacity * 0.56)
+        })
+      );
+      scene.add(accent);
+      aspectVisuals.push({
+        line: accent,
+        leftKey: aspect.left.key,
+        rightKey: aspect.right.key,
+        baseOpacity: Math.min(0.36, style.opacity * 0.56)
+      });
+    }
   });
 
   const raycaster = new THREE.Raycaster();
@@ -1319,7 +1321,7 @@ async function initNatal3DChart(data) {
       const scale = 1 + hoverMix * 0.22;
       item.mesh.scale.setScalar(scale);
       item.radial.material.opacity = 0.32 + hoverMix * 0.35;
-      const screen = projectToScreen(item.basePos.clone().add(new THREE.Vector3(0, 0.23, 0)));
+      const screen = projectToScreen(item.basePos.clone().add(new THREE.Vector3(0, 0, 0.26)));
       const labelItem = planetLabels[idx];
       if (labelItem) {
         const visible = screen.visible && (hoverMix || isFree(screen.x, screen.y, 24));
@@ -1338,7 +1340,7 @@ async function initNatal3DChart(data) {
     });
 
     zodiacLabels.forEach((entry) => {
-      const p = orbitPoint3D(outerRing + 0.92, entry.theta, 0, Math.PI * 0.08, 0);
+      const p = orbitPoint3D(outerRing + 0.92, entry.theta, 0, 0, 0);
       const end = new THREE.Vector3(p.x, p.y, p.z);
       const screen = projectToScreen(end);
       const visible = screen.visible && isFree(screen.x, screen.y, 20);
