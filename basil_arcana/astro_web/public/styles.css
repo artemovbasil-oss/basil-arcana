@@ -6,6 +6,7 @@
   --muted: #a9a9a9;
   --line: #2a2a2a;
   --line-strong: #3a3a3a;
+  --line-nested: color-mix(in srgb, var(--line) 38%, transparent 62%);
   --button-inverse-bg: #ffffff;
   --button-inverse-ink: #000000;
   --font-sans: "IBM Plex Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -38,6 +39,7 @@ body[data-theme="light"] {
   --muted: #5e5e5e;
   --line: #d7d7d7;
   --line-strong: #bdbdbd;
+  --line-nested: color-mix(in srgb, var(--line) 58%, transparent 42%);
   --button-inverse-bg: #101010;
   --button-inverse-ink: #ffffff;
 }
@@ -216,6 +218,26 @@ body[data-theme="light"] .topbar {
   background: var(--surface);
   box-shadow: none;
   transition: border-color 0.18s ease, transform 0.18s ease, background-color 0.18s ease;
+}
+
+/* Reduce visual noise from deeply nested framed blocks */
+:is(.card, .route-card, .feature-card, .hub-card, .friend-accordion) :is(
+  .card,
+  .route-card,
+  .feature-card,
+  .hub-card,
+  .profile-row,
+  .friend-domain-card,
+  .daily-delta-card,
+  .daily-achievement-item,
+  .daily-astro-compact-item,
+  .placement-card,
+  .aspect-card,
+  .zodiac-signal-card,
+  .friend-sign-panel,
+  .friend-mini-natal span
+) {
+  border-color: var(--line-nested);
 }
 
 .card:hover,
@@ -604,6 +626,7 @@ body[data-theme="light"] .auth-login-btn.telegram .auth-login-btn-icon .astro-ic
   background: var(--surface-2);
   color: var(--ink);
   padding: 0.32rem 0.52rem;
+  border-radius: 999px;
   font-size: 0.74rem;
   letter-spacing: 0.03em;
   text-transform: uppercase;
@@ -778,6 +801,7 @@ body[data-theme="dark"] .celeb-archive-thumb-link {
   background: color-mix(in srgb, var(--surface-2) 84%, transparent 16%);
   color: var(--ink);
   padding: 0.16rem 0.34rem;
+  border-radius: 999px;
   font-size: 0.64rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -2639,6 +2663,7 @@ body[data-theme="dark"] .form-grid input[type="time"]::-webkit-calendar-picker-i
   gap: 0.25rem;
   border: 1px solid var(--line-strong);
   padding: 0.22rem 0.42rem;
+  border-radius: 999px;
   font-size: 0.66rem;
   text-transform: uppercase;
   letter-spacing: 0.07em;
@@ -2798,6 +2823,7 @@ body[data-theme="dark"] .form-grid input[type="time"]::-webkit-calendar-picker-i
   background: var(--surface);
   color: var(--ink);
   padding: 0.26rem 0.46rem;
+  border-radius: 999px;
   font-size: 0.68rem;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -3132,6 +3158,7 @@ body[data-theme="light"] .celeb-avatar {
   border: 1px solid var(--line);
   background: color-mix(in srgb, var(--surface) 88%, transparent 12%);
   padding: 0.12rem 0.36rem;
+  border-radius: 999px;
   font-size: 0.62rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
