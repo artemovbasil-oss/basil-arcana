@@ -1019,7 +1019,7 @@ async function initNatal3DChart(data) {
   }
 
   const isDark = state.theme === "dark";
-  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, preserveDrawingBuffer: true });
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(44, 1, 0.1, 180);
   camera.position.set(0, 14.8, 0.01);
@@ -1259,9 +1259,139 @@ async function initNatal3DChart(data) {
   };
 
   const detach = [];
+  const buildPosterCanvas = () => {
+    try {
+      renderer.render(scene, camera);
+      const srcW = canvas.width || Math.round(canvas.clientWidth * (window.devicePixelRatio || 1));
+      const srcH = canvas.height || Math.round(canvas.clientHeight * (window.devicePixelRatio || 1));
+      const out = document.createElement("canvas");
+      out.width = 2400;
+      out.height = 1600;
+      const ctx = out.getContext("2d");
+      if (!ctx) {
+        return null;
+      }
+
+      const g = ctx.createLinearGradient(0, 0, out.width, out.height);
+      g.addColorStop(0, "#05070b");
+      g.addColorStop(0.45, "#090d15");
+      g.addColorStop(1, "#04060a");
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, out.width, out.height);
+
+      const glowA = ctx.createRadialGradient(out.width * 0.18, out.height * 0.2, 20, out.width * 0.18, out.height * 0.2, out.width * 0.42);
+      glowA.addColorStop(0, "rgba(255,255,255,0.10)");
+      glowA.addColorStop(1, "rgba(255,255,255,0)");
+      ctx.fillStyle = glowA;
+      ctx.fillRect(0, 0, out.width, out.height);
+
+      const glowB = ctx.createRadialGradient(out.width * 0.76, out.height * 0.72, 20, out.width * 0.76, out.height * 0.72, out.width * 0.4);
+      glowB.addColorStop(0, "rgba(255,255,255,0.08)");
+      glowB.addColorStop(1, "rgba(255,255,255,0)");
+      ctx.fillStyle = glowB;
+      ctx.fillRect(0, 0, out.width, out.height);
+
+      for (let i = 0; i < 260; i += 1) {
+        const seed = Math.abs(stringHash(`poster-star-${i}`));
+        const x = (seed * 37) % out.width;
+        const y = (seed * 59) % out.height;
+        const r = 0.7 + (seed % 14) / 14;
+        const alpha = 0.14 + ((seed >> 3) % 65) / 255;
+        ctx.beginPath();
+        ctx.fillStyle = `rgba(255,255,255,${alpha.toFixed(3)})`;
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      const framePad = 56;
+      ctx.strokeStyle = "rgba(245,245,245,0.62)";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(framePad, framePad, out.width - framePad * 2, out.height - framePad * 2);
+
+      ctx.fillStyle = "rgba(245,245,245,0.96)";
+      ctx.font = "700 70px Space Mono, sans-serif";
+      ctx.fillText("ASTRONAUTICA", 110, 164);
+      ctx.font = "500 30px Space Mono, sans-serif";
+      ctx.fillStyle = "rgba(220,224,232,0.88)";
+      ctx.fillText("NATAL WHEEL • app.basilarcana.com", 112, 208);
+
+      const chartX = 94;
+      const chartY = 248;
+      const chartW = 1360;
+      const chartH = 1260;
+      ctx.strokeStyle = "rgba(215,220,228,0.36)";
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(chartX, chartY, chartW, chartH);
+      ctx.drawImage(canvas, 0, 0, srcW, srcH, chartX + 8, chartY + 8, chartW - 16, chartH - 16);
+
+      const profile = state.profile || {};
+      const core = data?.core || {};
+      const userName = String(profile?.name || "User").trim() || "User";
+      const birthDate = String(profile?.birthDate || "N/A");
+      const birthTime = String(profile?.birthTime || "N/A");
+      const birthCity = String(profile?.birthCity || "N/A");
+      const summary = String(data?.summary || "").trim();
+      const keyFacts = [
+        `Name: ${userName}`,
+        `Sun: ${core.sun || "Unknown"}   Moon: ${core.moon || "Unknown"}   Rising: ${core.rising || "Unknown"}`,
+        `Birth: ${birthDate} ${birthTime !== "N/A" ? birthTime : ""} • ${birthCity}`.replace(/\s+•/, " •").trim(),
+        summary || "Natal chart generated from profile birth data."
+      ];
+      const notesX = 1518;
+      let notesY = 302;
+      ctx.fillStyle = "rgba(244,247,252,0.96)";
+      ctx.font = "700 42px Space Mono, sans-serif";
+      ctx.fillText("PROFILE SNAPSHOT", notesX, notesY);
+      notesY += 52;
+      ctx.strokeStyle = "rgba(255,255,255,0.2)";
+      ctx.strokeRect(notesX - 14, notesY - 30, 760, 1030);
+      notesY += 18;
+      ctx.font = "500 30px Space Mono, sans-serif";
+      keyFacts.forEach((line, idx) => {
+        const block = idx === keyFacts.length - 1 ? wrapPosterText(ctx, line, 700) : [line];
+        block.forEach((sub, subIdx) => {
+          const isLead = idx < 3 && subIdx === 0;
+          ctx.fillStyle = isLead ? "rgba(238,242,249,0.96)" : "rgba(202,208,220,0.9)";
+          ctx.font = isLead ? "600 30px Space Mono, sans-serif" : "500 27px Space Mono, sans-serif";
+          ctx.fillText(sub, notesX, notesY);
+          notesY += isLead ? 56 : 40;
+        });
+        notesY += idx < 3 ? 8 : 20;
+      });
+
+      ctx.fillStyle = "rgba(170,180,194,0.9)";
+      ctx.font = "500 24px Space Mono, sans-serif";
+      ctx.fillText(`Generated: ${new Date().toLocaleString("en-GB")}`, notesX, out.height - 118);
+      ctx.fillText("Astronautica • Precision natal intelligence", notesX, out.height - 78);
+      return out;
+    } catch {
+      return null;
+    }
+  };
+  const wrapPosterText = (ctx, text, maxWidth) => {
+    const words = String(text || "").split(/\s+/).filter(Boolean);
+    const lines = [];
+    let current = "";
+    words.forEach((word) => {
+      const candidate = current ? `${current} ${word}` : word;
+      if (ctx.measureText(candidate).width <= maxWidth) {
+        current = candidate;
+      } else {
+        if (current) {
+          lines.push(current);
+        }
+        current = word;
+      }
+    });
+    if (current) {
+      lines.push(current);
+    }
+    return lines;
+  };
   const triggerDownload = () => {
     try {
-      const dataUrl = canvas.toDataURL("image/png");
+      const poster = buildPosterCanvas();
+      const dataUrl = (poster || canvas).toDataURL("image/png");
       const a = document.createElement("a");
       a.href = dataUrl;
       a.download = `astronautica-natal-${new Date().toISOString().slice(0, 10)}.png`;
@@ -1272,8 +1402,10 @@ async function initNatal3DChart(data) {
     const shareTitle = "Astronautica Natal Chart";
     const shareText = "My natal chart from Astronautica.";
     try {
-      if (navigator.share && canvas.toBlob) {
-        const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+      const poster = buildPosterCanvas();
+      const source = poster || canvas;
+      if (navigator.share && source.toBlob) {
+        const blob = await new Promise((resolve) => source.toBlob(resolve, "image/png"));
         if (blob) {
           const file = new File([blob], "astronautica-natal.png", { type: "image/png" });
           if (!navigator.canShare || navigator.canShare({ files: [file] })) {
@@ -6124,6 +6256,34 @@ function termsOfServiceView() {
   `;
 }
 
+function manifestoView() {
+  return `
+    <section class="section">
+      <article class="card tone-card">
+        <span class="eyebrow">Astronautica Manifesto</span>
+        <h1>Why We Build This</h1>
+        <p>Astronautica exists to make reflective practice practical: clear timing, clear language, clear action. We do not build vague horoscope feed content. We build structured tools for people who want better decisions.</p>
+      </article>
+    </section>
+    <section class="section">
+      <article class="card faq legal-doc">
+        <article class="faq-item">
+          <h3>1. Precision over noise</h3>
+          <p>We combine deterministic natal computation with operational interpretation. Same input, same geometry. Then we translate geometry into behavior protocols, not mystical ambiguity.</p>
+        </article>
+        <article class="faq-item">
+          <h3>2. Daily utility</h3>
+          <p>Forecast, natal chart, and social compatibility are built as one system: what to do today, where pressure comes from, and how to coordinate better with people around you.</p>
+        </article>
+        <article class="faq-item">
+          <h3>3. Built with respect for place</h3>
+          <p>We are grateful for the creative energy, hospitality, and momentum that Türkiye gives to builders. For this team, Türkiye is the best country in the world to dream, ship, and grow new ideas.</p>
+        </article>
+      </article>
+    </section>
+  `;
+}
+
 const routes = {
   "/": () => (state.dashboard ? renderHomeDashboard(state.dashboard) : homeViewLoading()),
   "/login": loginView,
@@ -6136,7 +6296,8 @@ const routes = {
   "/astrology-hub": astrologyHubView,
   "/celebrities": celebritiesHubView,
   "/privacy-policy": privacyPolicyView,
-  "/terms-of-service": termsOfServiceView
+  "/terms-of-service": termsOfServiceView,
+  "/manifesto": manifestoView
 };
 
 function applySeoMeta(path) {
@@ -6170,6 +6331,11 @@ function applySeoMeta(path) {
     "/terms-of-service": {
       title: "Terms of Service - Astronautica",
       description: "Astronautica Terms of Service for EEA, UK and Switzerland users.",
+      type: "website"
+    },
+    "/manifesto": {
+      title: "Manifesto - Astronautica",
+      description: "Astronautica manifesto: precision astrology, practical self-knowledge, and product philosophy.",
       type: "website"
     }
   };
@@ -7657,7 +7823,8 @@ function render() {
     "/astrology-hub",
     "/celebrities",
     "/privacy-policy",
-    "/terms-of-service"
+    "/terms-of-service",
+    "/manifesto"
   ]);
   if (path !== "/profile") {
     state.profileEditMode = false;
