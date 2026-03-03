@@ -141,6 +141,7 @@ body[data-theme="light"] .topbar {
   display: inline-flex;
   align-items: center;
   gap: 0.36rem;
+  cursor: pointer;
 }
 
 .nav-tool-label {
@@ -1708,6 +1709,17 @@ body[data-theme="dark"] .form-grid input[type="time"]::-webkit-calendar-picker-i
   stroke: color-mix(in srgb, var(--ink) 55%, transparent 45%);
   stroke-width: 1.05;
   opacity: 0.34;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.energy-friend-line--friend {
+  stroke-dasharray: none;
+}
+
+.energy-friend-line--historical {
+  stroke-dasharray: 5.2 4.4;
+  opacity: 0.5;
 }
 
 .energy-friend-hit {
@@ -1812,6 +1824,18 @@ body[data-theme="dark"] .form-grid input[type="time"]::-webkit-calendar-picker-i
 
 .energy-legend .dot.friend {
   background: color-mix(in srgb, var(--ink) 62%, transparent 38%);
+}
+
+.energy-legend .dot.historical {
+  width: 10px;
+  height: 8px;
+  border-radius: 0;
+  background:
+    repeating-linear-gradient(
+      to right,
+      color-mix(in srgb, var(--ink) 72%, transparent 28%) 0 3px,
+      transparent 3px 5px
+    );
 }
 
 .energy-friend-tooltip {
@@ -3779,6 +3803,10 @@ body[data-theme="light"] .friend-gauge-fill {
 body[data-theme="light"] .energy-friend-line {
   stroke: #111;
   opacity: 0.28;
+}
+
+body[data-theme="light"] .energy-friend-line--historical {
+  opacity: 0.46;
 }
 
 body[data-theme="light"] .energy-star.neutral {

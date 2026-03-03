@@ -4,6 +4,8 @@ const menuButton = document.getElementById("menuButton");
 const profileButton = document.getElementById("profileButton");
 const profileInitials = document.getElementById("profileInitials");
 const themeToggle = document.getElementById("themeToggle");
+const navToolTheme = document.querySelector(".nav-tool-theme");
+const navToolAccount = document.querySelector(".nav-tool-account");
 const themeStorageKey = "astronautica_theme";
 
 const state = {
@@ -50,6 +52,20 @@ themeToggle?.addEventListener("click", () => {
   if (window.location.pathname === "/" && state.dashboard) {
     initSolarSystemWidget(state.dashboard, state.homePeriod);
   }
+});
+
+navToolTheme?.addEventListener("click", (event) => {
+  if (event.target.closest("#themeToggle")) {
+    return;
+  }
+  themeToggle?.click();
+});
+
+navToolAccount?.addEventListener("click", (event) => {
+  if (event.target.closest("#profileButton")) {
+    return;
+  }
+  profileButton?.click();
 });
 
 function navigate(path, { replace = false } = {}) {
@@ -115,23 +131,22 @@ function actionPlanEntries(actionPlan, profile, core) {
 }
 
 function getInitials() {
+  const profileName = String(state.profile?.name || "").trim();
+  if (profileName) {
+    const parts = profileName.split(/\s+/).filter(Boolean);
+    if (parts.length === 1) {
+      return parts[0].slice(0, 2).toUpperCase();
+    }
+    return `${parts[0]?.slice(0, 1) || ""}${parts[1]?.slice(0, 1) || ""}`.toUpperCase() || "AU";
+  }
   const first = String(state.authUser?.firstName || "").trim();
   const last = String(state.authUser?.lastName || "").trim();
   const username = String(state.authUser?.username || "").trim();
-  const profileName = String(state.profile?.name || "").trim();
   if (first || last) {
     return `${first.slice(0, 1)}${last.slice(0, 1)}`.toUpperCase() || "?";
   }
   if (username) {
     return username.slice(0, 2).toUpperCase();
-  }
-  if (profileName) {
-    return profileName
-      .split(/\s+/)
-      .slice(0, 2)
-      .map((part) => part.slice(0, 1))
-      .join("")
-      .toUpperCase();
   }
   return "AU";
 }
@@ -1086,7 +1101,7 @@ function buildSmoothPath(points) {
     const p1 = points[i];
     const p2 = points[i + 1];
     const p3 = points[i + 2] || p2;
-    const tension = 0.18;
+    const tension = 0.32;
     const cp1x = p1.x + ((p2.x - p0.x) * tension) / 3;
     const cp1y = p1.y + ((p2.y - p0.y) * tension) / 3;
     const cp2x = p2.x - ((p3.x - p1.x) * tension) / 3;
@@ -1169,12 +1184,19 @@ function buildFriendEnergySeries(dashboard, period, baseSeries) {
       return Math.max(8, Math.min(96, Math.round(anchor + waveA + waveB + trendBias + micro * 0.65)));
     });
     const avg = Math.round(friendValues.reduce((sum, value) => sum + value, 0) / Math.max(1, friendValues.length));
+    const isHistorical = Boolean(
+      friend?.isHistoricalCompanion
+      || friend?.isVirtual
+      || friend?.virtualSource === "celebrity"
+      || String(friend?.id || "").startsWith("celeb:")
+    );
     return {
       id: String(friend?.id || friendName),
       name: friendName,
       values: friendValues,
       today: friendValues[todayIndexForPeriod(period, friendValues.length)] || friendValues[0] || 0,
-      avg
+      avg,
+      isHistorical
     };
   });
 }
@@ -1231,9 +1253,12 @@ function renderEnergyChart(dashboard, period) {
     return {
       id: friend.id,
       name: friend.name,
-      path: buildSmoothPath(friendPoints)
+      path: buildSmoothPath(friendPoints),
+      isHistorical: Boolean(friend.isHistorical)
     };
   });
+  const hasHistoricalPaths = friendPaths.some((friend) => friend.isHistorical);
+  const hasFriendPaths = friendPaths.some((friend) => !friend.isHistorical);
 
   const todayBadgeY = todayPoint.y;
   const todayBadgeRadius = period === "year" ? 11 : 10;
@@ -1254,7 +1279,7 @@ function renderEnergyChart(dashboard, period) {
         ${friendPaths
           .map(
             (friend) => `
-              <path class="energy-friend-line" d="${friend.path}" />
+              <path class="energy-friend-line ${friend.isHistorical ? "energy-friend-line--historical" : "energy-friend-line--friend"}" d="${friend.path}" />
               <path class="energy-friend-hit" d="${friend.path}" data-friend-name="${escapeHtml(friend.name)}" />
             `
           )
@@ -1283,7 +1308,8 @@ function renderEnergyChart(dashboard, period) {
       <div class="energy-legend">
         <span><i class="dot peak"></i> Peak energy</span>
         <span><i class="dot dip"></i> Energy dip</span>
-        ${friendPaths.length ? `<span><i class="dot friend"></i> Friend trajectories</span>` : ""}
+        ${hasFriendPaths ? `<span><i class="dot friend"></i> Friend trajectories</span>` : ""}
+        ${hasHistoricalPaths ? `<span><i class="dot historical"></i> Historical companions</span>` : ""}
       </div>
       <div class="energy-friend-tooltip" aria-hidden="true"></div>
     </div>
@@ -3502,8 +3528,7 @@ function profileView() {
     { label: "Name", value: profile.name || "N/A" },
     { label: "Date of birth", value: profile.birthDate || "N/A" },
     { label: "Birth time", value: profile.birthTime || "N/A" },
-    { label: "Birth city", value: profile.birthCity || "N/A" },
-    { label: "Timezone", value: profile.timezone || "UTC" }
+    { label: "Birth city", value: profile.birthCity || "N/A" }
   ];
   return `
     <section class="section">
