@@ -4942,6 +4942,9 @@ function renderCelebrityNatalPage(celeb, natal) {
         </div>
       </article>
     </section>
+    <section class="section">
+      ${renderProfessionalReadingCta("celebrity-upgrade")}
+    </section>
   `;
 }
 
@@ -5088,30 +5091,37 @@ const routes = {
 };
 
 function applySeoMeta(path) {
+  const ogImageUrl = "https://app.basilarcana.com/og-image.svg";
   const defaultMeta = {
     title: "Astronautica",
-    description: "Astronautica: precision natal intelligence, daily guidance and compatibility insights."
+    description: "Astronautica: precision natal intelligence, daily guidance and compatibility insights.",
+    type: "website"
   };
   const pageMeta = {
     "/faq": {
       title: "FAQ - Astronautica",
-      description: "Astronautica FAQ: methodology, natal chart calculations, compatibility logic and product boundaries."
+      description: "Astronautica FAQ: methodology, natal chart calculations, compatibility logic and product boundaries.",
+      type: "website"
     },
     "/astrology-hub": {
       title: "Astrology Hub - Astronautica",
-      description: "Astrology Hub by Astronautica: in-depth sign guides, method papers, safety standards, and applied astrological strategy."
+      description: "Astrology Hub by Astronautica: in-depth sign guides, method papers, safety standards, and applied astrological strategy.",
+      type: "website"
     },
     "/celebrities": {
       title: "Celebrities - Astronautica",
-      description: "Historical celebrities by zodiac sign with public natal chart snapshots and structured astrological context."
+      description: "Historical celebrities by zodiac sign with public natal chart snapshots and structured astrological context.",
+      type: "website"
     },
     "/privacy-policy": {
       title: "Privacy Policy - Astronautica",
-      description: "Astronautica Privacy Policy for EEA, UK and Switzerland users."
+      description: "Astronautica Privacy Policy for EEA, UK and Switzerland users.",
+      type: "website"
     },
     "/terms-of-service": {
       title: "Terms of Service - Astronautica",
-      description: "Astronautica Terms of Service for EEA, UK and Switzerland users."
+      description: "Astronautica Terms of Service for EEA, UK and Switzerland users.",
+      type: "website"
     }
   };
   const articleSlug = path.startsWith("/astrology-hub/") ? path.replace("/astrology-hub/", "") : null;
@@ -5121,27 +5131,34 @@ function applySeoMeta(path) {
   const meta = article
     ? {
         title: `${article.title} - Astrology Hub`,
-        description: article.seoDescription || defaultMeta.description
+        description: article.seoDescription || defaultMeta.description,
+        type: "article"
       }
     : celebMeta
       ? {
           title: `${celebMeta.name} Natal Profile - Astronautica`,
-          description: `${celebMeta.name} (${celebMeta.years}) natal profile: ${celebMeta.sign} historical chart context and interpretation.`
+          description: `${celebMeta.name} (${celebMeta.years}) natal profile: ${celebMeta.sign} historical chart context and interpretation.`,
+          type: "article"
         }
     : (pageMeta[path] || defaultMeta);
   document.title = meta.title;
 
   const setMeta = (selector, content) => {
     const element = document.querySelector(selector);
-    if (element) {
+    if (element && content) {
       element.setAttribute("content", content);
     }
   };
   setMeta('meta[name="description"]', meta.description);
+  setMeta('meta[name="author"]', "Astronautica");
   setMeta('meta[property="og:title"]', meta.title);
   setMeta('meta[property="og:description"]', meta.description);
+  setMeta('meta[property="og:type"]', meta.type || "website");
   setMeta('meta[name="twitter:title"]', meta.title);
   setMeta('meta[name="twitter:description"]', meta.description);
+  setMeta('meta[name="twitter:card"]', "summary_large_image");
+  setMeta('meta[property="og:image"]', ogImageUrl);
+  setMeta('meta[name="twitter:image"]', ogImageUrl);
 
   const canonical = document.querySelector('link[rel="canonical"]');
   const canonicalUrl = `https://app.basilarcana.com${path === "/" ? "/" : path}`;
@@ -5151,7 +5168,30 @@ function applySeoMeta(path) {
   setMeta('meta[property="og:url"]', canonicalUrl);
 
   const schemaId = "page-structured-data";
+  const breadcrumbSchemaId = "page-structured-data-breadcrumb";
   document.getElementById(schemaId)?.remove();
+  document.getElementById(breadcrumbSchemaId)?.remove();
+
+  const appendBreadcrumbSchema = (items) => {
+    if (!Array.isArray(items) || !items.length) {
+      return;
+    }
+    const breadcrumbScript = document.createElement("script");
+    breadcrumbScript.id = breadcrumbSchemaId;
+    breadcrumbScript.type = "application/ld+json";
+    breadcrumbScript.textContent = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: items.map((item, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        name: item.name,
+        item: item.item
+      }))
+    });
+    document.head.appendChild(breadcrumbScript);
+  };
+
   if (article) {
     const script = document.createElement("script");
     script.id = schemaId;
@@ -5164,6 +5204,7 @@ function applySeoMeta(path) {
       datePublished: article.publishedAt,
       dateModified: article.publishedAt,
       inLanguage: "en",
+      image: ogImageUrl,
       author: {
         "@type": "Organization",
         name: "Astronautica"
@@ -5175,6 +5216,11 @@ function applySeoMeta(path) {
       mainEntityOfPage: canonicalUrl
     });
     document.head.appendChild(script);
+    appendBreadcrumbSchema([
+      { name: "Home", item: "https://app.basilarcana.com/" },
+      { name: "Astrology Hub", item: "https://app.basilarcana.com/astrology-hub" },
+      { name: article.title, item: canonicalUrl }
+    ]);
     return;
   }
   if (celebMeta) {
@@ -5195,12 +5241,18 @@ function applySeoMeta(path) {
       },
       mainEntityOfPage: canonicalUrl,
       inLanguage: "en",
+      image: zodiacDetails(celebMeta.sign).imageUrlDark || ogImageUrl,
       publisher: {
         "@type": "Organization",
         name: "Astronautica"
       }
     });
     document.head.appendChild(script);
+    appendBreadcrumbSchema([
+      { name: "Home", item: "https://app.basilarcana.com/" },
+      { name: "Celebrities", item: "https://app.basilarcana.com/celebrities" },
+      { name: `${celebMeta.name} Natal Profile`, item: canonicalUrl }
+    ]);
   }
 }
 
@@ -5909,6 +5961,9 @@ async function hydrateDaily() {
       </section>
       <section class="section">
         ${renderDailyAstronomySvg(data.astronomy, d)}
+      </section>
+      <section class="section">
+        ${renderProfessionalReadingCta("daily-upgrade")}
       </section>
     `;
     animateHeadingTypewriter();
