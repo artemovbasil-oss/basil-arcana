@@ -3904,6 +3904,129 @@ body[data-theme="light"] .solar-starfield {
   gap: 0.8rem;
 }
 
+.natal-3d-wrap {
+  border: 1px solid var(--line-strong);
+  background:
+    radial-gradient(circle at 18% 15%, color-mix(in srgb, var(--ink) 10%, transparent 90%) 0 18%, transparent 50%),
+    radial-gradient(circle at 82% 26%, color-mix(in srgb, var(--ink) 7%, transparent 93%) 0 15%, transparent 44%),
+    var(--surface-2);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  min-height: 520px;
+}
+
+body[data-theme="dark"] .natal-3d-wrap {
+  background:
+    radial-gradient(circle at 18% 15%, rgba(242, 242, 242, 0.08) 0 18%, transparent 50%),
+    radial-gradient(circle at 82% 26%, rgba(242, 242, 242, 0.05) 0 15%, transparent 44%),
+    #080a0e;
+}
+
+.natal-3d-canvas-wrap {
+  position: relative;
+  min-height: 520px;
+  overflow: hidden;
+}
+
+.natal-3d-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.natal-3d-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.natal-3d-planet-label,
+.natal-3d-zodiac-label {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.24rem;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface) 88%, transparent 12%);
+  color: var(--ink);
+  padding: 0.14rem 0.3rem;
+  font-size: 0.58rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  opacity: 0;
+  transition: opacity 0.16s ease;
+  white-space: nowrap;
+}
+
+.natal-3d-planet-label .astro-icon,
+.natal-3d-zodiac-label .astro-icon {
+  opacity: 0.8;
+  font-size: 0.66rem;
+}
+
+.natal-3d-planet-label strong,
+.natal-3d-zodiac-label strong {
+  font-size: 0.58rem;
+  font-weight: 600;
+}
+
+.natal-3d-planet-label small {
+  font-size: 0.52rem;
+  color: var(--muted);
+}
+
+.natal-3d-zodiac-label {
+  border-style: dashed;
+}
+
+.natal-3d-meta {
+  border-left: 1px solid var(--line);
+  padding: 0.72rem;
+  display: grid;
+  grid-auto-rows: min-content;
+  gap: 0.56rem;
+}
+
+.natal-3d-copy {
+  margin: 0;
+  font-size: 0.76rem;
+  color: var(--muted);
+}
+
+.natal-3d-legend {
+  display: grid;
+  gap: 0.36rem;
+}
+
+.natal-3d-legend-item {
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface) 88%, transparent 12%);
+  padding: 0.3rem 0.38rem;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.28rem;
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.natal-3d-legend-item strong {
+  font-size: 0.64rem;
+}
+
+.natal-3d-legend-item small {
+  font-size: 0.54rem;
+  color: var(--muted);
+}
+
+.natal-3d-legend-item.is-active {
+  border-color: var(--line-strong);
+  background: color-mix(in srgb, var(--surface-2) 82%, transparent 18%);
+}
+
 .natal-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 240px;
@@ -4189,6 +4312,15 @@ body[data-theme="light"] .energy-star.neutral {
 
   .natal-layout {
     grid-template-columns: 1fr;
+  }
+
+  .natal-3d-wrap {
+    grid-template-columns: 1fr;
+  }
+
+  .natal-3d-meta {
+    border-left: 0;
+    border-top: 1px solid var(--line);
   }
 
   .natal-toc {
