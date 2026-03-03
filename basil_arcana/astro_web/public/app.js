@@ -1609,6 +1609,7 @@ function renderOrbitalInsightFloor(dashboard, period) {
           <div class="home-orbit-body">
             <div class="home-orbit-canvas-wrap">
               <canvas id="homeOrbitCurrentCanvas" class="home-orbit-canvas" aria-label="Current sky state 3D view"></canvas>
+              <div id="homeOrbitCurrentOverlay" class="home-orbit-overlay" aria-hidden="true"></div>
             </div>
             <div class="home-orbit-copy">
               ${bodies
@@ -1632,6 +1633,7 @@ function renderOrbitalInsightFloor(dashboard, period) {
           <div class="home-orbit-body">
             <div class="home-orbit-canvas-wrap">
               <canvas id="homeOrbitLifecycleCanvas" class="home-orbit-canvas" aria-label="Lifecycle 3D view"></canvas>
+              <div id="homeOrbitLifecycleOverlay" class="home-orbit-overlay" aria-hidden="true"></div>
             </div>
             <div class="home-orbit-copy">
               ${lifecycleRows
@@ -1674,12 +1676,36 @@ function destroyHomeOrbitWidgets() {
   state.homeOrbitWidgets = null;
 }
 
-function buildMiniOrbitScene(THREE, canvas, wrap, type, dataset, isDark) {
+function orbitPeriodSpeedScale(period) {
+  if (period === "year") {
+    return 0.58;
+  }
+  if (period === "month") {
+    return 0.82;
+  }
+  return 1.12;
+}
+
+function orbitPoint3D(radius, theta, node, inclination, eccentricity = 0) {
+  const ecc = Math.max(0, Math.min(0.38, Number(eccentricity) || 0));
+  const safeRadius = Math.max(0.001, Number(radius) || 0.001);
+  const radial = safeRadius * (1 - ecc * ecc) / Math.max(0.18, 1 + ecc * Math.cos(theta));
+  const x0 = Math.cos(theta) * radial;
+  const z0 = Math.sin(theta) * radial;
+  const x1 = x0 * Math.cos(node) - z0 * Math.sin(node);
+  const z1 = x0 * Math.sin(node) + z0 * Math.cos(node);
+  const y = z1 * Math.sin(inclination);
+  const z = z1 * Math.cos(inclination);
+  return { x: x1, y, z };
+}
+
+function buildMiniOrbitScene(THREE, canvas, wrap, overlay, type, dataset, isDark, period) {
   const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 80);
   camera.position.set(0, 2.4, 4.5);
   camera.lookAt(0, 0, 0);
+  const speedScale = orbitPeriodSpeedScale(period);
 
   scene.add(new THREE.AmbientLight(0xffffff, isDark ? 0.9 : 0.82));
   const keyLight = new THREE.PointLight(isDark ? 0xffffff : 0x161a22, isDark ? 0.9 : 0.66, 40, 2);
@@ -1715,6 +1741,19 @@ function buildMiniOrbitScene(THREE, canvas, wrap, type, dataset, isDark) {
   scene.add(core);
 
   const bodies = [];
+  const labels = [];
+  const ringLabelAnchors = [];
+  const labelLayer = overlay instanceof HTMLElement ? overlay : null;
+  if (labelLayer) {
+    labelLayer.innerHTML = "";
+  }
+  ringRadii.forEach((radius, idx) => {
+    const el = document.createElement("span");
+    el.className = "home-orbit-label home-orbit-label-ring";
+    el.textContent = `RING ${idx + 1}`;
+    labelLayer?.appendChild(el);
+    ringLabelAnchors.push({ radius, el, theta: (28 + idx * 42) * (Math.PI / 180) });
+  });
   if (type === "current") {
     const lineGeometry = new THREE.BufferGeometry();
     const linePositions = new Float32Array(6 * 3);
@@ -1747,14 +1786,27 @@ function buildMiniOrbitScene(THREE, canvas, wrap, type, dataset, isDark) {
         })
       );
       scene.add(mesh);
+      const node = ((22 + idx * 57) * Math.PI) / 180;
+      const inclination = ((idx === 0 ? 7 : idx === 1 ? 13 : 18) * Math.PI) / 180;
+      const eccentricity = idx === 0 ? 0.08 : idx === 1 ? 0.11 : 0.14;
+      const startAngle = ((Number(body.angle) || 0) * Math.PI) / 180;
       bodies.push({
         mesh,
         radius: ringRadii[idx] || ringRadii[2],
-        angle: ((Number(body.angle) || 0) * Math.PI) / 180,
-        speed: 0.06 + idx * 0.022
+        angle: startAngle,
+        speed: (0.34 + idx * 0.11) * speedScale,
+        node,
+        inclination,
+        eccentricity,
+        label: String(body.name || `Body ${idx + 1}`)
       });
+      const el = document.createElement("span");
+      el.className = "home-orbit-label home-orbit-label-body";
+      el.textContent = `${String(body.name || "Body").toUpperCase()} ${Math.round(Number(body.angle) || 0)}°`;
+      labelLayer?.appendChild(el);
+      labels.push({ el, bodyIndex: idx, mode: "current" });
     });
-    return { renderer, scene, camera, bodies, links, type };
+    return { renderer, scene, camera, bodies, links, type, labels, ringLabelAnchors };
   }
 
   const lifecycle = Array.isArray(dataset?.lifecycle) ? dataset.lifecycle : [];
@@ -1777,14 +1829,21 @@ function buildMiniOrbitScene(THREE, canvas, wrap, type, dataset, isDark) {
     const endDeg = zodiacIndex(item.to) * 30 + 15;
     const start = (startDeg * Math.PI) / 180;
     const end = (endDeg * Math.PI) / 180;
+    const delta = Math.atan2(Math.sin(end - start), Math.cos(end - start));
     const radius = ringRadii[idx] || ringRadii[2];
     const points = [];
     const steps = 32;
-    const arcDelta = Math.atan2(Math.sin(end - start), Math.cos(end - start));
     for (let i = 0; i <= steps; i += 1) {
       const t = i / steps;
-      const a = start + arcDelta * t;
-      points.push(new THREE.Vector3(Math.cos(a) * radius, 0, Math.sin(a) * radius));
+      const a = start + delta * t;
+      const p = orbitPoint3D(
+        radius,
+        a,
+        ((15 + idx * 48) * Math.PI) / 180,
+        ((idx === 0 ? 8 : idx === 1 ? 12 : 16) * Math.PI) / 180,
+        idx === 0 ? 0.05 : idx === 1 ? 0.08 : 0.1
+      );
+      points.push(new THREE.Vector3(p.x, p.y, p.z));
     }
     const arc = new THREE.Line(
       new THREE.BufferGeometry().setFromPoints(points),
@@ -1797,24 +1856,40 @@ function buildMiniOrbitScene(THREE, canvas, wrap, type, dataset, isDark) {
       })
     );
     arc.computeLineDistances();
-    arc.rotation.x = axisTilt;
     scene.add(arc);
+    const node = ((15 + idx * 48) * Math.PI) / 180;
+    const inclination = ((idx === 0 ? 8 : idx === 1 ? 12 : 16) * Math.PI) / 180;
+    const eccentricity = idx === 0 ? 0.05 : idx === 1 ? 0.08 : 0.1;
     bodies.push({
       mesh,
       radius,
       angle: start,
-      speed: 0.05 + idx * 0.017
+      speed: (0.22 + idx * 0.08) * speedScale,
+      node,
+      inclination,
+      eccentricity,
+      start,
+      delta,
+      label: ["SUN", "MOON", "RISING"][idx] || `BODY ${idx + 1}`
     });
+    const el = document.createElement("span");
+    el.className = "home-orbit-label home-orbit-label-body";
+    const deltaDeg = Math.round(Math.abs((delta * 180) / Math.PI));
+    el.textContent = `${(["SUN", "MOON", "RISING"][idx] || "BODY")} Δ${deltaDeg}°`;
+    labelLayer?.appendChild(el);
+    labels.push({ el, bodyIndex: idx, mode: "lifecycle" });
   });
-  return { renderer, scene, camera, bodies, type };
+  return { renderer, scene, camera, bodies, type, labels, ringLabelAnchors };
 }
 
 async function initHomeOrbitWidgets(dashboard, period) {
   const currentCanvas = document.getElementById("homeOrbitCurrentCanvas");
   const lifecycleCanvas = document.getElementById("homeOrbitLifecycleCanvas");
+  const currentOverlay = document.getElementById("homeOrbitCurrentOverlay");
+  const lifecycleOverlay = document.getElementById("homeOrbitLifecycleOverlay");
   const currentWrap = currentCanvas?.closest(".home-orbit-canvas-wrap");
   const lifecycleWrap = lifecycleCanvas?.closest(".home-orbit-canvas-wrap");
-  if (!currentCanvas || !lifecycleCanvas || !currentWrap || !lifecycleWrap) {
+  if (!currentCanvas || !lifecycleCanvas || !currentWrap || !lifecycleWrap || !currentOverlay || !lifecycleOverlay) {
     destroyHomeOrbitWidgets();
     return;
   }
@@ -1839,8 +1914,8 @@ async function initHomeOrbitWidgets(dashboard, period) {
   ];
   const isDark = state.theme === "dark";
   const scenes = [
-    buildMiniOrbitScene(THREE, currentCanvas, currentWrap, "current", { bodies: bodyCycleData(dashboard, period) }, isDark),
-    buildMiniOrbitScene(THREE, lifecycleCanvas, lifecycleWrap, "lifecycle", { lifecycle }, isDark)
+    buildMiniOrbitScene(THREE, currentCanvas, currentWrap, currentOverlay, "current", { bodies: bodyCycleData(dashboard, period) }, isDark, period),
+    buildMiniOrbitScene(THREE, lifecycleCanvas, lifecycleWrap, lifecycleOverlay, "lifecycle", { lifecycle }, isDark, period)
   ];
 
   const resize = () => {
@@ -1859,25 +1934,58 @@ async function initHomeOrbitWidgets(dashboard, period) {
 
   const start = performance.now();
   const runtime = { frameId: 0, resizeHandler: resize, scenes };
+  const projectLabel = (entry, wrap, worldVec, el, active = false) => {
+    if (!(el instanceof HTMLElement)) {
+      return;
+    }
+    const v = worldVec.clone().project(entry.camera);
+    if (v.z >= 1) {
+      el.style.opacity = "0";
+      return;
+    }
+    const x = ((v.x + 1) / 2) * wrap.clientWidth;
+    const y = ((-v.y + 1) / 2) * wrap.clientHeight;
+    el.style.opacity = active ? "0.98" : "0.78";
+    el.style.transform = `translate(${x.toFixed(2)}px, ${y.toFixed(2)}px)`;
+  };
   const loop = (now) => {
     if (state.homeOrbitWidgets !== runtime) {
       return;
     }
     const elapsed = (now - start) / 1000;
-    scenes.forEach((entry) => {
+    scenes.forEach((entry, entryIdx) => {
+      const wrap = entryIdx === 0 ? currentWrap : lifecycleWrap;
       const linkPositions = [];
-      entry.bodies.forEach((body) => {
-        body.angle += body.speed * 0.01;
-        const x = Math.cos(body.angle + elapsed * body.speed) * body.radius;
-        const z = Math.sin(body.angle + elapsed * body.speed) * body.radius;
-        body.mesh.position.set(x, 0, z);
+      entry.bodies.forEach((body, bodyIdx) => {
+        let theta = body.angle + elapsed * body.speed;
+        if (entry.type === "lifecycle") {
+          const wave = (Math.sin(elapsed * body.speed + bodyIdx * 0.8) + 1) / 2;
+          theta = (body.start || 0) + (body.delta || 0) * wave;
+        }
+        const p = orbitPoint3D(body.radius, theta, body.node || 0, body.inclination || 0, body.eccentricity || 0);
+        body.mesh.position.set(p.x, p.y, p.z);
+        body.mesh.rotation.y += 0.01 + bodyIdx * 0.003;
         if (entry.type === "current") {
           const pad = 0.2;
-          const vx = x;
-          const vz = z;
+          const vx = p.x;
+          const vy = p.y;
+          const vz = p.z;
           const mag = Math.hypot(vx, vz) || 1;
-          linkPositions.push((vx / mag) * pad, 0, (vz / mag) * pad, x, 0, z);
+          linkPositions.push((vx / mag) * pad, (vy / Math.max(1, mag)) * (pad * 0.5), (vz / mag) * pad, p.x, p.y, p.z);
         }
+        const labelMeta = entry.labels.find((item) => item.bodyIndex === bodyIdx);
+        if (labelMeta?.el) {
+          const labelAnchor = new THREE.Vector3(p.x, p.y + 0.18, p.z);
+          projectLabel(entry, wrap, labelAnchor, labelMeta.el, true);
+          if (entry.type === "current") {
+            const deg = normalizeAngle((theta * 180) / Math.PI);
+            labelMeta.el.textContent = `${body.label} ${Math.round(deg)}°`;
+          }
+        }
+      });
+      entry.ringLabelAnchors?.forEach((anchor) => {
+        const world = orbitPoint3D(anchor.radius, anchor.theta + elapsed * 0.02, 0, Math.PI * 0.1, 0);
+        projectLabel(entry, wrap, new THREE.Vector3(world.x, world.y + 0.08, world.z), anchor.el, false);
       });
       if (entry.links && linkPositions.length >= 18) {
         const attr = entry.links.geometry.getAttribute("position");
@@ -1885,7 +1993,7 @@ async function initHomeOrbitWidgets(dashboard, period) {
         attr.needsUpdate = true;
         entry.links.computeLineDistances();
       }
-      entry.camera.lookAt(0, 0, 0);
+      entry.camera.lookAt(0, 0.04, 0);
       entry.renderer.render(entry.scene, entry.camera);
     });
     runtime.frameId = window.requestAnimationFrame(loop);

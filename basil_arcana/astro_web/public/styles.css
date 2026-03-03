@@ -3260,6 +3260,38 @@ body[data-theme="dark"] .home-orbit-canvas-wrap {
   z-index: 1;
 }
 
+.home-orbit-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.home-orbit-label {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface) 88%, transparent 12%);
+  color: var(--ink);
+  padding: 0.11rem 0.28rem;
+  font-size: 0.58rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  transition: opacity 0.2s ease;
+  opacity: 0;
+}
+
+.home-orbit-label-ring {
+  font-size: 0.54rem;
+  color: var(--muted);
+  border-style: dashed;
+}
+
+.home-orbit-label-body {
+  border-color: var(--line-strong);
+}
+
 .home-orbit-copy {
   display: grid;
   gap: 0.46rem;
