@@ -29,7 +29,8 @@ const state = {
   homePeriod: "week",
   theme: "dark",
   profileEditMode: false,
-  solarSystem: null
+  solarSystem: null,
+  lastRenderedRouteKey: ""
 };
 
 function referralCodeFromUrl() {
@@ -3287,6 +3288,34 @@ function homeViewLoading() {
   `;
 }
 
+function renderBreadcrumbs(items = []) {
+  const safeItems = Array.isArray(items) ? items.filter(Boolean) : [];
+  if (!safeItems.length) {
+    return "";
+  }
+  return `
+    <section class="section section-tight">
+      <nav class="card breadcrumb-card" aria-label="Breadcrumb">
+        <ol class="breadcrumbs">
+          ${safeItems
+            .map((item, index) => {
+              const isCurrent = Boolean(item.current) || index === safeItems.length - 1;
+              const label = String(item.label || "").trim();
+              if (!label) {
+                return "";
+              }
+              if (!isCurrent && item.href) {
+                return `<li><a href="${item.href}">${label}</a></li>`;
+              }
+              return `<li aria-current="page"><span>${label}</span></li>`;
+            })
+            .join("")}
+        </ol>
+      </nav>
+    </section>
+  `;
+}
+
 function renderProfessionalReadingCta(sectionId = "") {
   const idAttr = sectionId ? ` id="${sectionId}"` : "";
   return `
@@ -4630,7 +4659,13 @@ function astrologyHubArticleView(slug) {
     `;
   }
   const related = astrologyHubArticles.filter((item) => item.slug !== slug).slice(0, 2);
+  const breadcrumbs = renderBreadcrumbs([
+    { label: "Home", href: "/" },
+    { label: "Astrology Hub", href: "/astrology-hub" },
+    { label: article.title, current: true }
+  ]);
   return `
+    ${breadcrumbs}
     <section class="section">
       <article class="card tone-card article-hero">
         <div class="article-hero-grid">
@@ -4750,7 +4785,13 @@ function celebritiesHubView() {
 
 function celebrityProfileLoadingView(slug) {
   const celeb = state.celebrities.find((item) => String(item.slug || item.id) === String(slug || "").trim());
+  const breadcrumbs = renderBreadcrumbs([
+    { label: "Home", href: "/" },
+    { label: "Celebrities", href: "/celebrities" },
+    { label: celeb?.name || "Historical profile", current: true }
+  ]);
   return `
+    ${breadcrumbs}
     <section class="section">
       <article class="card tone-card">
         <span class="eyebrow">Celebrities</span>
@@ -4786,7 +4827,13 @@ function renderCelebrityNatalPage(celeb, natal) {
   const related = state.celebrities
     .filter((item) => item.sign === celeb.sign && item.id !== celeb.id)
     .slice(0, 4);
+  const breadcrumbs = renderBreadcrumbs([
+    { label: "Home", href: "/" },
+    { label: "Celebrities", href: "/celebrities" },
+    { label: celeb.name, current: true }
+  ]);
   return `
+    ${breadcrumbs}
     ${renderNatalHeader(profile, natal)}
     <section class="section">
       <article class="card celeb-profile-hero premium-panel">
@@ -6520,6 +6567,8 @@ function render() {
     || (isPublicHubArticle
       ? () => astrologyHubArticleView(hubSlug)
       : (isPublicCelebrityProfile ? () => celebrityProfileLoadingView(celebritySlug) : homeViewLoading));
+  const currentRouteKey = `${path}${window.location.search || ""}`;
+  const routeChanged = state.lastRenderedRouteKey !== currentRouteKey;
   app.innerHTML = makeView();
   syncZodiacThemeImages(state.theme);
   applySeoMeta(path);
@@ -6528,6 +6577,10 @@ function render() {
   markActiveNav(path);
   renderProfileChip();
   attachRouteHandlers(path);
+  if (routeChanged) {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }
+  state.lastRenderedRouteKey = currentRouteKey;
 
   if (path === "/natal-chart") {
     hydrateNatal();
