@@ -700,9 +700,19 @@ async function finalizeReferralSocialConnectionIfReady(userKey, userData) {
     return normalized;
   }
   await ensureMutualFriendLink(userKey, normalized, referrerUserKey, referrerData);
-  normalized.referral.socialConnectionCompleted = true;
-  await saveUserData(userKey, normalized);
-  return normalized;
+  const refreshed = normalizeUserData(await loadUserData(userKey));
+  refreshed.referral = refreshed.referral && typeof refreshed.referral === "object"
+    ? refreshed.referral
+    : {
+        code: "",
+        referredByCode: "",
+        referredByUserKey: "",
+        shareBirthDataConsent: true,
+        socialConnectionCompleted: false
+      };
+  refreshed.referral.socialConnectionCompleted = true;
+  await saveUserData(userKey, refreshed);
+  return refreshed;
 }
 
 async function deleteSessionBySid(sid) {
