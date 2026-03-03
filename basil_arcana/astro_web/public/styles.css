@@ -2901,6 +2901,61 @@ body[data-theme="dark"] .form-grid input[type="time"]::-webkit-calendar-picker-i
   gap: 0.68rem;
 }
 
+.today-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.55rem;
+}
+
+.today-panel-head h2 {
+  margin: 0;
+  white-space: nowrap;
+}
+
+.today-open-daily {
+  padding: 0.26rem 0.5rem;
+  font-size: 0.66rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.daily-date-title {
+  white-space: nowrap;
+}
+
+.recent-days-list {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 0.72rem;
+}
+
+.recent-day-item {
+  border-top: 1px solid var(--line);
+  padding-top: 0.5rem;
+  display: grid;
+  gap: 0.24rem;
+}
+
+.recent-day-item h3 {
+  margin: 0;
+  font-size: 0.68rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.recent-day-item p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.recent-day-item p strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
 .daily-hero-main,
 .daily-hero-side,
 .daily-quest-card,
@@ -4449,6 +4504,18 @@ body[data-theme="light"] .energy-star.neutral {
 
   .daily-kpis {
     grid-template-columns: 1fr;
+  }
+
+  .today-panel-head {
+    align-items: flex-start;
+  }
+
+  .today-panel-head h2 {
+    font-size: 1.04rem;
+  }
+
+  .daily-date-title {
+    font-size: clamp(1.55rem, 7.2vw, 2.35rem);
   }
 
   .daily-delta-grid {

@@ -1403,6 +1403,22 @@ function daysInCurrentMonth() {
   return new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
 }
 
+function formatShortDateLabel(value = new Date()) {
+  let date;
+  let formatOptions = { weekday: "short", month: "short", day: "numeric" };
+  if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    const [y, m, d] = value.split("-").map((v) => Number(v));
+    date = new Date(Date.UTC(y, m - 1, d));
+    formatOptions = { ...formatOptions, timeZone: "UTC" };
+  } else {
+    date = value instanceof Date ? value : new Date(value);
+  }
+  if (!(date instanceof Date) || Number.isNaN(date.getTime())) {
+    date = new Date();
+  }
+  return date.toLocaleDateString("en-US", formatOptions).toUpperCase();
+}
+
 function todayIndexForPeriod(period, length) {
   const now = new Date();
   if (period === "year") {
@@ -2624,7 +2640,7 @@ function buildTodayAstroData(profile, dashboard) {
     : 12;
 
   return {
-    dateLabel: now.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }),
+    dateLabel: formatShortDateLabel(now),
     moonPhase,
     illumination,
     seasonSign,
@@ -2642,7 +2658,10 @@ function renderTodayAstroPanel(profile, dashboard) {
   });
   return `
     <div class="today-panel">
-      <h2>${info.dateLabel}</h2>
+      <div class="today-panel-head">
+        <h2>${info.dateLabel}</h2>
+        <a class="btn ghost today-open-daily" href="/daily">Open daily</a>
+      </div>
       <div class="today-grid">
         <div class="today-item">
           <span>${uiIcon("moonphase")} Moon</span>
@@ -2711,6 +2730,35 @@ function personalizeDailyHistory(history, { core = null, profile = null } = {}) 
       focus: personalizedDailyLine(item?.focus || "", { dayKey: `${dayKey}:${index}`, core, profile })
     };
   });
+}
+
+function highlightDailyKeyWord(text) {
+  const raw = String(text || "").trim();
+  if (!raw) {
+    return "";
+  }
+  const stop = new Set([
+    "the", "and", "with", "from", "that", "this", "your", "into", "about", "over", "under",
+    "while", "where", "there", "their", "them", "will", "would", "could", "should", "have",
+    "has", "been", "were", "they", "you", "for", "but", "not", "one", "two", "three", "more",
+    "less", "than", "then", "when", "what", "which", "because", "after", "before", "today"
+  ]);
+  const candidates = (raw.match(/[A-Za-z][A-Za-z'-]{3,}/g) || [])
+    .filter((w) => !stop.has(w.toLowerCase()))
+    .sort((a, b) => b.length - a.length);
+  const target = candidates[0];
+  if (!target) {
+    return escapeHtml(raw);
+  }
+  const lower = raw.toLowerCase();
+  const idx = lower.indexOf(target.toLowerCase());
+  if (idx < 0) {
+    return escapeHtml(raw);
+  }
+  const head = escapeHtml(raw.slice(0, idx));
+  const mid = escapeHtml(raw.slice(idx, idx + target.length));
+  const tail = escapeHtml(raw.slice(idx + target.length));
+  return `${head}<strong>${mid}</strong>${tail}`;
 }
 
 function renderNatalZodiacSection(sign) {
@@ -6853,6 +6901,14 @@ async function hydrateDaily() {
     const d = data?.dayDashboard || {};
     const q = data?.dailyQuest || {};
     const a = data?.achievements || {};
+    const dailyDateLabel = formatShortDateLabel(
+      d?.date
+      || data?.dateIso
+      || data?.dateISO
+      || data?.dayKey
+      || data?.dateLabel
+      || new Date()
+    );
 
     const personalizedHistory = personalizeDailyHistory(data.history, {
       core: state.dashboard?.natalCore,
@@ -6863,7 +6919,7 @@ async function hydrateDaily() {
       <section class="hero">
         <article class="card daily-hero-main tone-card">
           <span class="eyebrow">Daily Ritual</span>
-          <h1>${data.dateLabel}</h1>
+          <h1 class="daily-date-title">${dailyDateLabel}</h1>
           <p>${data.intro}</p>
           <div class="daily-kpis">
             <article class="metric">
@@ -6923,9 +6979,15 @@ async function hydrateDaily() {
           <article class="route-card content-panel">
             <span class="premium-kicker">History</span>
             <h2>Recent days</h2>
-            <ul class="bullet-list">${personalizedHistory
-              .map((item) => `<li>${item.dayKey}: ${item.focus}</li>`)
-              .join("")}</ul>
+            <div class="recent-days-list">${personalizedHistory
+              .slice(0, 2)
+              .map((item) => `
+                <article class="recent-day-item">
+                  <h3>${formatShortDateLabel(item.dayKey)}</h3>
+                  <p>${highlightDailyKeyWord(item.focus)}</p>
+                </article>
+              `)
+              .join("")}</div>
           </article>
         </div>
       </section>
