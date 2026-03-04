@@ -1019,10 +1019,11 @@ async function initNatal3DChart(data) {
   }
 
   const isDark = state.theme === "dark";
+  const compactMobile = window.matchMedia?.("(max-width: 760px)")?.matches;
   const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, preserveDrawingBuffer: true });
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(44, 1, 0.1, 180);
-  camera.position.set(0, 14.8, 0.01);
+  camera.position.set(0, compactMobile ? 13.9 : 14.8, 0.01);
   camera.lookAt(0, 0, 0);
 
   scene.add(new THREE.AmbientLight(isDark ? 0xffffff : 0x111111, isDark ? 0.84 : 0.7));
@@ -1036,11 +1037,11 @@ async function initNatal3DChart(data) {
   );
   scene.add(core);
 
-  const outerRing = 4.18;
-  const signRing = 3.62;
-  const houseRing = 3.1;
-  const planetRing = 2.72;
-  const aspectRing = 2.36;
+  const outerRing = compactMobile ? 3.56 : 4.18;
+  const signRing = compactMobile ? 3.16 : 3.62;
+  const houseRing = compactMobile ? 2.7 : 3.1;
+  const planetRing = compactMobile ? 2.34 : 2.72;
+  const aspectRing = compactMobile ? 2.05 : 2.36;
 
   const ringMaterial = new THREE.LineBasicMaterial({
     color: isDark ? 0x4f5865 : 0x7f8b98,
@@ -1087,7 +1088,7 @@ async function initNatal3DChart(data) {
   zodiacOrder.forEach((sign, idx) => {
     const node = document.createElement("span");
     node.className = "natal-3d-zodiac-label";
-    node.innerHTML = `${zodiacIcon(sign)}<span>${sign.slice(0, 3).toUpperCase()}</span>`;
+    node.innerHTML = `${zodiacIcon(sign)}`;
     overlay.appendChild(node);
     const theta = ((idx * 30 + 15) * Math.PI) / 180;
     zodiacLabels.push({ node, theta, sign });
@@ -1158,12 +1159,22 @@ async function initNatal3DChart(data) {
     planetLabels.push({ node: label, planetKey: planet.key });
   });
 
-  const aspects = buildAspectGeometry(
+  const rawAspects = buildAspectGeometry(
     planets.map((planet, idx) => ({
       key: planet.key,
       longitude: planetLongitude(planet, idx)
     }))
   );
+  const aspects = rawAspects
+    .map((aspect) => {
+      const delta = shortestAngleDelta(aspect.left.longitude, aspect.right.longitude);
+      return {
+        ...aspect,
+        orb: Math.abs(delta - aspect.matched)
+      };
+    })
+    .sort((a, b) => a.orb - b.orb)
+    .slice(0, compactMobile ? 10 : 14);
   const aspectStyleMap = {
     conjunction: { colorDark: 0xd7dde6, colorLight: 0x374251, opacity: 0.74, primary: true },
     opposition: { colorDark: 0xd2d9e3, colorLight: 0x3a4555, opacity: 0.7, primary: true },
@@ -1193,26 +1204,6 @@ async function initNatal3DChart(data) {
       rightKey: aspect.right.key,
       baseOpacity: style.opacity
     });
-    if (style.primary) {
-      const accent = new THREE.Line(
-        new THREE.BufferGeometry().setFromPoints([
-          left.clone().add(new THREE.Vector3(0, 0.0008, 0)),
-          right.clone().add(new THREE.Vector3(0, 0.0008, 0))
-        ]),
-        new THREE.LineBasicMaterial({
-          color: isDark ? 0xffffff : 0x2f3948,
-          transparent: true,
-          opacity: Math.min(0.36, style.opacity * 0.56)
-        })
-      );
-      scene.add(accent);
-      aspectVisuals.push({
-        line: accent,
-        leftKey: aspect.left.key,
-        rightKey: aspect.right.key,
-        baseOpacity: Math.min(0.36, style.opacity * 0.56)
-      });
-    }
   });
 
   const raycaster = new THREE.Raycaster();
@@ -1240,10 +1231,12 @@ async function initNatal3DChart(data) {
 
   const resize = () => {
     const width = Math.max(260, Math.round(canvasWrap.clientWidth));
-    const height = Math.max(460, Math.round(canvasWrap.clientHeight));
+    const height = Math.max(420, Math.round(canvasWrap.clientHeight));
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.setSize(width, height, false);
     camera.aspect = width / height;
+    const verticalBoost = camera.aspect < 0.78 ? 1.24 : camera.aspect < 1 ? 1.12 : 1;
+    camera.position.set(0, (compactMobile ? 13.9 : 14.8) * verticalBoost, 0.01);
     camera.updateProjectionMatrix();
   };
   resize();
@@ -1304,25 +1297,9 @@ async function initNatal3DChart(data) {
       }
 
       const framePad = 56;
-      ctx.strokeStyle = "rgba(245,245,245,0.62)";
+      ctx.strokeStyle = "rgba(245,245,245,0.66)";
       ctx.lineWidth = 2;
       ctx.strokeRect(framePad, framePad, out.width - framePad * 2, out.height - framePad * 2);
-
-      ctx.fillStyle = "rgba(245,245,245,0.96)";
-      ctx.font = "700 70px Space Mono, sans-serif";
-      ctx.fillText("ASTRONAUTICA", 110, 164);
-      ctx.font = "500 30px Space Mono, sans-serif";
-      ctx.fillStyle = "rgba(220,224,232,0.88)";
-      ctx.fillText("NATAL WHEEL • app.basilarcana.com", 112, 208);
-
-      const chartX = 94;
-      const chartY = 248;
-      const chartW = 1360;
-      const chartH = 1260;
-      ctx.strokeStyle = "rgba(215,220,228,0.36)";
-      ctx.lineWidth = 1.5;
-      ctx.strokeRect(chartX, chartY, chartW, chartH);
-      ctx.drawImage(canvas, 0, 0, srcW, srcH, chartX + 8, chartY + 8, chartW - 16, chartH - 16);
 
       const profile = state.profile || {};
       const core = data?.core || {};
@@ -1331,38 +1308,61 @@ async function initNatal3DChart(data) {
       const birthTime = String(profile?.birthTime || "N/A");
       const birthCity = String(profile?.birthCity || "N/A");
       const summary = String(data?.summary || "").trim();
-      const keyFacts = [
-        `Name: ${userName}`,
-        `Sun: ${core.sun || "Unknown"}   Moon: ${core.moon || "Unknown"}   Rising: ${core.rising || "Unknown"}`,
-        `Birth: ${birthDate} ${birthTime !== "N/A" ? birthTime : ""} • ${birthCity}`.replace(/\s+•/, " •").trim(),
-        summary || "Natal chart generated from profile birth data."
-      ];
-      const notesX = 1518;
-      let notesY = 302;
-      ctx.fillStyle = "rgba(244,247,252,0.96)";
-      ctx.font = "700 42px Space Mono, sans-serif";
-      ctx.fillText("PROFILE SNAPSHOT", notesX, notesY);
-      notesY += 52;
-      ctx.strokeStyle = "rgba(255,255,255,0.2)";
-      ctx.strokeRect(notesX - 14, notesY - 30, 760, 1030);
-      notesY += 18;
-      ctx.font = "500 30px Space Mono, sans-serif";
-      keyFacts.forEach((line, idx) => {
-        const block = idx === keyFacts.length - 1 ? wrapPosterText(ctx, line, 700) : [line];
-        block.forEach((sub, subIdx) => {
-          const isLead = idx < 3 && subIdx === 0;
-          ctx.fillStyle = isLead ? "rgba(238,242,249,0.96)" : "rgba(202,208,220,0.9)";
-          ctx.font = isLead ? "600 30px Space Mono, sans-serif" : "500 27px Space Mono, sans-serif";
-          ctx.fillText(sub, notesX, notesY);
-          notesY += isLead ? 56 : 40;
-        });
-        notesY += idx < 3 ? 8 : 20;
-      });
 
-      ctx.fillStyle = "rgba(170,180,194,0.9)";
+      ctx.fillStyle = "rgba(245,245,245,0.96)";
+      ctx.font = "700 64px Space Mono, sans-serif";
+      ctx.fillText("ASTRONAUTICA", 104, 150);
+      ctx.font = "500 28px Space Mono, sans-serif";
+      ctx.fillStyle = "rgba(214,220,230,0.9)";
+      ctx.fillText("NATAL WHEEL", 106, 192);
+
+      const chartPadX = 118;
+      const chartPadY = 236;
+      const chartAreaW = out.width - chartPadX * 2;
+      const chartAreaH = out.height - chartPadY - 150;
+      const scale = Math.min(chartAreaW / srcW, chartAreaH / srcH);
+      const drawW = Math.round(srcW * scale);
+      const drawH = Math.round(srcH * scale);
+      const drawX = Math.round((out.width - drawW) / 2);
+      const drawY = Math.round(chartPadY + (chartAreaH - drawH) / 2);
+      ctx.drawImage(canvas, 0, 0, srcW, srcH, drawX, drawY, drawW, drawH);
+
+      ctx.strokeStyle = "rgba(210,216,226,0.34)";
+      ctx.lineWidth = 1.25;
+      ctx.strokeRect(drawX - 10, drawY - 10, drawW + 20, drawH + 20);
+
+      const keyFacts = [
+        `${userName}`,
+        `${core.sun || "Unknown"} sun • ${core.moon || "Unknown"} moon • ${core.rising || "Unknown"} rising`,
+        `${birthDate}${birthTime !== "N/A" ? ` ${birthTime}` : ""}`,
+        `${birthCity}`
+      ];
+      const topRight = [
+        `Generated ${new Date().toLocaleDateString("en-GB")}`,
+        `app.basilarcana.com`
+      ];
+      ctx.textAlign = "right";
+      ctx.fillStyle = "rgba(194,202,214,0.9)";
       ctx.font = "500 24px Space Mono, sans-serif";
-      ctx.fillText(`Generated: ${new Date().toLocaleString("en-GB")}`, notesX, out.height - 118);
-      ctx.fillText("Astronautica • Precision natal intelligence", notesX, out.height - 78);
+      ctx.fillText(topRight[0], out.width - 104, 140);
+      ctx.fillText(topRight[1], out.width - 104, 172);
+
+      ctx.textAlign = "left";
+      ctx.fillStyle = "rgba(226,232,241,0.94)";
+      ctx.font = "600 24px Space Mono, sans-serif";
+      ctx.fillText(keyFacts[0], 104, out.height - 106);
+      ctx.fillStyle = "rgba(182,192,206,0.9)";
+      ctx.font = "500 20px Space Mono, sans-serif";
+      ctx.fillText(keyFacts[1], 104, out.height - 72);
+      ctx.fillText(`${keyFacts[2]} • ${keyFacts[3]}`, 104, out.height - 42);
+      if (summary) {
+        const summaryLines = wrapPosterText(ctx, summary, out.width - 220);
+        const tail = summaryLines.slice(0, 2).join(" ");
+        if (tail) {
+          ctx.fillStyle = "rgba(170,180,194,0.84)";
+          ctx.fillText(tail, 104, out.height - 14);
+        }
+      }
       return out;
     } catch {
       return null;
@@ -1468,20 +1468,17 @@ async function initNatal3DChart(data) {
     const hasHover = Boolean(hoveredKey);
     aspectVisuals.forEach((item) => {
       const related = item.leftKey === hoveredKey || item.rightKey === hoveredKey;
-      const nextOpacity = !hasHover ? item.baseOpacity : related ? Math.min(0.82, item.baseOpacity + 0.24) : Math.max(0.1, item.baseOpacity * 0.32);
+      const nextOpacity = !hasHover ? item.baseOpacity : related ? Math.min(0.98, item.baseOpacity + 0.32) : Math.max(0.03, item.baseOpacity * 0.12);
       item.line.material.opacity = nextOpacity;
     });
 
     zodiacLabels.forEach((entry) => {
-      const p = orbitPoint3D(outerRing + 0.92, entry.theta, 0, 0, 0);
+      const p = orbitPoint3D(outerRing + 0.44, entry.theta, 0, 0, 0);
       const end = new THREE.Vector3(p.x, p.y, p.z);
       const screen = projectToScreen(end);
-      const visible = screen.visible && isFree(screen.x, screen.y, 20);
-      entry.node.style.opacity = visible ? "0.76" : "0";
+      const visible = screen.visible;
+      entry.node.style.opacity = visible ? "0.86" : "0";
       entry.node.style.transform = `translate(${screen.x.toFixed(2)}px, ${screen.y.toFixed(2)}px)`;
-      if (visible) {
-        occupied.push({ x: screen.x, y: screen.y });
-      }
     });
     camera.lookAt(0, 0, 0);
     renderer.render(scene, camera);
