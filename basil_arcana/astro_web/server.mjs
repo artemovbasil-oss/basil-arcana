@@ -1,5 +1,6 @@
 import crypto from "node:crypto";
 import express from "express";
+import fs from "node:fs";
 import path from "node:path";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
@@ -48,6 +49,7 @@ function normalizeBaseUrl(raw) {
 }
 
 const appBaseUrlEnv = normalizeBaseUrl(appBaseUrlEnvRaw);
+const indexHtmlTemplate = fs.readFileSync(path.join(publicDir, "index.html"), "utf8");
 
 app.set("trust proxy", 1);
 
@@ -112,6 +114,33 @@ const allowedCityCountryCodes = new Set([
   "VA",
   "XK"
 ]);
+
+function getBaseUrl(req) {
+  return (
+    appBaseUrlEnv ||
+    `${String(req.headers["x-forwarded-proto"] || "").toLowerCase().includes("https") ? "https" : req.protocol}://${req.get("host")}`
+  );
+}
+
+function escapeHtml(value) {
+  return String(value || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function truncateText(value, maxLen = 180) {
+  const text = String(value || "").trim();
+  if (!text) {
+    return "";
+  }
+  if (text.length <= maxLen) {
+    return text;
+  }
+  return `${text.slice(0, Math.max(0, maxLen - 1)).trim()}…`;
+}
 
 function slugify(value) {
   return String(value || "")
@@ -1528,6 +1557,118 @@ function buildNatalDetail(profile) {
   }
 }
 
+async function loadPublicNatalByCode(code) {
+  const normalizedCode = String(code || "").toUpperCase().trim();
+  if (!normalizedCode) {
+    return null;
+  }
+  const userKey = await findUserKeyByReferralCode(normalizedCode);
+  if (!userKey) {
+    return null;
+  }
+  const userData = await loadUserData(userKey);
+  const profile = resolveSessionProfile(null, userData);
+  if (!profile) {
+    return null;
+  }
+  const hydratedProfile = await ensureProfileCoordinates(profile);
+  const natal = buildNatalDetail(hydratedProfile);
+  const referralCode = String(userData?.referral?.code || normalizedCode || "").toUpperCase().trim();
+  return {
+    referralCode,
+    referralLink: `/login?ref=${encodeURIComponent(referralCode)}`,
+    owner: {
+      name: String(hydratedProfile?.name || "Astronautica user").trim() || "Astronautica user"
+    },
+    natal
+  };
+}
+
+function renderSharedNatalOgSvg(payload) {
+  const ownerName = escapeHtml(payload?.owner?.name || "Astronautica User");
+  const natal = payload?.natal || {};
+  const core = natal?.core || {};
+  const sun = escapeHtml(String(core.sun || "Unknown"));
+  const moon = escapeHtml(String(core.moon || "Unknown"));
+  const rising = escapeHtml(String(core.rising || "Unknown"));
+  const summary = escapeHtml(truncateText(natal?.summary || "Public natal chart shared from Astronautica.", 210));
+  const safeName = escapeHtml(truncateText(ownerName, 48));
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="Astronautica shared natal chart">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#07090d"/>
+      <stop offset="55%" stop-color="#0c1118"/>
+      <stop offset="100%" stop-color="#06080b"/>
+    </linearGradient>
+    <radialGradient id="orbA" cx="25%" cy="22%" r="55%">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.16)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+    </radialGradient>
+    <radialGradient id="orbB" cx="78%" cy="74%" r="48%">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.12)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+    </radialGradient>
+  </defs>
+  <rect x="0" y="0" width="1200" height="630" fill="url(#bg)"/>
+  <rect x="0" y="0" width="1200" height="630" fill="url(#orbA)"/>
+  <rect x="0" y="0" width="1200" height="630" fill="url(#orbB)"/>
+
+  <circle cx="330" cy="315" r="220" fill="none" stroke="rgba(230,236,245,0.22)" stroke-width="2"/>
+  <circle cx="330" cy="315" r="168" fill="none" stroke="rgba(230,236,245,0.16)" stroke-width="1.6"/>
+  <circle cx="330" cy="315" r="116" fill="none" stroke="rgba(230,236,245,0.12)" stroke-width="1.2"/>
+  <line x1="330" y1="95" x2="330" y2="535" stroke="rgba(230,236,245,0.12)" stroke-width="1"/>
+  <line x1="110" y1="315" x2="550" y2="315" stroke="rgba(230,236,245,0.12)" stroke-width="1"/>
+  <circle cx="330" cy="315" r="12" fill="#eef1f6"/>
+  <circle cx="458" cy="264" r="8.5" fill="rgba(238,241,246,0.9)"/>
+  <circle cx="410" cy="418" r="7.6" fill="rgba(238,241,246,0.75)"/>
+  <circle cx="250" cy="212" r="7.2" fill="rgba(238,241,246,0.66)"/>
+  <line x1="330" y1="315" x2="458" y2="264" stroke="rgba(238,241,246,0.44)" stroke-width="1.2"/>
+  <line x1="330" y1="315" x2="410" y2="418" stroke="rgba(238,241,246,0.38)" stroke-width="1.1"/>
+  <line x1="330" y1="315" x2="250" y2="212" stroke="rgba(238,241,246,0.34)" stroke-width="1.1"/>
+
+  <text x="620" y="122" fill="rgba(245,248,252,0.95)" font-size="22" font-family="IBM Plex Sans, Arial, sans-serif" letter-spacing="3.2">ASTRONAUTICA</text>
+  <text x="620" y="188" fill="#ffffff" font-size="62" font-family="Space Grotesk, IBM Plex Sans, Arial, sans-serif" font-weight="700">${safeName}</text>
+  <text x="620" y="238" fill="rgba(212,220,231,0.92)" font-size="25" font-family="IBM Plex Sans, Arial, sans-serif">Public natal chart snapshot</text>
+
+  <text x="620" y="302" fill="rgba(250,252,255,0.94)" font-size="28" font-family="IBM Plex Sans, Arial, sans-serif" font-weight="600">SUN ${sun} · MOON ${moon} · RISING ${rising}</text>
+  <foreignObject x="620" y="334" width="500" height="138">
+    <div xmlns="http://www.w3.org/1999/xhtml" style="font-family: 'IBM Plex Sans', Arial, sans-serif; color: rgba(214,222,233,0.9); font-size: 24px; line-height: 1.35;">
+      ${summary}
+    </div>
+  </foreignObject>
+  <text x="620" y="534" fill="rgba(255,255,255,0.95)" font-size="24" font-family="IBM Plex Sans, Arial, sans-serif" font-weight="600">Open profile and get your own chart on app.basilarcana.com</text>
+</svg>`;
+}
+
+function renderSharedNatalHtml({ code, baseUrl }) {
+  const normalizedCode = String(code || "").toUpperCase().trim();
+  const safeCode = encodeURIComponent(normalizedCode);
+  const canonical = `${baseUrl}/shared-natal/${safeCode}`;
+  const ogImage = `${baseUrl}/og/shared-natal/${safeCode}.svg`;
+  const title = "Public Natal Chart - Astronautica";
+  const description = "Shared natal chart profile from Astronautica. Register to calculate your own chart and daily timing.";
+  let html = indexHtmlTemplate;
+  html = html.replace(/<title>[\s\S]*?<\/title>/i, `<title>${escapeHtml(title)}</title>`);
+  html = html.replace(
+    /<meta\s+name="description"\s+content="[^"]*"\s*\/?>/i,
+    `<meta name="description" content="${escapeHtml(description)}" />`
+  );
+  html = html.replace(
+    /<link\s+rel="canonical"\s+href="[^"]*"\s*\/?>/i,
+    `<link rel="canonical" href="${escapeHtml(canonical)}" />`
+  );
+  html = html.replace(/<meta\s+property="og:title"\s+content="[^"]*"\s*\/?>/i, `<meta property="og:title" content="${escapeHtml(title)}" />`);
+  html = html.replace(/<meta\s+property="og:description"\s+content="[^"]*"\s*\/?>/i, `<meta property="og:description" content="${escapeHtml(description)}" />`);
+  html = html.replace(/<meta\s+property="og:url"\s+content="[^"]*"\s*\/?>/i, `<meta property="og:url" content="${escapeHtml(canonical)}" />`);
+  html = html.replace(/<meta\s+property="og:image"\s+content="[^"]*"\s*\/?>/i, `<meta property="og:image" content="${escapeHtml(ogImage)}" />`);
+  html = html.replace(/<meta\s+name="twitter:title"\s+content="[^"]*"\s*\/?>/i, `<meta name="twitter:title" content="${escapeHtml(title)}" />`);
+  html = html.replace(/<meta\s+name="twitter:description"\s+content="[^"]*"\s*\/?>/i, `<meta name="twitter:description" content="${escapeHtml(description)}" />`);
+  html = html.replace(/<meta\s+name="twitter:image"\s+content="[^"]*"\s*\/?>/i, `<meta name="twitter:image" content="${escapeHtml(ogImage)}" />`);
+  html = html.replace(/<body([^>]*)>/i, `<body$1 class="public-landing">`);
+  return html;
+}
+
 async function geocodeCity(cityName) {
   const key = String(cityName || "").trim().toLowerCase();
   if (!key) {
@@ -2636,33 +2777,46 @@ app.get("/api/public/natal/:code", async (req, res) => {
     if (!code) {
       return res.status(400).json({ error: "invalid_share_code" });
     }
-    const userKey = await findUserKeyByReferralCode(code);
-    if (!userKey) {
+    const payload = await loadPublicNatalByCode(code);
+    if (!payload) {
       return res.status(404).json({ error: "shared_profile_not_found" });
     }
-    const userData = await loadUserData(userKey);
-    const profile = resolveSessionProfile(null, userData);
-    if (!profile) {
-      return res.status(404).json({ error: "shared_profile_not_ready" });
-    }
-    const hydratedProfile = await ensureProfileCoordinates(profile);
-    const natal = buildNatalDetail(hydratedProfile);
-    const referralCode = String(userData?.referral?.code || code || "").toUpperCase().trim();
-    return res.json({
-      ok: true,
-      referralCode,
-      referralLink: `/login?ref=${encodeURIComponent(referralCode)}`,
-      owner: {
-        name: String(hydratedProfile?.name || "Astronautica user").trim() || "Astronautica user"
-      },
-      natal
-    });
+    return res.json({ ok: true, ...payload });
   } catch (error) {
     return res.status(500).json({
       error: "public_natal_failed",
       message: error?.message || "Failed to load public natal."
     });
   }
+});
+
+app.get("/og/shared-natal/:code.svg", async (req, res) => {
+  try {
+    const code = String(req.params?.code || "").toUpperCase().trim();
+    if (!code) {
+      return res.status(404).type("text/plain").send("Not found");
+    }
+    const payload = await loadPublicNatalByCode(code);
+    if (!payload) {
+      return res.status(404).type("text/plain").send("Not found");
+    }
+    const svg = renderSharedNatalOgSvg(payload);
+    res.setHeader("Content-Type", "image/svg+xml; charset=utf-8");
+    res.setHeader("Cache-Control", "public, max-age=600");
+    return res.status(200).send(svg);
+  } catch (error) {
+    return res.status(500).type("text/plain").send("Failed to generate OG image");
+  }
+});
+
+app.get("/shared-natal/:code", async (req, res) => {
+  const code = String(req.params?.code || "").toUpperCase().trim();
+  if (!code) {
+    return res.status(404).send("Not found");
+  }
+  const html = renderSharedNatalHtml({ code, baseUrl: getBaseUrl(req) });
+  res.setHeader("Cache-Control", "no-store");
+  return res.status(200).send(html);
 });
 
 app.get("/api/friends", requireAuth, async (req, res) => {
