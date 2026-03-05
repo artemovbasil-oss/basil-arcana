@@ -2630,6 +2630,41 @@ app.get("/api/referral", requireAuth, async (req, res) => {
   });
 });
 
+app.get("/api/public/natal/:code", async (req, res) => {
+  try {
+    const code = String(req.params?.code || "").toUpperCase().trim();
+    if (!code) {
+      return res.status(400).json({ error: "invalid_share_code" });
+    }
+    const userKey = await findUserKeyByReferralCode(code);
+    if (!userKey) {
+      return res.status(404).json({ error: "shared_profile_not_found" });
+    }
+    const userData = await loadUserData(userKey);
+    const profile = resolveSessionProfile(null, userData);
+    if (!profile) {
+      return res.status(404).json({ error: "shared_profile_not_ready" });
+    }
+    const hydratedProfile = await ensureProfileCoordinates(profile);
+    const natal = buildNatalDetail(hydratedProfile);
+    const referralCode = String(userData?.referral?.code || code || "").toUpperCase().trim();
+    return res.json({
+      ok: true,
+      referralCode,
+      referralLink: `/login?ref=${encodeURIComponent(referralCode)}`,
+      owner: {
+        name: String(hydratedProfile?.name || "Astronautica user").trim() || "Astronautica user"
+      },
+      natal
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: "public_natal_failed",
+      message: error?.message || "Failed to load public natal."
+    });
+  }
+});
+
 app.get("/api/friends", requireAuth, async (req, res) => {
   req.userData = await finalizeReferralSocialConnectionIfReady(req.userId, req.userData);
   res.json({ ok: true, friends: req.userData.friends || [] });

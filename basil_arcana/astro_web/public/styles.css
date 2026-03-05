@@ -182,12 +182,34 @@ body[data-theme="light"] .topbar {
   padding: clamp(1.1rem, 2vw, 1.8rem) 0 clamp(3rem, 7vw, 6rem);
 }
 
+body.public-landing .topbar,
+body.public-landing .footer {
+  display: none;
+}
+
+body.public-landing .page {
+  width: min(980px, calc(100% - 2rem));
+  padding-top: clamp(1rem, 3vw, 2rem);
+}
+
 .page > .section:first-child {
   margin-top: 0;
 }
 
 .page.route-enter {
   animation: route-enter 280ms ease both;
+}
+
+.section-head-inline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  margin-bottom: 0.75rem;
+}
+
+.section-head-inline h2 {
+  margin: 0;
 }
 
 @keyframes route-enter {
@@ -4250,6 +4272,34 @@ body[data-theme="light"] .natal-starfield {
   height: auto;
   border: 1px solid var(--line-strong);
   background: radial-gradient(circle at center, var(--surface-2) 0%, var(--surface) 62%);
+}
+
+.shared-natal-shell {
+  display: grid;
+  gap: 1rem;
+}
+
+.shared-natal-hero h1 {
+  margin-bottom: 0.45rem;
+}
+
+.shared-natal-card h2 {
+  margin-bottom: 0.75rem;
+}
+
+.shared-natal-card .natal-chart-svg {
+  width: 100%;
+  max-width: 860px;
+}
+
+.shared-natal-cta {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.shared-natal-cta h2,
+.shared-natal-cta p {
+  margin: 0;
 }
 
 .natal-ring {

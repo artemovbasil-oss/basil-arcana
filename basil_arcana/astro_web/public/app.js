@@ -56,8 +56,6 @@ themeToggle?.addEventListener("click", () => {
   if (window.location.pathname === "/" && state.dashboard) {
     initSolarSystemWidget(state.dashboard, state.homePeriod);
     initHomeOrbitWidgets(state.dashboard, state.homePeriod);
-  } else if (window.location.pathname === "/natal-chart" && state.natalReport) {
-    initNatal3DChart(state.natalReport);
   }
 });
 
@@ -4835,6 +4833,18 @@ function natalViewLoading() {
   `;
 }
 
+function sharedNatalLoadingView() {
+  return `
+    <section class="section shared-natal-shell">
+      <article class="card tone-card">
+        <span class="eyebrow">Public Natal Profile</span>
+        <h1>Natal Chart Snapshot</h1>
+        <p id="sharedNatalStatus">Loading chart...</p>
+      </article>
+    </section>
+  `;
+}
+
 function renderNatalHeader(profile, report) {
   const nameClass = String(profile?.name || "").length > 20 ? "mask-fade" : "name-plain";
   const chips = [
@@ -4857,6 +4867,74 @@ function renderNatalHeader(profile, report) {
       </article>
     </section>
   `;
+}
+
+function renderPublicNatalLanding(payload) {
+  const ownerName = escapeHtml(String(payload?.owner?.name || "This user"));
+  const referralCode = escapeHtml(String(payload?.referralCode || ""));
+  const referralHref = `/login?ref=${encodeURIComponent(String(payload?.referralCode || ""))}`;
+  const chartHtml = renderNatalChartSvg(payload?.natal || {});
+  const summary = escapeHtml(String(payload?.natal?.summary || ""));
+  const sun = escapeHtml(String(payload?.natal?.core?.sun || "Unknown"));
+  const moon = escapeHtml(String(payload?.natal?.core?.moon || "Unknown"));
+  const rising = escapeHtml(String(payload?.natal?.core?.rising || "Unknown"));
+  return `
+    <section class="section shared-natal-shell">
+      <article class="card tone-card shared-natal-hero">
+        <span class="eyebrow">Public Natal Profile</span>
+        <h1>${ownerName}</h1>
+        <p>${summary || "Natal chart shared from Astronautica."}</p>
+        <div class="chip-grid">
+          <span class="astro-chip">${zodiacIcon(sun)} Sun: ${sun}</span>
+          <span class="astro-chip">${zodiacIcon(moon)} Moon: ${moon}</span>
+          <span class="astro-chip">${zodiacIcon(rising)} Rising: ${rising}</span>
+          <span class="astro-chip">${uiIcon("link")} Referral: ${referralCode}</span>
+        </div>
+      </article>
+      <article class="route-card shared-natal-card">
+        <h2>Natal Wheel</h2>
+        ${chartHtml}
+      </article>
+      <article class="card shared-natal-cta">
+        <span class="eyebrow">Get Your Own Chart</span>
+        <h2>Build your personal natal map</h2>
+        <p>Sign up to calculate your full natal chart, daily timing, and compatibility insights based on your own birth data.</p>
+        <a class="btn primary" href="${referralHref}">Register and get your natal chart</a>
+      </article>
+    </section>
+  `;
+}
+
+function buildNatalShareUrl() {
+  const code = String(state.referral?.code || "").trim();
+  if (!code) {
+    return "";
+  }
+  return `${window.location.origin}/shared-natal/${encodeURIComponent(code)}`;
+}
+
+async function shareNatalPublicPage() {
+  const shareUrl = buildNatalShareUrl();
+  if (!shareUrl) {
+    alert("Share link is not ready yet. Please refresh and try again.");
+    return;
+  }
+  const shareTitle = "Astronautica Natal Chart";
+  const shareText = "View this public natal chart and get your own in Astronautica.";
+  try {
+    if (navigator.share) {
+      await navigator.share({ title: shareTitle, text: shareText, url: shareUrl });
+      return;
+    }
+  } catch {
+    // fallback to clipboard below
+  }
+  try {
+    await navigator.clipboard.writeText(shareUrl);
+    alert("Public natal link copied to clipboard.");
+  } catch {
+    window.prompt("Copy this natal link:", shareUrl);
+  }
 }
 
 function interpretPlanetPlacement(item) {
@@ -6456,6 +6534,7 @@ const routes = {
   "/faq": faqView,
   "/astrology-hub": astrologyHubView,
   "/celebrities": celebritiesHubView,
+  "/shared-natal": sharedNatalLoadingView,
   "/privacy-policy": privacyPolicyView,
   "/terms-of-service": termsOfServiceView,
   "/manifesto": manifestoView
@@ -6504,6 +6583,7 @@ function applySeoMeta(path) {
   const article = articleSlug ? astrologyHubBySlug[articleSlug] : null;
   const celebSlug = path.startsWith("/celebrities/") ? path.replace("/celebrities/", "") : null;
   const celebMeta = celebSlug ? state.celebrities.find((item) => String(item.slug || item.id) === celebSlug) : null;
+  const isSharedNatalPage = path.startsWith("/shared-natal/");
   const meta = article
     ? {
         title: `${article.title} - Astrology Hub`,
@@ -6514,6 +6594,12 @@ function applySeoMeta(path) {
       ? {
           title: `${celebMeta.name} Natal Profile - Astronautica`,
           description: `${celebMeta.name} (${celebMeta.years}) natal profile: ${celebMeta.sign} historical chart context and interpretation.`,
+          type: "article"
+        }
+    : isSharedNatalPage
+      ? {
+          title: "Public Natal Chart - Astronautica",
+          description: "Shared natal chart profile from Astronautica. Register to calculate your own chart and daily timing.",
           type: "article"
         }
     : (pageMeta[path] || defaultMeta);
@@ -7015,7 +7101,7 @@ async function hydrateNatal() {
     });
     const profile = state.profile;
 
-    const natalChart3d = renderNatalChart3D(data);
+    const natalChart = renderNatalChartSvg(data);
     state.natalReport = data;
 
     const editorial = buildNatalEditorial(profile, data);
@@ -7029,8 +7115,11 @@ async function hydrateNatal() {
         <div class="natal-main">
           <section class="section" id="natal-wheel">
             <article class="route-card">
-              <h2>Natal Wheel</h2>
-              ${natalChart3d}
+              <div class="section-head-inline">
+                <h2>Natal Wheel</h2>
+                <button id="natalShareButton" type="button" class="btn ghost">Share</button>
+              </div>
+              ${natalChart}
             </article>
           </section>
           <section class="section" id="natal-placements">
@@ -7083,7 +7172,10 @@ async function hydrateNatal() {
     `;
     bindNatalToc();
     bindNatalAsciiLogo();
-    initNatal3DChart(data);
+    const natalShareButton = document.getElementById("natalShareButton");
+    natalShareButton?.addEventListener("click", () => {
+      shareNatalPublicPage();
+    });
     animateHeadingTypewriter();
     window.setTimeout(() => scrollToNatalHash({ smooth: false }), 0);
   } catch (error) {
@@ -7904,6 +7996,34 @@ function attachRouteHandlers(path) {
         }
       });
   }
+
+  if (path.startsWith("/shared-natal/")) {
+    const code = path.replace("/shared-natal/", "").trim();
+    const status = document.getElementById("sharedNatalStatus");
+    if (!code) {
+      if (status) {
+        status.textContent = "Invalid shared link.";
+      }
+      return;
+    }
+    fetchJson(`/api/public/natal/${encodeURIComponent(code)}`)
+      .then((payload) => {
+        if (!payload?.ok || !payload?.natal) {
+          if (status) {
+            status.textContent = "Shared chart is unavailable.";
+          }
+          return;
+        }
+        app.innerHTML = renderPublicNatalLanding(payload);
+        syncZodiacThemeImages(state.theme);
+        animateHeadingTypewriter();
+      })
+      .catch((error) => {
+        if (status) {
+          status.textContent = `Failed to load chart: ${error.message}`;
+        }
+      });
+  }
 }
 
 async function refreshAuthState() {
@@ -7978,11 +8098,14 @@ function render() {
   const isPublicHubArticle = Boolean(hubSlug && astrologyHubBySlug[hubSlug]);
   const celebritySlug = path.startsWith("/celebrities/") ? path.replace("/celebrities/", "") : "";
   const isPublicCelebrityProfile = Boolean(celebritySlug);
+  const sharedNatalCode = path.startsWith("/shared-natal/") ? path.replace("/shared-natal/", "").trim() : "";
+  const isPublicSharedNatal = Boolean(sharedNatalCode);
   const publicPaths = new Set([
     "/login",
     "/faq",
     "/astrology-hub",
     "/celebrities",
+    "/shared-natal",
     "/privacy-policy",
     "/terms-of-service",
     "/manifesto"
@@ -7992,12 +8115,12 @@ function render() {
   }
   const profileExists = hasProfile();
 
-  if (state.authRequired && !state.authenticated && !publicPaths.has(path) && !isPublicHubArticle && !isPublicCelebrityProfile) {
+  if (state.authRequired && !state.authenticated && !publicPaths.has(path) && !isPublicHubArticle && !isPublicCelebrityProfile && !isPublicSharedNatal) {
     path = "/login";
     window.history.replaceState({}, "", path);
   }
 
-  if (state.authRequired && state.authenticated && !profileExists && !["/onboarding", ...publicPaths].includes(path) && !isPublicHubArticle && !isPublicCelebrityProfile) {
+  if (state.authRequired && state.authenticated && !profileExists && !["/onboarding", ...publicPaths].includes(path) && !isPublicHubArticle && !isPublicCelebrityProfile && !isPublicSharedNatal) {
     path = "/onboarding";
     window.history.replaceState({}, "", path);
   }
@@ -8018,10 +8141,13 @@ function render() {
   const makeView = routes[path]
     || (isPublicHubArticle
       ? () => astrologyHubArticleView(hubSlug)
-      : (isPublicCelebrityProfile ? () => celebrityProfileLoadingView(celebritySlug) : homeViewLoading));
+      : (isPublicCelebrityProfile
+          ? () => celebrityProfileLoadingView(celebritySlug)
+          : (isPublicSharedNatal ? sharedNatalLoadingView : homeViewLoading)));
   const currentRouteKey = `${path}${window.location.search || ""}`;
   const routeChanged = state.lastRenderedRouteKey !== currentRouteKey;
   app.innerHTML = makeView();
+  document.body.classList.toggle("public-landing", isPublicSharedNatal);
   syncZodiacThemeImages(state.theme);
   applySeoMeta(path);
   animateRouteTransition();
