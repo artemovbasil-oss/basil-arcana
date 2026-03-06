@@ -1832,6 +1832,7 @@ body[data-theme="dark"] .form-grid input[type="time"]::-webkit-calendar-picker-i
   opacity: 0.34;
   stroke-linecap: round;
   stroke-linejoin: round;
+  transition: opacity 0.16s ease, stroke-width 0.16s ease, stroke 0.16s ease;
 }
 
 .energy-friend-line--friend {
@@ -1848,6 +1849,37 @@ body[data-theme="dark"] .form-grid input[type="time"]::-webkit-calendar-picker-i
   stroke: transparent;
   stroke-width: 12;
   cursor: pointer;
+}
+
+.energy-friend-line.is-active {
+  opacity: 0.92;
+  stroke-width: 1.5;
+  stroke: color-mix(in srgb, var(--ink) 82%, transparent 18%);
+}
+
+.energy-friend-line.is-muted {
+  opacity: 0.14;
+}
+
+.energy-friend-compare {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.25;
+}
+
+.energy-friend-compare--above {
+  stroke: #1f9d55;
+}
+
+.energy-friend-compare--below {
+  stroke: #d64545;
+}
+
+.energy-friend-cross {
+  fill: #d64545;
+  stroke: color-mix(in srgb, var(--surface) 65%, transparent 35%);
+  stroke-width: 1;
 }
 
 .energy-line {
@@ -4434,6 +4466,15 @@ body[data-theme="light"] .energy-friend-line {
 
 body[data-theme="light"] .energy-friend-line--historical {
   opacity: 0.46;
+}
+
+body[data-theme="light"] .energy-friend-line.is-active {
+  stroke: #111;
+  opacity: 0.9;
+}
+
+body[data-theme="light"] .energy-friend-line.is-muted {
+  opacity: 0.14;
 }
 
 body[data-theme="light"] .energy-star.neutral {

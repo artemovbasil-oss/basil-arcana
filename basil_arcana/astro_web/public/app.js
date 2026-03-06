@@ -1274,7 +1274,8 @@ function renderEnergyChart(dashboard, period) {
       id: friend.id,
       name: friend.name,
       path: buildSmoothPath(friendPoints),
-      isHistorical: Boolean(friend.isHistorical)
+      isHistorical: Boolean(friend.isHistorical),
+      values: friend.values
     };
   });
   const hasHistoricalPaths = friendPaths.some((friend) => friend.isHistorical);
@@ -1291,6 +1292,10 @@ function renderEnergyChart(dashboard, period) {
         aria-label="Energy trend chart"
         data-min-x="${padX}"
         data-max-x="${width - padX}"
+        data-pad-y="${padY}"
+        data-chart-bottom="${chartBottom}"
+        data-point-count="${series.values.length}"
+        data-user-values="${series.values.join(",")}"
       >
         <line class="energy-axis" x1="${padX}" y1="${chartBottom}" x2="${width - padX}" y2="${chartBottom}" />
         ${points
@@ -1299,11 +1304,12 @@ function renderEnergyChart(dashboard, period) {
         ${friendPaths
           .map(
             (friend) => `
-              <path class="energy-friend-line ${friend.isHistorical ? "energy-friend-line--historical" : "energy-friend-line--friend"}" d="${friend.path}" />
-              <path class="energy-friend-hit" d="${friend.path}" data-friend-name="${escapeHtml(friend.name)}" />
+              <path class="energy-friend-line ${friend.isHistorical ? "energy-friend-line--historical" : "energy-friend-line--friend"}" d="${friend.path}" data-friend-id="${escapeHtml(friend.id)}" />
+              <path class="energy-friend-hit" d="${friend.path}" data-friend-id="${escapeHtml(friend.id)}" data-friend-name="${escapeHtml(friend.name)}" data-friend-values="${friend.values.join(",")}" />
             `
           )
           .join("")}
+        <g class="energy-friend-compare-layer" aria-hidden="true"></g>
         <line class="energy-hover-line" x1="${padX}" y1="${padY}" x2="${padX}" y2="${chartBottom}" />
         <path class="energy-line" d="${linePath}" />
         ${points
@@ -2171,6 +2177,113 @@ async function initHomeOrbitWidgets(dashboard, period) {
 }
 
 function bindEnergyChartInteractions() {
+  const parseCsvNumbers = (input) =>
+    String(input || "")
+      .split(",")
+      .map((item) => Number(item))
+      .filter((item) => Number.isFinite(item));
+  const valueToY = (value, padY, chartBottom) => chartBottom - (value / 100) * (chartBottom - padY);
+  const buildPolylines = (segments) => {
+    const paths = [];
+    let current = [];
+    const flush = () => {
+      if (current.length < 2) {
+        current = [];
+        return;
+      }
+      const d = current.map((pt, idx) => `${idx === 0 ? "M" : "L"} ${pt.x.toFixed(2)} ${pt.y.toFixed(2)}`).join(" ");
+      paths.push(d);
+      current = [];
+    };
+    segments.forEach((segment) => {
+      const start = { x: segment.x0, y: segment.y0 };
+      const end = { x: segment.x1, y: segment.y1 };
+      const prev = current[current.length - 1];
+      const connected = prev && Math.abs(prev.x - start.x) < 0.01 && Math.abs(prev.y - start.y) < 0.01;
+      if (!connected) {
+        flush();
+        current.push(start);
+      }
+      current.push(end);
+    });
+    flush();
+    return paths;
+  };
+  const updateFriendComparisonLayer = (svg, friendPath) => {
+    const layer = svg.querySelector(".energy-friend-compare-layer");
+    if (!(layer instanceof SVGGElement)) {
+      return;
+    }
+    const userValues = parseCsvNumbers(svg.getAttribute("data-user-values"));
+    const friendValues = parseCsvNumbers(friendPath.getAttribute("data-friend-values"));
+    const minX = Number(svg.getAttribute("data-min-x")) || 18;
+    const maxX = Number(svg.getAttribute("data-max-x")) || 962;
+    const padY = Number(svg.getAttribute("data-pad-y")) || 18;
+    const chartBottom = Number(svg.getAttribute("data-chart-bottom")) || 200;
+    const count = Number(svg.getAttribute("data-point-count")) || Math.min(userValues.length, friendValues.length);
+    const size = Math.max(0, Math.min(count, userValues.length, friendValues.length));
+    if (size < 2) {
+      layer.innerHTML = "";
+      return;
+    }
+    const stepX = (maxX - minX) / Math.max(1, size - 1);
+    const greenSegments = [];
+    const redSegments = [];
+    const intersections = [];
+    const pushSegment = (target, x0, y0, x1, y1) => {
+      target.push({ x0, y0, x1, y1 });
+    };
+
+    for (let i = 0; i < size - 1; i += 1) {
+      const x0 = minX + i * stepX;
+      const x1 = minX + (i + 1) * stepX;
+      const friendY0 = valueToY(friendValues[i], padY, chartBottom);
+      const friendY1 = valueToY(friendValues[i + 1], padY, chartBottom);
+      const userY0 = valueToY(userValues[i], padY, chartBottom);
+      const userY1 = valueToY(userValues[i + 1], padY, chartBottom);
+      const delta0 = friendY0 - userY0;
+      const delta1 = friendY1 - userY1;
+      const isAboveStart = delta0 < 0;
+      const isAboveEnd = delta1 < 0;
+      const hasCross = (delta0 === 0 || delta1 === 0) ? true : (delta0 > 0 && delta1 < 0) || (delta0 < 0 && delta1 > 0);
+
+      if (hasCross) {
+        const denom = (delta0 - delta1);
+        const tRaw = Math.abs(denom) < 1e-6 ? 0.5 : delta0 / denom;
+        const t = Math.max(0, Math.min(1, tRaw));
+        const crossX = x0 + (x1 - x0) * t;
+        const crossY = friendY0 + (friendY1 - friendY0) * t;
+        intersections.push({ x: crossX, y: crossY });
+
+        if (isAboveStart) {
+          pushSegment(greenSegments, x0, friendY0, crossX, crossY);
+          pushSegment(redSegments, crossX, crossY, x1, friendY1);
+        } else {
+          pushSegment(redSegments, x0, friendY0, crossX, crossY);
+          pushSegment(greenSegments, crossX, crossY, x1, friendY1);
+        }
+      } else if (isAboveStart && isAboveEnd) {
+        pushSegment(greenSegments, x0, friendY0, x1, friendY1);
+      } else {
+        pushSegment(redSegments, x0, friendY0, x1, friendY1);
+      }
+    }
+
+    const greenPaths = buildPolylines(greenSegments);
+    const redPaths = buildPolylines(redSegments);
+    layer.innerHTML = `
+      ${greenPaths.map((d) => `<path class="energy-friend-compare energy-friend-compare--above" d="${d}" />`).join("")}
+      ${redPaths.map((d) => `<path class="energy-friend-compare energy-friend-compare--below" d="${d}" />`).join("")}
+      ${intersections.map((pt) => `<circle class="energy-friend-cross" cx="${pt.x.toFixed(2)}" cy="${pt.y.toFixed(2)}" r="3.1" />`).join("")}
+    `;
+  };
+  const clearFriendComparisonLayer = (svg) => {
+    const layer = svg.querySelector(".energy-friend-compare-layer");
+    if (layer) {
+      layer.innerHTML = "";
+    }
+  };
+
   document.querySelectorAll(".energy-chart").forEach((svg) => {
     const hoverLine = svg.querySelector(".energy-hover-line");
     if (!hoverLine) {
@@ -2212,16 +2325,48 @@ function bindEnergyChartInteractions() {
     const hideFriendTooltip = () => {
       tooltip.style.opacity = "0";
     };
+    const setActiveFriendLine = (friendId) => {
+      const id = String(friendId || "").trim();
+      svg.querySelectorAll(".energy-friend-line").forEach((line) => {
+        const same = String(line.getAttribute("data-friend-id") || "") === id;
+        line.classList.toggle("is-active", Boolean(id) && same);
+        line.classList.toggle("is-muted", Boolean(id) && !same);
+      });
+    };
+    const clearActiveFriendLine = () => {
+      svg.querySelectorAll(".energy-friend-line").forEach((line) => {
+        line.classList.remove("is-active");
+        line.classList.remove("is-muted");
+      });
+    };
     svg.querySelectorAll(".energy-friend-hit").forEach((path) => {
       path.addEventListener("mouseenter", (event) => {
         const name = path.getAttribute("data-friend-name") || "Friend";
+        const friendId = path.getAttribute("data-friend-id") || "";
+        path.classList.add("active");
+        setActiveFriendLine(friendId);
+        updateFriendComparisonLayer(svg, path);
         showFriendTooltip(event, name);
       });
       path.addEventListener("mousemove", (event) => {
         const name = path.getAttribute("data-friend-name") || "Friend";
+        const friendId = path.getAttribute("data-friend-id") || "";
+        path.classList.add("active");
+        setActiveFriendLine(friendId);
+        updateFriendComparisonLayer(svg, path);
         showFriendTooltip(event, name);
       });
-      path.addEventListener("mouseleave", hideFriendTooltip);
+      path.addEventListener("mouseleave", () => {
+        path.classList.remove("active");
+        clearFriendComparisonLayer(svg);
+        clearActiveFriendLine();
+        hideFriendTooltip();
+      });
+    });
+    svg.addEventListener("mouseleave", () => {
+      clearFriendComparisonLayer(svg);
+      clearActiveFriendLine();
+      svg.querySelectorAll(".energy-friend-hit.active").forEach((path) => path.classList.remove("active"));
     });
   });
 }
