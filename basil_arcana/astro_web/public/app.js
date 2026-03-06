@@ -691,6 +691,8 @@ const uiIconClasses = {
   chart: "mdi:chart-line",
   layers: "mdi:layers-outline",
   checklist: "mdi:clipboard-check-outline",
+  focus: "mdi:target",
+  relationships: "mdi:account-group-outline",
   moonphase: "mdi:moon-waxing-crescent",
   sun: "mdi:white-balance-sunny",
   sunrise: "mdi:weather-sunset-up",
@@ -2822,6 +2824,35 @@ function renderFriendGauge(score) {
   `;
 }
 
+function renderTimingWindowPills(windows = []) {
+  const list = Array.isArray(windows) ? windows : [];
+  if (!list.length) {
+    return `<span class="timing-pill muted">No windows yet</span>`;
+  }
+  return list
+    .map((window) => `<span class="timing-pill"><strong>${window.label}</strong> <em>${Math.max(0, Math.min(100, Number(window.score) || 0))}</em></span>`)
+    .join("");
+}
+
+function renderFriendSharedTiming(friend) {
+  const windows = Array.isArray(friend?.sharedTiming?.windows) ? friend.sharedTiming.windows : [];
+  if (!windows.length) {
+    return "";
+  }
+  const summary = String(friend?.sharedTiming?.summary || "").trim();
+  return `
+    <article class="friend-shared-timing">
+      <div class="friend-shared-timing-head">
+        <span class="eyebrow">Shared windows today</span>
+      </div>
+      <div class="friend-shared-timing-pills">
+        ${renderTimingWindowPills(windows)}
+      </div>
+      ${summary ? `<p class="muted">${summary}</p>` : ""}
+    </article>
+  `;
+}
+
 function renderFriendAccordion(friend, { expanded = false, canDelete = false } = {}) {
   const score = Math.max(0, Math.min(100, Math.round(Number(friend?.score) || 0)));
   const highlights = Array.isArray(friend?.highlights) ? friend.highlights : [];
@@ -2871,6 +2902,7 @@ function renderFriendAccordion(friend, { expanded = false, canDelete = false } =
           <span>Birth time: ${friend.friendBirthTime || "N/A"}</span>
           <span>Birth place: ${friend.friendBirthCity || "N/A"}</span>
         </div>
+        ${renderFriendSharedTiming(friend)}
         ${friend?.natalMini?.summary && !historicalCompanion ? `<p class="muted">${friend.natalMini.summary}</p>` : ""}
         ${renderFriendZodiacSnippet(friend.friendSign)}
         <div class="friend-domain-grid">
@@ -2929,6 +2961,51 @@ function renderForecastSummary(dashboard, period) {
   return `
     <p><strong>${periodLabel} intensity: ${intensity}/100.</strong> ${dashboard?.periodForecast?.summary || ""}</p>
     ${detailBlock}
+  `;
+}
+
+function renderPersonalTimingEngine(dashboard) {
+  const engine = dashboard?.personalTiming || {};
+  const objectives = engine?.objectives || {};
+  const cards = [
+    { key: "negotiation", icon: uiIcon("relationships"), fallbackTitle: "Negotiations" },
+    { key: "focus", icon: uiIcon("focus"), fallbackTitle: "Deep focus" },
+    { key: "rest", icon: uiIcon("moonphase"), fallbackTitle: "Recovery" }
+  ];
+  const content = cards
+    .map((item) => {
+      const objective = objectives[item.key] || {};
+      const title = String(objective.title || item.fallbackTitle);
+      const subtitle = String(objective.subtitle || "");
+      const reason = String(objective.reason || "");
+      const windows = Array.isArray(objective.windows) ? objective.windows : [];
+      return `
+        <article class="timing-engine-card">
+          <h3>${item.icon} ${title}</h3>
+          ${subtitle ? `<p class="timing-engine-sub">${subtitle}</p>` : ""}
+          <div class="timing-engine-pills">
+            ${renderTimingWindowPills(windows)}
+          </div>
+          ${reason ? `<p class="timing-engine-note">${reason}</p>` : ""}
+        </article>
+      `;
+    })
+    .join("");
+  return `
+    <section class="section">
+      <article class="card timing-engine">
+        <div class="dashboard-head timing-engine-head">
+          <div>
+            <span class="eyebrow">Personal timing engine</span>
+            <h2>Best 2 windows of your day</h2>
+          </div>
+          <span class="timing-engine-index">Rhythm ${Math.max(0, Math.min(100, Number(engine?.intensity) || 0))}/100</span>
+        </div>
+        <div class="timing-engine-grid">
+          ${content}
+        </div>
+      </article>
+    </section>
   `;
 }
 
@@ -4232,6 +4309,7 @@ function renderHomeDashboard(dashboard) {
   const zodiacCompact = renderHomeZodiacCompact(dashboard.natalCore?.sun);
   const zodiacCelebBlock = renderZodiacCelebrities(dashboard.natalCore?.sun);
   const solarSystemBlock = renderSolarSystemBlock(dashboard, period);
+  const personalTimingEngine = renderPersonalTimingEngine(dashboard);
   const orbitInsightFloor = renderOrbitalInsightFloor(dashboard, period);
 
   return `
@@ -4264,6 +4342,7 @@ function renderHomeDashboard(dashboard) {
         <div id="homeForecastBlock" class="dashboard-swap">${forecastSummary}</div>
       </article>
     </section>
+    ${personalTimingEngine}
     ${solarSystemBlock}
     ${zodiacCompact}
     <section class="section">

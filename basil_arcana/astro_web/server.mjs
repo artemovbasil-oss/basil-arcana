@@ -972,6 +972,25 @@ function signElement(sign) {
   return zodiacElements[String(sign || "").trim()] || "neutral";
 }
 
+const zodiacModalities = {
+  Aries: "cardinal",
+  Cancer: "cardinal",
+  Libra: "cardinal",
+  Capricorn: "cardinal",
+  Taurus: "fixed",
+  Leo: "fixed",
+  Scorpio: "fixed",
+  Aquarius: "fixed",
+  Gemini: "mutable",
+  Virgo: "mutable",
+  Sagittarius: "mutable",
+  Pisces: "mutable"
+};
+
+function signModality(sign) {
+  return zodiacModalities[String(sign || "").trim()] || "mutable";
+}
+
 function monthDayCount(now) {
   const year = now.getUTCFullYear();
   const month = now.getUTCMonth();
@@ -1220,6 +1239,182 @@ function buildCompatibilityDetail({ userSign, friendSign, friendName = "Friend",
   };
 }
 
+const timingWindowSlots = [
+  { start: 6, end: 8 },
+  { start: 8, end: 10 },
+  { start: 10, end: 12 },
+  { start: 12, end: 14 },
+  { start: 14, end: 16 },
+  { start: 16, end: 18 },
+  { start: 18, end: 20 },
+  { start: 20, end: 22 },
+  { start: 22, end: 24 }
+];
+
+function formatHourLabel(hour) {
+  const normalized = ((Number(hour) % 24) + 24) % 24;
+  return `${String(Math.floor(normalized)).padStart(2, "0")}:00`;
+}
+
+function formatWindowLabel(slot) {
+  return `${formatHourLabel(slot.start)}-${formatHourLabel(slot.end)}`;
+}
+
+function slotDistanceToAnchors(slot, anchors) {
+  const center = (slot.start + slot.end) / 2;
+  return Math.min(...anchors.map((anchor) => Math.abs(center - anchor)));
+}
+
+function timingObjectivesForSigns(natalCore) {
+  const sunElement = signElement(natalCore?.sun);
+  const moonElement = signElement(natalCore?.moon);
+  const risingModality = signModality(natalCore?.rising);
+
+  return {
+    negotiation: {
+      title: "Negotiations",
+      subtitle: "dialogue quality + alignment",
+      anchors: [10, 16.5, 19],
+      elementBias: sunElement === "air" || sunElement === "fire" ? 6 : 2,
+      modalityBias: risingModality === "cardinal" ? 4 : 1,
+      reason: "Best for difficult conversations, agreements, and expectation reset."
+    },
+    focus: {
+      title: "Deep focus",
+      subtitle: "execution + cognitive precision",
+      anchors: [8.5, 11, 15],
+      elementBias: sunElement === "earth" || sunElement === "air" ? 6 : 2,
+      modalityBias: risingModality === "fixed" ? 4 : 1,
+      reason: "Use for concentrated work, planning, and measurable output."
+    },
+    rest: {
+      title: "Recovery",
+      subtitle: "reset + nervous-system stability",
+      anchors: [13, 21, 23],
+      elementBias: moonElement === "water" || moonElement === "earth" ? 7 : 3,
+      modalityBias: risingModality === "mutable" ? 3 : 1,
+      reason: "Best for decompression, reflection, and energy restoration."
+    }
+  };
+}
+
+function chooseTopTimingWindows({
+  objectiveKey,
+  daySeed,
+  intensity,
+  objectiveConfig
+}) {
+  const slots = timingWindowSlots.map((slot, index) => {
+    const driftSeed = hashStringToInt(`${objectiveKey}:${daySeed}:${index}`);
+    const drift = ((driftSeed % 11) - 5) * 0.9;
+    const anchorDistance = slotDistanceToAnchors(slot, objectiveConfig.anchors);
+    const anchorScore = Math.max(0, 35 - anchorDistance * 10);
+    const intensityAdjustment =
+      objectiveKey === "rest"
+        ? (100 - intensity) * 0.26
+        : intensity * (objectiveKey === "focus" ? 0.22 : 0.18);
+    const score = Math.round(
+      42
+      + objectiveConfig.elementBias
+      + objectiveConfig.modalityBias
+      + anchorScore
+      + intensityAdjustment
+      + drift
+    );
+    return {
+      ...slot,
+      score: Math.max(40, Math.min(99, score))
+    };
+  });
+
+  const sorted = slots.sort((a, b) => b.score - a.score);
+  const picked = [];
+  for (const slot of sorted) {
+    const hasConflict = picked.some((selected) => Math.abs(selected.start - slot.start) < 2);
+    if (hasConflict) {
+      continue;
+    }
+    picked.push(slot);
+    if (picked.length === 2) {
+      break;
+    }
+  }
+  return picked.map((slot, idx) => ({
+    id: `${objectiveKey}-${idx + 1}`,
+    label: formatWindowLabel(slot),
+    startHour: slot.start,
+    endHour: slot.end,
+    score: slot.score
+  }));
+}
+
+function buildPersonalTimingEngine(profile, natalCore, periodForecast, dayKey) {
+  const objectives = timingObjectivesForSigns(natalCore || {});
+  const intensity = Math.max(0, Math.min(100, Number(periodForecast?.intensity || 50)));
+  const daySeed = hashStringToInt(`${profile?.name || "user"}:${dayKey}:${natalCore?.sun || "Unknown"}:${intensity}`);
+  const result = {};
+
+  Object.entries(objectives).forEach(([key, config]) => {
+    result[key] = {
+      title: config.title,
+      subtitle: config.subtitle,
+      reason: config.reason,
+      windows: chooseTopTimingWindows({
+        objectiveKey: key,
+        daySeed,
+        intensity,
+        objectiveConfig: config
+      })
+    };
+  });
+
+  return {
+    dateKey: dayKey,
+    intensity,
+    objectives: result
+  };
+}
+
+function buildSharedTimingWindows({ profile, natalCore, friendSign, dayKey, score }) {
+  const userSign = String(natalCore?.sun || signFromDate(profile?.birthDate || "") || "Unknown");
+  const safeFriendSign = String(friendSign || "Unknown");
+  const seed = hashStringToInt(`${profile?.name || "user"}:${userSign}:${safeFriendSign}:${dayKey}:${score}`);
+  const compatibilityBoost = Math.max(0, Math.min(22, Math.round((Number(score) - 50) * 0.4)));
+  const candidates = timingWindowSlots.map((slot, index) => {
+    const center = (slot.start + slot.end) / 2;
+    const dialogueAnchor = 11.5;
+    const collaborationAnchor = 17;
+    const scoreValue =
+      56
+      + compatibilityBoost
+      + Math.max(0, 24 - Math.abs(center - dialogueAnchor) * 7)
+      + Math.max(0, 16 - Math.abs(center - collaborationAnchor) * 6)
+      + (((seed + index * 17) % 9) - 4);
+    return {
+      ...slot,
+      score: Math.max(42, Math.min(98, Math.round(scoreValue)))
+    };
+  });
+  candidates.sort((a, b) => b.score - a.score);
+  const windows = [];
+  for (const slot of candidates) {
+    if (windows.some((item) => Math.abs(item.start - slot.start) < 2)) {
+      continue;
+    }
+    windows.push(slot);
+    if (windows.length === 2) {
+      break;
+    }
+  }
+  return windows.map((slot, idx) => ({
+    id: `shared-${idx + 1}`,
+    label: formatWindowLabel(slot),
+    startHour: slot.start,
+    endHour: slot.end,
+    score: slot.score
+  }));
+}
+
 function toBoolean(value) {
   if (typeof value === "boolean") {
     return value;
@@ -1358,6 +1553,13 @@ function buildDynamicCompatibility(profile, friend, dayKey, period, userSign) {
     period,
     seedKey: friend.id || friend.friendName
   });
+  const sharedWindows = buildSharedTimingWindows({
+    profile,
+    natalCore: { sun: normalizedUserSign, moon: profile?.birthDate ? moonFromDate(profile.birthDate) : "Unknown", rising: profile?.birthTime ? risingFromTime(profile.birthTime) : "Unknown" },
+    friendSign: resolvedFriendSign,
+    dayKey,
+    score: detail.score
+  });
   return {
     id: friend.id,
     friendName: friend.friendName,
@@ -1369,6 +1571,14 @@ function buildDynamicCompatibility(profile, friend, dayKey, period, userSign) {
     friendBirthTime: String(friend.friendBirthTime || ""),
     friendBirthCity: String(friend.friendBirthCity || ""),
     natalMini,
+    sharedTiming: {
+      summary: detail.score >= 70
+        ? "High-coherence windows for sync and shared execution."
+        : detail.score >= 60
+          ? "Usable windows if scope and ownership stay explicit."
+          : "Use tighter windows with explicit checkpoints.",
+      windows: sharedWindows
+    },
     ...detail
   };
 }
@@ -1902,6 +2112,7 @@ function buildDashboardPayload(sessionData, period = "week") {
   };
 
   const periodForecast = buildPeriodForecast(period, profile, now, natalCore);
+  const personalTiming = buildPersonalTimingEngine(profile, natalCore, periodForecast, dayKey);
   const friendsDynamic = (sessionData.friends || []).map((friend) => buildDynamicCompatibility(profile, friend, dayKey, period, natalCore.sun));
   const selectedCelebrityIds = Array.isArray(profile.selectedCelebrityIds) ? profile.selectedCelebrityIds.slice(0, 3) : [];
   const celebrityComparisons = selectedCelebrityIds
@@ -1946,6 +2157,16 @@ function buildDashboardPayload(sessionData, period = "week") {
     advice: "",
     rationale: item.fact,
     biography: item.fact,
+    sharedTiming: {
+      summary: "Use these windows for reflection and comparison against your own pacing.",
+      windows: buildSharedTimingWindows({
+        profile,
+        natalCore,
+        friendSign: item.sign,
+        dayKey,
+        score: item.score
+      })
+    },
     domains: [],
     noShareData: true,
     natalMini: {
@@ -1965,6 +2186,7 @@ function buildDashboardPayload(sessionData, period = "week") {
     natalCore,
     daily,
     periodForecast,
+    personalTiming,
     friendsDynamic: [...friendsDynamic, ...celebrityDynamic],
     celebrityComparisons
   };
