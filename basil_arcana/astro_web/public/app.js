@@ -1005,6 +1005,9 @@ function shell({ eyebrow, title, intro, primaryCta, secondaryCta, rightPanel, bo
 }
 
 function energyPointLabel(period, index) {
+  if (period === "day") {
+    return `${String(index).padStart(2, "0")}:00`;
+  }
   if (period === "week") {
     return ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][index] || `D${index + 1}`;
   }
@@ -1037,6 +1040,9 @@ function formatShortDateLabel(value = new Date()) {
 
 function todayIndexForPeriod(period, length) {
   const now = new Date();
+  if (period === "day") {
+    return Math.max(0, Math.min(length - 1, now.getHours()));
+  }
   if (period === "year") {
     return Math.max(0, Math.min(length - 1, now.getMonth()));
   }
@@ -1049,6 +1055,9 @@ function todayIndexForPeriod(period, length) {
 }
 
 function todayMarkerValue(period) {
+  if (period === "day") {
+    return String(new Date().getHours()).padStart(2, "0");
+  }
   return String(new Date().getDate());
 }
 
@@ -1086,7 +1095,7 @@ function buildEnergySeries(dashboard, period) {
   }
   const profile = dashboard?.profile;
   const intensity = Number(dashboard?.periodForecast?.intensity || 50);
-  const count = period === "year" ? 12 : period === "month" ? daysInCurrentMonth() : 7;
+  const count = period === "day" ? 24 : period === "year" ? 12 : period === "month" ? daysInCurrentMonth() : 7;
   const baseSeed = stringHash(`${profile?.name || "anon"}:${profile?.birthDate || "0000-00-00"}:${period}:${intensity}`);
   const baseline = Math.max(28, Math.min(82, Number(intensity) || 50));
   const values = Array.from({ length: count }, (_, index) => {
@@ -1228,6 +1237,16 @@ function isMobileViewport() {
 }
 
 function visibleLabelIndexes(length, period) {
+  if (period === "day") {
+    const result = [];
+    for (let idx = 0; idx < length; idx += 3) {
+      result.push(idx);
+    }
+    if (!result.includes(length - 1)) {
+      result.push(length - 1);
+    }
+    return result;
+  }
   if (period === "week") {
     return Array.from({ length }, (_, idx) => idx);
   }
@@ -1384,7 +1403,7 @@ function renderEnergyCards(dashboard, period, options = {}) {
   const todayValue = series.values[todayIndex] || 0;
   const peakValue = series.values[series.peakIndex] || 0;
   const dipValue = series.values[series.dipIndex] || 0;
-  const periodLabel = period === "year" ? "Year" : period === "month" ? "Month" : "Week";
+  const periodLabel = period === "year" ? "Year" : period === "month" ? "Month" : period === "day" ? "Day" : "Week";
   return `
     <div class="energy-cards">
       <article class="energy-card">
@@ -1453,7 +1472,7 @@ function transitionSeries(dashboard, period) {
 
 function bodyCycleData(dashboard, period) {
   const transits = transitionSeries(dashboard, period);
-  const periodSize = period === "year" ? 12 : period === "month" ? daysInCurrentMonth() : 7;
+  const periodSize = period === "year" ? 12 : period === "month" ? daysInCurrentMonth() : period === "day" ? 24 : 7;
   const idx = todayIndexForPeriod(period, periodSize);
   const current = transits[idx] || {};
   const signs = [current?.sun?.sign || dashboard?.natalCore?.sun, current?.moon?.sign || dashboard?.natalCore?.moon, current?.rising?.sign || dashboard?.natalCore?.rising];
@@ -1611,7 +1630,7 @@ function renderCyclePanel(dashboard, period) {
   const step = (width - 54) / Math.max(1, values.length - 1);
   const pts = values.map((v, i) => `${28 + i * step},${y(v)}`).join(" ");
   const markerX = 28 + todayIndexForPeriod(period, values.length) * step;
-  const duration = period === "week" ? 7 : period === "month" ? 12 : 18;
+  const duration = period === "day" ? 5 : period === "week" ? 7 : period === "month" ? 12 : 18;
   return `
     <article class="astro-viz-card">
       <h3>Cycle through ${period}</h3>
@@ -1762,6 +1781,9 @@ function destroyHomeOrbitWidgets() {
 }
 
 function orbitPeriodSpeedScale(period) {
+  if (period === "day") {
+    return 1.36;
+  }
   if (period === "year") {
     return 0.58;
   }
@@ -2830,7 +2852,11 @@ function renderTimingWindowPills(windows = []) {
     return `<span class="timing-pill muted">No windows yet</span>`;
   }
   return list
-    .map((window) => `<span class="timing-pill"><strong>${window.label}</strong> <em>${Math.max(0, Math.min(100, Number(window.score) || 0))}</em></span>`)
+    .map((window) => {
+      const score = Math.max(0, Math.min(100, Number(window.score) || 0));
+      const tierClass = score > 90 ? "is-high" : score >= 60 ? "is-mid" : "is-low";
+      return `<span class="timing-pill ${tierClass}"><strong>${window.label}</strong> <em>${score}</em></span>`;
+    })
     .join("");
 }
 
@@ -2953,7 +2979,7 @@ function renderFriendsBlock(dashboard, period) {
 }
 
 function renderForecastSummary(dashboard, period) {
-  const periodLabel = period === "year" ? "Year" : period === "month" ? "Month" : "Week";
+  const periodLabel = period === "year" ? "Year" : period === "month" ? "Month" : period === "day" ? "Day" : "Week";
   const intensity = Number(dashboard?.periodForecast?.intensity || 0);
   const detailBlock = isMobileViewport()
     ? `${renderEnergyChart(dashboard, period)}${renderEnergyCards(dashboard, period, { includeTable: false })}`
@@ -3216,7 +3242,7 @@ function renderSolarMobileMatrix(aspects, selectedKey = "__all__") {
 
 function renderSolarSceneInfo(dashboard, period) {
   const today = new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
-  const periodLabel = period === "year" ? "Year" : period === "month" ? "Month" : "Week";
+  const periodLabel = period === "year" ? "Year" : period === "month" ? "Month" : period === "day" ? "Day" : "Week";
   const intensity = clampScore(dashboard?.periodForecast?.intensity || 0);
   const sun = dashboard?.natalCore?.sun || "Unknown";
   const moon = dashboard?.natalCore?.moon || "Unknown";
@@ -4334,6 +4360,7 @@ function renderHomeDashboard(dashboard) {
         <div class="dashboard-head">
           <h2>Forecast</h2>
           <div class="period-switch">
+            <button class="btn ghost js-period ${period === "day" ? "is-active" : ""}" data-period="day" type="button">Day</button>
             <button class="btn ghost js-period ${period === "week" ? "is-active" : ""}" data-period="week" type="button">Week</button>
             <button class="btn ghost js-period ${period === "month" ? "is-active" : ""}" data-period="month" type="button">Month</button>
             <button class="btn ghost js-period ${period === "year" ? "is-active" : ""}" data-period="year" type="button">Year</button>

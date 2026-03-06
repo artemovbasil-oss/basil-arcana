@@ -1001,7 +1001,7 @@ function buildRealEnergySeries(profile, period, now, natalCore) {
   if (!hasUsableCoordinates(profile)) {
     return null;
   }
-  const count = period === "year" ? 12 : period === "month" ? monthDayCount(now) : 7;
+  const count = period === "day" ? 24 : period === "year" ? 12 : period === "month" ? monthDayCount(now) : 7;
   const year = now.getUTCFullYear();
   const month = now.getUTCMonth();
   const labels = [];
@@ -1009,7 +1009,10 @@ function buildRealEnergySeries(profile, period, now, natalCore) {
   const transits = [];
   for (let idx = 0; idx < count; idx += 1) {
     let pointDate;
-    if (period === "year") {
+    if (period === "day") {
+      pointDate = new Date(Date.UTC(year, month, now.getUTCDate(), idx, 0, 0));
+      labels.push(`${String(idx).padStart(2, "0")}:00`);
+    } else if (period === "year") {
       pointDate = new Date(Date.UTC(year, idx, 1, 12, 0, 0));
       labels.push(["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][idx]);
     } else if (period === "month") {
@@ -1127,13 +1130,14 @@ function hashStringToInt(value) {
 }
 
 function buildPeriodForecast(period, profile, now, natalCore) {
-  const normalizedPeriod = ["week", "month", "year"].includes(period) ? period : "week";
+  const normalizedPeriod = ["day", "week", "month", "year"].includes(period) ? period : "week";
   const daySeed = Number(now.toISOString().slice(0, 10).replaceAll("-", ""));
   const sign = signFromDate(profile.birthDate);
   const base = hashStringToInt(`${profile.name}:${sign}:${normalizedPeriod}:${daySeed}`);
   const intensity = 45 + (base % 51);
 
   const messageByPeriod = {
+    day: "For today, protect the top two high-signal windows and avoid context switching around peak hours.",
     week: `For this week, stabilize execution tempo: one strategic move per day beats reactive bursts.`,
     month: `For this month, build structural momentum: reduce context switching and protect recurring focus windows.`,
     year: `For this year, your best outcomes come from long-range consistency and explicit partnership boundaries.`
@@ -2680,7 +2684,7 @@ const contracts = {
     }
   },
   dashboard: {
-    get: "GET /api/dashboard?period=week|month|year",
+    get: "GET /api/dashboard?period=day|week|month|year",
     response: {
       profile: "profile",
       natalCore: { sun: "string", moon: "string", rising: "string" },
@@ -2691,7 +2695,7 @@ const contracts = {
         horoscopeToday: "string"
       },
       periodForecast: {
-        period: "week|month|year",
+        period: "day|week|month|year",
         intensity: "number",
         summary: "string"
       },
@@ -3388,7 +3392,7 @@ app.post("/api/compatibility-report", requireAuth, (req, res) => {
 
 app.get("/api/dashboard", requireAuth, async (req, res) => {
   const requestedPeriod = String(req.query?.period || "week").trim().toLowerCase();
-  const period = ["week", "month", "year"].includes(requestedPeriod) ? requestedPeriod : "week";
+  const period = ["day", "week", "month", "year"].includes(requestedPeriod) ? requestedPeriod : "week";
   const current = pickProfile({ profile: req.userData.profile });
   await hydrateAndPersistProfileCoordinates(req, current);
   const payload = buildDashboardPayload(req.userData, period);

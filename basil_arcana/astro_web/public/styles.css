@@ -1782,6 +1782,27 @@ body[data-theme="dark"] .form-grid input[type="time"]::-webkit-calendar-picker-i
   font-size: 0.62rem;
 }
 
+.timing-pill.is-high {
+  border-color: color-mix(in srgb, #1f9d55 72%, var(--line-strong) 28%);
+  background: color-mix(in srgb, #1f9d55 18%, var(--surface) 82%);
+}
+
+.timing-pill.is-mid {
+  border-color: color-mix(in srgb, #e6c84c 72%, var(--line-strong) 28%);
+  background: color-mix(in srgb, #e6c84c 15%, var(--surface) 85%);
+}
+
+.timing-pill.is-low {
+  border-color: color-mix(in srgb, #e4872f 74%, var(--line-strong) 26%);
+  background: color-mix(in srgb, #e4872f 16%, var(--surface) 84%);
+}
+
+.timing-pill.is-high em,
+.timing-pill.is-mid em,
+.timing-pill.is-low em {
+  color: var(--ink);
+}
+
 .friend-row {
   padding: 0.72rem;
   display: flex;
