@@ -1280,6 +1280,7 @@ function renderEnergyChart(dashboard, period) {
   });
   const hasHistoricalPaths = friendPaths.some((friend) => friend.isHistorical);
   const hasFriendPaths = friendPaths.some((friend) => !friend.isHistorical);
+  const mobileMode = isMobileViewport();
 
   const todayBadgeY = todayPoint.y;
   const todayBadgeRadius = period === "year" ? 11 : 10;
@@ -1337,12 +1338,43 @@ function renderEnergyChart(dashboard, period) {
         ${hasFriendPaths ? `<span><i class="dot friend"></i> Friend trajectories</span>` : ""}
         ${hasHistoricalPaths ? `<span><i class="dot historical"></i> Historical companions</span>` : ""}
       </div>
+      ${
+        mobileMode && friendPaths.length
+          ? `
+            <div class="energy-mobile-tools">
+              <div class="energy-mobile-tools-head">
+                <span>Compare with friends</span>
+                <button type="button" class="btn ghost energy-mobile-clear" data-energy-clear>Reset</button>
+              </div>
+              <div class="energy-mobile-friend-list">
+                ${friendPaths
+                  .map(
+                    (friend) => `
+                      <button
+                        type="button"
+                        class="energy-mobile-friend-chip"
+                        data-energy-friend-id="${escapeHtml(friend.id)}"
+                        data-energy-friend-name="${escapeHtml(friend.name)}"
+                      >
+                        ${escapeHtml(friend.name)}
+                        ${friend.isHistorical ? `<span class="energy-mobile-friend-kind">historical</span>` : ""}
+                      </button>
+                    `
+                  )
+                  .join("")}
+              </div>
+              <p class="energy-mobile-status muted">Tap a friend to highlight intersections and above/below segments.</p>
+            </div>
+          `
+          : ""
+      }
       <div class="energy-friend-tooltip" aria-hidden="true"></div>
     </div>
   `;
 }
 
-function renderEnergyCards(dashboard, period) {
+function renderEnergyCards(dashboard, period, options = {}) {
+  const includeTable = options.includeTable !== false;
   const intensity = Number(dashboard?.periodForecast?.intensity || 50);
   const series = buildEnergySeries(dashboard, period);
   const todayIndex = todayIndexForPeriod(period, series.values.length);
@@ -1370,7 +1402,7 @@ function renderEnergyCards(dashboard, period) {
         <strong>${intensity}/100</strong>
       </article>
     </div>
-    ${renderFriendEnergyTable(dashboard, period, series)}
+    ${includeTable ? renderFriendEnergyTable(dashboard, period, series) : ""}
   `;
 }
 
@@ -2309,6 +2341,8 @@ function bindEnergyChartInteractions() {
 
     const wrap = svg.closest(".energy-chart-wrap");
     const tooltip = wrap?.querySelector(".energy-friend-tooltip");
+    const mobileStatus = wrap?.querySelector(".energy-mobile-status");
+    let lockedFriendId = "";
     if (!(tooltip instanceof HTMLElement) || !(wrap instanceof HTMLElement)) {
       return;
     }
@@ -2325,6 +2359,12 @@ function bindEnergyChartInteractions() {
     const hideFriendTooltip = () => {
       tooltip.style.opacity = "0";
     };
+    const setMobileStatus = (text) => {
+      if (!(mobileStatus instanceof HTMLElement)) {
+        return;
+      }
+      mobileStatus.textContent = text;
+    };
     const setActiveFriendLine = (friendId) => {
       const id = String(friendId || "").trim();
       svg.querySelectorAll(".energy-friend-line").forEach((line) => {
@@ -2339,8 +2379,23 @@ function bindEnergyChartInteractions() {
         line.classList.remove("is-muted");
       });
     };
+    const applyFriendFocus = (friendPath, friendName = "Friend") => {
+      if (!(friendPath instanceof SVGPathElement)) {
+        clearFriendComparisonLayer(svg);
+        clearActiveFriendLine();
+        setMobileStatus("Tap a friend to highlight intersections and above/below segments.");
+        return;
+      }
+      const friendId = friendPath.getAttribute("data-friend-id") || "";
+      setActiveFriendLine(friendId);
+      updateFriendComparisonLayer(svg, friendPath);
+      setMobileStatus(`${friendName}: green = above your line, red = below, red dots = intersections.`);
+    };
     svg.querySelectorAll(".energy-friend-hit").forEach((path) => {
       path.addEventListener("mouseenter", (event) => {
+        if (lockedFriendId) {
+          return;
+        }
         const name = path.getAttribute("data-friend-name") || "Friend";
         const friendId = path.getAttribute("data-friend-id") || "";
         path.classList.add("active");
@@ -2349,6 +2404,9 @@ function bindEnergyChartInteractions() {
         showFriendTooltip(event, name);
       });
       path.addEventListener("mousemove", (event) => {
+        if (lockedFriendId) {
+          return;
+        }
         const name = path.getAttribute("data-friend-name") || "Friend";
         const friendId = path.getAttribute("data-friend-id") || "";
         path.classList.add("active");
@@ -2357,16 +2415,61 @@ function bindEnergyChartInteractions() {
         showFriendTooltip(event, name);
       });
       path.addEventListener("mouseleave", () => {
+        if (lockedFriendId) {
+          return;
+        }
         path.classList.remove("active");
         clearFriendComparisonLayer(svg);
         clearActiveFriendLine();
         hideFriendTooltip();
       });
+      path.addEventListener("click", () => {
+        const friendId = path.getAttribute("data-friend-id") || "";
+        const friendName = path.getAttribute("data-friend-name") || "Friend";
+        if (!friendId) {
+          return;
+        }
+        lockedFriendId = friendId;
+        applyFriendFocus(path, friendName);
+        wrap.querySelectorAll(".energy-mobile-friend-chip").forEach((chip) => {
+          chip.classList.toggle("is-active", chip.getAttribute("data-energy-friend-id") === friendId);
+        });
+      });
     });
     svg.addEventListener("mouseleave", () => {
+      if (lockedFriendId) {
+        return;
+      }
       clearFriendComparisonLayer(svg);
       clearActiveFriendLine();
       svg.querySelectorAll(".energy-friend-hit.active").forEach((path) => path.classList.remove("active"));
+    });
+
+    wrap.querySelectorAll(".energy-mobile-friend-chip").forEach((chip) => {
+      chip.addEventListener("click", () => {
+        const friendId = String(chip.getAttribute("data-energy-friend-id") || "").trim();
+        const friendName = String(chip.getAttribute("data-energy-friend-name") || "Friend").trim();
+        if (!friendId) {
+          return;
+        }
+        lockedFriendId = friendId;
+        wrap.querySelectorAll(".energy-mobile-friend-chip").forEach((btn) => btn.classList.remove("is-active"));
+        chip.classList.add("is-active");
+        const hitPath = Array.from(svg.querySelectorAll(".energy-friend-hit")).find(
+          (node) => String(node.getAttribute("data-friend-id") || "").trim() === friendId
+        ) || null;
+        applyFriendFocus(hitPath, friendName || "Friend");
+      });
+    });
+
+    const clearButton = wrap.querySelector("[data-energy-clear]");
+    clearButton?.addEventListener("click", () => {
+      lockedFriendId = "";
+      wrap.querySelectorAll(".energy-mobile-friend-chip").forEach((btn) => btn.classList.remove("is-active"));
+      clearFriendComparisonLayer(svg);
+      clearActiveFriendLine();
+      hideFriendTooltip();
+      setMobileStatus("Tap a friend to highlight intersections and above/below segments.");
     });
   });
 }
@@ -2820,7 +2923,9 @@ function renderFriendsBlock(dashboard, period) {
 function renderForecastSummary(dashboard, period) {
   const periodLabel = period === "year" ? "Year" : period === "month" ? "Month" : "Week";
   const intensity = Number(dashboard?.periodForecast?.intensity || 0);
-  const detailBlock = isMobileViewport() ? renderEnergyCards(dashboard, period) : renderEnergyChart(dashboard, period);
+  const detailBlock = isMobileViewport()
+    ? `${renderEnergyChart(dashboard, period)}${renderEnergyCards(dashboard, period, { includeTable: false })}`
+    : renderEnergyChart(dashboard, period);
   return `
     <p><strong>${periodLabel} intensity: ${intensity}/100.</strong> ${dashboard?.periodForecast?.summary || ""}</p>
     ${detailBlock}

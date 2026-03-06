@@ -2347,6 +2347,72 @@ body[data-theme="dark"] .form-grid input[type="time"]::-webkit-calendar-picker-i
   pointer-events: none;
 }
 
+.energy-mobile-tools {
+  margin-top: 0.58rem;
+  display: grid;
+  gap: 0.48rem;
+}
+
+.energy-mobile-tools-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.energy-mobile-tools-head span {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.energy-mobile-clear {
+  padding: 0.22rem 0.6rem;
+  min-height: 30px;
+  font-size: 0.68rem;
+}
+
+.energy-mobile-friend-list {
+  display: flex;
+  gap: 0.4rem;
+  overflow-x: auto;
+  padding-bottom: 0.2rem;
+  scrollbar-width: thin;
+}
+
+.energy-mobile-friend-chip {
+  border: 1px solid var(--line-strong);
+  background: var(--surface-2);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 0.34rem 0.68rem;
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.32rem;
+}
+
+.energy-mobile-friend-chip.is-active {
+  border-color: color-mix(in srgb, #1f9d55 70%, var(--line-strong) 30%);
+  background: color-mix(in srgb, #1f9d55 17%, var(--surface-2) 83%);
+}
+
+.energy-mobile-friend-kind {
+  font-size: 0.58rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+}
+
+.energy-mobile-status {
+  margin: 0;
+  font-size: 0.74rem;
+  line-height: 1.35;
+}
+
 .astro-viz-sat-orbit {
   fill: none;
   stroke: color-mix(in srgb, var(--line-strong) 74%, var(--ink) 26%);
