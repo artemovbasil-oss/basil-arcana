@@ -4517,9 +4517,18 @@ body[data-theme="light"] .natal-starfield {
   text-transform: uppercase;
 }
 
+.natal-charge-line {
+  margin: 0.18rem 0 0;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--ink) 82%, var(--muted) 18%);
+}
+
 .natal-corner-tr {
   top: 0.25rem;
   right: 0.45rem;
+  text-align: right;
 }
 
 .natal-top-actions {
@@ -4529,12 +4538,7 @@ body[data-theme="light"] .natal-starfield {
 }
 
 .natal-charge-chip {
-  border: 1px solid var(--line-strong);
-  padding: 0.2rem 0.42rem;
-  font-size: 0.62rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  background: color-mix(in srgb, var(--surface) 84%, transparent 16%);
+  display: none;
 }
 
 .natal-corner-bl {
@@ -4607,6 +4611,7 @@ body[data-theme="light"] .natal-starfield {
 .natal-corner-br {
   right: 0.42rem;
   bottom: 0.38rem;
+  text-align: right;
 }
 
 .natal-chart-meta {
@@ -4696,7 +4701,8 @@ body[data-theme="light"] .natal-starfield {
 
 .natal-sign-icon {
   fill: color-mix(in srgb, var(--ink) 84%, var(--muted) 16%);
-  font-size: 20px;
+  font-family: "Noto Sans Symbols 2", "Segoe UI Symbol", "Apple Symbols", "Arial Unicode MS", sans-serif;
+  font-size: 22px;
   font-weight: 600;
   opacity: 0.96;
 }
@@ -4725,9 +4731,21 @@ body[data-theme="light"] .natal-starfield {
 
 .natal-aspect-line {
   stroke: #8f8f8f;
-  stroke-width: 1;
-  opacity: 0.88;
-  transition: stroke 0.14s ease, stroke-width 0.14s ease, opacity 0.14s ease;
+  stroke-width: 1.12;
+  opacity: 0.8;
+  transition: stroke 0.14s ease, stroke-width 0.14s ease, opacity 0.14s ease, filter 0.14s ease;
+  pointer-events: stroke;
+}
+
+.natal-aspect-sheen {
+  stroke: color-mix(in srgb, #ffffff 85%, transparent 15%);
+  stroke-width: 2.5;
+  opacity: 0;
+  pointer-events: none;
+  stroke-linecap: round;
+  stroke-dasharray: 22 220;
+  stroke-dashoffset: 0;
+  filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.65));
 }
 
 .natal-aspect-line.hard {
@@ -4746,34 +4764,37 @@ body[data-theme="light"] .natal-starfield {
   stroke-width: 1.35;
 }
 
-.natal-aspect-line.square {
-  stroke-dasharray: 6 4;
-}
-
-.natal-aspect-line.trine {
-  stroke-dasharray: 2 4;
-}
-
-.natal-aspect-line.sextile {
-  stroke-dasharray: 3 5;
-}
-
-.natal-aspect-line:hover {
+.natal-aspect-group:hover .natal-aspect-line {
   opacity: 1;
-  stroke-width: 2.2;
+  stroke-width: 2.5;
+  filter: drop-shadow(0 0 3px currentColor);
 }
 
-.natal-aspect-line.hard:hover,
-.natal-aspect-line.conjunction:hover,
-.natal-aspect-line.opposition:hover,
-.natal-aspect-line.square:hover {
+.natal-aspect-group:hover .natal-aspect-sheen {
+  opacity: 0.95;
+  animation: natal-aspect-sheen-run 0.95s linear infinite;
+}
+
+.natal-aspect-group:hover .natal-aspect-line.hard,
+.natal-aspect-group:hover .natal-aspect-line.conjunction,
+.natal-aspect-group:hover .natal-aspect-line.opposition,
+.natal-aspect-group:hover .natal-aspect-line.square {
   stroke: #d64545;
 }
 
-.natal-aspect-line.soft:hover,
-.natal-aspect-line.trine:hover,
-.natal-aspect-line.sextile:hover {
+.natal-aspect-group:hover .natal-aspect-line.soft,
+.natal-aspect-group:hover .natal-aspect-line.trine,
+.natal-aspect-group:hover .natal-aspect-line.sextile {
   stroke: #1f9d55;
+}
+
+@keyframes natal-aspect-sheen-run {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: -242;
+  }
 }
 
 body[data-theme="light"] .natal-aspect-line {
@@ -4786,6 +4807,79 @@ body[data-theme="light"] .natal-aspect-line.hard {
 
 body[data-theme="light"] .natal-aspect-line.soft {
   stroke: #8f8f8f;
+}
+
+.planet-tone-red-1 {
+  fill: #d86a6a;
+  stroke: #d86a6a;
+}
+
+.planet-tone-red-2 {
+  fill: #c75a5a;
+  stroke: #c75a5a;
+}
+
+.planet-tone-red-3 {
+  fill: #b84b4b;
+  stroke: #b84b4b;
+}
+
+.planet-tone-red-4 {
+  fill: #a03f3f;
+  stroke: #a03f3f;
+}
+
+.planet-tone-red-5 {
+  fill: #8c3636;
+  stroke: #8c3636;
+}
+
+.planet-tone-green-1 {
+  fill: #63b27c;
+  stroke: #63b27c;
+}
+
+.planet-tone-green-2 {
+  fill: #56a26f;
+  stroke: #56a26f;
+}
+
+.planet-tone-green-3 {
+  fill: #499364;
+  stroke: #499364;
+}
+
+.planet-tone-green-4 {
+  fill: #3f8458;
+  stroke: #3f8458;
+}
+
+.planet-tone-green-5 {
+  fill: #35754d;
+  stroke: #35754d;
+}
+
+.app-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 1.2rem;
+  transform: translateX(-50%) translateY(12px);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 1200;
+  border: 1px solid var(--line-strong);
+  background: color-mix(in srgb, var(--surface-2) 92%, transparent 8%);
+  color: var(--ink);
+  font-size: 0.74rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.55rem 0.78rem;
+  transition: opacity 0.16s ease, transform 0.16s ease;
+}
+
+.app-toast.is-visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
 }
 
 body[data-theme="light"] .energy-chart {

@@ -193,18 +193,18 @@ const zodiacOrder = [
   "Pisces"
 ];
 const zodiacGlyphs = {
-  Aries: "♈",
-  Taurus: "♉",
-  Gemini: "♊",
-  Cancer: "♋",
-  Leo: "♌",
-  Virgo: "♍",
-  Libra: "♎",
-  Scorpio: "♏",
-  Sagittarius: "♐",
-  Capricorn: "♑",
-  Aquarius: "♒",
-  Pisces: "♓"
+  Aries: "♈︎",
+  Taurus: "♉︎",
+  Gemini: "♊︎",
+  Cancer: "♋︎",
+  Leo: "♌︎",
+  Virgo: "♍︎",
+  Libra: "♎︎",
+  Scorpio: "♏︎",
+  Sagittarius: "♐︎",
+  Capricorn: "♑︎",
+  Aquarius: "♒︎",
+  Pisces: "♓︎"
 };
 
 const zodiacAssetBaseUrl = "https://basilarcana-assets.b-cdn.net/astronautica";
@@ -887,16 +887,28 @@ function renderNatalChartSvg(data, options = {}) {
     { label: "Square", className: "square" },
     { label: "Sextile", className: "sextile" }
   ];
+  const planetToneMap = {
+    Sun: "planet-tone-red-1",
+    Moon: "planet-tone-green-2",
+    Mercury: "planet-tone-red-2",
+    Venus: "planet-tone-green-1",
+    Mars: "planet-tone-red-3",
+    Jupiter: "planet-tone-green-3",
+    Saturn: "planet-tone-red-4",
+    Uranus: "planet-tone-green-4",
+    Neptune: "planet-tone-red-5",
+    Pluto: "planet-tone-green-5"
+  };
 
   return `
     <div class="natal-graphic natal-graphic-premium">
       <div class="natal-corner natal-corner-tl">
         <h2>Natal Wheel</h2>
+        ${chartMeta ? `<p class="natal-charge-line">Chart charge ${Math.max(90, Math.min(100, Number(chartMeta.charge) || 94))}/100</p>` : ""}
       </div>
       <div class="natal-corner natal-corner-tr">
         <div class="natal-top-actions">
           ${showShare ? `<button id="natalShareButton" type="button" class="btn ghost btn-natal-flicker">Share</button>` : ""}
-          ${chartMeta ? `<span class="natal-charge-chip">Charge ${Math.max(90, Math.min(100, Number(chartMeta.charge) || 94))}/100</span>` : ""}
         </div>
       </div>
       <svg class="natal-chart-svg" viewBox="0 0 ${size} ${size}" role="img" aria-label="Natal chart wheel">
@@ -941,7 +953,12 @@ function renderNatalChartSvg(data, options = {}) {
             const start = pointOnCircle(center, center, aspectRadius, aspect.left.longitude);
             const end = pointOnCircle(center, center, aspectRadius, aspect.right.longitude);
             const aspectId = `${aspect.left.key}-${aspect.right.key}-${aspect.matched}`;
-            return `<line class="natal-aspect-line ${aspect.type} ${aspect.styleClass}" data-aspect-id="${aspectId}" x1="${start.x}" y1="${start.y}" x2="${end.x}" y2="${end.y}" />`;
+            return `
+              <g class="natal-aspect-group" data-aspect-id="${aspectId}">
+                <line class="natal-aspect-line ${aspect.type} ${aspect.styleClass}" x1="${start.x}" y1="${start.y}" x2="${end.x}" y2="${end.y}" />
+                <line class="natal-aspect-sheen ${aspect.type} ${aspect.styleClass}" x1="${start.x}" y1="${start.y}" x2="${end.x}" y2="${end.y}" />
+              </g>
+            `;
           })
           .join("")}
 
@@ -956,12 +973,12 @@ function renderNatalChartSvg(data, options = {}) {
             const symbol = String(planet.key || "").slice(0, 2).toUpperCase();
             const hint = planetHints[planet.key] || `${planet.key}: important psychological and behavioral theme.`;
             return `
-              <line class="natal-planet-line" x1="${guide.x}" y1="${guide.y}" x2="${planet.dot.x}" y2="${planet.dot.y}" />
-              <circle class="natal-planet-dot" cx="${planet.dot.x}" cy="${planet.dot.y}" r="4.2">
-                <title>${hint}</title>
+              <line class="natal-planet-line ${planetToneMap[planet.key] || ""}" x1="${guide.x}" y1="${guide.y}" x2="${planet.dot.x}" y2="${planet.dot.y}" />
+              <circle class="natal-planet-dot ${planetToneMap[planet.key] || ""}" cx="${planet.dot.x}" cy="${planet.dot.y}" r="4.6">
+                <title>${planet.key || "Planet"}</title>
               </circle>
-              <text class="natal-planet-label" x="${planet.label.x}" y="${planet.label.y}" text-anchor="middle" dominant-baseline="middle">
-                <title>${hint}</title>
+              <text class="natal-planet-label ${planetToneMap[planet.key] || ""}" x="${planet.label.x}" y="${planet.label.y}" text-anchor="middle" dominant-baseline="middle">
+                <title>${planet.key || "Planet"} · ${planet.sign || "Unknown"}</title>
                 ${symbol}
               </text>
             `;
@@ -1053,9 +1070,33 @@ function buildNatalChartMeta(profile, report) {
     String(report?.core?.rising || "").trim(),
     now.toISOString()
   ].join(":"));
-  const charge = 90 + (seed % 11);
+  const baseline = 93;
+  const hasMoon = String(report?.core?.moon || "").trim() !== "";
+  const hasRising = String(report?.core?.rising || "").trim() !== "";
+  const majorAspects = Array.isArray(report?.aspects) ? Math.min(6, report.aspects.length) : 0;
+  const bonus = (seed % 5) + (hasMoon ? 1 : 0) + (hasRising ? 1 : 0) + Math.min(2, Math.floor(majorAspects / 3));
+  const charge = Math.max(90, Math.min(100, baseline + bonus));
   const chartId = `AW-${String((seed % 999999) + 1).padStart(6, "0")}`;
   return { generatedAt, charge, chartId };
+}
+
+function showToast(message, timeout = 2200) {
+  if (!message) {
+    return;
+  }
+  let host = document.getElementById("appToast");
+  if (!host) {
+    host = document.createElement("div");
+    host.id = "appToast";
+    host.className = "app-toast";
+    document.body.appendChild(host);
+  }
+  host.textContent = message;
+  host.classList.add("is-visible");
+  window.clearTimeout(showToast._timer);
+  showToast._timer = window.setTimeout(() => {
+    host?.classList.remove("is-visible");
+  }, timeout);
 }
 
 function shell({ eyebrow, title, intro, primaryCta, secondaryCta, rightPanel, body }) {
@@ -4757,8 +4798,17 @@ function renderPublicNatalLanding(payload) {
   const ownerName = escapeHtml(String(payload?.owner?.name || "This user"));
   const referralCode = escapeHtml(String(payload?.referralCode || ""));
   const referralHref = `/login?ref=${encodeURIComponent(String(payload?.referralCode || ""))}`;
-  const chartHtml = renderNatalChartSvg(payload?.natal || {});
-  const summary = escapeHtml(String(payload?.natal?.summary || ""));
+  const nowStamp = new Date().toLocaleString("en-GB", {
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit"
+  }).toUpperCase();
+  const chartHtml = renderNatalChartSvg(payload?.natal || {}, {
+    showShareButton: false,
+    meta: buildNatalChartMeta(payload?.owner || {}, payload?.natal || {})
+  });
   const sun = escapeHtml(String(payload?.natal?.core?.sun || "Unknown"));
   const moon = escapeHtml(String(payload?.natal?.core?.moon || "Unknown"));
   const rising = escapeHtml(String(payload?.natal?.core?.rising || "Unknown"));
@@ -4767,7 +4817,7 @@ function renderPublicNatalLanding(payload) {
       <article class="card tone-card shared-natal-hero">
         <span class="eyebrow">Public Natal Profile</span>
         <h1>${ownerName}</h1>
-        <p>${summary || "Natal chart shared from Astronautica."}</p>
+        <p>This chart is calculated at ${nowStamp}.</p>
         <div class="chip-grid">
           <span class="astro-chip">${zodiacIcon(sun)} Sun: ${sun}</span>
           <span class="astro-chip">${zodiacIcon(moon)} Moon: ${moon}</span>
@@ -4776,7 +4826,6 @@ function renderPublicNatalLanding(payload) {
         </div>
       </article>
       <article class="route-card shared-natal-card">
-        <h2>Natal Wheel</h2>
         ${chartHtml}
       </article>
       <article class="card shared-natal-cta">
@@ -4803,19 +4852,9 @@ async function shareNatalPublicPage() {
     alert("Share link is not ready yet. Please refresh and try again.");
     return;
   }
-  const shareTitle = "Astronautica Natal Chart";
-  const shareText = "View this public natal chart and get your own in Astronautica.";
-  try {
-    if (navigator.share) {
-      await navigator.share({ title: shareTitle, text: shareText, url: shareUrl });
-      return;
-    }
-  } catch {
-    // fallback to clipboard below
-  }
   try {
     await navigator.clipboard.writeText(shareUrl);
-    alert("Public natal link copied to clipboard.");
+    showToast("Link copied to clipboard.");
   } catch {
     window.prompt("Copy this natal link:", shareUrl);
   }
