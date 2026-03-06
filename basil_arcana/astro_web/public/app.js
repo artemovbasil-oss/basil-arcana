@@ -804,11 +804,14 @@ function buildAspectGeometry(planets) {
   return lines.slice(0, 24);
 }
 
-function renderNatalChartSvg(data) {
+function renderNatalChartSvg(data, options = {}) {
+  const chartMeta = options?.meta && typeof options.meta === "object" ? options.meta : null;
+  const showShare = Boolean(options?.showShareButton);
   const size = 760;
   const center = size / 2;
   const outerRadius = 330;
-  const signRadius = 286;
+  const signRadius = 292;
+  const signIconRadius = 318;
   const houseRadius = 245;
   const aspectRadius = 188;
   const planetRadius = 226;
@@ -877,8 +880,25 @@ function renderNatalChartSvg(data) {
     )
     .join("");
 
+  const legendItems = [
+    { label: "Conjunction", className: "conjunction" },
+    { label: "Opposition", className: "opposition" },
+    { label: "Trine", className: "trine" },
+    { label: "Square", className: "square" },
+    { label: "Sextile", className: "sextile" }
+  ];
+
   return `
-    <div class="natal-graphic">
+    <div class="natal-graphic natal-graphic-premium">
+      <div class="natal-corner natal-corner-tl">
+        <h2>Natal Wheel</h2>
+      </div>
+      <div class="natal-corner natal-corner-tr">
+        <div class="natal-top-actions">
+          ${showShare ? `<button id="natalShareButton" type="button" class="btn ghost btn-natal-flicker">Share</button>` : ""}
+          ${chartMeta ? `<span class="natal-charge-chip">Charge ${Math.max(90, Math.min(100, Number(chartMeta.charge) || 94))}/100</span>` : ""}
+        </div>
+      </div>
       <svg class="natal-chart-svg" viewBox="0 0 ${size} ${size}" role="img" aria-label="Natal chart wheel">
         <circle class="natal-ring" cx="${center}" cy="${center}" r="${outerRadius}" />
         <circle class="natal-ring" cx="${center}" cy="${center}" r="${houseRadius}" />
@@ -901,8 +921,13 @@ function renderNatalChartSvg(data) {
           .map((sign, index) => {
             const degree = index * 30 + 15;
             const signPoint = pointOnCircle(center, center, signRadius, degree);
+            const signIconPoint = pointOnCircle(center, center, signIconRadius, degree);
             const hint = signHints[sign] || "Core archetypal zodiac pattern.";
             return `
+              <text class="natal-sign-icon" x="${signIconPoint.x}" y="${signIconPoint.y}" text-anchor="middle" dominant-baseline="middle">
+                <title>${sign}: ${hint}</title>
+                ${zodiacGlyphs[sign] || "·"}
+              </text>
               <text class="natal-sign-label" x="${signPoint.x}" y="${signPoint.y}" text-anchor="middle" dominant-baseline="middle">
                 <title>${sign}: ${hint}</title>
                 ${sign.slice(0, 3).toUpperCase()}
@@ -915,7 +940,8 @@ function renderNatalChartSvg(data) {
           .map((aspect) => {
             const start = pointOnCircle(center, center, aspectRadius, aspect.left.longitude);
             const end = pointOnCircle(center, center, aspectRadius, aspect.right.longitude);
-            return `<line class="natal-aspect-line ${aspect.type} ${aspect.styleClass}" x1="${start.x}" y1="${start.y}" x2="${end.x}" y2="${end.y}" />`;
+            const aspectId = `${aspect.left.key}-${aspect.right.key}-${aspect.matched}`;
+            return `<line class="natal-aspect-line ${aspect.type} ${aspect.styleClass}" data-aspect-id="${aspectId}" x1="${start.x}" y1="${start.y}" x2="${end.x}" y2="${end.y}" />`;
           })
           .join("")}
 
@@ -942,7 +968,32 @@ function renderNatalChartSvg(data) {
           })
           .join("")}
       </svg>
-      <p class="muted">Outer ring: signs. Inner wheel: houses. Chords: major aspects. Markers: planetary placements.</p>
+      <div class="natal-corner natal-corner-bl">
+        <div class="natal-mini-legend">
+          <strong>Legend</strong>
+          <div class="natal-mini-legend-grid">
+            ${legendItems
+              .map(
+                (item) => `
+                  <span><i class="natal-mini-line ${item.className}"></i>${item.label}</span>
+                `
+              )
+              .join("")}
+            <span><i class="natal-mini-dot"></i>Planet marker</span>
+            <span><i class="natal-mini-ring"></i>Signs/houses ring</span>
+          </div>
+        </div>
+      </div>
+      ${
+        chartMeta
+          ? `<div class="natal-corner natal-corner-br">
+              <div class="natal-chart-meta">
+                <span>Generated ${chartMeta.generatedAt || ""}</span>
+                <span>Chart ID ${chartMeta.chartId || ""}</span>
+              </div>
+            </div>`
+          : ""
+      }
     </div>
   `;
 }
@@ -982,6 +1033,29 @@ function bindNatalAsciiLogo() {
   };
   svg.addEventListener("mousemove", move);
   svg.addEventListener("mouseleave", reset);
+}
+
+function buildNatalChartMeta(profile, report) {
+  const now = new Date();
+  const generatedAt = now.toLocaleString("en-GB", {
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit"
+  }).toUpperCase();
+  const seed = stringHash([
+    String(profile?.name || "USER").trim().toUpperCase(),
+    String(profile?.birthDate || "").trim(),
+    String(profile?.birthTime || "").trim(),
+    String(report?.core?.sun || "").trim(),
+    String(report?.core?.moon || "").trim(),
+    String(report?.core?.rising || "").trim(),
+    now.toISOString()
+  ].join(":"));
+  const charge = 90 + (seed % 11);
+  const chartId = `AW-${String((seed % 999999) + 1).padStart(6, "0")}`;
+  return { generatedAt, charge, chartId };
 }
 
 function shell({ eyebrow, title, intro, primaryCta, secondaryCta, rightPanel, body }) {
@@ -6915,7 +6989,8 @@ async function hydrateNatal() {
     });
     const profile = state.profile;
 
-    const natalChart = renderNatalChartSvg(data);
+    const chartMeta = buildNatalChartMeta(profile, data);
+    const natalChart = renderNatalChartSvg(data, { showShareButton: true, meta: chartMeta });
     state.natalReport = data;
 
     const editorial = buildNatalEditorial(profile, data);
@@ -6929,10 +7004,6 @@ async function hydrateNatal() {
         <div class="natal-main">
           <section class="section" id="natal-wheel">
             <article class="route-card">
-              <div class="section-head-inline">
-                <h2>Natal Wheel</h2>
-                <button id="natalShareButton" type="button" class="btn ghost">Share</button>
-              </div>
               ${natalChart}
             </article>
           </section>
