@@ -3502,19 +3502,20 @@ body[data-theme="light"] .activity-cell.level-4 {
   overflow: visible;
 }
 
-.activity-widget-home.activity-widget.compact .activity-months,
 .activity-widget-home.activity-widget.compact .activity-grid {
   grid-template-columns: repeat(var(--weeks, 53), minmax(0, 1fr));
   width: 100%;
 }
 
-.activity-widget-home.activity-widget.compact .activity-months {
-  gap: 0.12rem;
+.activity-widget-home.activity-widget.compact .activity-grid {
+  gap: 0.1rem;
+  min-height: auto;
 }
 
-.activity-widget-home.activity-widget.compact .activity-grid {
-  gap: 0.12rem;
-  min-height: calc((0.28rem * 7) + (0.12rem * 6));
+.activity-widget-home.activity-widget.compact .activity-cell {
+  aspect-ratio: auto;
+  height: 0.34rem;
+  border-radius: 0.1rem;
 }
 
 .activity-widget.compact .activity-weekdays span {

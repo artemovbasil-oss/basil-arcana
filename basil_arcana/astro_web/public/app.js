@@ -2784,7 +2784,8 @@ function renderActivityHeatmap(activityPayload, {
   title = "Rhythm Activity",
   subtitle = "Last 12 months",
   rangeDays = 365,
-  className = ""
+  className = "",
+  showMonths = true
 } = {}) {
   const model = buildActivityHeatmapModel(activityPayload, { rangeDays });
   const widgetClass = compact ? "activity-widget compact" : "activity-widget";
@@ -2796,11 +2797,12 @@ function renderActivityHeatmap(activityPayload, {
         <h3>${title}</h3>
         <span>${subtitle}</span>
       </div>
+      ${showMonths ? `
       <div class="activity-months">
         ${model.monthMarkers
           .map((item) => `<span style="grid-column:${item.week + 1}">${item.label}</span>`)
           .join("")}
-      </div>
+      </div>` : ""}
       <div class="activity-main">
         <div class="activity-weekdays">
           <span>Mon</span>
@@ -2885,9 +2887,10 @@ function renderTodayAstroPanel(profile, dashboard) {
   const activityWidget = renderActivityHeatmap(dashboard?.activity, {
     compact: true,
     title: "Usage rhythm",
-    subtitle: "Last 120 days",
-    rangeDays: 120,
-    className: "activity-widget-home"
+    subtitle: "Last 84 days",
+    rangeDays: 84,
+    className: "activity-widget-home",
+    showMonths: false
   });
   return `
     <div class="today-panel">
