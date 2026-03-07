@@ -7720,7 +7720,8 @@ async function hydrateDaily() {
       title: "Rhythm Activity",
       subtitle: "Last 12 months",
       rangeDays: 365,
-      className: "activity-widget-daily"
+      className: "activity-widget-daily",
+      showMonths: false
     });
 
     app.innerHTML = `
