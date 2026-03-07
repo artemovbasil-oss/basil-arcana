@@ -239,7 +239,8 @@ function defaultSessionData() {
     daily: {
       streak: 0,
       lastDayKey: "",
-      history: []
+      history: [],
+      activity: []
     }
   };
 }
@@ -263,7 +264,8 @@ function defaultUserData() {
     daily: {
       streak: 0,
       lastDayKey: "",
-      history: []
+      history: [],
+      activity: []
     }
   };
 }
@@ -293,7 +295,18 @@ function normalizeUserData(raw) {
     daily: {
       streak: Number.isFinite(Number(dailySource.streak)) ? Number(dailySource.streak) : 0,
       lastDayKey: String(dailySource.lastDayKey || ""),
-      history: Array.isArray(dailySource.history) ? dailySource.history : []
+      history: Array.isArray(dailySource.history) ? dailySource.history : [],
+      activity: Array.isArray(dailySource.activity)
+        ? dailySource.activity
+          .map((item) => ({
+            dayKey: String(item?.dayKey || "").slice(0, 10),
+            score: Math.max(0, Math.min(100, Number(item?.score || 0))),
+            kinds: Array.isArray(item?.kinds) ? item.kinds.map((k) => String(k || "").trim().toLowerCase()).filter(Boolean) : [],
+            note: String(item?.note || "").trim()
+          }))
+          .filter((item) => item.dayKey)
+          .slice(0, 420)
+        : []
     }
   };
 }
@@ -357,7 +370,18 @@ function normalizeSessionData(raw) {
     daily: {
       streak: Number.isFinite(Number(dailySource.streak)) ? Number(dailySource.streak) : 0,
       lastDayKey: String(dailySource.lastDayKey || ""),
-      history: Array.isArray(dailySource.history) ? dailySource.history : []
+      history: Array.isArray(dailySource.history) ? dailySource.history : [],
+      activity: Array.isArray(dailySource.activity)
+        ? dailySource.activity
+          .map((item) => ({
+            dayKey: String(item?.dayKey || "").slice(0, 10),
+            score: Math.max(0, Math.min(100, Number(item?.score || 0))),
+            kinds: Array.isArray(item?.kinds) ? item.kinds.map((k) => String(k || "").trim().toLowerCase()).filter(Boolean) : [],
+            note: String(item?.note || "").trim()
+          }))
+          .filter((item) => item.dayKey)
+          .slice(0, 420)
+        : []
     }
   };
 }
@@ -1118,6 +1142,52 @@ function resolveSessionProfile(reqProfile, session) {
 function pushDailyHistory(dailyState, entry) {
   const history = Array.isArray(dailyState.history) ? dailyState.history : [];
   dailyState.history = [entry, ...history.filter((item) => item.dayKey !== entry.dayKey)].slice(0, 7);
+}
+
+function registerDailyActivity(dailyState, {
+  dayKey,
+  kind = "dashboard",
+  intensity = 0,
+  note = ""
+}) {
+  const normalizedDayKey = String(dayKey || "").slice(0, 10);
+  if (!normalizedDayKey) {
+    return false;
+  }
+  const normalizedKind = String(kind || "").trim().toLowerCase() || "dashboard";
+  const scoreByKind = {
+    dashboard: 20,
+    daily: 44
+  };
+  const bonus = Math.max(0, Math.min(14, Math.round(Number(intensity || 0) / 10)));
+  const increment = (scoreByKind[normalizedKind] || 14) + bonus;
+  const existing = Array.isArray(dailyState.activity) ? dailyState.activity : [];
+  const next = [...existing];
+  const index = next.findIndex((item) => String(item?.dayKey || "") === normalizedDayKey);
+  const entry = index >= 0
+    ? { ...next[index] }
+    : { dayKey: normalizedDayKey, score: 0, kinds: [], note: "" };
+  const kinds = Array.isArray(entry.kinds) ? entry.kinds.map((k) => String(k || "").trim().toLowerCase()).filter(Boolean) : [];
+  let changed = false;
+  if (!kinds.includes(normalizedKind)) {
+    kinds.push(normalizedKind);
+    entry.score = Math.max(0, Math.min(100, Number(entry.score || 0) + increment));
+    changed = true;
+  }
+  const safeNote = String(note || "").trim();
+  if (safeNote && safeNote !== entry.note) {
+    entry.note = safeNote;
+    changed = true;
+  }
+  entry.kinds = kinds.slice(0, 6);
+  if (index >= 0) {
+    next[index] = entry;
+  } else {
+    next.push(entry);
+  }
+  next.sort((a, b) => String(b.dayKey).localeCompare(String(a.dayKey)));
+  dailyState.activity = next.slice(0, 420);
+  return changed;
 }
 
 function hashStringToInt(value) {
@@ -2189,6 +2259,10 @@ function buildDashboardPayload(sessionData, period = "week") {
     profile,
     natalCore,
     daily,
+    activity: {
+      entries: Array.isArray(sessionData?.daily?.activity) ? sessionData.daily.activity : [],
+      history: Array.isArray(sessionData?.daily?.history) ? sessionData.daily.history : []
+    },
     periodForecast,
     personalTiming,
     friendsDynamic: [...friendsDynamic, ...celebrityDynamic],
@@ -3242,7 +3316,7 @@ app.post("/api/daily-insight", requireAuth, async (req, res) => {
     day: "numeric"
   });
 
-  const sessionDaily = req.userData.daily || { streak: 0, lastDayKey: "", history: [] };
+  const sessionDaily = req.userData.daily || { streak: 0, lastDayKey: "", history: [], activity: [] };
   if (sessionDaily.lastDayKey !== dayKey) {
     const previous = sessionDaily.lastDayKey ? new Date(`${sessionDaily.lastDayKey}T00:00:00Z`) : null;
     const current = new Date(`${dayKey}T00:00:00Z`);
@@ -3309,6 +3383,12 @@ app.post("/api/daily-insight", requireAuth, async (req, res) => {
   })();
 
   pushDailyHistory(sessionDaily, { dayKey, focus, step });
+  registerDailyActivity(sessionDaily, {
+    dayKey,
+    kind: "daily",
+    intensity: dailyDelta.today,
+    note: focus
+  });
   req.userData.daily = sessionDaily;
   if (!Number.isFinite(Number(req.userData.firstSeenAt))) {
     req.userData.firstSeenAt = Date.now();
@@ -3327,6 +3407,10 @@ app.post("/api/daily-insight", requireAuth, async (req, res) => {
     streak: sessionDaily.streak,
     streakLabel: `Current streak: ${sessionDaily.streak} day${sessionDaily.streak === 1 ? "" : "s"}.`,
     history: sessionDaily.history,
+    activity: {
+      entries: Array.isArray(sessionDaily.activity) ? sessionDaily.activity : [],
+      history: sessionDaily.history
+    },
     dayDashboard: {
       focus,
       risk,
@@ -3398,6 +3482,20 @@ app.get("/api/dashboard", requireAuth, async (req, res) => {
   const payload = buildDashboardPayload(req.userData, period);
   if (!payload) {
     return res.status(400).json({ error: "profile_required", message: "Complete profile first." });
+  }
+  const dayKey = new Date().toISOString().slice(0, 10);
+  const activityChanged = registerDailyActivity(req.userData.daily || (req.userData.daily = { streak: 0, lastDayKey: "", history: [], activity: [] }), {
+    dayKey,
+    kind: "dashboard",
+    intensity: payload?.periodForecast?.intensity || 0,
+    note: payload?.daily?.focus || "Opened dashboard and reviewed timing."
+  });
+  if (activityChanged) {
+    await saveUserData(req.userId, req.userData);
+    payload.activity = {
+      entries: Array.isArray(req.userData?.daily?.activity) ? req.userData.daily.activity : [],
+      history: Array.isArray(req.userData?.daily?.history) ? req.userData.daily.history : []
+    };
   }
   return res.json({ ok: true, dashboard: payload });
 });

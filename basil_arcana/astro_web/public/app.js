@@ -2650,12 +2650,229 @@ function buildTodayAstroData(profile, dashboard) {
   };
 }
 
+function pad2(value) {
+  return String(value).padStart(2, "0");
+}
+
+function toDayKey(date) {
+  if (!(date instanceof Date) || Number.isNaN(date.getTime())) {
+    return "";
+  }
+  return `${date.getUTCFullYear()}-${pad2(date.getUTCMonth() + 1)}-${pad2(date.getUTCDate())}`;
+}
+
+function formatActivityDay(dateLike) {
+  const d = new Date(dateLike);
+  if (Number.isNaN(d.getTime())) {
+    return String(dateLike || "");
+  }
+  return d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" });
+}
+
+function activityLevel(score) {
+  const value = Math.max(0, Math.min(100, Number(score || 0)));
+  if (value >= 90) {
+    return 4;
+  }
+  if (value >= 70) {
+    return 3;
+  }
+  if (value >= 45) {
+    return 2;
+  }
+  if (value >= 15) {
+    return 1;
+  }
+  return 0;
+}
+
+function buildActivityHeatmapModel(activityPayload = null) {
+  const entries = Array.isArray(activityPayload?.entries) ? activityPayload.entries : [];
+  const history = Array.isArray(activityPayload?.history) ? activityPayload.history : [];
+  const activityByDay = new Map(
+    entries
+      .map((item) => [String(item?.dayKey || "").slice(0, 10), item])
+      .filter(([dayKey]) => Boolean(dayKey))
+  );
+  const historyByDay = new Map(
+    history
+      .map((item) => [String(item?.dayKey || "").slice(0, 10), item])
+      .filter(([dayKey]) => Boolean(dayKey))
+  );
+
+  const now = new Date();
+  const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  const rangeStartRaw = new Date(today);
+  rangeStartRaw.setUTCDate(rangeStartRaw.getUTCDate() - 364);
+  const startWeekday = (rangeStartRaw.getUTCDay() + 6) % 7;
+  const rangeStart = new Date(rangeStartRaw);
+  rangeStart.setUTCDate(rangeStart.getUTCDate() - startWeekday);
+
+  const totalDays = Math.floor((today.getTime() - rangeStart.getTime()) / 86400000) + 1;
+  const cells = [];
+  const monthMarkers = [];
+  const seenMonth = new Set();
+
+  for (let i = 0; i < totalDays; i += 1) {
+    const date = new Date(rangeStart);
+    date.setUTCDate(rangeStart.getUTCDate() + i);
+    const dayKey = toDayKey(date);
+    const dayEntry = activityByDay.get(dayKey) || null;
+    const historyEntry = historyByDay.get(dayKey) || null;
+    const score = Number(dayEntry?.score || 0);
+    const level = activityLevel(score);
+    const week = Math.floor(i / 7);
+    const row = (date.getUTCDay() + 6) % 7;
+    if (date.getUTCDate() === 1) {
+      const monthKey = `${date.getUTCFullYear()}-${date.getUTCMonth()}`;
+      if (!seenMonth.has(monthKey)) {
+        seenMonth.add(monthKey);
+        monthMarkers.push({
+          week,
+          label: date.toLocaleDateString("en-US", { month: "short" })
+        });
+      }
+    }
+    const note = String(dayEntry?.note || historyEntry?.focus || "").trim();
+    const kinds = Array.isArray(dayEntry?.kinds) ? dayEntry.kinds : [];
+    const useful = note
+      || (kinds.includes("daily")
+        ? "Daily module used: timing protocol updated."
+        : kinds.includes("dashboard")
+          ? "Dashboard reviewed: rhythm baseline refreshed."
+          : "No activity recorded.");
+    const tooltip = `${formatActivityDay(dayKey)} · ${score}/100\n${useful}`;
+    cells.push({
+      key: dayKey,
+      week,
+      row,
+      level,
+      score,
+      tooltip
+    });
+  }
+
+  const maxWeek = cells.reduce((max, item) => Math.max(max, item.week), 0) + 1;
+  const activeDays = cells.filter((item) => item.score > 0).length;
+  const currentStreak = (() => {
+    let streak = 0;
+    for (let i = cells.length - 1; i >= 0; i -= 1) {
+      if (cells[i].score > 0) {
+        streak += 1;
+      } else {
+        break;
+      }
+    }
+    return streak;
+  })();
+
+  return {
+    weeks: maxWeek,
+    cells,
+    monthMarkers,
+    activeDays,
+    currentStreak
+  };
+}
+
+function renderActivityHeatmap(activityPayload, {
+  compact = false,
+  title = "Rhythm Activity",
+  subtitle = "Last 12 months"
+} = {}) {
+  const model = buildActivityHeatmapModel(activityPayload);
+  const widgetClass = compact ? "activity-widget compact" : "activity-widget";
+  return `
+    <section class="${widgetClass}" data-activity-widget>
+      <div class="activity-head">
+        <h3>${title}</h3>
+        <span>${subtitle}</span>
+      </div>
+      <div class="activity-months">
+        ${model.monthMarkers
+          .map((item) => `<span style="grid-column:${item.week + 1}">${item.label}</span>`)
+          .join("")}
+      </div>
+      <div class="activity-main">
+        <div class="activity-weekdays">
+          <span>Mon</span>
+          <span>Wed</span>
+          <span>Fri</span>
+        </div>
+        <div class="activity-grid" style="--weeks:${model.weeks}">
+          ${model.cells
+            .map((cell, index) => `
+              <button
+                type="button"
+                class="activity-cell level-${cell.level}"
+                style="grid-column:${cell.week + 1};grid-row:${cell.row + 1};--i:${index};"
+                data-tip="${escapeHtml(cell.tooltip)}"
+                data-day="${cell.key}"
+                data-score="${cell.score}"
+                aria-label="${escapeHtml(cell.tooltip)}"
+              ></button>
+            `)
+            .join("")}
+        </div>
+      </div>
+      <div class="activity-foot">
+        <span>${model.activeDays} active day${model.activeDays === 1 ? "" : "s"} · ${model.currentStreak} day streak</span>
+        <div class="activity-legend">
+          <span>Less</span>
+          <i class="activity-cell level-0"></i>
+          <i class="activity-cell level-1"></i>
+          <i class="activity-cell level-2"></i>
+          <i class="activity-cell level-3"></i>
+          <i class="activity-cell level-4"></i>
+          <span>More</span>
+        </div>
+      </div>
+      <div class="activity-tooltip" aria-hidden="true"></div>
+    </section>
+  `;
+}
+
+function bindActivityHeatmapInteractions(root = document) {
+  const widgets = Array.from(root.querySelectorAll("[data-activity-widget]"));
+  widgets.forEach((widget) => {
+    const tooltip = widget.querySelector(".activity-tooltip");
+    if (!(tooltip instanceof HTMLElement)) {
+      return;
+    }
+    const cells = Array.from(widget.querySelectorAll(".activity-cell[data-tip]"));
+    const show = (event) => {
+      const target = event.currentTarget;
+      if (!(target instanceof HTMLElement)) {
+        return;
+      }
+      const text = target.getAttribute("data-tip") || "";
+      tooltip.textContent = text;
+      tooltip.classList.add("is-visible");
+      const widgetRect = widget.getBoundingClientRect();
+      const rect = target.getBoundingClientRect();
+      const x = rect.left - widgetRect.left + rect.width / 2;
+      const y = rect.top - widgetRect.top - 10;
+      tooltip.style.left = `${x}px`;
+      tooltip.style.top = `${y}px`;
+    };
+    const hide = () => {
+      tooltip.classList.remove("is-visible");
+    };
+    cells.forEach((cell) => {
+      cell.addEventListener("mouseenter", show);
+      cell.addEventListener("focus", show);
+      cell.addEventListener("mouseleave", hide);
+      cell.addEventListener("blur", hide);
+    });
+  });
+}
+
 function renderTodayAstroPanel(profile, dashboard) {
   const info = buildTodayAstroData(profile, dashboard);
-  const dailyFocus = personalizedDailyLine(dashboard?.daily?.focus || "", {
-    dayKey: new Date().toISOString().slice(0, 10),
-    core: dashboard?.natalCore,
-    profile
+  const activityWidget = renderActivityHeatmap(dashboard?.activity, {
+    compact: true,
+    title: "Usage rhythm",
+    subtitle: "Last 12 months"
   });
   return `
     <div class="today-panel">
@@ -2680,12 +2897,8 @@ function renderTodayAstroPanel(profile, dashboard) {
           <span>${uiIcon("sunrise")} Daylight</span>
           <strong>${info.daylightHours}h</strong>
         </div>
-        <div class="today-item">
-          <span>${uiIcon("transit")} Transit Tone</span>
-          <strong>${info.transitIntensity}/100</strong>
-        </div>
       </div>
-      <p class="muted">${dailyFocus}</p>
+      ${activityWidget}
     </div>
   `;
 }
@@ -7328,6 +7541,7 @@ async function hydrateHome() {
     state.dashboard = payload.dashboard;
     app.innerHTML = renderHomeDashboard(payload.dashboard);
     bindHomePeriodHandlers();
+    bindActivityHeatmapInteractions(app);
     updateHomeDynamicBlocks(state.dashboard, state.homePeriod, { animate: false });
     animateHeadingTypewriter();
   } catch (error) {
@@ -7484,6 +7698,10 @@ async function hydrateDaily() {
       core: state.dashboard?.natalCore,
       profile: state.profile
     });
+    const dailyActivityWidget = renderActivityHeatmap(data.activity, {
+      title: "Rhythm Activity",
+      subtitle: "Last 12 months"
+    });
 
     app.innerHTML = `
       <section class="hero">
@@ -7525,6 +7743,9 @@ async function hydrateDaily() {
           <p class="muted"><strong>Focus:</strong> ${d.focus || data.focus || ""}</p>
           <p class="muted"><strong>Risk:</strong> ${d.risk || data.risk || ""}</p>
         </aside>
+      </section>
+      <section class="section section-tight">
+        ${dailyActivityWidget}
       </section>
       <section class="section">
         <div class="editorial-grid">
@@ -7568,6 +7789,7 @@ async function hydrateDaily() {
         ${renderProfessionalReadingCta("daily-upgrade")}
       </section>
     `;
+    bindActivityHeatmapInteractions(app);
     animateHeadingTypewriter();
   } catch (error) {
     if (error.status === 401) {

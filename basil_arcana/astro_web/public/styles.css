@@ -389,6 +389,11 @@ p {
   .btn-natal-flicker {
     animation: none;
   }
+
+  .activity-widget,
+  .activity-cell {
+    animation: none;
+  }
 }
 
 .section-separator {
@@ -3187,6 +3192,280 @@ body[data-theme="dark"] .form-grid input[type="time"]::-webkit-calendar-picker-i
   text-transform: uppercase;
 }
 
+.activity-widget {
+  position: relative;
+  display: grid;
+  gap: 0.5rem;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface-2) 82%, transparent 18%);
+  padding: 0.62rem;
+  overflow: hidden;
+  animation: activity-widget-in 0.38s ease both;
+}
+
+@keyframes activity-widget-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.activity-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.55rem;
+}
+
+.activity-head h3 {
+  margin: 0;
+  font-size: 0.82rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.activity-head span {
+  color: var(--muted);
+  font-size: 0.66rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.activity-months {
+  display: grid;
+  grid-template-columns: repeat(var(--weeks, 53), 0.46rem);
+  gap: 0.12rem;
+  min-height: 0.68rem;
+}
+
+.activity-months span {
+  color: var(--muted);
+  font-size: 0.56rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.activity-main {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.36rem;
+  align-items: start;
+}
+
+.activity-weekdays {
+  padding-top: 0.04rem;
+  display: grid;
+  grid-template-rows: repeat(7, 1fr);
+  gap: 0.12rem;
+}
+
+.activity-weekdays span {
+  color: var(--muted);
+  font-size: 0.54rem;
+  line-height: 1;
+  align-self: center;
+}
+
+.activity-weekdays span:nth-child(1) { grid-row: 1; }
+.activity-weekdays span:nth-child(2) { grid-row: 3; }
+.activity-weekdays span:nth-child(3) { grid-row: 5; }
+
+.activity-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--weeks, 53), 0.46rem);
+  grid-template-rows: repeat(7, minmax(0, 1fr));
+  gap: 0.12rem;
+  min-height: calc((0.46rem * 7) + (0.12rem * 6));
+}
+
+.activity-cell {
+  width: 100%;
+  min-width: 0.46rem;
+  aspect-ratio: 1 / 1;
+  border-radius: 0.14rem;
+  border: 1px solid color-mix(in srgb, var(--line) 70%, transparent 30%);
+  background: color-mix(in srgb, var(--surface) 86%, transparent 14%);
+  appearance: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  transform: translateY(4px) scale(0.95);
+  opacity: 0;
+  animation: activity-cell-in 0.35s ease forwards;
+  animation-delay: calc(var(--i, 0) * 4ms);
+  transition: transform 0.14s ease, border-color 0.14s ease, box-shadow 0.14s ease, filter 0.14s ease;
+}
+
+@keyframes activity-cell-in {
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+.activity-cell:focus-visible,
+.activity-cell:hover {
+  outline: none;
+  transform: translateY(-1px) scale(1.06);
+  border-color: color-mix(in srgb, #74de8b 56%, var(--line) 44%);
+  box-shadow: 0 0 0 1px color-mix(in srgb, #74de8b 36%, transparent 64%);
+  z-index: 1;
+}
+
+.activity-cell.level-0 {
+  background: color-mix(in srgb, var(--surface) 80%, transparent 20%);
+}
+
+.activity-cell.level-1 {
+  background: #193e23;
+  border-color: #2a6438;
+}
+
+.activity-cell.level-2 {
+  background: #1f5f33;
+  border-color: #2f7b44;
+}
+
+.activity-cell.level-3 {
+  background: #248842;
+  border-color: #36a352;
+}
+
+.activity-cell.level-4 {
+  background: #33b85b;
+  border-color: #46d870;
+}
+
+body[data-theme="light"] .activity-cell.level-1 {
+  background: #cfeeda;
+  border-color: #abdfbe;
+}
+
+body[data-theme="light"] .activity-cell.level-2 {
+  background: #a7dfba;
+  border-color: #7fca9a;
+}
+
+body[data-theme="light"] .activity-cell.level-3 {
+  background: #74cc94;
+  border-color: #54b87a;
+}
+
+body[data-theme="light"] .activity-cell.level-4 {
+  background: #34b463;
+  border-color: #23934d;
+}
+
+.activity-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.activity-foot > span {
+  color: var(--muted);
+  font-size: 0.64rem;
+  letter-spacing: 0.04em;
+}
+
+.activity-legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.16rem;
+}
+
+.activity-legend span {
+  color: var(--muted);
+  font-size: 0.58rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.activity-legend .activity-cell {
+  min-width: 0.42rem;
+  width: 0.42rem;
+  animation: none;
+  opacity: 1;
+  transform: none;
+  cursor: default;
+}
+
+.activity-tooltip {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: translate(-50%, calc(-100% - 8px)) scale(0.96);
+  border: 1px solid var(--line-strong);
+  background: color-mix(in srgb, var(--surface) 93%, transparent 7%);
+  color: var(--ink);
+  font-size: 0.62rem;
+  line-height: 1.35;
+  letter-spacing: 0.02em;
+  padding: 0.34rem 0.42rem;
+  white-space: pre-line;
+  max-width: min(240px, 84vw);
+  z-index: 6;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.14s ease, transform 0.14s ease;
+}
+
+.activity-tooltip.is-visible {
+  opacity: 1;
+  transform: translate(-50%, calc(-100% - 12px)) scale(1);
+}
+
+.activity-widget.compact {
+  padding: 0.5rem;
+  gap: 0.42rem;
+}
+
+.activity-widget.compact .activity-head h3 {
+  font-size: 0.74rem;
+}
+
+.activity-widget.compact .activity-head span {
+  font-size: 0.58rem;
+}
+
+.activity-widget.compact .activity-months {
+  grid-template-columns: repeat(var(--weeks, 53), 0.36rem);
+  min-height: 0.52rem;
+}
+
+.activity-widget.compact .activity-months span {
+  font-size: 0.5rem;
+}
+
+.activity-widget.compact .activity-grid {
+  grid-template-columns: repeat(var(--weeks, 53), 0.36rem);
+  min-height: calc((0.36rem * 7) + (0.1rem * 6));
+  gap: 0.1rem;
+}
+
+.activity-widget.compact .activity-cell {
+  min-width: 0.36rem;
+  border-radius: 0.12rem;
+}
+
+.activity-widget.compact .activity-weekdays span {
+  font-size: 0.5rem;
+}
+
+.activity-widget.compact .activity-foot > span {
+  font-size: 0.58rem;
+}
+
+.activity-widget.compact .activity-legend span {
+  font-size: 0.5rem;
+}
+
 .daily-date-title {
   white-space: nowrap;
 }
@@ -5298,6 +5577,44 @@ body[data-theme="light"] .energy-star.neutral {
 
   .today-panel-head h2 {
     font-size: 1.04rem;
+  }
+
+  .activity-widget {
+    padding: 0.5rem;
+    gap: 0.4rem;
+  }
+
+  .activity-months {
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+
+  .activity-main {
+    grid-template-columns: 1fr;
+    gap: 0.24rem;
+  }
+
+  .activity-weekdays {
+    display: none;
+  }
+
+  .activity-grid {
+    overflow-x: auto;
+    padding-bottom: 0.08rem;
+    scrollbar-width: thin;
+  }
+
+  .activity-cell {
+    min-width: 0.38rem;
+  }
+
+  .activity-foot {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .activity-tooltip {
+    max-width: min(220px, 90vw);
   }
 
   .daily-date-title {
