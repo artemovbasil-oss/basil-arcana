@@ -2885,8 +2885,9 @@ function renderTodayAstroPanel(profile, dashboard) {
   const activityWidget = renderActivityHeatmap(dashboard?.activity, {
     compact: true,
     title: "Usage rhythm",
-    subtitle: "Last 30 days",
-    rangeDays: 30
+    subtitle: "Last 120 days",
+    rangeDays: 120,
+    className: "activity-widget-home"
   });
   return `
     <div class="today-panel">

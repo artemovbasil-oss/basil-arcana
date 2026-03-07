@@ -3498,6 +3498,25 @@ body[data-theme="light"] .activity-cell.level-4 {
   display: none;
 }
 
+.activity-widget-home.activity-widget.compact .activity-main {
+  overflow: visible;
+}
+
+.activity-widget-home.activity-widget.compact .activity-months,
+.activity-widget-home.activity-widget.compact .activity-grid {
+  grid-template-columns: repeat(var(--weeks, 53), minmax(0, 1fr));
+  width: 100%;
+}
+
+.activity-widget-home.activity-widget.compact .activity-months {
+  gap: 0.12rem;
+}
+
+.activity-widget-home.activity-widget.compact .activity-grid {
+  gap: 0.12rem;
+  min-height: calc((0.28rem * 7) + (0.12rem * 6));
+}
+
 .activity-widget.compact .activity-weekdays span {
   font-size: 0.5rem;
 }
