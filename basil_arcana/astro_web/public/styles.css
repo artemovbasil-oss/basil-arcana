@@ -959,6 +959,30 @@ body[data-theme="dark"] .celeb-archive-thumb-link {
   color: var(--ink);
 }
 
+.article-infographic {
+  margin: 1rem 0 1.1rem;
+  border: 1px solid var(--line);
+  background:
+    radial-gradient(circle at 18% 22%, color-mix(in srgb, var(--ink) 8%, transparent 92%) 0%, transparent 46%),
+    radial-gradient(circle at 80% 68%, color-mix(in srgb, var(--ink) 7%, transparent 93%) 0%, transparent 50%),
+    var(--surface-2);
+  padding: 0.7rem;
+}
+
+.article-infographic svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.article-infographic figcaption {
+  margin-top: 0.5rem;
+  font-size: 0.73rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
 .article-cta {
   display: grid;
   gap: 0.5rem;

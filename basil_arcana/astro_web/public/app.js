@@ -5893,6 +5893,200 @@ const coreHubArticles = [
       <p>Astronautica is our attempt to build a world-class astrology/astronomy companion that treats users like thinking adults: transparent methods, high signal, and practical outcomes.</p>
       <p>Continue with <a href="/astrology-hub/how-to-use-astronautica-complete-practical-guide">How to Use Astronautica: A Complete Practical Guide</a> and <a href="/astrology-hub/astrology-for-self-knowledge-and-growth">Astrology for Self-Knowledge and Growth</a>.</p>
     `
+  },
+  {
+    slug: "astrology-and-tarot-practical-framework-and-basilarcana-link",
+    title: "Astrology and Tarot Together: A Practical Framework for Better Decisions",
+    excerpt: "How to combine natal architecture and Tarot reflection without mystification: a rigorous two-lens workflow with weekly protocols and measurable outcomes.",
+    readTime: "21 min",
+    publishedAt: "2026-03-07",
+    category: "Tarot x Astrology",
+    seoDescription: "Long-form guide to combining astrology and Tarot for self-knowledge and decision quality, including practical routines and Basilarcana Tarot integration.",
+    content: `
+      <p class="article-lead">Astrology and Tarot are often treated as competing systems. In practice, they solve different cognitive tasks and can work together with high signal. Astrology maps stable pattern architecture. Tarot captures present-tense psychological dynamics. Combined correctly, they produce clearer decisions with less emotional noise.</p>
+      <figure class="article-infographic">
+        <svg viewBox="0 0 900 320" role="img" aria-label="Astrology and Tarot dual-lens workflow diagram">
+          <defs>
+            <linearGradient id="astTarotFlow" x1="0" x2="1" y1="0" y2="0">
+              <stop offset="0%" stop-color="currentColor" stop-opacity="0.14"/>
+              <stop offset="50%" stop-color="currentColor" stop-opacity="0.06"/>
+              <stop offset="100%" stop-color="currentColor" stop-opacity="0.14"/>
+            </linearGradient>
+          </defs>
+          <rect x="26" y="44" width="240" height="230" fill="none" stroke="currentColor" stroke-opacity="0.42"/>
+          <rect x="330" y="44" width="240" height="230" fill="none" stroke="currentColor" stroke-opacity="0.42"/>
+          <rect x="634" y="44" width="240" height="230" fill="none" stroke="currentColor" stroke-opacity="0.42"/>
+          <rect x="26" y="44" width="240" height="230" fill="url(#astTarotFlow)"/>
+          <rect x="330" y="44" width="240" height="230" fill="url(#astTarotFlow)"/>
+          <rect x="634" y="44" width="240" height="230" fill="url(#astTarotFlow)"/>
+          <text x="146" y="84" text-anchor="middle" font-size="22" fill="currentColor">ASTROLOGY</text>
+          <text x="450" y="84" text-anchor="middle" font-size="22" fill="currentColor">INTEGRATION</text>
+          <text x="754" y="84" text-anchor="middle" font-size="22" fill="currentColor">TAROT</text>
+          <text x="146" y="122" text-anchor="middle" font-size="14" fill="currentColor" opacity="0.78">Natal Baseline</text>
+          <text x="146" y="146" text-anchor="middle" font-size="14" fill="currentColor" opacity="0.78">Timing Windows</text>
+          <text x="146" y="170" text-anchor="middle" font-size="14" fill="currentColor" opacity="0.78">Stress Pattern Map</text>
+          <text x="450" y="122" text-anchor="middle" font-size="14" fill="currentColor" opacity="0.78">Question Design</text>
+          <text x="450" y="146" text-anchor="middle" font-size="14" fill="currentColor" opacity="0.78">Hypothesis + Protocol</text>
+          <text x="450" y="170" text-anchor="middle" font-size="14" fill="currentColor" opacity="0.78">Weekly Review</text>
+          <text x="754" y="122" text-anchor="middle" font-size="14" fill="currentColor" opacity="0.78">Present Tension Read</text>
+          <text x="754" y="146" text-anchor="middle" font-size="14" fill="currentColor" opacity="0.78">Narrative Reframe</text>
+          <text x="754" y="170" text-anchor="middle" font-size="14" fill="currentColor" opacity="0.78">Action Prompt</text>
+          <line x1="266" y1="158" x2="330" y2="158" stroke="currentColor" stroke-width="2.1" stroke-opacity="0.48"/>
+          <line x1="570" y1="158" x2="634" y2="158" stroke="currentColor" stroke-width="2.1" stroke-opacity="0.48"/>
+          <polygon points="324,151 330,158 324,165" fill="currentColor" fill-opacity="0.58"/>
+          <polygon points="628,151 634,158 628,165" fill="currentColor" fill-opacity="0.58"/>
+        </svg>
+        <figcaption>Dual-lens model: stable chart architecture + present-state Tarot reflection.</figcaption>
+      </figure>
+      <h2>Why they pair well</h2>
+      <p>Astrology is good at structure: recurring pattern geometry, high-friction domains, and timing context. Tarot is good at state clarity: what is active right now emotionally, what narrative is distorting judgment, and what single move can improve agency today. Using one without the other often leaves blind spots.</p>
+      <ul class="bullet-list">
+        <li><strong>Astrology without Tarot:</strong> strong architecture, weaker present-moment calibration.</li>
+        <li><strong>Tarot without Astrology:</strong> strong emotional clarity, weaker long-cycle context.</li>
+        <li><strong>Combined:</strong> better sequencing of action under pressure.</li>
+      </ul>
+      <h2>A clean integration protocol</h2>
+      <p>Use this six-step flow each week:</p>
+      <ul class="bullet-list">
+        <li><strong>1. Baseline:</strong> review Sun, Moon, Rising and dominant houses in your natal chart.</li>
+        <li><strong>2. Timing:</strong> identify high/low execution windows in Daily.</li>
+        <li><strong>3. Question:</strong> write one exact Tarot prompt (not generic, no fatalist framing).</li>
+        <li><strong>4. Draw:</strong> run a 3-card spread: Context, Friction, Action.</li>
+        <li><strong>5. Translate:</strong> convert symbolic output into one measurable behavior.</li>
+        <li><strong>6. Review:</strong> measure effect after 48-72 hours.</li>
+      </ul>
+      <h2>Interesting historical fact pattern</h2>
+      <p>In Renaissance Europe, astrology and card symbolism often lived in the same cultural ecosystem of memory systems, moral narratives, and cyclical time thinking. While methods differed, the practical purpose overlapped: reduce uncertainty by structuring attention and choice.</p>
+      <h2>How to avoid pseudo-mystical overreach</h2>
+      <p>Never use Tarot as final authority over legal, medical, or financial decisions. Treat cards as cognitive prompts. Treat astrology as probabilistic pattern mapping. Keep both in service of human agency, not dependency.</p>
+      <h2>Basilarcana as the Tarot layer</h2>
+      <p>If you want a practical Tarot environment for this dual-lens method, use <a href="https://basilarcana.com" target="_blank" rel="noopener noreferrer">basilarcana.com</a>. It is designed for structured reflection, not fear-based predictions.</p>
+      <h2>Recommended reading path</h2>
+      <p>Continue with <a href="/astrology-hub/how-to-use-astronautica-complete-practical-guide">How to Use Astronautica</a>, then read <a href="/astrology-hub/astrology-for-self-knowledge-and-growth">Astrology for Self-Knowledge and Growth</a> and <a href="/astrology-hub/how-to-read-a-natal-chart-correctly">How to Read a Natal Chart Correctly</a>.</p>
+    `
+  },
+  {
+    slug: "astrology-and-numerology-patterns-structure-and-practical-usage",
+    title: "Astrology and Numerology: Pattern Languages, Structure, and Practical Usage",
+    excerpt: "A deep comparative guide to astrology and numerology: where the systems align, where they diverge, and how to use both without methodological confusion.",
+    readTime: "19 min",
+    publishedAt: "2026-03-07",
+    category: "Comparative Method",
+    seoDescription: "Long-form analysis of astrology and numerology: structural comparison, practical use-cases, validation logic, and combined protocol for self-development.",
+    content: `
+      <p class="article-lead">Astrology and numerology are often grouped together as “esoteric systems,” but they operate with different symbolic grammars. Astrology is geometry + time + location. Numerology is arithmetic symbolism over names and dates. The productive way to use them is to preserve these differences and combine them only at the protocol layer.</p>
+      <figure class="article-infographic">
+        <svg viewBox="0 0 900 320" role="img" aria-label="Astrology and numerology comparison chart">
+          <rect x="34" y="34" width="832" height="252" fill="none" stroke="currentColor" stroke-opacity="0.42"/>
+          <line x1="310" y1="34" x2="310" y2="286" stroke="currentColor" stroke-opacity="0.28"/>
+          <line x1="596" y1="34" x2="596" y2="286" stroke="currentColor" stroke-opacity="0.28"/>
+          <text x="172" y="74" text-anchor="middle" font-size="22" fill="currentColor">INPUTS</text>
+          <text x="453" y="74" text-anchor="middle" font-size="22" fill="currentColor">MODEL</text>
+          <text x="731" y="74" text-anchor="middle" font-size="22" fill="currentColor">OUTPUT</text>
+          <text x="172" y="112" text-anchor="middle" font-size="14" fill="currentColor" opacity="0.8">Date / Time / Place</text>
+          <text x="172" y="136" text-anchor="middle" font-size="14" fill="currentColor" opacity="0.8">Name / Date Digits</text>
+          <text x="172" y="160" text-anchor="middle" font-size="14" fill="currentColor" opacity="0.8">Calendar Context</text>
+          <text x="453" y="112" text-anchor="middle" font-size="14" fill="currentColor" opacity="0.8">Planetary Geometry</text>
+          <text x="453" y="136" text-anchor="middle" font-size="14" fill="currentColor" opacity="0.8">Number Symbol Logic</text>
+          <text x="453" y="160" text-anchor="middle" font-size="14" fill="currentColor" opacity="0.8">Pattern Weighting</text>
+          <text x="731" y="112" text-anchor="middle" font-size="14" fill="currentColor" opacity="0.8">Behavior Protocols</text>
+          <text x="731" y="136" text-anchor="middle" font-size="14" fill="currentColor" opacity="0.8">Timing Routines</text>
+          <text x="731" y="160" text-anchor="middle" font-size="14" fill="currentColor" opacity="0.8">Decision Constraints</text>
+          <polyline points="260,214 330,188 410,200 490,172 568,184 654,156 742,168" fill="none" stroke="currentColor" stroke-width="2.2" stroke-opacity="0.5"/>
+          <circle cx="260" cy="214" r="4" fill="currentColor" fill-opacity="0.75"/>
+          <circle cx="330" cy="188" r="4" fill="currentColor" fill-opacity="0.75"/>
+          <circle cx="410" cy="200" r="4" fill="currentColor" fill-opacity="0.75"/>
+          <circle cx="490" cy="172" r="4" fill="currentColor" fill-opacity="0.75"/>
+          <circle cx="568" cy="184" r="4" fill="currentColor" fill-opacity="0.75"/>
+          <circle cx="654" cy="156" r="4" fill="currentColor" fill-opacity="0.75"/>
+          <circle cx="742" cy="168" r="4" fill="currentColor" fill-opacity="0.75"/>
+        </svg>
+        <figcaption>Comparison logic: different symbolic engines, shared operational output layer.</figcaption>
+      </figure>
+      <h2>Core methodological difference</h2>
+      <p>Astrology computes sky positions from spatiotemporal data. Numerology computes symbolic vectors from number reduction systems (often based on date and name structures). That means astrology is heavily dependent on birth time and place precision, while numerology is more sensitive to transliteration and naming conventions.</p>
+      <h2>Where they overlap productively</h2>
+      <ul class="bullet-list">
+        <li><strong>Cycle thinking:</strong> both systems segment time into interpretable phases.</li>
+        <li><strong>Pattern compression:</strong> both convert complex inputs into manageable symbolic maps.</li>
+        <li><strong>Behavior design:</strong> both can support routines when outputs are made concrete.</li>
+      </ul>
+      <h2>Where users get confused</h2>
+      <p>The most common error is model blending without rules. Users take a numerology “life path” statement and force it as a hard override over natal architecture. This creates contradiction noise. Better approach: keep system outputs parallel, then merge only in decision protocol.</p>
+      <h2>A rigorous integration template</h2>
+      <p>Use this layered method:</p>
+      <ul class="bullet-list">
+        <li><strong>Layer A (Astrology):</strong> identify domain timing and stress geometry.</li>
+        <li><strong>Layer B (Numerology):</strong> identify decision style and repetition themes.</li>
+        <li><strong>Layer C (Protocol):</strong> define one weekly action and one review metric.</li>
+      </ul>
+      <h2>Interesting fact</h2>
+      <p>Pythagorean number symbolism and Hellenistic cosmological thinking were historically adjacent in several philosophical schools, but they were never identical methods. Their convergence in modern culture is mostly interpretive, not computational.</p>
+      <h2>How Astronautica users can apply this today</h2>
+      <p>Use Astrology Hub and Natal/Daily first as the structural backbone. If you use numerology separately, treat it as a secondary perspective for reflection prompts, not a replacement for computed timing architecture.</p>
+      <h2>Further reading</h2>
+      <p>Continue with <a href="/astrology-hub/natal-charts-how-they-are-built-and-why-they-matter">Natal Charts: How They Are Built and Why They Can Be Meaningful</a>, <a href="/astrology-hub/how-to-build-a-natal-chart-yourself-academic-method">How to Build a Natal Chart Yourself</a>, and <a href="/astrology-hub/astrology-and-astronomy-shared-roots-modern-paths">Astrology and Astronomy</a>.</p>
+    `
+  },
+  {
+    slug: "astrology-in-modern-politics-narratives-timing-and-power",
+    title: "Astrology in Modern Politics: Narratives, Timing, and Power Signaling",
+    excerpt: "An analytical longread on how astrological language appears in modern politics: campaign timing, media narratives, leadership branding, and voter psychology.",
+    readTime: "23 min",
+    publishedAt: "2026-03-07",
+    category: "Politics & Culture",
+    seoDescription: "Comprehensive analysis of astrology in modern politics, including strategic narratives, timing effects, media framing, and ethical boundaries.",
+    content: `
+      <p class="article-lead">Astrology in politics is less about secret prophecy and more about narrative architecture. In modern media systems, symbolic language can shape attention, identity framing, and timing rituals around leadership. The key question is not whether politicians “believe” astrology, but how astrological motifs influence communication ecosystems.</p>
+      <figure class="article-infographic">
+        <svg viewBox="0 0 900 320" role="img" aria-label="Astrology in politics influence map">
+          <defs>
+            <radialGradient id="polNode" cx="50%" cy="50%" r="60%">
+              <stop offset="0%" stop-color="currentColor" stop-opacity="0.18"/>
+              <stop offset="100%" stop-color="currentColor" stop-opacity="0.04"/>
+            </radialGradient>
+          </defs>
+          <circle cx="450" cy="160" r="56" fill="url(#polNode)" stroke="currentColor" stroke-opacity="0.46"/>
+          <text x="450" y="166" text-anchor="middle" font-size="15" fill="currentColor">POLITICAL</text>
+          <circle cx="210" cy="80" r="46" fill="url(#polNode)" stroke="currentColor" stroke-opacity="0.4"/>
+          <circle cx="700" cy="88" r="46" fill="url(#polNode)" stroke="currentColor" stroke-opacity="0.4"/>
+          <circle cx="220" cy="254" r="46" fill="url(#polNode)" stroke="currentColor" stroke-opacity="0.4"/>
+          <circle cx="692" cy="250" r="46" fill="url(#polNode)" stroke="currentColor" stroke-opacity="0.4"/>
+          <text x="210" y="86" text-anchor="middle" font-size="13" fill="currentColor">MEDIA</text>
+          <text x="700" y="94" text-anchor="middle" font-size="13" fill="currentColor">TIMING</text>
+          <text x="220" y="260" text-anchor="middle" font-size="13" fill="currentColor">IDENTITY</text>
+          <text x="692" y="256" text-anchor="middle" font-size="13" fill="currentColor">MYTH</text>
+          <line x1="254" y1="96" x2="402" y2="145" stroke="currentColor" stroke-opacity="0.44"/>
+          <line x1="654" y1="104" x2="500" y2="147" stroke="currentColor" stroke-opacity="0.44"/>
+          <line x1="264" y1="238" x2="403" y2="176" stroke="currentColor" stroke-opacity="0.44"/>
+          <line x1="646" y1="236" x2="498" y2="176" stroke="currentColor" stroke-opacity="0.44"/>
+          <text x="450" y="304" text-anchor="middle" font-size="13" fill="currentColor" opacity="0.75">Symbolic language can amplify existing political narratives.</text>
+        </svg>
+        <figcaption>Influence map: astrology as symbolic narrative layer in political communication.</figcaption>
+      </figure>
+      <h2>What “astrology in politics” actually means</h2>
+      <p>In contemporary democracies, astrology appears in at least four channels: media commentary, consultant culture, voter subcultures, and leader myth-building. It is usually not a formal policy instrument. It is a framing instrument that can modulate perceived momentum, fate, and personal authority.</p>
+      <h2>Channel 1: media narrative optimization</h2>
+      <p>Political coverage depends on stories, not just facts. Astrological hooks can be used to dramatize campaign periods, leadership transitions, and conflict cycles. Even when audiences do not “believe” astrology literally, symbolic frames can improve memorability and emotional salience.</p>
+      <h2>Channel 2: timing rituals</h2>
+      <p>Some campaign teams historically used election calendars, launch windows, and messaging phases informed by symbolic timing systems. Whether causally effective or not, these rituals can increase internal team confidence and coherence, which does affect execution quality.</p>
+      <h2>Channel 3: identity branding</h2>
+      <p>Public figures may be described through zodiac archetypes to simplify personality narratives. This compresses complexity into recognizable cultural shorthand. The risk is stereotyping; the advantage is quick emotional indexing in high-noise information environments.</p>
+      <h2>Interesting fact snapshots</h2>
+      <ul class="bullet-list">
+        <li>In multiple countries, mainstream newspapers run election-cycle astrology columns during high-volatility periods.</li>
+        <li>Political memoirs from different eras mention informal consultation cultures, even when not publicly acknowledged during campaigns.</li>
+        <li>Social media astrology communities now influence narrative velocity among younger voter cohorts.</li>
+      </ul>
+      <h2>What astrology cannot do in politics</h2>
+      <p>It cannot replace policy analysis, polling methodology, macroeconomics, institutional law, or geopolitical intelligence. Treating symbolic systems as direct forecasting tools for complex political systems is a category error.</p>
+      <h2>Ethical boundary</h2>
+      <p>Responsible usage means transparency and limits. Astrology can be used for communication reflection and rhythm design, but it should not be used to manipulate fear, suppress evidence, or bypass democratic accountability.</p>
+      <h2>Why this matters for Astronautica readers</h2>
+      <p>This topic illustrates a broader principle: symbolic systems are most useful when they improve cognition, not when they replace reality testing. That is also the core product philosophy in Astronautica.</p>
+      <h2>Further reading</h2>
+      <p>Continue with <a href="/astrology-hub/how-to-avoid-astrology-scams">How to Avoid Astrology Scams</a>, <a href="/astrology-hub/astrology-and-astronomy-shared-roots-modern-paths">Astrology and Astronomy</a>, and <a href="/astrology-hub/astrology-for-self-knowledge-and-growth">Astrology for Self-Knowledge and Growth</a>.</p>
+    `
   }
 ];
 
