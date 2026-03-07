@@ -2884,11 +2884,12 @@ function bindActivityHeatmapInteractions(root = document) {
 
 function renderTodayAstroPanel(profile, dashboard) {
   const info = buildTodayAstroData(profile, dashboard);
+  const homeRangeDays = isMobileViewport() ? 140 : 210;
   const activityWidget = renderActivityHeatmap(dashboard?.activity, {
     compact: true,
     title: "Usage rhythm",
-    subtitle: "Last 70 days",
-    rangeDays: 70,
+    subtitle: `Last ${homeRangeDays} days`,
+    rangeDays: homeRangeDays,
     className: "activity-widget-home",
     showMonths: false
   });
