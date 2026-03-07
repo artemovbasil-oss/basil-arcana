@@ -2261,7 +2261,8 @@ function buildDashboardPayload(sessionData, period = "week") {
     daily,
     activity: {
       entries: Array.isArray(sessionData?.daily?.activity) ? sessionData.daily.activity : [],
-      history: Array.isArray(sessionData?.daily?.history) ? sessionData.daily.history : []
+      history: Array.isArray(sessionData?.daily?.history) ? sessionData.daily.history : [],
+      streak: Math.max(0, Number(sessionData?.daily?.streak || 0))
     },
     periodForecast,
     personalTiming,
@@ -3409,7 +3410,8 @@ app.post("/api/daily-insight", requireAuth, async (req, res) => {
     history: sessionDaily.history,
     activity: {
       entries: Array.isArray(sessionDaily.activity) ? sessionDaily.activity : [],
-      history: sessionDaily.history
+      history: sessionDaily.history,
+      streak: Math.max(0, Number(sessionDaily.streak || 0))
     },
     dayDashboard: {
       focus,

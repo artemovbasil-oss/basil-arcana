@@ -2686,7 +2686,7 @@ function activityLevel(score) {
   return 0;
 }
 
-function buildActivityHeatmapModel(activityPayload = null) {
+function buildActivityHeatmapModel(activityPayload = null, { rangeDays = 365 } = {}) {
   const entries = Array.isArray(activityPayload?.entries) ? activityPayload.entries : [];
   const history = Array.isArray(activityPayload?.history) ? activityPayload.history : [];
   const activityByDay = new Map(
@@ -2703,7 +2703,7 @@ function buildActivityHeatmapModel(activityPayload = null) {
   const now = new Date();
   const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
   const rangeStartRaw = new Date(today);
-  rangeStartRaw.setUTCDate(rangeStartRaw.getUTCDate() - 364);
+  rangeStartRaw.setUTCDate(rangeStartRaw.getUTCDate() - Math.max(0, Number(rangeDays || 365) - 1));
   const startWeekday = (rangeStartRaw.getUTCDay() + 6) % 7;
   const rangeStart = new Date(rangeStartRaw);
   rangeStart.setUTCDate(rangeStart.getUTCDate() - startWeekday);
@@ -2754,7 +2754,7 @@ function buildActivityHeatmapModel(activityPayload = null) {
 
   const maxWeek = cells.reduce((max, item) => Math.max(max, item.week), 0) + 1;
   const activeDays = cells.filter((item) => item.score > 0).length;
-  const currentStreak = (() => {
+  const computedStreak = (() => {
     let streak = 0;
     for (let i = cells.length - 1; i >= 0; i -= 1) {
       if (cells[i].score > 0) {
@@ -2765,6 +2765,8 @@ function buildActivityHeatmapModel(activityPayload = null) {
     }
     return streak;
   })();
+  const sourceStreak = Number(activityPayload?.streak);
+  const currentStreak = Number.isFinite(sourceStreak) && sourceStreak >= 0 ? sourceStreak : computedStreak;
 
   return {
     weeks: maxWeek,
@@ -2778,12 +2780,14 @@ function buildActivityHeatmapModel(activityPayload = null) {
 function renderActivityHeatmap(activityPayload, {
   compact = false,
   title = "Rhythm Activity",
-  subtitle = "Last 12 months"
+  subtitle = "Last 12 months",
+  rangeDays = 365
 } = {}) {
-  const model = buildActivityHeatmapModel(activityPayload);
+  const model = buildActivityHeatmapModel(activityPayload, { rangeDays });
   const widgetClass = compact ? "activity-widget compact" : "activity-widget";
+  const rangeClass = rangeDays <= 35 ? " recent-30" : "";
   return `
-    <section class="${widgetClass}" data-activity-widget>
+    <section class="${widgetClass}${rangeClass}" data-activity-widget>
       <div class="activity-head">
         <h3>${title}</h3>
         <span>${subtitle}</span>
@@ -2850,9 +2854,14 @@ function bindActivityHeatmapInteractions(root = document) {
       tooltip.classList.add("is-visible");
       const widgetRect = widget.getBoundingClientRect();
       const rect = target.getBoundingClientRect();
-      const x = rect.left - widgetRect.left + rect.width / 2;
+      const rawX = rect.left - widgetRect.left + rect.width / 2;
       const y = rect.top - widgetRect.top - 10;
-      tooltip.style.left = `${x}px`;
+      const tooltipWidth = Math.max(80, tooltip.offsetWidth || 0);
+      const clampedX = Math.max(
+        tooltipWidth / 2 + 8,
+        Math.min(widgetRect.width - tooltipWidth / 2 - 8, rawX)
+      );
+      tooltip.style.left = `${clampedX}px`;
       tooltip.style.top = `${y}px`;
     };
     const hide = () => {
@@ -2872,7 +2881,8 @@ function renderTodayAstroPanel(profile, dashboard) {
   const activityWidget = renderActivityHeatmap(dashboard?.activity, {
     compact: true,
     title: "Usage rhythm",
-    subtitle: "Last 12 months"
+    subtitle: "Last 30 days",
+    rangeDays: 30
   });
   return `
     <div class="today-panel">
@@ -7700,7 +7710,8 @@ async function hydrateDaily() {
     });
     const dailyActivityWidget = renderActivityHeatmap(data.activity, {
       title: "Rhythm Activity",
-      subtitle: "Last 12 months"
+      subtitle: "Last 12 months",
+      rangeDays: 365
     });
 
     app.innerHTML = `
