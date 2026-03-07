@@ -59,14 +59,16 @@ themeToggle?.addEventListener("click", () => {
 });
 
 navToolTheme?.addEventListener("click", (event) => {
-  if (event.target.closest("#themeToggle")) {
+  const path = typeof event.composedPath === "function" ? event.composedPath() : [];
+  if (path.includes(themeToggle)) {
     return;
   }
   themeToggle?.click();
 });
 
 navToolAccount?.addEventListener("click", (event) => {
-  if (event.target.closest("#profileButton")) {
+  const path = typeof event.composedPath === "function" ? event.composedPath() : [];
+  if (path.includes(profileButton)) {
     return;
   }
   profileButton?.click();
@@ -2781,13 +2783,15 @@ function renderActivityHeatmap(activityPayload, {
   compact = false,
   title = "Rhythm Activity",
   subtitle = "Last 12 months",
-  rangeDays = 365
+  rangeDays = 365,
+  className = ""
 } = {}) {
   const model = buildActivityHeatmapModel(activityPayload, { rangeDays });
   const widgetClass = compact ? "activity-widget compact" : "activity-widget";
   const rangeClass = rangeDays <= 35 ? " recent-30" : "";
+  const extraClass = className ? ` ${className}` : "";
   return `
-    <section class="${widgetClass}${rangeClass}" data-activity-widget>
+    <section class="${widgetClass}${rangeClass}${extraClass}" data-activity-widget>
       <div class="activity-head">
         <h3>${title}</h3>
         <span>${subtitle}</span>
@@ -7711,7 +7715,8 @@ async function hydrateDaily() {
     const dailyActivityWidget = renderActivityHeatmap(data.activity, {
       title: "Rhythm Activity",
       subtitle: "Last 12 months",
-      rangeDays: 365
+      rangeDays: 365,
+      className: "activity-widget-daily"
     });
 
     app.innerHTML = `

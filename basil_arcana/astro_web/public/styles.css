@@ -146,6 +146,12 @@ body[data-theme="light"] .topbar {
   cursor: pointer;
 }
 
+.nav-tool-theme,
+.nav-tool-account {
+  position: relative;
+  z-index: 3;
+}
+
 .nav-tool-label {
   display: none;
   font-family: var(--font-sans);
@@ -3436,7 +3442,10 @@ body[data-theme="light"] .activity-cell.level-4 {
 }
 
 .activity-widget.compact .activity-months {
-  min-height: 0.52rem;
+  grid-template-columns: repeat(var(--weeks, 53), 0.32rem);
+  gap: 0.08rem;
+  min-height: 0.5rem;
+  width: max-content;
 }
 
 .activity-widget.compact .activity-months span {
@@ -3444,8 +3453,10 @@ body[data-theme="light"] .activity-cell.level-4 {
 }
 
 .activity-widget.compact .activity-grid {
-  min-height: calc((0.34rem * 7) + (0.1rem * 6));
-  gap: 0.1rem;
+  grid-template-columns: repeat(var(--weeks, 53), 0.32rem);
+  min-height: calc((0.32rem * 7) + (0.08rem * 6));
+  gap: 0.08rem;
+  width: max-content;
 }
 
 .activity-widget.compact .activity-cell {
@@ -3454,12 +3465,37 @@ body[data-theme="light"] .activity-cell.level-4 {
 }
 
 .activity-widget.compact.recent-30 .activity-months {
-  gap: 0.16rem;
+  grid-template-columns: repeat(var(--weeks, 53), 0.36rem);
+  gap: 0.1rem;
 }
 
 .activity-widget.compact.recent-30 .activity-grid {
-  gap: 0.16rem;
-  min-height: calc((0.42rem * 7) + (0.16rem * 6));
+  grid-template-columns: repeat(var(--weeks, 53), 0.36rem);
+  gap: 0.1rem;
+  min-height: calc((0.36rem * 7) + (0.1rem * 6));
+}
+
+.activity-widget.compact .activity-main {
+  grid-template-columns: 1fr;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.activity-widget.compact .activity-weekdays {
+  display: none;
+}
+
+.activity-widget.compact .activity-months {
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.activity-widget-daily .activity-main {
+  grid-template-columns: 1fr;
+}
+
+.activity-widget-daily .activity-weekdays {
+  display: none;
 }
 
 .activity-widget.compact .activity-weekdays span {
@@ -5405,6 +5441,27 @@ body[data-theme="light"] .energy-star.neutral {
   .feature-grid,
   .metric-grid {
     grid-template-columns: 1fr;
+  }
+
+  .dashboard-head > h2 {
+    display: none;
+  }
+
+  .dashboard-head {
+    justify-content: flex-end;
+  }
+
+  .period-switch {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.3rem;
+  }
+
+  .period-switch .btn {
+    width: 100%;
+    min-width: 0;
+    padding-inline: 0.32rem;
   }
 
   .hub-grid {
