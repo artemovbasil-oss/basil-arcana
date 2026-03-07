@@ -2887,8 +2887,8 @@ function renderTodayAstroPanel(profile, dashboard) {
   const activityWidget = renderActivityHeatmap(dashboard?.activity, {
     compact: true,
     title: "Usage rhythm",
-    subtitle: "Last 84 days",
-    rangeDays: 84,
+    subtitle: "Last 70 days",
+    rangeDays: 70,
     className: "activity-widget-home",
     showMonths: false
   });
@@ -5002,7 +5002,7 @@ function sharedNatalLoadingView() {
 }
 
 function renderNatalHeader(profile, report) {
-  const nameClass = String(profile?.name || "").length > 20 ? "mask-fade" : "name-plain";
+  const nameClass = "natal-name-wrap";
   const chips = [
     `${zodiacIcon(report?.core?.sun)} Sun: ${report?.core?.sun || "Unknown"}`,
     `${zodiacIcon(report?.core?.moon)} Moon: ${report?.core?.moon || "Unknown"}`,
@@ -7716,10 +7716,11 @@ async function hydrateDaily() {
       core: state.dashboard?.natalCore,
       profile: state.profile
     });
+    const dailyRangeDays = isMobileViewport() ? 140 : 365;
     const dailyActivityWidget = renderActivityHeatmap(data.activity, {
       title: "Rhythm Activity",
-      subtitle: "Last 12 months",
-      rangeDays: 365,
+      subtitle: isMobileViewport() ? "Last 140 days" : "Last 12 months",
+      rangeDays: dailyRangeDays,
       className: "activity-widget-daily",
       showMonths: false
     });

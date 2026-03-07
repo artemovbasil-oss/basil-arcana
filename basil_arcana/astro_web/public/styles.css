@@ -646,6 +646,13 @@ body[data-theme="light"] .auth-login-btn.telegram .auth-login-btn-icon .astro-ic
   margin: 0;
 }
 
+.natal-name-wrap {
+  display: block;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
 .chip-grid {
   display: flex;
   flex-wrap: wrap;
@@ -3503,18 +3510,19 @@ body[data-theme="light"] .activity-cell.level-4 {
 }
 
 .activity-widget-home.activity-widget.compact .activity-grid {
-  grid-template-columns: repeat(var(--weeks, 53), minmax(0, 1fr));
+  grid-template-columns: repeat(var(--weeks, 53), 0.32rem);
+  justify-content: space-between;
   width: 100%;
 }
 
 .activity-widget-home.activity-widget.compact .activity-grid {
-  gap: 0.1rem;
+  gap: 0.12rem;
   min-height: auto;
 }
 
 .activity-widget-home.activity-widget.compact .activity-cell {
-  aspect-ratio: auto;
-  height: 0.34rem;
+  aspect-ratio: 1 / 1;
+  height: auto;
   border-radius: 0.1rem;
 }
 
@@ -5693,6 +5701,32 @@ body[data-theme="light"] .energy-star.neutral {
     min-width: 0.38rem;
   }
 
+  .activity-widget-home.activity-widget.compact .activity-grid {
+    overflow: visible;
+    grid-template-columns: repeat(var(--weeks, 53), 0.34rem);
+    justify-content: space-between;
+    gap: 0.12rem;
+  }
+
+  .activity-widget-home.activity-widget.compact .activity-cell {
+    min-width: 0;
+    aspect-ratio: 1 / 1;
+    height: auto;
+  }
+
+  .activity-widget-daily .activity-grid {
+    overflow: visible;
+    grid-template-columns: repeat(var(--weeks, 53), minmax(0, 1fr));
+    gap: 0.22rem;
+    min-height: calc((0.72rem * 7) + (0.22rem * 6));
+  }
+
+  .activity-widget-daily .activity-cell {
+    min-width: 0;
+    aspect-ratio: 1 / 1;
+    height: auto;
+  }
+
   .activity-foot {
     flex-direction: column;
     align-items: flex-start;
@@ -5704,6 +5738,11 @@ body[data-theme="light"] .energy-star.neutral {
 
   .daily-date-title {
     font-size: clamp(1.55rem, 7.2vw, 2.35rem);
+  }
+
+  .natal-main-name {
+    font-size: clamp(1.46rem, 8.2vw, 2.15rem);
+    line-height: 1.04;
   }
 
   .daily-delta-grid {
