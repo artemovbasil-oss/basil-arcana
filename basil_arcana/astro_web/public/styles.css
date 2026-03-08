@@ -4863,6 +4863,52 @@ body[data-theme="light"] .natal-starfield {
   background: transparent;
 }
 
+.numerology-hero h1 {
+  margin-bottom: 0.45rem;
+}
+
+.numerology-hero p {
+  max-width: 72ch;
+}
+
+.numerology-layout .premium-panel h2 {
+  margin-bottom: 0.85rem;
+}
+
+.numerology-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.numerology-grid-compact {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.numerology-cell {
+  border: 1px solid var(--line);
+  padding: 0.75rem 0.8rem;
+  background: color-mix(in srgb, var(--surface) 92%, var(--surface-2) 8%);
+}
+
+.numerology-cell h3 {
+  margin: 0;
+  font-size: 0.96rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.numerology-cell p {
+  margin: 0.32rem 0 0;
+}
+
+.numerology-steps {
+  margin: 0.3rem 0 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.38rem;
+}
+
 .natal-chart-svg {
   width: min(100%, 760px);
   height: auto;
@@ -5421,6 +5467,11 @@ body[data-theme="light"] .energy-star.neutral {
   }
 
   .timing-engine-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .numerology-grid,
+  .numerology-grid-compact {
     grid-template-columns: 1fr;
   }
 }

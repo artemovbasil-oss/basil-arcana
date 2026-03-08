@@ -6888,12 +6888,371 @@ function manifestoView() {
   `;
 }
 
+const numerologyArchetypes = {
+  1: {
+    title: "Initiator",
+    strengths: "Independent, decisive, and strong at starting new cycles.",
+    growth: "Avoid isolation and impatience; delegate and iterate.",
+    strategy: "Pick one flagship objective and drive it with weekly milestones."
+  },
+  2: {
+    title: "Mediator",
+    strengths: "Diplomatic, empathetic, and excellent in partnership dynamics.",
+    growth: "Avoid over-accommodation and unclear boundaries.",
+    strategy: "Set clear agreements before entering collaboration."
+  },
+  3: {
+    title: "Communicator",
+    strengths: "Creative, expressive, and socially magnetic.",
+    growth: "Avoid scattering attention across too many channels.",
+    strategy: "Ship one visible piece of work before opening new threads."
+  },
+  4: {
+    title: "Builder",
+    strengths: "Reliable, methodical, and strong in systems execution.",
+    growth: "Avoid rigidity and over-attachment to process.",
+    strategy: "Keep structure, but reserve one block weekly for experimentation."
+  },
+  5: {
+    title: "Explorer",
+    strengths: "Adaptive, persuasive, and opportunity-oriented.",
+    growth: "Avoid impulsive pivots and unfinished commitments.",
+    strategy: "Use short sprints with strict close-out criteria."
+  },
+  6: {
+    title: "Guardian",
+    strengths: "Responsible, relationally loyal, and service-focused.",
+    growth: "Avoid over-responsibility for other people’s outcomes.",
+    strategy: "Protect recovery time as a non-negotiable part of leadership."
+  },
+  7: {
+    title: "Analyst",
+    strengths: "Reflective, strategic, and deep in pattern recognition.",
+    growth: "Avoid overthinking and social withdrawal loops.",
+    strategy: "Turn insight into one concrete decision every day."
+  },
+  8: {
+    title: "Executive",
+    strengths: "Ambitious, operational, and high-capacity under pressure.",
+    growth: "Avoid control reflexes and output-only identity.",
+    strategy: "Balance performance metrics with relationship metrics."
+  },
+  9: {
+    title: "Humanitarian",
+    strengths: "Visionary, compassionate, and impact-driven.",
+    growth: "Avoid diffuse focus and emotional overload.",
+    strategy: "Choose one mission lens and route decisions through it."
+  },
+  11: {
+    title: "Visionary",
+    strengths: "Intuitive, inspiring, and high-sensitivity leadership potential.",
+    growth: "Avoid nervous overdrive and unfinished ideation loops.",
+    strategy: "Ground vision in operational cadence and simple routines."
+  },
+  22: {
+    title: "Master Builder",
+    strengths: "Large-scale execution, architecture thinking, social impact orientation.",
+    growth: "Avoid perfectionism and load imbalance.",
+    strategy: "Break ambitious systems into quarterly deliverable layers."
+  },
+  33: {
+    title: "Mentor",
+    strengths: "Service leadership, care intelligence, and value transmission.",
+    growth: "Avoid emotional overextension and blurred accountability.",
+    strategy: "Teach through clear frameworks, not only emotional labor."
+  }
+};
+
+function normalizeNumerologyName(value) {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toUpperCase()
+    .replace(/[^\p{L}\s]/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function reduceNumerologyNumber(value, { keepMaster = true } = {}) {
+  let number = Math.max(0, Math.floor(Number(value) || 0));
+  const master = new Set([11, 22, 33]);
+  while (number > 9 && !(keepMaster && master.has(number))) {
+    number = String(number)
+      .split("")
+      .reduce((sum, digit) => sum + Number(digit), 0);
+  }
+  return number;
+}
+
+function digitsFromDateParts(parts) {
+  return parts
+    .map((part) => String(part || ""))
+    .join("")
+    .replace(/\D/g, "")
+    .split("")
+    .map((digit) => Number(digit));
+}
+
+function sumDigits(values) {
+  return (Array.isArray(values) ? values : []).reduce((sum, item) => sum + (Number(item) || 0), 0);
+}
+
+function numerologyLetterValue(letter) {
+  const char = String(letter || "").toUpperCase();
+  const code = char.charCodeAt(0);
+  if (code >= 65 && code <= 90) {
+    return ((code - 65) % 9) + 1;
+  }
+  const codePoint = char.codePointAt(0);
+  if (!Number.isFinite(codePoint)) {
+    return 0;
+  }
+  return (Number(codePoint) % 9) + 1;
+}
+
+function archetypeFor(number) {
+  return numerologyArchetypes[number] || numerologyArchetypes[reduceNumerologyNumber(number)] || numerologyArchetypes[9];
+}
+
+function buildNumerologyReport(profile) {
+  const birthDateRaw = String(profile?.birthDate || "");
+  const [yearRaw, monthRaw, dayRaw] = birthDateRaw.split("-");
+  const year = Number(yearRaw);
+  const month = Number(monthRaw);
+  const day = Number(dayRaw);
+  if (!year || !month || !day) {
+    return null;
+  }
+
+  const normalizedName = normalizeNumerologyName(profile?.name || "");
+  const letters = normalizedName.replace(/\s+/g, "").split("");
+  const vowels = new Set(["A", "E", "I", "O", "U", "Y"]);
+  const letterValues = letters.map((letter) => numerologyLetterValue(letter)).filter(Boolean);
+  const vowelValues = letters.filter((letter) => vowels.has(letter)).map((letter) => numerologyLetterValue(letter));
+  const consonantValues = letters.filter((letter) => !vowels.has(letter)).map((letter) => numerologyLetterValue(letter));
+
+  const birthDigits = digitsFromDateParts([year, month, day]);
+  const lifePath = reduceNumerologyNumber(sumDigits(birthDigits), { keepMaster: true });
+  const birthday = reduceNumerologyNumber(day, { keepMaster: true });
+  const attitude = reduceNumerologyNumber(month + day, { keepMaster: true });
+  const destiny = reduceNumerologyNumber(sumDigits(letterValues), { keepMaster: true });
+  const soulUrge = reduceNumerologyNumber(sumDigits(vowelValues), { keepMaster: true });
+  const personality = reduceNumerologyNumber(sumDigits(consonantValues), { keepMaster: true });
+  const maturity = reduceNumerologyNumber(lifePath + destiny, { keepMaster: true });
+
+  const today = new Date();
+  const currentYear = today.getFullYear();
+  const currentMonth = today.getMonth() + 1;
+  const currentDay = today.getDate();
+  const personalYear = reduceNumerologyNumber(month + day + reduceNumerologyNumber(currentYear, { keepMaster: false }), { keepMaster: true });
+  const personalMonth = reduceNumerologyNumber(personalYear + currentMonth, { keepMaster: true });
+  const personalDay = reduceNumerologyNumber(personalMonth + currentDay, { keepMaster: true });
+
+  const primary = archetypeFor(lifePath);
+  const mission = archetypeFor(destiny);
+  const soul = archetypeFor(soulUrge);
+  const presence = archetypeFor(personality);
+
+  const resonanceMap = {
+    1: [1, 3, 5, 8],
+    2: [2, 4, 6, 8],
+    3: [1, 3, 5, 9],
+    4: [2, 4, 6, 8],
+    5: [1, 3, 5, 7],
+    6: [2, 4, 6, 9],
+    7: [5, 7, 9, 11],
+    8: [1, 2, 4, 8],
+    9: [3, 6, 7, 9],
+    11: [2, 7, 9, 11],
+    22: [4, 8, 22, 6],
+    33: [6, 9, 11, 33]
+  };
+
+  const lifeResonance = resonanceMap[lifePath] || resonanceMap[reduceNumerologyNumber(lifePath)] || [3, 6, 9];
+  return {
+    normalizedName,
+    birthDateRaw,
+    numbers: { lifePath, birthday, attitude, destiny, soulUrge, personality, maturity, personalYear, personalMonth, personalDay },
+    archetypes: { primary, mission, soul, presence },
+    nameMath: {
+      letters: letters.length,
+      vowels: vowelValues.length,
+      consonants: consonantValues.length
+    },
+    resonance: lifeResonance
+  };
+}
+
+function numerologyToc() {
+  const items = [
+    { id: "numerology-matrix", label: "Core Matrix" },
+    { id: "numerology-identity", label: "Identity Layer" },
+    { id: "numerology-cycles", label: "Timing Cycles" },
+    { id: "numerology-resonance", label: "Resonance Codes" },
+    { id: "numerology-practice", label: "Daily Practice" }
+  ];
+  return `
+    <aside class="natal-toc">
+      <div class="natal-toc-sticky">
+        <span class="eyebrow">Navigation</span>
+        <nav class="natal-toc-nav">
+          ${items
+            .map((item, index) => `<a href="#${item.id}" class="js-natal-toc ${index === 0 ? "active" : ""}" data-target="${item.id}">${item.label}</a>`)
+            .join("")}
+        </nav>
+      </div>
+    </aside>
+  `;
+}
+
+function numerologyView() {
+  if (!hasProfile()) {
+    return shell({
+      eyebrow: "Numerology",
+      title: "Profile required before report",
+      intro: "Numerology is calculated from your name and birth date. Complete onboarding first.",
+      primaryCta: { href: "/onboarding", label: "Complete Onboarding" },
+      secondaryCta: { href: "/", label: "Back Home" },
+      rightPanel: "<h2>Why</h2><p>Without profile data, number cycles and core matrix are not reliable.</p>",
+      body: ""
+    });
+  }
+
+  const report = buildNumerologyReport(state.profile);
+  if (!report) {
+    return `
+      <section class="section">
+        <article class="card tone-card">
+          <span class="eyebrow">Numerology</span>
+          <h1>Numerology report unavailable</h1>
+          <p>Please check your birth date in profile settings and try again.</p>
+        </article>
+      </section>
+    `;
+  }
+
+  const n = report.numbers;
+  const a = report.archetypes;
+  const profileName = escapeHtml(String(state.profile?.name || "User"));
+  const cycleSignal = n.personalDay >= 8 || n.personalDay === 1
+    ? "execution-heavy day"
+    : (n.personalDay <= 3 ? "communication-heavy day" : "stability-heavy day");
+
+  return `
+    <section class="section">
+      <article class="card tone-card numerology-hero">
+        <span class="eyebrow">Numerology Report</span>
+        <h1>${profileName}</h1>
+        <p>Your profile is translated into a practical numerology matrix: identity code, relationship signal, and timing cycles you can use for real decisions.</p>
+        <div class="chip-grid">
+          <span class="astro-chip">Life Path: ${n.lifePath}</span>
+          <span class="astro-chip">Destiny: ${n.destiny}</span>
+          <span class="astro-chip">Soul Urge: ${n.soulUrge}</span>
+          <span class="astro-chip">Personal Year: ${n.personalYear}</span>
+          <span class="astro-chip">Personal Day: ${n.personalDay}</span>
+        </div>
+      </article>
+    </section>
+    <div class="natal-layout numerology-layout">
+      <main class="natal-main">
+        <section class="section" id="numerology-matrix">
+          <article class="route-card content-panel premium-panel">
+            <span class="premium-kicker">Core Matrix</span>
+            <h2>Primary Numbers</h2>
+            <div class="numerology-grid">
+              <article class="numerology-cell">
+                <h3>Life Path ${n.lifePath}</h3>
+                <p class="muted">${a.primary.title}</p>
+                <p>${a.primary.strengths}</p>
+              </article>
+              <article class="numerology-cell">
+                <h3>Destiny ${n.destiny}</h3>
+                <p class="muted">${a.mission.title}</p>
+                <p>${a.mission.strengths}</p>
+              </article>
+              <article class="numerology-cell">
+                <h3>Soul Urge ${n.soulUrge}</h3>
+                <p class="muted">${a.soul.title}</p>
+                <p>${a.soul.strengths}</p>
+              </article>
+              <article class="numerology-cell">
+                <h3>Personality ${n.personality}</h3>
+                <p class="muted">${a.presence.title}</p>
+                <p>${a.presence.strengths}</p>
+              </article>
+            </div>
+          </article>
+        </section>
+        <section class="section" id="numerology-identity">
+          <article class="route-card content-panel premium-panel">
+            <span class="premium-kicker">Identity Layer</span>
+            <h2>Name + Birth Signature</h2>
+            <p class="dropcap"><strong>${profileName}</strong> maps to ${report.nameMath.letters} active letters, including ${report.nameMath.vowels} vowel channels and ${report.nameMath.consonants} consonant channels. In numerology terms, vowels show inner motivation while consonants shape external style.</p>
+            <div class="chip-grid">
+              <span class="astro-chip">Birthday Number: ${n.birthday}</span>
+              <span class="astro-chip">Attitude Number: ${n.attitude}</span>
+              <span class="astro-chip">Maturity Number: ${n.maturity}</span>
+            </div>
+            <blockquote class="premium-quote">Numerology is most useful when converted into behavior protocol: what to start, what to defer, and where to spend social energy.</blockquote>
+          </article>
+        </section>
+        <section class="section" id="numerology-cycles">
+          <article class="route-card content-panel premium-panel">
+            <span class="premium-kicker">Timing Cycles</span>
+            <h2>Current Cycle Engine</h2>
+            <p>Today is a <strong>${cycleSignal}</strong> based on your Personal Day ${n.personalDay}. Use this as a tactical lens for meetings, focused work, and recovery planning.</p>
+            <div class="numerology-grid numerology-grid-compact">
+              <article class="numerology-cell">
+                <h3>Personal Year ${n.personalYear}</h3>
+                <p>Defines strategic theme for this year: expansion, consolidation, reset, or repositioning.</p>
+              </article>
+              <article class="numerology-cell">
+                <h3>Personal Month ${n.personalMonth}</h3>
+                <p>Operational cadence for this month: pace of commitments and delivery rhythm.</p>
+              </article>
+              <article class="numerology-cell">
+                <h3>Personal Day ${n.personalDay}</h3>
+                <p>Daily execution tone: choose communication style and workload intensity accordingly.</p>
+              </article>
+            </div>
+          </article>
+        </section>
+        <section class="section" id="numerology-resonance">
+          <article class="route-card content-panel premium-panel">
+            <span class="premium-kicker">Resonance Codes</span>
+            <h2>People and Collaboration Fit</h2>
+            <p>Users usually care most about compatibility. Your strongest resonance numbers right now are shown below and can be used as a quick filter for collaboration style.</p>
+            <div class="chip-grid">
+              ${report.resonance.map((value) => `<span class="astro-chip">Code ${value}</span>`).join("")}
+            </div>
+            <p class="muted">Practical use: if someone’s core number is in your resonance set, start with shared planning; if not, start with explicit boundaries and smaller commitments.</p>
+          </article>
+        </section>
+        <section class="section" id="numerology-practice">
+          <article class="route-card content-panel premium-panel">
+            <span class="premium-kicker">Applied Practice</span>
+            <h2>How to use this weekly</h2>
+            <ol class="numerology-steps">
+              <li>Monday: read your Personal Month and define one measurable priority.</li>
+              <li>Daily: adjust communication pace by Personal Day signal.</li>
+              <li>Friday: run a 15-minute review, keep what compounds, drop what drains energy.</li>
+            </ol>
+            <p class="muted">This numerology layer is designed as decision support, not prediction certainty.</p>
+          </article>
+        </section>
+      </main>
+      ${numerologyToc()}
+    </div>
+  `;
+}
+
 const routes = {
   "/": () => (state.dashboard ? renderHomeDashboard(state.dashboard) : homeViewLoading()),
   "/login": loginView,
   "/onboarding": onboardingView,
   "/profile": profileView,
   "/natal-chart": () => `<section class="section"><article class="card"><p class="muted">Loading...</p></article></section>`,
+  "/numerology": numerologyView,
   "/daily": () => `<section class="section"><article class="card"><p class="muted">Loading...</p></article></section>`,
   "/friends": friendsView,
   "/faq": faqView,
@@ -6916,6 +7275,11 @@ function applySeoMeta(path) {
     "/faq": {
       title: "FAQ - Astronautica",
       description: "Astronautica FAQ: methodology, natal chart calculations, compatibility logic and product boundaries.",
+      type: "website"
+    },
+    "/numerology": {
+      title: "Numerology Report - Astronautica",
+      description: "Personal numerology report: life path, destiny number, cycle timing, and practical weekly guidance.",
       type: "website"
     },
     "/astrology-hub": {
@@ -8235,6 +8599,10 @@ function attachRouteHandlers(path) {
       render();
     });
 
+  }
+
+  if (path === "/numerology") {
+    bindNatalToc();
   }
 
   if (path === "/friends") {
