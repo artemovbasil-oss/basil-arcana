@@ -7436,7 +7436,9 @@ async function initNumerologyDiceWidget() {
   }
   const threeScene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
-  camera.position.set(0, 4.35, 6.8);
+  const defaultCameraPos = new THREE.Vector3(0, 4.35, 6.8);
+  const topViewCameraPos = new THREE.Vector3(0, 8.6, 0.14);
+  camera.position.copy(defaultCameraPos);
   camera.lookAt(0, 0.7, 0);
   threeScene.add(camera);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -7563,14 +7565,17 @@ async function initNumerologyDiceWidget() {
   window.addEventListener("resize", resize);
 
   const displayTargets = [
-    new THREE.Vector3(-1.16, dieSize / 2 + 0.05, -0.05),
-    new THREE.Vector3(0, dieSize / 2 + 0.08, 0.02),
-    new THREE.Vector3(1.16, dieSize / 2 + 0.05, -0.03)
+    new THREE.Vector3(-1.42, dieSize / 2 + 0.06, 0),
+    new THREE.Vector3(0, dieSize / 2 + 0.06, 0),
+    new THREE.Vector3(1.42, dieSize / 2 + 0.06, 0)
   ];
+  const displayQuat = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, 0, 0));
 
   let settledView = false;
+  let presentationBlend = 0;
   const applyRoll = () => {
     settledView = false;
+    presentationBlend = 0;
     const targetTriple = numerologyRollTripleForTarget(personalDay);
     dice.forEach((die, idx) => {
       const x = -0.9 + idx * 0.9;
@@ -7607,9 +7612,12 @@ async function initNumerologyDiceWidget() {
     }
     world.step(step);
     const t = (performance.now() || Date.now()) * 0.00035;
-    camera.position.x = Math.sin(t) * 0.22;
-    camera.position.z = 6.8 + Math.cos(t * 0.92) * 0.12;
-    camera.lookAt(0, 0.7, 0);
+    if (!settledView) {
+      camera.position.x = Math.sin(t) * 0.22;
+      camera.position.z = defaultCameraPos.z + Math.cos(t * 0.92) * 0.12;
+      camera.position.y = defaultCameraPos.y;
+      camera.lookAt(0, 0.7, 0);
+    }
     holoRingA.rotation.z += 0.0034;
     holoRingB.rotation.z -= 0.0044;
     let allSlow = true;
@@ -7637,10 +7645,15 @@ async function initNumerologyDiceWidget() {
       settledView = false;
     }
     if (settledView) {
+      presentationBlend = Math.min(1, presentationBlend + 0.028);
       dice.forEach((die, idx) => {
-        die.mesh.position.lerp(displayTargets[idx], 0.08);
+        die.mesh.position.lerp(displayTargets[idx], 0.09);
+        die.mesh.quaternion.slerp(displayQuat, 0.08);
         die.edgeLines.position.copy(die.mesh.position);
+        die.edgeLines.quaternion.copy(die.mesh.quaternion);
       });
+      camera.position.lerp(topViewCameraPos, 0.05 + presentationBlend * 0.025);
+      camera.lookAt(0, dieSize / 2 + 0.06, 0);
     }
     renderer.render(threeScene, camera);
     frameId = window.requestAnimationFrame(loop);
