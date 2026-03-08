@@ -7298,19 +7298,20 @@ function renderNumerologyDiceBlock(report) {
   return `
     <section class="section" id="numerology-dice">
       <article class="route-card content-panel premium-panel numerology-dice-card">
-        <div class="numerology-dice-head">
-          <span class="premium-kicker">Number Lab</span>
-          <h2>Daily Number Roll</h2>
-          <button id="numerologyRerollButton" class="btn ghost" type="button">Roll again</button>
-        </div>
         <div class="numerology-dice-scene" data-personal-day="${personalDay}">
-          <div class="numerology-dice-table"></div>
           <canvas id="numerologyDiceCanvas" class="numerology-dice-canvas" aria-label="3D dice simulation"></canvas>
-        </div>
-        <div class="numerology-dice-meta">
-          <span class="astro-chip">Target day number: <strong id="numerologyTargetDay">${personalDay}</strong></span>
-          <span class="astro-chip">Roll total: <strong id="numerologyRollTotal">--</strong></span>
-          <span class="astro-chip">Reduced result: <strong id="numerologyRollReduced">--</strong></span>
+          <div class="numerology-dice-overlay numerology-dice-overlay-top">
+            <div class="numerology-dice-title-wrap">
+              <span class="premium-kicker">Number Lab</span>
+              <h2>Daily Number Roll</h2>
+            </div>
+            <button id="numerologyRerollButton" class="btn ghost" type="button">Roll again</button>
+          </div>
+          <div class="numerology-dice-overlay numerology-dice-overlay-bottom">
+            <span class="astro-chip">Target day number: <strong id="numerologyTargetDay">${personalDay}</strong></span>
+            <span class="astro-chip">Roll total: <strong id="numerologyRollTotal">--</strong></span>
+            <span class="astro-chip">Reduced result: <strong id="numerologyRollReduced">--</strong></span>
+          </div>
         </div>
       </article>
     </section>
