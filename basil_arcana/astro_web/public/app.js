@@ -31,6 +31,7 @@ const state = {
   profileEditMode: false,
   solarSystem: null,
   homeOrbitWidgets: null,
+  numerologyDice: null,
   natalReport: null,
   lastRenderedRouteKey: ""
 };
@@ -3413,6 +3414,7 @@ const solarPlanetModel = [
 ];
 
 let threeRuntimePromise = null;
+let cannonRuntimePromise = null;
 
 function clampScore(value) {
   return Math.max(0, Math.min(100, Math.round(Number(value) || 0)));
@@ -3662,6 +3664,13 @@ async function ensureThreeRuntime() {
   return threeRuntimePromise;
 }
 
+async function ensureCannonRuntime() {
+  if (!cannonRuntimePromise) {
+    cannonRuntimePromise = import("https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.js");
+  }
+  return cannonRuntimePromise;
+}
+
 function destroySolarSystemWidget() {
   const runtime = state.solarSystem;
   if (!runtime) {
@@ -3693,6 +3702,24 @@ function destroySolarSystemWidget() {
   }
   runtime.renderer?.dispose?.();
   state.solarSystem = null;
+}
+
+function destroyNumerologyDiceWidget() {
+  const runtime = state.numerologyDice;
+  if (!runtime) {
+    return;
+  }
+  if (runtime.frameId) {
+    window.cancelAnimationFrame(runtime.frameId);
+  }
+  if (runtime.resizeHandler) {
+    window.removeEventListener("resize", runtime.resizeHandler);
+  }
+  if (runtime.rerollButton) {
+    runtime.rerollButton.onclick = null;
+  }
+  runtime.renderer?.dispose?.();
+  state.numerologyDice = null;
 }
 
 function bindSolarMobileInteractions(aspects, onSelect = null) {
@@ -7220,10 +7247,10 @@ function renderNumerologyTimeline(report) {
   if (!points.length) {
     return "";
   }
-  const width = 780;
-  const height = 200;
-  const padX = 20;
-  const padY = 22;
+  const width = 860;
+  const height = 270;
+  const padX = 30;
+  const padY = 26;
   const plotW = width - padX * 2;
   const plotH = height - padY * 2;
   const step = points.length > 1 ? plotW / (points.length - 1) : plotW;
@@ -7247,35 +7274,22 @@ function renderNumerologyTimeline(report) {
           const y = yFor(value);
           return `
             <line x1="${padX}" y1="${y.toFixed(2)}" x2="${(width - padX).toFixed(2)}" y2="${y.toFixed(2)}" class="numerology-timeline-grid" />
-            <text x="4" y="${(y + 3).toFixed(2)}" class="numerology-timeline-scale">${value}</text>
+            <text x="8" y="${(y + 4).toFixed(2)}" class="numerology-timeline-scale">${value}</text>
           `;
         })
         .join("")}
       <path d="${path}" class="numerology-timeline-line" />
       ${coords
-        .filter((_, idx) => idx % 5 === 0 || idx === coords.length - 1)
-        .map((point) => `<text x="${point.x.toFixed(2)}" y="${(height - 4).toFixed(2)}" class="numerology-timeline-label">${point.label}</text>`)
+        .filter((_, idx) => idx % 6 === 0 || idx === coords.length - 1)
+        .map((point) => `<text x="${point.x.toFixed(2)}" y="${(height - 6).toFixed(2)}" class="numerology-timeline-label">${point.label}</text>`)
         .join("")}
       ${coords
         .map((point) => `
-          <circle cx="${point.x.toFixed(2)}" cy="${point.y.toFixed(2)}" r="2.6" class="numerology-timeline-dot" />
+          <circle cx="${point.x.toFixed(2)}" cy="${point.y.toFixed(2)}" r="3.5" class="numerology-timeline-dot" />
           <title>${point.label}: Personal Day ${point.value}</title>
         `)
         .join("")}
     </svg>
-  `;
-}
-
-function renderNumerologyDie(className) {
-  return `
-    <div class="numerology-die ${className}" data-die>
-      <span class="numerology-die-face face-1">1</span>
-      <span class="numerology-die-face face-2">2</span>
-      <span class="numerology-die-face face-3">3</span>
-      <span class="numerology-die-face face-4">4</span>
-      <span class="numerology-die-face face-5">5</span>
-      <span class="numerology-die-face face-6">6</span>
-    </div>
   `;
 }
 
@@ -7289,14 +7303,10 @@ function renderNumerologyDiceBlock(report) {
           <h2>3D Day Number Engine</h2>
           <button id="numerologyRerollButton" class="btn ghost" type="button">Roll again</button>
         </div>
-        <p class="muted">Each throw resolves into your Personal Day number so the page feels alive but remains deterministic to your cycle signal.</p>
+        <p class="muted">Real-time rigid-body simulation: three physical dice thrown on a table. Result is compared with your Personal Day signal.</p>
         <div class="numerology-dice-scene" data-personal-day="${personalDay}">
           <div class="numerology-dice-table"></div>
-          <div class="numerology-dice-grid">
-            ${renderNumerologyDie("die-a")}
-            ${renderNumerologyDie("die-b")}
-            ${renderNumerologyDie("die-c")}
-          </div>
+          <canvas id="numerologyDiceCanvas" class="numerology-dice-canvas" aria-label="3D dice simulation"></canvas>
         </div>
         <div class="numerology-dice-meta">
           <span class="astro-chip">Target day number: <strong id="numerologyTargetDay">${personalDay}</strong></span>
@@ -7339,44 +7349,233 @@ function numerologyRollTripleForTarget(targetDay) {
   return candidates[Math.floor(Math.random() * candidates.length)];
 }
 
-function initNumerologyDiceWidget() {
+function topFaceNumberFromBody(body, CANNON) {
+  const up = new CANNON.Vec3(0, 1, 0);
+  const map = [
+    { num: 3, axis: new CANNON.Vec3(1, 0, 0) },
+    { num: 4, axis: new CANNON.Vec3(-1, 0, 0) },
+    { num: 1, axis: new CANNON.Vec3(0, 1, 0) },
+    { num: 6, axis: new CANNON.Vec3(0, -1, 0) },
+    { num: 2, axis: new CANNON.Vec3(0, 0, 1) },
+    { num: 5, axis: new CANNON.Vec3(0, 0, -1) }
+  ];
+  let best = 1;
+  let bestDot = -Infinity;
+  map.forEach((item) => {
+    const worldAxis = body.quaternion.vmult(item.axis);
+    const dot = worldAxis.dot(up);
+    if (dot > bestDot) {
+      bestDot = dot;
+      best = item.num;
+    }
+  });
+  return best;
+}
+
+function makeDieFaceTexture(THREE, value, theme = "dark") {
+  const size = 256;
+  const c = document.createElement("canvas");
+  c.width = size;
+  c.height = size;
+  const ctx = c.getContext("2d");
+  if (!ctx) {
+    return null;
+  }
+  const isDark = theme === "dark";
+  ctx.fillStyle = isDark ? "#11151f" : "#f7f8fa";
+  ctx.fillRect(0, 0, size, size);
+  ctx.strokeStyle = isDark ? "#d9dee7" : "#181f29";
+  ctx.lineWidth = 10;
+  ctx.strokeRect(6, 6, size - 12, size - 12);
+  ctx.fillStyle = isDark ? "#f4f8ff" : "#131922";
+  ctx.font = "700 148px 'Space Grotesk', 'IBM Plex Sans', sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(String(value), size / 2, size / 2 + 10);
+  const tx = new THREE.CanvasTexture(c);
+  tx.needsUpdate = true;
+  return tx;
+}
+
+async function initNumerologyDiceWidget() {
   const scene = document.querySelector(".numerology-dice-scene");
   if (!(scene instanceof HTMLElement)) {
     return;
   }
-  const dice = Array.from(scene.querySelectorAll("[data-die]"));
-  if (!dice.length) {
+  const canvas = document.getElementById("numerologyDiceCanvas");
+  if (!(canvas instanceof HTMLCanvasElement)) {
     return;
   }
+  destroyNumerologyDiceWidget();
+  let THREE;
+  let CANNON;
+  try {
+    [THREE, CANNON] = await Promise.all([ensureThreeRuntime(), ensureCannonRuntime()]);
+  } catch {
+    return;
+  }
+
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  const gl = renderer.getContext();
+  if (gl) {
+    gl.disable(gl.DITHER);
+  }
+  const threeScene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
+  camera.position.set(0, 4.7, 8.4);
+  camera.lookAt(0, 0.8, 0);
+  threeScene.add(new THREE.AmbientLight(0xffffff, state.theme === "dark" ? 0.56 : 0.66));
+  const keyLight = new THREE.DirectionalLight(state.theme === "dark" ? 0xe7f0ff : 0x111827, state.theme === "dark" ? 1.05 : 0.85);
+  keyLight.position.set(4, 7, 6);
+  threeScene.add(keyLight);
+
+  const world = new CANNON.World({ gravity: new CANNON.Vec3(0, -14, 0) });
+  world.broadphase = new CANNON.SAPBroadphase(world);
+  world.allowSleep = true;
+  const groundBody = new CANNON.Body({
+    mass: 0,
+    shape: new CANNON.Plane(),
+    material: new CANNON.Material("ground")
+  });
+  groundBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
+  world.addBody(groundBody);
+
+  const wallShape = new CANNON.Plane();
+  const createWall = (x, z, ry) => {
+    const body = new CANNON.Body({ mass: 0, shape: wallShape });
+    body.position.set(x, 0, z);
+    body.quaternion.setFromEuler(0, ry, 0);
+    world.addBody(body);
+  };
+  createWall(-3.8, 0, Math.PI / 2);
+  createWall(3.8, 0, -Math.PI / 2);
+  createWall(0, -3.5, 0);
+  createWall(0, 3.5, Math.PI);
+
+  const table = new THREE.Mesh(
+    new THREE.PlaneGeometry(12, 12),
+    new THREE.MeshBasicMaterial({
+      color: state.theme === "dark" ? 0x0b1019 : 0xe8edf4,
+      transparent: true,
+      opacity: state.theme === "dark" ? 0.76 : 0.62
+    })
+  );
+  table.rotation.x = -Math.PI / 2;
+  table.position.y = -0.01;
+  threeScene.add(table);
+
+  const dieSize = 1;
+  const dieShape = new CANNON.Box(new CANNON.Vec3(dieSize / 2, dieSize / 2, dieSize / 2));
+  const dice = [];
+  const faceOrder = [3, 4, 1, 6, 2, 5];
+  for (let i = 0; i < 3; i += 1) {
+    const materials = faceOrder.map((value) => {
+      const texture = makeDieFaceTexture(THREE, value, state.theme);
+      return new THREE.MeshStandardMaterial({
+        map: texture || null,
+        color: state.theme === "dark" ? 0x111827 : 0xf5f7fb,
+        metalness: 0.08,
+        roughness: 0.58
+      });
+    });
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(dieSize, dieSize, dieSize), materials);
+    mesh.castShadow = false;
+    threeScene.add(mesh);
+    const body = new CANNON.Body({
+      mass: 1,
+      shape: dieShape,
+      sleepTimeLimit: 0.4,
+      sleepSpeedLimit: 0.18
+    });
+    world.addBody(body);
+    dice.push({ mesh, body });
+  }
+
   const personalDay = Number(scene.dataset.personalDay || 1);
   const totalEl = document.getElementById("numerologyRollTotal");
   const reducedEl = document.getElementById("numerologyRollReduced");
   const rerollButton = document.getElementById("numerologyRerollButton");
 
+  const resize = () => {
+    const width = Math.max(240, Math.round(scene.clientWidth));
+    const height = Math.max(210, Math.round(scene.clientHeight));
+    renderer.setSize(width, height, false);
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+  };
+  resize();
+  window.addEventListener("resize", resize);
+
   const applyRoll = () => {
-    const values = numerologyRollTripleForTarget(personalDay);
-    values.forEach((value, idx) => {
-      const die = dice[idx];
-      if (!(die instanceof HTMLElement)) {
-        return;
-      }
-      const [x, y] = numerologyDiceRotationForFace(value);
-      const spinX = (Math.floor(Math.random() * 3) + 3) * 360 + x;
-      const spinY = (Math.floor(Math.random() * 3) + 3) * 360 + y;
-      die.style.transform = `rotateX(${spinX}deg) rotateY(${spinY}deg)`;
+    const targetTriple = numerologyRollTripleForTarget(personalDay);
+    dice.forEach((die, idx) => {
+      const x = -1.8 + idx * 1.8;
+      die.body.position.set(x, 1.6 + Math.random() * 0.45, -1.2 + Math.random() * 0.8);
+      die.body.velocity.set((Math.random() - 0.5) * 2.4, 2.8 + Math.random() * 1.2, 4 + Math.random() * 1.6);
+      die.body.angularVelocity.set((Math.random() - 0.5) * 16, (Math.random() - 0.5) * 16, (Math.random() - 0.5) * 16);
+      die.body.quaternion.setFromEuler(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+      die.body.wakeUp();
+      const [rx, ry] = numerologyDiceRotationForFace(targetTriple[idx] || 1);
+      die.mesh.rotation.set((rx * Math.PI) / 180, (ry * Math.PI) / 180, 0);
     });
-    const total = values.reduce((sum, item) => sum + item, 0);
-    const reduced = numerologySingleDigit(total);
     if (totalEl) {
-      totalEl.textContent = String(total);
+      totalEl.textContent = "Rolling…";
     }
     if (reducedEl) {
-      reducedEl.textContent = String(reduced);
+      reducedEl.textContent = "…";
     }
   };
 
+  const updateResultFromPhysics = () => {
+    const values = dice.map((die) => topFaceNumberFromBody(die.body, CANNON));
+    const total = values.reduce((sum, v) => sum + v, 0);
+    const reduced = numerologySingleDigit(total);
+    if (totalEl) totalEl.textContent = String(total);
+    if (reducedEl) reducedEl.textContent = String(reduced);
+  };
+
+  let settleFrames = 0;
+  let frameId = 0;
+  const step = 1 / 60;
+  const loop = () => {
+    if (state.numerologyDice?.canvas !== canvas) {
+      return;
+    }
+    world.step(step);
+    let allSlow = true;
+    dice.forEach((die) => {
+      die.mesh.position.set(die.body.position.x, die.body.position.y, die.body.position.z);
+      die.mesh.quaternion.set(die.body.quaternion.x, die.body.quaternion.y, die.body.quaternion.z, die.body.quaternion.w);
+      const speed = die.body.velocity.length();
+      const spin = die.body.angularVelocity.length();
+      if (speed > 0.26 || spin > 0.26) {
+        allSlow = false;
+      }
+    });
+    if (allSlow) {
+      settleFrames += 1;
+      if (settleFrames === 8) {
+        updateResultFromPhysics();
+      }
+    } else {
+      settleFrames = 0;
+    }
+    renderer.render(threeScene, camera);
+    frameId = window.requestAnimationFrame(loop);
+    state.numerologyDice.frameId = frameId;
+  };
+
+  rerollButton.onclick = applyRoll;
+  state.numerologyDice = {
+    canvas,
+    renderer,
+    resizeHandler: resize,
+    rerollButton,
+    frameId: 0
+  };
   applyRoll();
-  rerollButton?.addEventListener("click", applyRoll);
+  loop();
 }
 
 function renderNumerologyVisuals(report) {
@@ -9192,6 +9391,9 @@ function render() {
   if (path !== "/") {
     destroySolarSystemWidget();
     destroyHomeOrbitWidgets();
+  }
+  if (path !== "/numerology") {
+    destroyNumerologyDiceWidget();
   }
 
   const makeView = routes[path]

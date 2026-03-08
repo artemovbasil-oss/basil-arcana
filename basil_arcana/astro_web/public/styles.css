@@ -4931,7 +4931,7 @@ body[data-theme="light"] .natal-starfield {
 .numerology-dice-scene {
   position: relative;
   margin-top: 0.45rem;
-  min-height: 300px;
+  min-height: 340px;
   border: 1px solid var(--line);
   background:
     radial-gradient(circle at 22% 24%, color-mix(in srgb, var(--surface-2) 72%, transparent 28%) 0%, transparent 48%),
@@ -4948,46 +4948,13 @@ body[data-theme="light"] .natal-starfield {
   border-top: 1px solid color-mix(in srgb, var(--line) 76%, transparent 24%);
 }
 
-.numerology-dice-grid {
+.numerology-dice-canvas {
   position: relative;
   z-index: 2;
-  min-height: 300px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1.35rem;
-  transform-style: preserve-3d;
+  width: 100%;
+  height: 340px;
+  display: block;
 }
-
-.numerology-die {
-  position: relative;
-  width: 78px;
-  height: 78px;
-  transform-style: preserve-3d;
-  transition: transform 1.45s cubic-bezier(0.18, 0.86, 0.28, 1);
-  filter: drop-shadow(0 16px 20px color-mix(in srgb, #000 48%, transparent 52%));
-}
-
-.numerology-die-face {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  border: 1px solid color-mix(in srgb, var(--line-strong) 72%, transparent 28%);
-  background: linear-gradient(160deg, color-mix(in srgb, var(--surface-2) 90%, transparent 10%), color-mix(in srgb, var(--surface) 94%, transparent 6%));
-  color: var(--ink);
-  font-size: 1.5rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  backface-visibility: hidden;
-}
-
-.numerology-die-face.face-1 { transform: translateZ(39px); }
-.numerology-die-face.face-2 { transform: rotateX(90deg) translateZ(39px); }
-.numerology-die-face.face-3 { transform: rotateY(90deg) translateZ(39px); }
-.numerology-die-face.face-4 { transform: rotateY(-90deg) translateZ(39px); }
-.numerology-die-face.face-5 { transform: rotateX(-90deg) translateZ(39px); }
-.numerology-die-face.face-6 { transform: rotateY(180deg) translateZ(39px); }
 
 .numerology-dice-meta {
   margin-top: 0.58rem;
@@ -5010,30 +4977,31 @@ body[data-theme="light"] .natal-starfield {
 
 .numerology-radar-ring {
   fill: none;
-  stroke: color-mix(in srgb, var(--line) 84%, transparent 16%);
-  stroke-width: 1;
+  stroke: color-mix(in srgb, var(--line-strong) 86%, transparent 14%);
+  stroke-width: 1.2;
 }
 
 .numerology-radar-axis {
-  stroke: color-mix(in srgb, var(--line) 74%, transparent 26%);
-  stroke-width: 1;
+  stroke: color-mix(in srgb, var(--line-strong) 80%, transparent 20%);
+  stroke-width: 1.15;
 }
 
 .numerology-radar-shape {
-  fill: color-mix(in srgb, var(--accent-up) 22%, transparent 78%);
-  stroke: color-mix(in srgb, var(--accent-up) 68%, transparent 32%);
-  stroke-width: 1.5;
+  fill: color-mix(in srgb, var(--accent-up) 35%, transparent 65%);
+  stroke: color-mix(in srgb, var(--accent-up) 82%, transparent 18%);
+  stroke-width: 2.3;
 }
 
 .numerology-radar-node {
-  fill: color-mix(in srgb, var(--accent-up) 66%, #ffffff 34%);
+  fill: color-mix(in srgb, var(--accent-up) 75%, #ffffff 25%);
 }
 
 .numerology-radar-label {
-  fill: color-mix(in srgb, var(--muted) 80%, var(--ink) 20%);
-  font-size: 10px;
+  fill: color-mix(in srgb, var(--ink) 90%, var(--muted) 10%);
+  font-size: 12px;
   letter-spacing: 0.08em;
   text-anchor: middle;
+  font-weight: 600;
 }
 
 .numerology-timeline-svg {
@@ -5044,31 +5012,50 @@ body[data-theme="light"] .natal-starfield {
 }
 
 .numerology-timeline-grid {
-  stroke: color-mix(in srgb, var(--line) 80%, transparent 20%);
-  stroke-width: 1;
+  stroke: color-mix(in srgb, var(--line-strong) 86%, transparent 14%);
+  stroke-width: 1.2;
 }
 
 .numerology-timeline-line {
   fill: none;
-  stroke: color-mix(in srgb, var(--ink) 82%, transparent 18%);
-  stroke-width: 2.2;
+  stroke: color-mix(in srgb, var(--ink) 96%, transparent 4%);
+  stroke-width: 3;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
 .numerology-timeline-dot {
-  fill: color-mix(in srgb, var(--accent-up) 62%, #ffffff 38%);
+  fill: color-mix(in srgb, var(--accent-up) 72%, #ffffff 28%);
 }
 
 .numerology-timeline-label {
-  fill: color-mix(in srgb, var(--muted) 82%, var(--ink) 18%);
-  font-size: 8.8px;
+  fill: color-mix(in srgb, var(--ink) 92%, var(--muted) 8%);
+  font-size: 11px;
   text-anchor: middle;
+  font-weight: 500;
 }
 
 .numerology-timeline-scale {
-  fill: color-mix(in srgb, var(--muted) 74%, var(--ink) 26%);
-  font-size: 9px;
+  fill: color-mix(in srgb, var(--ink) 86%, var(--muted) 14%);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.numerology-visual-grid h2 {
+  font-size: clamp(1.3rem, 2.2vw, 1.95rem);
+  line-height: 1.05;
+}
+
+body[data-theme="dark"] .numerology-radar-ring,
+body[data-theme="dark"] .numerology-radar-axis,
+body[data-theme="dark"] .numerology-timeline-grid {
+  stroke: color-mix(in srgb, #f0f5ff 38%, transparent 62%);
+}
+
+body[data-theme="dark"] .numerology-radar-label,
+body[data-theme="dark"] .numerology-timeline-label,
+body[data-theme="dark"] .numerology-timeline-scale {
+  fill: #e9efff;
 }
 
 .natal-chart-svg {
@@ -5637,22 +5624,13 @@ body[data-theme="light"] .energy-star.neutral {
     grid-template-columns: 1fr;
   }
 
-  .numerology-dice-scene,
-  .numerology-dice-grid {
+  .numerology-dice-scene {
     min-height: 250px;
   }
 
-  .numerology-die {
-    width: 64px;
-    height: 64px;
+  .numerology-dice-canvas {
+    height: 250px;
   }
-
-  .numerology-die-face.face-1 { transform: translateZ(32px); }
-  .numerology-die-face.face-2 { transform: rotateX(90deg) translateZ(32px); }
-  .numerology-die-face.face-3 { transform: rotateY(90deg) translateZ(32px); }
-  .numerology-die-face.face-4 { transform: rotateY(-90deg) translateZ(32px); }
-  .numerology-die-face.face-5 { transform: rotateX(-90deg) translateZ(32px); }
-  .numerology-die-face.face-6 { transform: rotateY(180deg) translateZ(32px); }
 }
 
 @media (max-width: 760px) {
@@ -5899,25 +5877,9 @@ body[data-theme="light"] .energy-star.neutral {
     align-items: start;
   }
 
-  .numerology-dice-grid {
-    gap: 0.8rem;
+  .numerology-dice-canvas {
+    height: 220px;
   }
-
-  .numerology-die {
-    width: 54px;
-    height: 54px;
-  }
-
-  .numerology-die-face {
-    font-size: 1.2rem;
-  }
-
-  .numerology-die-face.face-1 { transform: translateZ(27px); }
-  .numerology-die-face.face-2 { transform: rotateX(90deg) translateZ(27px); }
-  .numerology-die-face.face-3 { transform: rotateY(90deg) translateZ(27px); }
-  .numerology-die-face.face-4 { transform: rotateY(-90deg) translateZ(27px); }
-  .numerology-die-face.face-5 { transform: rotateX(-90deg) translateZ(27px); }
-  .numerology-die-face.face-6 { transform: rotateY(180deg) translateZ(27px); }
 
   .today-panel-head {
     align-items: flex-start;
