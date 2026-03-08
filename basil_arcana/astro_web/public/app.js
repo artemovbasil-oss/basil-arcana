@@ -7410,6 +7410,32 @@ function makeDieFaceTexture(THREE, value, theme = "dark") {
   return tx;
 }
 
+function createChamferedBoxGeometry(THREE, size, radius = 0.14, segments = 5) {
+  const geometry = new THREE.BoxGeometry(size, size, size, segments, segments, segments);
+  const half = size / 2;
+  const innerHalf = Math.max(0.01, half - radius);
+  const pos = geometry.attributes.position;
+  const v = new THREE.Vector3();
+  const inner = new THREE.Vector3();
+  for (let i = 0; i < pos.count; i += 1) {
+    v.set(pos.getX(i), pos.getY(i), pos.getZ(i));
+    inner.set(
+      Math.max(-innerHalf, Math.min(innerHalf, v.x)),
+      Math.max(-innerHalf, Math.min(innerHalf, v.y)),
+      Math.max(-innerHalf, Math.min(innerHalf, v.z))
+    );
+    const delta = v.sub(inner);
+    if (delta.lengthSq() > 1e-6) {
+      delta.normalize().multiplyScalar(radius);
+      v.copy(inner).add(delta);
+      pos.setXYZ(i, v.x, v.y, v.z);
+    }
+  }
+  pos.needsUpdate = true;
+  geometry.computeVertexNormals();
+  return geometry;
+}
+
 async function initNumerologyDiceWidget() {
   const scene = document.querySelector(".numerology-dice-scene");
   if (!(scene instanceof HTMLElement)) {
@@ -7466,6 +7492,8 @@ async function initNumerologyDiceWidget() {
   const world = new CANNON.World({ gravity: new CANNON.Vec3(0, -14, 0) });
   world.broadphase = new CANNON.SAPBroadphase(world);
   world.allowSleep = true;
+  world.defaultContactMaterial.friction = 0.52;
+  world.defaultContactMaterial.restitution = 0.04;
   const groundBody = new CANNON.Body({
     mass: 0,
     shape: new CANNON.Plane(),
@@ -7487,6 +7515,7 @@ async function initNumerologyDiceWidget() {
   createWall(0, 2.35, Math.PI);
 
   const dieSize = 1.24;
+  const dieVisualGeometry = createChamferedBoxGeometry(THREE, dieSize, dieSize * 0.12, 5);
   const holoRingA = new THREE.Mesh(
     new THREE.TorusGeometry(2.7, 0.032, 12, 180),
     new THREE.MeshBasicMaterial({
@@ -7525,11 +7554,11 @@ async function initNumerologyDiceWidget() {
         emissiveIntensity: state.theme === "dark" ? 0.52 : 0
       });
     });
-    const mesh = new THREE.Mesh(new THREE.BoxGeometry(dieSize, dieSize, dieSize), materials);
+    const mesh = new THREE.Mesh(dieVisualGeometry, materials);
     mesh.castShadow = false;
     threeScene.add(mesh);
     const edgeLines = new THREE.LineSegments(
-      new THREE.EdgesGeometry(new THREE.BoxGeometry(dieSize, dieSize, dieSize)),
+      new THREE.EdgesGeometry(dieVisualGeometry),
       new THREE.LineBasicMaterial({
         color: state.theme === "dark" ? 0x62e3ff : 0x234a96,
         transparent: true,
@@ -7538,12 +7567,12 @@ async function initNumerologyDiceWidget() {
     );
     threeScene.add(edgeLines);
     const body = new CANNON.Body({
-      mass: 1,
+      mass: 1.65,
       shape: dieShape,
       sleepTimeLimit: 0.36,
       sleepSpeedLimit: 0.12,
-      linearDamping: 0.28,
-      angularDamping: 0.38
+      linearDamping: 0.44,
+      angularDamping: 0.5
     });
     world.addBody(body);
     dice.push({ mesh, edgeLines, body });
@@ -7565,27 +7594,36 @@ async function initNumerologyDiceWidget() {
   window.addEventListener("resize", resize);
 
   const displayTargets = [
-    new THREE.Vector3(-1.42, dieSize / 2 + 0.06, 0),
+    new THREE.Vector3(-1.56, dieSize / 2 + 0.06, 0),
     new THREE.Vector3(0, dieSize / 2 + 0.06, 0),
-    new THREE.Vector3(1.42, dieSize / 2 + 0.06, 0)
+    new THREE.Vector3(1.56, dieSize / 2 + 0.06, 0)
   ];
   const displayQuat = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, 0, 0));
+  const baseEmissiveIntensity = state.theme === "dark" ? 0.52 : 0;
+  const diceFlicker = dice.map(() => ({ timer: 0, value: 1 }));
 
   let settledView = false;
   let presentationBlend = 0;
+  let finalizedPose = false;
   const applyRoll = () => {
     settledView = false;
     presentationBlend = 0;
+    finalizedPose = false;
     const targetTriple = numerologyRollTripleForTarget(personalDay);
     dice.forEach((die, idx) => {
-      const x = -0.9 + idx * 0.9;
-      die.body.position.set(x, 2.1 + Math.random() * 0.38, -0.12 + Math.random() * 0.36);
-      die.body.velocity.set((Math.random() - 0.5) * 1.2, 3.0 + Math.random() * 1.0, 1.6 + Math.random() * 0.9);
-      die.body.angularVelocity.set((Math.random() - 0.5) * 12, (Math.random() - 0.5) * 12, (Math.random() - 0.5) * 12);
+      const x = -1.22 + idx * 1.22;
+      die.body.position.set(x, 2.35 + Math.random() * 0.34, -0.08 + Math.random() * 0.24);
+      die.body.velocity.set((Math.random() - 0.5) * 0.9, 2.7 + Math.random() * 0.8, 1.15 + Math.random() * 0.7);
+      die.body.angularVelocity.set((Math.random() - 0.5) * 8.5, (Math.random() - 0.5) * 8.5, (Math.random() - 0.5) * 8.5);
       die.body.quaternion.setFromEuler(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
       die.body.wakeUp();
       const [rx, ry] = numerologyDiceRotationForFace(targetTriple[idx] || 1);
       die.mesh.rotation.set((rx * Math.PI) / 180, (ry * Math.PI) / 180, 0);
+      die.mesh.material.forEach((material) => {
+        material.emissiveIntensity = baseEmissiveIntensity;
+      });
+      diceFlicker[idx].timer = 0;
+      diceFlicker[idx].value = 1;
     });
     if (totalEl) {
       totalEl.textContent = "Rolling…";
@@ -7646,13 +7684,44 @@ async function initNumerologyDiceWidget() {
     }
     if (settledView) {
       presentationBlend = Math.min(1, presentationBlend + 0.028);
+      if (!finalizedPose) {
+        dice.forEach((die, idx) => {
+          die.body.velocity.set(0, 0, 0);
+          die.body.angularVelocity.set(0, 0, 0);
+          die.body.position.set(displayTargets[idx].x, displayTargets[idx].y, displayTargets[idx].z);
+          die.body.quaternion.set(0, 0, 0, 1);
+          die.body.sleep();
+        });
+        finalizedPose = true;
+      }
       dice.forEach((die, idx) => {
         die.mesh.position.lerp(displayTargets[idx], 0.09);
         die.mesh.quaternion.slerp(displayQuat, 0.08);
         die.edgeLines.position.copy(die.mesh.position);
         die.edgeLines.quaternion.copy(die.mesh.quaternion);
+        if (state.theme === "dark") {
+          const flick = diceFlicker[idx];
+          flick.timer -= step;
+          if (flick.timer <= 0) {
+            if (Math.random() < 0.2) {
+              flick.value = 0.28 + Math.random() * 0.4;
+              flick.timer = 0.03 + Math.random() * 0.08;
+            } else {
+              flick.value = 0.94 + Math.random() * 0.1;
+              flick.timer = 0.12 + Math.random() * 0.45;
+            }
+          }
+          const targetGlow = baseEmissiveIntensity * flick.value;
+          die.mesh.material.forEach((material) => {
+            material.emissiveIntensity = targetGlow;
+          });
+        }
       });
-      camera.position.lerp(topViewCameraPos, 0.05 + presentationBlend * 0.025);
+      const orbitRadius = 0.22 * (0.44 + presentationBlend * 0.56);
+      const orbitX = Math.cos(t * 0.82) * orbitRadius;
+      const orbitZ = 0.14 + Math.sin(t * 0.82) * orbitRadius;
+      const dynamicTopView = new THREE.Vector3(orbitX, topViewCameraPos.y, orbitZ);
+      camera.position.lerp(dynamicTopView, 0.05 + presentationBlend * 0.025);
       camera.lookAt(0, dieSize / 2 + 0.06, 0);
     }
     renderer.render(threeScene, camera);
