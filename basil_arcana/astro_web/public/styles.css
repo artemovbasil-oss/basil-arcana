@@ -4955,23 +4955,45 @@ body[data-theme="dark"] .numerology-hero .astro-chip {
   min-height: 372px;
   border: 1px solid var(--line);
   background:
-    radial-gradient(circle at 22% 22%, color-mix(in srgb, var(--surface-2) 82%, transparent 18%) 0%, transparent 50%),
-    radial-gradient(circle at 78% 74%, color-mix(in srgb, var(--surface-2) 70%, transparent 30%) 0%, transparent 58%),
-    linear-gradient(180deg, color-mix(in srgb, var(--surface) 86%, transparent 14%), var(--surface));
+    radial-gradient(circle at 18% 20%, color-mix(in srgb, #3a9dff 18%, transparent 82%) 0%, transparent 52%),
+    radial-gradient(circle at 82% 78%, color-mix(in srgb, #58b0ff 14%, transparent 86%) 0%, transparent 56%),
+    linear-gradient(180deg, color-mix(in srgb, var(--surface) 94%, transparent 6%), var(--surface));
   perspective: 1200px;
+  overflow: hidden;
+}
+
+.numerology-dice-scene::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(105deg, transparent 0%, rgba(102, 214, 255, 0.08) 48%, transparent 100%);
+  transform: translateX(-44%);
+  animation: numerologyDiceSweep 8.5s linear infinite;
+}
+
+.numerology-dice-scene::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    180deg,
+    transparent 0 11px,
+    rgba(118, 209, 255, 0.032) 11px 12px
+  );
+  mix-blend-mode: screen;
+  animation: numerologyDiceScan 2.8s steps(2, end) infinite;
 }
 
 .numerology-dice-table {
-  position: absolute;
-  inset: auto 0 0;
-  height: 46%;
-  background: radial-gradient(ellipse at center top, color-mix(in srgb, var(--surface-2) 74%, transparent 26%), color-mix(in srgb, var(--surface) 88%, transparent 12%));
-  border-top: 1px solid color-mix(in srgb, var(--line) 76%, transparent 24%);
+  display: none;
 }
 
 .numerology-dice-canvas {
   position: relative;
-  z-index: 2;
+  z-index: 3;
   width: 100%;
   height: 372px;
   display: block;
@@ -4993,6 +5015,10 @@ body[data-theme="dark"] .numerology-hero .astro-chip {
 
 .numerology-visual-grid-wide {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.numerology-visual-grid-single {
+  grid-template-columns: 1fr;
 }
 
 .numerology-radar-svg {
@@ -5088,9 +5114,38 @@ body[data-theme="dark"] .numerology-timeline-scale {
 
 body[data-theme="dark"] .numerology-dice-scene {
   background:
-    radial-gradient(circle at 24% 20%, color-mix(in srgb, #3f5b8d 28%, transparent 72%) 0%, transparent 52%),
-    radial-gradient(circle at 74% 78%, color-mix(in srgb, #5273a8 24%, transparent 76%) 0%, transparent 56%),
-    linear-gradient(180deg, #090c14 0%, #080b12 100%);
+    radial-gradient(circle at 22% 22%, rgba(69, 219, 255, 0.18) 0%, rgba(69, 219, 255, 0) 52%),
+    radial-gradient(circle at 78% 78%, rgba(60, 148, 255, 0.15) 0%, rgba(60, 148, 255, 0) 58%),
+    linear-gradient(180deg, #05070f 0%, #03060d 100%);
+}
+
+@keyframes numerologyDiceSweep {
+  0% {
+    transform: translateX(-44%);
+    opacity: 0.12;
+  }
+  40% {
+    opacity: 0.22;
+  }
+  100% {
+    transform: translateX(44%);
+    opacity: 0.12;
+  }
+}
+
+@keyframes numerologyDiceScan {
+  0% {
+    opacity: 0.05;
+  }
+  45% {
+    opacity: 0.11;
+  }
+  52% {
+    opacity: 0.03;
+  }
+  100% {
+    opacity: 0.08;
+  }
 }
 
 .natal-chart-svg {

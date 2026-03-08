@@ -7303,7 +7303,6 @@ function renderNumerologyDiceBlock(report) {
           <h2>Daily Number Roll</h2>
           <button id="numerologyRerollButton" class="btn ghost" type="button">Roll again</button>
         </div>
-        <p class="muted">Real-time rigid-body simulation: three physical dice thrown on a table. Result is compared with your Personal Day signal.</p>
         <div class="numerology-dice-scene" data-personal-day="${personalDay}">
           <div class="numerology-dice-table"></div>
           <canvas id="numerologyDiceCanvas" class="numerology-dice-canvas" aria-label="3D dice simulation"></canvas>
@@ -7382,12 +7381,15 @@ function makeDieFaceTexture(THREE, value, theme = "dark") {
     return null;
   }
   const isDark = theme === "dark";
-  ctx.fillStyle = isDark ? "#dfe8f8" : "#f7f8fa";
+  ctx.fillStyle = isDark ? "#070d19" : "#f3f7ff";
   ctx.fillRect(0, 0, size, size);
-  ctx.strokeStyle = isDark ? "#1a2233" : "#181f29";
-  ctx.lineWidth = 10;
+  ctx.strokeStyle = isDark ? "#52c7ff" : "#2a4f92";
+  ctx.shadowColor = isDark ? "#4ad9ff" : "#7eb8ff";
+  ctx.shadowBlur = isDark ? 18 : 8;
+  ctx.lineWidth = 8;
   ctx.strokeRect(6, 6, size - 12, size - 12);
-  ctx.fillStyle = isDark ? "#111927" : "#131922";
+  ctx.shadowBlur = isDark ? 24 : 10;
+  ctx.fillStyle = isDark ? "#8ee7ff" : "#1f56b5";
   ctx.font = "700 148px 'Space Grotesk', 'IBM Plex Sans', sans-serif";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
@@ -7426,20 +7428,23 @@ async function initNumerologyDiceWidget() {
   camera.position.set(0, 4.35, 6.8);
   camera.lookAt(0, 0.7, 0);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = state.theme === "dark" ? 1.2 : 1.06;
-  threeScene.add(new THREE.AmbientLight(0xffffff, state.theme === "dark" ? 0.92 : 0.78));
+  renderer.toneMappingExposure = state.theme === "dark" ? 1.38 : 1.12;
+  threeScene.add(new THREE.AmbientLight(0xffffff, state.theme === "dark" ? 0.66 : 0.74));
   const hemiLight = new THREE.HemisphereLight(
-    state.theme === "dark" ? 0xdde8ff : 0xeff5ff,
-    state.theme === "dark" ? 0x101420 : 0xbfc8d6,
-    state.theme === "dark" ? 0.78 : 0.62
+    state.theme === "dark" ? 0x77d8ff : 0xeff5ff,
+    state.theme === "dark" ? 0x050912 : 0xbfc8d6,
+    state.theme === "dark" ? 0.9 : 0.62
   );
   threeScene.add(hemiLight);
-  const keyLight = new THREE.DirectionalLight(state.theme === "dark" ? 0xf6f8ff : 0x0d1322, state.theme === "dark" ? 1.5 : 1.0);
+  const keyLight = new THREE.DirectionalLight(state.theme === "dark" ? 0x93e8ff : 0x0d1322, state.theme === "dark" ? 1.7 : 1.0);
   keyLight.position.set(3.2, 7.4, 4.8);
   threeScene.add(keyLight);
-  const rimLight = new THREE.PointLight(state.theme === "dark" ? 0x8fb2ff : 0x4a5f89, state.theme === "dark" ? 1.05 : 0.45, 18);
-  rimLight.position.set(-3.5, 2.4, -2.8);
+  const rimLight = new THREE.PointLight(state.theme === "dark" ? 0x36bcff : 0x4a5f89, state.theme === "dark" ? 1.24 : 0.45, 18);
+  rimLight.position.set(-2.8, 2.6, -2.1);
   threeScene.add(rimLight);
+  const fillLight = new THREE.PointLight(state.theme === "dark" ? 0x1f8bff : 0xb8dcff, state.theme === "dark" ? 0.8 : 0.38, 14);
+  fillLight.position.set(2.3, 1.6, -1.6);
+  threeScene.add(fillLight);
 
   const world = new CANNON.World({ gravity: new CANNON.Vec3(0, -14, 0) });
   world.broadphase = new CANNON.SAPBroadphase(world);
@@ -7464,18 +7469,6 @@ async function initNumerologyDiceWidget() {
   createWall(0, -2.35, 0);
   createWall(0, 2.35, Math.PI);
 
-  const table = new THREE.Mesh(
-    new THREE.PlaneGeometry(12, 12),
-    new THREE.MeshBasicMaterial({
-      color: state.theme === "dark" ? 0x0b1019 : 0xe8edf4,
-      transparent: true,
-      opacity: state.theme === "dark" ? 0.76 : 0.62
-    })
-  );
-  table.rotation.x = -Math.PI / 2;
-  table.position.y = -0.01;
-  threeScene.add(table);
-
   const dieSize = 1.24;
   const dieShape = new CANNON.Box(new CANNON.Vec3(dieSize / 2, dieSize / 2, dieSize / 2));
   const dice = [];
@@ -7485,16 +7478,25 @@ async function initNumerologyDiceWidget() {
       const texture = makeDieFaceTexture(THREE, value, state.theme);
       return new THREE.MeshStandardMaterial({
         map: texture || null,
-        color: state.theme === "dark" ? 0x111827 : 0xf5f7fb,
-        metalness: 0.12,
-        roughness: 0.36,
-        emissive: state.theme === "dark" ? 0x1b2433 : 0x000000,
-        emissiveIntensity: state.theme === "dark" ? 0.18 : 0
+        color: state.theme === "dark" ? 0x0c172a : 0xf5f7fb,
+        metalness: 0.18,
+        roughness: 0.28,
+        emissive: state.theme === "dark" ? 0x0f5c84 : 0x000000,
+        emissiveIntensity: state.theme === "dark" ? 0.36 : 0
       });
     });
     const mesh = new THREE.Mesh(new THREE.BoxGeometry(dieSize, dieSize, dieSize), materials);
     mesh.castShadow = false;
     threeScene.add(mesh);
+    const edgeLines = new THREE.LineSegments(
+      new THREE.EdgesGeometry(new THREE.BoxGeometry(dieSize, dieSize, dieSize)),
+      new THREE.LineBasicMaterial({
+        color: state.theme === "dark" ? 0x62e3ff : 0x234a96,
+        transparent: true,
+        opacity: state.theme === "dark" ? 0.88 : 0.56
+      })
+    );
+    threeScene.add(edgeLines);
     const body = new CANNON.Body({
       mass: 1,
       shape: dieShape,
@@ -7504,7 +7506,7 @@ async function initNumerologyDiceWidget() {
       angularDamping: 0.38
     });
     world.addBody(body);
-    dice.push({ mesh, body });
+    dice.push({ mesh, edgeLines, body });
   }
 
   const personalDay = Number(scene.dataset.personalDay || 1);
@@ -7570,6 +7572,8 @@ async function initNumerologyDiceWidget() {
     dice.forEach((die) => {
       die.mesh.position.set(die.body.position.x, die.body.position.y, die.body.position.z);
       die.mesh.quaternion.set(die.body.quaternion.x, die.body.quaternion.y, die.body.quaternion.z, die.body.quaternion.w);
+      die.edgeLines.position.copy(die.mesh.position);
+      die.edgeLines.quaternion.copy(die.mesh.quaternion);
       const speed = die.body.velocity.length();
       const spin = die.body.angularVelocity.length();
       if (speed > 0.26 || spin > 0.26) {
@@ -7591,6 +7595,7 @@ async function initNumerologyDiceWidget() {
     if (settledView) {
       dice.forEach((die, idx) => {
         die.mesh.position.lerp(displayTargets[idx], 0.08);
+        die.edgeLines.position.copy(die.mesh.position);
       });
     }
     renderer.render(threeScene, camera);
@@ -7613,13 +7618,7 @@ async function initNumerologyDiceWidget() {
 function renderNumerologyVisuals(report) {
   return `
     <section class="section" id="numerology-visuals">
-      <div class="editorial-grid numerology-visual-grid numerology-visual-grid-wide">
-        <article class="route-card content-panel premium-panel">
-          <span class="premium-kicker">Profile Geometry</span>
-          <h2>Number Constellation Radar</h2>
-          <p class="muted">Five core vectors projected as one profile shape for faster pattern reading.</p>
-          ${renderNumerologyRadar(report)}
-        </article>
+      <div class="editorial-grid numerology-visual-grid numerology-visual-grid-single">
         <article class="route-card content-panel premium-panel">
           <span class="premium-kicker">Forecast Curve</span>
           <h2>30-Day Personal Number Wave</h2>
