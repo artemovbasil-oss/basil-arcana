@@ -4960,6 +4960,9 @@ body[data-theme="dark"] .numerology-hero .astro-chip {
     linear-gradient(180deg, color-mix(in srgb, var(--surface) 94%, transparent 6%), var(--surface));
   perspective: 1200px;
   overflow: hidden;
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--line-strong) 58%, transparent 42%),
+    inset 0 0 48px rgba(73, 176, 255, 0.08);
 }
 
 .numerology-dice-scene::before {
@@ -5117,6 +5120,10 @@ body[data-theme="dark"] .numerology-dice-scene {
     radial-gradient(circle at 22% 22%, rgba(69, 219, 255, 0.18) 0%, rgba(69, 219, 255, 0) 52%),
     radial-gradient(circle at 78% 78%, rgba(60, 148, 255, 0.15) 0%, rgba(60, 148, 255, 0) 58%),
     linear-gradient(180deg, #05070f 0%, #03060d 100%);
+}
+
+body[data-theme="dark"] .numerology-dice-canvas {
+  filter: brightness(1.18) contrast(1.14) saturate(1.2);
 }
 
 @keyframes numerologyDiceSweep {

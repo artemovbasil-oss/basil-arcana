@@ -7388,11 +7388,22 @@ function makeDieFaceTexture(THREE, value, theme = "dark") {
   ctx.shadowBlur = isDark ? 18 : 8;
   ctx.lineWidth = 8;
   ctx.strokeRect(6, 6, size - 12, size - 12);
-  ctx.shadowBlur = isDark ? 24 : 10;
-  ctx.fillStyle = isDark ? "#8ee7ff" : "#1f56b5";
-  ctx.font = "700 148px 'Space Grotesk', 'IBM Plex Sans', sans-serif";
+  ctx.font = "800 152px 'Space Grotesk', 'IBM Plex Sans', sans-serif";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
+  if (isDark) {
+    ctx.shadowColor = "#8ff1ff";
+    ctx.shadowBlur = 30;
+    ctx.lineWidth = 10;
+    ctx.strokeStyle = "#123a56";
+    ctx.fillStyle = "#ecffff";
+  } else {
+    ctx.shadowBlur = 6;
+    ctx.lineWidth = 8;
+    ctx.strokeStyle = "#edf3ff";
+    ctx.fillStyle = "#1f56b5";
+  }
+  ctx.strokeText(String(value), size / 2, size / 2 + 10);
   ctx.fillText(String(value), size / 2, size / 2 + 10);
   const tx = new THREE.CanvasTexture(c);
   tx.needsUpdate = true;
@@ -7427,6 +7438,7 @@ async function initNumerologyDiceWidget() {
   const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
   camera.position.set(0, 4.35, 6.8);
   camera.lookAt(0, 0.7, 0);
+  threeScene.add(camera);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = state.theme === "dark" ? 1.38 : 1.12;
   threeScene.add(new THREE.AmbientLight(0xffffff, state.theme === "dark" ? 0.66 : 0.74));
@@ -7445,6 +7457,9 @@ async function initNumerologyDiceWidget() {
   const fillLight = new THREE.PointLight(state.theme === "dark" ? 0x1f8bff : 0xb8dcff, state.theme === "dark" ? 0.8 : 0.38, 14);
   fillLight.position.set(2.3, 1.6, -1.6);
   threeScene.add(fillLight);
+  const cameraFill = new THREE.PointLight(state.theme === "dark" ? 0xbcefff : 0xffffff, state.theme === "dark" ? 0.7 : 0.26, 18);
+  cameraFill.position.set(0, 0.5, 2.8);
+  camera.add(cameraFill);
 
   const world = new CANNON.World({ gravity: new CANNON.Vec3(0, -14, 0) });
   world.broadphase = new CANNON.SAPBroadphase(world);
@@ -7470,6 +7485,28 @@ async function initNumerologyDiceWidget() {
   createWall(0, 2.35, Math.PI);
 
   const dieSize = 1.24;
+  const holoRingA = new THREE.Mesh(
+    new THREE.TorusGeometry(2.7, 0.032, 12, 180),
+    new THREE.MeshBasicMaterial({
+      color: state.theme === "dark" ? 0x61dcff : 0x2d63bd,
+      transparent: true,
+      opacity: state.theme === "dark" ? 0.32 : 0.18
+    })
+  );
+  holoRingA.rotation.x = Math.PI / 2;
+  holoRingA.position.set(0, 0.05, 0);
+  threeScene.add(holoRingA);
+  const holoRingB = new THREE.Mesh(
+    new THREE.TorusGeometry(1.72, 0.026, 10, 160),
+    new THREE.MeshBasicMaterial({
+      color: state.theme === "dark" ? 0x2ca5ff : 0x4d76c4,
+      transparent: true,
+      opacity: state.theme === "dark" ? 0.24 : 0.14
+    })
+  );
+  holoRingB.rotation.x = Math.PI / 2;
+  holoRingB.position.set(0, 0.075, 0);
+  threeScene.add(holoRingB);
   const dieShape = new CANNON.Box(new CANNON.Vec3(dieSize / 2, dieSize / 2, dieSize / 2));
   const dice = [];
   const faceOrder = [3, 4, 1, 6, 2, 5];
@@ -7481,8 +7518,9 @@ async function initNumerologyDiceWidget() {
         color: state.theme === "dark" ? 0x0c172a : 0xf5f7fb,
         metalness: 0.18,
         roughness: 0.28,
-        emissive: state.theme === "dark" ? 0x0f5c84 : 0x000000,
-        emissiveIntensity: state.theme === "dark" ? 0.36 : 0
+        emissiveMap: texture || null,
+        emissive: state.theme === "dark" ? 0x6de9ff : 0x000000,
+        emissiveIntensity: state.theme === "dark" ? 0.52 : 0
       });
     });
     const mesh = new THREE.Mesh(new THREE.BoxGeometry(dieSize, dieSize, dieSize), materials);
@@ -7568,6 +7606,12 @@ async function initNumerologyDiceWidget() {
       return;
     }
     world.step(step);
+    const t = (performance.now() || Date.now()) * 0.00035;
+    camera.position.x = Math.sin(t) * 0.22;
+    camera.position.z = 6.8 + Math.cos(t * 0.92) * 0.12;
+    camera.lookAt(0, 0.7, 0);
+    holoRingA.rotation.z += 0.0034;
+    holoRingB.rotation.z -= 0.0044;
     let allSlow = true;
     dice.forEach((die) => {
       die.mesh.position.set(die.body.position.x, die.body.position.y, die.body.position.z);
@@ -7678,10 +7722,10 @@ function numerologyView() {
         </div>
       </article>
     </section>
-    ${renderNumerologyDiceBlock(report)}
-    ${renderNumerologyVisuals(report)}
     <div class="natal-layout numerology-layout">
       <main class="natal-main">
+        ${renderNumerologyDiceBlock(report)}
+        ${renderNumerologyVisuals(report)}
         <section class="section" id="numerology-matrix">
           <article class="route-card content-panel premium-panel">
             <span class="premium-kicker">Core Matrix</span>
