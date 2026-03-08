@@ -776,6 +776,25 @@ body[data-theme="light"] .auth-login-btn.telegram .auth-login-btn-icon .astro-ic
   gap: 0.5rem;
 }
 
+.hero-chip-groups {
+  display: grid;
+  gap: 0.48rem;
+}
+
+.hero-chip-group {
+  display: grid;
+  gap: 0.24rem;
+}
+
+.hero-chip-group-title {
+  display: inline-block;
+  font-family: var(--font-sans);
+  font-size: 0.56rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--muted);
+}
+
 .astro-chip {
   display: inline-flex;
   align-items: center;

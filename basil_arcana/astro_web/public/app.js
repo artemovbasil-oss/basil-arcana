@@ -3741,10 +3741,10 @@ function destroyHomeHeroEye() {
     window.cancelAnimationFrame(runtime.frameId);
   }
   if (runtime.pointerMoveHandler) {
-    runtime.container?.removeEventListener("pointermove", runtime.pointerMoveHandler);
+    runtime.pointerTarget?.removeEventListener("pointermove", runtime.pointerMoveHandler);
   }
   if (runtime.pointerLeaveHandler) {
-    runtime.container?.removeEventListener("pointerleave", runtime.pointerLeaveHandler);
+    runtime.pointerTarget?.removeEventListener("pointerleave", runtime.pointerLeaveHandler);
   }
   state.homeHeroEye = null;
 }
@@ -4743,10 +4743,12 @@ function renderHomeDashboard(dashboard) {
   const nameClass = displayName.length > 18 ? "mask-fade" : "name-plain";
   const todayPanel = renderTodayAstroPanel(dashboard.profile, dashboard);
   const numerology = buildNumerologyReport(dashboard.profile || state.profile || {});
-  const chips = [
+  const astroChips = [
     `${zodiacIcon(dashboard.natalCore.sun)} Sun: ${dashboard.natalCore.sun}`,
     `${zodiacIcon(dashboard.natalCore.moon)} Moon: ${dashboard.natalCore.moon}`,
-    `${zodiacIcon(dashboard.natalCore.rising)} Rising: ${dashboard.natalCore.rising}`,
+    `${zodiacIcon(dashboard.natalCore.rising)} Rising: ${dashboard.natalCore.rising}`
+  ].filter((item) => item.replace(/<[^>]+>/g, "").trim());
+  const numberChips = [
     `${uiIcon("spark")} Life Path: ${numerology?.numbers?.lifePath ?? "—"}`,
     `${uiIcon("spark")} Destiny: ${numerology?.numbers?.destiny ?? "—"}`,
     `${uiIcon("spark")} Soul Urge: ${numerology?.numbers?.soulUrge ?? "—"}`
@@ -4770,8 +4772,19 @@ function renderHomeDashboard(dashboard) {
         </div>
         <span class="eyebrow">User Dashboard</span>
         <h1 class="dashboard-name"><span class="${nameClass}">${displayName}</span></h1>
-        <div class="chip-grid">
-          ${chips.map((chip) => `<span class="astro-chip">${chip}</span>`).join("")}
+        <div class="hero-chip-groups">
+          <div class="hero-chip-group">
+            <span class="hero-chip-group-title">Astro</span>
+            <div class="chip-grid">
+              ${astroChips.map((chip) => `<span class="astro-chip">${chip}</span>`).join("")}
+            </div>
+          </div>
+          <div class="hero-chip-group">
+            <span class="hero-chip-group-title">Numbers</span>
+            <div class="chip-grid">
+              ${numberChips.map((chip) => `<span class="astro-chip">${chip}</span>`).join("")}
+            </div>
+          </div>
         </div>
         <div class="hero-actions">
           <a class="btn primary btn-natal-flicker" href="/natal-chart">Natal Profile</a>
@@ -4817,6 +4830,10 @@ function initHomeHeroEye() {
   if (!(container instanceof HTMLElement)) {
     return;
   }
+  const pointerTarget = container.closest(".home-hero-eye-card");
+  if (!(pointerTarget instanceof HTMLElement)) {
+    return;
+  }
   destroyHomeHeroEye();
   const iris = container.querySelector(".home-hero-eye-iris");
   const pupil = container.querySelector(".home-hero-eye-pupil");
@@ -4829,7 +4846,7 @@ function initHomeHeroEye() {
   const current = { x: 0, y: 0 };
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
   const setTargetFromPointer = (event) => {
-    const rect = container.getBoundingClientRect();
+    const rect = pointerTarget.getBoundingClientRect();
     const px = ((event.clientX - rect.left) / rect.width) * 2 - 1;
     const py = ((event.clientY - rect.top) / rect.height) * 2 - 1;
     target.x = clamp(px, -1, 1);
@@ -4848,8 +4865,8 @@ function initHomeHeroEye() {
     target.x = 0;
     target.y = 0;
   };
-  container.addEventListener("pointermove", onPointerMove);
-  container.addEventListener("pointerleave", onPointerLeave);
+  pointerTarget.addEventListener("pointermove", onPointerMove);
+  pointerTarget.addEventListener("pointerleave", onPointerLeave);
   let frameId = 0;
   const tick = () => {
     if (state.homeHeroEye?.container !== container) {
@@ -4873,6 +4890,7 @@ function initHomeHeroEye() {
   };
   state.homeHeroEye = {
     container,
+    pointerTarget,
     frameId: 0,
     pointerMoveHandler: onPointerMove,
     pointerLeaveHandler: onPointerLeave
