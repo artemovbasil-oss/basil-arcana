@@ -4909,6 +4909,168 @@ body[data-theme="light"] .natal-starfield {
   gap: 0.38rem;
 }
 
+.numerology-dice-card {
+  overflow: hidden;
+}
+
+.numerology-dice-head {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.45rem 0.8rem;
+  align-items: end;
+}
+
+.numerology-dice-head .premium-kicker {
+  grid-column: 1 / -1;
+}
+
+.numerology-dice-head h2 {
+  margin: 0;
+}
+
+.numerology-dice-scene {
+  position: relative;
+  margin-top: 0.45rem;
+  min-height: 300px;
+  border: 1px solid var(--line);
+  background:
+    radial-gradient(circle at 22% 24%, color-mix(in srgb, var(--surface-2) 72%, transparent 28%) 0%, transparent 48%),
+    radial-gradient(circle at 78% 72%, color-mix(in srgb, var(--surface-2) 64%, transparent 36%) 0%, transparent 58%),
+    linear-gradient(180deg, color-mix(in srgb, var(--surface) 86%, transparent 14%), var(--surface));
+  perspective: 1200px;
+}
+
+.numerology-dice-table {
+  position: absolute;
+  inset: auto 0 0;
+  height: 42%;
+  background: radial-gradient(ellipse at center top, color-mix(in srgb, var(--surface-2) 64%, transparent 36%), color-mix(in srgb, var(--surface) 88%, transparent 12%));
+  border-top: 1px solid color-mix(in srgb, var(--line) 76%, transparent 24%);
+}
+
+.numerology-dice-grid {
+  position: relative;
+  z-index: 2;
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.35rem;
+  transform-style: preserve-3d;
+}
+
+.numerology-die {
+  position: relative;
+  width: 78px;
+  height: 78px;
+  transform-style: preserve-3d;
+  transition: transform 1.45s cubic-bezier(0.18, 0.86, 0.28, 1);
+  filter: drop-shadow(0 16px 20px color-mix(in srgb, #000 48%, transparent 52%));
+}
+
+.numerology-die-face {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--line-strong) 72%, transparent 28%);
+  background: linear-gradient(160deg, color-mix(in srgb, var(--surface-2) 90%, transparent 10%), color-mix(in srgb, var(--surface) 94%, transparent 6%));
+  color: var(--ink);
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  backface-visibility: hidden;
+}
+
+.numerology-die-face.face-1 { transform: translateZ(39px); }
+.numerology-die-face.face-2 { transform: rotateX(90deg) translateZ(39px); }
+.numerology-die-face.face-3 { transform: rotateY(90deg) translateZ(39px); }
+.numerology-die-face.face-4 { transform: rotateY(-90deg) translateZ(39px); }
+.numerology-die-face.face-5 { transform: rotateX(-90deg) translateZ(39px); }
+.numerology-die-face.face-6 { transform: rotateY(180deg) translateZ(39px); }
+
+.numerology-dice-meta {
+  margin-top: 0.58rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.numerology-visual-grid .route-card {
+  min-height: 100%;
+}
+
+.numerology-radar-svg {
+  width: 100%;
+  max-width: 420px;
+  height: auto;
+  display: block;
+  margin: 0.2rem auto 0;
+}
+
+.numerology-radar-ring {
+  fill: none;
+  stroke: color-mix(in srgb, var(--line) 84%, transparent 16%);
+  stroke-width: 1;
+}
+
+.numerology-radar-axis {
+  stroke: color-mix(in srgb, var(--line) 74%, transparent 26%);
+  stroke-width: 1;
+}
+
+.numerology-radar-shape {
+  fill: color-mix(in srgb, var(--accent-up) 22%, transparent 78%);
+  stroke: color-mix(in srgb, var(--accent-up) 68%, transparent 32%);
+  stroke-width: 1.5;
+}
+
+.numerology-radar-node {
+  fill: color-mix(in srgb, var(--accent-up) 66%, #ffffff 34%);
+}
+
+.numerology-radar-label {
+  fill: color-mix(in srgb, var(--muted) 80%, var(--ink) 20%);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-anchor: middle;
+}
+
+.numerology-timeline-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  margin-top: 0.25rem;
+}
+
+.numerology-timeline-grid {
+  stroke: color-mix(in srgb, var(--line) 80%, transparent 20%);
+  stroke-width: 1;
+}
+
+.numerology-timeline-line {
+  fill: none;
+  stroke: color-mix(in srgb, var(--ink) 82%, transparent 18%);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.numerology-timeline-dot {
+  fill: color-mix(in srgb, var(--accent-up) 62%, #ffffff 38%);
+}
+
+.numerology-timeline-label {
+  fill: color-mix(in srgb, var(--muted) 82%, var(--ink) 18%);
+  font-size: 8.8px;
+  text-anchor: middle;
+}
+
+.numerology-timeline-scale {
+  fill: color-mix(in srgb, var(--muted) 74%, var(--ink) 26%);
+  font-size: 9px;
+}
+
 .natal-chart-svg {
   width: min(100%, 760px);
   height: auto;
@@ -5474,6 +5636,23 @@ body[data-theme="light"] .energy-star.neutral {
   .numerology-grid-compact {
     grid-template-columns: 1fr;
   }
+
+  .numerology-dice-scene,
+  .numerology-dice-grid {
+    min-height: 250px;
+  }
+
+  .numerology-die {
+    width: 64px;
+    height: 64px;
+  }
+
+  .numerology-die-face.face-1 { transform: translateZ(32px); }
+  .numerology-die-face.face-2 { transform: rotateX(90deg) translateZ(32px); }
+  .numerology-die-face.face-3 { transform: rotateY(90deg) translateZ(32px); }
+  .numerology-die-face.face-4 { transform: rotateY(-90deg) translateZ(32px); }
+  .numerology-die-face.face-5 { transform: rotateX(-90deg) translateZ(32px); }
+  .numerology-die-face.face-6 { transform: rotateY(180deg) translateZ(32px); }
 }
 
 @media (max-width: 760px) {
@@ -5714,6 +5893,31 @@ body[data-theme="light"] .energy-star.neutral {
   .daily-kpis {
     grid-template-columns: 1fr;
   }
+
+  .numerology-dice-head {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+
+  .numerology-dice-grid {
+    gap: 0.8rem;
+  }
+
+  .numerology-die {
+    width: 54px;
+    height: 54px;
+  }
+
+  .numerology-die-face {
+    font-size: 1.2rem;
+  }
+
+  .numerology-die-face.face-1 { transform: translateZ(27px); }
+  .numerology-die-face.face-2 { transform: rotateX(90deg) translateZ(27px); }
+  .numerology-die-face.face-3 { transform: rotateY(90deg) translateZ(27px); }
+  .numerology-die-face.face-4 { transform: rotateY(-90deg) translateZ(27px); }
+  .numerology-die-face.face-5 { transform: rotateX(-90deg) translateZ(27px); }
+  .numerology-die-face.face-6 { transform: rotateY(180deg) translateZ(27px); }
 
   .today-panel-head {
     align-items: flex-start;

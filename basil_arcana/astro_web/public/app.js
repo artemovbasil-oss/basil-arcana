@@ -7072,6 +7072,8 @@ function buildNumerologyReport(profile) {
   return {
     normalizedName,
     birthDateRaw,
+    birthMonth: month,
+    birthDay: day,
     numbers: { lifePath, birthday, attitude, destiny, soulUrge, personality, maturity, personalYear, personalMonth, personalDay },
     archetypes: { primary, mission, soul, presence },
     nameMath: {
@@ -7085,7 +7087,9 @@ function buildNumerologyReport(profile) {
 
 function numerologyToc() {
   const items = [
+    { id: "numerology-dice", label: "Day Number Engine" },
     { id: "numerology-matrix", label: "Core Matrix" },
+    { id: "numerology-visuals", label: "Visual Analytics" },
     { id: "numerology-identity", label: "Identity Layer" },
     { id: "numerology-cycles", label: "Timing Cycles" },
     { id: "numerology-resonance", label: "Resonance Codes" },
@@ -7102,6 +7106,297 @@ function numerologyToc() {
         </nav>
       </div>
     </aside>
+  `;
+}
+
+function numerologySingleDigit(value) {
+  return reduceNumerologyNumber(value, { keepMaster: false });
+}
+
+function numerologyPersonalDayForDate(date, birthMonth, birthDay) {
+  const yearNumber = reduceNumerologyNumber(date.getFullYear(), { keepMaster: false });
+  const personalYear = reduceNumerologyNumber(birthMonth + birthDay + yearNumber, { keepMaster: true });
+  const personalMonth = reduceNumerologyNumber(personalYear + (date.getMonth() + 1), { keepMaster: true });
+  return reduceNumerologyNumber(personalMonth + date.getDate(), { keepMaster: true });
+}
+
+function buildNumerologyCycleForecast(report, days = 30) {
+  const total = Math.max(7, Math.min(60, Number(days) || 30));
+  const out = [];
+  const birthMonth = Number(report?.birthMonth || 0);
+  const birthDay = Number(report?.birthDay || 0);
+  if (!birthMonth || !birthDay) {
+    return out;
+  }
+  const start = new Date();
+  start.setHours(0, 0, 0, 0);
+  for (let i = 0; i < total; i += 1) {
+    const date = new Date(start);
+    date.setDate(start.getDate() + i);
+    const value = numerologyPersonalDayForDate(date, birthMonth, birthDay);
+    out.push({
+      date,
+      label: date.toLocaleDateString("en-US", { month: "short", day: "numeric" }).toUpperCase(),
+      value
+    });
+  }
+  return out;
+}
+
+function renderNumerologyRadar(report) {
+  const metrics = [
+    { label: "Life Path", value: Number(report?.numbers?.lifePath) || 1 },
+    { label: "Destiny", value: Number(report?.numbers?.destiny) || 1 },
+    { label: "Soul", value: Number(report?.numbers?.soulUrge) || 1 },
+    { label: "Personality", value: Number(report?.numbers?.personality) || 1 },
+    { label: "Maturity", value: Number(report?.numbers?.maturity) || 1 }
+  ];
+  const size = 340;
+  const cx = size / 2;
+  const cy = size / 2;
+  const maxRadius = 124;
+  const maxValue = 11;
+  const toPoint = (idx, value, radiusScale = 1) => {
+    const angle = (-Math.PI / 2) + ((Math.PI * 2 * idx) / metrics.length);
+    const radius = (Math.min(maxValue, Math.max(1, value)) / maxValue) * maxRadius * radiusScale;
+    return {
+      x: cx + Math.cos(angle) * radius,
+      y: cy + Math.sin(angle) * radius
+    };
+  };
+
+  const shape = metrics
+    .map((item, idx) => {
+      const point = toPoint(idx, item.value);
+      return `${point.x.toFixed(2)},${point.y.toFixed(2)}`;
+    })
+    .join(" ");
+
+  return `
+    <svg class="numerology-radar-svg" viewBox="0 0 ${size} ${size}" role="img" aria-label="Numerology profile radar">
+      <defs>
+        <radialGradient id="numerologyRadarGlow" cx="50%" cy="48%" r="62%">
+          <stop offset="0%" stop-color="var(--surface-2)" stop-opacity="0.6" />
+          <stop offset="100%" stop-color="var(--surface)" stop-opacity="0.08" />
+        </radialGradient>
+      </defs>
+      <rect x="0" y="0" width="${size}" height="${size}" fill="url(#numerologyRadarGlow)" />
+      ${[0.25, 0.5, 0.75, 1]
+        .map((scale) => `
+          <polygon
+            points="${metrics
+              .map((_, idx) => {
+                const p = toPoint(idx, maxValue, scale);
+                return `${p.x.toFixed(2)},${p.y.toFixed(2)}`;
+              })
+              .join(" ")}"
+            class="numerology-radar-ring"
+          />
+        `)
+        .join("")}
+      ${metrics
+        .map((item, idx) => {
+          const p = toPoint(idx, maxValue);
+          return `<line x1="${cx}" y1="${cy}" x2="${p.x.toFixed(2)}" y2="${p.y.toFixed(2)}" class="numerology-radar-axis" />`;
+        })
+        .join("")}
+      <polygon points="${shape}" class="numerology-radar-shape" />
+      ${metrics
+        .map((item, idx) => {
+          const valuePoint = toPoint(idx, item.value);
+          const labelPoint = toPoint(idx, maxValue, 1.14);
+          return `
+            <circle cx="${valuePoint.x.toFixed(2)}" cy="${valuePoint.y.toFixed(2)}" r="3.2" class="numerology-radar-node" />
+            <text x="${labelPoint.x.toFixed(2)}" y="${labelPoint.y.toFixed(2)}" class="numerology-radar-label">${escapeHtml(item.label.toUpperCase())}</text>
+          `;
+        })
+        .join("")}
+    </svg>
+  `;
+}
+
+function renderNumerologyTimeline(report) {
+  const points = buildNumerologyCycleForecast(report, 30);
+  if (!points.length) {
+    return "";
+  }
+  const width = 780;
+  const height = 200;
+  const padX = 20;
+  const padY = 22;
+  const plotW = width - padX * 2;
+  const plotH = height - padY * 2;
+  const step = points.length > 1 ? plotW / (points.length - 1) : plotW;
+  const yFor = (value) => padY + ((9 - Math.min(9, Math.max(1, value))) / 8) * plotH;
+  const coords = points.map((item, idx) => ({
+    x: padX + idx * step,
+    y: yFor(item.value),
+    value: item.value,
+    label: item.label
+  }));
+
+  const path = coords
+    .map((point, idx) => `${idx === 0 ? "M" : "L"} ${point.x.toFixed(2)} ${point.y.toFixed(2)}`)
+    .join(" ");
+
+  return `
+    <svg class="numerology-timeline-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="30 day personal number forecast">
+      <rect x="0" y="0" width="${width}" height="${height}" fill="transparent" />
+      ${[1, 3, 5, 7, 9]
+        .map((value) => {
+          const y = yFor(value);
+          return `
+            <line x1="${padX}" y1="${y.toFixed(2)}" x2="${(width - padX).toFixed(2)}" y2="${y.toFixed(2)}" class="numerology-timeline-grid" />
+            <text x="4" y="${(y + 3).toFixed(2)}" class="numerology-timeline-scale">${value}</text>
+          `;
+        })
+        .join("")}
+      <path d="${path}" class="numerology-timeline-line" />
+      ${coords
+        .filter((_, idx) => idx % 5 === 0 || idx === coords.length - 1)
+        .map((point) => `<text x="${point.x.toFixed(2)}" y="${(height - 4).toFixed(2)}" class="numerology-timeline-label">${point.label}</text>`)
+        .join("")}
+      ${coords
+        .map((point) => `
+          <circle cx="${point.x.toFixed(2)}" cy="${point.y.toFixed(2)}" r="2.6" class="numerology-timeline-dot" />
+          <title>${point.label}: Personal Day ${point.value}</title>
+        `)
+        .join("")}
+    </svg>
+  `;
+}
+
+function renderNumerologyDie(className) {
+  return `
+    <div class="numerology-die ${className}" data-die>
+      <span class="numerology-die-face face-1">1</span>
+      <span class="numerology-die-face face-2">2</span>
+      <span class="numerology-die-face face-3">3</span>
+      <span class="numerology-die-face face-4">4</span>
+      <span class="numerology-die-face face-5">5</span>
+      <span class="numerology-die-face face-6">6</span>
+    </div>
+  `;
+}
+
+function renderNumerologyDiceBlock(report) {
+  const personalDay = Number(report?.numbers?.personalDay) || 1;
+  return `
+    <section class="section" id="numerology-dice">
+      <article class="route-card content-panel premium-panel numerology-dice-card">
+        <div class="numerology-dice-head">
+          <span class="premium-kicker">Number Lab</span>
+          <h2>3D Day Number Engine</h2>
+          <button id="numerologyRerollButton" class="btn ghost" type="button">Roll again</button>
+        </div>
+        <p class="muted">Each throw resolves into your Personal Day number so the page feels alive but remains deterministic to your cycle signal.</p>
+        <div class="numerology-dice-scene" data-personal-day="${personalDay}">
+          <div class="numerology-dice-table"></div>
+          <div class="numerology-dice-grid">
+            ${renderNumerologyDie("die-a")}
+            ${renderNumerologyDie("die-b")}
+            ${renderNumerologyDie("die-c")}
+          </div>
+        </div>
+        <div class="numerology-dice-meta">
+          <span class="astro-chip">Target day number: <strong id="numerologyTargetDay">${personalDay}</strong></span>
+          <span class="astro-chip">Roll total: <strong id="numerologyRollTotal">--</strong></span>
+          <span class="astro-chip">Reduced result: <strong id="numerologyRollReduced">--</strong></span>
+        </div>
+      </article>
+    </section>
+  `;
+}
+
+function numerologyDiceRotationForFace(face) {
+  const map = {
+    1: [0, 0],
+    2: [-90, 0],
+    3: [0, 90],
+    4: [0, -90],
+    5: [90, 0],
+    6: [180, 0]
+  };
+  return map[Number(face)] || map[1];
+}
+
+function numerologyRollTripleForTarget(targetDay) {
+  const desired = Math.min(9, Math.max(1, Number(targetDay) || 1));
+  const candidates = [];
+  for (let a = 1; a <= 6; a += 1) {
+    for (let b = 1; b <= 6; b += 1) {
+      for (let c = 1; c <= 6; c += 1) {
+        const sum = a + b + c;
+        if (numerologySingleDigit(sum) === desired) {
+          candidates.push([a, b, c]);
+        }
+      }
+    }
+  }
+  if (!candidates.length) {
+    return [2, 3, 4];
+  }
+  return candidates[Math.floor(Math.random() * candidates.length)];
+}
+
+function initNumerologyDiceWidget() {
+  const scene = document.querySelector(".numerology-dice-scene");
+  if (!(scene instanceof HTMLElement)) {
+    return;
+  }
+  const dice = Array.from(scene.querySelectorAll("[data-die]"));
+  if (!dice.length) {
+    return;
+  }
+  const personalDay = Number(scene.dataset.personalDay || 1);
+  const totalEl = document.getElementById("numerologyRollTotal");
+  const reducedEl = document.getElementById("numerologyRollReduced");
+  const rerollButton = document.getElementById("numerologyRerollButton");
+
+  const applyRoll = () => {
+    const values = numerologyRollTripleForTarget(personalDay);
+    values.forEach((value, idx) => {
+      const die = dice[idx];
+      if (!(die instanceof HTMLElement)) {
+        return;
+      }
+      const [x, y] = numerologyDiceRotationForFace(value);
+      const spinX = (Math.floor(Math.random() * 3) + 3) * 360 + x;
+      const spinY = (Math.floor(Math.random() * 3) + 3) * 360 + y;
+      die.style.transform = `rotateX(${spinX}deg) rotateY(${spinY}deg)`;
+    });
+    const total = values.reduce((sum, item) => sum + item, 0);
+    const reduced = numerologySingleDigit(total);
+    if (totalEl) {
+      totalEl.textContent = String(total);
+    }
+    if (reducedEl) {
+      reducedEl.textContent = String(reduced);
+    }
+  };
+
+  applyRoll();
+  rerollButton?.addEventListener("click", applyRoll);
+}
+
+function renderNumerologyVisuals(report) {
+  return `
+    <section class="section" id="numerology-visuals">
+      <div class="editorial-grid numerology-visual-grid">
+        <article class="route-card content-panel premium-panel">
+          <span class="premium-kicker">Profile Geometry</span>
+          <h2>Number Constellation Radar</h2>
+          <p class="muted">Five core vectors projected as one profile shape for faster pattern reading.</p>
+          ${renderNumerologyRadar(report)}
+        </article>
+        <article class="route-card content-panel premium-panel">
+          <span class="premium-kicker">Forecast Curve</span>
+          <h2>30-Day Personal Number Wave</h2>
+          <p class="muted">Use this chart to schedule hard tasks on 8-9 days and communication-heavy work on 2-3 days.</p>
+          ${renderNumerologyTimeline(report)}
+        </article>
+      </div>
+    </section>
   `;
 }
 
@@ -7153,6 +7448,7 @@ function numerologyView() {
         </div>
       </article>
     </section>
+    ${renderNumerologyDiceBlock(report)}
     <div class="natal-layout numerology-layout">
       <main class="natal-main">
         <section class="section" id="numerology-matrix">
@@ -7183,6 +7479,7 @@ function numerologyView() {
             </div>
           </article>
         </section>
+        ${renderNumerologyVisuals(report)}
         <section class="section" id="numerology-identity">
           <article class="route-card content-panel premium-panel">
             <span class="premium-kicker">Identity Layer</span>
@@ -7213,6 +7510,18 @@ function numerologyView() {
               <article class="numerology-cell">
                 <h3>Personal Day ${n.personalDay}</h3>
                 <p>Daily execution tone: choose communication style and workload intensity accordingly.</p>
+              </article>
+              <article class="numerology-cell">
+                <h3>Focus Protocol</h3>
+                <p>When day number is 8-9, run output-heavy sessions. When 2-3 dominates, move negotiations and writing tasks there.</p>
+              </article>
+              <article class="numerology-cell">
+                <h3>Relationship Protocol</h3>
+                <p>On 6-days, prioritize repair and agreements. On 5-days, use shorter loops and avoid emotional over-commitment.</p>
+              </article>
+              <article class="numerology-cell">
+                <h3>Recovery Protocol</h3>
+                <p>On 7-days, reduce social noise and schedule deeper review blocks to avoid reactive execution.</p>
               </article>
             </div>
           </article>
@@ -8603,6 +8912,7 @@ function attachRouteHandlers(path) {
 
   if (path === "/numerology") {
     bindNatalToc();
+    initNumerologyDiceWidget();
   }
 
   if (path === "/friends") {
