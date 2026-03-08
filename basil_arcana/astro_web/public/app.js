@@ -7381,10 +7381,10 @@ function makeDieFaceTexture(THREE, value, theme = "dark") {
     return null;
   }
   const isDark = theme === "dark";
-  ctx.fillStyle = isDark ? "#070d19" : "#f3f7ff";
+  ctx.fillStyle = isDark ? "#0b090b" : "#f8f4f4";
   ctx.fillRect(0, 0, size, size);
-  ctx.strokeStyle = isDark ? "#52c7ff" : "#2a4f92";
-  ctx.shadowColor = isDark ? "#4ad9ff" : "#7eb8ff";
+  ctx.strokeStyle = isDark ? "#ff4b4b" : "#7a0d0d";
+  ctx.shadowColor = isDark ? "#ff5a5a" : "#d35b5b";
   ctx.shadowBlur = isDark ? 18 : 8;
   ctx.lineWidth = 8;
   ctx.strokeRect(6, 6, size - 12, size - 12);
@@ -7392,16 +7392,16 @@ function makeDieFaceTexture(THREE, value, theme = "dark") {
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   if (isDark) {
-    ctx.shadowColor = "#8ff1ff";
+    ctx.shadowColor = "#ff7171";
     ctx.shadowBlur = 30;
     ctx.lineWidth = 10;
-    ctx.strokeStyle = "#123a56";
-    ctx.fillStyle = "#ecffff";
+    ctx.strokeStyle = "#581313";
+    ctx.fillStyle = "#ffe6e6";
   } else {
     ctx.shadowBlur = 6;
     ctx.lineWidth = 8;
-    ctx.strokeStyle = "#edf3ff";
-    ctx.fillStyle = "#1f56b5";
+    ctx.strokeStyle = "#fde8e8";
+    ctx.fillStyle = "#c81f1f";
   }
   ctx.strokeText(String(value), size / 2, size / 2 + 10);
   ctx.fillText(String(value), size / 2, size / 2 + 10);
@@ -7471,21 +7471,21 @@ async function initNumerologyDiceWidget() {
   renderer.toneMappingExposure = state.theme === "dark" ? 1.38 : 1.12;
   threeScene.add(new THREE.AmbientLight(0xffffff, state.theme === "dark" ? 0.66 : 0.74));
   const hemiLight = new THREE.HemisphereLight(
-    state.theme === "dark" ? 0x77d8ff : 0xeff5ff,
-    state.theme === "dark" ? 0x050912 : 0xbfc8d6,
+    state.theme === "dark" ? 0xff9b9b : 0xfff0f0,
+    state.theme === "dark" ? 0x0b0505 : 0xd8c8c8,
     state.theme === "dark" ? 0.9 : 0.62
   );
   threeScene.add(hemiLight);
-  const keyLight = new THREE.DirectionalLight(state.theme === "dark" ? 0x93e8ff : 0x0d1322, state.theme === "dark" ? 1.7 : 1.0);
+  const keyLight = new THREE.DirectionalLight(state.theme === "dark" ? 0xffd4d4 : 0x3a1414, state.theme === "dark" ? 1.7 : 1.0);
   keyLight.position.set(3.2, 7.4, 4.8);
   threeScene.add(keyLight);
-  const rimLight = new THREE.PointLight(state.theme === "dark" ? 0x36bcff : 0x4a5f89, state.theme === "dark" ? 1.24 : 0.45, 18);
+  const rimLight = new THREE.PointLight(state.theme === "dark" ? 0xff4f4f : 0x8c2a2a, state.theme === "dark" ? 1.24 : 0.45, 18);
   rimLight.position.set(-2.8, 2.6, -2.1);
   threeScene.add(rimLight);
-  const fillLight = new THREE.PointLight(state.theme === "dark" ? 0x1f8bff : 0xb8dcff, state.theme === "dark" ? 0.8 : 0.38, 14);
+  const fillLight = new THREE.PointLight(state.theme === "dark" ? 0xff8a8a : 0xf2b8b8, state.theme === "dark" ? 0.8 : 0.38, 14);
   fillLight.position.set(2.3, 1.6, -1.6);
   threeScene.add(fillLight);
-  const cameraFill = new THREE.PointLight(state.theme === "dark" ? 0xbcefff : 0xffffff, state.theme === "dark" ? 0.7 : 0.26, 18);
+  const cameraFill = new THREE.PointLight(state.theme === "dark" ? 0xffd3d3 : 0xffffff, state.theme === "dark" ? 0.7 : 0.26, 18);
   cameraFill.position.set(0, 0.5, 2.8);
   camera.add(cameraFill);
 
@@ -7516,28 +7516,38 @@ async function initNumerologyDiceWidget() {
 
   const dieSize = 1.24;
   const dieVisualGeometry = createChamferedBoxGeometry(THREE, dieSize, dieSize * 0.12, 5);
-  const holoRingA = new THREE.Mesh(
-    new THREE.TorusGeometry(2.7, 0.032, 12, 180),
-    new THREE.MeshBasicMaterial({
-      color: state.theme === "dark" ? 0x61dcff : 0x2d63bd,
-      transparent: true,
-      opacity: state.theme === "dark" ? 0.32 : 0.18
-    })
-  );
-  holoRingA.rotation.x = Math.PI / 2;
-  holoRingA.position.set(0, 0.05, 0);
-  threeScene.add(holoRingA);
-  const holoRingB = new THREE.Mesh(
-    new THREE.TorusGeometry(1.72, 0.026, 10, 160),
-    new THREE.MeshBasicMaterial({
-      color: state.theme === "dark" ? 0x2ca5ff : 0x4d76c4,
-      transparent: true,
-      opacity: state.theme === "dark" ? 0.24 : 0.14
-    })
-  );
-  holoRingB.rotation.x = Math.PI / 2;
-  holoRingB.position.set(0, 0.075, 0);
-  threeScene.add(holoRingB);
+  const dotCount = 220;
+  const dotPositions = new Float32Array(dotCount * 3);
+  const dotColors = new Float32Array(dotCount * 3);
+  const dotMeta = Array.from({ length: dotCount }, () => ({
+    phase: Math.random() * Math.PI * 2,
+    speed: 0.55 + Math.random() * 1.4,
+    amp: 0.2 + Math.random() * 0.8,
+    blink: Math.random() * 0.4
+  }));
+  for (let i = 0; i < dotCount; i += 1) {
+    const r = Math.sqrt(Math.random()) * 2.9;
+    const a = Math.random() * Math.PI * 2;
+    dotPositions[i * 3] = Math.cos(a) * r;
+    dotPositions[(i * 3) + 1] = 0.03 + Math.random() * 0.08;
+    dotPositions[(i * 3) + 2] = Math.sin(a) * r;
+    dotColors[i * 3] = state.theme === "dark" ? 0.95 : 0.66;
+    dotColors[(i * 3) + 1] = state.theme === "dark" ? 0.18 : 0.24;
+    dotColors[(i * 3) + 2] = state.theme === "dark" ? 0.18 : 0.24;
+  }
+  const dotGeometry = new THREE.BufferGeometry();
+  dotGeometry.setAttribute("position", new THREE.BufferAttribute(dotPositions, 3));
+  dotGeometry.setAttribute("color", new THREE.BufferAttribute(dotColors, 3));
+  const dotMaterial = new THREE.PointsMaterial({
+    size: 0.055,
+    vertexColors: true,
+    transparent: true,
+    opacity: state.theme === "dark" ? 0.78 : 0.5,
+    sizeAttenuation: true,
+    depthWrite: false
+  });
+  const dotField = new THREE.Points(dotGeometry, dotMaterial);
+  threeScene.add(dotField);
   const dieShape = new CANNON.Box(new CANNON.Vec3(dieSize / 2, dieSize / 2, dieSize / 2));
   const dice = [];
   const faceOrder = [3, 4, 1, 6, 2, 5];
@@ -7550,7 +7560,7 @@ async function initNumerologyDiceWidget() {
         metalness: 0.18,
         roughness: 0.28,
         emissiveMap: texture || null,
-        emissive: state.theme === "dark" ? 0x6de9ff : 0x000000,
+        emissive: state.theme === "dark" ? 0xff7777 : 0x000000,
         emissiveIntensity: state.theme === "dark" ? 0.52 : 0
       });
     });
@@ -7560,7 +7570,7 @@ async function initNumerologyDiceWidget() {
     const edgeLines = new THREE.LineSegments(
       new THREE.EdgesGeometry(dieVisualGeometry),
       new THREE.LineBasicMaterial({
-        color: state.theme === "dark" ? 0x62e3ff : 0x234a96,
+        color: state.theme === "dark" ? 0xff7a7a : 0x7a1f1f,
         transparent: true,
         opacity: state.theme === "dark" ? 0.88 : 0.56
       })
@@ -7663,8 +7673,26 @@ async function initNumerologyDiceWidget() {
       camera.position.y = defaultCameraPos.y;
       camera.lookAt(0, 0.7, 0);
     }
-    holoRingA.rotation.z += 0.0034;
-    holoRingB.rotation.z -= 0.0044;
+    dotField.rotation.y += 0.0012;
+    const colors = dotGeometry.attributes.color.array;
+    for (let i = 0; i < dotCount; i += 1) {
+      const meta = dotMeta[i];
+      meta.blink -= step;
+      if (meta.blink <= 0) {
+        meta.blink = Math.random() < 0.14 ? (0.04 + Math.random() * 0.06) : (0.12 + Math.random() * 0.4);
+        if (Math.random() < 0.14) {
+          meta.amp = 0.1 + Math.random() * 0.25;
+        } else {
+          meta.amp = 0.45 + Math.random() * 0.55;
+        }
+      }
+      const pulse = 0.55 + (Math.sin((t * 10 * meta.speed) + meta.phase) * 0.45);
+      const intensity = Math.max(0.08, Math.min(1, pulse * meta.amp));
+      colors[i * 3] = (state.theme === "dark" ? 0.85 : 0.66) * intensity;
+      colors[(i * 3) + 1] = (state.theme === "dark" ? 0.1 : 0.2) * intensity;
+      colors[(i * 3) + 2] = (state.theme === "dark" ? 0.1 : 0.2) * intensity;
+    }
+    dotGeometry.attributes.color.needsUpdate = true;
     let allSlow = true;
     dice.forEach((die) => {
       die.mesh.position.set(die.body.position.x, die.body.position.y, die.body.position.z);

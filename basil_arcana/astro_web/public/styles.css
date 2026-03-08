@@ -4955,14 +4955,14 @@ body[data-theme="dark"] .numerology-hero .astro-chip {
   min-height: 372px;
   border: 1px solid var(--line);
   background:
-    radial-gradient(circle at 18% 20%, color-mix(in srgb, #3a9dff 18%, transparent 82%) 0%, transparent 52%),
-    radial-gradient(circle at 82% 78%, color-mix(in srgb, #58b0ff 14%, transparent 86%) 0%, transparent 56%),
+    radial-gradient(circle at 18% 20%, color-mix(in srgb, #ff4747 14%, transparent 86%) 0%, transparent 52%),
+    radial-gradient(circle at 82% 78%, color-mix(in srgb, #c31717 12%, transparent 88%) 0%, transparent 56%),
     linear-gradient(180deg, color-mix(in srgb, var(--surface) 94%, transparent 6%), var(--surface));
   perspective: 1200px;
   overflow: hidden;
   box-shadow:
     inset 0 0 0 1px color-mix(in srgb, var(--line-strong) 58%, transparent 42%),
-    inset 0 0 48px rgba(73, 176, 255, 0.08);
+    inset 0 0 48px rgba(255, 64, 64, 0.09);
 }
 
 .numerology-dice-scene::before {
@@ -4971,7 +4971,7 @@ body[data-theme="dark"] .numerology-hero .astro-chip {
   inset: 0;
   pointer-events: none;
   background:
-    linear-gradient(105deg, transparent 0%, rgba(102, 214, 255, 0.08) 48%, transparent 100%);
+    linear-gradient(105deg, transparent 0%, rgba(255, 88, 88, 0.08) 48%, transparent 100%);
   transform: translateX(-44%);
   animation: numerologyDiceSweep 8.5s linear infinite;
 }
@@ -4984,7 +4984,7 @@ body[data-theme="dark"] .numerology-hero .astro-chip {
   background: repeating-linear-gradient(
     180deg,
     transparent 0 11px,
-    rgba(118, 209, 255, 0.032) 11px 12px
+    rgba(255, 120, 120, 0.03) 11px 12px
   );
   mix-blend-mode: screen;
   animation: numerologyDiceScan 2.8s steps(2, end) infinite;
@@ -5117,13 +5117,13 @@ body[data-theme="dark"] .numerology-timeline-scale {
 
 body[data-theme="dark"] .numerology-dice-scene {
   background:
-    radial-gradient(circle at 22% 22%, rgba(69, 219, 255, 0.18) 0%, rgba(69, 219, 255, 0) 52%),
-    radial-gradient(circle at 78% 78%, rgba(60, 148, 255, 0.15) 0%, rgba(60, 148, 255, 0) 58%),
-    linear-gradient(180deg, #05070f 0%, #03060d 100%);
+    radial-gradient(circle at 22% 22%, rgba(255, 74, 74, 0.16) 0%, rgba(255, 74, 74, 0) 52%),
+    radial-gradient(circle at 78% 78%, rgba(173, 24, 24, 0.15) 0%, rgba(173, 24, 24, 0) 58%),
+    linear-gradient(180deg, #070405 0%, #050304 100%);
 }
 
 body[data-theme="dark"] .numerology-dice-canvas {
-  filter: brightness(1.18) contrast(1.14) saturate(1.2);
+  filter: brightness(1.2) contrast(1.16) saturate(1.08);
 }
 
 @keyframes numerologyDiceSweep {
