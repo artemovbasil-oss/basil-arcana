@@ -7114,7 +7114,7 @@ function buildNumerologyReport(profile) {
 
 function numerologyToc() {
   const items = [
-    { id: "numerology-dice", label: "Day Number Engine" },
+    { id: "numerology-dice", label: "Daily Number Roll" },
     { id: "numerology-matrix", label: "Core Matrix" },
     { id: "numerology-visuals", label: "Visual Analytics" },
     { id: "numerology-identity", label: "Identity Layer" },
@@ -7300,7 +7300,7 @@ function renderNumerologyDiceBlock(report) {
       <article class="route-card content-panel premium-panel numerology-dice-card">
         <div class="numerology-dice-head">
           <span class="premium-kicker">Number Lab</span>
-          <h2>3D Day Number Engine</h2>
+          <h2>Daily Number Roll</h2>
           <button id="numerologyRerollButton" class="btn ghost" type="button">Roll again</button>
         </div>
         <p class="muted">Real-time rigid-body simulation: three physical dice thrown on a table. Result is compared with your Personal Day signal.</p>
@@ -7382,12 +7382,12 @@ function makeDieFaceTexture(THREE, value, theme = "dark") {
     return null;
   }
   const isDark = theme === "dark";
-  ctx.fillStyle = isDark ? "#11151f" : "#f7f8fa";
+  ctx.fillStyle = isDark ? "#dfe8f8" : "#f7f8fa";
   ctx.fillRect(0, 0, size, size);
-  ctx.strokeStyle = isDark ? "#d9dee7" : "#181f29";
+  ctx.strokeStyle = isDark ? "#1a2233" : "#181f29";
   ctx.lineWidth = 10;
   ctx.strokeRect(6, 6, size - 12, size - 12);
-  ctx.fillStyle = isDark ? "#f4f8ff" : "#131922";
+  ctx.fillStyle = isDark ? "#111927" : "#131922";
   ctx.font = "700 148px 'Space Grotesk', 'IBM Plex Sans', sans-serif";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
@@ -7422,13 +7422,24 @@ async function initNumerologyDiceWidget() {
     gl.disable(gl.DITHER);
   }
   const threeScene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
-  camera.position.set(0, 4.7, 8.4);
-  camera.lookAt(0, 0.8, 0);
-  threeScene.add(new THREE.AmbientLight(0xffffff, state.theme === "dark" ? 0.56 : 0.66));
-  const keyLight = new THREE.DirectionalLight(state.theme === "dark" ? 0xe7f0ff : 0x111827, state.theme === "dark" ? 1.05 : 0.85);
-  keyLight.position.set(4, 7, 6);
+  const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
+  camera.position.set(0, 4.35, 6.8);
+  camera.lookAt(0, 0.7, 0);
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = state.theme === "dark" ? 1.2 : 1.06;
+  threeScene.add(new THREE.AmbientLight(0xffffff, state.theme === "dark" ? 0.92 : 0.78));
+  const hemiLight = new THREE.HemisphereLight(
+    state.theme === "dark" ? 0xdde8ff : 0xeff5ff,
+    state.theme === "dark" ? 0x101420 : 0xbfc8d6,
+    state.theme === "dark" ? 0.78 : 0.62
+  );
+  threeScene.add(hemiLight);
+  const keyLight = new THREE.DirectionalLight(state.theme === "dark" ? 0xf6f8ff : 0x0d1322, state.theme === "dark" ? 1.5 : 1.0);
+  keyLight.position.set(3.2, 7.4, 4.8);
   threeScene.add(keyLight);
+  const rimLight = new THREE.PointLight(state.theme === "dark" ? 0x8fb2ff : 0x4a5f89, state.theme === "dark" ? 1.05 : 0.45, 18);
+  rimLight.position.set(-3.5, 2.4, -2.8);
+  threeScene.add(rimLight);
 
   const world = new CANNON.World({ gravity: new CANNON.Vec3(0, -14, 0) });
   world.broadphase = new CANNON.SAPBroadphase(world);
@@ -7448,10 +7459,10 @@ async function initNumerologyDiceWidget() {
     body.quaternion.setFromEuler(0, ry, 0);
     world.addBody(body);
   };
-  createWall(-3.8, 0, Math.PI / 2);
-  createWall(3.8, 0, -Math.PI / 2);
-  createWall(0, -3.5, 0);
-  createWall(0, 3.5, Math.PI);
+  createWall(-2.7, 0, Math.PI / 2);
+  createWall(2.7, 0, -Math.PI / 2);
+  createWall(0, -2.35, 0);
+  createWall(0, 2.35, Math.PI);
 
   const table = new THREE.Mesh(
     new THREE.PlaneGeometry(12, 12),
@@ -7465,7 +7476,7 @@ async function initNumerologyDiceWidget() {
   table.position.y = -0.01;
   threeScene.add(table);
 
-  const dieSize = 1;
+  const dieSize = 1.24;
   const dieShape = new CANNON.Box(new CANNON.Vec3(dieSize / 2, dieSize / 2, dieSize / 2));
   const dice = [];
   const faceOrder = [3, 4, 1, 6, 2, 5];
@@ -7475,8 +7486,10 @@ async function initNumerologyDiceWidget() {
       return new THREE.MeshStandardMaterial({
         map: texture || null,
         color: state.theme === "dark" ? 0x111827 : 0xf5f7fb,
-        metalness: 0.08,
-        roughness: 0.58
+        metalness: 0.12,
+        roughness: 0.36,
+        emissive: state.theme === "dark" ? 0x1b2433 : 0x000000,
+        emissiveIntensity: state.theme === "dark" ? 0.18 : 0
       });
     });
     const mesh = new THREE.Mesh(new THREE.BoxGeometry(dieSize, dieSize, dieSize), materials);
@@ -7485,8 +7498,10 @@ async function initNumerologyDiceWidget() {
     const body = new CANNON.Body({
       mass: 1,
       shape: dieShape,
-      sleepTimeLimit: 0.4,
-      sleepSpeedLimit: 0.18
+      sleepTimeLimit: 0.36,
+      sleepSpeedLimit: 0.12,
+      linearDamping: 0.28,
+      angularDamping: 0.38
     });
     world.addBody(body);
     dice.push({ mesh, body });
@@ -7507,13 +7522,21 @@ async function initNumerologyDiceWidget() {
   resize();
   window.addEventListener("resize", resize);
 
+  const displayTargets = [
+    new THREE.Vector3(-1.16, dieSize / 2 + 0.05, -0.05),
+    new THREE.Vector3(0, dieSize / 2 + 0.08, 0.02),
+    new THREE.Vector3(1.16, dieSize / 2 + 0.05, -0.03)
+  ];
+
+  let settledView = false;
   const applyRoll = () => {
+    settledView = false;
     const targetTriple = numerologyRollTripleForTarget(personalDay);
     dice.forEach((die, idx) => {
-      const x = -1.8 + idx * 1.8;
-      die.body.position.set(x, 1.6 + Math.random() * 0.45, -1.2 + Math.random() * 0.8);
-      die.body.velocity.set((Math.random() - 0.5) * 2.4, 2.8 + Math.random() * 1.2, 4 + Math.random() * 1.6);
-      die.body.angularVelocity.set((Math.random() - 0.5) * 16, (Math.random() - 0.5) * 16, (Math.random() - 0.5) * 16);
+      const x = -0.9 + idx * 0.9;
+      die.body.position.set(x, 2.1 + Math.random() * 0.38, -0.12 + Math.random() * 0.36);
+      die.body.velocity.set((Math.random() - 0.5) * 1.2, 3.0 + Math.random() * 1.0, 1.6 + Math.random() * 0.9);
+      die.body.angularVelocity.set((Math.random() - 0.5) * 12, (Math.random() - 0.5) * 12, (Math.random() - 0.5) * 12);
       die.body.quaternion.setFromEuler(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
       die.body.wakeUp();
       const [rx, ry] = numerologyDiceRotationForFace(targetTriple[idx] || 1);
@@ -7558,8 +7581,17 @@ async function initNumerologyDiceWidget() {
       if (settleFrames === 8) {
         updateResultFromPhysics();
       }
+      if (settleFrames > 12) {
+        settledView = true;
+      }
     } else {
       settleFrames = 0;
+      settledView = false;
+    }
+    if (settledView) {
+      dice.forEach((die, idx) => {
+        die.mesh.position.lerp(displayTargets[idx], 0.08);
+      });
     }
     renderer.render(threeScene, camera);
     frameId = window.requestAnimationFrame(loop);
@@ -7581,7 +7613,7 @@ async function initNumerologyDiceWidget() {
 function renderNumerologyVisuals(report) {
   return `
     <section class="section" id="numerology-visuals">
-      <div class="editorial-grid numerology-visual-grid">
+      <div class="editorial-grid numerology-visual-grid numerology-visual-grid-wide">
         <article class="route-card content-panel premium-panel">
           <span class="premium-kicker">Profile Geometry</span>
           <h2>Number Constellation Radar</h2>
@@ -7648,6 +7680,7 @@ function numerologyView() {
       </article>
     </section>
     ${renderNumerologyDiceBlock(report)}
+    ${renderNumerologyVisuals(report)}
     <div class="natal-layout numerology-layout">
       <main class="natal-main">
         <section class="section" id="numerology-matrix">
@@ -7678,7 +7711,6 @@ function numerologyView() {
             </div>
           </article>
         </section>
-        ${renderNumerologyVisuals(report)}
         <section class="section" id="numerology-identity">
           <article class="route-card content-panel premium-panel">
             <span class="premium-kicker">Identity Layer</span>
