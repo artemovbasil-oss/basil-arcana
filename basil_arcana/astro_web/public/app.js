@@ -6664,7 +6664,6 @@ function renderCelebrityNatalPage(celeb, natal) {
     </section>
     <section class="section" id="natal-wheel">
       <article class="route-card">
-        <h2>Natal Wheel</h2>
         ${chartSvg}
       </article>
     </section>
