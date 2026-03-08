@@ -3715,6 +3715,15 @@ function destroyNumerologyDiceWidget() {
   if (runtime.resizeHandler) {
     window.removeEventListener("resize", runtime.resizeHandler);
   }
+  if (runtime.pointerMoveHandler) {
+    runtime.canvas?.removeEventListener("pointermove", runtime.pointerMoveHandler);
+  }
+  if (runtime.pointerLeaveHandler) {
+    runtime.canvas?.removeEventListener("pointerleave", runtime.pointerLeaveHandler);
+  }
+  if (runtime.pointerDownHandler) {
+    runtime.canvas?.removeEventListener("pointerdown", runtime.pointerDownHandler);
+  }
   if (runtime.rerollButton) {
     runtime.rerollButton.onclick = null;
   }
@@ -7495,8 +7504,8 @@ async function initNumerologyDiceWidget() {
   world.allowSleep = true;
   world.solver.iterations = 20;
   world.solver.tolerance = 0.001;
-  world.defaultContactMaterial.friction = 0.52;
-  world.defaultContactMaterial.restitution = 0.04;
+  world.defaultContactMaterial.friction = 0.48;
+  world.defaultContactMaterial.restitution = 0.2;
   const groundBody = new CANNON.Body({
     mass: 0,
     shape: new CANNON.Plane(),
@@ -7517,7 +7526,7 @@ async function initNumerologyDiceWidget() {
   createWall(0, -2.35, 0);
   createWall(0, 2.35, Math.PI);
 
-  const dieSize = 1.24;
+  const dieSize = 1.02;
   const dieVisualGeometry = createChamferedBoxGeometry(THREE, dieSize, dieSize * 0.12, 5);
   const dotCount = 260;
   const dotPositions = new Float32Array(dotCount * 3);
@@ -7580,15 +7589,15 @@ async function initNumerologyDiceWidget() {
     );
     threeScene.add(edgeLines);
     const body = new CANNON.Body({
-      mass: 1.65,
+      mass: 1.9,
       shape: dieShape,
       sleepTimeLimit: 0.36,
       sleepSpeedLimit: 0.12,
-      linearDamping: 0.44,
-      angularDamping: 0.5
+      linearDamping: 0.46,
+      angularDamping: 0.54
     });
     world.addBody(body);
-    dice.push({ mesh, edgeLines, body });
+    dice.push({ mesh, edgeLines, body, flash: 0, tapJolt: 0, baseEdgeColor: edgeLines.material.color.clone() });
   }
 
   const personalDay = Number(scene.dataset.personalDay || 1);
@@ -7607,9 +7616,9 @@ async function initNumerologyDiceWidget() {
   window.addEventListener("resize", resize);
 
   const displayTargets = [
-    new THREE.Vector3(-2.28, dieSize / 2 + 0.06, 0),
+    new THREE.Vector3(-1.92, dieSize / 2 + 0.06, 0),
     new THREE.Vector3(0, dieSize / 2 + 0.06, 0),
-    new THREE.Vector3(2.28, dieSize / 2 + 0.06, 0)
+    new THREE.Vector3(1.92, dieSize / 2 + 0.06, 0)
   ];
   const displayQuat = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, 0, 0));
   let finalDisplayQuats = [displayQuat.clone(), displayQuat.clone(), displayQuat.clone()];
@@ -7619,6 +7628,73 @@ async function initNumerologyDiceWidget() {
   let settledView = false;
   let presentationBlend = 0;
   let finalizedPose = false;
+  const raycaster = new THREE.Raycaster();
+  const pointerNdc = new THREE.Vector2(0, 0);
+  let hasPointer = false;
+  let hoveredIndex = -1;
+
+  const updatePointer = (event) => {
+    const rect = canvas.getBoundingClientRect();
+    if (!rect.width || !rect.height) {
+      return;
+    }
+    pointerNdc.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    pointerNdc.y = -(((event.clientY - rect.top) / rect.height) * 2 - 1);
+    hasPointer = true;
+  };
+  const onPointerMove = (event) => {
+    updatePointer(event);
+  };
+  const onPointerLeave = () => {
+    hasPointer = false;
+    hoveredIndex = -1;
+  };
+  const onPointerDown = (event) => {
+    updatePointer(event);
+    if (!settledView || hoveredIndex < 0) {
+      return;
+    }
+    const die = dice[hoveredIndex];
+    if (!die) {
+      return;
+    }
+    die.tapJolt = 0.2;
+    die.flash = 1;
+  };
+  canvas.addEventListener("pointermove", onPointerMove);
+  canvas.addEventListener("pointerleave", onPointerLeave);
+  canvas.addEventListener("pointerdown", onPointerDown);
+
+  const softSeparateDice = () => {
+    const minDist = dieSize * 1.12;
+    const spring = 0.22;
+    for (let i = 0; i < dice.length; i += 1) {
+      for (let j = i + 1; j < dice.length; j += 1) {
+        const a = dice[i].body;
+        const b = dice[j].body;
+        const dx = b.position.x - a.position.x;
+        const dz = b.position.z - a.position.z;
+        const dy = b.position.y - a.position.y;
+        const dist = Math.sqrt((dx * dx) + (dy * dy) + (dz * dz)) || 0.0001;
+        if (dist < minDist) {
+          const push = (minDist - dist) * 0.5;
+          const nx = dx / dist;
+          const ny = dy / dist;
+          const nz = dz / dist;
+          a.position.x -= nx * push;
+          a.position.y -= ny * push * 0.45;
+          a.position.z -= nz * push;
+          b.position.x += nx * push;
+          b.position.y += ny * push * 0.45;
+          b.position.z += nz * push;
+          a.velocity.x -= nx * spring;
+          a.velocity.z -= nz * spring;
+          b.velocity.x += nx * spring;
+          b.velocity.z += nz * spring;
+        }
+      }
+    }
+  };
   const applyRoll = () => {
     settledView = false;
     presentationBlend = 0;
@@ -7673,6 +7749,7 @@ async function initNumerologyDiceWidget() {
     const delta = Math.min(0.05, Math.max(0.008, (now - lastTick) / 1000));
     lastTick = now;
     world.step(step, delta, 8);
+    softSeparateDice();
     const t = (performance.now() || Date.now()) * 0.00035;
     if (!settledView) {
       camera.position.x = Math.sin(t) * 0.22;
@@ -7737,11 +7814,28 @@ async function initNumerologyDiceWidget() {
         });
         finalizedPose = true;
       }
+      if (hasPointer) {
+        raycaster.setFromCamera(pointerNdc, camera);
+        const hits = raycaster.intersectObjects(dice.map((d) => d.mesh), false);
+        hoveredIndex = hits.length ? dice.findIndex((d) => d.mesh === hits[0].object) : -1;
+      } else {
+        hoveredIndex = -1;
+      }
       dice.forEach((die, idx) => {
-        die.mesh.position.lerp(displayTargets[idx], 0.09);
+        const hoverOffset = hoveredIndex === idx
+          ? new THREE.Vector3(pointerNdc.x * 0.24, 0.06, -pointerNdc.y * 0.18)
+          : new THREE.Vector3(0, 0, 0);
+        const targetPos = displayTargets[idx].clone().add(hoverOffset);
+        die.mesh.position.lerp(targetPos, hoveredIndex === idx ? 0.14 : 0.09);
         die.mesh.quaternion.slerp(finalDisplayQuats[idx] || displayQuat, 0.08);
         if (presentationBlend > 0.86) {
           die.mesh.quaternion.copy(finalDisplayQuats[idx] || displayQuat);
+        }
+        if (die.tapJolt > 0) {
+          const joltWave = Math.sin((1 - die.tapJolt) * 32) * die.tapJolt;
+          die.mesh.position.y += joltWave * 0.08;
+          die.mesh.rotation.z += joltWave * 0.05;
+          die.tapJolt = Math.max(0, die.tapJolt - 0.02);
         }
         die.edgeLines.position.copy(die.mesh.position);
         die.edgeLines.quaternion.copy(die.mesh.quaternion);
@@ -7758,12 +7852,22 @@ async function initNumerologyDiceWidget() {
             }
           }
           const targetGlow = baseEmissiveIntensity * flick.value;
+          const electricBoost = die.flash > 0 ? (0.9 * die.flash) : 0;
           die.mesh.material.forEach((material) => {
-            material.emissiveIntensity = targetGlow;
+            material.emissive.setHex(die.flash > 0 ? 0x65c9ff : 0xff7777);
+            material.emissiveIntensity = targetGlow + electricBoost;
           });
+          if (die.flash > 0) {
+            die.edgeLines.material.color.setHex(0x6dd8ff);
+            die.edgeLines.material.opacity = 0.95;
+            die.flash = Math.max(0, die.flash - 0.04);
+          } else {
+            die.edgeLines.material.color.copy(die.baseEdgeColor);
+            die.edgeLines.material.opacity = state.theme === "dark" ? 0.88 : 0.56;
+          }
         }
       });
-      const orbitRadius = 0.14 * (0.44 + presentationBlend * 0.56);
+      const orbitRadius = 0.05 * (0.44 + presentationBlend * 0.56);
       const orbitX = Math.cos(t * 0.82) * orbitRadius;
       const orbitZ = topViewCameraPos.z + Math.sin(t * 0.82) * orbitRadius;
       const dynamicTopView = new THREE.Vector3(orbitX, topViewCameraPos.y, orbitZ);
@@ -7780,6 +7884,9 @@ async function initNumerologyDiceWidget() {
     canvas,
     renderer,
     resizeHandler: resize,
+    pointerMoveHandler: onPointerMove,
+    pointerLeaveHandler: onPointerLeave,
+    pointerDownHandler: onPointerDown,
     rerollButton,
     frameId: 0
   };
