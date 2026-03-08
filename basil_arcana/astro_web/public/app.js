@@ -7493,6 +7493,8 @@ async function initNumerologyDiceWidget() {
   const world = new CANNON.World({ gravity: new CANNON.Vec3(0, -14, 0) });
   world.broadphase = new CANNON.SAPBroadphase(world);
   world.allowSleep = true;
+  world.solver.iterations = 20;
+  world.solver.tolerance = 0.001;
   world.defaultContactMaterial.friction = 0.52;
   world.defaultContactMaterial.restitution = 0.04;
   const groundBody = new CANNON.Body({
@@ -7517,7 +7519,7 @@ async function initNumerologyDiceWidget() {
 
   const dieSize = 1.24;
   const dieVisualGeometry = createChamferedBoxGeometry(THREE, dieSize, dieSize * 0.12, 5);
-  const dotCount = 220;
+  const dotCount = 260;
   const dotPositions = new Float32Array(dotCount * 3);
   const dotColors = new Float32Array(dotCount * 3);
   const dotMeta = Array.from({ length: dotCount }, () => ({
@@ -7526,12 +7528,12 @@ async function initNumerologyDiceWidget() {
     amp: 0.2 + Math.random() * 0.8,
     blink: Math.random() * 0.4
   }));
+  const dotRangeX = 6.6;
+  const dotRangeZ = 4.2;
   for (let i = 0; i < dotCount; i += 1) {
-    const r = Math.sqrt(Math.random()) * 2.9;
-    const a = Math.random() * Math.PI * 2;
-    dotPositions[i * 3] = Math.cos(a) * r;
-    dotPositions[(i * 3) + 1] = 0.03 + Math.random() * 0.08;
-    dotPositions[(i * 3) + 2] = Math.sin(a) * r;
+    dotPositions[i * 3] = (Math.random() * 2 - 1) * dotRangeX;
+    dotPositions[(i * 3) + 1] = 0.03 + Math.random() * 0.11;
+    dotPositions[(i * 3) + 2] = (Math.random() * 2 - 1) * dotRangeZ;
     dotColors[i * 3] = state.theme === "dark" ? 0.95 : 0.66;
     dotColors[(i * 3) + 1] = state.theme === "dark" ? 0.18 : 0.24;
     dotColors[(i * 3) + 2] = state.theme === "dark" ? 0.18 : 0.24;
@@ -7605,9 +7607,9 @@ async function initNumerologyDiceWidget() {
   window.addEventListener("resize", resize);
 
   const displayTargets = [
-    new THREE.Vector3(-2.02, dieSize / 2 + 0.06, 0),
+    new THREE.Vector3(-2.28, dieSize / 2 + 0.06, 0),
     new THREE.Vector3(0, dieSize / 2 + 0.06, 0),
-    new THREE.Vector3(2.02, dieSize / 2 + 0.06, 0)
+    new THREE.Vector3(2.28, dieSize / 2 + 0.06, 0)
   ];
   const displayQuat = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, 0, 0));
   let finalDisplayQuats = [displayQuat.clone(), displayQuat.clone(), displayQuat.clone()];
@@ -7623,9 +7625,9 @@ async function initNumerologyDiceWidget() {
     finalizedPose = false;
     const targetTriple = numerologyRollTripleForTarget(personalDay);
     dice.forEach((die, idx) => {
-      const x = -1.22 + idx * 1.22;
-      die.body.position.set(x, 2.35 + Math.random() * 0.34, -0.08 + Math.random() * 0.24);
-      die.body.velocity.set((Math.random() - 0.5) * 0.9, 2.7 + Math.random() * 0.8, 1.15 + Math.random() * 0.7);
+      const x = -1.6 + idx * 1.6;
+      die.body.position.set(x, 2.35 + Math.random() * 0.3, -0.06 + Math.random() * 0.12);
+      die.body.velocity.set((Math.random() - 0.5) * 0.65, 2.65 + Math.random() * 0.65, 1.0 + Math.random() * 0.55);
       die.body.angularVelocity.set((Math.random() - 0.5) * 8.5, (Math.random() - 0.5) * 8.5, (Math.random() - 0.5) * 8.5);
       die.body.quaternion.setFromEuler(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
       die.body.wakeUp();
@@ -7662,11 +7664,15 @@ async function initNumerologyDiceWidget() {
   let settleFrames = 0;
   let frameId = 0;
   const step = 1 / 60;
+  let lastTick = performance.now() || Date.now();
   const loop = () => {
     if (state.numerologyDice?.canvas !== canvas) {
       return;
     }
-    world.step(step);
+    const now = performance.now() || Date.now();
+    const delta = Math.min(0.05, Math.max(0.008, (now - lastTick) / 1000));
+    lastTick = now;
+    world.step(step, delta, 8);
     const t = (performance.now() || Date.now()) * 0.00035;
     if (!settledView) {
       camera.position.x = Math.sin(t) * 0.22;
