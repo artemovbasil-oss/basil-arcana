@@ -2688,7 +2688,15 @@ function activityLevel(score) {
   return 0;
 }
 
-function buildActivityHeatmapModel(activityPayload = null, { rangeDays = 365 } = {}) {
+function cleanNarrativeText(text) {
+  return String(text || "")
+    .replace(/\bundefined\b/gi, "")
+    .replace(/\s{2,}/g, " ")
+    .replace(/\s+([,.!?;:])/g, "$1")
+    .trim();
+}
+
+function buildActivityHeatmapModel(activityPayload = null, { rangeDays = 365, core = null, profile = null } = {}) {
   const entries = Array.isArray(activityPayload?.entries) ? activityPayload.entries : [];
   const history = Array.isArray(activityPayload?.history) ? activityPayload.history : [];
   const activityByDay = new Map(
@@ -2735,9 +2743,12 @@ function buildActivityHeatmapModel(activityPayload = null, { rangeDays = 365 } =
         });
       }
     }
-    const note = String(dayEntry?.note || historyEntry?.focus || "").trim();
+    const note = cleanNarrativeText(dayEntry?.note || historyEntry?.focus || "");
     const kinds = Array.isArray(dayEntry?.kinds) ? dayEntry.kinds : [];
-    const useful = note
+    const personalized = cleanNarrativeText(
+      personalizedDailyLine(note, { dayKey, core, profile })
+    );
+    const useful = personalized
       || (kinds.includes("daily")
         ? "Daily module used: timing protocol updated."
         : kinds.includes("dashboard")
@@ -2785,9 +2796,11 @@ function renderActivityHeatmap(activityPayload, {
   subtitle = "Last 12 months",
   rangeDays = 365,
   className = "",
-  showMonths = true
+  showMonths = true,
+  core = null,
+  profile = null
 } = {}) {
-  const model = buildActivityHeatmapModel(activityPayload, { rangeDays });
+  const model = buildActivityHeatmapModel(activityPayload, { rangeDays, core, profile });
   const widgetClass = compact ? "activity-widget compact" : "activity-widget";
   const rangeClass = rangeDays <= 35 ? " recent-30" : "";
   const extraClass = className ? ` ${className}` : "";
@@ -2891,7 +2904,9 @@ function renderTodayAstroPanel(profile, dashboard) {
     subtitle: `Last ${homeRangeDays} days`,
     rangeDays: homeRangeDays,
     className: "activity-widget-home",
-    showMonths: false
+    showMonths: false,
+    core: dashboard?.natalCore,
+    profile
   });
   return `
     <div class="today-panel">
@@ -2960,7 +2975,9 @@ function personalizeDailyHistory(history, { core = null, profile = null } = {}) 
     return {
       ...item,
       dayKey,
-      focus: personalizedDailyLine(item?.focus || "", { dayKey: `${dayKey}:${index}`, core, profile })
+      focus: cleanNarrativeText(
+        personalizedDailyLine(item?.focus || "", { dayKey: `${dayKey}:${index}`, core, profile })
+      )
     };
   });
 }
@@ -7723,7 +7740,9 @@ async function hydrateDaily() {
       subtitle: isMobileViewport() ? "Last 140 days" : "Last 12 months",
       rangeDays: dailyRangeDays,
       className: "activity-widget-daily",
-      showMonths: false
+      showMonths: false,
+      core: state.dashboard?.natalCore,
+      profile: state.profile
     });
 
     app.innerHTML = `
