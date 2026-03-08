@@ -288,6 +288,123 @@ body.public-landing .page {
     var(--surface);
 }
 
+.home-hero-eye-card {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.home-hero-eye-card > :not(.home-hero-eye) {
+  position: relative;
+  z-index: 2;
+}
+
+.home-hero-eye {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.home-hero-eye::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 22% 24%, color-mix(in srgb, var(--ink) 12%, transparent 88%) 0%, transparent 44%),
+    radial-gradient(circle at 86% 80%, color-mix(in srgb, var(--ink) 8%, transparent 92%) 0%, transparent 42%);
+}
+
+.home-hero-eye-orbit {
+  position: absolute;
+  top: 50%;
+  left: 70%;
+  width: clamp(280px, 36vw, 520px);
+  aspect-ratio: 1 / 1;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--ink) 14%, transparent 86%);
+  box-shadow:
+    inset 0 0 40px color-mix(in srgb, var(--ink) 8%, transparent 92%),
+    0 0 40px color-mix(in srgb, var(--ink) 7%, transparent 93%);
+}
+
+.home-hero-eye-orbit::before,
+.home-hero-eye-orbit::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--ink) 10%, transparent 90%);
+}
+
+.home-hero-eye-orbit::before {
+  inset: 16%;
+}
+
+.home-hero-eye-orbit::after {
+  inset: 31%;
+}
+
+.home-hero-eye-globe {
+  position: absolute;
+  top: 50%;
+  left: 70%;
+  width: clamp(150px, 22vw, 270px);
+  aspect-ratio: 1 / 1;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 38% 32%, color-mix(in srgb, #fff 24%, transparent 76%) 0%, transparent 18%),
+    radial-gradient(circle at 68% 72%, color-mix(in srgb, var(--ink) 24%, transparent 76%) 0%, transparent 44%),
+    radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--ink) 12%, transparent 88%) 0%, transparent 66%);
+  border: 1px solid color-mix(in srgb, var(--ink) 18%, transparent 82%);
+  box-shadow:
+    inset 0 0 80px color-mix(in srgb, var(--ink) 13%, transparent 87%),
+    0 0 70px color-mix(in srgb, var(--ink) 10%, transparent 90%);
+}
+
+.home-hero-eye-iris,
+.home-hero-eye-pupil,
+.home-hero-eye-spec {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+}
+
+.home-hero-eye-iris {
+  width: 47%;
+  aspect-ratio: 1 / 1;
+  background:
+    radial-gradient(circle at 50% 52%, color-mix(in srgb, var(--ink) 55%, transparent 45%) 0%, color-mix(in srgb, var(--ink) 12%, transparent 88%) 62%, transparent 100%),
+    conic-gradient(from 30deg, color-mix(in srgb, var(--ink) 22%, transparent 78%), color-mix(in srgb, #fff 8%, transparent 92%), color-mix(in srgb, var(--ink) 26%, transparent 74%), color-mix(in srgb, #fff 10%, transparent 90%), color-mix(in srgb, var(--ink) 22%, transparent 78%));
+  border: 1px solid color-mix(in srgb, var(--ink) 20%, transparent 80%);
+  transition: transform 0.06s linear;
+}
+
+.home-hero-eye-pupil {
+  width: 20%;
+  aspect-ratio: 1 / 1;
+  background:
+    radial-gradient(circle at 46% 42%, color-mix(in srgb, #fff 20%, transparent 80%) 0%, transparent 26%),
+    color-mix(in srgb, #000 94%, var(--ink) 6%);
+  box-shadow:
+    0 0 20px color-mix(in srgb, #000 65%, transparent 35%),
+    inset 0 0 9px color-mix(in srgb, #fff 14%, transparent 86%);
+  transition: transform 0.06s linear;
+}
+
+.home-hero-eye-spec {
+  width: 11%;
+  aspect-ratio: 1 / 1;
+  transform: translate(-18%, -54%);
+  background: radial-gradient(circle at 50% 50%, color-mix(in srgb, #fff 38%, transparent 62%) 0%, transparent 74%);
+  filter: blur(1px);
+  opacity: 0.72;
+}
+
 .eyebrow {
   font-family: var(--font-sans);
   display: inline-block;
@@ -5684,6 +5801,11 @@ body[data-theme="light"] .energy-star.neutral {
     grid-template-columns: 1fr;
   }
 
+  .home-hero-eye-orbit,
+  .home-hero-eye-globe {
+    left: 58%;
+  }
+
   .login-shell {
     grid-template-columns: 1fr;
   }
@@ -5804,6 +5926,18 @@ body[data-theme="light"] .energy-star.neutral {
 
   .dashboard-head {
     justify-content: flex-end;
+  }
+
+  .home-hero-eye-orbit {
+    width: clamp(210px, 78vw, 320px);
+    top: 52%;
+    left: 64%;
+  }
+
+  .home-hero-eye-globe {
+    width: clamp(118px, 42vw, 180px);
+    top: 52%;
+    left: 64%;
   }
 
   .period-switch {

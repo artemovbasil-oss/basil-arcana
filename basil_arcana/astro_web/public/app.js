@@ -31,6 +31,7 @@ const state = {
   profileEditMode: false,
   solarSystem: null,
   homeOrbitWidgets: null,
+  homeHeroEye: null,
   numerologyDice: null,
   natalReport: null,
   lastRenderedRouteKey: ""
@@ -3731,6 +3732,23 @@ function destroyNumerologyDiceWidget() {
   state.numerologyDice = null;
 }
 
+function destroyHomeHeroEye() {
+  const runtime = state.homeHeroEye;
+  if (!runtime) {
+    return;
+  }
+  if (runtime.frameId) {
+    window.cancelAnimationFrame(runtime.frameId);
+  }
+  if (runtime.pointerMoveHandler) {
+    runtime.container?.removeEventListener("pointermove", runtime.pointerMoveHandler);
+  }
+  if (runtime.pointerLeaveHandler) {
+    runtime.container?.removeEventListener("pointerleave", runtime.pointerLeaveHandler);
+  }
+  state.homeHeroEye = null;
+}
+
 function bindSolarMobileInteractions(aspects, onSelect = null) {
   const panel = document.getElementById("solarAspectPanel");
   const matrixWrap = document.getElementById("solarMobileMatrixWrap");
@@ -4724,13 +4742,14 @@ function renderHomeDashboard(dashboard) {
   const displayName = profileName.split(/\s+/).filter(Boolean)[0] || profileName || "User";
   const nameClass = displayName.length > 18 ? "mask-fade" : "name-plain";
   const todayPanel = renderTodayAstroPanel(dashboard.profile, dashboard);
+  const numerology = buildNumerologyReport(dashboard.profile || state.profile || {});
   const chips = [
     `${zodiacIcon(dashboard.natalCore.sun)} Sun: ${dashboard.natalCore.sun}`,
     `${zodiacIcon(dashboard.natalCore.moon)} Moon: ${dashboard.natalCore.moon}`,
     `${zodiacIcon(dashboard.natalCore.rising)} Rising: ${dashboard.natalCore.rising}`,
-    `${uiIcon("calendar")} ${dashboard.profile?.birthDate || ""}`,
-    `${uiIcon("clock")} ${dashboard.profile?.birthTime || ""}`,
-    `${uiIcon("location")} ${dashboard.profile?.birthCity || ""}`
+    `${uiIcon("spark")} Life Path: ${numerology?.numbers?.lifePath ?? "—"}`,
+    `${uiIcon("spark")} Destiny: ${numerology?.numbers?.destiny ?? "—"}`,
+    `${uiIcon("spark")} Soul Urge: ${numerology?.numbers?.soulUrge ?? "—"}`
   ].filter((item) => item.replace(/<[^>]+>/g, "").trim());
   const zodiacCompact = renderHomeZodiacCompact(dashboard.natalCore?.sun);
   const zodiacCelebBlock = renderZodiacCelebrities(dashboard.natalCore?.sun);
@@ -4740,7 +4759,15 @@ function renderHomeDashboard(dashboard) {
 
   return `
     <section class="hero">
-      <article class="card tone-card">
+      <article class="card tone-card home-hero-eye-card">
+        <div id="homeHeroEye" class="home-hero-eye" aria-hidden="true">
+          <div class="home-hero-eye-orbit"></div>
+          <div class="home-hero-eye-globe">
+            <div class="home-hero-eye-iris"></div>
+            <div class="home-hero-eye-pupil"></div>
+            <div class="home-hero-eye-spec"></div>
+          </div>
+        </div>
         <span class="eyebrow">User Dashboard</span>
         <h1 class="dashboard-name"><span class="${nameClass}">${displayName}</span></h1>
         <div class="chip-grid">
@@ -4748,7 +4775,6 @@ function renderHomeDashboard(dashboard) {
         </div>
         <div class="hero-actions">
           <a class="btn primary btn-natal-flicker" href="/natal-chart">Natal Profile</a>
-          <a class="btn ghost" href="/profile">Edit Birth Data</a>
         </div>
       </article>
       <aside class="card">
@@ -4784,6 +4810,74 @@ function renderHomeDashboard(dashboard) {
     </section>
     ${renderProfessionalReadingCta()}
   `;
+}
+
+function initHomeHeroEye() {
+  const container = document.getElementById("homeHeroEye");
+  if (!(container instanceof HTMLElement)) {
+    return;
+  }
+  destroyHomeHeroEye();
+  const iris = container.querySelector(".home-hero-eye-iris");
+  const pupil = container.querySelector(".home-hero-eye-pupil");
+  if (!(iris instanceof HTMLElement) || !(pupil instanceof HTMLElement)) {
+    return;
+  }
+  const isMobile = window.matchMedia("(max-width: 760px)").matches
+    || window.matchMedia("(pointer: coarse)").matches;
+  const target = { x: 0, y: 0 };
+  const current = { x: 0, y: 0 };
+  const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+  const setTargetFromPointer = (event) => {
+    const rect = container.getBoundingClientRect();
+    const px = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    const py = ((event.clientY - rect.top) / rect.height) * 2 - 1;
+    target.x = clamp(px, -1, 1);
+    target.y = clamp(py, -1, 1);
+  };
+  const onPointerMove = (event) => {
+    if (isMobile) {
+      return;
+    }
+    setTargetFromPointer(event);
+  };
+  const onPointerLeave = () => {
+    if (isMobile) {
+      return;
+    }
+    target.x = 0;
+    target.y = 0;
+  };
+  container.addEventListener("pointermove", onPointerMove);
+  container.addEventListener("pointerleave", onPointerLeave);
+  let frameId = 0;
+  const tick = () => {
+    if (state.homeHeroEye?.container !== container) {
+      return;
+    }
+    if (isMobile) {
+      const t = (performance.now() || Date.now()) * 0.00034;
+      target.x = Math.sin(t) * 0.56;
+      target.y = Math.cos(t * 0.74) * 0.34;
+    }
+    current.x += (target.x - current.x) * 0.11;
+    current.y += (target.y - current.y) * 0.11;
+    const irisX = current.x * 16;
+    const irisY = current.y * 11;
+    const pupilX = current.x * 23;
+    const pupilY = current.y * 15;
+    iris.style.transform = `translate(${irisX.toFixed(2)}px, ${irisY.toFixed(2)}px)`;
+    pupil.style.transform = `translate(${pupilX.toFixed(2)}px, ${pupilY.toFixed(2)}px)`;
+    frameId = window.requestAnimationFrame(tick);
+    state.homeHeroEye.frameId = frameId;
+  };
+  state.homeHeroEye = {
+    container,
+    frameId: 0,
+    pointerMoveHandler: onPointerMove,
+    pointerLeaveHandler: onPointerLeave
+  };
+  tick();
 }
 
 function loginView() {
@@ -9311,6 +9405,7 @@ async function deleteCurrentProfile(button) {
 
 function attachRouteHandlers(path) {
   if (path === "/") {
+    initHomeHeroEye();
     const homeFriends = document.getElementById("homeFriendsBlock");
     if (homeFriends) {
       bindFriendAccordionInteractions(homeFriends);
@@ -9701,6 +9796,7 @@ function render() {
   if (path !== "/") {
     destroySolarSystemWidget();
     destroyHomeOrbitWidgets();
+    destroyHomeHeroEye();
   }
   if (path !== "/numerology") {
     destroyNumerologyDiceWidget();
