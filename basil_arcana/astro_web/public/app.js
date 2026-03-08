@@ -7462,8 +7462,8 @@ async function initNumerologyDiceWidget() {
   }
   const threeScene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
-  const defaultCameraPos = new THREE.Vector3(0, 4.35, 6.8);
-  const topViewCameraPos = new THREE.Vector3(0, 8.6, 0.14);
+  const defaultCameraPos = new THREE.Vector3(0, 4.8, 7.6);
+  const topViewCameraPos = new THREE.Vector3(0, 10.1, 0.22);
   camera.position.copy(defaultCameraPos);
   camera.lookAt(0, 0.7, 0);
   threeScene.add(camera);
@@ -7594,11 +7594,12 @@ async function initNumerologyDiceWidget() {
   window.addEventListener("resize", resize);
 
   const displayTargets = [
-    new THREE.Vector3(-1.56, dieSize / 2 + 0.06, 0),
+    new THREE.Vector3(-2.02, dieSize / 2 + 0.06, 0),
     new THREE.Vector3(0, dieSize / 2 + 0.06, 0),
-    new THREE.Vector3(1.56, dieSize / 2 + 0.06, 0)
+    new THREE.Vector3(2.02, dieSize / 2 + 0.06, 0)
   ];
   const displayQuat = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, 0, 0));
+  let finalDisplayQuats = [displayQuat.clone(), displayQuat.clone(), displayQuat.clone()];
   const baseEmissiveIntensity = state.theme === "dark" ? 0.52 : 0;
   const diceFlicker = dice.map(() => ({ timer: 0, value: 1 }));
 
@@ -7635,6 +7636,12 @@ async function initNumerologyDiceWidget() {
 
   const updateResultFromPhysics = () => {
     const values = dice.map((die) => topFaceNumberFromBody(die.body, CANNON));
+    finalDisplayQuats = values.map((value) => {
+      const [rx, ry] = numerologyDiceRotationForFace(value);
+      return new THREE.Quaternion().setFromEuler(
+        new THREE.Euler((rx * Math.PI) / 180, (ry * Math.PI) / 180, 0)
+      );
+    });
     const total = values.reduce((sum, v) => sum + v, 0);
     const reduced = numerologySingleDigit(total);
     if (totalEl) totalEl.textContent = String(total);
@@ -7689,14 +7696,15 @@ async function initNumerologyDiceWidget() {
           die.body.velocity.set(0, 0, 0);
           die.body.angularVelocity.set(0, 0, 0);
           die.body.position.set(displayTargets[idx].x, displayTargets[idx].y, displayTargets[idx].z);
-          die.body.quaternion.set(0, 0, 0, 1);
+          const q = finalDisplayQuats[idx] || displayQuat;
+          die.body.quaternion.set(q.x, q.y, q.z, q.w);
           die.body.sleep();
         });
         finalizedPose = true;
       }
       dice.forEach((die, idx) => {
         die.mesh.position.lerp(displayTargets[idx], 0.09);
-        die.mesh.quaternion.slerp(displayQuat, 0.08);
+        die.mesh.quaternion.slerp(finalDisplayQuats[idx] || displayQuat, 0.08);
         die.edgeLines.position.copy(die.mesh.position);
         die.edgeLines.quaternion.copy(die.mesh.quaternion);
         if (state.theme === "dark") {
@@ -7717,9 +7725,9 @@ async function initNumerologyDiceWidget() {
           });
         }
       });
-      const orbitRadius = 0.22 * (0.44 + presentationBlend * 0.56);
+      const orbitRadius = 0.14 * (0.44 + presentationBlend * 0.56);
       const orbitX = Math.cos(t * 0.82) * orbitRadius;
-      const orbitZ = 0.14 + Math.sin(t * 0.82) * orbitRadius;
+      const orbitZ = topViewCameraPos.z + Math.sin(t * 0.82) * orbitRadius;
       const dynamicTopView = new THREE.Vector3(orbitX, topViewCameraPos.y, orbitZ);
       camera.position.lerp(dynamicTopView, 0.05 + presentationBlend * 0.025);
       camera.lookAt(0, dieSize / 2 + 0.06, 0);
