@@ -7321,8 +7321,8 @@ function numerologyDiceRotationForFace(face) {
   const map = {
     1: [0, 0],
     2: [-90, 0],
-    3: [0, 90],
-    4: [0, -90],
+    3: [0, 0, 90],
+    4: [0, 0, -90],
     5: [90, 0],
     6: [180, 0]
   };
@@ -7618,8 +7618,8 @@ async function initNumerologyDiceWidget() {
       die.body.angularVelocity.set((Math.random() - 0.5) * 8.5, (Math.random() - 0.5) * 8.5, (Math.random() - 0.5) * 8.5);
       die.body.quaternion.setFromEuler(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
       die.body.wakeUp();
-      const [rx, ry] = numerologyDiceRotationForFace(targetTriple[idx] || 1);
-      die.mesh.rotation.set((rx * Math.PI) / 180, (ry * Math.PI) / 180, 0);
+      const [rx, ry, rz = 0] = numerologyDiceRotationForFace(targetTriple[idx] || 1);
+      die.mesh.rotation.set((rx * Math.PI) / 180, (ry * Math.PI) / 180, (rz * Math.PI) / 180);
       die.mesh.material.forEach((material) => {
         material.emissiveIntensity = baseEmissiveIntensity;
       });
@@ -7637,9 +7637,9 @@ async function initNumerologyDiceWidget() {
   const updateResultFromPhysics = () => {
     const values = dice.map((die) => topFaceNumberFromBody(die.body, CANNON));
     finalDisplayQuats = values.map((value) => {
-      const [rx, ry] = numerologyDiceRotationForFace(value);
+      const [rx, ry, rz = 0] = numerologyDiceRotationForFace(value);
       return new THREE.Quaternion().setFromEuler(
-        new THREE.Euler((rx * Math.PI) / 180, (ry * Math.PI) / 180, 0)
+        new THREE.Euler((rx * Math.PI) / 180, (ry * Math.PI) / 180, (rz * Math.PI) / 180)
       );
     });
     const total = values.reduce((sum, v) => sum + v, 0);
@@ -7705,6 +7705,9 @@ async function initNumerologyDiceWidget() {
       dice.forEach((die, idx) => {
         die.mesh.position.lerp(displayTargets[idx], 0.09);
         die.mesh.quaternion.slerp(finalDisplayQuats[idx] || displayQuat, 0.08);
+        if (presentationBlend > 0.86) {
+          die.mesh.quaternion.copy(finalDisplayQuats[idx] || displayQuat);
+        }
         die.edgeLines.position.copy(die.mesh.position);
         die.edgeLines.quaternion.copy(die.mesh.quaternion);
         if (state.theme === "dark") {
