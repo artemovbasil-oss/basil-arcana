@@ -4883,8 +4883,10 @@ function initHomeHeroEye() {
     const irisY = current.y * 11;
     const pupilX = current.x * 23;
     const pupilY = current.y * 15;
-    iris.style.transform = `translate(${irisX.toFixed(2)}px, ${irisY.toFixed(2)}px)`;
-    pupil.style.transform = `translate(${pupilX.toFixed(2)}px, ${pupilY.toFixed(2)}px)`;
+    iris.style.setProperty("--eye-x", `${irisX.toFixed(2)}px`);
+    iris.style.setProperty("--eye-y", `${irisY.toFixed(2)}px`);
+    pupil.style.setProperty("--eye-x", `${pupilX.toFixed(2)}px`);
+    pupil.style.setProperty("--eye-y", `${pupilY.toFixed(2)}px`);
     frameId = window.requestAnimationFrame(tick);
     state.homeHeroEye.frameId = frameId;
   };
@@ -8869,6 +8871,7 @@ async function hydrateHome() {
     const payload = await fetchJson(`/api/dashboard?period=${encodeURIComponent(state.homePeriod)}`);
     state.dashboard = payload.dashboard;
     app.innerHTML = renderHomeDashboard(payload.dashboard);
+    initHomeHeroEye();
     bindHomePeriodHandlers();
     bindActivityHeatmapInteractions(app);
     updateHomeDynamicBlocks(state.dashboard, state.homePeriod, { animate: false });
