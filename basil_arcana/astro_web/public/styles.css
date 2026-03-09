@@ -630,6 +630,15 @@ p {
   gap: 0.45rem;
 }
 
+.login-tools-section {
+  margin-top: 0.9rem;
+}
+
+.login-tools-card {
+  display: grid;
+  gap: 0.72rem;
+}
+
 .login-free-tools {
   margin-top: 1rem;
   display: grid;
@@ -677,6 +686,24 @@ p {
   border-color: var(--ink);
   background: color-mix(in srgb, var(--surface-2) 72%, transparent 28%);
   transform: translateY(-1px);
+}
+
+.login-lead-red {
+  background:
+    radial-gradient(160% 140% at 0% 0%, color-mix(in srgb, #d64545 14%, transparent) 0%, transparent 65%),
+    color-mix(in srgb, var(--surface-2) 84%, transparent 16%);
+}
+
+.login-lead-green {
+  background:
+    radial-gradient(150% 130% at 0% 0%, color-mix(in srgb, #2fa35a 15%, transparent) 0%, transparent 62%),
+    color-mix(in srgb, var(--surface-2) 84%, transparent 16%);
+}
+
+.login-lead-white {
+  background:
+    radial-gradient(150% 130% at 0% 0%, color-mix(in srgb, #f2f2f2 11%, transparent) 0%, transparent 62%),
+    color-mix(in srgb, var(--surface-2) 84%, transparent 16%);
 }
 
 .login-lead-link {
@@ -805,6 +832,24 @@ body[data-theme="light"] .auth-login-btn.gmail .auth-login-btn-icon .astro-icon 
 
 body[data-theme="light"] .auth-login-btn.telegram .auth-login-btn-icon .astro-icon {
   color: #ffffff;
+}
+
+body[data-theme="light"] .login-lead-red {
+  background:
+    radial-gradient(155% 130% at 0% 0%, rgba(214, 69, 69, 0.12) 0%, transparent 62%),
+    color-mix(in srgb, var(--surface-2) 88%, transparent 12%);
+}
+
+body[data-theme="light"] .login-lead-green {
+  background:
+    radial-gradient(155% 130% at 0% 0%, rgba(47, 163, 90, 0.12) 0%, transparent 62%),
+    color-mix(in srgb, var(--surface-2) 88%, transparent 12%);
+}
+
+body[data-theme="light"] .login-lead-white {
+  background:
+    radial-gradient(155% 130% at 0% 0%, rgba(120, 120, 120, 0.1) 0%, transparent 62%),
+    color-mix(in srgb, var(--surface-2) 88%, transparent 12%);
 }
 
 .btn {

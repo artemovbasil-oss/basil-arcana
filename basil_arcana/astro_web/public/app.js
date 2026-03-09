@@ -4928,6 +4928,37 @@ function loginView() {
   const anyEnabled = telegramEnabled || googleEnabled;
   const referralCode = referralCodeFromUrl() || String(state.referralContext?.code || "").trim();
   const referralConsent = state.referralContext?.shareBirthDataConsent !== false;
+  const toolsSection = anyEnabled
+    ? `
+      <section class="section login-tools-section">
+        <article class="card login-tools-card">
+          <span class="eyebrow">Free preview tools</span>
+          <h2>Try 3 mini-readings before registration</h2>
+          <p class="muted">Short public flows with instant result. When you are ready, return to this screen and create your free account via Telegram or Gmail.</p>
+          <div class="login-lead-grid">
+            <a class="login-lead-card login-lead-red" href="/free-tools/compatibility">
+              <span class="eyebrow">Flow 1</span>
+              <h3>Pair Compatibility Check</h3>
+              <p>Enter two birth dates and get relationship dynamics, communication profile, and quick compatibility score.</p>
+              <span class="login-lead-link">Open tool</span>
+            </a>
+            <a class="login-lead-card login-lead-green" href="/free-tools/timing-windows">
+              <span class="eyebrow">Flow 2</span>
+              <h3>Best Windows of Today</h3>
+              <p>Use birth date and city suggestions to generate precise focus and communication windows for the current day.</p>
+              <span class="login-lead-link">Open tool</span>
+            </a>
+            <a class="login-lead-card login-lead-white" href="/free-tools/numerology-quick-read">
+              <span class="eyebrow">Flow 3</span>
+              <h3>Numerology Quick Read</h3>
+              <p>Generate life path, destiny and day number in seconds, then get actionable interpretation and ritual prompt.</p>
+              <span class="login-lead-link">Open tool</span>
+            </a>
+          </div>
+        </article>
+      </section>
+    `
+    : "";
 
   return `
     <section class="section login-shell">
@@ -4974,31 +5005,6 @@ function loginView() {
                   <p>Astronautica is a precision astrology interface that turns natal geometry into practical daily decisions, relationship timing, and communication strategy.</p>
                   <p>Your profile anchors the model, so forecasts, compatibility and action guidance stay coherent over time instead of feeling like generic horoscope feed content.</p>
                 </div>
-                <section class="login-free-tools" aria-label="Free preview tools">
-                  <span class="eyebrow">Free preview tools</span>
-                  <h2>Try 3 mini-readings before registration</h2>
-                  <p class="muted">Short public flows with instant result. When you are ready, return to this screen and create your free account via Telegram or Gmail.</p>
-                  <div class="login-lead-grid">
-                    <a class="login-lead-card" href="/free-tools/compatibility">
-                      <span class="eyebrow">Flow 1</span>
-                      <h3>Pair Compatibility Check</h3>
-                      <p>Enter two birth dates and get relationship dynamics, communication profile, and quick compatibility score.</p>
-                      <span class="login-lead-link">Open tool</span>
-                    </a>
-                    <a class="login-lead-card" href="/free-tools/timing-windows">
-                      <span class="eyebrow">Flow 2</span>
-                      <h3>Best Windows of Today</h3>
-                      <p>Use birth date and city suggestions to generate precise focus and communication windows for the current day.</p>
-                      <span class="login-lead-link">Open tool</span>
-                    </a>
-                    <a class="login-lead-card" href="/free-tools/numerology-quick-read">
-                      <span class="eyebrow">Flow 3</span>
-                      <h3>Numerology Quick Read</h3>
-                      <p>Generate life path, destiny and day number in seconds, then get actionable interpretation and ritual prompt.</p>
-                      <span class="login-lead-link">Open tool</span>
-                    </a>
-                  </div>
-                </section>
                 <p id="loginStatus" class="muted" style="margin-top:0.8rem"></p>
               `
               : `<p>No login providers configured yet. Configure Telegram or Google credentials in environment variables.</p>`
@@ -5009,6 +5015,7 @@ function loginView() {
         <img src="https://basilarcana-assets.b-cdn.net/astronautica/app.png" alt="" loading="lazy" decoding="async" />
       </aside>
     </section>
+    ${toolsSection}
   `;
 }
 
@@ -5038,13 +5045,46 @@ function normalizeScore(value) {
 }
 
 function freeToolResultCta() {
+  const googleEnabled = state.googleLoginEnabled;
+  const telegramEnabled = state.telegramLoginEnabled && state.telegramBotUsername;
   return `
     <div class="login-tool-cta">
       <p><strong>Unlock full report for free.</strong> Continue to login and create your account via Telegram or Gmail.</p>
       <p class="muted">Free. No card required.</p>
-      <a class="btn primary" href="/login">Go to login</a>
+      <div class="auth-provider-row">
+        ${
+          googleEnabled
+            ? `<button class="auth-login-btn gmail js-free-google-login" type="button">
+                 <span class="auth-login-btn-icon" aria-hidden="true">${uiIcon("google")}</span>
+                 <span>Continue with Gmail</span>
+               </button>`
+            : ""
+        }
+        ${
+          telegramEnabled
+            ? `<button class="auth-login-btn telegram js-free-telegram-login" type="button">
+                 <span class="auth-login-btn-icon" aria-hidden="true">${uiIcon("telegram")}</span>
+                 <span>Continue with Telegram</span>
+               </button>`
+            : ""
+        }
+        ${
+          !googleEnabled && !telegramEnabled
+            ? `<a class="btn primary" href="/login">Go to login</a>`
+            : ""
+        }
+      </div>
+      <p id="freeToolAuthStatus" class="muted"></p>
     </div>
   `;
+}
+
+function bindFreeToolAuthButtons(root) {
+  if (!(root instanceof HTMLElement)) {
+    return;
+  }
+  root.querySelector(".js-free-google-login")?.addEventListener("click", handleGoogleLoginStart);
+  root.querySelector(".js-free-telegram-login")?.addEventListener("click", handleSwitchTelegramAccount);
 }
 
 function leadFlowShell({ eyebrow, title, intro, formHtml, resultId, seoHint, extraHtml = "" }) {
@@ -5232,6 +5272,7 @@ function initFreePairCompatibilityTool() {
         ${freeToolResultCta()}
       </div>
     `;
+    bindFreeToolAuthButtons(result);
   });
 }
 
@@ -5284,6 +5325,7 @@ function initFreeTimingWindowsTool() {
         ${freeToolResultCta()}
       </div>
     `;
+    bindFreeToolAuthButtons(result);
   });
 }
 
@@ -5322,6 +5364,7 @@ function initFreeNumerologyQuickTool() {
         ${freeToolResultCta()}
       </div>
     `;
+    bindFreeToolAuthButtons(result);
   });
 }
 
@@ -9735,6 +9778,10 @@ function referralConsentPayload() {
   };
 }
 
+function getAuthStatusElement() {
+  return document.getElementById("loginStatus") || document.getElementById("freeToolAuthStatus");
+}
+
 async function persistReferralContextFromUi() {
   const payload = referralConsentPayload();
   if (!payload) {
@@ -9751,7 +9798,7 @@ async function persistReferralContextFromUi() {
 }
 
 async function handleGoogleLoginStart() {
-  const status = document.getElementById("loginStatus");
+  const status = getAuthStatusElement();
   try {
     await persistReferralContextFromUi();
     window.location.assign("/api/auth/google/start?returnTo=%2F");
@@ -9772,7 +9819,7 @@ async function handleTelegramWidgetAuth(telegramAuth) {
     await loadSessionState();
     navigate("/", { replace: true });
   } catch (error) {
-    const status = document.getElementById("loginStatus");
+    const status = getAuthStatusElement();
     if (status) {
       status.textContent = `Login failed: ${error.message}`;
     }
@@ -9780,7 +9827,7 @@ async function handleTelegramWidgetAuth(telegramAuth) {
 }
 
 async function handleWebAppInitDataAuth() {
-  const status = document.getElementById("loginStatus");
+  const status = getAuthStatusElement();
   const initData = window.Telegram?.WebApp?.initData;
   if (!initData) {
     if (status) {
@@ -9805,7 +9852,7 @@ async function handleWebAppInitDataAuth() {
 }
 
 function handleSwitchTelegramAccount() {
-  const status = document.getElementById("loginStatus");
+  const status = getAuthStatusElement();
   const botId = Number(state.telegramBotId);
   if (!Number.isFinite(botId) || botId <= 0) {
     if (status) {
@@ -9844,8 +9891,30 @@ async function loadCitySuggestions(query) {
   if (q.length < 2) {
     return [];
   }
-  const payload = await fetchJson(`/api/cities?query=${encodeURIComponent(q)}&limit=12`);
-  return Array.isArray(payload?.cities) ? payload.cities : [];
+  try {
+    const payload = await fetchJson(`/api/cities?query=${encodeURIComponent(q)}&limit=12`);
+    if (Array.isArray(payload?.cities) && payload.cities.length) {
+      return payload.cities;
+    }
+  } catch {}
+  try {
+    const response = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=12&language=en&format=json`);
+    const payload = await response.json().catch(() => ({}));
+    const rows = Array.isArray(payload?.results) ? payload.results : [];
+    return rows.map((row) => {
+      const parts = [row.name, row.admin1, row.country].filter(Boolean);
+      const displayName = parts.join(", ");
+      return {
+        displayName,
+        name: row.name || displayName,
+        latitude: row.latitude,
+        longitude: row.longitude,
+        timezoneIana: row.timezone || ""
+      };
+    });
+  } catch {
+    return [];
+  }
 }
 
 function bindCityAutocomplete(form, cityInputId, options = {}) {
