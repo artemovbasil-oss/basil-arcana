@@ -630,6 +630,99 @@ p {
   gap: 0.45rem;
 }
 
+.login-free-tools {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.72rem;
+  border-top: 1px solid var(--line);
+  padding-top: 0.88rem;
+}
+
+.login-free-tools h2 {
+  margin: 0;
+  font-size: clamp(1.15rem, 1.8vw, 1.5rem);
+  letter-spacing: 0.01em;
+}
+
+.login-tool-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.42rem;
+}
+
+.login-tool-tabs .btn {
+  padding: 0.5rem 0.76rem;
+  font-size: 0.66rem;
+}
+
+.login-tool-panel {
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface-2) 82%, transparent 18%);
+  padding: 0.7rem;
+  display: grid;
+  gap: 0.48rem;
+}
+
+.login-tool-panel h3 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.login-tool-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+  align-items: end;
+}
+
+.login-tool-form label {
+  display: grid;
+  gap: 0.26rem;
+  color: var(--muted);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.login-tool-form .btn {
+  align-self: end;
+}
+
+.login-tool-result {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.login-tool-result-card {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  padding: 0.64rem;
+  display: grid;
+  gap: 0.36rem;
+}
+
+.login-tool-result-card h4 {
+  margin: 0;
+  font-size: 1.02rem;
+  letter-spacing: 0.01em;
+}
+
+.login-tool-result-card p {
+  margin: 0;
+}
+
+.login-tool-cta {
+  border-top: 1px solid var(--line);
+  margin-top: 0.12rem;
+  padding-top: 0.58rem;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.login-tool-cta .btn {
+  justify-self: start;
+}
+
 .telegram-widget-mount-hidden {
   position: absolute;
   width: 0;
@@ -6037,6 +6130,15 @@ body[data-theme="light"] .energy-star.neutral {
   }
 
   .friend-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .login-tool-form {
+    grid-template-columns: 1fr;
+  }
+
+  .login-tool-tabs {
+    display: grid;
     grid-template-columns: 1fr;
   }
 

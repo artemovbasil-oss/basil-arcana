@@ -4974,6 +4974,61 @@ function loginView() {
                   <p>Astronautica is a precision astrology interface that turns natal geometry into practical daily decisions, relationship timing, and communication strategy.</p>
                   <p>Your profile anchors the model, so forecasts, compatibility and action guidance stay coherent over time instead of feeling like generic horoscope feed content.</p>
                 </div>
+                <section id="loginFreeTools" class="login-free-tools" aria-label="Free calculators">
+                  <span class="eyebrow">Free preview tools</span>
+                  <h2>Try compatibility and numerology calculators</h2>
+                  <p class="muted">Use these short tools without registration. You get a quick result in under 2 minutes, then can create a free account to unlock full charts and daily timing.</p>
+                  <div class="login-tool-tabs" role="tablist" aria-label="Free tool tabs">
+                    <button class="btn ghost is-active js-login-tool-tab" type="button" role="tab" aria-selected="true" data-tool="pair">Pair compatibility</button>
+                    <button class="btn ghost js-login-tool-tab" type="button" role="tab" aria-selected="false" data-tool="windows">Today windows</button>
+                    <button class="btn ghost js-login-tool-tab" type="button" role="tab" aria-selected="false" data-tool="numbers">Numerology quick read</button>
+                  </div>
+
+                  <article class="login-tool-panel is-active" data-panel="pair" role="tabpanel">
+                    <h3>Free Love & Communication Compatibility Check</h3>
+                    <p class="muted">Enter two birth dates to see a fast compatibility estimate and interaction dynamics.</p>
+                    <form id="loginPairForm" class="login-tool-form">
+                      <label>Your birth date
+                        <input required type="date" name="dateA" />
+                      </label>
+                      <label>Partner birth date
+                        <input required type="date" name="dateB" />
+                      </label>
+                      <button class="btn primary" type="submit">Run compatibility check</button>
+                    </form>
+                    <div id="loginPairResult" class="login-tool-result" aria-live="polite"></div>
+                  </article>
+
+                  <article class="login-tool-panel" data-panel="windows" role="tabpanel" hidden>
+                    <h3>Best 2 Windows of Your Day</h3>
+                    <p class="muted">Get focus and communication windows for today from your birth date rhythm.</p>
+                    <form id="loginWindowsForm" class="login-tool-form">
+                      <label>Birth date
+                        <input required type="date" name="birthDate" />
+                      </label>
+                      <label>Birth city (optional)
+                        <input name="birthCity" placeholder="City, Country" />
+                      </label>
+                      <button class="btn primary" type="submit">Calculate today's windows</button>
+                    </form>
+                    <div id="loginWindowsResult" class="login-tool-result" aria-live="polite"></div>
+                  </article>
+
+                  <article class="login-tool-panel" data-panel="numbers" role="tabpanel" hidden>
+                    <h3>Numerology Day Code</h3>
+                    <p class="muted">Generate your Life Path, Destiny and Personal Day numbers instantly.</p>
+                    <form id="loginNumbersForm" class="login-tool-form">
+                      <label>Full name
+                        <input required name="name" placeholder="Your full name" />
+                      </label>
+                      <label>Birth date
+                        <input required type="date" name="birthDate" />
+                      </label>
+                      <button class="btn primary" type="submit">Generate numerology code</button>
+                    </form>
+                    <div id="loginNumbersResult" class="login-tool-result" aria-live="polite"></div>
+                  </article>
+                </section>
                 <p id="loginStatus" class="muted" style="margin-top:0.8rem"></p>
               `
               : `<p>No login providers configured yet. Configure Telegram or Google credentials in environment variables.</p>`
@@ -4985,6 +5040,206 @@ function loginView() {
       </aside>
     </section>
   `;
+}
+
+function zodiacFromIsoDate(dateValue) {
+  const raw = String(dateValue || "");
+  const [y, m, d] = raw.split("-").map((v) => Number(v));
+  if (!y || !m || !d) {
+    return "Aries";
+  }
+  const md = m * 100 + d;
+  if (md >= 321 && md <= 419) return "Aries";
+  if (md >= 420 && md <= 520) return "Taurus";
+  if (md >= 521 && md <= 620) return "Gemini";
+  if (md >= 621 && md <= 722) return "Cancer";
+  if (md >= 723 && md <= 822) return "Leo";
+  if (md >= 823 && md <= 922) return "Virgo";
+  if (md >= 923 && md <= 1022) return "Libra";
+  if (md >= 1023 && md <= 1121) return "Scorpio";
+  if (md >= 1122 && md <= 1221) return "Sagittarius";
+  if (md >= 1222 || md <= 119) return "Capricorn";
+  if (md >= 120 && md <= 218) return "Aquarius";
+  return "Pisces";
+}
+
+function normalizeScore(value) {
+  return Math.max(0, Math.min(100, Math.round(Number(value) || 0)));
+}
+
+function loginResultCta() {
+  return `
+    <div class="login-tool-cta">
+      <p><strong>Create a free account</strong> to unlock full natal report, daily timing engine, and dynamic compatibility history.</p>
+      <p class="muted">Free. No card required.</p>
+      <a class="btn primary" href="#googleLoginButton">Create free account</a>
+    </div>
+  `;
+}
+
+function initLoginLeadTools() {
+  const root = document.getElementById("loginFreeTools");
+  if (!(root instanceof HTMLElement)) {
+    return;
+  }
+
+  const tabs = Array.from(root.querySelectorAll(".js-login-tool-tab"));
+  const panels = Array.from(root.querySelectorAll(".login-tool-panel"));
+  const activate = (key) => {
+    tabs.forEach((tab) => {
+      if (!(tab instanceof HTMLButtonElement)) {
+        return;
+      }
+      const active = tab.getAttribute("data-tool") === key;
+      tab.classList.toggle("is-active", active);
+      tab.setAttribute("aria-selected", active ? "true" : "false");
+    });
+    panels.forEach((panel) => {
+      if (!(panel instanceof HTMLElement)) {
+        return;
+      }
+      const active = panel.getAttribute("data-panel") === key;
+      panel.classList.toggle("is-active", active);
+      panel.hidden = !active;
+    });
+  };
+  tabs.forEach((tab) => {
+    tab.addEventListener("click", () => activate(tab.getAttribute("data-tool") || "pair"));
+  });
+  activate("pair");
+
+  const pairForm = document.getElementById("loginPairForm");
+  const pairResult = document.getElementById("loginPairResult");
+  pairForm?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    if (!(pairForm instanceof HTMLFormElement) || !(pairResult instanceof HTMLElement)) {
+      return;
+    }
+    const data = new FormData(pairForm);
+    const dateA = String(data.get("dateA") || "");
+    const dateB = String(data.get("dateB") || "");
+    if (!dateA || !dateB) {
+      return;
+    }
+    const signA = zodiacFromIsoDate(dateA);
+    const signB = zodiacFromIsoDate(dateB);
+    const detailsA = zodiacDetails(signA);
+    const detailsB = zodiacDetails(signB);
+    const indexA = zodiacIndex(signA);
+    const indexB = zodiacIndex(signB);
+    const distance = Math.min(Math.abs(indexA - indexB), 12 - Math.abs(indexA - indexB));
+    const sameElement = detailsA.element === detailsB.element;
+    const sameModality = detailsA.modality === detailsB.modality;
+    const polarityA = zodiacPolarity(signA);
+    const polarityB = zodiacPolarity(signB);
+    const score = normalizeScore(
+      58
+      + (12 - distance) * 2.1
+      + (sameElement ? 11 : 0)
+      + (sameModality ? 6 : 0)
+      + (polarityA === polarityB ? 4 : 0)
+      + (signA === signB ? 8 : 0)
+    );
+    const tier = score >= 85 ? "high" : score >= 68 ? "medium" : "adaptive";
+    const interaction = sameElement
+      ? "Natural emotional language overlap and faster conflict repair."
+      : "Different emotional languages: explicit communication rules increase stability.";
+    const timing = sameModality
+      ? "Shared pacing style. Define priorities early to avoid parallel drift."
+      : "Different pacing modes. Use fixed checkpoints to keep collaboration aligned.";
+    pairResult.innerHTML = `
+      <div class="login-tool-result-card">
+        <p class="eyebrow">Compatibility preview</p>
+        <h4>${signA} × ${signB} · ${score}/100</h4>
+        <p><strong>Tier:</strong> ${tier}</p>
+        <p>${interaction}</p>
+        <p>${timing}</p>
+        ${loginResultCta()}
+      </div>
+    `;
+  });
+
+  const windowsForm = document.getElementById("loginWindowsForm");
+  const windowsResult = document.getElementById("loginWindowsResult");
+  windowsForm?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    if (!(windowsForm instanceof HTMLFormElement) || !(windowsResult instanceof HTMLElement)) {
+      return;
+    }
+    const data = new FormData(windowsForm);
+    const birthDate = String(data.get("birthDate") || "");
+    if (!birthDate) {
+      return;
+    }
+    const city = String(data.get("birthCity") || "").trim();
+    const today = new Date();
+    const pd = derivePersonalDayNumber(today, birthDate);
+    const energy = normalizeScore(56 + pd * 4.2);
+    const windowsMap = {
+      1: ["08:00-10:00", "17:00-19:00"],
+      2: ["10:00-12:00", "18:00-20:00"],
+      3: ["09:00-11:00", "15:00-17:00"],
+      4: ["07:00-09:00", "14:00-16:00"],
+      5: ["11:00-13:00", "19:00-21:00"],
+      6: ["08:00-10:00", "20:00-22:00"],
+      7: ["06:00-08:00", "13:00-15:00"],
+      8: ["12:00-14:00", "16:00-18:00"],
+      9: ["09:00-11:00", "21:00-23:00"]
+    };
+    const primary = windowsMap[pd]?.[0] || "10:00-12:00";
+    const secondary = windowsMap[pd]?.[1] || "18:00-20:00";
+    const focusNote = pd >= 7
+      ? "Use the first window for decisive output and high-friction tasks."
+      : "Use the first window for communication clarity and sequence planning.";
+    const recoveryNote = pd <= 3
+      ? "Schedule a short reset before evening to avoid social overextension."
+      : "Protect evening recovery to preserve next-day execution quality.";
+    windowsResult.innerHTML = `
+      <div class="login-tool-result-card">
+        <p class="eyebrow">Today preview ${city ? `· ${escapeHtml(city)}` : ""}</p>
+        <h4>Best windows: ${primary} and ${secondary}</h4>
+        <p><strong>Energy index:</strong> ${energy}/100 · Personal Day ${pd}</p>
+        <p>${focusNote}</p>
+        <p>${recoveryNote}</p>
+        ${loginResultCta()}
+      </div>
+    `;
+  });
+
+  const numbersForm = document.getElementById("loginNumbersForm");
+  const numbersResult = document.getElementById("loginNumbersResult");
+  numbersForm?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    if (!(numbersForm instanceof HTMLFormElement) || !(numbersResult instanceof HTMLElement)) {
+      return;
+    }
+    const data = new FormData(numbersForm);
+    const name = String(data.get("name") || "").trim();
+    const birthDate = String(data.get("birthDate") || "").trim();
+    if (!name || !birthDate) {
+      return;
+    }
+    const report = buildNumerologyReport({ name, birthDate });
+    if (!report) {
+      numbersResult.innerHTML = `<p class="muted">Please enter valid name and birth date.</p>`;
+      return;
+    }
+    const n = report.numbers;
+    const focus = report.archetypes?.primary?.strengths || "Build one concrete step and complete it today.";
+    numbersResult.innerHTML = `
+      <div class="login-tool-result-card">
+        <p class="eyebrow">Numerology preview</p>
+        <h4>${escapeHtml(name)} · Day Code</h4>
+        <div class="chip-grid">
+          <span class="astro-chip">Life Path ${n.lifePath}</span>
+          <span class="astro-chip">Destiny ${n.destiny}</span>
+          <span class="astro-chip">Personal Day ${n.personalDay}</span>
+        </div>
+        <p>${focus}</p>
+        ${loginResultCta()}
+      </div>
+    `;
+  });
 }
 
 function onboardingView() {
@@ -8395,6 +8650,11 @@ function applySeoMeta(path) {
     type: "website"
   };
   const pageMeta = {
+    "/login": {
+      title: "Free Compatibility & Numerology Calculators - Astronautica",
+      description: "Try free pair compatibility, daily timing windows, and numerology quick read calculators. Instant result, then create a free Astronautica account.",
+      type: "website"
+    },
     "/faq": {
       title: "FAQ - Astronautica",
       description: "Astronautica FAQ: methodology, natal chart calculations, compatibility logic and product boundaries.",
@@ -9633,6 +9893,7 @@ function attachRouteHandlers(path) {
     }
     const googleLoginButton = document.getElementById("googleLoginButton");
     googleLoginButton?.addEventListener("click", handleGoogleLoginStart);
+    initLoginLeadTools();
 
     const logoutButton = document.getElementById("logoutButton");
     logoutButton?.addEventListener("click", async () => {
