@@ -2,6 +2,9 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://app.basilarcana.com/</loc></url>
   <url><loc>https://app.basilarcana.com/login</loc></url>
+  <url><loc>https://app.basilarcana.com/free-tools/compatibility</loc></url>
+  <url><loc>https://app.basilarcana.com/free-tools/timing-windows</loc></url>
+  <url><loc>https://app.basilarcana.com/free-tools/numerology-quick-read</loc></url>
   <url><loc>https://app.basilarcana.com/onboarding</loc></url>
   <url><loc>https://app.basilarcana.com/profile</loc></url>
   <url><loc>https://app.basilarcana.com/natal-chart</loc></url>

@@ -4974,60 +4974,30 @@ function loginView() {
                   <p>Astronautica is a precision astrology interface that turns natal geometry into practical daily decisions, relationship timing, and communication strategy.</p>
                   <p>Your profile anchors the model, so forecasts, compatibility and action guidance stay coherent over time instead of feeling like generic horoscope feed content.</p>
                 </div>
-                <section id="loginFreeTools" class="login-free-tools" aria-label="Free calculators">
+                <section class="login-free-tools" aria-label="Free preview tools">
                   <span class="eyebrow">Free preview tools</span>
-                  <h2>Try compatibility and numerology calculators</h2>
-                  <p class="muted">Use these short tools without registration. You get a quick result in under 2 minutes, then can create a free account to unlock full charts and daily timing.</p>
-                  <div class="login-tool-tabs" role="tablist" aria-label="Free tool tabs">
-                    <button class="btn ghost is-active js-login-tool-tab" type="button" role="tab" aria-selected="true" data-tool="pair">Pair compatibility</button>
-                    <button class="btn ghost js-login-tool-tab" type="button" role="tab" aria-selected="false" data-tool="windows">Today windows</button>
-                    <button class="btn ghost js-login-tool-tab" type="button" role="tab" aria-selected="false" data-tool="numbers">Numerology quick read</button>
+                  <h2>Try 3 mini-readings before registration</h2>
+                  <p class="muted">Short public flows with instant result. When you are ready, return to this screen and create your free account via Telegram or Gmail.</p>
+                  <div class="login-lead-grid">
+                    <a class="login-lead-card" href="/free-tools/compatibility">
+                      <span class="eyebrow">Flow 1</span>
+                      <h3>Pair Compatibility Check</h3>
+                      <p>Enter two birth dates and get relationship dynamics, communication profile, and quick compatibility score.</p>
+                      <span class="login-lead-link">Open tool</span>
+                    </a>
+                    <a class="login-lead-card" href="/free-tools/timing-windows">
+                      <span class="eyebrow">Flow 2</span>
+                      <h3>Best Windows of Today</h3>
+                      <p>Use birth date and city suggestions to generate precise focus and communication windows for the current day.</p>
+                      <span class="login-lead-link">Open tool</span>
+                    </a>
+                    <a class="login-lead-card" href="/free-tools/numerology-quick-read">
+                      <span class="eyebrow">Flow 3</span>
+                      <h3>Numerology Quick Read</h3>
+                      <p>Generate life path, destiny and day number in seconds, then get actionable interpretation and ritual prompt.</p>
+                      <span class="login-lead-link">Open tool</span>
+                    </a>
                   </div>
-
-                  <article class="login-tool-panel is-active" data-panel="pair" role="tabpanel">
-                    <h3>Free Love & Communication Compatibility Check</h3>
-                    <p class="muted">Enter two birth dates to see a fast compatibility estimate and interaction dynamics.</p>
-                    <form id="loginPairForm" class="login-tool-form">
-                      <label>Your birth date
-                        <input required type="date" name="dateA" />
-                      </label>
-                      <label>Partner birth date
-                        <input required type="date" name="dateB" />
-                      </label>
-                      <button class="btn primary" type="submit">Run compatibility check</button>
-                    </form>
-                    <div id="loginPairResult" class="login-tool-result" aria-live="polite"></div>
-                  </article>
-
-                  <article class="login-tool-panel" data-panel="windows" role="tabpanel" hidden>
-                    <h3>Best 2 Windows of Your Day</h3>
-                    <p class="muted">Get focus and communication windows for today from your birth date rhythm.</p>
-                    <form id="loginWindowsForm" class="login-tool-form">
-                      <label>Birth date
-                        <input required type="date" name="birthDate" />
-                      </label>
-                      <label>Birth city (optional)
-                        <input name="birthCity" placeholder="City, Country" />
-                      </label>
-                      <button class="btn primary" type="submit">Calculate today's windows</button>
-                    </form>
-                    <div id="loginWindowsResult" class="login-tool-result" aria-live="polite"></div>
-                  </article>
-
-                  <article class="login-tool-panel" data-panel="numbers" role="tabpanel" hidden>
-                    <h3>Numerology Day Code</h3>
-                    <p class="muted">Generate your Life Path, Destiny and Personal Day numbers instantly.</p>
-                    <form id="loginNumbersForm" class="login-tool-form">
-                      <label>Full name
-                        <input required name="name" placeholder="Your full name" />
-                      </label>
-                      <label>Birth date
-                        <input required type="date" name="birthDate" />
-                      </label>
-                      <button class="btn primary" type="submit">Generate numerology code</button>
-                    </form>
-                    <div id="loginNumbersResult" class="login-tool-result" aria-live="polite"></div>
-                  </article>
                 </section>
                 <p id="loginStatus" class="muted" style="margin-top:0.8rem"></p>
               `
@@ -5067,55 +5037,160 @@ function normalizeScore(value) {
   return Math.max(0, Math.min(100, Math.round(Number(value) || 0)));
 }
 
-function loginResultCta() {
+function freeToolResultCta() {
   return `
     <div class="login-tool-cta">
-      <p><strong>Create a free account</strong> to unlock full natal report, daily timing engine, and dynamic compatibility history.</p>
+      <p><strong>Unlock full report for free.</strong> Continue to login and create your account via Telegram or Gmail.</p>
       <p class="muted">Free. No card required.</p>
-      <a class="btn primary" href="#googleLoginButton">Create free account</a>
+      <a class="btn primary" href="/login">Go to login</a>
     </div>
   `;
 }
 
-function initLoginLeadTools() {
-  const root = document.getElementById("loginFreeTools");
-  if (!(root instanceof HTMLElement)) {
-    return;
-  }
+function leadFlowShell({ eyebrow, title, intro, formHtml, resultId, seoHint, extraHtml = "" }) {
+  return `
+    <section class="section">
+      <article class="card tone-card lead-flow-hero">
+        <span class="eyebrow">${eyebrow}</span>
+        <h1>${title}</h1>
+        <p>${intro}</p>
+        <p class="muted">${seoHint}</p>
+      </article>
+    </section>
+    <section class="section">
+      <article class="card lead-flow-card">
+        ${formHtml}
+        <div id="${resultId}" class="login-tool-result" aria-live="polite"></div>
+      </article>
+    </section>
+    ${extraHtml}
+  `;
+}
 
-  const tabs = Array.from(root.querySelectorAll(".js-login-tool-tab"));
-  const panels = Array.from(root.querySelectorAll(".login-tool-panel"));
-  const activate = (key) => {
-    tabs.forEach((tab) => {
-      if (!(tab instanceof HTMLButtonElement)) {
-        return;
-      }
-      const active = tab.getAttribute("data-tool") === key;
-      tab.classList.toggle("is-active", active);
-      tab.setAttribute("aria-selected", active ? "true" : "false");
-    });
-    panels.forEach((panel) => {
-      if (!(panel instanceof HTMLElement)) {
-        return;
-      }
-      const active = panel.getAttribute("data-panel") === key;
-      panel.classList.toggle("is-active", active);
-      panel.hidden = !active;
-    });
-  };
-  tabs.forEach((tab) => {
-    tab.addEventListener("click", () => activate(tab.getAttribute("data-tool") || "pair"));
+function freePairCompatibilityView() {
+  return leadFlowShell({
+    eyebrow: "Free Compatibility Tool",
+    title: "Pair Compatibility Calculator",
+    intro: "Check romantic and communication compatibility from two birth dates. This short reading estimates interaction tier, rhythm fit, and emotional language overlap.",
+    seoHint: "Public mini-reading by Astronautica. No registration required for this preview.",
+    resultId: "freePairResult",
+    formHtml: `
+      <h2>Run Compatibility Check</h2>
+      <form id="freePairForm" class="login-tool-form lead-tool-form">
+        <label>Your birth date
+          <input required type="date" name="dateA" />
+        </label>
+        <label>Partner birth date
+          <input required type="date" name="dateB" />
+        </label>
+        <button class="btn primary" type="submit">Calculate compatibility</button>
+      </form>
+    `,
+    extraHtml: `
+      <section class="section">
+        <article class="card lead-flow-card">
+          <span class="eyebrow">How this free calculator works</span>
+          <h2>Compatibility methodology (public preview)</h2>
+          <p>The preview blends zodiac element resonance, modality pacing, and polarity balance into one practical compatibility score. It is designed for quick orientation before full registration.</p>
+          <ul class="article-list">
+            <li>Input: two birth dates.</li>
+            <li>Output: compatibility score, interaction tier, communication timing notes.</li>
+            <li>Upgrade path: full relationship dynamics inside authenticated Astronautica dashboard.</li>
+          </ul>
+          <p class="muted">More context: <a href="/astrology-hub/how-to-read-a-natal-chart-correctly">how to read a natal chart</a>.</p>
+        </article>
+      </section>
+    `
   });
-  activate("pair");
+}
 
-  const pairForm = document.getElementById("loginPairForm");
-  const pairResult = document.getElementById("loginPairResult");
-  pairForm?.addEventListener("submit", (event) => {
+function freeTimingWindowsView() {
+  return leadFlowShell({
+    eyebrow: "Free Timing Tool",
+    title: "Best 2 Windows of Your Day",
+    intro: "Use birth date and birth city to estimate the strongest two windows for focus and communication today.",
+    seoHint: "City input uses live suggestions to improve geographic precision before calculation.",
+    resultId: "freeWindowsResult",
+    formHtml: `
+      <h2>Calculate Today Windows</h2>
+      <form id="freeWindowsForm" class="login-tool-form lead-tool-form">
+        <label>Birth date
+          <input required type="date" name="birthDate" />
+        </label>
+        <label>Birth city
+          <input id="freeToolBirthCity" required name="birthCity" placeholder="City, Country" list="freeToolCitySuggestions" autocomplete="off" />
+        </label>
+        <input type="hidden" name="latitude" />
+        <input type="hidden" name="longitude" />
+        <input type="hidden" name="timezoneIana" />
+        <datalist id="freeToolCitySuggestions"></datalist>
+        <button class="btn primary" type="submit">Calculate windows</button>
+      </form>
+    `,
+    extraHtml: `
+      <section class="section">
+        <article class="card lead-flow-card">
+          <span class="eyebrow">Precision input</span>
+          <h2>Why city suggestions matter</h2>
+          <p>Timing windows become more coherent when birth location is selected from validated city suggestions. This improves coordinate precision and keeps day-window interpretation consistent.</p>
+          <ul class="article-list">
+            <li>Input: birth date + selected birth city.</li>
+            <li>Output: two strongest windows + day energy signal.</li>
+            <li>Use case: scheduling difficult conversations, focused work, and recovery blocks.</li>
+          </ul>
+          <p class="muted">More context: <a href="/astrology-hub/natal-charts-how-they-are-built-and-why-they-matter">how natal timing is built</a>.</p>
+        </article>
+      </section>
+    `
+  });
+}
+
+function freeNumerologyQuickReadView() {
+  return leadFlowShell({
+    eyebrow: "Free Numerology Tool",
+    title: "Numerology Quick Read",
+    intro: "Generate your core numbers in seconds: Life Path, Destiny, Soul Urge, and Personal Day with practical interpretation.",
+    seoHint: "Fast public numerology preview. Create a free account to unlock full report history and advanced timing.",
+    resultId: "freeNumbersResult",
+    formHtml: `
+      <h2>Generate Numerology Snapshot</h2>
+      <form id="freeNumbersForm" class="login-tool-form lead-tool-form">
+        <label>Full name
+          <input required name="name" placeholder="Your full name" />
+        </label>
+        <label>Birth date
+          <input required type="date" name="birthDate" />
+        </label>
+        <button class="btn primary" type="submit">Generate numbers</button>
+      </form>
+    `,
+    extraHtml: `
+      <section class="section">
+        <article class="card lead-flow-card">
+          <span class="eyebrow">Numerology preview</span>
+          <h2>What these numbers represent</h2>
+          <p>Life Path maps long-horizon direction, Destiny maps operational style, Soul Urge maps internal drive, and Personal Day maps current execution tone.</p>
+          <ul class="article-list">
+            <li>Input: full name + birth date.</li>
+            <li>Output: core number vector + short practical interpretation.</li>
+            <li>Next step: full numerology and astrology synthesis after free sign-up.</li>
+          </ul>
+          <p class="muted">More context: <a href="/astrology-hub/numerology-complete-guide-history-method-and-modern-use">complete numerology guide</a>.</p>
+        </article>
+      </section>
+    `
+  });
+}
+
+function initFreePairCompatibilityTool() {
+  const form = document.getElementById("freePairForm");
+  const result = document.getElementById("freePairResult");
+  form?.addEventListener("submit", (event) => {
     event.preventDefault();
-    if (!(pairForm instanceof HTMLFormElement) || !(pairResult instanceof HTMLElement)) {
+    if (!(form instanceof HTMLFormElement) || !(result instanceof HTMLElement)) {
       return;
     }
-    const data = new FormData(pairForm);
+    const data = new FormData(form);
     const dateA = String(data.get("dateA") || "");
     const dateB = String(data.get("dateB") || "");
     if (!dateA || !dateB) {
@@ -5147,31 +5222,36 @@ function initLoginLeadTools() {
     const timing = sameModality
       ? "Shared pacing style. Define priorities early to avoid parallel drift."
       : "Different pacing modes. Use fixed checkpoints to keep collaboration aligned.";
-    pairResult.innerHTML = `
+    result.innerHTML = `
       <div class="login-tool-result-card">
         <p class="eyebrow">Compatibility preview</p>
         <h4>${signA} × ${signB} · ${score}/100</h4>
         <p><strong>Tier:</strong> ${tier}</p>
         <p>${interaction}</p>
         <p>${timing}</p>
-        ${loginResultCta()}
+        ${freeToolResultCta()}
       </div>
     `;
   });
+}
 
-  const windowsForm = document.getElementById("loginWindowsForm");
-  const windowsResult = document.getElementById("loginWindowsResult");
-  windowsForm?.addEventListener("submit", (event) => {
+function initFreeTimingWindowsTool() {
+  const form = document.getElementById("freeWindowsForm");
+  const result = document.getElementById("freeWindowsResult");
+  if (form instanceof HTMLFormElement) {
+    bindCityAutocomplete(form, "freeToolBirthCity", { strictSelection: true, datalistId: "freeToolCitySuggestions" });
+  }
+  form?.addEventListener("submit", (event) => {
     event.preventDefault();
-    if (!(windowsForm instanceof HTMLFormElement) || !(windowsResult instanceof HTMLElement)) {
+    if (!(form instanceof HTMLFormElement) || !(result instanceof HTMLElement)) {
       return;
     }
-    const data = new FormData(windowsForm);
+    const data = new FormData(form);
     const birthDate = String(data.get("birthDate") || "");
-    if (!birthDate) {
+    const city = String(data.get("birthCity") || "").trim();
+    if (!birthDate || !city) {
       return;
     }
-    const city = String(data.get("birthCity") || "").trim();
     const today = new Date();
     const pd = derivePersonalDayNumber(today, birthDate);
     const energy = normalizeScore(56 + pd * 4.2);
@@ -5194,26 +5274,28 @@ function initLoginLeadTools() {
     const recoveryNote = pd <= 3
       ? "Schedule a short reset before evening to avoid social overextension."
       : "Protect evening recovery to preserve next-day execution quality.";
-    windowsResult.innerHTML = `
+    result.innerHTML = `
       <div class="login-tool-result-card">
-        <p class="eyebrow">Today preview ${city ? `· ${escapeHtml(city)}` : ""}</p>
+        <p class="eyebrow">Today preview · ${escapeHtml(city)}</p>
         <h4>Best windows: ${primary} and ${secondary}</h4>
         <p><strong>Energy index:</strong> ${energy}/100 · Personal Day ${pd}</p>
         <p>${focusNote}</p>
         <p>${recoveryNote}</p>
-        ${loginResultCta()}
+        ${freeToolResultCta()}
       </div>
     `;
   });
+}
 
-  const numbersForm = document.getElementById("loginNumbersForm");
-  const numbersResult = document.getElementById("loginNumbersResult");
-  numbersForm?.addEventListener("submit", (event) => {
+function initFreeNumerologyQuickTool() {
+  const form = document.getElementById("freeNumbersForm");
+  const result = document.getElementById("freeNumbersResult");
+  form?.addEventListener("submit", (event) => {
     event.preventDefault();
-    if (!(numbersForm instanceof HTMLFormElement) || !(numbersResult instanceof HTMLElement)) {
+    if (!(form instanceof HTMLFormElement) || !(result instanceof HTMLElement)) {
       return;
     }
-    const data = new FormData(numbersForm);
+    const data = new FormData(form);
     const name = String(data.get("name") || "").trim();
     const birthDate = String(data.get("birthDate") || "").trim();
     if (!name || !birthDate) {
@@ -5221,24 +5303,36 @@ function initLoginLeadTools() {
     }
     const report = buildNumerologyReport({ name, birthDate });
     if (!report) {
-      numbersResult.innerHTML = `<p class="muted">Please enter valid name and birth date.</p>`;
+      result.innerHTML = `<p class="muted">Please enter valid name and birth date.</p>`;
       return;
     }
     const n = report.numbers;
     const focus = report.archetypes?.primary?.strengths || "Build one concrete step and complete it today.";
-    numbersResult.innerHTML = `
+    result.innerHTML = `
       <div class="login-tool-result-card">
         <p class="eyebrow">Numerology preview</p>
         <h4>${escapeHtml(name)} · Day Code</h4>
         <div class="chip-grid">
           <span class="astro-chip">Life Path ${n.lifePath}</span>
           <span class="astro-chip">Destiny ${n.destiny}</span>
+          <span class="astro-chip">Soul Urge ${n.soulUrge}</span>
           <span class="astro-chip">Personal Day ${n.personalDay}</span>
         </div>
         <p>${focus}</p>
-        ${loginResultCta()}
+        ${freeToolResultCta()}
       </div>
     `;
+  });
+}
+
+function initLoginLeadTools() {
+  const root = document.querySelector(".login-lead-grid");
+  if (!(root instanceof HTMLElement)) {
+    return;
+  }
+  Array.from(root.querySelectorAll(".login-lead-card")).forEach((card) => {
+    card.addEventListener("mouseenter", () => card.classList.add("is-hover"));
+    card.addEventListener("mouseleave", () => card.classList.remove("is-hover"));
   });
 }
 
@@ -8627,6 +8721,9 @@ function numerologyView() {
 const routes = {
   "/": () => (state.dashboard ? renderHomeDashboard(state.dashboard) : homeViewLoading()),
   "/login": loginView,
+  "/free-tools/compatibility": freePairCompatibilityView,
+  "/free-tools/timing-windows": freeTimingWindowsView,
+  "/free-tools/numerology-quick-read": freeNumerologyQuickReadView,
   "/onboarding": onboardingView,
   "/profile": profileView,
   "/natal-chart": () => `<section class="section"><article class="card"><p class="muted">Loading...</p></article></section>`,
@@ -8653,6 +8750,21 @@ function applySeoMeta(path) {
     "/login": {
       title: "Free Compatibility & Numerology Calculators - Astronautica",
       description: "Try free pair compatibility, daily timing windows, and numerology quick read calculators. Instant result, then create a free Astronautica account.",
+      type: "website"
+    },
+    "/free-tools/compatibility": {
+      title: "Pair Compatibility Calculator (Free) - Astronautica",
+      description: "Free relationship compatibility calculator by birth date. Get interaction tier, communication fit, and practical timing notes in seconds.",
+      type: "website"
+    },
+    "/free-tools/timing-windows": {
+      title: "Best Windows of the Day Calculator (Free) - Astronautica",
+      description: "Free daily timing calculator using birth date and birth city. Find the strongest windows for focus, communication, and recovery.",
+      type: "website"
+    },
+    "/free-tools/numerology-quick-read": {
+      title: "Numerology Quick Read (Free) - Astronautica",
+      description: "Free numerology quick read: life path, destiny, soul urge, and personal day with practical interpretation.",
       type: "website"
     },
     "/faq": {
@@ -9903,6 +10015,18 @@ function attachRouteHandlers(path) {
     });
   }
 
+  if (path === "/free-tools/compatibility") {
+    initFreePairCompatibilityTool();
+  }
+
+  if (path === "/free-tools/timing-windows") {
+    initFreeTimingWindowsTool();
+  }
+
+  if (path === "/free-tools/numerology-quick-read") {
+    initFreeNumerologyQuickTool();
+  }
+
   if (path === "/onboarding") {
     const form = document.getElementById("onboardingForm");
     bindCityAutocomplete(form, "onboardingBirthCity");
@@ -10238,6 +10362,9 @@ function render() {
   const isPublicSharedNatal = Boolean(sharedNatalCode);
   const publicPaths = new Set([
     "/login",
+    "/free-tools/compatibility",
+    "/free-tools/timing-windows",
+    "/free-tools/numerology-quick-read",
     "/faq",
     "/astrology-hub",
     "/celebrities",

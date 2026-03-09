@@ -644,6 +644,49 @@ p {
   letter-spacing: 0.01em;
 }
 
+.login-lead-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.56rem;
+}
+
+.login-lead-card {
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface-2) 82%, transparent 18%);
+  text-decoration: none;
+  color: inherit;
+  padding: 0.72rem;
+  display: grid;
+  gap: 0.46rem;
+  transition: border-color 0.18s ease, transform 0.18s ease, background-color 0.18s ease;
+}
+
+.login-lead-card h3 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.login-lead-card p {
+  margin: 0;
+  font-size: 0.86rem;
+  color: var(--muted);
+}
+
+.login-lead-card:hover,
+.login-lead-card.is-hover {
+  border-color: var(--ink);
+  background: color-mix(in srgb, var(--surface-2) 72%, transparent 28%);
+  transform: translateY(-1px);
+}
+
+.login-lead-link {
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.66rem;
+  color: var(--ink);
+}
+
 .login-tool-tabs {
   display: flex;
   flex-wrap: wrap;
@@ -721,6 +764,24 @@ p {
 
 .login-tool-cta .btn {
   justify-self: start;
+}
+
+.lead-flow-hero {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.lead-flow-card {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.lead-flow-card h2 {
+  margin: 0;
+}
+
+.lead-tool-form {
+  margin-top: 0.1rem;
 }
 
 .telegram-widget-mount-hidden {
@@ -6139,6 +6200,10 @@ body[data-theme="light"] .energy-star.neutral {
 
   .login-tool-tabs {
     display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .login-lead-grid {
     grid-template-columns: 1fr;
   }
 
