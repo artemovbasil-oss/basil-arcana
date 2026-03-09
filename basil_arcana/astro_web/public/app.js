@@ -6428,6 +6428,197 @@ const coreHubArticles = [
     `
   },
   {
+    slug: "numerology-complete-guide-history-method-and-modern-use",
+    title: "Numerology Complete Guide: History, Methods, and Modern Practical Use",
+    excerpt: "A long-form numerology guide covering historical roots, core systems, cultural differences, famous facts, and practical use in modern life.",
+    readTime: "22 min",
+    publishedAt: "2026-03-09",
+    category: "Numerology",
+    seoDescription: "Comprehensive numerology guide: history, key schools, life path logic, practical applications, and evidence-aware best practices for modern users.",
+    content: `
+      <p class="article-lead">Numerology is one of the oldest symbolic systems for pattern interpretation. At its best, it is not a replacement for reality but a language for reflection: cycles, attention, decision rhythm, and personal narrative structure. This guide gives you the full picture: where numerology came from, how systems differ, and how to use it without confusion.</p>
+      <figure class="article-infographic">
+        <svg viewBox="0 0 920 330" role="img" aria-label="Numerology timeline and model overview">
+          <rect x="28" y="36" width="864" height="256" fill="none" stroke="currentColor" stroke-opacity="0.4"/>
+          <line x1="80" y1="198" x2="840" y2="198" stroke="currentColor" stroke-opacity="0.35" stroke-width="2"/>
+          <circle cx="120" cy="198" r="8" fill="currentColor" fill-opacity="0.72"/>
+          <circle cx="300" cy="198" r="8" fill="currentColor" fill-opacity="0.72"/>
+          <circle cx="500" cy="198" r="8" fill="currentColor" fill-opacity="0.72"/>
+          <circle cx="700" cy="198" r="8" fill="currentColor" fill-opacity="0.72"/>
+          <text x="120" y="165" text-anchor="middle" font-size="14" fill="currentColor" opacity="0.86">Ancient Counting</text>
+          <text x="300" y="165" text-anchor="middle" font-size="14" fill="currentColor" opacity="0.86">Pythagorean Layer</text>
+          <text x="500" y="165" text-anchor="middle" font-size="14" fill="currentColor" opacity="0.86">Mystic Synthesis</text>
+          <text x="700" y="165" text-anchor="middle" font-size="14" fill="currentColor" opacity="0.86">Digital Era</text>
+          <text x="120" y="226" text-anchor="middle" font-size="12" fill="currentColor" opacity="0.76">Calendar + ritual cycles</text>
+          <text x="300" y="226" text-anchor="middle" font-size="12" fill="currentColor" opacity="0.76">Number-symbol logic</text>
+          <text x="500" y="226" text-anchor="middle" font-size="12" fill="currentColor" opacity="0.76">Names + destiny narratives</text>
+          <text x="700" y="226" text-anchor="middle" font-size="12" fill="currentColor" opacity="0.76">Apps + behavioral tracking</text>
+          <rect x="736" y="74" width="126" height="78" fill="none" stroke="currentColor" stroke-opacity="0.36"/>
+          <text x="799" y="100" text-anchor="middle" font-size="12" fill="currentColor" opacity="0.8">CORE VECTORS</text>
+          <text x="799" y="122" text-anchor="middle" font-size="12" fill="currentColor" opacity="0.8">Life Path</text>
+          <text x="799" y="138" text-anchor="middle" font-size="12" fill="currentColor" opacity="0.8">Destiny</text>
+        </svg>
+        <figcaption>Numerology evolves across cultures, but keeps one core principle: mapping patterns through number structures.</figcaption>
+      </figure>
+      <h2>Historical roots: long before modern “self-help” culture</h2>
+      <p>Number symbolism appears in Mesopotamian, Egyptian, Greek, Indian, Chinese, and medieval traditions. While methods differ, the common intuition is stable: numbers are not only quantity, but also structure. They help people classify time, meaning, and cycles.</p>
+      <p>Pythagorean schools are often cited in modern Western numerology because they formalized number archetypes and reduction logic. Later traditions combined this with religious, mystical, and psychological interpretations.</p>
+      <h2>Main numerology systems today</h2>
+      <ul class="bullet-list">
+        <li><strong>Pythagorean:</strong> the most common in apps and modern reports; letter-to-number mapping plus reduction rules.</li>
+        <li><strong>Chaldean:</strong> different letter mapping and symbolic emphasis; often considered more “vibrational” by practitioners.</li>
+        <li><strong>Kabbalistic variants:</strong> integrated with spiritual texts and language-based interpretation.</li>
+      </ul>
+      <p>There is no single universal canon. A high-quality report must explicitly state the system it uses.</p>
+      <h2>Interesting facts most people miss</h2>
+      <ul class="bullet-list">
+        <li>Master numbers (11, 22, 33) are a modern synthesis feature in many systems and are handled differently across schools.</li>
+        <li>Name transliteration can change outcomes significantly in multilingual contexts.</li>
+        <li>Date normalization (calendar standard, timezone context) matters for daily cycles in digital numerology products.</li>
+      </ul>
+      <h2>What numerology can be useful for</h2>
+      <p>Numerology is most practical as a reflection framework: identifying recurring patterns in behavior, communication style, and decision fatigue. It can help users create routines and review cycles, especially when paired with measurable habits.</p>
+      <h2>What numerology cannot do reliably</h2>
+      <p>It cannot replace professional advice in medicine, law, finance, or mental health. It cannot guarantee outcomes. Treat it as a lens for structuring questions, not as a deterministic engine.</p>
+      <h2>A modern, evidence-aware workflow</h2>
+      <ul class="bullet-list">
+        <li><strong>1)</strong> Generate core vectors (Life Path, Destiny, Soul Urge).</li>
+        <li><strong>2)</strong> Convert one insight into one daily behavior.</li>
+        <li><strong>3)</strong> Track effect for 2-4 weeks.</li>
+        <li><strong>4)</strong> Keep only what improves outcomes in real life.</li>
+      </ul>
+      <h2>Where to go next</h2>
+      <p>Continue with <a href="/astrology-hub/how-to-use-numerology-daily-rituals-and-practical-routines">How to Use Numerology Daily</a> and <a href="/astrology-hub/numerology-scams-how-to-avoid-fraud-and-manipulation">Numerology Scams: How to Avoid Fraud</a>. You can also compare frameworks in <a href="/astrology-hub/astrology-and-numerology-patterns-structure-and-practical-usage">Astrology and Numerology</a>.</p>
+    `
+  },
+  {
+    slug: "how-to-use-numerology-daily-rituals-and-practical-routines",
+    title: "How to Use Numerology Daily: Rituals, Routines, and Decision Windows",
+    excerpt: "A practical playbook for daily numerology: morning calibration, work blocks, communication rituals, and evening review.",
+    readTime: "18 min",
+    publishedAt: "2026-03-09",
+    category: "Numerology Practice",
+    seoDescription: "Practical daily numerology guide with rituals, routines, and structured review steps to improve focus, communication, and consistency.",
+    content: `
+      <p class="article-lead">Most people fail with numerology because they keep it abstract. Useful numerology is operational: one number insight, one concrete action, one review cycle. This article gives you a real daily protocol you can run immediately.</p>
+      <figure class="article-infographic">
+        <svg viewBox="0 0 920 320" role="img" aria-label="Daily numerology ritual flow">
+          <rect x="30" y="40" width="860" height="240" fill="none" stroke="currentColor" stroke-opacity="0.4"/>
+          <rect x="56" y="90" width="180" height="140" fill="none" stroke="currentColor" stroke-opacity="0.45"/>
+          <rect x="270" y="90" width="180" height="140" fill="none" stroke="currentColor" stroke-opacity="0.45"/>
+          <rect x="484" y="90" width="180" height="140" fill="none" stroke="currentColor" stroke-opacity="0.45"/>
+          <rect x="698" y="90" width="166" height="140" fill="none" stroke="currentColor" stroke-opacity="0.45"/>
+          <text x="146" y="118" text-anchor="middle" font-size="15" fill="currentColor">Morning</text>
+          <text x="146" y="142" text-anchor="middle" font-size="13" fill="currentColor" opacity="0.82">Day Number</text>
+          <text x="146" y="164" text-anchor="middle" font-size="13" fill="currentColor" opacity="0.82">Intent Prompt</text>
+          <text x="360" y="118" text-anchor="middle" font-size="15" fill="currentColor">Work Blocks</text>
+          <text x="360" y="142" text-anchor="middle" font-size="13" fill="currentColor" opacity="0.82">1 Core Task</text>
+          <text x="360" y="164" text-anchor="middle" font-size="13" fill="currentColor" opacity="0.82">1 Support Task</text>
+          <text x="574" y="118" text-anchor="middle" font-size="15" fill="currentColor">Communication</text>
+          <text x="574" y="142" text-anchor="middle" font-size="13" fill="currentColor" opacity="0.82">Message Timing</text>
+          <text x="574" y="164" text-anchor="middle" font-size="13" fill="currentColor" opacity="0.82">Boundary Script</text>
+          <text x="781" y="118" text-anchor="middle" font-size="15" fill="currentColor">Evening</text>
+          <text x="781" y="142" text-anchor="middle" font-size="13" fill="currentColor" opacity="0.82">Review</text>
+          <text x="781" y="164" text-anchor="middle" font-size="13" fill="currentColor" opacity="0.82">Adjust</text>
+          <line x1="236" y1="160" x2="270" y2="160" stroke="currentColor" stroke-opacity="0.52" stroke-width="2"/>
+          <line x1="450" y1="160" x2="484" y2="160" stroke="currentColor" stroke-opacity="0.52" stroke-width="2"/>
+          <line x1="664" y1="160" x2="698" y2="160" stroke="currentColor" stroke-opacity="0.52" stroke-width="2"/>
+        </svg>
+        <figcaption>A numerology day is most useful as a repeatable routine, not a one-off prediction.</figcaption>
+      </figure>
+      <h2>Step 1: Morning calibration (5 minutes)</h2>
+      <p>Start with your Personal Day number and one sentence: “What must be true tonight for this day to count as successful?” Avoid vague intentions. Define one measurable outcome.</p>
+      <h2>Step 2: Build two execution blocks</h2>
+      <p>Create a two-block schedule:</p>
+      <ul class="bullet-list">
+        <li><strong>Block A:</strong> one hard task that moves long-term goals.</li>
+        <li><strong>Block B:</strong> one communication task (follow-up, boundary, negotiation, clarity message).</li>
+      </ul>
+      <p>Numerology themes are useful only when attached to behavior. No behavior, no value.</p>
+      <h2>Step 3: Communication ritual</h2>
+      <p>Before sending high-stakes messages, run a 20-second check:</p>
+      <ul class="bullet-list">
+        <li>Is the ask explicit?</li>
+        <li>Is the deadline explicit?</li>
+        <li>Is the success condition explicit?</li>
+      </ul>
+      <p>This single ritual reduces most social friction loops users mistakenly call “bad energy.”</p>
+      <h2>Step 4: Evening review (7 minutes)</h2>
+      <p>Record three items:</p>
+      <ul class="bullet-list">
+        <li>What worked today?</li>
+        <li>Where did attention leak?</li>
+        <li>What one change do I test tomorrow?</li>
+      </ul>
+      <h2>Weekly numerology ritual</h2>
+      <p>Once per week, review seven days as one system. Track completion rate, communication quality, and emotional load. Keep only rituals that improve these metrics.</p>
+      <h2>Advanced tip: combine with astrology timing</h2>
+      <p>If you already use Astronautica Daily and Natal, use numerology as a micro-routine layer and astrology as macro-timing structure. That combination typically produces better stability than using either one alone.</p>
+      <h2>Red flags in “daily numerology coaching”</h2>
+      <p>If a service gives dramatic claims but no routine, no review method, and no measurable outcomes, it is entertainment, not practice.</p>
+      <h2>Continue learning</h2>
+      <p>Read <a href="/astrology-hub/numerology-complete-guide-history-method-and-modern-use">Numerology Complete Guide</a> and <a href="/astrology-hub/numerology-scams-how-to-avoid-fraud-and-manipulation">Numerology Scams</a>. For cross-system integration, see <a href="/astrology-hub/astrology-and-numerology-patterns-structure-and-practical-usage">Astrology and Numerology</a> and test your routines in <a href="/numerology">Numerology Report</a>.</p>
+    `
+  },
+  {
+    slug: "numerology-scams-how-to-avoid-fraud-and-manipulation",
+    title: "Numerology Scams: How to Avoid Fraud, Manipulation, and Fear-Based Sales",
+    excerpt: "A practical anti-scam framework: warning signs, due-diligence checklist, payment safety, and how to choose trustworthy numerology services.",
+    readTime: "16 min",
+    publishedAt: "2026-03-09",
+    category: "Numerology Safety",
+    seoDescription: "How to avoid numerology scams: red flags, fraud patterns, safe payment practices, and a checklist for choosing credible practitioners and apps.",
+    content: `
+      <p class="article-lead">Numerology can be useful. The scam economy around it is not. Fraud patterns are predictable: fear escalation, fake urgency, and opaque upsells. This guide gives you a concrete anti-scam protocol so you can protect your money, privacy, and decision autonomy.</p>
+      <figure class="article-infographic">
+        <svg viewBox="0 0 920 320" role="img" aria-label="Numerology scam detection checklist">
+          <rect x="30" y="30" width="860" height="260" fill="none" stroke="currentColor" stroke-opacity="0.4"/>
+          <text x="460" y="70" text-anchor="middle" font-size="22" fill="currentColor">NUMEROLOGY SAFETY CHECK</text>
+          <line x1="90" y1="96" x2="830" y2="96" stroke="currentColor" stroke-opacity="0.28"/>
+          <text x="120" y="128" font-size="14" fill="currentColor" opacity="0.88">Fear language</text>
+          <text x="120" y="154" font-size="14" fill="currentColor" opacity="0.88">Guaranteed outcomes</text>
+          <text x="120" y="180" font-size="14" fill="currentColor" opacity="0.88">Urgent payment pressure</text>
+          <text x="120" y="206" font-size="14" fill="currentColor" opacity="0.88">Method not explained</text>
+          <text x="120" y="232" font-size="14" fill="currentColor" opacity="0.88">Sensitive data requests</text>
+          <rect x="500" y="112" width="300" height="132" fill="none" stroke="currentColor" stroke-opacity="0.42"/>
+          <text x="650" y="136" text-anchor="middle" font-size="13" fill="currentColor" opacity="0.84">IF 2+ RED FLAGS APPEAR</text>
+          <text x="650" y="162" text-anchor="middle" font-size="13" fill="currentColor" opacity="0.84">STOP PAYMENT</text>
+          <text x="650" y="186" text-anchor="middle" font-size="13" fill="currentColor" opacity="0.84">DO NOT SHARE PERSONAL FILES</text>
+          <text x="650" y="210" text-anchor="middle" font-size="13" fill="currentColor" opacity="0.84">LEAVE THE CHANNEL</text>
+          <line x1="350" y1="170" x2="500" y2="170" stroke="currentColor" stroke-opacity="0.5" stroke-width="2"/>
+          <polygon points="492,163 500,170 492,177" fill="currentColor" fill-opacity="0.7"/>
+        </svg>
+        <figcaption>Fraud prevention rule: two or more red flags is enough to stop immediately.</figcaption>
+      </figure>
+      <h2>Most common scam mechanics in numerology</h2>
+      <ul class="bullet-list">
+        <li><strong>Fear trigger:</strong> “Your number means danger unless you buy this ritual now.”</li>
+        <li><strong>False certainty:</strong> “100% guaranteed relationship return / wealth unlock.”</li>
+        <li><strong>Escalation funnel:</strong> cheap entry report followed by expensive “urgent cleansing.”</li>
+        <li><strong>Authority theater:</strong> fake certificates and unverifiable “lineage” claims.</li>
+        <li><strong>Data extraction:</strong> requests for IDs, account screenshots, OTP codes, or full birth documents.</li>
+      </ul>
+      <h2>How a credible numerology service behaves</h2>
+      <p>Trustworthy services describe their method, limits, and privacy policy clearly. They avoid panic language and make no deterministic promises. They frame insights as interpretation plus practical experiments.</p>
+      <h2>Decision checklist before paying</h2>
+      <ul class="bullet-list">
+        <li>Can they explain how numbers are derived?</li>
+        <li>Do they provide transparent pricing before checkout?</li>
+        <li>Is there a published privacy and refund policy?</li>
+        <li>Do they avoid medical/legal/financial claims?</li>
+        <li>Do they let you leave without pressure?</li>
+      </ul>
+      <h2>Payment and privacy baseline</h2>
+      <p>Use secure payment methods, keep two-factor authentication enabled, and never share one-time verification codes. No legitimate numerology provider needs your banking credentials or messenger account access.</p>
+      <h2>How to protect vulnerable users</h2>
+      <p>Scammers often target people under stress or grief. If someone close to you is being manipulated, help them pause, document messages, and move communication to a safer channel. Practical support beats confrontation.</p>
+      <h2>Astronautica safety standard</h2>
+      <p>Our product approach is anti-dependency: transparent model inputs, structured outputs, and no fear-driven upsells. If a symbolic system does not increase clarity and agency, it fails the standard.</p>
+      <h2>Recommended next reading</h2>
+      <p>Continue with <a href="/astrology-hub/numerology-complete-guide-history-method-and-modern-use">Numerology Complete Guide</a> and <a href="/astrology-hub/how-to-use-numerology-daily-rituals-and-practical-routines">Daily Numerology Rituals</a>. For adjacent safety patterns, read <a href="/astrology-hub/how-to-avoid-astrology-scams">How to Avoid Astrology Scams</a>.</p>
+    `
+  },
+  {
     slug: "astrology-in-modern-politics-narratives-timing-and-power",
     title: "Astrology in Modern Politics: Narratives, Timing, and Power Signaling",
     excerpt: "An analytical longread on how astrological language appears in modern politics: campaign timing, media narratives, leadership branding, and voter psychology.",
