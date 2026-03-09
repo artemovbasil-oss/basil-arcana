@@ -5283,7 +5283,7 @@ function initFreeTimingWindowsTool() {
   const form = document.getElementById("freeWindowsForm");
   const result = document.getElementById("freeWindowsResult");
   if (form instanceof HTMLFormElement) {
-    bindCityAutocomplete(form, "freeToolBirthCity", { strictSelection: true, datalistId: "freeToolCitySuggestions" });
+    bindCityAutocomplete(form, "freeToolBirthCity", { strictSelection: false, datalistId: "freeToolCitySuggestions" });
   }
   form?.addEventListener("submit", (event) => {
     event.preventDefault();
