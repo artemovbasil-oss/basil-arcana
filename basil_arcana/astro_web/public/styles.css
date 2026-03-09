@@ -801,6 +801,7 @@ p {
 .lead-flow-card {
   display: grid;
   gap: 0.7rem;
+  padding: 1.05rem;
 }
 
 .lead-flow-card h2 {
@@ -808,7 +809,47 @@ p {
 }
 
 .lead-tool-form {
+  margin-top: 0.14rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.68rem;
+  max-width: 780px;
+}
+
+.lead-tool-form label {
+  gap: 0.34rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.lead-tool-form input {
+  width: 100%;
+  min-height: 46px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--ink);
+  padding: 0.62rem 0.72rem;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+}
+
+.lead-tool-form input:focus {
+  outline: none;
+  border-color: var(--ink);
+}
+
+.lead-tool-form .btn {
+  justify-self: start;
   margin-top: 0.1rem;
+}
+
+.lead-form-help {
+  margin: 0;
+  color: var(--muted);
+  max-width: 780px;
+  line-height: 1.48;
 }
 
 .telegram-widget-mount-hidden {

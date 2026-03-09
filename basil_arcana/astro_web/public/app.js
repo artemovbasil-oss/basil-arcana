@@ -5116,12 +5116,13 @@ function freePairCompatibilityView() {
     resultId: "freePairResult",
     formHtml: `
       <h2>Run Compatibility Check</h2>
+      <p class="lead-form-help">Use full birth dates for both people. We calculate sign resonance and interaction pacing instantly.</p>
       <form id="freePairForm" class="login-tool-form lead-tool-form">
         <label>Your birth date
-          <input required type="date" name="dateA" />
+          <input required type="date" name="dateA" autocomplete="bday" />
         </label>
         <label>Partner birth date
-          <input required type="date" name="dateB" />
+          <input required type="date" name="dateB" autocomplete="off" />
         </label>
         <button class="btn primary" type="submit">Calculate compatibility</button>
       </form>
@@ -5153,12 +5154,13 @@ function freeTimingWindowsView() {
     resultId: "freeWindowsResult",
     formHtml: `
       <h2>Calculate Today Windows</h2>
+      <p class="lead-form-help">Start typing the city and pick one suggestion from the list to keep location data accurate.</p>
       <form id="freeWindowsForm" class="login-tool-form lead-tool-form">
         <label>Birth date
-          <input required type="date" name="birthDate" />
+          <input required type="date" name="birthDate" autocomplete="bday" />
         </label>
         <label>Birth city
-          <input id="freeToolBirthCity" required name="birthCity" placeholder="City, Country" list="freeToolCitySuggestions" autocomplete="off" />
+          <input id="freeToolBirthCity" required name="birthCity" placeholder="City, Country" list="freeToolCitySuggestions" autocomplete="address-level2" />
         </label>
         <input type="hidden" name="latitude" />
         <input type="hidden" name="longitude" />
@@ -5194,12 +5196,13 @@ function freeNumerologyQuickReadView() {
     resultId: "freeNumbersResult",
     formHtml: `
       <h2>Generate Numerology Snapshot</h2>
+      <p class="lead-form-help">Use your full legal or commonly used name for a more stable numerology vector.</p>
       <form id="freeNumbersForm" class="login-tool-form lead-tool-form">
         <label>Full name
-          <input required name="name" placeholder="Your full name" />
+          <input required name="name" placeholder="Your full name" autocomplete="name" />
         </label>
         <label>Birth date
-          <input required type="date" name="birthDate" />
+          <input required type="date" name="birthDate" autocomplete="bday" />
         </label>
         <button class="btn primary" type="submit">Generate numbers</button>
       </form>
