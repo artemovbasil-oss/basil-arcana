@@ -5124,7 +5124,7 @@ function freePairCompatibilityView() {
         <label>Partner birth date
           <input required type="date" name="dateB" autocomplete="off" />
         </label>
-        <button class="btn primary" type="submit">Calculate compatibility</button>
+        <button id="freePairSubmit" class="btn primary" type="button">Calculate compatibility</button>
       </form>
     `,
     extraHtml: `
@@ -5166,7 +5166,7 @@ function freeTimingWindowsView() {
         <input type="hidden" name="longitude" />
         <input type="hidden" name="timezoneIana" />
         <datalist id="freeToolCitySuggestions"></datalist>
-        <button class="btn primary" type="submit">Calculate windows</button>
+        <button id="freeWindowsSubmit" class="btn primary" type="button">Calculate windows</button>
       </form>
     `,
     extraHtml: `
@@ -5204,7 +5204,7 @@ function freeNumerologyQuickReadView() {
         <label>Birth date
           <input required type="date" name="birthDate" autocomplete="bday" />
         </label>
-        <button class="btn primary" type="submit">Generate numbers</button>
+        <button id="freeNumbersSubmit" class="btn primary" type="button">Generate numbers</button>
       </form>
     `,
     extraHtml: `
@@ -5228,15 +5228,19 @@ function freeNumerologyQuickReadView() {
 function initFreePairCompatibilityTool() {
   const form = document.getElementById("freePairForm");
   const result = document.getElementById("freePairResult");
-  form?.addEventListener("submit", (event) => {
-    event.preventDefault();
+  const run = () => {
     if (!(form instanceof HTMLFormElement) || !(result instanceof HTMLElement)) {
+      return;
+    }
+    if (!form.checkValidity()) {
+      form.reportValidity();
       return;
     }
     const data = new FormData(form);
     const dateA = String(data.get("dateA") || "");
     const dateB = String(data.get("dateB") || "");
     if (!dateA || !dateB) {
+      result.innerHTML = `<p class="muted">Please enter both birth dates.</p>`;
       return;
     }
     const signA = zodiacFromIsoDate(dateA);
@@ -5276,7 +5280,12 @@ function initFreePairCompatibilityTool() {
       </div>
     `;
     bindFreeToolAuthButtons(result);
+  };
+  form?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    run();
   });
+  document.getElementById("freePairSubmit")?.addEventListener("click", run);
 }
 
 function initFreeTimingWindowsTool() {
@@ -5285,15 +5294,19 @@ function initFreeTimingWindowsTool() {
   if (form instanceof HTMLFormElement) {
     bindCityAutocomplete(form, "freeToolBirthCity", { strictSelection: false, datalistId: "freeToolCitySuggestions" });
   }
-  form?.addEventListener("submit", (event) => {
-    event.preventDefault();
+  const run = () => {
     if (!(form instanceof HTMLFormElement) || !(result instanceof HTMLElement)) {
+      return;
+    }
+    if (!form.checkValidity()) {
+      form.reportValidity();
       return;
     }
     const data = new FormData(form);
     const birthDate = String(data.get("birthDate") || "");
     const city = String(data.get("birthCity") || "").trim();
     if (!birthDate || !city) {
+      result.innerHTML = `<p class="muted">Please provide birth date and city.</p>`;
       return;
     }
     const today = new Date();
@@ -5329,21 +5342,30 @@ function initFreeTimingWindowsTool() {
       </div>
     `;
     bindFreeToolAuthButtons(result);
+  };
+  form?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    run();
   });
+  document.getElementById("freeWindowsSubmit")?.addEventListener("click", run);
 }
 
 function initFreeNumerologyQuickTool() {
   const form = document.getElementById("freeNumbersForm");
   const result = document.getElementById("freeNumbersResult");
-  form?.addEventListener("submit", (event) => {
-    event.preventDefault();
+  const run = () => {
     if (!(form instanceof HTMLFormElement) || !(result instanceof HTMLElement)) {
+      return;
+    }
+    if (!form.checkValidity()) {
+      form.reportValidity();
       return;
     }
     const data = new FormData(form);
     const name = String(data.get("name") || "").trim();
     const birthDate = String(data.get("birthDate") || "").trim();
     if (!name || !birthDate) {
+      result.innerHTML = `<p class="muted">Please enter name and birth date.</p>`;
       return;
     }
     const report = buildNumerologyReport({ name, birthDate });
@@ -5368,7 +5390,12 @@ function initFreeNumerologyQuickTool() {
       </div>
     `;
     bindFreeToolAuthButtons(result);
+  };
+  form?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    run();
   });
+  document.getElementById("freeNumbersSubmit")?.addEventListener("click", run);
 }
 
 function initLoginLeadTools() {
@@ -9509,6 +9536,9 @@ function animateRouteTransition() {
 }
 
 function animateHeadingTypewriter() {
+  if (window.location.pathname.startsWith("/free-tools/")) {
+    return;
+  }
   const heading = app.querySelector("h1");
   if (!(heading instanceof HTMLElement) || heading.dataset.typed === "1") {
     return;

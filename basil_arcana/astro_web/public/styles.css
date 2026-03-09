@@ -798,6 +798,15 @@ p {
   gap: 0.5rem;
 }
 
+.lead-flow-hero h1 {
+  margin-top: 0.35rem;
+  margin-bottom: 0.7rem;
+  font-size: clamp(1.8rem, 5.2vw, 3.8rem);
+  line-height: 0.94;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
 .lead-flow-card {
   display: grid;
   gap: 0.7rem;
@@ -6291,6 +6300,20 @@ body[data-theme="light"] .energy-star.neutral {
 
   .login-lead-grid {
     grid-template-columns: 1fr;
+  }
+
+  .lead-flow-hero h1 {
+    font-size: clamp(1.56rem, 10.5vw, 2.26rem);
+    line-height: 0.98;
+  }
+
+  .lead-tool-form {
+    max-width: 100%;
+  }
+
+  .lead-tool-form .btn {
+    width: 100%;
+    justify-self: stretch;
   }
 
   .form-grid select {
