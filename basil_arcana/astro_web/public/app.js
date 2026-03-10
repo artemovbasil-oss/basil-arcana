@@ -5288,6 +5288,19 @@ function initFreePairCompatibilityTool() {
   document.getElementById("freePairSubmit")?.addEventListener("click", run);
 }
 
+function derivePersonalDayNumber(referenceDate, birthDateIso) {
+  const parsed = String(birthDateIso || "").trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!parsed) {
+    return 5;
+  }
+  const month = Number(parsed[2]);
+  const day = Number(parsed[3]);
+  if (!month || !day || month < 1 || month > 12 || day < 1 || day > 31) {
+    return 5;
+  }
+  return numerologyPersonalDayForDate(referenceDate, month, day);
+}
+
 function initFreeTimingWindowsTool() {
   const form = document.getElementById("freeWindowsForm");
   const result = document.getElementById("freeWindowsResult");
@@ -5302,46 +5315,51 @@ function initFreeTimingWindowsTool() {
       form.reportValidity();
       return;
     }
-    const data = new FormData(form);
-    const birthDate = String(data.get("birthDate") || "");
-    const city = String(data.get("birthCity") || "").trim();
-    if (!birthDate || !city) {
-      result.innerHTML = `<p class="muted">Please provide birth date and city.</p>`;
-      return;
+    try {
+      const data = new FormData(form);
+      const birthDate = String(data.get("birthDate") || "");
+      const city = String(data.get("birthCity") || "").trim();
+      if (!birthDate || !city) {
+        result.innerHTML = `<p class="muted">Please provide birth date and city.</p>`;
+        return;
+      }
+      const today = new Date();
+      const pd = derivePersonalDayNumber(today, birthDate);
+      const energy = normalizeScore(56 + pd * 4.2);
+      const windowsMap = {
+        1: ["08:00-10:00", "17:00-19:00"],
+        2: ["10:00-12:00", "18:00-20:00"],
+        3: ["09:00-11:00", "15:00-17:00"],
+        4: ["07:00-09:00", "14:00-16:00"],
+        5: ["11:00-13:00", "19:00-21:00"],
+        6: ["08:00-10:00", "20:00-22:00"],
+        7: ["06:00-08:00", "13:00-15:00"],
+        8: ["12:00-14:00", "16:00-18:00"],
+        9: ["09:00-11:00", "21:00-23:00"]
+      };
+      const primary = windowsMap[pd]?.[0] || "10:00-12:00";
+      const secondary = windowsMap[pd]?.[1] || "18:00-20:00";
+      const focusNote = pd >= 7
+        ? "Use the first window for decisive output and high-friction tasks."
+        : "Use the first window for communication clarity and sequence planning.";
+      const recoveryNote = pd <= 3
+        ? "Schedule a short reset before evening to avoid social overextension."
+        : "Protect evening recovery to preserve next-day execution quality.";
+      result.innerHTML = `
+        <div class="login-tool-result-card">
+          <p class="eyebrow">Today preview · ${escapeHtml(city)}</p>
+          <h4>Best windows: ${primary} and ${secondary}</h4>
+          <p><strong>Energy index:</strong> ${energy}/100 · Personal Day ${pd}</p>
+          <p>${focusNote}</p>
+          <p>${recoveryNote}</p>
+          ${freeToolResultCta()}
+        </div>
+      `;
+      bindFreeToolAuthButtons(result);
+    } catch (error) {
+      result.innerHTML = `<p class="muted">Calculation failed. Please try again.</p>`;
+      console.error("free timing windows error", error);
     }
-    const today = new Date();
-    const pd = derivePersonalDayNumber(today, birthDate);
-    const energy = normalizeScore(56 + pd * 4.2);
-    const windowsMap = {
-      1: ["08:00-10:00", "17:00-19:00"],
-      2: ["10:00-12:00", "18:00-20:00"],
-      3: ["09:00-11:00", "15:00-17:00"],
-      4: ["07:00-09:00", "14:00-16:00"],
-      5: ["11:00-13:00", "19:00-21:00"],
-      6: ["08:00-10:00", "20:00-22:00"],
-      7: ["06:00-08:00", "13:00-15:00"],
-      8: ["12:00-14:00", "16:00-18:00"],
-      9: ["09:00-11:00", "21:00-23:00"]
-    };
-    const primary = windowsMap[pd]?.[0] || "10:00-12:00";
-    const secondary = windowsMap[pd]?.[1] || "18:00-20:00";
-    const focusNote = pd >= 7
-      ? "Use the first window for decisive output and high-friction tasks."
-      : "Use the first window for communication clarity and sequence planning.";
-    const recoveryNote = pd <= 3
-      ? "Schedule a short reset before evening to avoid social overextension."
-      : "Protect evening recovery to preserve next-day execution quality.";
-    result.innerHTML = `
-      <div class="login-tool-result-card">
-        <p class="eyebrow">Today preview · ${escapeHtml(city)}</p>
-        <h4>Best windows: ${primary} and ${secondary}</h4>
-        <p><strong>Energy index:</strong> ${energy}/100 · Personal Day ${pd}</p>
-        <p>${focusNote}</p>
-        <p>${recoveryNote}</p>
-        ${freeToolResultCta()}
-      </div>
-    `;
-    bindFreeToolAuthButtons(result);
   };
   form?.addEventListener("submit", (event) => {
     event.preventDefault();
