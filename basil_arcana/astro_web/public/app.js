@@ -17,6 +17,7 @@ const state = {
   telegramBotId: null,
   googleLoginEnabled: false,
   githubLoginEnabled: false,
+  monitoring: null,
   referralContext: null,
   referral: null,
   celebrities: [],
@@ -103,6 +104,95 @@ async function fetchJson(url, options) {
     throw error;
   }
   return payload;
+}
+
+const clientMonitoringRuntime = {
+  installed: false,
+  sentryLoaded: false,
+  recentFingerprints: new Map()
+};
+
+function shouldSendClientLog(fingerprint) {
+  const key = String(fingerprint || "").trim();
+  if (!key) {
+    return true;
+  }
+  const now = Date.now();
+  const prev = Number(clientMonitoringRuntime.recentFingerprints.get(key) || 0);
+  if (now - prev < 6000) {
+    return false;
+  }
+  clientMonitoringRuntime.recentFingerprints.set(key, now);
+  if (clientMonitoringRuntime.recentFingerprints.size > 120) {
+    const staleBorder = now - 5 * 60 * 1000;
+    for (const [itemKey, ts] of clientMonitoringRuntime.recentFingerprints.entries()) {
+      if (ts < staleBorder) {
+        clientMonitoringRuntime.recentFingerprints.delete(itemKey);
+      }
+    }
+  }
+  return true;
+}
+
+function postClientLog(payload) {
+  const endpoint = String(state.monitoring?.clientLogEndpoint || "").trim() || "/api/client-log";
+  const body = {
+    level: payload?.level || "error",
+    source: payload?.source || "frontend",
+    message: String(payload?.message || "client_log"),
+    stack: String(payload?.stack || ""),
+    route: window.location.pathname,
+    userAgent: navigator.userAgent,
+    theme: state.theme || document.body.getAttribute("data-theme") || "dark",
+    extra: payload?.extra || null
+  };
+  const fingerprint = `${body.level}:${body.message}:${body.route}`;
+  if (!shouldSendClientLog(fingerprint)) {
+    return;
+  }
+  fetch(endpoint, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+    keepalive: true
+  }).catch(() => {});
+}
+
+function initClientMonitoring() {
+  if (clientMonitoringRuntime.installed) {
+    return;
+  }
+  clientMonitoringRuntime.installed = true;
+  window.addEventListener("error", (event) => {
+    const err = event?.error;
+    postClientLog({
+      level: "error",
+      message: String(event?.message || err?.message || "window_error"),
+      stack: String(err?.stack || ""),
+      extra: {
+        filename: event?.filename || "",
+        lineno: Number(event?.lineno || 0),
+        colno: Number(event?.colno || 0)
+      }
+    });
+  });
+  window.addEventListener("unhandledrejection", (event) => {
+    const reason = event?.reason;
+    const message = reason?.message || (typeof reason === "string" ? reason : "unhandled_rejection");
+    const stack = reason?.stack || "";
+    postClientLog({
+      level: "error",
+      message: String(message),
+      stack: String(stack)
+    });
+  });
+  window.addEventListener("offline", () => {
+    postClientLog({
+      level: "warn",
+      message: "browser_offline"
+    });
+  });
 }
 
 const citySuggestionMeta = new Map();
@@ -10417,6 +10507,8 @@ async function refreshAuthState() {
   state.googleLoginEnabled = Boolean(auth.googleLoginEnabled);
   state.githubLoginEnabled = Boolean(auth.githubLoginEnabled);
   state.referralContext = auth.referralContext || null;
+  state.monitoring = auth.monitoring || null;
+  initClientMonitoring();
 }
 
 async function loadSessionState() {

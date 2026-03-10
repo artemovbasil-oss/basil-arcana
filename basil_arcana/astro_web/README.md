@@ -15,6 +15,21 @@ npm install
 npm start
 ```
 
+## E2E smoke tests
+
+```bash
+cd astro_web
+npx playwright install chromium
+npm run test:e2e
+```
+
+The smoke suite covers:
+- login screen availability
+- free tool flow (`/free-tools/timing-windows`)
+- onboarding flow
+- friends referral block
+- delete profile flow
+
 Open:
 - `http://localhost:8080/`
 - `http://localhost:8080/health`
@@ -57,6 +72,11 @@ Open:
    - `TELEGRAM_BOT_TOKEN` (enables Telegram auth verification and auth gate)
    - `TELEGRAM_BOT_USERNAME` (required for Telegram Login Widget on `/login`)
    - `AUTH_REQUIRED=true` (optional explicit flag; auth also becomes required automatically when bot token is set)
+   - `SENTRY_DSN` (optional, backend error monitoring)
+   - `SENTRY_FRONTEND_DSN` (optional, exposed to frontend status config for future browser SDK use)
+   - `SENTRY_ENVIRONMENT` (optional, defaults to `NODE_ENV`)
+   - `SENTRY_RELEASE` (optional, defaults to git/railway commit env when available)
+   - `SENTRY_TRACES_SAMPLE_RATE` (optional, `0..1`, default `0.05`)
 6. Add custom domain: `app.basilarcana.com`
 7. In GoDaddy DNS add:
    - `CNAME` name `app` value `<railway-target>.up.railway.app`

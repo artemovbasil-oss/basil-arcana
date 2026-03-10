@@ -5,6 +5,7 @@ import path from "node:path";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import pg from "pg";
+import * as Sentry from "@sentry/node";
 
 const { Pool } = pg;
 const require = createRequire(import.meta.url);
@@ -50,8 +51,41 @@ function normalizeBaseUrl(raw) {
 
 const appBaseUrlEnv = normalizeBaseUrl(appBaseUrlEnvRaw);
 const indexHtmlTemplate = fs.readFileSync(path.join(publicDir, "index.html"), "utf8");
+const sentryDsn = String(process.env.SENTRY_DSN || "").trim();
+const frontendSentryDsn = String(process.env.SENTRY_FRONTEND_DSN || "").trim();
+const sentryEnvironment = String(process.env.SENTRY_ENVIRONMENT || process.env.NODE_ENV || "development").trim();
+const sentryRelease = String(
+  process.env.SENTRY_RELEASE
+  || process.env.RENDER_GIT_COMMIT
+  || process.env.RAILWAY_GIT_COMMIT_SHA
+  || ""
+).trim();
+const sentryTraceSampleRateRaw = Number(process.env.SENTRY_TRACES_SAMPLE_RATE);
+const sentryTraceSampleRate = Number.isFinite(sentryTraceSampleRateRaw)
+  ? Math.max(0, Math.min(1, sentryTraceSampleRateRaw))
+  : 0.05;
+const sentryEnabled = Boolean(sentryDsn);
+
+if (sentryEnabled) {
+  Sentry.init({
+    dsn: sentryDsn,
+    environment: sentryEnvironment,
+    release: sentryRelease || undefined,
+    tracesSampleRate: sentryTraceSampleRate
+  });
+}
 
 app.set("trust proxy", 1);
+
+process.on("unhandledRejection", (reason) => {
+  console.error("unhandledRejection", reason);
+  captureServerException(reason instanceof Error ? reason : new Error(String(reason || "unhandledRejection")));
+});
+
+process.on("uncaughtException", (error) => {
+  console.error("uncaughtException", error);
+  captureServerException(error);
+});
 
 const sessionStore = new Map();
 const geoCache = new Map();
@@ -140,6 +174,33 @@ function truncateText(value, maxLen = 180) {
     return text;
   }
   return `${text.slice(0, Math.max(0, maxLen - 1)).trim()}…`;
+}
+
+function captureServerException(error, context = {}) {
+  if (sentryEnabled) {
+    Sentry.withScope((scope) => {
+      Object.entries(context || {}).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          scope.setExtra(key, value);
+        }
+      });
+      Sentry.captureException(error);
+    });
+  }
+}
+
+function captureServerMessage(message, context = {}) {
+  if (!sentryEnabled) {
+    return;
+  }
+  Sentry.withScope((scope) => {
+    Object.entries(context || {}).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        scope.setExtra(key, value);
+      }
+    });
+    Sentry.captureMessage(String(message || "server_event"));
+  });
 }
 
 function slugify(value) {
@@ -2789,6 +2850,35 @@ const contracts = {
 };
 
 app.use(express.json({ limit: "256kb" }));
+app.use((req, res, next) => {
+  const startedAt = Date.now();
+  const requestId = crypto.randomUUID().slice(0, 8);
+  req.requestId = requestId;
+  res.setHeader("X-Request-Id", requestId);
+  res.on("finish", () => {
+    const durationMs = Date.now() - startedAt;
+    const status = Number(res.statusCode || 0);
+    const isApi = String(req.path || "").startsWith("/api/");
+    if (!isApi) {
+      return;
+    }
+    if (status >= 500) {
+      captureServerMessage("api_request_failed", {
+        requestId,
+        method: req.method,
+        path: req.path,
+        status,
+        durationMs
+      });
+    }
+    if (status >= 400) {
+      console.warn(
+        `[api] ${req.method} ${req.path} -> ${status} (${durationMs}ms) [${requestId}]`
+      );
+    }
+  });
+  next();
+});
 app.use(async (req, res, next) => {
   try {
     const session = await getOrCreateSession(req, res);
@@ -2819,6 +2909,58 @@ app.get("/api/contracts", (_req, res) => {
   res.json({ ok: true, contracts, dbEnabled: Boolean(dbPool), authRequired });
 });
 
+app.post("/api/client-log", (req, res) => {
+  const levelRaw = String(req.body?.level || "error").trim().toLowerCase();
+  const level = ["error", "warn", "info"].includes(levelRaw) ? levelRaw : "error";
+  const message = truncateText(req.body?.message || "client_log", 600);
+  const stack = truncateText(req.body?.stack || "", 4000);
+  const metadata = {
+    route: truncateText(req.body?.route || "", 180),
+    source: truncateText(req.body?.source || "frontend", 120),
+    userAgent: truncateText(req.body?.userAgent || "", 240),
+    requestId: truncateText(req.body?.requestId || "", 64),
+    theme: truncateText(req.body?.theme || "", 24),
+    extra: req.body?.extra && typeof req.body.extra === "object" ? req.body.extra : null
+  };
+  const payload = {
+    level,
+    message,
+    stack,
+    ...metadata
+  };
+  if (level === "error") {
+    console.error("client-log", payload);
+  } else if (level === "warn") {
+    console.warn("client-log", payload);
+  } else {
+    console.log("client-log", payload);
+  }
+  if (sentryEnabled) {
+    Sentry.withScope((scope) => {
+      scope.setTag("source", "frontend");
+      scope.setTag("level", level);
+      if (metadata.route) {
+        scope.setTag("route", metadata.route);
+      }
+      if (metadata.theme) {
+        scope.setTag("theme", metadata.theme);
+      }
+      if (metadata.userAgent) {
+        scope.setExtra("userAgent", metadata.userAgent);
+      }
+      if (metadata.extra) {
+        scope.setExtra("clientExtra", metadata.extra);
+      }
+      if (stack) {
+        Sentry.captureException(new Error(`${message}\n${stack}`));
+      } else {
+        Sentry.captureMessage(message);
+      }
+    });
+  }
+  return res.json({ ok: true });
+});
+
 app.get("/api/auth/status", (req, res) => {
   const authenticated = isAuthenticated(req.sessionData);
   const provider = authenticated ? String(req.sessionData?.auth?.provider || "") : null;
@@ -2833,7 +2975,14 @@ app.get("/api/auth/status", (req, res) => {
     githubLoginEnabled,
     telegramBotUsername: telegramBotUsername || null,
     telegramBotId,
-    referralContext: req.sessionData?.referralContext || null
+    referralContext: req.sessionData?.referralContext || null,
+    monitoring: {
+      sentryEnabled,
+      frontendSentryDsn: frontendSentryDsn || null,
+      environment: sentryEnvironment,
+      release: sentryRelease || null,
+      clientLogEndpoint: "/api/client-log"
+    }
   });
 });
 
@@ -3511,6 +3660,11 @@ app.use((error, req, res, next) => {
     return next(error);
   }
   console.error("astro-web error", error);
+  captureServerException(error, {
+    path: req?.path,
+    method: req?.method,
+    requestId: req?.requestId
+  });
   if (String(req.path || "").startsWith("/api/")) {
     return res.status(500).json({ error: "internal_error" });
   }
@@ -3532,5 +3686,6 @@ initDb()
   })
   .catch((error) => {
     console.error("Failed to initialize astro-web", error);
+    captureServerException(error, { stage: "init" });
     process.exit(1);
   });
