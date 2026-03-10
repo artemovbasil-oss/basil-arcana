@@ -7446,6 +7446,201 @@ const coreHubArticles = [
     `
   },
   {
+    slug: "most-famous-astrologers-in-history-ptolemy-tetrabiblos",
+    title: "Most Famous Astrologers in History: Ptolemy and the Tetrabiblos Legacy",
+    excerpt: "A deep historical profile of Claudius Ptolemy, the Tetrabiblos, and why his framework still defines technical astrology language today.",
+    readTime: "22 min",
+    publishedAt: "2026-03-10",
+    category: "Astrologer Profiles",
+    seoDescription: "Long-form SEO biography of Claudius Ptolemy, one of the most famous astrologers in history: Tetrabiblos, methodology, influence, criticism, and legacy.",
+    content: `
+      <p class="article-lead">If you search for the <strong>most famous astrologers in history</strong>, one name appears in almost every serious list: Claudius Ptolemy. His text <em>Tetrabiblos</em> became a structural foundation for technical astrology across centuries, not because it was mystical, but because it tried to systematize interpretation in a disciplined way.</p>
+      <figure class="article-infographic">
+        <svg viewBox="0 0 920 320" role="img" aria-label="Ptolemy legacy map">
+          <defs>
+            <linearGradient id="ptolA" x1="0%" x2="100%" y1="0%" y2="100%">
+              <stop offset="0%" stop-color="currentColor" stop-opacity="0.45"/>
+              <stop offset="100%" stop-color="currentColor" stop-opacity="0.08"/>
+            </linearGradient>
+          </defs>
+          <rect x="30" y="30" width="860" height="260" fill="none" stroke="url(#ptolA)" stroke-width="1.4"/>
+          <circle cx="180" cy="160" r="72" fill="none" stroke="currentColor" stroke-opacity="0.55"/>
+          <circle cx="450" cy="160" r="82" fill="none" stroke="currentColor" stroke-opacity="0.5"/>
+          <circle cx="730" cy="160" r="72" fill="none" stroke="currentColor" stroke-opacity="0.55"/>
+          <text x="180" y="152" text-anchor="middle" font-size="15" fill="currentColor">ALMAGEST</text>
+          <text x="180" y="174" text-anchor="middle" font-size="13" fill="currentColor" opacity="0.8">Astronomy</text>
+          <text x="450" y="152" text-anchor="middle" font-size="16" fill="currentColor">PTOLEMY</text>
+          <text x="450" y="176" text-anchor="middle" font-size="13" fill="currentColor" opacity="0.8">System Builder</text>
+          <text x="730" y="152" text-anchor="middle" font-size="15" fill="currentColor">TETRABIBLOS</text>
+          <text x="730" y="174" text-anchor="middle" font-size="13" fill="currentColor" opacity="0.8">Astrology</text>
+          <line x1="252" y1="160" x2="366" y2="160" stroke="currentColor" stroke-opacity="0.44" stroke-width="2"/>
+          <line x1="532" y1="160" x2="658" y2="160" stroke="currentColor" stroke-opacity="0.44" stroke-width="2"/>
+          <text x="460" y="292" text-anchor="middle" font-size="13" fill="currentColor" opacity="0.74">Shared geometry, different interpretive purpose.</text>
+        </svg>
+        <figcaption>Ptolemy positioned astrology as a structured interpretive layer built on astronomical computation.</figcaption>
+      </figure>
+      <h2>Who was Claudius Ptolemy?</h2>
+      <p>Ptolemy lived in Roman Egypt (2nd century CE) and is remembered as a polymath: astronomer, geographer, mathematician, and astrologically influential author. His <em>Almagest</em> systematized astronomical models, while <em>Tetrabiblos</em> became one of the most referenced astrological treatises in the Western tradition.</p>
+      <p>Historically, his importance comes from <strong>integration</strong>. He did not treat sky interpretation as pure oracle language. Instead, he tried to connect celestial configuration, terrestrial climate logic, and human typology in one coherent explanatory framework.</p>
+      <h2>Why Tetrabiblos became canonical</h2>
+      <p>The book offered what many earlier traditions lacked in one place: methodology, classification, and interpretive sequence. Rather than listing symbolic correspondences randomly, Ptolemy argued for weighted factors and contextual reading.</p>
+      <div class="article-spotlight-grid">
+        <article class="article-spotlight">
+          <h3>Method over slogan</h3>
+          <p>He framed astrology as probabilistic tendency, not deterministic command.</p>
+        </article>
+        <article class="article-spotlight">
+          <h3>Context over absolutes</h3>
+          <p>He emphasized geography, seasonality, and environmental mediation in interpretation.</p>
+        </article>
+        <article class="article-spotlight">
+          <h3>Structure over mystification</h3>
+          <p>He attempted a full reading logic: from sky factors to grounded outcome claims.</p>
+        </article>
+      </div>
+      <h2>Ptolemy's core contribution to astrological language</h2>
+      <p>Many contemporary astrology systems still mirror his structural assumptions: planetary condition, sign quality, house relevance, and aspect interactions as layered inputs. Even schools that reject parts of his cosmology keep his compositional logic.</p>
+      <p>In modern terms, he helped define an early version of a modeling pipeline: <strong>input normalization → factor weighting → synthesis output</strong>.</p>
+      <h2>What modern readers should not do</h2>
+      <p>Two errors are common. First, treating Ptolemy as unquestionable authority. Second, dismissing him without reading his method. A better approach is critical adoption: preserve what is structurally useful, update what is empirically weak, and stay explicit about interpretive boundaries.</p>
+      <h2>Interesting historical facts</h2>
+      <ul class="bullet-list">
+        <li><strong>Cross-domain influence:</strong> Ptolemy's astronomical and astrological works traveled together in many manuscript traditions.</li>
+        <li><strong>Translation pipeline:</strong> Greek, Arabic, and Latin scholarly worlds each reinterpreted and transmitted his framework.</li>
+        <li><strong>Method legacy:</strong> Later Renaissance and early modern astrologers often worked in dialogue with Ptolemaic assumptions.</li>
+      </ul>
+      <h2>How this matters for SEO-era readers</h2>
+      <p>People searching “famous astrologers” usually get short lists with no method context. Ptolemy deserves more than listicle treatment because his value is not celebrity but architecture: he shows how symbolic systems can become readable, auditable, and operational.</p>
+      <h2>Practical takeaway for Astronautica users</h2>
+      <p>The modern use-case is simple: keep calculation transparent, interpretation bounded, and recommendations behavior-linked. That is the same standard that makes a historical tradition usable in a contemporary product.</p>
+      <p>Continue with <a href="/astrology-hub/abu-mashar-the-astrologer-who-shaped-medieval-europe">Abu Ma'shar</a> and <a href="/astrology-hub/william-lilly-astrology-revolution-in-17th-century-england">William Lilly</a>. For larger context, read <a href="/astrology-hub/astrology-and-astronomy-shared-roots-modern-paths">Astrology and Astronomy</a>.</p>
+    `
+  },
+  {
+    slug: "abu-mashar-the-astrologer-who-shaped-medieval-europe",
+    title: "Abu Ma'shar: The Astrologer Who Shaped Medieval Europe",
+    excerpt: "From Baghdad's translation era to Latin scholastic culture: why Abu Ma'shar became one of history's most influential astrologers.",
+    readTime: "24 min",
+    publishedAt: "2026-03-10",
+    category: "Astrologer Profiles",
+    seoDescription: "Long-form SEO article on Abu Mashar, one of the most influential astrologers in history: Abbasid context, key books, transmission to Europe, and enduring impact.",
+    content: `
+      <p class="article-lead">Among the <strong>most influential astrologers in history</strong>, Abu Ma'shar al-Balkhi (Albumasar in Latin transmission) stands out as a bridge figure between intellectual worlds. His work in the Abbasid era shaped not only Islamic astrology but also medieval European astrological thought through translation networks.</p>
+      <figure class="article-infographic">
+        <svg viewBox="0 0 920 320" role="img" aria-label="Abu Mashar transmission map">
+          <rect x="34" y="34" width="852" height="252" fill="none" stroke="currentColor" stroke-opacity="0.35"/>
+          <circle cx="150" cy="160" r="56" fill="none" stroke="currentColor" stroke-opacity="0.52"/>
+          <circle cx="360" cy="160" r="64" fill="none" stroke="currentColor" stroke-opacity="0.52"/>
+          <circle cx="576" cy="160" r="64" fill="none" stroke="currentColor" stroke-opacity="0.52"/>
+          <circle cx="786" cy="160" r="56" fill="none" stroke="currentColor" stroke-opacity="0.52"/>
+          <text x="150" y="154" text-anchor="middle" font-size="13" fill="currentColor">Greek</text>
+          <text x="150" y="174" text-anchor="middle" font-size="12" fill="currentColor" opacity="0.82">Sources</text>
+          <text x="360" y="154" text-anchor="middle" font-size="14" fill="currentColor">Baghdad</text>
+          <text x="360" y="176" text-anchor="middle" font-size="12" fill="currentColor" opacity="0.82">Abu Ma'shar</text>
+          <text x="576" y="154" text-anchor="middle" font-size="14" fill="currentColor">Arabic</text>
+          <text x="576" y="176" text-anchor="middle" font-size="12" fill="currentColor" opacity="0.82">Commentary</text>
+          <text x="786" y="154" text-anchor="middle" font-size="13" fill="currentColor">Latin</text>
+          <text x="786" y="174" text-anchor="middle" font-size="12" fill="currentColor" opacity="0.82">Europe</text>
+          <line x1="206" y1="160" x2="296" y2="160" stroke="currentColor" stroke-opacity="0.5" stroke-width="2"/>
+          <line x1="424" y1="160" x2="512" y2="160" stroke="currentColor" stroke-opacity="0.5" stroke-width="2"/>
+          <line x1="640" y1="160" x2="730" y2="160" stroke="currentColor" stroke-opacity="0.5" stroke-width="2"/>
+          <text x="460" y="292" text-anchor="middle" font-size="13" fill="currentColor" opacity="0.74">Knowledge transfer across languages changed astrological history.</text>
+        </svg>
+        <figcaption>Abu Ma'shar's influence grew through translation corridors linking Greek, Arabic, and Latin scholarship.</figcaption>
+      </figure>
+      <h2>Historical setting: why Baghdad mattered</h2>
+      <p>Abu Ma'shar worked in an ecosystem where translation, commentary, and synthesis were elite scholarly practices. Baghdad's intellectual climate encouraged large-scale integration of Greek astronomy, Persian thought, and local analytical traditions.</p>
+      <p>That context is crucial: his legacy is not only personal genius but also participation in a high-bandwidth knowledge infrastructure.</p>
+      <h2>From scholar to system architect</h2>
+      <p>His writings on mundane astrology, planetary cycles, and historical periods became highly influential because they connected technical language with civilizational interpretation. Later readers often encountered astrology through frameworks that had already been filtered by Abu Ma'shar's synthesis.</p>
+      <div class="article-timeline">
+        <div class="article-timeline-item"><strong>Phase 1:</strong> encounter with prior astronomical-astrological corpus.</div>
+        <div class="article-timeline-item"><strong>Phase 2:</strong> synthesis in Arabic scholarly context.</div>
+        <div class="article-timeline-item"><strong>Phase 3:</strong> translation and adaptation into Latin Europe.</div>
+        <div class="article-timeline-item"><strong>Phase 4:</strong> long afterlife in scholastic and early Renaissance traditions.</div>
+      </div>
+      <h2>Why medieval Europe read him seriously</h2>
+      <p>Latin scholars inherited his work not as folklore but as technical material. The attraction was methodological scope: broad historical cycles, political timing, and cosmological explanation within a coherent interpretive frame.</p>
+      <p>In periods where theology, natural philosophy, and astronomy overlapped institutionally, his texts provided a usable vocabulary for thinking about celestial causality and earthly change.</p>
+      <h2>Key legacy dimensions</h2>
+      <ul class="bullet-list">
+        <li><strong>Transmission power:</strong> he became a reference point across language boundaries.</li>
+        <li><strong>Conceptual scale:</strong> he worked at macro-history level, not only personal chart reading.</li>
+        <li><strong>Pedagogical effect:</strong> generations learned astrological argumentation through lines influenced by his corpus.</li>
+      </ul>
+      <h2>Critical reading in the present</h2>
+      <p>Modern readers should separate intellectual history from empirical claims. Abu Ma'shar's value today is strongest in historical method analysis: how frameworks are assembled, justified, translated, and institutionalized.</p>
+      <p>Even when one disagrees with premises, the architecture of argument remains instructive for any symbolic model-building discipline.</p>
+      <h2>Interesting fact snapshots</h2>
+      <ul class="bullet-list">
+        <li>His Latin reputation was so strong that “Albumasar” became a canonical reference name in European texts.</li>
+        <li>His works circulated in contexts that also shaped medicine, philosophy, and political theory debates.</li>
+        <li>He influenced discussions of long-cycle historical periods far beyond narrow natal practice.</li>
+      </ul>
+      <h2>Why he belongs in “most famous astrologers” discussions</h2>
+      <p>Because fame is not only public recognition. In knowledge history, influence means transmission durability. By that criterion, Abu Ma'shar is foundational.</p>
+      <p>Next read <a href="/astrology-hub/william-lilly-astrology-revolution-in-17th-century-england">William Lilly</a> and <a href="/astrology-hub/most-famous-astrologers-in-history-ptolemy-tetrabiblos">Ptolemy</a>. For broader history, see <a href="/astrology-hub/astrology-and-astronomy-shared-roots-modern-paths">Astrology and Astronomy</a>.</p>
+    `
+  },
+  {
+    slug: "william-lilly-astrology-revolution-in-17th-century-england",
+    title: "William Lilly and the Astrology Revolution in 17th-Century England",
+    excerpt: "The rise of print-era astrology, Christian Astrology, public fame, controversy, and the modern legacy of William Lilly.",
+    readTime: "21 min",
+    publishedAt: "2026-03-10",
+    category: "Astrologer Profiles",
+    seoDescription: "Comprehensive SEO profile of William Lilly, one of the most famous astrologers in history: Christian Astrology, print culture, politics, and technical legacy.",
+    content: `
+      <p class="article-lead">If Ptolemy represents classical architecture and Abu Ma'shar represents translation-era transmission, William Lilly represents something different: <strong>mass visibility</strong>. In 17th-century England, Lilly became a widely recognized astrological figure through print culture, political turbulence, and instructional writing.</p>
+      <figure class="article-infographic">
+        <svg viewBox="0 0 920 320" role="img" aria-label="William Lilly print-era astrology model">
+          <rect x="28" y="32" width="864" height="256" fill="none" stroke="currentColor" stroke-opacity="0.36"/>
+          <rect x="70" y="92" width="210" height="140" fill="none" stroke="currentColor" stroke-opacity="0.48"/>
+          <rect x="354" y="92" width="210" height="140" fill="none" stroke="currentColor" stroke-opacity="0.48"/>
+          <rect x="638" y="92" width="210" height="140" fill="none" stroke="currentColor" stroke-opacity="0.48"/>
+          <text x="175" y="120" text-anchor="middle" font-size="14" fill="currentColor">PRINT</text>
+          <text x="175" y="146" text-anchor="middle" font-size="13" fill="currentColor" opacity="0.84">Almanacs</text>
+          <text x="175" y="168" text-anchor="middle" font-size="13" fill="currentColor" opacity="0.84">Mass readership</text>
+          <text x="459" y="120" text-anchor="middle" font-size="14" fill="currentColor">LILLY</text>
+          <text x="459" y="146" text-anchor="middle" font-size="13" fill="currentColor" opacity="0.84">Christian Astrology</text>
+          <text x="459" y="168" text-anchor="middle" font-size="13" fill="currentColor" opacity="0.84">Technical teaching</text>
+          <text x="743" y="120" text-anchor="middle" font-size="14" fill="currentColor">PUBLIC SPHERE</text>
+          <text x="743" y="146" text-anchor="middle" font-size="13" fill="currentColor" opacity="0.84">Politics</text>
+          <text x="743" y="168" text-anchor="middle" font-size="13" fill="currentColor" opacity="0.84">Controversy</text>
+          <line x1="280" y1="162" x2="354" y2="162" stroke="currentColor" stroke-opacity="0.48" stroke-width="2"/>
+          <line x1="564" y1="162" x2="638" y2="162" stroke="currentColor" stroke-opacity="0.48" stroke-width="2"/>
+          <text x="460" y="292" text-anchor="middle" font-size="13" fill="currentColor" opacity="0.75">Lilly turned astrology into a print-era public discipline.</text>
+        </svg>
+        <figcaption>Lilly's impact came from combining technical pedagogy with media distribution power.</figcaption>
+      </figure>
+      <h2>Why William Lilly became historically central</h2>
+      <p>Lilly wrote in English for a broad readership and produced works that were both instructional and publicly visible. His <em>Christian Astrology</em> remains one of the most referenced English-language texts in traditional practice circles.</p>
+      <p>In media terms, he mastered format: concise almanac communication for mass audiences plus deeper technical exposition for committed students.</p>
+      <h2>Astrology in a high-volatility political era</h2>
+      <p>17th-century England was marked by civil war, institutional conflict, and intense pamphlet culture. Astrology operated inside this information economy. Forecasts, symbolic framing, and interpretive commentary could circulate quickly and shape public attention.</p>
+      <p>Lilly's fame emerged partly because he understood this ecosystem and communicated effectively within it.</p>
+      <h2>Technical contribution: pedagogy and accessibility</h2>
+      <p>One reason Lilly still matters is pedagogical clarity. He did not only perform astrology; he taught it in a structured, reproducible way for readers who lacked elite-language training.</p>
+      <div class="article-callout">
+        <h3>Why this matters now</h3>
+        <p>Modern astrology education still depends on the same principle: if the method cannot be explained clearly, the output should not be trusted.</p>
+      </div>
+      <h2>Controversy and reputation</h2>
+      <p>With visibility comes scrutiny. Lilly's public role attracted criticism, political suspicion, and retrospective myth-making. This is typical for symbolic interpreters in unstable public environments: they are often judged not only by method but by their proximity to power narratives.</p>
+      <h2>Interesting fact snapshots</h2>
+      <ul class="bullet-list">
+        <li><strong>Print-era scale:</strong> Lilly's almanacs reached audiences far beyond specialist circles.</li>
+        <li><strong>Instructional legacy:</strong> <em>Christian Astrology</em> is still cited by students of traditional techniques.</li>
+        <li><strong>Public visibility:</strong> he became part of the political-media ecosystem, not just private consultation culture.</li>
+      </ul>
+      <h2>What modern readers can learn from Lilly</h2>
+      <p>First, method needs distribution. Second, clarity beats obscurity. Third, public symbolic language can influence behavior even when audiences disagree on ontology. These lessons apply to any modern product combining interpretation with user decision support.</p>
+      <h2>Why Lilly belongs in any “famous astrologers” list</h2>
+      <p>Because he demonstrates how astrology entered modern media dynamics. If Ptolemy is architecture and Abu Ma'shar is transmission, Lilly is public adoption.</p>
+      <p>Continue with <a href="/astrology-hub/most-famous-astrologers-in-history-ptolemy-tetrabiblos">Ptolemy</a> and <a href="/astrology-hub/abu-mashar-the-astrologer-who-shaped-medieval-europe">Abu Ma'shar</a>. For method boundaries, read <a href="/astrology-hub/how-to-avoid-astrology-scams">How to Avoid Astrology Scams</a>.</p>
+    `
+  },
+  {
     slug: "astrology-in-modern-politics-narratives-timing-and-power",
     title: "Astrology in Modern Politics: Narratives, Timing, and Power Signaling",
     excerpt: "An analytical longread on how astrological language appears in modern politics: campaign timing, media narratives, leadership branding, and voter psychology.",
