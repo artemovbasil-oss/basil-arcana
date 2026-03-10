@@ -5130,6 +5130,99 @@ function zodiacFromIsoDate(dateValue) {
   return "Pisces";
 }
 
+function parseIsoBirthDate(dateValue) {
+  const raw = String(dateValue || "").trim();
+  const match = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) {
+    return null;
+  }
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  if (!year || !month || !day || month < 1 || month > 12 || day < 1 || day > 31) {
+    return null;
+  }
+  return { year, month, day, raw };
+}
+
+function numerologyFromBirthDate(dateValue) {
+  const parts = parseIsoBirthDate(dateValue);
+  if (!parts) {
+    return null;
+  }
+  const birthDigits = digitsFromDateParts([parts.year, parts.month, parts.day]);
+  const lifePath = reduceNumerologyNumber(sumDigits(birthDigits), { keepMaster: true });
+  const birthday = reduceNumerologyNumber(parts.day, { keepMaster: true });
+  const attitude = reduceNumerologyNumber(parts.month + parts.day, { keepMaster: true });
+  return {
+    lifePath,
+    birthday,
+    attitude,
+    month: parts.month,
+    day: parts.day,
+    year: parts.year
+  };
+}
+
+function compatibilityTierLabel(score) {
+  if (score >= 90) return "Exceptional";
+  if (score >= 80) return "Strong";
+  if (score >= 68) return "Promising";
+  return "Adaptive";
+}
+
+function elementBlendNarrative(elementA, elementB) {
+  if (elementA === elementB) {
+    return `Both operate through ${elementA} element. Emotional decoding speed is high and conflict repair tends to be faster.`;
+  }
+  const key = `${elementA}-${elementB}`;
+  const reversed = `${elementB}-${elementA}`;
+  const narratives = {
+    "Fire-Air": "Fire plus Air usually creates fast chemistry and idea momentum. Guard against impulsive decisions.",
+    "Fire-Earth": "Fire brings initiative while Earth stabilizes execution. Works best with clear role separation.",
+    "Fire-Water": "Attraction can be intense, but emotional pacing differs. Use explicit check-ins during stress.",
+    "Earth-Air": "Earth offers structure while Air brings strategy. Shared planning rituals improve trust.",
+    "Earth-Water": "This pair can build deep loyalty and long-term reliability when expectations are named early.",
+    "Air-Water": "Air processes through logic, Water through feeling. Translate emotions into clear language."
+  };
+  return narratives[key] || narratives[reversed] || "Your elements are different, which is a strength when communication agreements are explicit.";
+}
+
+function modalityBlendNarrative(modalityA, modalityB) {
+  if (modalityA === modalityB) {
+    return `${modalityA} × ${modalityB}: you move at a similar pace. Align priorities weekly to avoid parallel drift.`;
+  }
+  return `${modalityA} × ${modalityB}: complementary pacing. One tends to initiate while the other stabilizes or adapts.`;
+}
+
+function buildPairTimingHints(dateA, dateB, days = 14) {
+  const a = parseIsoBirthDate(dateA);
+  const b = parseIsoBirthDate(dateB);
+  if (!a || !b) {
+    return [];
+  }
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const out = [];
+  for (let i = 0; i < Math.max(7, Math.min(30, days)); i += 1) {
+    const day = new Date(today);
+    day.setDate(today.getDate() + i);
+    const pdA = numerologyPersonalDayForDate(day, a.month, a.day);
+    const pdB = numerologyPersonalDayForDate(day, b.month, b.day);
+    const delta = Math.abs(pdA - pdB);
+    const synergy = 100 - Math.min(42, delta * 11) + (pdA === pdB ? 8 : 0);
+    out.push({
+      label: day.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }),
+      pdA,
+      pdB,
+      synergy
+    });
+  }
+  return out
+    .sort((left, right) => right.synergy - left.synergy)
+    .slice(0, 3);
+}
+
 function normalizeScore(value) {
   return Math.max(0, Math.min(100, Math.round(Number(value) || 0)));
 }
@@ -5201,21 +5294,55 @@ function freePairCompatibilityView() {
   return leadFlowShell({
     eyebrow: "Free Compatibility Tool",
     title: "Pair Compatibility Calculator",
-    intro: "Check romantic and communication compatibility from two birth dates. This short reading estimates interaction tier, rhythm fit, and emotional language overlap.",
+    intro: "Relationship clarity in 30 seconds. Enter two birth dates and get a conversion-ready compatibility brief: attraction axis, communication fit, and practical timing cues.",
     seoHint: "Public mini-reading by Astronautica. No registration required for this preview.",
     resultId: "freePairResult",
     formHtml: `
-      <h2>Run Compatibility Check</h2>
-      <p class="lead-form-help">Use full birth dates for both people. We calculate sign resonance and interaction pacing instantly.</p>
-      <form id="freePairForm" class="login-tool-form lead-tool-form">
-        <label>Your birth date
-          <input required type="date" name="dateA" autocomplete="bday" />
-        </label>
-        <label>Partner birth date
-          <input required type="date" name="dateB" autocomplete="off" />
-        </label>
-        <button id="freePairSubmit" class="btn primary" type="button">Calculate compatibility</button>
-      </form>
+      <div class="compat-hero-layout">
+        <div class="compat-hero-copy">
+          <span class="eyebrow">Before Login Preview</span>
+          <h2>Know if this connection is worth deeper investment</h2>
+          <p class="lead-form-help">We combine zodiac structure and date numerology to estimate emotional chemistry, pacing, and stability risks.</p>
+          <div class="compat-proof-row">
+            <span class="astro-chip">${uiIcon("spark")} Fast check</span>
+            <span class="astro-chip">${uiIcon("calendar")} Date-based</span>
+            <span class="astro-chip">${uiIcon("heart")} Relationship focus</span>
+          </div>
+        </div>
+        <div class="compat-hero-art" aria-hidden="true">
+          <svg viewBox="0 0 360 220" role="img" aria-label="">
+            <defs>
+              <linearGradient id="compatLineA" x1="0%" x2="100%" y1="0%" y2="100%">
+                <stop offset="0%" stop-color="#d64545" stop-opacity="0.95"></stop>
+                <stop offset="100%" stop-color="#f2a65e" stop-opacity="0.7"></stop>
+              </linearGradient>
+              <linearGradient id="compatLineB" x1="100%" x2="0%" y1="0%" y2="100%">
+                <stop offset="0%" stop-color="#2fa35a" stop-opacity="0.95"></stop>
+                <stop offset="100%" stop-color="#6fd6ff" stop-opacity="0.7"></stop>
+              </linearGradient>
+            </defs>
+            <rect x="0" y="0" width="360" height="220" rx="24" fill="rgba(255,255,255,0.02)"></rect>
+            <circle cx="108" cy="110" r="66" fill="none" stroke="url(#compatLineA)" stroke-width="3"></circle>
+            <circle cx="252" cy="110" r="66" fill="none" stroke="url(#compatLineB)" stroke-width="3"></circle>
+            <circle cx="180" cy="110" r="36" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2"></circle>
+            <path d="M108 110 C136 72, 224 72, 252 110" stroke="rgba(255,255,255,0.26)" stroke-width="2" fill="none"></path>
+            <path d="M108 110 C136 148, 224 148, 252 110" stroke="rgba(255,255,255,0.18)" stroke-width="2" fill="none"></path>
+          </svg>
+        </div>
+      </div>
+      <div class="compat-form-surface">
+        <h3>Run Compatibility Check</h3>
+        <p class="lead-form-help">Use complete birth dates for both people. You will get score, strengths, friction points, and best communication days.</p>
+        <form id="freePairForm" class="login-tool-form lead-tool-form">
+          <label>Your birth date
+            <input required type="date" name="dateA" autocomplete="bday" />
+          </label>
+          <label>Partner birth date
+            <input required type="date" name="dateB" autocomplete="off" />
+          </label>
+          <button id="freePairSubmit" class="btn primary compat-submit-btn" type="button">Calculate compatibility</button>
+        </form>
+      </div>
     `,
     extraHtml: `
       <section class="section">
@@ -5337,35 +5464,80 @@ function initFreePairCompatibilityTool() {
     const signB = zodiacFromIsoDate(dateB);
     const detailsA = zodiacDetails(signA);
     const detailsB = zodiacDetails(signB);
+    const numerologyA = numerologyFromBirthDate(dateA);
+    const numerologyB = numerologyFromBirthDate(dateB);
     const indexA = zodiacIndex(signA);
     const indexB = zodiacIndex(signB);
     const distance = Math.min(Math.abs(indexA - indexB), 12 - Math.abs(indexA - indexB));
+    const orbitDistance = distance === 0 ? "Same sign axis" : `${distance} signs apart`;
     const sameElement = detailsA.element === detailsB.element;
     const sameModality = detailsA.modality === detailsB.modality;
     const polarityA = zodiacPolarity(signA);
     const polarityB = zodiacPolarity(signB);
+    const samePolarity = polarityA === polarityB;
     const score = normalizeScore(
       58
       + (12 - distance) * 2.1
       + (sameElement ? 11 : 0)
       + (sameModality ? 6 : 0)
-      + (polarityA === polarityB ? 4 : 0)
+      + (samePolarity ? 4 : 0)
       + (signA === signB ? 8 : 0)
     );
-    const tier = score >= 85 ? "high" : score >= 68 ? "medium" : "adaptive";
-    const interaction = sameElement
-      ? "Natural emotional language overlap and faster conflict repair."
-      : "Different emotional languages: explicit communication rules increase stability.";
-    const timing = sameModality
-      ? "Shared pacing style. Define priorities early to avoid parallel drift."
-      : "Different pacing modes. Use fixed checkpoints to keep collaboration aligned.";
+    const tier = compatibilityTierLabel(score);
+    const interaction = elementBlendNarrative(detailsA.element, detailsB.element);
+    const timing = modalityBlendNarrative(detailsA.modality, detailsB.modality);
+    const numerologyDelta = numerologyA && numerologyB ? Math.abs(numerologyA.lifePath - numerologyB.lifePath) : null;
+    const numerologyBridge = numerologyDelta === null
+      ? "Date numerology bridge is unavailable for one of the dates."
+      : numerologyDelta <= 1
+        ? "Life Path numbers are close: natural decision rhythm and easier long-term alignment."
+        : numerologyDelta <= 3
+          ? "Life Path numbers are complementary: growth through different strengths."
+          : "Life Path numbers are far apart: align expectations explicitly on pace, money, and commitment.";
+    const timingHints = buildPairTimingHints(dateA, dateB, 15);
+    const timingHtml = timingHints.length
+      ? `
+        <ul class="compat-fact-list">
+          ${timingHints.map((item) => `<li>${item.label} · PD ${item.pdA}/${item.pdB}</li>`).join("")}
+        </ul>
+      `
+      : `<p class="muted">No timing hints available.</p>`;
     result.innerHTML = `
       <div class="login-tool-result-card">
         <p class="eyebrow">Compatibility preview</p>
-        <h4>${signA} × ${signB} · ${score}/100</h4>
+        <h4>${escapeHtml(signA)} × ${escapeHtml(signB)} · ${score}/100</h4>
         <p><strong>Tier:</strong> ${tier}</p>
-        <p>${interaction}</p>
-        <p>${timing}</p>
+        <div class="compat-score-meter" role="img" aria-label="Compatibility score ${score} out of 100">
+          <span class="compat-score-meter-fill" style="--compat-score:${score}"></span>
+        </div>
+        <div class="compat-facts-grid">
+          <article class="compat-fact-card">
+            <span class="eyebrow">Element chemistry</span>
+            <p>${interaction}</p>
+          </article>
+          <article class="compat-fact-card">
+            <span class="eyebrow">Pacing model</span>
+            <p>${timing}</p>
+          </article>
+          <article class="compat-fact-card">
+            <span class="eyebrow">Birth-date facts</span>
+            <p>${escapeHtml(signA)}: ${detailsA.element} / ${detailsA.modality} · ${escapeHtml(signB)}: ${detailsB.element} / ${detailsB.modality} · ${orbitDistance}.</p>
+          </article>
+          <article class="compat-fact-card">
+            <span class="eyebrow">Numerology bridge</span>
+            <p>${numerologyBridge}</p>
+            ${
+              numerologyA && numerologyB
+                ? `<p class="muted">Life Path ${numerologyA.lifePath} × ${numerologyB.lifePath} · Birthday ${numerologyA.birthday} × ${numerologyB.birthday}</p>`
+                : ""
+            }
+          </article>
+        </div>
+        <div class="compat-timing-block">
+          <span class="eyebrow">Best dialogue days (next 2 weeks)</span>
+          ${timingHtml}
+        </div>
+        <p class="muted"><strong>Polarity:</strong> ${polarityA} + ${polarityB}${samePolarity ? " (same polarity)" : " (complementary polarity)"}.</p>
         ${freeToolResultCta()}
       </div>
     `;

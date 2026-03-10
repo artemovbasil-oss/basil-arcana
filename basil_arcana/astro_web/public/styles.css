@@ -861,6 +861,124 @@ p {
   line-height: 1.48;
 }
 
+.compat-hero-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(220px, 0.95fr);
+  gap: 1rem;
+  align-items: center;
+}
+
+.compat-hero-copy {
+  display: grid;
+  gap: 0.52rem;
+}
+
+.compat-hero-copy h2 {
+  margin: 0;
+  font-size: clamp(1.3rem, 2.5vw, 2rem);
+}
+
+.compat-proof-row {
+  margin-top: 0.18rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.42rem;
+}
+
+.compat-hero-art {
+  border: 1px solid var(--line);
+  background:
+    radial-gradient(120% 140% at 15% 12%, color-mix(in srgb, #d64545 14%, transparent) 0%, transparent 58%),
+    radial-gradient(120% 140% at 86% 10%, color-mix(in srgb, #2fa35a 14%, transparent) 0%, transparent 60%),
+    var(--surface);
+  padding: 0.5rem;
+}
+
+.compat-hero-art svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.compat-form-surface {
+  margin-top: 0.45rem;
+  border: 1px solid var(--line-strong);
+  background:
+    linear-gradient(140deg, color-mix(in srgb, #d64545 7%, transparent) 0%, transparent 42%),
+    linear-gradient(320deg, color-mix(in srgb, #2fa35a 7%, transparent) 0%, transparent 44%),
+    var(--surface-2);
+  padding: 0.92rem;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.compat-form-surface h3 {
+  margin: 0;
+  font-size: 1.14rem;
+}
+
+.compat-submit-btn {
+  min-height: 52px;
+  width: 100%;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+}
+
+.compat-score-meter {
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  height: 12px;
+  overflow: hidden;
+}
+
+.compat-score-meter-fill {
+  display: block;
+  height: 100%;
+  width: calc(var(--compat-score, 0) * 1%);
+  background: linear-gradient(90deg, #d64545 0%, #f2a65e 38%, #2fa35a 100%);
+}
+
+.compat-facts-grid {
+  margin-top: 0.2rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.52rem;
+}
+
+.compat-fact-card {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  padding: 0.54rem 0.56rem;
+  display: grid;
+  gap: 0.3rem;
+}
+
+.compat-fact-card p {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.compat-timing-block {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  padding: 0.56rem;
+  display: grid;
+  gap: 0.3rem;
+}
+
+.compat-fact-list {
+  margin: 0;
+  padding-left: 1rem;
+  display: grid;
+  gap: 0.24rem;
+}
+
+.compat-fact-list li {
+  font-size: 0.84rem;
+  color: var(--ink);
+}
+
 .telegram-widget-mount-hidden {
   position: absolute;
   width: 0;
@@ -6314,6 +6432,18 @@ body[data-theme="light"] .energy-star.neutral {
   .lead-tool-form .btn {
     width: 100%;
     justify-self: stretch;
+  }
+
+  .compat-hero-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .compat-hero-art {
+    order: -1;
+  }
+
+  .compat-facts-grid {
+    grid-template-columns: 1fr;
   }
 
   .form-grid select {
