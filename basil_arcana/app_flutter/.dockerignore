@@ -1,0 +1,24 @@
+.git
+.gitignore
+.DS_Store
+
+# Local Flutter build/cache artifacts (not needed for Docker web build)
+build
+.dart_tool
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# IDE / local env
+.idea
+.vscode
+
+# Platform folders not needed for flutter build web
+ios
+macos
+linux
+windows
+
+# Test and temporary outputs
+test
+coverage
+

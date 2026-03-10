@@ -979,6 +979,95 @@ p {
   color: var(--ink);
 }
 
+.timing-lead-grid,
+.numbers-lead-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.8rem;
+}
+
+.timing-lead-copy,
+.numbers-lead-copy {
+  display: grid;
+  gap: 0.54rem;
+}
+
+.timing-lead-copy h2,
+.numbers-lead-copy h2 {
+  margin: 0;
+  font-size: clamp(1.28rem, 2.6vw, 1.95rem);
+}
+
+.timing-proof-cards,
+.numbers-proof-cards {
+  margin-top: 0.2rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.42rem;
+}
+
+.timing-form-surface,
+.numbers-form-surface {
+  border: 1px solid var(--line-strong);
+  padding: 0.92rem;
+  display: grid;
+  gap: 0.58rem;
+}
+
+.timing-form-surface {
+  background:
+    radial-gradient(130% 140% at 10% 0%, color-mix(in srgb, #2fa35a 14%, transparent) 0%, transparent 55%),
+    var(--surface-2);
+}
+
+.numbers-form-surface {
+  background:
+    radial-gradient(130% 140% at 8% 0%, color-mix(in srgb, #f2a65e 14%, transparent) 0%, transparent 58%),
+    var(--surface-2);
+}
+
+.timing-form-surface h3,
+.numbers-form-surface h3 {
+  margin: 0;
+  font-size: 1.14rem;
+}
+
+.timing-submit-btn,
+.numbers-submit-btn {
+  min-height: 52px;
+  width: 100%;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+}
+
+.timing-result-grid,
+.numbers-result-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.52rem;
+}
+
+.timing-result-card,
+.numbers-result-card {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  padding: 0.54rem 0.56rem;
+  display: grid;
+  gap: 0.28rem;
+}
+
+.timing-result-card p,
+.numbers-result-card p {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.timing-result-card-span,
+.numbers-result-card-span {
+  grid-column: 1 / -1;
+}
+
 .telegram-widget-mount-hidden {
   position: absolute;
   width: 0;
@@ -6443,6 +6532,11 @@ body[data-theme="light"] .energy-star.neutral {
   }
 
   .compat-facts-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .timing-result-grid,
+  .numbers-result-grid {
     grid-template-columns: 1fr;
   }
 

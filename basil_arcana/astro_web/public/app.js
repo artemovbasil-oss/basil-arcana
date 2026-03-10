@@ -5365,39 +5365,73 @@ function freePairCompatibilityView() {
 function freeTimingWindowsView() {
   return leadFlowShell({
     eyebrow: "Free Timing Tool",
-    title: "Best 2 Windows of Your Day",
-    intro: "Use birth date and birth city to estimate the strongest two windows for focus and communication today.",
-    seoHint: "City input uses live suggestions to improve geographic precision before calculation.",
+    title: "Best Daily Timing Windows Calculator",
+    intro: "Find your strongest focus and communication windows by birth date and city. Built for founders, creators, and teams who need cleaner daily execution.",
+    seoHint: "SEO intent: daily timing calculator, best time to work today, communication windows by birth date.",
     resultId: "freeWindowsResult",
     formHtml: `
-      <h2>Calculate Today Windows</h2>
-      <p class="lead-form-help">Start typing the city and pick one suggestion from the list to keep location data accurate.</p>
-      <form id="freeWindowsForm" class="login-tool-form lead-tool-form">
-        <label>Birth date
-          <input required type="date" name="birthDate" autocomplete="bday" />
-        </label>
-        <label>Birth city
-          <input id="freeToolBirthCity" required name="birthCity" placeholder="City, Country" list="freeToolCitySuggestions" autocomplete="address-level2" />
-        </label>
-        <input type="hidden" name="latitude" />
-        <input type="hidden" name="longitude" />
-        <input type="hidden" name="timezoneIana" />
-        <datalist id="freeToolCitySuggestions"></datalist>
-        <button id="freeWindowsSubmit" class="btn primary" type="button">Calculate windows</button>
-      </form>
+      <div class="timing-lead-grid">
+        <article class="timing-lead-copy">
+          <span class="eyebrow">No Login Required</span>
+          <h2>Plan your day around high-energy intervals</h2>
+          <p class="lead-form-help">This free calculator maps a practical work rhythm: when to push output, when to schedule key conversations, and when to recover.</p>
+          <div class="timing-proof-cards">
+            <span class="astro-chip">${uiIcon("spark")} Instant result</span>
+            <span class="astro-chip">${uiIcon("clock")} Daily planning</span>
+            <span class="astro-chip">${uiIcon("location")} City-aware signal</span>
+          </div>
+        </article>
+      </div>
+      <div class="timing-form-surface">
+        <h3>Calculate Today Windows</h3>
+        <p class="lead-form-help">Start typing the city and select one suggestion for better location precision.</p>
+        <form id="freeWindowsForm" class="login-tool-form lead-tool-form">
+          <label>Birth date
+            <input required type="date" name="birthDate" autocomplete="bday" />
+          </label>
+          <label>Birth city
+            <input id="freeToolBirthCity" required name="birthCity" placeholder="City, Country" list="freeToolCitySuggestions" autocomplete="address-level2" />
+          </label>
+          <input type="hidden" name="latitude" />
+          <input type="hidden" name="longitude" />
+          <input type="hidden" name="timezoneIana" />
+          <datalist id="freeToolCitySuggestions"></datalist>
+          <button id="freeWindowsSubmit" class="btn primary timing-submit-btn" type="button">Calculate windows</button>
+        </form>
+      </div>
     `,
     extraHtml: `
       <section class="section">
         <article class="card lead-flow-card">
-          <span class="eyebrow">Precision input</span>
-          <h2>Why city suggestions matter</h2>
-          <p>Timing windows become more coherent when birth location is selected from validated city suggestions. This improves coordinate precision and keeps day-window interpretation consistent.</p>
+          <span class="eyebrow">Method</span>
+          <h2>How this daily timing calculator works</h2>
+          <p>Timing windows become more coherent when birth location is selected from validated city suggestions. The model combines personal day numerology and day pacing logic into two practical windows.</p>
           <ul class="article-list">
             <li>Input: birth date + selected birth city.</li>
             <li>Output: two strongest windows + day energy signal.</li>
             <li>Use case: scheduling difficult conversations, focused work, and recovery blocks.</li>
           </ul>
           <p class="muted">More context: <a href="/astrology-hub/natal-charts-how-they-are-built-and-why-they-matter">how natal timing is built</a>.</p>
+        </article>
+      </section>
+      <section class="section">
+        <article class="card lead-flow-card">
+          <span class="eyebrow">FAQ</span>
+          <h2>Daily timing windows FAQ</h2>
+          <div class="faq">
+            <div class="faq-item">
+              <h3>Is this a “best time to work” calculator?</h3>
+              <p>Yes. It is a practical best-time-to-work and best-time-to-communicate estimator based on birth date and location context.</p>
+            </div>
+            <div class="faq-item">
+              <h3>Do I need exact birth time?</h3>
+              <p>No for this preview. Birth date and city are enough for useful daily planning signals.</p>
+            </div>
+            <div class="faq-item">
+              <h3>Can I use this for meetings and sales calls?</h3>
+              <p>Yes. Use primary window for high-stakes calls and secondary window for follow-ups, reviews, and relationship maintenance.</p>
+            </div>
+          </div>
         </article>
       </section>
     `
@@ -5407,22 +5441,36 @@ function freeTimingWindowsView() {
 function freeNumerologyQuickReadView() {
   return leadFlowShell({
     eyebrow: "Free Numerology Tool",
-    title: "Numerology Quick Read",
-    intro: "Generate your core numbers in seconds: Life Path, Destiny, Soul Urge, and Personal Day with practical interpretation.",
-    seoHint: "Fast public numerology preview. Create a free account to unlock full report history and advanced timing.",
+    title: "Numerology Calculator: Life Path & Destiny",
+    intro: "Run a free numerology calculator for Life Path, Destiny, Soul Urge, and Personal Day with practical interpretation you can use immediately.",
+    seoHint: "SEO intent: numerology calculator, life path number calculator, destiny number calculator, personal day number.",
     resultId: "freeNumbersResult",
     formHtml: `
-      <h2>Generate Numerology Snapshot</h2>
-      <p class="lead-form-help">Use your full legal or commonly used name for a more stable numerology vector.</p>
-      <form id="freeNumbersForm" class="login-tool-form lead-tool-form">
-        <label>Full name
-          <input required name="name" placeholder="Your full name" autocomplete="name" />
-        </label>
-        <label>Birth date
-          <input required type="date" name="birthDate" autocomplete="bday" />
-        </label>
-        <button id="freeNumbersSubmit" class="btn primary" type="button">Generate numbers</button>
-      </form>
+      <div class="numbers-lead-grid">
+        <article class="numbers-lead-copy">
+          <span class="eyebrow">Public Mini Reading</span>
+          <h2>Get your core number profile in under a minute</h2>
+          <p class="lead-form-help">This page is optimized for quick numerology discovery: core numbers, daily signal, and immediate action hints.</p>
+          <div class="numbers-proof-cards">
+            <span class="astro-chip">${uiIcon("spark")} Core numbers</span>
+            <span class="astro-chip">${uiIcon("calendar")} Daily signal</span>
+            <span class="astro-chip">${uiIcon("heart")} Relationship hints</span>
+          </div>
+        </article>
+      </div>
+      <div class="numbers-form-surface">
+        <h3>Generate Numerology Snapshot</h3>
+        <p class="lead-form-help">Use your full legal or commonly used name for a more stable numerology vector.</p>
+        <form id="freeNumbersForm" class="login-tool-form lead-tool-form">
+          <label>Full name
+            <input required name="name" placeholder="Your full name" autocomplete="name" />
+          </label>
+          <label>Birth date
+            <input required type="date" name="birthDate" autocomplete="bday" />
+          </label>
+          <button id="freeNumbersSubmit" class="btn primary numbers-submit-btn" type="button">Calculate my numerology</button>
+        </form>
+      </div>
     `,
     extraHtml: `
       <section class="section">
@@ -5436,6 +5484,26 @@ function freeNumerologyQuickReadView() {
             <li>Next step: full numerology and astrology synthesis after free sign-up.</li>
           </ul>
           <p class="muted">More context: <a href="/astrology-hub/numerology-complete-guide-history-method-and-modern-use">complete numerology guide</a>.</p>
+        </article>
+      </section>
+      <section class="section">
+        <article class="card lead-flow-card">
+          <span class="eyebrow">FAQ</span>
+          <h2>Numerology calculator FAQ</h2>
+          <div class="faq">
+            <div class="faq-item">
+              <h3>How is Life Path number calculated?</h3>
+              <p>It is reduced from your full birth date digits. Master numbers 11, 22, and 33 are preserved.</p>
+            </div>
+            <div class="faq-item">
+              <h3>Why do you ask for full name?</h3>
+              <p>Name letters are used for Destiny, Soul Urge, and Personality vectors, which explain motivation and behavior style.</p>
+            </div>
+            <div class="faq-item">
+              <h3>Is this numerology reading free?</h3>
+              <p>Yes, this quick read is free and public. Deeper historical and synthesis layers are available after sign-up.</p>
+            </div>
+          </div>
         </article>
       </section>
     `
@@ -5587,6 +5655,8 @@ function initFreeTimingWindowsTool() {
       }
       const today = new Date();
       const pd = derivePersonalDayNumber(today, birthDate);
+      const sign = zodiacFromIsoDate(birthDate);
+      const signMeta = zodiacDetails(sign);
       const energy = normalizeScore(56 + pd * 4.2);
       const windowsMap = {
         1: ["08:00-10:00", "17:00-19:00"],
@@ -5607,13 +5677,40 @@ function initFreeTimingWindowsTool() {
       const recoveryNote = pd <= 3
         ? "Schedule a short reset before evening to avoid social overextension."
         : "Protect evening recovery to preserve next-day execution quality.";
+      const nextThree = Array.from({ length: 3 }).map((_, index) => {
+        const d = new Date(today);
+        d.setDate(today.getDate() + index);
+        const pdLocal = derivePersonalDayNumber(d, birthDate);
+        const primaryWindow = windowsMap[pdLocal]?.[0] || "10:00-12:00";
+        const tone = pdLocal >= 7 ? "Execution heavy" : pdLocal <= 3 ? "Communication heavy" : "Balanced";
+        return {
+          label: d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }),
+          pd: pdLocal,
+          window: primaryWindow,
+          tone
+        };
+      });
       result.innerHTML = `
         <div class="login-tool-result-card">
           <p class="eyebrow">Today preview · ${escapeHtml(city)}</p>
           <h4>Best windows: ${primary} and ${secondary}</h4>
-          <p><strong>Energy index:</strong> ${energy}/100 · Personal Day ${pd}</p>
-          <p>${focusNote}</p>
-          <p>${recoveryNote}</p>
+          <p><strong>Energy index:</strong> ${energy}/100 · Personal Day ${pd} · ${escapeHtml(sign)} (${signMeta.element}/${signMeta.modality})</p>
+          <div class="timing-result-grid">
+            <article class="timing-result-card">
+              <span class="eyebrow">Execution note</span>
+              <p>${focusNote}</p>
+            </article>
+            <article class="timing-result-card">
+              <span class="eyebrow">Recovery note</span>
+              <p>${recoveryNote}</p>
+            </article>
+            <article class="timing-result-card timing-result-card-span">
+              <span class="eyebrow">3-day schedule preview</span>
+              <ul class="compat-fact-list">
+                ${nextThree.map((item) => `<li>${item.label}: ${item.window} · PD ${item.pd} · ${item.tone}</li>`).join("")}
+              </ul>
+            </article>
+          </div>
           ${freeToolResultCta()}
         </div>
       `;
@@ -5655,6 +5752,12 @@ function initFreeNumerologyQuickTool() {
     }
     const n = report.numbers;
     const focus = report.archetypes?.primary?.strengths || "Build one concrete step and complete it today.";
+    const strategy = report.archetypes?.primary?.strategy || "Pick one measurable step and ship it today.";
+    const growth = report.archetypes?.primary?.growth || "Keep decisions simple and consistent.";
+    const cyclePreview = buildNumerologyCycleForecast(report, 10)
+      .filter((item) => [3, 6, 8, 9].includes(Number(item.value)))
+      .slice(0, 3)
+      .map((item) => `${item.label} · Day ${item.value}`);
     result.innerHTML = `
       <div class="login-tool-result-card">
         <p class="eyebrow">Numerology preview</p>
@@ -5665,7 +5768,29 @@ function initFreeNumerologyQuickTool() {
           <span class="astro-chip">Soul Urge ${n.soulUrge}</span>
           <span class="astro-chip">Personal Day ${n.personalDay}</span>
         </div>
-        <p>${focus}</p>
+        <div class="numbers-result-grid">
+          <article class="numbers-result-card">
+            <span class="eyebrow">Core strength</span>
+            <p>${focus}</p>
+          </article>
+          <article class="numbers-result-card">
+            <span class="eyebrow">Growth edge</span>
+            <p>${growth}</p>
+          </article>
+          <article class="numbers-result-card numbers-result-card-span">
+            <span class="eyebrow">Action strategy</span>
+            <p>${strategy}</p>
+            <p class="muted"><strong>Resonance:</strong> ${report.resonance.join(", ")}</p>
+          </article>
+          <article class="numbers-result-card numbers-result-card-span">
+            <span class="eyebrow">Best next dates</span>
+            ${
+              cyclePreview.length
+                ? `<ul class="compat-fact-list">${cyclePreview.map((item) => `<li>${item}</li>`).join("")}</ul>`
+                : `<p class="muted">Date forecast is temporarily unavailable.</p>`
+            }
+          </article>
+        </div>
         ${freeToolResultCta()}
       </div>
     `;
@@ -9111,13 +9236,13 @@ function applySeoMeta(path) {
       type: "website"
     },
     "/free-tools/timing-windows": {
-      title: "Best Windows of the Day Calculator (Free) - Astronautica",
-      description: "Free daily timing calculator using birth date and birth city. Find the strongest windows for focus, communication, and recovery.",
+      title: "Best Time To Work Today Calculator (Free) - Astronautica",
+      description: "Free daily timing windows calculator by birth date and city. Find your best hours for focus, meetings, communication, and recovery.",
       type: "website"
     },
     "/free-tools/numerology-quick-read": {
-      title: "Numerology Quick Read (Free) - Astronautica",
-      description: "Free numerology quick read: life path, destiny, soul urge, and personal day with practical interpretation.",
+      title: "Numerology Calculator: Life Path & Destiny (Free) - Astronautica",
+      description: "Free numerology calculator: life path number, destiny number, soul urge, and personal day with practical interpretation.",
       type: "website"
     },
     "/faq": {
@@ -9295,6 +9420,105 @@ function applySeoMeta(path) {
       { name: "Home", item: "https://app.basilarcana.com/" },
       { name: "Celebrities", item: "https://app.basilarcana.com/celebrities" },
       { name: `${celebMeta.name} Natal Profile`, item: canonicalUrl }
+    ]);
+    return;
+  }
+  if (path === "/free-tools/timing-windows" || path === "/free-tools/numerology-quick-read") {
+    const faqMainEntity = path === "/free-tools/timing-windows"
+      ? [
+          {
+            "@type": "Question",
+            name: "How does this daily timing windows calculator work?",
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: "It combines birth date numerology and city context to estimate two practical windows for focus and communication."
+            }
+          },
+          {
+            "@type": "Question",
+            name: "Do I need to register to use this tool?",
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: "No, this preview is free and available without registration."
+            }
+          },
+          {
+            "@type": "Question",
+            name: "Can I use this for meetings and sales calls?",
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: "Yes. Use the primary window for high-stakes interactions and the secondary window for follow-up and maintenance."
+            }
+          }
+        ]
+      : [
+          {
+            "@type": "Question",
+            name: "How is Life Path number calculated?",
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: "Life Path is reduced from all digits of your birth date, while preserving master numbers 11, 22 and 33."
+            }
+          },
+          {
+            "@type": "Question",
+            name: "Why do I need to enter my full name?",
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: "Name letters are used to derive Destiny, Soul Urge and Personality numbers for a complete quick-read."
+            }
+          },
+          {
+            "@type": "Question",
+            name: "Is this numerology reading free?",
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: "Yes, this quick numerology calculator and reading are free."
+            }
+          }
+        ];
+    const howToSteps = path === "/free-tools/timing-windows"
+      ? [
+          { "@type": "HowToStep", name: "Enter birth date", text: "Add your date of birth." },
+          { "@type": "HowToStep", name: "Select birth city", text: "Start typing and pick a suggested city." },
+          { "@type": "HowToStep", name: "Calculate windows", text: "Get best focus and communication windows for today." }
+        ]
+      : [
+          { "@type": "HowToStep", name: "Enter full name", text: "Use your legal or commonly used full name." },
+          { "@type": "HowToStep", name: "Enter birth date", text: "Add your birth date to compute core numbers." },
+          { "@type": "HowToStep", name: "Generate report", text: "Get Life Path, Destiny, Soul Urge and Personal Day with interpretation." }
+        ];
+    const script = document.createElement("script");
+    script.id = schemaId;
+    script.type = "application/ld+json";
+    script.textContent = JSON.stringify({
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebPage",
+          name: meta.title,
+          description: meta.description,
+          url: canonicalUrl,
+          inLanguage: "en"
+        },
+        {
+          "@type": "FAQPage",
+          mainEntity: faqMainEntity
+        },
+        {
+          "@type": "HowTo",
+          name: path === "/free-tools/timing-windows"
+            ? "How to calculate daily timing windows"
+            : "How to calculate numerology core numbers",
+          step: howToSteps
+        }
+      ]
+    });
+    document.head.appendChild(script);
+    appendBreadcrumbSchema([
+      { name: "Home", item: "https://app.basilarcana.com/" },
+      { name: "Free Tools", item: "https://app.basilarcana.com/login" },
+      { name: meta.title, item: canonicalUrl }
     ]);
   }
 }

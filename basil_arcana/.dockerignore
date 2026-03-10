@@ -1,0 +1,16 @@
+.git
+.DS_Store
+
+# Heavy local artifacts that should never be sent as Docker build context
+**/build
+**/.dart_tool
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/node_modules
+**/test-results
+**/playwright-report
+
+# IDE
+**/.idea
+**/.vscode
+
