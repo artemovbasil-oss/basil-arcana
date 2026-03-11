@@ -5675,6 +5675,137 @@ body[data-theme="dark"] .numerology-hero .astro-chip {
   backdrop-filter: blur(2px);
 }
 
+.tarot-hero {
+  display: grid;
+  gap: 0.56rem;
+}
+
+.tarot-stage-card {
+  display: grid;
+  gap: 0.86rem;
+  padding: 1.05rem;
+}
+
+.tarot-spread-stage {
+  perspective: 1300px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.72rem;
+}
+
+.tarot-scene-card {
+  border: 1px solid var(--line);
+  background:
+    radial-gradient(120% 140% at 10% 0%, color-mix(in srgb, #f2a65e 14%, transparent) 0%, transparent 58%),
+    var(--surface-2);
+  padding: 0.52rem;
+  display: grid;
+  gap: 0.42rem;
+  transform-style: preserve-3d;
+  animation: tarotCardDrop 0.75s cubic-bezier(0.2, 0.84, 0.2, 1) both;
+  animation-delay: calc(var(--card-index, 0) * 120ms);
+}
+
+.tarot-scene-card.is-reversed .tarot-card-visual img {
+  transform: rotate(180deg);
+}
+
+.tarot-card-visual {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  padding: 0.36rem;
+}
+
+.tarot-card-visual img {
+  width: 100%;
+  height: auto;
+  display: block;
+  transition: transform 0.25s ease;
+}
+
+.tarot-card-meta h3 {
+  margin: 0;
+  font-size: 0.92rem;
+}
+
+.tarot-card-meta p {
+  margin: 0.2rem 0 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.tarot-controls {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.tarot-question-form {
+  display: grid;
+  gap: 0.56rem;
+}
+
+.tarot-question-form label {
+  display: grid;
+  gap: 0.3rem;
+  color: var(--muted);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.tarot-question-form input {
+  width: 100%;
+  min-height: 46px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--ink);
+  padding: 0.62rem 0.72rem;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+}
+
+.tarot-question-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.tarot-narrative {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  padding: 0.64rem;
+}
+
+.tarot-interpretation p {
+  margin: 0 0 0.45rem;
+  color: var(--muted);
+}
+
+.tarot-meaning-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.48rem;
+}
+
+.tarot-meaning-card {
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  padding: 0.5rem;
+  display: grid;
+  gap: 0.26rem;
+}
+
+.tarot-meaning-card h3 {
+  margin: 0;
+  font-size: 0.88rem;
+}
+
+.tarot-meaning-card p {
+  margin: 0;
+  font-size: 0.79rem;
+  line-height: 1.45;
+}
+
 .numerology-visual-grid .route-card {
   min-height: 100%;
   display: grid;
@@ -5823,6 +5954,17 @@ body[data-theme="dark"] .numerology-dice-overlay .astro-chip {
   }
   100% {
     opacity: 0.08;
+  }
+}
+
+@keyframes tarotCardDrop {
+  from {
+    opacity: 0;
+    transform: translateY(-36px) rotateX(22deg) rotateZ(calc((var(--card-index, 0) - 1) * 3deg));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) rotateX(0deg) rotateZ(calc((var(--card-index, 0) - 1) * 1.1deg));
   }
 }
 
@@ -6397,6 +6539,11 @@ body[data-theme="light"] .energy-star.neutral {
     grid-template-columns: 1fr;
   }
 
+  .tarot-spread-stage,
+  .tarot-meaning-grid {
+    grid-template-columns: 1fr;
+  }
+
   .numerology-dice-scene {
     min-height: 320px;
   }
@@ -6582,6 +6729,10 @@ body[data-theme="light"] .energy-star.neutral {
   .lead-tool-form .btn {
     width: 100%;
     justify-self: stretch;
+  }
+
+  .tarot-question-actions .btn {
+    width: 100%;
   }
 
   .compat-hero-layout {

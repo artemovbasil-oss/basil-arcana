@@ -34,6 +34,7 @@ const state = {
   homeOrbitWidgets: null,
   homeHeroEye: null,
   numerologyDice: null,
+  tarotSession: null,
   natalReport: null,
   lastRenderedRouteKey: ""
 };
@@ -9391,6 +9392,309 @@ function numerologyView() {
   `;
 }
 
+const tarotMajorArcana = [
+  { id: "major-00-fool", name: "The Fool", num: "0", keywords: ["new path", "trust", "leap"], light: "A fresh chapter opens. Move with curiosity and beginner energy.", shadow: "Impulsivity can replace clarity. Slow down and verify assumptions." },
+  { id: "major-01-magician", name: "The Magician", num: "I", keywords: ["focus", "will", "manifest"], light: "You have tools and momentum. Concentrated action can produce fast results.", shadow: "Scattered effort weakens outcomes. Avoid overpromising or image-first moves." },
+  { id: "major-02-high-priestess", name: "The High Priestess", num: "II", keywords: ["intuition", "silence", "pattern"], light: "Listen before acting. Quiet observation reveals the decisive signal.", shadow: "Withholding too much creates ambiguity. Name what matters with precision." },
+  { id: "major-03-empress", name: "The Empress", num: "III", keywords: ["growth", "care", "abundance"], light: "Nurture what already works. Sustainable growth comes from consistent care.", shadow: "Overgiving can drain you. Build boundaries around your energy budget." },
+  { id: "major-04-emperor", name: "The Emperor", num: "IV", keywords: ["structure", "order", "authority"], light: "Set firm structure and ownership. Clear rules reduce friction fast.", shadow: "Control can harden into rigidity. Leave room for adaptation." },
+  { id: "major-05-hierophant", name: "The Hierophant", num: "V", keywords: ["tradition", "learning", "values"], light: "Use proven frameworks and mentors. Standards increase reliability.", shadow: "Blind conformity blocks innovation. Keep principles, update tactics." },
+  { id: "major-06-lovers", name: "The Lovers", num: "VI", keywords: ["choice", "alignment", "bond"], light: "Choose the path aligned with your values, not only short-term comfort.", shadow: "Mixed signals create tension. Decide and communicate your direction." },
+  { id: "major-07-chariot", name: "The Chariot", num: "VII", keywords: ["drive", "discipline", "victory"], light: "Momentum is available. Focus and disciplined execution move you forward.", shadow: "Forcing pace can trigger conflict. Align team rhythm before pushing." },
+  { id: "major-08-strength", name: "Strength", num: "VIII", keywords: ["courage", "patience", "self-mastery"], light: "Calm strength wins. Lead with grounded confidence and emotional control.", shadow: "Suppressed frustration can leak through tone. Regulate before responding." },
+  { id: "major-09-hermit", name: "The Hermit", num: "IX", keywords: ["reflection", "wisdom", "clarity"], light: "Step back to refine strategy. Solitude now improves future precision.", shadow: "Isolation can become avoidance. Re-enter dialogue with a clear message." },
+  { id: "major-10-wheel-of-fortune", name: "Wheel of Fortune", num: "X", keywords: ["cycle", "turn", "timing"], light: "Cycles are shifting in your favor. Stay adaptive and seize the opening.", shadow: "Resisting change increases stress. Work with timing, not against it." },
+  { id: "major-11-justice", name: "Justice", num: "XI", keywords: ["truth", "balance", "accountability"], light: "Facts and fairness matter now. Document decisions and align consequences.", shadow: "Bias or vagueness can backfire. Be explicit and evidence-based." },
+  { id: "major-12-hanged-man", name: "The Hanged Man", num: "XII", keywords: ["pause", "perspective", "surrender"], light: "A strategic pause reveals a better angle. Reframe before acting.", shadow: "Stagnation drains momentum. Choose one concrete next move." },
+  { id: "major-13-death", name: "Death", num: "XIII", keywords: ["ending", "reset", "renewal"], light: "Close the old loop. Transformation begins when you release what is done.", shadow: "Fear of endings delays growth. Cut low-value commitments." },
+  { id: "major-14-temperance", name: "Temperance", num: "XIV", keywords: ["balance", "alchemy", "flow"], light: "Blend extremes into a workable system. Small calibrated steps compound.", shadow: "Imbalance in schedule or tone causes friction. Recalibrate priorities." },
+  { id: "major-15-devil", name: "The Devil", num: "XV", keywords: ["attachment", "temptation", "shadow"], light: "See hidden dependencies clearly. Awareness is the first freedom step.", shadow: "Reactive habits may lead. Break one compulsive loop today." },
+  { id: "major-16-tower", name: "The Tower", num: "XVI", keywords: ["shock", "truth", "breakthrough"], light: "A disruption reveals what was unstable. Rebuild on stronger ground.", shadow: "Defensiveness worsens collapse. Accept data and pivot quickly." },
+  { id: "major-17-star", name: "The Star", num: "XVII", keywords: ["hope", "healing", "vision"], light: "Renewed clarity and faith return. Keep moving with gentle consistency.", shadow: "Idealism without action stays fantasy. Anchor hope in daily practice." },
+  { id: "major-18-moon", name: "The Moon", num: "XVIII", keywords: ["emotion", "uncertainty", "intuition"], light: "Subtle signals are strong. Move carefully and verify what is unclear.", shadow: "Anxiety can distort perception. Separate facts from stories." },
+  { id: "major-19-sun", name: "The Sun", num: "XIX", keywords: ["success", "vitality", "joy"], light: "Visibility and confidence are high. Share openly and act with warmth.", shadow: "Ego or overexposure can burn trust. Stay humble and clear." },
+  { id: "major-20-judgement", name: "Judgement", num: "XX", keywords: ["calling", "review", "awakening"], light: "A decisive evaluation point. Align with your higher standard now.", shadow: "Self-criticism can paralyze. Learn, adjust, and move." },
+  { id: "major-21-world", name: "The World", num: "XXI", keywords: ["completion", "mastery", "integration"], light: "A cycle completes successfully. Consolidate gains and prepare next expansion.", shadow: "Loose ends reduce impact. Finalize details before new starts." }
+];
+
+const tarotSuitMeta = {
+  Wands: {
+    glyph: "W",
+    theme: "drive, action, creative fire",
+    light: "Energy favors initiative and visible movement.",
+    shadow: "Impatience and overpush can create avoidable conflict."
+  },
+  Cups: {
+    glyph: "C",
+    theme: "emotion, connection, intuition",
+    light: "Relational intelligence and empathy can unlock cooperation.",
+    shadow: "Mood waves and unclear boundaries may blur decisions."
+  },
+  Swords: {
+    glyph: "S",
+    theme: "mind, communication, strategy",
+    light: "Clear thinking and direct language can cut through noise.",
+    shadow: "Overanalysis or harsh tone may escalate friction."
+  },
+  Pentacles: {
+    glyph: "P",
+    theme: "resources, work, practical outcomes",
+    light: "Steady systems and execution improve tangible results.",
+    shadow: "Overfocus on control can reduce flexibility and creativity."
+  }
+};
+
+const tarotMinorRanks = [
+  { key: "Ace", label: "Ace", numeral: "A", light: "New potential appears in this domain.", shadow: "Opportunity is present but needs commitment." },
+  { key: "Two", label: "Two", numeral: "2", light: "A choice or partnership dynamic is active.", shadow: "Indecision can stall momentum." },
+  { key: "Three", label: "Three", numeral: "3", light: "Collaboration and expansion are favored.", shadow: "Too many inputs can reduce quality." },
+  { key: "Four", label: "Four", numeral: "4", light: "Stability and consolidation are needed.", shadow: "Defensive holding can block growth." },
+  { key: "Five", label: "Five", numeral: "5", light: "Tension reveals what must be improved.", shadow: "Conflict loops can repeat without clear rules." },
+  { key: "Six", label: "Six", numeral: "6", light: "Rebalancing and mutual exchange are possible.", shadow: "Uneven giving may create resentment." },
+  { key: "Seven", label: "Seven", numeral: "7", light: "Strategy and discernment are key.", shadow: "Doubt or avoidance can weaken execution." },
+  { key: "Eight", label: "Eight", numeral: "8", light: "Focused effort compounds quickly.", shadow: "Tunnel vision may ignore context." },
+  { key: "Nine", label: "Nine", numeral: "9", light: "Results are near; resilience matters.", shadow: "Fatigue may distort judgment." },
+  { key: "Ten", label: "Ten", numeral: "10", light: "A cycle reaches fullness and consequence.", shadow: "Overload signals need for redistribution." },
+  { key: "Page", label: "Page", numeral: "Pg", light: "A learning phase invites curiosity and experimentation.", shadow: "Immaturity or scattered focus may appear." },
+  { key: "Knight", label: "Knight", numeral: "Kn", light: "Movement and commitment accelerate the story.", shadow: "Rushing can create unnecessary risk." },
+  { key: "Queen", label: "Queen", numeral: "Qn", light: "Internal mastery and nuanced leadership are available.", shadow: "Emotional overcontrol may reduce openness." },
+  { key: "King", label: "King", numeral: "Kg", light: "Authority and strategic completion are supported.", shadow: "Rigidity can weaken collaboration." }
+];
+
+function tarotDeckCardSvg(card) {
+  const title = String(card.name || "RWS");
+  const suitGlyph = card.suit ? tarotSuitMeta[card.suit]?.glyph || "T" : "M";
+  const rankGlyph = card.arcana === "major" ? card.rank : card.rankShort;
+  const bg = card.arcana === "major" ? "#f2a65e" : card.suit === "Cups" ? "#6fd6ff" : card.suit === "Wands" ? "#ff8f6b" : card.suit === "Swords" ? "#d0d7e5" : "#7adf9a";
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 360" role="img" aria-label="${title}">
+      <rect x="8" y="8" width="204" height="344" rx="16" fill="#f8f8f7"/>
+      <rect x="16" y="16" width="188" height="328" rx="12" fill="#ffffff" stroke="#111111" stroke-opacity="0.22" />
+      <rect x="28" y="30" width="164" height="62" rx="10" fill="${bg}" fill-opacity="0.28"/>
+      <text x="110" y="56" text-anchor="middle" font-family="Space Grotesk, IBM Plex Sans, sans-serif" font-size="16" fill="#111111">${title}</text>
+      <text x="110" y="78" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#111111" fill-opacity="0.72">${card.arcana === "major" ? "MAJOR ARCANA" : "MINOR ARCANA"}</text>
+      <rect x="52" y="118" width="116" height="136" rx="16" fill="#111111" fill-opacity="0.05" stroke="#111111" stroke-opacity="0.18"/>
+      <text x="110" y="178" text-anchor="middle" font-family="Space Grotesk, IBM Plex Sans, sans-serif" font-size="54" fill="#111111" fill-opacity="0.86">${suitGlyph}</text>
+      <text x="110" y="304" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="24" fill="#111111">${rankGlyph}</text>
+      <rect x="18" y="18" width="184" height="324" rx="12" fill="none" stroke="#111111" stroke-opacity="0.28"/>
+    </svg>
+  `;
+  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+}
+
+function buildRwsTarotDeck() {
+  const deck = [];
+  tarotMajorArcana.forEach((item) => {
+    const card = {
+      id: item.id,
+      name: item.name,
+      arcana: "major",
+      suit: "Major",
+      rank: item.num,
+      rankShort: item.num,
+      keywords: item.keywords,
+      light: item.light,
+      shadow: item.shadow
+    };
+    card.svg = tarotDeckCardSvg(card);
+    deck.push(card);
+  });
+
+  Object.entries(tarotSuitMeta).forEach(([suit, meta]) => {
+    tarotMinorRanks.forEach((rank) => {
+      const card = {
+        id: `minor-${String(suit).toLowerCase()}-${String(rank.key).toLowerCase()}`,
+        name: `${rank.label} of ${suit}`,
+        arcana: "minor",
+        suit,
+        rank: rank.label,
+        rankShort: rank.numeral,
+        keywords: [suit.toLowerCase(), rank.label.toLowerCase(), meta.theme],
+        light: `${rank.light} In ${suit}, this highlights ${meta.theme}. ${meta.light}`,
+        shadow: `${rank.shadow} In ${suit}, ${meta.shadow}`
+      };
+      card.svg = tarotDeckCardSvg(card);
+      deck.push(card);
+    });
+  });
+  return deck;
+}
+
+const rwsTarotDeck = buildRwsTarotDeck();
+
+function pickUniqueTarotCards(total = 3) {
+  const pool = [...rwsTarotDeck];
+  for (let i = pool.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  return pool.slice(0, Math.max(1, Math.min(5, total)));
+}
+
+function tarotSpreadLabel(index) {
+  const labels = ["Energy of the day", "Main challenge", "Best guidance"];
+  return labels[index] || `Position ${index + 1}`;
+}
+
+function buildTarotInterpretation(session, question = "") {
+  const cards = Array.isArray(session?.cards) ? session.cards : [];
+  if (!cards.length) {
+    return "<p class=\"muted\">No spread data available yet.</p>";
+  }
+  const majorCount = cards.filter((item) => item.card.arcana === "major").length;
+  const reversedCount = cards.filter((item) => item.reversed).length;
+  const questionText = String(question || "").trim();
+  const cardLines = cards.map((item, idx) => {
+    const message = item.reversed ? item.card.shadow : item.card.light;
+    return `
+      <article class="tarot-meaning-card">
+        <span class="eyebrow">${tarotSpreadLabel(idx)}</span>
+        <h3>${item.card.name}${item.reversed ? " (Reversed)" : ""}</h3>
+        <p>${message}</p>
+      </article>
+    `;
+  }).join("");
+
+  const comboSummary = majorCount >= 2
+    ? "The spread is dominated by major arcana, so the day carries a strong turning-point quality."
+    : "The spread is mostly minor arcana, so progress comes from practical micro-decisions."
+  ;
+  const polaritySummary = reversedCount >= 2
+    ? "Reversed emphasis suggests hidden tension: clarity comes through slowing down and naming assumptions."
+    : "Orientation is mostly upright, supporting direct action with measured confidence.";
+  const guidance = cards[2] || cards[0];
+  const challenge = cards[1] || cards[0];
+  const answer = questionText
+    ? `Question focus: <strong>${escapeHtml(questionText)}</strong>. In this combination, the best answer is to use <strong>${guidance.card.name}</strong> as strategy while consciously managing the friction of <strong>${challenge.card.name}</strong>.`
+    : "No question entered. Use this spread as a daily strategy map: identify one action, one risk, and one conversation boundary.";
+
+  return `
+    <div class="tarot-interpretation">
+      <p>${comboSummary} ${polaritySummary}</p>
+      <p>${answer}</p>
+      <div class="tarot-meaning-grid">
+        ${cardLines}
+      </div>
+    </div>
+  `;
+}
+
+function tarotView() {
+  if (!hasProfile()) {
+    return shell({
+      eyebrow: "Tarot",
+      title: "Profile required before tarot spread",
+      intro: "Tarot daily interpretation works best with your profile context. Complete onboarding first.",
+      primaryCta: { href: "/onboarding", label: "Complete Onboarding" },
+      secondaryCta: { href: "/", label: "Back Home" },
+      rightPanel: "<h2>RWS Daily Spread</h2><p>Three cards, automatic draw, and actionable interpretation.</p>",
+      body: ""
+    });
+  }
+
+  return `
+    <section class="section">
+      <article class="card tone-card tarot-hero">
+        <span class="eyebrow">RWS Tarot</span>
+        <h1>Daily 3-Card Tarot Spread</h1>
+        <p>Automatic three-card draw on page load with minimal RWS-style SVG deck and practical interpretation. Ask your own question to get an answer in the context of the same card combination.</p>
+        <div class="chip-grid">
+          <span class="astro-chip">Deck: Rider-Waite-Smith inspired</span>
+          <span class="astro-chip">Cards: 78 minimalist SVG</span>
+          <span class="astro-chip">Mode: Daily + Question</span>
+        </div>
+      </article>
+    </section>
+    <section class="section">
+      <article class="card tarot-stage-card">
+        <div id="tarotSpreadStage" class="tarot-spread-stage" aria-live="polite"></div>
+        <div class="tarot-controls">
+          <form id="tarotQuestionForm" class="tarot-question-form">
+            <label>Your question
+              <input id="tarotQuestionInput" name="question" placeholder="What should I focus on in this situation?" maxlength="280" />
+            </label>
+            <div class="tarot-question-actions">
+              <button id="tarotQuestionSubmit" class="btn primary" type="submit">Interpret this spread</button>
+              <button id="tarotRedrawButton" class="btn ghost" type="button">Draw new 3 cards</button>
+            </div>
+          </form>
+          <div id="tarotNarrative" class="tarot-narrative"></div>
+        </div>
+      </article>
+    </section>
+    <section class="section">
+      <article class="card lead-flow-card">
+        <span class="eyebrow">How to read this spread</span>
+        <h2>3-card protocol</h2>
+        <ul class="article-list">
+          <li>Card 1 shows your current energy pattern.</li>
+          <li>Card 2 shows friction, blind spots, or the pressure point.</li>
+          <li>Card 3 gives the best strategic move for today.</li>
+        </ul>
+        <p class="muted">Tip: keep one concrete action from Card 3 and one boundary from Card 2.</p>
+      </article>
+    </section>
+  `;
+}
+
+function renderTarotSpread(session, question = "") {
+  const stage = document.getElementById("tarotSpreadStage");
+  const narrative = document.getElementById("tarotNarrative");
+  if (!(stage instanceof HTMLElement) || !(narrative instanceof HTMLElement)) {
+    return;
+  }
+  const cards = Array.isArray(session?.cards) ? session.cards : [];
+  stage.innerHTML = cards.map((item, index) => `
+    <article class="tarot-scene-card ${item.reversed ? "is-reversed" : ""}" style="--card-index:${index}">
+      <div class="tarot-card-visual">
+        <img src="${item.card.svg}" alt="${escapeHtml(item.card.name)}" loading="lazy" decoding="async" />
+      </div>
+      <div class="tarot-card-meta">
+        <span class="eyebrow">${tarotSpreadLabel(index)}</span>
+        <h3>${escapeHtml(item.card.name)}</h3>
+        <p>${item.reversed ? "Reversed" : "Upright"} · ${escapeHtml(item.card.keywords.slice(0, 3).join(" / "))}</p>
+      </div>
+    </article>
+  `).join("");
+  narrative.innerHTML = buildTarotInterpretation(session, question);
+}
+
+function createTarotSession() {
+  const cards = pickUniqueTarotCards(3).map((card) => ({
+    card,
+    reversed: Math.random() < 0.33
+  }));
+  return {
+    cards,
+    drawnAt: new Date().toISOString()
+  };
+}
+
+function initTarotReadingFlow() {
+  const stage = document.getElementById("tarotSpreadStage");
+  const narrative = document.getElementById("tarotNarrative");
+  const form = document.getElementById("tarotQuestionForm");
+  const input = document.getElementById("tarotQuestionInput");
+  const redrawButton = document.getElementById("tarotRedrawButton");
+  if (!(stage instanceof HTMLElement) || !(narrative instanceof HTMLElement)) {
+    return;
+  }
+  state.tarotSession = createTarotSession();
+  renderTarotSpread(state.tarotSession);
+
+  form?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const question = input instanceof HTMLInputElement ? String(input.value || "").trim() : "";
+    renderTarotSpread(state.tarotSession, question);
+  });
+
+  redrawButton?.addEventListener("click", () => {
+    state.tarotSession = createTarotSession();
+    const question = input instanceof HTMLInputElement ? String(input.value || "").trim() : "";
+    renderTarotSpread(state.tarotSession, question);
+  });
+}
+
 const routes = {
   "/": () => (state.dashboard ? renderHomeDashboard(state.dashboard) : homeViewLoading()),
   "/login": loginView,
@@ -9400,6 +9704,7 @@ const routes = {
   "/onboarding": onboardingView,
   "/profile": profileView,
   "/natal-chart": () => `<section class="section"><article class="card"><p class="muted">Loading...</p></article></section>`,
+  "/tarot": tarotView,
   "/numerology": numerologyView,
   "/daily": () => `<section class="section"><article class="card"><p class="muted">Loading...</p></article></section>`,
   "/friends": friendsView,
@@ -9448,6 +9753,11 @@ function applySeoMeta(path) {
     "/numerology": {
       title: "Numerology Report - Astronautica",
       description: "Personal numerology report: life path, destiny number, cycle timing, and practical weekly guidance.",
+      type: "website"
+    },
+    "/tarot": {
+      title: "Tarot Daily 3-Card Spread (RWS) - Astronautica",
+      description: "Rider-Waite-Smith inspired daily tarot: automatic 3-card spread, minimalist SVG deck, and question-based interpretation.",
       type: "website"
     },
     "/astrology-hub": {
@@ -10826,6 +11136,10 @@ function attachRouteHandlers(path) {
 
   if (path === "/free-tools/numerology-quick-read") {
     initFreeNumerologyQuickTool();
+  }
+
+  if (path === "/tarot") {
+    initTarotReadingFlow();
   }
 
   if (path === "/onboarding") {
