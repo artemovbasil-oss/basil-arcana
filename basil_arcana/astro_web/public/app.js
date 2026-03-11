@@ -9513,20 +9513,31 @@ function tarotSeed(text) {
   return Math.abs(hash >>> 0);
 }
 
-function tarotPalette(card) {
+function tarotPalette(card, theme = "light") {
+  const isDark = theme === "dark";
   if (card.arcana === "major") {
-    return { top: "#f2a65e", mid: "#e8d9bf", line: "#1a1a1a", accent: "#be6b1d" };
+    return isDark
+      ? { top: "#7d5633", mid: "#2d2721", line: "#f0f2f6", accent: "#f2b26a", paper: "#141211", card: "#1a1715" }
+      : { top: "#f2a65e", mid: "#e8d9bf", line: "#1a1a1a", accent: "#be6b1d", paper: "#f8f8f7", card: "#ffffff" };
   }
   if (card.suit === "Wands") {
-    return { top: "#ff9f6e", mid: "#f6e6d8", line: "#1a1a1a", accent: "#b84a14" };
+    return isDark
+      ? { top: "#7e4a31", mid: "#2b221d", line: "#f0f2f6", accent: "#ff9f6e", paper: "#141211", card: "#171412" }
+      : { top: "#ff9f6e", mid: "#f6e6d8", line: "#1a1a1a", accent: "#b84a14", paper: "#f8f8f7", card: "#ffffff" };
   }
   if (card.suit === "Cups") {
-    return { top: "#7dcfff", mid: "#dceff9", line: "#1a1a1a", accent: "#1f6ea0" };
+    return isDark
+      ? { top: "#3f6a85", mid: "#1f2830", line: "#f0f2f6", accent: "#7dcfff", paper: "#11151a", card: "#151a20" }
+      : { top: "#7dcfff", mid: "#dceff9", line: "#1a1a1a", accent: "#1f6ea0", paper: "#f8f8f7", card: "#ffffff" };
   }
   if (card.suit === "Swords") {
-    return { top: "#d1d8e6", mid: "#edf1f8", line: "#1a1a1a", accent: "#5b6f8f" };
+    return isDark
+      ? { top: "#546073", mid: "#21262f", line: "#f0f2f6", accent: "#c8d5ec", paper: "#101318", card: "#161a21" }
+      : { top: "#d1d8e6", mid: "#edf1f8", line: "#1a1a1a", accent: "#5b6f8f", paper: "#f8f8f7", card: "#ffffff" };
   }
-  return { top: "#8be3ae", mid: "#e3f5e9", line: "#1a1a1a", accent: "#2b7c45" };
+  return theme === "dark"
+    ? { top: "#2f6d49", mid: "#1c2a22", line: "#f0f2f6", accent: "#8be3ae", paper: "#111711", card: "#151f17" }
+    : { top: "#8be3ae", mid: "#e3f5e9", line: "#1a1a1a", accent: "#2b7c45", paper: "#f8f8f7", card: "#ffffff" };
 }
 
 function tarotSuitSymbol(suit) {
@@ -9605,11 +9616,12 @@ function tarotMinorScene(card, line, accent) {
   return `${sceneHead}${marks.join("")}`;
 }
 
-function tarotDeckCardSvg(card) {
+function tarotDeckCardSvg(card, theme = "light") {
   const title = String(card.name || "RWS");
   const suitGlyph = card.suit ? tarotSuitMeta[card.suit]?.glyph || "T" : "M";
   const rankGlyph = card.arcana === "major" ? card.rank : card.rankShort;
-  const palette = tarotPalette(card);
+  const palette = tarotPalette(card, theme);
+  const textColor = palette.line;
   const seed = tarotSeed(card.id);
   const majorSpec = tarotMajorArtSpec[card.id];
   const skyGlyph = majorSpec?.sky === "moon" ? "◐" : majorSpec?.sky === "storm" ? "⚡" : majorSpec?.sky === "clouds" ? "☁" : "✦";
@@ -9619,21 +9631,21 @@ function tarotDeckCardSvg(card) {
   const pattern = tarotPatternLayer(seed, palette.accent);
   const svg = `
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 360" role="img" aria-label="${title}">
-      <rect x="8" y="8" width="204" height="344" rx="16" fill="#f8f8f7"/>
-      <rect x="16" y="16" width="188" height="328" rx="12" fill="#ffffff" stroke="#111111" stroke-opacity="0.26" />
+      <rect x="8" y="8" width="204" height="344" rx="16" fill="${palette.paper}"/>
+      <rect x="16" y="16" width="188" height="328" rx="12" fill="${palette.card}" stroke="${textColor}" stroke-opacity="0.28" />
       <rect x="24" y="24" width="172" height="312" rx="11" fill="${palette.mid}" fill-opacity="0.34"/>
       <rect x="28" y="30" width="164" height="62" rx="10" fill="${palette.top}" fill-opacity="0.32"/>
-      <text x="110" y="56" text-anchor="middle" font-family="Space Grotesk, IBM Plex Sans, sans-serif" font-size="16" fill="#111111">${title}</text>
-      <text x="110" y="78" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#111111" fill-opacity="0.76">${card.arcana === "major" ? "MAJOR ARCANA" : "MINOR ARCANA"}</text>
-      <text x="40" y="46" text-anchor="middle" font-size="12" fill="#111111" fill-opacity="0.74">${skyGlyph}</text>
-      <text x="180" y="46" text-anchor="middle" font-size="12" fill="#111111" fill-opacity="0.74">${skyGlyph}</text>
-      <rect x="50" y="112" width="120" height="148" rx="16" fill="#ffffff" fill-opacity="0.54" stroke="${palette.line}" stroke-opacity="0.22"/>
+      <text x="110" y="56" text-anchor="middle" font-family="Space Grotesk, IBM Plex Sans, sans-serif" font-size="16" fill="${textColor}">${title}</text>
+      <text x="110" y="78" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="${textColor}" fill-opacity="0.76">${card.arcana === "major" ? "MAJOR ARCANA" : "MINOR ARCANA"}</text>
+      <text x="40" y="46" text-anchor="middle" font-size="12" fill="${textColor}" fill-opacity="0.74">${skyGlyph}</text>
+      <text x="180" y="46" text-anchor="middle" font-size="12" fill="${textColor}" fill-opacity="0.74">${skyGlyph}</text>
+      <rect x="50" y="112" width="120" height="148" rx="16" fill="${palette.card}" fill-opacity="0.56" stroke="${palette.line}" stroke-opacity="0.24"/>
       ${pattern}
       ${scene}
       <text x="36" y="298" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="18" fill="${palette.accent}" fill-opacity="0.85">${suitGlyph}</text>
       <text x="184" y="298" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="18" fill="${palette.accent}" fill-opacity="0.85">${suitGlyph}</text>
-      <text x="110" y="304" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="24" fill="#111111">${rankGlyph}</text>
-      <rect x="18" y="18" width="184" height="324" rx="12" fill="none" stroke="#111111" stroke-opacity="0.32"/>
+      <text x="110" y="304" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="24" fill="${textColor}">${rankGlyph}</text>
+      <rect x="18" y="18" width="184" height="324" rx="12" fill="none" stroke="${textColor}" stroke-opacity="0.34"/>
     </svg>
   `;
   return `data:image/svg+xml,${encodeURIComponent(svg)}`;
@@ -9653,7 +9665,8 @@ function buildRwsTarotDeck() {
       light: item.light,
       shadow: item.shadow
     };
-    card.svg = tarotDeckCardSvg(card);
+    card.svgLight = tarotDeckCardSvg(card, "light");
+    card.svgDark = tarotDeckCardSvg(card, "dark");
     deck.push(card);
   });
 
@@ -9670,7 +9683,8 @@ function buildRwsTarotDeck() {
         light: `${rank.light} In ${suit}, this highlights ${meta.theme}. ${meta.light}`,
         shadow: `${rank.shadow} In ${suit}, ${meta.shadow}`
       };
-      card.svg = tarotDeckCardSvg(card);
+      card.svgLight = tarotDeckCardSvg(card, "light");
+      card.svgDark = tarotDeckCardSvg(card, "dark");
       deck.push(card);
     });
   });
@@ -9804,7 +9818,7 @@ function renderTarotSpread(session, question = "") {
   stage.innerHTML = cards.map((item, index) => `
     <article class="tarot-scene-card ${item.reversed ? "is-reversed" : ""}" style="--card-index:${index}">
       <div class="tarot-card-visual">
-        <img src="${item.card.svg}" alt="${escapeHtml(item.card.name)}" loading="lazy" decoding="async" />
+        <img src="${state.theme === "dark" ? item.card.svgDark : item.card.svgLight}" alt="${escapeHtml(item.card.name)}" loading="lazy" decoding="async" />
       </div>
       <div class="tarot-card-meta">
         <span class="eyebrow">${tarotSpreadLabel(index)}</span>
@@ -9836,7 +9850,9 @@ function initTarotReadingFlow() {
   if (!(stage instanceof HTMLElement) || !(narrative instanceof HTMLElement)) {
     return;
   }
-  state.tarotSession = createTarotSession();
+  if (!state.tarotSession || !Array.isArray(state.tarotSession.cards) || !state.tarotSession.cards.length) {
+    state.tarotSession = createTarotSession();
+  }
   renderTarotSpread(state.tarotSession);
 
   form?.addEventListener("submit", (event) => {
