@@ -7742,9 +7742,208 @@ function buildSignHubArticle(sign) {
 }
 
 const signHubArticles = zodiacOrder.map((sign) => buildSignHubArticle(sign));
-const astrologyHubArticles = [...coreHubArticles, ...signHubArticles];
 
-const astrologyHubBySlug = astrologyHubArticles.reduce((acc, article) => {
+function tarotHubSlug(text) {
+  return String(text || "")
+    .toLowerCase()
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .replace(/-{2,}/g, "-");
+}
+
+function tarotHubSuitMeta(suit) {
+  if (suit === "Wands") return { symbol: "W", topic: "initiative, drive, and execution", fact: "Wands correspond to fire dynamics: motivation, movement, and creative risk." };
+  if (suit === "Cups") return { symbol: "C", topic: "relationships, emotions, and trust", fact: "Cups map emotional intelligence, bonding, and inner climate management." };
+  if (suit === "Swords") return { symbol: "S", topic: "thinking, language, and strategy", fact: "Swords are linked with mental models, decision clarity, and conflict navigation." };
+  if (suit === "Pentacles") return { symbol: "P", topic: "resources, work, and material systems", fact: "Pentacles focus on tangible outcomes, sustainability, and operational structure." };
+  return { symbol: "M", topic: "major life direction and long-cycle transitions", fact: "Major Arcana cards usually indicate high-impact turning points and core lessons." };
+}
+
+function tarotHubCardImage(card, theme = "light") {
+  const isDark = theme === "dark";
+  const suitMeta = tarotHubSuitMeta(card.suit);
+  const top = isDark ? "#16243c" : "#dce8fb";
+  const paper = isDark ? "#0f1116" : "#fcfcfb";
+  const line = isDark ? "#eef2fb" : "#15181e";
+  const accent = card.arcana === "major"
+    ? (isDark ? "#f4b06e" : "#b76724")
+    : card.suit === "Wands"
+      ? (isDark ? "#ff9f6e" : "#b84a14")
+      : card.suit === "Cups"
+        ? (isDark ? "#7dcfff" : "#1f6ea0")
+        : card.suit === "Swords"
+          ? (isDark ? "#c8d5ec" : "#5b6f8f")
+          : (isDark ? "#8be3ae" : "#2b7c45");
+  const subtitle = card.arcana === "major" ? "Major Arcana" : `${card.rank} · ${card.suit}`;
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 860" role="img" aria-label="${card.name}">
+      <rect x="18" y="18" width="604" height="824" rx="32" fill="${paper}" stroke="${line}" stroke-opacity="0.35" stroke-width="2.4"/>
+      <rect x="34" y="34" width="572" height="792" rx="24" fill="${top}" fill-opacity="${isDark ? "0.28" : "0.36"}"/>
+      <rect x="76" y="74" width="488" height="126" rx="18" fill="${accent}" fill-opacity="${isDark ? "0.2" : "0.24"}"/>
+      <text x="320" y="132" text-anchor="middle" font-family="IBM Plex Sans, system-ui, sans-serif" font-size="46" font-weight="600" fill="${line}">${card.name}</text>
+      <text x="320" y="176" text-anchor="middle" font-family="IBM Plex Sans, system-ui, sans-serif" font-size="22" fill="${line}" fill-opacity="0.82">${subtitle}</text>
+      <circle cx="320" cy="440" r="134" fill="${accent}" fill-opacity="${isDark ? "0.18" : "0.14"}"/>
+      <text x="320" y="465" text-anchor="middle" font-family="IBM Plex Sans, system-ui, sans-serif" font-size="132" font-weight="700" fill="${accent}" fill-opacity="0.78">${suitMeta.symbol}</text>
+      <text x="90" y="780" font-family="IBM Plex Sans, system-ui, sans-serif" font-size="20" fill="${line}" fill-opacity="0.8">${card.arcana === "major" ? card.rank : card.rankLabel}</text>
+      <text x="550" y="780" text-anchor="end" font-family="IBM Plex Sans, system-ui, sans-serif" font-size="20" fill="${line}" fill-opacity="0.8">${card.arcana === "major" ? "M" : suitMeta.symbol}</text>
+    </svg>
+  `;
+  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+}
+
+function tarotHubCardFacts(card) {
+  if (card.arcana === "major") {
+    return [
+      "In the Rider-Waite-Smith tradition, major arcana cards usually describe high-impact milestones rather than minor day-to-day details.",
+      `${card.name} is commonly read through the lens of transformation pressure: what must evolve for the next chapter to open.`,
+      "When a major arcana repeats across readings, practitioners usually treat it as a signal to revisit strategy, boundaries, and long-term priorities."
+    ];
+  }
+  const suitMeta = tarotHubSuitMeta(card.suit);
+  return [
+    `This card belongs to ${card.suit}, the suit of ${suitMeta.topic}.`,
+    `${card.rank} cards in minor arcana are often used as intensity markers: they help estimate pace, complexity, and decision load.`,
+    "In practical readings, this card becomes more useful when translated into one concrete behavior and one measurable checkpoint."
+  ];
+}
+
+const tarotHubMajorCards = [
+  { name: "The Fool", rank: "0", keywords: ["beginnings", "trust", "open path"] },
+  { name: "The Magician", rank: "I", keywords: ["focus", "agency", "execution"] },
+  { name: "The High Priestess", rank: "II", keywords: ["intuition", "silence", "inner data"] },
+  { name: "The Empress", rank: "III", keywords: ["growth", "care", "creative abundance"] },
+  { name: "The Emperor", rank: "IV", keywords: ["structure", "authority", "order"] },
+  { name: "The Hierophant", rank: "V", keywords: ["tradition", "learning", "values"] },
+  { name: "The Lovers", rank: "VI", keywords: ["alignment", "choice", "integrity"] },
+  { name: "The Chariot", rank: "VII", keywords: ["discipline", "direction", "will"] },
+  { name: "Strength", rank: "VIII", keywords: ["patience", "self-mastery", "courage"] },
+  { name: "The Hermit", rank: "IX", keywords: ["reflection", "wisdom", "signal"] },
+  { name: "Wheel of Fortune", rank: "X", keywords: ["cycle", "timing", "turning point"] },
+  { name: "Justice", rank: "XI", keywords: ["truth", "fairness", "balance"] },
+  { name: "The Hanged Man", rank: "XII", keywords: ["pause", "perspective", "reframe"] },
+  { name: "Death", rank: "XIII", keywords: ["ending", "renewal", "release"] },
+  { name: "Temperance", rank: "XIV", keywords: ["integration", "harmony", "calibration"] },
+  { name: "The Devil", rank: "XV", keywords: ["attachment", "pattern lock", "shadow"] },
+  { name: "The Tower", rank: "XVI", keywords: ["disruption", "truth", "reset"] },
+  { name: "The Star", rank: "XVII", keywords: ["hope", "healing", "clarity"] },
+  { name: "The Moon", rank: "XVIII", keywords: ["uncertainty", "emotion", "intuition"] },
+  { name: "The Sun", rank: "XIX", keywords: ["visibility", "vitality", "success"] },
+  { name: "Judgement", rank: "XX", keywords: ["review", "calling", "awakening"] },
+  { name: "The World", rank: "XXI", keywords: ["completion", "integration", "mastery"] }
+].map((card, idx) => ({
+  ...card,
+  arcana: "major",
+  suit: "Major Arcana",
+  rankLabel: card.rank,
+  slug: `${tarotHubSlug(card.name)}-tarot-card-meaning`,
+  order: idx
+}));
+
+const tarotHubMinorSuits = ["Wands", "Cups", "Swords", "Pentacles"];
+const tarotHubMinorRanks = [
+  { rank: "Ace", rankLabel: "A", keywords: ["new potential", "seed", "opening"] },
+  { rank: "Two", rankLabel: "2", keywords: ["choice", "duality", "coordination"] },
+  { rank: "Three", rankLabel: "3", keywords: ["growth", "collaboration", "expansion"] },
+  { rank: "Four", rankLabel: "4", keywords: ["stability", "structure", "consolidation"] },
+  { rank: "Five", rankLabel: "5", keywords: ["friction", "adjustment", "stress test"] },
+  { rank: "Six", rankLabel: "6", keywords: ["rebalancing", "support", "movement"] },
+  { rank: "Seven", rankLabel: "7", keywords: ["discernment", "strategy", "assessment"] },
+  { rank: "Eight", rankLabel: "8", keywords: ["focus", "craft", "execution"] },
+  { rank: "Nine", rankLabel: "9", keywords: ["resilience", "threshold", "discipline"] },
+  { rank: "Ten", rankLabel: "10", keywords: ["culmination", "weight", "outcome"] },
+  { rank: "Page", rankLabel: "Pg", keywords: ["learning", "message", "openness"] },
+  { rank: "Knight", rankLabel: "Kn", keywords: ["motion", "commitment", "momentum"] },
+  { rank: "Queen", rankLabel: "Qn", keywords: ["maturity", "holding power", "nuance"] },
+  { rank: "King", rankLabel: "Kg", keywords: ["authority", "strategy", "completion"] }
+];
+
+const tarotHubMinorCards = tarotHubMinorSuits.flatMap((suit, suitIndex) => tarotHubMinorRanks.map((rank, rankIndex) => ({
+  name: `${rank.rank} of ${suit}`,
+  rank: rank.rank,
+  rankLabel: rank.rankLabel,
+  suit,
+  arcana: "minor",
+  keywords: rank.keywords,
+  slug: `${tarotHubSlug(`${rank.rank}-of-${suit}`)}-tarot-card-meaning`,
+  order: 22 + suitIndex * tarotHubMinorRanks.length + rankIndex
+})));
+
+const tarotHubCardCatalog = [...tarotHubMajorCards, ...tarotHubMinorCards];
+
+function buildTarotHubArticle(card, index, allCards) {
+  const prev = allCards[(index + allCards.length - 1) % allCards.length];
+  const next = allCards[(index + 1) % allCards.length];
+  const sameStream = allCards.filter((item) => item.slug !== card.slug && (item.arcana === card.arcana || item.suit === card.suit)).slice(0, 3);
+  const facts = tarotHubCardFacts(card);
+  const suitMeta = tarotHubSuitMeta(card.suit);
+  const cardName = card.name;
+  const imageLight = tarotHubCardImage(card, "light");
+  const imageDark = tarotHubCardImage(card, "dark");
+  const seo = `${cardName} tarot card meaning (upright and reversed), symbolism, love/career guidance, and practical planning prompts in Rider-Waite-Smith context.`;
+  return {
+    slug: card.slug,
+    title: `${cardName} Tarot Card Meaning (Upright & Reversed)`,
+    excerpt: `${cardName} in-depth guide: symbolism, upright/reversed interpretation, planning prompts, and key practical facts.`,
+    readTime: "14 min",
+    publishedAt: "2026-03-11",
+    category: "Tarot Cards",
+    seoDescription: seo,
+    arcana: card.arcana,
+    suit: card.suit,
+    rank: card.rank,
+    imageLight,
+    imageDark,
+    imageAlt: `${cardName} tarot card artwork`,
+    content: `
+      <figure class="article-infographic tarot-article-visual">
+        <img
+          class="article-sign-hero tarot-article-card-image"
+          src="${state.theme === "light" ? imageLight : imageDark}"
+          data-zodiac-light="${imageLight}"
+          data-zodiac-dark="${imageDark}"
+          alt="${cardName} tarot card illustration"
+          loading="lazy"
+          decoding="async"
+        />
+      </figure>
+      <p class="article-lead"><strong>${cardName}</strong> is a high-signal tarot archetype in the Rider-Waite-Smith tradition. This guide explains the card in practical language: what it means when upright, what changes when reversed, and how to convert the message into decisions and planning.</p>
+      <h2>${cardName} core symbolism</h2>
+      <p>This card is usually read through the lens of <strong>${card.keywords.join(", ")}</strong>. In a reflective workflow, that means noticing where your current strategy supports these qualities and where your behavior resists them.</p>
+      <p>${card.arcana === "major"
+        ? "As a Major Arcana card, this symbol often points to higher-order chapter changes: identity, direction, standards, and long-cycle priorities."
+        : `As part of ${card.suit}, this card primarily describes ${suitMeta.topic}.`}</p>
+      <h2>Upright meaning of ${cardName}</h2>
+      <p>Upright, this card suggests productive alignment. It favors clear priorities, grounded action, and transparent communication. Use it to identify what should be amplified now rather than trying to optimize everything at once.</p>
+      <h2>Reversed meaning of ${cardName}</h2>
+      <p>Reversed, the same symbolism tends to internalize or distort: overcontrol, hesitation, projection, or energy leakage. This is not "bad luck"; it is usually a signal to slow down, clarify assumptions, and remove one repeating friction loop.</p>
+      <h2>${cardName} in love, work, and planning</h2>
+      <ul class="bullet-list">
+        <li><strong>Love and relationships:</strong> read this card as a communication and boundaries indicator.</li>
+        <li><strong>Career and money:</strong> use it to define one strategic action and one measurable output.</li>
+        <li><strong>Daily planning:</strong> translate the card into one priority, one risk control, and one follow-up checkpoint.</li>
+      </ul>
+      <h2>Important facts about ${cardName}</h2>
+      <ul class="bullet-list">
+        ${facts.map((fact) => `<li>${fact}</li>`).join("")}
+      </ul>
+      <h2>How to read this card in a 3-card spread</h2>
+      <p>When ${cardName} appears in position 1, read it as your baseline state. In position 2, treat it as friction or blind zone. In position 3, treat it as strategic advice. This simple position logic dramatically improves interpretation quality.</p>
+      <h2>Related tarot card meanings</h2>
+      <p>Continue with <a href="/astrology-hub/${prev.slug}">${prev.name}</a> and <a href="/astrology-hub/${next.slug}">${next.name}</a>.</p>
+      <ul class="bullet-list">
+        ${sameStream.map((item) => `<li><a href="/astrology-hub/${item.slug}">${item.name} meaning</a></li>`).join("")}
+      </ul>
+      <p>For live application, open <a href="/tarot">Daily Tarot Spread</a> and compare this meaning with your current 3-card draw.</p>
+    `
+  };
+}
+
+const tarotHubArticles = tarotHubCardCatalog.map((card, idx, allCards) => buildTarotHubArticle(card, idx, allCards));
+
+let astrologyHubArticles = [...coreHubArticles, ...signHubArticles, ...tarotHubArticles];
+
+let astrologyHubBySlug = astrologyHubArticles.reduce((acc, article) => {
   acc[article.slug] = article;
   return acc;
 }, {});
@@ -7764,14 +7963,14 @@ function astrologyHubView() {
           .map((article) => `
             <article class="card hub-card">
               ${
-                article.sign
+                article.imageLight && article.imageDark
                   ? `<a class="hub-sign-thumb-link" href="/astrology-hub/${article.slug}">
                       <img
                         class="hub-sign-thumb"
                         src="${state.theme === "light" ? article.imageLight : article.imageDark}"
                         data-zodiac-light="${article.imageLight}"
                         data-zodiac-dark="${article.imageDark}"
-                        alt="${article.sign} zodiac illustration"
+                        alt="${article.imageAlt || `${article.title} illustration`}"
                         loading="lazy"
                         decoding="async"
                       />
@@ -7808,7 +8007,11 @@ function astrologyHubArticleView(slug) {
       </section>
     `;
   }
-  const related = astrologyHubArticles.filter((item) => item.slug !== slug).slice(0, 2);
+  const related = article.category === "Tarot Cards"
+    ? astrologyHubArticles
+      .filter((item) => item.slug !== slug && item.category === "Tarot Cards" && (item.arcana === article.arcana || item.suit === article.suit))
+      .slice(0, 3)
+    : astrologyHubArticles.filter((item) => item.slug !== slug).slice(0, 2);
   const breadcrumbs = renderBreadcrumbs([
     { label: "Home", href: "/" },
     { label: "Astrology Hub", href: "/astrology-hub" },
@@ -7829,13 +8032,13 @@ function astrologyHubArticleView(slug) {
             </div>
           </div>
           ${
-            article.sign
+            article.imageLight && article.imageDark
               ? `<img
                   class="article-sign-hero"
                   src="${state.theme === "light" ? article.imageLight : article.imageDark}"
                   data-zodiac-light="${article.imageLight}"
                   data-zodiac-dark="${article.imageDark}"
-                  alt="${article.sign} zodiac illustration"
+                  alt="${article.imageAlt || `${article.title} illustration`}"
                   loading="lazy"
                   decoding="async"
                 />`

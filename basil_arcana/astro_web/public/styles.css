@@ -1593,6 +1593,24 @@ body[data-theme="dark"] .celeb-archive-thumb-link {
   color: var(--muted);
 }
 
+.tarot-article-visual {
+  display: grid;
+  justify-items: center;
+  background:
+    radial-gradient(circle at 26% 22%, color-mix(in srgb, var(--accent-up) 18%, transparent 82%) 0%, transparent 42%),
+    radial-gradient(circle at 74% 70%, color-mix(in srgb, var(--accent-down) 16%, transparent 84%) 0%, transparent 48%),
+    var(--surface-2);
+}
+
+.tarot-article-card-image {
+  width: min(100%, 360px);
+  max-height: none;
+  border-radius: 14px;
+  box-shadow:
+    0 16px 32px rgba(13, 20, 33, 0.18),
+    0 2px 7px rgba(13, 20, 33, 0.12);
+}
+
 .article-spotlight-grid {
   margin: 0.95rem 0 0.55rem;
   display: grid;
