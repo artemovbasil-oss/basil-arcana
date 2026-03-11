@@ -7896,17 +7896,6 @@ function buildTarotHubArticle(card, index, allCards) {
     imageDark,
     imageAlt: `${cardName} tarot card artwork`,
     content: `
-      <figure class="article-infographic tarot-article-visual">
-        <img
-          class="article-sign-hero tarot-article-card-image"
-          src="${state.theme === "light" ? imageLight : imageDark}"
-          data-zodiac-light="${imageLight}"
-          data-zodiac-dark="${imageDark}"
-          alt="${cardName} tarot card illustration"
-          loading="lazy"
-          decoding="async"
-        />
-      </figure>
       <p class="article-lead"><strong>${cardName}</strong> is a high-signal tarot archetype in the Rider-Waite-Smith tradition. This guide explains the card in practical language: what it means when upright, what changes when reversed, and how to convert the message into decisions and planning.</p>
       <h2>${cardName} core symbolism</h2>
       <p>This card is usually read through the lens of <strong>${card.keywords.join(", ")}</strong>. In a reflective workflow, that means noticing where your current strategy supports these qualities and where your behavior resists them.</p>
@@ -9923,6 +9912,34 @@ function buildRwsTarotDeck() {
 }
 
 const rwsTarotDeck = buildRwsTarotDeck();
+
+function tarotHubArticleSlugFromName(name) {
+  return `${tarotHubSlug(name)}-tarot-card-meaning`;
+}
+
+function syncTarotHubArticleImagesFromDeck() {
+  const deckBySlug = rwsTarotDeck.reduce((acc, card) => {
+    acc[tarotHubArticleSlugFromName(card.name)] = card;
+    return acc;
+  }, {});
+  astrologyHubArticles = astrologyHubArticles.map((article) => {
+    if (article.category !== "Tarot Cards") return article;
+    const deckCard = deckBySlug[article.slug];
+    if (!deckCard) return article;
+    return {
+      ...article,
+      imageLight: deckCard.svgLight,
+      imageDark: deckCard.svgDark,
+      imageAlt: `${deckCard.name} tarot card artwork`
+    };
+  });
+  astrologyHubBySlug = astrologyHubArticles.reduce((acc, article) => {
+    acc[article.slug] = article;
+    return acc;
+  }, {});
+}
+
+syncTarotHubArticleImagesFromDeck();
 
 function pickUniqueTarotCards(total = 3) {
   const pool = [...rwsTarotDeck];
