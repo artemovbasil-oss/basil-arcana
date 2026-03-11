@@ -5047,6 +5047,41 @@ function loginView() {
             </a>
           </div>
         </article>
+        <article class="card tarot-stage-card login-tarot-preview-card">
+          <span class="eyebrow">Tarot Preview</span>
+          <h2>Daily 3-card tarot spread</h2>
+          <p class="muted">Quick public preview: three cards of the day with practical interpretation. No question field here, just instant guidance.</p>
+          <div id="loginTarotSpreadStage" class="tarot-spread-stage" aria-live="polite"></div>
+          <div class="tarot-controls">
+            <div id="loginTarotNarrative" class="tarot-narrative"></div>
+            <div class="tarot-question-actions">
+              <button id="loginTarotRedrawButton" class="btn ghost" type="button">Draw 3 cards again</button>
+            </div>
+          </div>
+        </article>
+        <article class="card lead-flow-card">
+          <span class="eyebrow">Continue in full mode</span>
+          <h2>Create account to unlock full personalized reading</h2>
+          <p class="muted">After login you get persistent profile-based tarot, natal analysis, daily windows, and relationship flows.</p>
+          <div class="auth-provider-row">
+            ${
+              googleEnabled
+                ? `<button class="auth-login-btn gmail js-login-preview-google" type="button">
+                     <span class="auth-login-btn-icon" aria-hidden="true">${uiIcon("google")}</span>
+                     <span>Continue with Gmail</span>
+                   </button>`
+                : ""
+            }
+            ${
+              telegramEnabled
+                ? `<button class="auth-login-btn telegram js-login-preview-telegram" type="button">
+                     <span class="auth-login-btn-icon" aria-hidden="true">${uiIcon("telegram")}</span>
+                     <span>Continue with Telegram</span>
+                   </button>`
+                : ""
+            }
+          </div>
+        </article>
       </section>
     `
     : "";
@@ -5806,13 +5841,15 @@ function initFreeNumerologyQuickTool() {
 
 function initLoginLeadTools() {
   const root = document.querySelector(".login-lead-grid");
-  if (!(root instanceof HTMLElement)) {
-    return;
+  if (root instanceof HTMLElement) {
+    Array.from(root.querySelectorAll(".login-lead-card")).forEach((card) => {
+      card.addEventListener("mouseenter", () => card.classList.add("is-hover"));
+      card.addEventListener("mouseleave", () => card.classList.remove("is-hover"));
+    });
   }
-  Array.from(root.querySelectorAll(".login-lead-card")).forEach((card) => {
-    card.addEventListener("mouseenter", () => card.classList.add("is-hover"));
-    card.addEventListener("mouseleave", () => card.classList.remove("is-hover"));
-  });
+  document.querySelector(".js-login-preview-google")?.addEventListener("click", handleGoogleLoginStart);
+  document.querySelector(".js-login-preview-telegram")?.addEventListener("click", handleSwitchTelegramAccount);
+  initLoginTarotPreview();
 }
 
 function onboardingView() {
@@ -10097,9 +10134,11 @@ function tarotView() {
   `;
 }
 
-function renderTarotSpread(session, question = "") {
-  const stage = document.getElementById("tarotSpreadStage");
-  const narrative = document.getElementById("tarotNarrative");
+function renderTarotSpread(session, question = "", opts = {}) {
+  const stageId = String(opts?.stageId || "tarotSpreadStage");
+  const narrativeId = String(opts?.narrativeId || "tarotNarrative");
+  const stage = document.getElementById(stageId);
+  const narrative = document.getElementById(narrativeId);
   if (!(stage instanceof HTMLElement) || !(narrative instanceof HTMLElement)) {
     return;
   }
@@ -10131,6 +10170,29 @@ function createTarotSession() {
     cards,
     drawnAt: new Date().toISOString()
   };
+}
+
+function initLoginTarotPreview() {
+  const stage = document.getElementById("loginTarotSpreadStage");
+  const narrative = document.getElementById("loginTarotNarrative");
+  const redrawButton = document.getElementById("loginTarotRedrawButton");
+  if (!(stage instanceof HTMLElement) || !(narrative instanceof HTMLElement)) {
+    return;
+  }
+  if (!state.loginTarotSession || !Array.isArray(state.loginTarotSession.cards) || !state.loginTarotSession.cards.length) {
+    state.loginTarotSession = createTarotSession();
+  }
+  renderTarotSpread(state.loginTarotSession, "", {
+    stageId: "loginTarotSpreadStage",
+    narrativeId: "loginTarotNarrative"
+  });
+  redrawButton?.addEventListener("click", () => {
+    state.loginTarotSession = createTarotSession();
+    renderTarotSpread(state.loginTarotSession, "", {
+      stageId: "loginTarotSpreadStage",
+      narrativeId: "loginTarotNarrative"
+    });
+  });
 }
 
 function initTarotReadingFlow() {

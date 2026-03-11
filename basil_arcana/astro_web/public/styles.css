@@ -632,11 +632,25 @@ p {
 
 .login-tools-section {
   margin-top: 0.9rem;
+  display: grid;
+  gap: 0.72rem;
 }
 
 .login-tools-card {
   display: grid;
   gap: 0.72rem;
+}
+
+.login-tarot-preview-card {
+  gap: 0.62rem;
+}
+
+.login-tarot-preview-card h2 {
+  margin: 0;
+}
+
+.login-tarot-preview-card .tarot-spread-stage {
+  gap: 0.5rem;
 }
 
 .login-free-tools {
