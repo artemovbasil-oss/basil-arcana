@@ -5737,7 +5737,7 @@ body[data-theme="dark"] .numerology-hero .astro-chip {
     tarotCardDrop 0.75s cubic-bezier(0.2, 0.84, 0.2, 1) both,
     tarotCardFloat 6.2s ease-in-out infinite;
   animation-delay: calc(var(--card-index, 0) * 120ms);
-  border-radius: 16px;
+  border-radius: 26px;
   overflow: hidden;
   box-shadow:
     0 12px 30px rgba(0, 0, 0, 0.22),
@@ -5748,6 +5748,7 @@ body[data-theme="dark"] .numerology-hero .astro-chip {
   width: 100%;
   height: auto;
   display: block;
+  border-radius: 26px;
   transition: transform 0.25s ease, filter 0.25s ease;
 }
 
@@ -5795,17 +5796,14 @@ body[data-theme="dark"] .numerology-hero .astro-chip {
 
 .tarot-card-caption {
   position: absolute;
-  left: 0.42rem;
-  right: 0.42rem;
-  bottom: 0.44rem;
+  left: 0.66rem;
+  right: 0.66rem;
+  bottom: 0.62rem;
   z-index: 3;
-  border-radius: 10px;
-  border: 1px solid color-mix(in srgb, var(--line-strong) 72%, transparent 28%);
-  background: color-mix(in srgb, var(--surface) 86%, transparent 14%);
-  backdrop-filter: blur(2px);
-  padding: 0.38rem 0.44rem;
+  padding: 0;
   display: grid;
   gap: 0.18rem;
+  pointer-events: none;
 }
 
 .tarot-card-caption .eyebrow {
@@ -5817,23 +5815,22 @@ body[data-theme="dark"] .numerology-hero .astro-chip {
   margin: 0;
   font-size: 0.73rem;
   line-height: 1.18;
+  color: var(--ink);
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.12);
 }
 
 .tarot-card-caption p {
   margin: 0;
-  color: var(--muted);
+  color: color-mix(in srgb, var(--ink) 82%, var(--muted) 18%);
   font-size: 0.61rem;
   line-height: 1.3;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.08);
 }
 
 body[data-theme="dark"] .tarot-card-visual {
   box-shadow:
     0 14px 34px rgba(0, 0, 0, 0.46),
     0 2px 12px rgba(0, 0, 0, 0.34);
-}
-
-body[data-theme="dark"] .tarot-card-caption {
-  background: color-mix(in srgb, #111722 84%, transparent 16%);
 }
 
 body[data-theme="dark"] .tarot-card-caption p {
@@ -5853,10 +5850,6 @@ body[data-theme="light"] .tarot-card-visual {
 
 body[data-theme="light"] .tarot-arcana-tag {
   background: color-mix(in srgb, #ffffff 88%, transparent 12%);
-}
-
-body[data-theme="light"] .tarot-card-caption {
-  background: color-mix(in srgb, #ffffff 90%, transparent 10%);
 }
 
 body[data-theme="light"] .tarot-reversed-tag {
@@ -6907,10 +6900,10 @@ body[data-theme="light"] .energy-star.neutral {
   }
 
   .tarot-card-caption {
-    left: 0.28rem;
-    right: 0.28rem;
-    bottom: 0.28rem;
-    padding: 0.26rem 0.3rem;
+    left: 0.4rem;
+    right: 0.4rem;
+    bottom: 0.34rem;
+    padding: 0;
     gap: 0.13rem;
   }
 
