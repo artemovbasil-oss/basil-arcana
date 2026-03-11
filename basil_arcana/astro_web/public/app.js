@@ -9461,22 +9461,179 @@ const tarotMinorRanks = [
   { key: "King", label: "King", numeral: "Kg", light: "Authority and strategic completion are supported.", shadow: "Rigidity can weaken collaboration." }
 ];
 
+const tarotMajorArtSpec = {
+  "major-00-fool": { icon: "cliff", sky: "sun", motif: "feather" },
+  "major-01-magician": { icon: "wand-table", sky: "stars", motif: "infinity" },
+  "major-02-high-priestess": { icon: "pillars", sky: "moon", motif: "veil" },
+  "major-03-empress": { icon: "crown-field", sky: "sun", motif: "wheat" },
+  "major-04-emperor": { icon: "throne-mountain", sky: "sun", motif: "ram" },
+  "major-05-hierophant": { icon: "keys-seat", sky: "stars", motif: "cross" },
+  "major-06-lovers": { icon: "duo-tree", sky: "sun", motif: "angel" },
+  "major-07-chariot": { icon: "chariot", sky: "stars", motif: "sphinx" },
+  "major-08-strength": { icon: "lion", sky: "sun", motif: "infinity" },
+  "major-09-hermit": { icon: "lantern", sky: "stars", motif: "mountain" },
+  "major-10-wheel-of-fortune": { icon: "wheel", sky: "stars", motif: "cloud" },
+  "major-11-justice": { icon: "scales", sky: "sun", motif: "sword" },
+  "major-12-hanged-man": { icon: "hanged", sky: "moon", motif: "halo" },
+  "major-13-death": { icon: "banner", sky: "moon", motif: "rose" },
+  "major-14-temperance": { icon: "cups-flow", sky: "sun", motif: "path" },
+  "major-15-devil": { icon: "chains", sky: "moon", motif: "horn" },
+  "major-16-tower": { icon: "tower", sky: "storm", motif: "lightning" },
+  "major-17-star": { icon: "star-pool", sky: "stars", motif: "water" },
+  "major-18-moon": { icon: "moon-path", sky: "moon", motif: "wolves" },
+  "major-19-sun": { icon: "sun-child", sky: "sun", motif: "sunflower" },
+  "major-20-judgement": { icon: "trumpet", sky: "clouds", motif: "rising" },
+  "major-21-world": { icon: "wreath", sky: "stars", motif: "laurel" }
+};
+
+const tarotRankScene = {
+  Ace: "seed",
+  Two: "duality",
+  Three: "triangle",
+  Four: "square",
+  Five: "fracture",
+  Six: "harmony",
+  Seven: "search",
+  Eight: "craft",
+  Nine: "guard",
+  Ten: "load",
+  Page: "messenger",
+  Knight: "rider",
+  Queen: "throne",
+  King: "scepter"
+};
+
+function tarotSeed(text) {
+  let hash = 2166136261;
+  const source = String(text || "");
+  for (let i = 0; i < source.length; i += 1) {
+    hash ^= source.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return Math.abs(hash >>> 0);
+}
+
+function tarotPalette(card) {
+  if (card.arcana === "major") {
+    return { top: "#f2a65e", mid: "#e8d9bf", line: "#1a1a1a", accent: "#be6b1d" };
+  }
+  if (card.suit === "Wands") {
+    return { top: "#ff9f6e", mid: "#f6e6d8", line: "#1a1a1a", accent: "#b84a14" };
+  }
+  if (card.suit === "Cups") {
+    return { top: "#7dcfff", mid: "#dceff9", line: "#1a1a1a", accent: "#1f6ea0" };
+  }
+  if (card.suit === "Swords") {
+    return { top: "#d1d8e6", mid: "#edf1f8", line: "#1a1a1a", accent: "#5b6f8f" };
+  }
+  return { top: "#8be3ae", mid: "#e3f5e9", line: "#1a1a1a", accent: "#2b7c45" };
+}
+
+function tarotSuitSymbol(suit) {
+  if (suit === "Wands") return "ᛯ";
+  if (suit === "Cups") return "◡";
+  if (suit === "Swords") return "†";
+  if (suit === "Pentacles") return "✶";
+  return "✦";
+}
+
+function tarotPatternLayer(seed, accent) {
+  const nodes = [];
+  for (let i = 0; i < 7; i += 1) {
+    const x = 46 + ((seed + i * 37) % 128);
+    const y = 126 + ((seed + i * 53) % 118);
+    const r = 2 + ((seed + i * 11) % 4);
+    nodes.push(`<circle cx="${x}" cy="${y}" r="${r}" fill="${accent}" fill-opacity="0.15"/>`);
+  }
+  return nodes.join("");
+}
+
+function tarotMajorScene(spec, line, accent) {
+  const icon = String(spec?.icon || "star");
+  if (icon === "tower") return `<rect x="100" y="132" width="20" height="86" fill="none" stroke="${line}" stroke-width="2"/><path d="M92 132h36l-8-16h-20z" fill="none" stroke="${line}" stroke-width="2"/><path d="M88 110l22 20 22-20" fill="none" stroke="${accent}" stroke-width="3"/>`;
+  if (icon === "wheel") return `<circle cx="110" cy="176" r="40" fill="none" stroke="${line}" stroke-width="2"/><circle cx="110" cy="176" r="14" fill="none" stroke="${line}" stroke-width="2"/><path d="M110 136v80M70 176h80M82 148l56 56M82 204l56-56" stroke="${accent}" stroke-width="2"/>`;
+  if (icon === "scales") return `<path d="M110 132v84M90 148h40" stroke="${line}" stroke-width="2"/><path d="M90 148l-18 24h36zM130 148l-18 24h36z" fill="none" stroke="${accent}" stroke-width="2"/>`;
+  if (icon === "wreath") return `<ellipse cx="110" cy="176" rx="38" ry="52" fill="none" stroke="${line}" stroke-width="2"/><path d="M82 176q28-24 56 0q-28 24-56 0z" fill="none" stroke="${accent}" stroke-width="2"/>`;
+  if (icon === "lion") return `<circle cx="110" cy="174" r="28" fill="none" stroke="${line}" stroke-width="2"/><circle cx="98" cy="170" r="2.5" fill="${line}"/><circle cx="122" cy="170" r="2.5" fill="${line}"/><path d="M98 186q12 8 24 0" stroke="${accent}" stroke-width="2" fill="none"/>`;
+  if (icon === "lantern") return `<path d="M96 138h28v42H96z" fill="none" stroke="${line}" stroke-width="2"/><path d="M104 150h12v18h-12z" fill="${accent}" fill-opacity="0.3"/><path d="M110 180v36" stroke="${line}" stroke-width="2"/>`;
+  if (icon === "chariot") return `<path d="M74 184h72l-10-24H84z" fill="none" stroke="${line}" stroke-width="2"/><circle cx="90" cy="194" r="8" fill="none" stroke="${accent}" stroke-width="2"/><circle cx="130" cy="194" r="8" fill="none" stroke="${accent}" stroke-width="2"/>`;
+  if (icon === "sun-child") return `<circle cx="110" cy="144" r="22" fill="none" stroke="${accent}" stroke-width="2"/><path d="M110 170v34M96 186h28" stroke="${line}" stroke-width="2"/>`;
+  if (icon === "moon-path") return `<path d="M124 142a22 22 0 1 1-16 35a16 16 0 1 0 16-35z" fill="none" stroke="${accent}" stroke-width="2"/><path d="M86 210q24-30 48 0" fill="none" stroke="${line}" stroke-width="2"/>`;
+  if (icon === "star-pool") return `<path d="M110 128l7 16 18 2-13 11 4 17-16-9-16 9 4-17-13-11 18-2z" fill="none" stroke="${accent}" stroke-width="2"/><path d="M78 204h64" stroke="${line}" stroke-width="2"/>`;
+  if (icon === "trumpet") return `<path d="M86 162h34l16-10v44l-16-10H86z" fill="none" stroke="${line}" stroke-width="2"/><path d="M86 178v22" stroke="${accent}" stroke-width="2"/>`;
+  if (icon === "throne-mountain") return `<path d="M82 196h56v16H82zM90 168h40v28H90z" fill="none" stroke="${line}" stroke-width="2"/><path d="M78 162l12-18 12 18M130 162l12-18 12 18" stroke="${accent}" stroke-width="2" fill="none"/>`;
+  if (icon === "crown-field") return `<path d="M86 166l12-18 12 14 12-14 12 18v18H86z" fill="none" stroke="${line}" stroke-width="2"/><path d="M78 206h64" stroke="${accent}" stroke-width="2"/>`;
+  if (icon === "keys-seat") return `<circle cx="94" cy="186" r="8" fill="none" stroke="${line}" stroke-width="2"/><path d="M102 186h20M122 186v8" stroke="${accent}" stroke-width="2"/>`;
+  if (icon === "duo-tree") return `<path d="M92 206v-34M128 206v-34" stroke="${line}" stroke-width="2"/><circle cx="92" cy="162" r="14" fill="none" stroke="${accent}" stroke-width="2"/><circle cx="128" cy="162" r="14" fill="none" stroke="${accent}" stroke-width="2"/>`;
+  if (icon === "hanged") return `<path d="M84 132h52M110 132v24M110 156q-14 8-14 20q0 12 14 18q14-6 14-18q0-12-14-20z" fill="none" stroke="${line}" stroke-width="2"/>`;
+  if (icon === "banner") return `<path d="M88 132v84M88 144h40l-8 16 8 16H88" fill="none" stroke="${line}" stroke-width="2"/><circle cx="136" cy="196" r="12" fill="none" stroke="${accent}" stroke-width="2"/>`;
+  if (icon === "cups-flow") return `<path d="M88 154h20v14H88zM112 184h20v14h-20z" fill="none" stroke="${line}" stroke-width="2"/><path d="M108 168q8 8 8 16" stroke="${accent}" stroke-width="2"/>`;
+  if (icon === "chains") return `<circle cx="98" cy="176" r="14" fill="none" stroke="${line}" stroke-width="2"/><circle cx="122" cy="176" r="14" fill="none" stroke="${line}" stroke-width="2"/><path d="M110 176h0" stroke="${accent}" stroke-width="2"/>`;
+  if (icon === "pillars") return `<rect x="84" y="138" width="14" height="72" fill="none" stroke="${line}" stroke-width="2"/><rect x="122" y="138" width="14" height="72" fill="none" stroke="${line}" stroke-width="2"/><path d="M98 148h24" stroke="${accent}" stroke-width="2"/>`;
+  if (icon === "wand-table") return `<path d="M84 190h52M90 174h40M110 148v52" stroke="${line}" stroke-width="2"/><circle cx="110" cy="138" r="6" fill="${accent}" fill-opacity="0.4"/>`;
+  if (icon === "cliff") return `<path d="M78 210h64M88 210l18-36 16 20 14-14" fill="none" stroke="${line}" stroke-width="2"/><circle cx="146" cy="146" r="6" fill="${accent}" fill-opacity="0.45"/>`;
+  return `<path d="M110 132l10 20 22 3-16 14 5 22-21-12-21 12 5-22-16-14 22-3z" fill="none" stroke="${line}" stroke-width="2"/>`;
+}
+
+function tarotMinorScene(card, line, accent) {
+  const scene = tarotRankScene[card.rank] || "seed";
+  const suitSymbol = tarotSuitSymbol(card.suit);
+  const quantityMap = { Ace: 1, Two: 2, Three: 3, Four: 4, Five: 5, Six: 6, Seven: 7, Eight: 8, Nine: 9, Ten: 10, Page: 1, Knight: 1, Queen: 1, King: 1 };
+  const qty = quantityMap[card.rank] || 1;
+  const marks = [];
+  const rows = qty > 6 ? 4 : qty > 3 ? 3 : 2;
+  for (let i = 0; i < qty; i += 1) {
+    const col = i % 3;
+    const row = Math.floor(i / 3);
+    const x = 78 + col * 16;
+    const y = 150 + row * Math.max(14, Math.floor(44 / rows));
+    marks.push(`<text x="${x}" y="${y}" text-anchor="middle" font-size="13" fill="${accent}" fill-opacity="0.82">${suitSymbol}</text>`);
+  }
+  const sceneHead = scene === "messenger"
+    ? `<path d="M88 198q22-26 44 0" stroke="${line}" stroke-width="2" fill="none"/><circle cx="110" cy="164" r="14" fill="none" stroke="${accent}" stroke-width="2"/>`
+    : scene === "rider"
+      ? `<path d="M80 192h60M96 192l8-20h16l8 20" stroke="${line}" stroke-width="2" fill="none"/>`
+      : scene === "throne"
+        ? `<path d="M86 194h48v16H86zM92 168h36v26H92z" fill="none" stroke="${line}" stroke-width="2"/>`
+        : scene === "scepter"
+          ? `<path d="M110 142v60" stroke="${line}" stroke-width="2"/><circle cx="110" cy="136" r="6" fill="none" stroke="${accent}" stroke-width="2"/>`
+          : scene === "fracture"
+            ? `<path d="M86 146h48M110 146v52" stroke="${line}" stroke-width="2"/><path d="M102 162l8 8-8 8 8 8" stroke="${accent}" stroke-width="2" fill="none"/>`
+            : scene === "load"
+              ? `<path d="M82 200h56M88 190l44-24" stroke="${line}" stroke-width="2" fill="none"/>`
+              : `<path d="M90 200h40M110 152v48" stroke="${line}" stroke-width="2"/>`;
+  return `${sceneHead}${marks.join("")}`;
+}
+
 function tarotDeckCardSvg(card) {
   const title = String(card.name || "RWS");
   const suitGlyph = card.suit ? tarotSuitMeta[card.suit]?.glyph || "T" : "M";
   const rankGlyph = card.arcana === "major" ? card.rank : card.rankShort;
-  const bg = card.arcana === "major" ? "#f2a65e" : card.suit === "Cups" ? "#6fd6ff" : card.suit === "Wands" ? "#ff8f6b" : card.suit === "Swords" ? "#d0d7e5" : "#7adf9a";
+  const palette = tarotPalette(card);
+  const seed = tarotSeed(card.id);
+  const majorSpec = tarotMajorArtSpec[card.id];
+  const skyGlyph = majorSpec?.sky === "moon" ? "◐" : majorSpec?.sky === "storm" ? "⚡" : majorSpec?.sky === "clouds" ? "☁" : "✦";
+  const scene = card.arcana === "major"
+    ? tarotMajorScene(majorSpec, palette.line, palette.accent)
+    : tarotMinorScene(card, palette.line, palette.accent);
+  const pattern = tarotPatternLayer(seed, palette.accent);
   const svg = `
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 360" role="img" aria-label="${title}">
       <rect x="8" y="8" width="204" height="344" rx="16" fill="#f8f8f7"/>
-      <rect x="16" y="16" width="188" height="328" rx="12" fill="#ffffff" stroke="#111111" stroke-opacity="0.22" />
-      <rect x="28" y="30" width="164" height="62" rx="10" fill="${bg}" fill-opacity="0.28"/>
+      <rect x="16" y="16" width="188" height="328" rx="12" fill="#ffffff" stroke="#111111" stroke-opacity="0.26" />
+      <rect x="24" y="24" width="172" height="312" rx="11" fill="${palette.mid}" fill-opacity="0.34"/>
+      <rect x="28" y="30" width="164" height="62" rx="10" fill="${palette.top}" fill-opacity="0.32"/>
       <text x="110" y="56" text-anchor="middle" font-family="Space Grotesk, IBM Plex Sans, sans-serif" font-size="16" fill="#111111">${title}</text>
-      <text x="110" y="78" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#111111" fill-opacity="0.72">${card.arcana === "major" ? "MAJOR ARCANA" : "MINOR ARCANA"}</text>
-      <rect x="52" y="118" width="116" height="136" rx="16" fill="#111111" fill-opacity="0.05" stroke="#111111" stroke-opacity="0.18"/>
-      <text x="110" y="178" text-anchor="middle" font-family="Space Grotesk, IBM Plex Sans, sans-serif" font-size="54" fill="#111111" fill-opacity="0.86">${suitGlyph}</text>
+      <text x="110" y="78" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#111111" fill-opacity="0.76">${card.arcana === "major" ? "MAJOR ARCANA" : "MINOR ARCANA"}</text>
+      <text x="40" y="46" text-anchor="middle" font-size="12" fill="#111111" fill-opacity="0.74">${skyGlyph}</text>
+      <text x="180" y="46" text-anchor="middle" font-size="12" fill="#111111" fill-opacity="0.74">${skyGlyph}</text>
+      <rect x="50" y="112" width="120" height="148" rx="16" fill="#ffffff" fill-opacity="0.54" stroke="${palette.line}" stroke-opacity="0.22"/>
+      ${pattern}
+      ${scene}
+      <text x="36" y="298" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="18" fill="${palette.accent}" fill-opacity="0.85">${suitGlyph}</text>
+      <text x="184" y="298" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="18" fill="${palette.accent}" fill-opacity="0.85">${suitGlyph}</text>
       <text x="110" y="304" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="24" fill="#111111">${rankGlyph}</text>
-      <rect x="18" y="18" width="184" height="324" rx="12" fill="none" stroke="#111111" stroke-opacity="0.28"/>
+      <rect x="18" y="18" width="184" height="324" rx="12" fill="none" stroke="#111111" stroke-opacity="0.32"/>
     </svg>
   `;
   return `data:image/svg+xml,${encodeURIComponent(svg)}`;
@@ -9597,10 +9754,10 @@ function tarotView() {
       <article class="card tone-card tarot-hero">
         <span class="eyebrow">RWS Tarot</span>
         <h1>Daily 3-Card Tarot Spread</h1>
-        <p>Automatic three-card draw on page load with minimal RWS-style SVG deck and practical interpretation. Ask your own question to get an answer in the context of the same card combination.</p>
+        <p>Automatic three-card draw on page load with handcrafted RWS-inspired SVG illustrations for all 78 cards and practical interpretation. Ask your own question to get an answer in the context of the same card combination.</p>
         <div class="chip-grid">
           <span class="astro-chip">Deck: Rider-Waite-Smith inspired</span>
-          <span class="astro-chip">Cards: 78 minimalist SVG</span>
+          <span class="astro-chip">Cards: 78 handcrafted SVG</span>
           <span class="astro-chip">Mode: Daily + Question</span>
         </div>
       </article>
