@@ -9633,41 +9633,56 @@ function tarotMinorScene(card, line, accent) {
   return `${sceneHead}${marks.join("")}`;
 }
 
+function tarotCardHasFigure(card) {
+  if (card.arcana === "major") return true;
+  return ["Page", "Knight", "Queen", "King"].includes(String(card.rank || ""));
+}
+
+function tarotFigureSeed(card) {
+  const source = `${card.id}-${card.rank || ""}-${card.suit || ""}`;
+  let hash = 0;
+  for (let i = 0; i < source.length; i += 1) {
+    hash = ((hash << 5) - hash + source.charCodeAt(i)) | 0;
+  }
+  return `${String(card.name || "tarot").replace(/\s+/g, "-").toLowerCase()}-${Math.abs(hash)}`;
+}
+
+function tarotFigureLayer(card) {
+  if (!tarotCardHasFigure(card)) return "";
+  const seed = tarotFigureSeed(card);
+  const clipId = `fig-${String(card.id || "rws").replace(/[^a-zA-Z0-9_-]/g, "")}`;
+  const url = `https://api.dicebear.com/9.x/notionists/svg?seed=${encodeURIComponent(seed)}`;
+  return `
+    <defs>
+      <clipPath id="${clipId}">
+        <rect x="58" y="118" width="104" height="130" rx="16"/>
+      </clipPath>
+    </defs>
+    <image href="${url}" x="58" y="118" width="104" height="130" clip-path="url(#${clipId})" preserveAspectRatio="xMidYMid slice" opacity="0.95"/>
+  `;
+}
+
 function tarotDeckCardSvg(card, theme = "light") {
   const title = String(card.name || "RWS");
-  const suitGlyph = card.suit ? tarotSuitMeta[card.suit]?.glyph || "T" : "M";
-  const rankGlyph = card.arcana === "major" ? card.rank : card.rankShort;
   const palette = tarotPalette(card, theme);
   const textColor = palette.line;
   const seed = tarotSeed(card.id);
   const majorSpec = tarotMajorArtSpec[card.id];
-  const skyGlyph = majorSpec?.sky === "moon" ? "◐" : majorSpec?.sky === "storm" ? "⚡" : majorSpec?.sky === "clouds" ? "☁" : "✦";
   const scene = card.arcana === "major"
     ? tarotMajorScene(majorSpec, palette.line, palette.accent)
     : tarotMinorScene(card, palette.line, palette.accent);
+  const figure = tarotFigureLayer(card);
   const pattern = tarotPatternLayer(seed, palette.accent);
   const constellation = tarotConstellationLayer(seed, palette.line, palette.accent);
-  const arcanaTagX = card.arcana === "major" ? 32 : 36;
-  const arcanaTagLabel = card.arcana === "major" ? "MAJOR" : "MINOR";
   const svg = `
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 360" role="img" aria-label="${title}">
-      <rect x="8" y="8" width="204" height="344" rx="16" fill="${palette.paper}"/>
-      <rect x="16" y="16" width="188" height="328" rx="12" fill="${palette.card}" stroke="${textColor}" stroke-opacity="0.28" />
-      <rect x="24" y="24" width="172" height="312" rx="11" fill="${palette.mid}" fill-opacity="0.34"/>
-      <rect x="28" y="30" width="164" height="62" rx="10" fill="${palette.top}" fill-opacity="0.32"/>
-      <text x="110" y="55" text-anchor="middle" font-family="Georgia, Times New Roman, serif" font-size="17" fill="${textColor}" letter-spacing="0.15">${title}</text>
-      <rect x="${220 - arcanaTagX - 14}" y="66" width="${arcanaTagX}" height="14" rx="7" fill="${palette.accent}" fill-opacity="0.22" stroke="${palette.accent}" stroke-opacity="0.38"/>
-      <text x="${220 - arcanaTagX / 2 - 14}" y="76.5" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="7.5" fill="${textColor}" fill-opacity="0.86" letter-spacing="0.6">${arcanaTagLabel}</text>
-      <text x="40" y="46" text-anchor="middle" font-size="12" fill="${textColor}" fill-opacity="0.74">${skyGlyph}</text>
-      <text x="180" y="46" text-anchor="middle" font-size="12" fill="${textColor}" fill-opacity="0.74">${skyGlyph}</text>
-      <rect x="50" y="112" width="120" height="148" rx="16" fill="${palette.card}" fill-opacity="0.56" stroke="${palette.line}" stroke-opacity="0.24"/>
+      <rect x="8" y="8" width="204" height="344" rx="16" fill="${palette.paper}" stroke="${textColor}" stroke-opacity="0.36" stroke-width="1.4"/>
+      <rect x="16" y="16" width="188" height="328" rx="12" fill="${palette.card}"/>
+      <text x="110" y="46" text-anchor="middle" font-family="IBM Plex Sans, system-ui, sans-serif" font-size="14.8" font-weight="600" fill="${textColor}" letter-spacing="0.02em">${title}</text>
       ${constellation}
       ${pattern}
+      ${figure}
       ${scene}
-      <text x="36" y="298" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="18" fill="${palette.accent}" fill-opacity="0.85">${suitGlyph}</text>
-      <text x="184" y="298" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="18" fill="${palette.accent}" fill-opacity="0.85">${suitGlyph}</text>
-      <text x="110" y="304" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="24" fill="${textColor}">${rankGlyph}</text>
-      <rect x="18" y="18" width="184" height="324" rx="12" fill="none" stroke="${textColor}" stroke-opacity="0.34"/>
     </svg>
   `;
   return `data:image/svg+xml,${encodeURIComponent(svg)}`;
@@ -9840,6 +9855,7 @@ function renderTarotSpread(session, question = "") {
   stage.innerHTML = cards.map((item, index) => `
     <article class="tarot-scene-card ${item.reversed ? "is-reversed" : ""}" style="--card-index:${index}">
       <div class="tarot-card-visual">
+        <span class="tarot-arcana-tag">${item.card.arcana === "major" ? "Major" : "Minor"}</span>
         <img src="${state.theme === "dark" ? item.card.svgDark : item.card.svgLight}" alt="${escapeHtml(item.card.name)}" loading="lazy" decoding="async" />
         ${item.reversed ? `<span class="tarot-reversed-tag">Reversed</span>` : ``}
       </div>
