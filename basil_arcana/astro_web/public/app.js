@@ -10078,15 +10078,37 @@ function buildTarotInterpretation(session, question = "") {
 
 function tarotView() {
   if (!hasProfile()) {
-    return shell({
-      eyebrow: "Tarot",
-      title: "Profile required before tarot spread",
-      intro: "Tarot daily interpretation works best with your profile context. Complete onboarding first.",
-      primaryCta: { href: "/onboarding", label: "Complete Onboarding" },
-      secondaryCta: { href: "/", label: "Back Home" },
-      rightPanel: "<h2>RWS Daily Spread</h2><p>Three cards, automatic draw, and actionable interpretation.</p>",
-      body: ""
-    });
+    return `
+      <section class="section">
+        <article class="card tone-card tarot-hero">
+          <span class="eyebrow">RWS Tarot Preview</span>
+          <h1>Daily 3-Card Tarot Spread</h1>
+          <p>Public preview mode: get today’s 3-card spread and practical interpretation. Create an account to unlock full personalized tarot linked to your profile.</p>
+        </article>
+      </section>
+      <section class="section">
+        <article class="card tarot-stage-card">
+          <div id="tarotSpreadStage" class="tarot-spread-stage" aria-live="polite"></div>
+          <div class="tarot-controls">
+            <div class="tarot-question-actions">
+              <button id="tarotRedrawButton" class="btn ghost" type="button">Draw new 3 cards</button>
+            </div>
+            <div id="tarotNarrative" class="tarot-narrative"></div>
+          </div>
+        </article>
+      </section>
+      <section class="section">
+        <article class="card lead-flow-card">
+          <span class="eyebrow">Unlock full mode</span>
+          <h2>Save spreads and get profile-based guidance</h2>
+          <p class="muted">Sign in to keep your profile, combine tarot with natal analysis, and access full daily tools.</p>
+          <div class="hero-actions">
+            <a class="btn primary" href="/login">Sign in / Register</a>
+            <a class="btn ghost" href="/">Back Home</a>
+          </div>
+        </article>
+      </section>
+    `;
   }
 
   return `
@@ -10134,6 +10156,26 @@ function tarotView() {
   `;
 }
 
+function tarotImageSource(card, theme = "light") {
+  const key = theme === "dark" ? "svgDark" : "svgLight";
+  const raw = String(card?.[key] || "");
+  if (!raw.startsWith("data:image/svg+xml,")) {
+    return raw;
+  }
+  const cacheKey = theme === "dark" ? "_svgBlobDark" : "_svgBlobLight";
+  if (card[cacheKey]) {
+    return card[cacheKey];
+  }
+  try {
+    const encoded = raw.slice("data:image/svg+xml,".length);
+    const svg = decodeURIComponent(encoded);
+    card[cacheKey] = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml;charset=utf-8" }));
+    return card[cacheKey];
+  } catch (_) {
+    return raw;
+  }
+}
+
 function renderTarotSpread(session, question = "", opts = {}) {
   const stageId = String(opts?.stageId || "tarotSpreadStage");
   const narrativeId = String(opts?.narrativeId || "tarotNarrative");
@@ -10147,7 +10189,7 @@ function renderTarotSpread(session, question = "", opts = {}) {
     <article class="tarot-scene-card ${item.reversed ? "is-reversed" : ""}" style="--card-index:${index}">
       <div class="tarot-card-visual">
         <span class="tarot-arcana-tag">${item.card.arcana === "major" ? "Major" : "Minor"}</span>
-        <img class="tarot-card-face" src="${state.theme === "dark" ? item.card.svgDark : item.card.svgLight}" alt="${escapeHtml(item.card.name)}" loading="lazy" decoding="async" />
+        <img class="tarot-card-face" src="${tarotImageSource(item.card, state.theme === "dark" ? "dark" : "light")}" alt="${escapeHtml(item.card.name)}" loading="lazy" decoding="async" />
         ${item.card.figureUrl ? `<img class="tarot-figure-overlay" src="${item.card.figureUrl}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" />` : ``}
         ${item.reversed ? `<span class="tarot-reversed-tag">Reversed</span>` : ``}
       </div>
