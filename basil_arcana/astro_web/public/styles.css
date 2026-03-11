@@ -6831,6 +6831,14 @@ body[data-theme="light"] .energy-star.neutral {
     gap: 0.32rem;
   }
 
+  .tarot-card-face {
+    transform: translateY(8px);
+  }
+
+  .tarot-figure-overlay {
+    top: 35%;
+  }
+
   .tarot-card-meta h3 {
     font-size: 0.68rem;
     line-height: 1.18;
