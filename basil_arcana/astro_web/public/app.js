@@ -9559,6 +9559,23 @@ function tarotPatternLayer(seed, accent) {
   return nodes.join("");
 }
 
+function tarotConstellationLayer(seed, line, accent) {
+  const points = [];
+  for (let i = 0; i < 6; i += 1) {
+    const x = 62 + ((seed + i * 29) % 94);
+    const y = 132 + ((seed + i * 47) % 112);
+    points.push({ x, y });
+  }
+  const links = [];
+  for (let i = 0; i < points.length - 1; i += 1) {
+    const left = points[i];
+    const right = points[i + 1];
+    links.push(`<line x1="${left.x}" y1="${left.y}" x2="${right.x}" y2="${right.y}" stroke="${line}" stroke-opacity="0.16" stroke-width="1"/>`);
+  }
+  const stars = points.map((point, idx) => `<circle cx="${point.x}" cy="${point.y}" r="${idx % 2 === 0 ? 2.2 : 1.6}" fill="${accent}" fill-opacity="0.35"/>`);
+  return `${links.join("")}${stars.join("")}`;
+}
+
 function tarotMajorScene(spec, line, accent) {
   const icon = String(spec?.icon || "star");
   if (icon === "tower") return `<rect x="100" y="132" width="20" height="86" fill="none" stroke="${line}" stroke-width="2"/><path d="M92 132h36l-8-16h-20z" fill="none" stroke="${line}" stroke-width="2"/><path d="M88 110l22 20 22-20" fill="none" stroke="${accent}" stroke-width="3"/>`;
@@ -9629,17 +9646,22 @@ function tarotDeckCardSvg(card, theme = "light") {
     ? tarotMajorScene(majorSpec, palette.line, palette.accent)
     : tarotMinorScene(card, palette.line, palette.accent);
   const pattern = tarotPatternLayer(seed, palette.accent);
+  const constellation = tarotConstellationLayer(seed, palette.line, palette.accent);
+  const arcanaTagX = card.arcana === "major" ? 32 : 36;
+  const arcanaTagLabel = card.arcana === "major" ? "MAJOR" : "MINOR";
   const svg = `
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 360" role="img" aria-label="${title}">
       <rect x="8" y="8" width="204" height="344" rx="16" fill="${palette.paper}"/>
       <rect x="16" y="16" width="188" height="328" rx="12" fill="${palette.card}" stroke="${textColor}" stroke-opacity="0.28" />
       <rect x="24" y="24" width="172" height="312" rx="11" fill="${palette.mid}" fill-opacity="0.34"/>
       <rect x="28" y="30" width="164" height="62" rx="10" fill="${palette.top}" fill-opacity="0.32"/>
-      <text x="110" y="56" text-anchor="middle" font-family="Space Grotesk, IBM Plex Sans, sans-serif" font-size="16" fill="${textColor}">${title}</text>
-      <text x="110" y="78" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="${textColor}" fill-opacity="0.76">${card.arcana === "major" ? "MAJOR ARCANA" : "MINOR ARCANA"}</text>
+      <text x="110" y="55" text-anchor="middle" font-family="Georgia, Times New Roman, serif" font-size="17" fill="${textColor}" letter-spacing="0.15">${title}</text>
+      <rect x="${220 - arcanaTagX - 14}" y="66" width="${arcanaTagX}" height="14" rx="7" fill="${palette.accent}" fill-opacity="0.22" stroke="${palette.accent}" stroke-opacity="0.38"/>
+      <text x="${220 - arcanaTagX / 2 - 14}" y="76.5" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="7.5" fill="${textColor}" fill-opacity="0.86" letter-spacing="0.6">${arcanaTagLabel}</text>
       <text x="40" y="46" text-anchor="middle" font-size="12" fill="${textColor}" fill-opacity="0.74">${skyGlyph}</text>
       <text x="180" y="46" text-anchor="middle" font-size="12" fill="${textColor}" fill-opacity="0.74">${skyGlyph}</text>
       <rect x="50" y="112" width="120" height="148" rx="16" fill="${palette.card}" fill-opacity="0.56" stroke="${palette.line}" stroke-opacity="0.24"/>
+      ${constellation}
       ${pattern}
       ${scene}
       <text x="36" y="298" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="18" fill="${palette.accent}" fill-opacity="0.85">${suitGlyph}</text>
@@ -9819,6 +9841,7 @@ function renderTarotSpread(session, question = "") {
     <article class="tarot-scene-card ${item.reversed ? "is-reversed" : ""}" style="--card-index:${index}">
       <div class="tarot-card-visual">
         <img src="${state.theme === "dark" ? item.card.svgDark : item.card.svgLight}" alt="${escapeHtml(item.card.name)}" loading="lazy" decoding="async" />
+        ${item.reversed ? `<span class="tarot-reversed-tag">Reversed</span>` : ``}
       </div>
       <div class="tarot-card-meta">
         <span class="eyebrow">${tarotSpreadLabel(index)}</span>

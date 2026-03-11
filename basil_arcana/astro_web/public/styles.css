@@ -5698,13 +5698,12 @@ body[data-theme="dark"] .numerology-hero .astro-chip {
   gap: 0.42rem;
 }
 
-.tarot-scene-card.is-reversed .tarot-card-visual img {
-  transform: rotate(180deg);
-}
-
 .tarot-card-visual {
+  position: relative;
   transform-style: preserve-3d;
-  animation: tarotCardDrop 0.75s cubic-bezier(0.2, 0.84, 0.2, 1) both;
+  animation:
+    tarotCardDrop 0.75s cubic-bezier(0.2, 0.84, 0.2, 1) both,
+    tarotCardFloat 6.2s ease-in-out infinite;
   animation-delay: calc(var(--card-index, 0) * 120ms);
   border-radius: 14px;
   overflow: hidden;
@@ -5713,11 +5712,45 @@ body[data-theme="dark"] .numerology-hero .astro-chip {
     0 2px 10px rgba(0, 0, 0, 0.15);
 }
 
+.tarot-card-visual::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at 18% 14%, rgba(255, 255, 255, 0.18) 0%, transparent 42%);
+  mix-blend-mode: screen;
+  opacity: 0.42;
+}
+
+.tarot-card-visual::after {
+  content: "";
+  position: absolute;
+  inset: -28% -10%;
+  pointer-events: none;
+  background: linear-gradient(112deg, transparent 0%, rgba(255, 255, 255, 0.16) 48%, transparent 100%);
+  transform: translateX(-45%);
+  animation: tarotSheen 7.2s linear infinite;
+}
+
 .tarot-card-visual img {
   width: 100%;
   height: auto;
   display: block;
   transition: transform 0.25s ease, filter 0.25s ease;
+}
+
+.tarot-reversed-tag {
+  position: absolute;
+  left: 0.44rem;
+  top: 0.44rem;
+  border: 1px solid color-mix(in srgb, #ff7d7d 58%, var(--line-strong) 42%);
+  background: color-mix(in srgb, #2b1111 68%, transparent 32%);
+  color: #ffd8d8;
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.18rem 0.34rem;
+  z-index: 3;
 }
 
 .tarot-card-meta h3 {
@@ -5737,6 +5770,10 @@ body[data-theme="dark"] .tarot-card-visual {
     0 2px 12px rgba(0, 0, 0, 0.34);
 }
 
+body[data-theme="dark"] .tarot-card-visual::before {
+  opacity: 0.25;
+}
+
 body[data-theme="dark"] .tarot-card-meta p {
   color: color-mix(in srgb, var(--muted) 86%, #f1f2f6 14%);
 }
@@ -5745,6 +5782,11 @@ body[data-theme="light"] .tarot-card-visual {
   box-shadow:
     0 14px 28px rgba(20, 28, 42, 0.14),
     0 1px 6px rgba(20, 28, 42, 0.12);
+}
+
+body[data-theme="light"] .tarot-reversed-tag {
+  background: color-mix(in srgb, #ffe6e6 78%, transparent 22%);
+  color: #7b1c1c;
 }
 
 .tarot-controls {
@@ -5978,6 +6020,32 @@ body[data-theme="dark"] .numerology-dice-overlay .astro-chip {
   to {
     opacity: 1;
     transform: translateY(0) rotateX(0deg) rotateZ(calc((var(--card-index, 0) - 1) * 1.1deg));
+  }
+}
+
+@keyframes tarotCardFloat {
+  0% {
+    transform: translateY(0) rotateZ(calc((var(--card-index, 0) - 1) * 1.1deg));
+  }
+  50% {
+    transform: translateY(-5px) rotateZ(calc((var(--card-index, 0) - 1) * 0.8deg));
+  }
+  100% {
+    transform: translateY(0) rotateZ(calc((var(--card-index, 0) - 1) * 1.1deg));
+  }
+}
+
+@keyframes tarotSheen {
+  0% {
+    transform: translateX(-48%);
+    opacity: 0.08;
+  }
+  42% {
+    opacity: 0.24;
+  }
+  100% {
+    transform: translateX(48%);
+    opacity: 0.08;
   }
 }
 
@@ -6552,7 +6620,11 @@ body[data-theme="light"] .energy-star.neutral {
     grid-template-columns: 1fr;
   }
 
-  .tarot-spread-stage,
+  .tarot-spread-stage {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.42rem;
+  }
+
   .tarot-meaning-grid {
     grid-template-columns: 1fr;
   }
@@ -6746,6 +6818,28 @@ body[data-theme="light"] .energy-star.neutral {
 
   .tarot-question-actions .btn {
     width: 100%;
+  }
+
+  .tarot-stage-card {
+    padding: 0.66rem;
+  }
+
+  .tarot-spread-stage {
+    gap: 0.32rem;
+  }
+
+  .tarot-card-meta h3 {
+    font-size: 0.68rem;
+    line-height: 1.18;
+  }
+
+  .tarot-card-meta p {
+    display: none;
+  }
+
+  .tarot-card-meta .eyebrow {
+    font-size: 0.5rem;
+    letter-spacing: 0.06em;
   }
 
   .compat-hero-layout {
