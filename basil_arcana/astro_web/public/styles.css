@@ -5851,6 +5851,7 @@ body[data-theme="light"] .tarot-figure-overlay {
 .tarot-interpretation p {
   margin: 0 0 0.45rem;
   color: var(--muted);
+  line-height: 1.52;
 }
 
 .tarot-meaning-grid {
@@ -5876,6 +5877,10 @@ body[data-theme="light"] .tarot-figure-overlay {
   margin: 0;
   font-size: 0.79rem;
   line-height: 1.45;
+}
+
+.tarot-meaning-card p + p {
+  margin-top: 0.34rem;
 }
 
 .numerology-visual-grid .route-card {

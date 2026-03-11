@@ -9735,6 +9735,36 @@ function tarotSpreadLabel(index) {
   return labels[index] || `Position ${index + 1}`;
 }
 
+function tarotDomainLabel(card) {
+  if (card.arcana === "major") return "life direction and key decisions";
+  if (card.suit === "Wands") return "initiative, ambition, and execution speed";
+  if (card.suit === "Cups") return "relationships, emotional tone, and trust";
+  if (card.suit === "Swords") return "thinking, communication, and strategic clarity";
+  return "resources, work systems, and concrete outcomes";
+}
+
+function tarotPositionAdvice(index) {
+  if (index === 0) {
+    return "Read this as your baseline state: how you are entering the day before external pressure appears.";
+  }
+  if (index === 1) {
+    return "Treat this card as the friction point: where mistakes repeat if you stay on autopilot.";
+  }
+  return "Use this as the decision rule for the next 24 hours: one focused move is better than ten scattered actions.";
+}
+
+function tarotActionPrompt(item, index) {
+  const domain = tarotDomainLabel(item.card);
+  if (item.reversed) {
+    if (index === 0) return `Stabilize ${domain} first. Slow pace by 15%, remove one non-essential task, and clarify priorities in writing.`;
+    if (index === 1) return `Name the risk openly in ${domain}. Reduce ambiguity with explicit boundaries, ownership, and timing.`;
+    return `Choose a conservative move in ${domain}: protect energy, confirm facts, then commit to a smaller but reliable step.`;
+  }
+  if (index === 0) return `Leverage momentum in ${domain}. Start with the highest-impact action while your attention is clean.`;
+  if (index === 1) return `Transform pressure in ${domain} into structure: one metric, one owner, one deadline.`;
+  return `Advance ${domain} with one visible action today and a clear follow-up checkpoint tomorrow.`;
+}
+
 function buildTarotInterpretation(session, question = "") {
   const cards = Array.isArray(session?.cards) ? session.cards : [];
   if (!cards.length) {
@@ -9745,32 +9775,43 @@ function buildTarotInterpretation(session, question = "") {
   const questionText = String(question || "").trim();
   const cardLines = cards.map((item, idx) => {
     const message = item.reversed ? item.card.shadow : item.card.light;
+    const advice = tarotPositionAdvice(idx);
+    const prompt = tarotActionPrompt(item, idx);
+    const domain = tarotDomainLabel(item.card);
     return `
       <article class="tarot-meaning-card">
         <span class="eyebrow">${tarotSpreadLabel(idx)}</span>
         <h3>${item.card.name}${item.reversed ? " (Reversed)" : ""}</h3>
         <p>${message}</p>
+        <p><strong>Domain:</strong> ${domain}.</p>
+        <p><strong>Reading:</strong> ${advice}</p>
+        <p><strong>Action:</strong> ${prompt}</p>
       </article>
     `;
   }).join("");
 
   const comboSummary = majorCount >= 2
-    ? "The spread is dominated by major arcana, so the day carries a strong turning-point quality."
-    : "The spread is mostly minor arcana, so progress comes from practical micro-decisions."
+    ? "This spread is major-arcana heavy, so the day is about direction, standards, and decisions that shape a larger chapter."
+    : "This spread is minor-arcana dominant, so results come from practical execution, communication quality, and daily habits."
   ;
   const polaritySummary = reversedCount >= 2
-    ? "Reversed emphasis suggests hidden tension: clarity comes through slowing down and naming assumptions."
-    : "Orientation is mostly upright, supporting direct action with measured confidence.";
+    ? "Two or more reversed cards indicate hidden drag. Slow down enough to verify assumptions before committing."
+    : "Orientation is mostly upright, which supports decisive action if you keep focus and avoid overextension.";
   const guidance = cards[2] || cards[0];
   const challenge = cards[1] || cards[0];
+  const energy = cards[0];
   const answer = questionText
-    ? `Question focus: <strong>${escapeHtml(questionText)}</strong>. In this combination, the best answer is to use <strong>${guidance.card.name}</strong> as strategy while consciously managing the friction of <strong>${challenge.card.name}</strong>.`
-    : "No question entered. Use this spread as a daily strategy map: identify one action, one risk, and one conversation boundary.";
+    ? `Question focus: <strong>${escapeHtml(questionText)}</strong>. Use <strong>${guidance.card.name}</strong> as your primary strategy, manage the tension of <strong>${challenge.card.name}</strong>, and let <strong>${energy.card.name}</strong> define your tone.`
+    : "No question entered. Use this spread as a daily planning lens: define one priority action, one risk to prevent, and one boundary for communication.";
+  const synthesis = `
+    <p><strong>Synthesis:</strong> Start from <strong>${energy.card.name}</strong> (state), pass through <strong>${challenge.card.name}</strong> (pressure), and execute through <strong>${guidance.card.name}</strong> (strategy). This sequence helps convert symbolic insight into concrete behavior.</p>
+  `;
 
   return `
     <div class="tarot-interpretation">
       <p>${comboSummary} ${polaritySummary}</p>
       <p>${answer}</p>
+      ${synthesis}
       <div class="tarot-meaning-grid">
         ${cardLines}
       </div>
@@ -9796,11 +9837,11 @@ function tarotView() {
       <article class="card tone-card tarot-hero">
         <span class="eyebrow">RWS Tarot</span>
         <h1>Daily 3-Card Tarot Spread</h1>
-        <p>Automatic three-card draw on page load with handcrafted RWS-inspired SVG illustrations for all 78 cards and practical interpretation. Ask your own question to get an answer in the context of the same card combination.</p>
+        <p>Tarot here is not entertainment and not fatalism. It is a structured reflection tool for planning your day, spotting blind zones, and choosing cleaner decisions. You get a three-card spread automatically and can ask a specific question to get a contextual answer.</p>
         <div class="chip-grid">
-          <span class="astro-chip">Deck: Rider-Waite-Smith inspired</span>
-          <span class="astro-chip">Cards: 78 handcrafted SVG</span>
-          <span class="astro-chip">Mode: Daily + Question</span>
+          <span class="astro-chip">Method: reflection + planning</span>
+          <span class="astro-chip">Format: 3-card daily spread</span>
+          <span class="astro-chip">Mode: open draw + question focus</span>
         </div>
       </article>
     </section>
@@ -9824,13 +9865,13 @@ function tarotView() {
     <section class="section">
       <article class="card lead-flow-card">
         <span class="eyebrow">How to read this spread</span>
-        <h2>3-card protocol</h2>
+        <h2>Simple protocol for real decisions</h2>
         <ul class="article-list">
-          <li>Card 1 shows your current energy pattern.</li>
-          <li>Card 2 shows friction, blind spots, or the pressure point.</li>
-          <li>Card 3 gives the best strategic move for today.</li>
+          <li>Card 1 shows your starting state: tone, mindset, and available energy.</li>
+          <li>Card 2 reveals friction: where conflict, delay, or confusion is likely.</li>
+          <li>Card 3 provides strategy: the move with the best risk/reward for today.</li>
         </ul>
-        <p class="muted">Tip: keep one concrete action from Card 3 and one boundary from Card 2.</p>
+        <p class="muted">Use it as a planning ritual: choose one priority action, one boundary, and one conversation you need to handle cleanly.</p>
       </article>
     </section>
   `;
