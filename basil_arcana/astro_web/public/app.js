@@ -9650,16 +9650,7 @@ function tarotFigureSeed(card) {
 function tarotFigureLayer(card) {
   if (!tarotCardHasFigure(card)) return "";
   const seed = tarotFigureSeed(card);
-  const clipId = `fig-${String(card.id || "rws").replace(/[^a-zA-Z0-9_-]/g, "")}`;
-  const url = `https://api.dicebear.com/9.x/notionists/svg?seed=${encodeURIComponent(seed)}`;
-  return `
-    <defs>
-      <clipPath id="${clipId}">
-        <rect x="58" y="118" width="104" height="130" rx="16"/>
-      </clipPath>
-    </defs>
-    <image href="${url}" x="58" y="118" width="104" height="130" clip-path="url(#${clipId})" preserveAspectRatio="xMidYMid slice" opacity="0.95"/>
-  `;
+  return `https://api.dicebear.com/9.x/notionists/svg?seed=${encodeURIComponent(seed)}`;
 }
 
 function tarotDeckCardSvg(card, theme = "light") {
@@ -9671,7 +9662,6 @@ function tarotDeckCardSvg(card, theme = "light") {
   const scene = card.arcana === "major"
     ? tarotMajorScene(majorSpec, palette.line, palette.accent)
     : tarotMinorScene(card, palette.line, palette.accent);
-  const figure = tarotFigureLayer(card);
   const pattern = tarotPatternLayer(seed, palette.accent);
   const constellation = tarotConstellationLayer(seed, palette.line, palette.accent);
   const svg = `
@@ -9681,7 +9671,6 @@ function tarotDeckCardSvg(card, theme = "light") {
       <text x="110" y="46" text-anchor="middle" font-family="IBM Plex Sans, system-ui, sans-serif" font-size="14.8" font-weight="600" fill="${textColor}" letter-spacing="0.02em">${title}</text>
       ${constellation}
       ${pattern}
-      ${figure}
       ${scene}
     </svg>
   `;
@@ -9704,6 +9693,7 @@ function buildRwsTarotDeck() {
     };
     card.svgLight = tarotDeckCardSvg(card, "light");
     card.svgDark = tarotDeckCardSvg(card, "dark");
+    card.figureUrl = tarotFigureLayer(card);
     deck.push(card);
   });
 
@@ -9722,6 +9712,7 @@ function buildRwsTarotDeck() {
       };
       card.svgLight = tarotDeckCardSvg(card, "light");
       card.svgDark = tarotDeckCardSvg(card, "dark");
+      card.figureUrl = tarotFigureLayer(card);
       deck.push(card);
     });
   });
@@ -9856,7 +9847,8 @@ function renderTarotSpread(session, question = "") {
     <article class="tarot-scene-card ${item.reversed ? "is-reversed" : ""}" style="--card-index:${index}">
       <div class="tarot-card-visual">
         <span class="tarot-arcana-tag">${item.card.arcana === "major" ? "Major" : "Minor"}</span>
-        <img src="${state.theme === "dark" ? item.card.svgDark : item.card.svgLight}" alt="${escapeHtml(item.card.name)}" loading="lazy" decoding="async" />
+        <img class="tarot-card-face" src="${state.theme === "dark" ? item.card.svgDark : item.card.svgLight}" alt="${escapeHtml(item.card.name)}" loading="lazy" decoding="async" />
+        ${item.card.figureUrl ? `<img class="tarot-figure-overlay" src="${item.card.figureUrl}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" />` : ``}
         ${item.reversed ? `<span class="tarot-reversed-tag">Reversed</span>` : ``}
       </div>
       <div class="tarot-card-meta">
