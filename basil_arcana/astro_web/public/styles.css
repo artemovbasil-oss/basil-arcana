@@ -5752,6 +5752,24 @@ body[data-theme="dark"] .numerology-hero .astro-chip {
   transition: transform 0.25s ease, filter 0.25s ease;
 }
 
+.tarot-card-face-svg {
+  line-height: 0;
+}
+
+.tarot-card-face-svg svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 26px;
+}
+
+.tarot-card-face-fallback {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 26px;
+}
+
 .tarot-figure-overlay {
   position: absolute;
   left: 26.5%;
@@ -5798,12 +5816,14 @@ body[data-theme="dark"] .numerology-hero .astro-chip {
   position: absolute;
   left: 0.66rem;
   right: 0.66rem;
-  bottom: 0.62rem;
+  bottom: 1.24rem;
   z-index: 3;
   padding: 0;
   display: grid;
   gap: 0.18rem;
   pointer-events: none;
+  text-align: center;
+  justify-items: center;
 }
 
 .tarot-card-caption .eyebrow {
@@ -6902,7 +6922,7 @@ body[data-theme="light"] .energy-star.neutral {
   .tarot-card-caption {
     left: 0.4rem;
     right: 0.4rem;
-    bottom: 0.34rem;
+    bottom: 0.74rem;
     padding: 0;
     gap: 0.13rem;
   }

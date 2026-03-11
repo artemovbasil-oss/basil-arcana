@@ -10176,6 +10176,26 @@ function tarotImageSource(card, theme = "light") {
   }
 }
 
+function tarotInlineSvgMarkup(card, theme = "light") {
+  const key = theme === "dark" ? "svgDark" : "svgLight";
+  const raw = String(card?.[key] || "");
+  if (!raw.startsWith("data:image/svg+xml,")) {
+    return "";
+  }
+  const cacheKey = theme === "dark" ? "_svgMarkupDark" : "_svgMarkupLight";
+  if (card[cacheKey]) {
+    return card[cacheKey];
+  }
+  try {
+    const encoded = raw.slice("data:image/svg+xml,".length);
+    const svg = decodeURIComponent(encoded);
+    card[cacheKey] = svg;
+    return svg;
+  } catch (_) {
+    return "";
+  }
+}
+
 function renderTarotSpread(session, question = "", opts = {}) {
   const stageId = String(opts?.stageId || "tarotSpreadStage");
   const narrativeId = String(opts?.narrativeId || "tarotNarrative");
@@ -10189,7 +10209,7 @@ function renderTarotSpread(session, question = "", opts = {}) {
     <article class="tarot-scene-card ${item.reversed ? "is-reversed" : ""}" style="--card-index:${index}">
       <div class="tarot-card-visual">
         <span class="tarot-arcana-tag">${item.card.arcana === "major" ? "Major" : "Minor"}</span>
-        <img class="tarot-card-face" src="${tarotImageSource(item.card, state.theme === "dark" ? "dark" : "light")}" alt="${escapeHtml(item.card.name)}" loading="lazy" decoding="async" />
+        <div class="tarot-card-face tarot-card-face-svg" role="img" aria-label="${escapeHtml(item.card.name)}">${tarotInlineSvgMarkup(item.card, state.theme === "dark" ? "dark" : "light") || `<img class="tarot-card-face-fallback" src="${tarotImageSource(item.card, state.theme === "dark" ? "dark" : "light")}" alt="${escapeHtml(item.card.name)}" loading="lazy" decoding="async" />`}</div>
         ${item.card.figureUrl ? `<img class="tarot-figure-overlay" src="${item.card.figureUrl}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" />` : ``}
         ${item.reversed ? `<span class="tarot-reversed-tag">Reversed</span>` : ``}
         <div class="tarot-card-caption">
