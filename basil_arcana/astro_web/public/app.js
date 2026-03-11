@@ -10192,11 +10192,11 @@ function renderTarotSpread(session, question = "", opts = {}) {
         <img class="tarot-card-face" src="${tarotImageSource(item.card, state.theme === "dark" ? "dark" : "light")}" alt="${escapeHtml(item.card.name)}" loading="lazy" decoding="async" />
         ${item.card.figureUrl ? `<img class="tarot-figure-overlay" src="${item.card.figureUrl}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" />` : ``}
         ${item.reversed ? `<span class="tarot-reversed-tag">Reversed</span>` : ``}
-      </div>
-      <div class="tarot-card-meta">
-        <span class="eyebrow">${tarotSpreadLabel(index)}</span>
-        <h3>${escapeHtml(item.card.name)}</h3>
-        <p>${item.reversed ? "Reversed" : "Upright"} · ${escapeHtml(item.card.keywords.slice(0, 3).join(" / "))}</p>
+        <div class="tarot-card-caption">
+          <span class="eyebrow">${tarotSpreadLabel(index)}</span>
+          <h3>${escapeHtml(item.card.name)}</h3>
+          <p>${item.reversed ? "Reversed" : "Upright"} · ${escapeHtml(item.card.keywords.slice(0, 3).join(" / "))}</p>
+        </div>
       </div>
     </article>
   `).join("");
