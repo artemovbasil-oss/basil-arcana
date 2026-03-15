@@ -7,14 +7,27 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",
-    "dev": "tsx src/index.ts"
+    "dev": "tsx src/index.ts",
+    "sofia:create-task": "tsx src/sofia_agent_cli.ts create-task",
+    "sofia:run-once": "tsx src/sofia_agent_cli.ts run-once",
+    "sofia:list-drafts": "tsx src/sofia_agent_cli.ts list-drafts",
+    "sofia:ingest-inbox": "tsx src/sofia_agent_cli.ts ingest-inbox",
+    "sofia:scheduler-once": "tsx src/sofia_agent_cli.ts scheduler-once",
+    "sofia:scheduler": "tsx src/sofia_agent_cli.ts scheduler",
+    "sofia:add-search-target": "tsx src/sofia_agent_cli.ts add-search-target",
+    "sofia:list-search-targets": "tsx src/sofia_agent_cli.ts list-search-targets",
+    "sofia:approve-task": "tsx src/sofia_agent_cli.ts approve-task",
+    "sofia:send-approved": "tsx src/sofia_agent_cli.ts send-approved",
+    "sofia:session-check": "tsx src/sofia_agent_cli.ts session-check",
+    "sofia:list-private-dialogs": "tsx src/sofia_agent_cli.ts list-private-dialogs"
   },
   "engines": {
     "node": ">=18"
   },
   "dependencies": {
     "grammy": "^1.22.4",
-    "pg": "^8.18.0"
+    "pg": "^8.18.0",
+    "telegram": "^2.26.22"
   },
   "devDependencies": {
     "@types/node": "^20.11.30",

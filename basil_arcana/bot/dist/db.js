@@ -16,6 +16,23 @@ exports.listUsersForBroadcast = listUsersForBroadcast;
 exports.listUsersForSofia = listUsersForSofia;
 exports.listUsersCreatedTodayForSofia = listUsersCreatedTodayForSofia;
 exports.insertFunnelEvent = insertFunnelEvent;
+exports.createSofiaAgentTask = createSofiaAgentTask;
+exports.claimNextSofiaAgentTask = claimNextSofiaAgentTask;
+exports.saveSofiaAgentDraft = saveSofiaAgentDraft;
+exports.markSofiaAgentTaskFailed = markSofiaAgentTaskFailed;
+exports.listSofiaAgentDrafts = listSofiaAgentDrafts;
+exports.markSofiaAgentTaskApproved = markSofiaAgentTaskApproved;
+exports.markSofiaAgentTaskSent = markSofiaAgentTaskSent;
+exports.getLatestDraftForTask = getLatestDraftForTask;
+exports.listSofiaAgentTasksByStatus = listSofiaAgentTasksByStatus;
+exports.findSofiaTaskByDedupKey = findSofiaTaskByDedupKey;
+exports.upsertSofiaAgentThread = upsertSofiaAgentThread;
+exports.createSofiaAgentMessage = createSofiaAgentMessage;
+exports.listRecentInboundSofiaMessages = listRecentInboundSofiaMessages;
+exports.createSofiaSearchTarget = createSofiaSearchTarget;
+exports.listSofiaSearchTargets = listSofiaSearchTargets;
+exports.listDueSofiaSearchTargets = listDueSofiaSearchTargets;
+exports.markSofiaSearchTargetChecked = markSofiaSearchTargetChecked;
 const pg_1 = require("pg");
 let pool = null;
 function requirePool() {
@@ -114,6 +131,77 @@ async function ensureSchema() {
   `);
     await db.query("CREATE INDEX IF NOT EXISTS idx_bot_funnel_events_user_created ON bot_funnel_events (telegram_user_id, created_at DESC);");
     await db.query("CREATE INDEX IF NOT EXISTS idx_bot_funnel_events_event_created ON bot_funnel_events (event_name, created_at DESC);");
+    await db.query(`
+    CREATE TABLE IF NOT EXISTS sofia_agent_tasks (
+      id BIGSERIAL PRIMARY KEY,
+      task_type TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'pending',
+      title TEXT NOT NULL,
+      source_channel TEXT,
+      target_chat TEXT,
+      payload JSONB NOT NULL DEFAULT '{}'::jsonb,
+      claimed_at TIMESTAMPTZ,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+    await db.query(`
+    CREATE TABLE IF NOT EXISTS sofia_agent_drafts (
+      id BIGSERIAL PRIMARY KEY,
+      task_id BIGINT NOT NULL REFERENCES sofia_agent_tasks(id) ON DELETE CASCADE,
+      draft_text TEXT NOT NULL,
+      model TEXT,
+      notes TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+    await db.query(`
+    CREATE TABLE IF NOT EXISTS sofia_agent_threads (
+      id BIGSERIAL PRIMARY KEY,
+      platform TEXT NOT NULL DEFAULT 'telegram',
+      external_thread_id TEXT NOT NULL,
+      user_label TEXT,
+      topic TEXT,
+      last_inbound_text TEXT,
+      metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      UNIQUE (platform, external_thread_id)
+    );
+  `);
+    await db.query(`
+    CREATE TABLE IF NOT EXISTS sofia_agent_messages (
+      id BIGSERIAL PRIMARY KEY,
+      thread_id BIGINT NOT NULL REFERENCES sofia_agent_threads(id) ON DELETE CASCADE,
+      platform_message_id TEXT NOT NULL,
+      direction TEXT NOT NULL,
+      sender_label TEXT,
+      message_text TEXT NOT NULL,
+      sent_at TIMESTAMPTZ NOT NULL,
+      metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      UNIQUE (thread_id, platform_message_id)
+    );
+  `);
+    await db.query(`
+    CREATE TABLE IF NOT EXISTS sofia_agent_search_targets (
+      id BIGSERIAL PRIMARY KEY,
+      platform TEXT NOT NULL DEFAULT 'telegram',
+      label TEXT NOT NULL,
+      query TEXT NOT NULL,
+      target_chat TEXT,
+      cadence_minutes INTEGER NOT NULL DEFAULT 180,
+      enabled BOOLEAN NOT NULL DEFAULT TRUE,
+      last_checked_at TIMESTAMPTZ,
+      metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+    await db.query("CREATE INDEX IF NOT EXISTS idx_sofia_agent_tasks_status_created ON sofia_agent_tasks (status, created_at ASC);");
+    await db.query("CREATE INDEX IF NOT EXISTS idx_sofia_agent_drafts_task_created ON sofia_agent_drafts (task_id, created_at DESC);");
+    await db.query("CREATE INDEX IF NOT EXISTS idx_sofia_agent_messages_thread_sent ON sofia_agent_messages (thread_id, sent_at DESC);");
+    await db.query("CREATE INDEX IF NOT EXISTS idx_sofia_agent_search_targets_enabled_checked ON sofia_agent_search_targets (enabled, last_checked_at ASC);");
 }
 async function upsertUserProfile(telegramUserId, username, firstName, lastName, locale) {
     const db = requirePool();
@@ -424,4 +512,406 @@ async function getSubscriptionForUpdate(client, telegramUserId) {
         return null;
     }
     return mapSubscriptionRow(rows[0]);
+}
+function mapSofiaAgentTaskRow(row) {
+    return {
+        id: Number(row.id),
+        taskType: String(row.task_type ?? ""),
+        status: String(row.status ?? "pending"),
+        title: String(row.title ?? ""),
+        sourceChannel: row.source_channel ?? null,
+        targetChat: row.target_chat ?? null,
+        payload: row.payload ?? {},
+        claimedAt: toMillis(row.claimed_at ?? null),
+        createdAt: toMillis(row.created_at ?? null) ?? Date.now(),
+        updatedAt: toMillis(row.updated_at ?? null) ?? Date.now(),
+    };
+}
+function mapSofiaAgentThreadRow(row) {
+    return {
+        id: Number(row.id),
+        platform: String(row.platform ?? "telegram"),
+        externalThreadId: String(row.external_thread_id ?? ""),
+        userLabel: row.user_label ?? null,
+        topic: row.topic ?? null,
+        lastInboundText: row.last_inbound_text ?? null,
+        metadata: row.metadata ?? {},
+        createdAt: toMillis(row.created_at ?? null) ?? Date.now(),
+        updatedAt: toMillis(row.updated_at ?? null) ?? Date.now(),
+    };
+}
+function mapSofiaAgentSearchTargetRow(row) {
+    return {
+        id: Number(row.id),
+        platform: String(row.platform ?? "telegram"),
+        label: String(row.label ?? ""),
+        query: String(row.query ?? ""),
+        targetChat: row.target_chat ?? null,
+        cadenceMinutes: Number(row.cadence_minutes ?? 180),
+        enabled: Boolean(row.enabled),
+        lastCheckedAt: toMillis(row.last_checked_at ?? null),
+        metadata: row.metadata ?? {},
+        createdAt: toMillis(row.created_at ?? null) ?? Date.now(),
+        updatedAt: toMillis(row.updated_at ?? null) ?? Date.now(),
+    };
+}
+async function createSofiaAgentTask(input) {
+    const db = requirePool();
+    const { rows } = await db.query(`
+    INSERT INTO sofia_agent_tasks (
+      task_type,
+      title,
+      source_channel,
+      target_chat,
+      payload
+    )
+    VALUES ($1, $2, $3, $4, $5::jsonb)
+    RETURNING *;
+    `, [
+        input.taskType,
+        input.title,
+        input.sourceChannel,
+        input.targetChat,
+        JSON.stringify(input.payload ?? {}),
+    ]);
+    return mapSofiaAgentTaskRow(rows[0]);
+}
+async function claimNextSofiaAgentTask() {
+    const db = requirePool();
+    const client = await db.connect();
+    try {
+        await client.query("BEGIN");
+        const { rows } = await client.query(`
+      SELECT *
+      FROM sofia_agent_tasks
+      WHERE status = 'pending'
+      ORDER BY created_at ASC, id ASC
+      LIMIT 1
+      FOR UPDATE SKIP LOCKED;
+      `);
+        if (rows.length === 0) {
+            await client.query("COMMIT");
+            return null;
+        }
+        const row = rows[0];
+        await client.query(`
+      UPDATE sofia_agent_tasks
+      SET status = 'in_progress', claimed_at = NOW(), updated_at = NOW()
+      WHERE id = $1;
+      `, [row.id]);
+        await client.query("COMMIT");
+        return {
+            ...mapSofiaAgentTaskRow(row),
+            status: "in_progress",
+            claimedAt: Date.now(),
+            updatedAt: Date.now(),
+        };
+    }
+    catch (error) {
+        await client.query("ROLLBACK");
+        throw error;
+    }
+    finally {
+        client.release();
+    }
+}
+async function saveSofiaAgentDraft(input) {
+    const db = requirePool();
+    const client = await db.connect();
+    try {
+        await client.query("BEGIN");
+        const { rows } = await client.query(`
+      INSERT INTO sofia_agent_drafts (task_id, draft_text, model, notes)
+      VALUES ($1, $2, $3, $4)
+      RETURNING *;
+      `, [input.taskId, input.draftText, input.model ?? null, input.notes ?? null]);
+        await client.query(`
+      UPDATE sofia_agent_tasks
+      SET status = 'draft_ready', updated_at = NOW()
+      WHERE id = $1;
+      `, [input.taskId]);
+        await client.query("COMMIT");
+        const row = rows[0];
+        return {
+            id: Number(row.id),
+            taskId: Number(row.task_id),
+            draftText: String(row.draft_text ?? ""),
+            model: row.model ?? null,
+            notes: row.notes ?? null,
+            createdAt: toMillis(row.created_at ?? null) ?? Date.now(),
+        };
+    }
+    catch (error) {
+        await client.query("ROLLBACK");
+        throw error;
+    }
+    finally {
+        client.release();
+    }
+}
+async function markSofiaAgentTaskFailed(taskId, notes) {
+    const db = requirePool();
+    await db.query(`
+    UPDATE sofia_agent_tasks
+    SET status = 'failed',
+        updated_at = NOW(),
+        payload = jsonb_set(COALESCE(payload, '{}'::jsonb), '{lastError}', to_jsonb($2::text), true)
+    WHERE id = $1;
+    `, [taskId, notes]);
+}
+async function listSofiaAgentDrafts(limit = 20) {
+    const db = requirePool();
+    const safeLimit = Math.max(1, Math.min(100, Number(limit) || 20));
+    const { rows } = await db.query(`
+    SELECT id, task_id, draft_text, model, notes, created_at
+    FROM sofia_agent_drafts
+    ORDER BY created_at DESC, id DESC
+    LIMIT $1;
+    `, [safeLimit]);
+    return rows.map((row) => ({
+        id: Number(row.id),
+        taskId: Number(row.task_id),
+        draftText: String(row.draft_text ?? ""),
+        model: row.model ?? null,
+        notes: row.notes ?? null,
+        createdAt: toMillis(row.created_at ?? null) ?? Date.now(),
+    }));
+}
+async function markSofiaAgentTaskApproved(taskId) {
+    const db = requirePool();
+    await db.query(`
+    UPDATE sofia_agent_tasks
+    SET status = 'approved', updated_at = NOW()
+    WHERE id = $1;
+    `, [taskId]);
+}
+async function markSofiaAgentTaskSent(taskId, sendNotes) {
+    const db = requirePool();
+    await db.query(`
+    UPDATE sofia_agent_tasks
+    SET status = 'sent',
+        updated_at = NOW(),
+        payload = CASE
+          WHEN $2::text IS NULL THEN payload
+          ELSE jsonb_set(COALESCE(payload, '{}'::jsonb), '{sendNotes}', to_jsonb($2::text), true)
+        END
+    WHERE id = $1;
+    `, [taskId, sendNotes ?? null]);
+}
+async function getLatestDraftForTask(taskId) {
+    const db = requirePool();
+    const { rows } = await db.query(`
+    SELECT id, task_id, draft_text, model, notes, created_at
+    FROM sofia_agent_drafts
+    WHERE task_id = $1
+    ORDER BY created_at DESC, id DESC
+    LIMIT 1;
+    `, [taskId]);
+    if (rows.length === 0) {
+        return null;
+    }
+    const row = rows[0];
+    return {
+        id: Number(row.id),
+        taskId: Number(row.task_id),
+        draftText: String(row.draft_text ?? ""),
+        model: row.model ?? null,
+        notes: row.notes ?? null,
+        createdAt: toMillis(row.created_at ?? null) ?? Date.now(),
+    };
+}
+async function listSofiaAgentTasksByStatus(status, limit = 20) {
+    const db = requirePool();
+    const safeLimit = Math.max(1, Math.min(100, Number(limit) || 20));
+    const { rows } = await db.query(`
+    SELECT *
+    FROM sofia_agent_tasks
+    WHERE status = $1
+    ORDER BY created_at ASC, id ASC
+    LIMIT $2;
+    `, [status, safeLimit]);
+    return rows.map((row) => mapSofiaAgentTaskRow(row));
+}
+async function findSofiaTaskByDedupKey(dedupKey) {
+    const db = requirePool();
+    const { rows } = await db.query(`
+    SELECT *
+    FROM sofia_agent_tasks
+    WHERE payload->>'dedupKey' = $1
+    ORDER BY created_at DESC, id DESC
+    LIMIT 1;
+    `, [dedupKey]);
+    if (rows.length === 0) {
+        return null;
+    }
+    return mapSofiaAgentTaskRow(rows[0]);
+}
+async function upsertSofiaAgentThread(input) {
+    const db = requirePool();
+    const { rows } = await db.query(`
+    INSERT INTO sofia_agent_threads (
+      platform,
+      external_thread_id,
+      user_label,
+      topic,
+      last_inbound_text,
+      metadata
+    )
+    VALUES ('telegram', $1, $2, $3, $4, $5::jsonb)
+    ON CONFLICT (platform, external_thread_id)
+    DO UPDATE SET
+      user_label = COALESCE(EXCLUDED.user_label, sofia_agent_threads.user_label),
+      topic = COALESCE(EXCLUDED.topic, sofia_agent_threads.topic),
+      last_inbound_text = COALESCE(EXCLUDED.last_inbound_text, sofia_agent_threads.last_inbound_text),
+      metadata = COALESCE(sofia_agent_threads.metadata, '{}'::jsonb) || EXCLUDED.metadata,
+      updated_at = NOW()
+    RETURNING *;
+    `, [
+        input.externalThreadId,
+        input.userLabel ?? null,
+        input.topic ?? null,
+        input.lastInboundText ?? null,
+        JSON.stringify(input.metadata ?? {}),
+    ]);
+    return mapSofiaAgentThreadRow(rows[0]);
+}
+async function createSofiaAgentMessage(input) {
+    const db = requirePool();
+    const { rows } = await db.query(`
+    INSERT INTO sofia_agent_messages (
+      thread_id,
+      platform_message_id,
+      direction,
+      sender_label,
+      message_text,
+      sent_at,
+      metadata
+    )
+    VALUES ($1, $2, $3, $4, $5, to_timestamp($6 / 1000.0), $7::jsonb)
+    ON CONFLICT (thread_id, platform_message_id)
+    DO NOTHING
+    RETURNING *;
+    `, [
+        input.threadId,
+        input.platformMessageId,
+        input.direction,
+        input.senderLabel ?? null,
+        input.messageText,
+        input.sentAt,
+        JSON.stringify(input.metadata ?? {}),
+    ]);
+    if (rows.length > 0) {
+        const row = rows[0];
+        return {
+            inserted: true,
+            row: {
+                id: Number(row.id),
+                threadId: Number(row.thread_id),
+                platformMessageId: String(row.platform_message_id ?? ""),
+                direction: String(row.direction ?? "inbound"),
+                senderLabel: row.sender_label ?? null,
+                messageText: String(row.message_text ?? ""),
+                sentAt: toMillis(row.sent_at ?? null) ?? Date.now(),
+                metadata: row.metadata ?? {},
+                createdAt: toMillis(row.created_at ?? null) ?? Date.now(),
+            },
+        };
+    }
+    const existing = await db.query(`
+    SELECT *
+    FROM sofia_agent_messages
+    WHERE thread_id = $1 AND platform_message_id = $2
+    LIMIT 1;
+    `, [input.threadId, input.platformMessageId]);
+    const row = existing.rows[0];
+    return {
+        inserted: false,
+        row: {
+            id: Number(row.id),
+            threadId: Number(row.thread_id),
+            platformMessageId: String(row.platform_message_id ?? ""),
+            direction: String(row.direction ?? "inbound"),
+            senderLabel: row.sender_label ?? null,
+            messageText: String(row.message_text ?? ""),
+            sentAt: toMillis(row.sent_at ?? null) ?? Date.now(),
+            metadata: row.metadata ?? {},
+            createdAt: toMillis(row.created_at ?? null) ?? Date.now(),
+        },
+    };
+}
+async function listRecentInboundSofiaMessages(limit = 20) {
+    const db = requirePool();
+    const safeLimit = Math.max(1, Math.min(200, Number(limit) || 20));
+    const { rows } = await db.query(`
+    SELECT *
+    FROM sofia_agent_messages
+    WHERE direction = 'inbound'
+    ORDER BY sent_at DESC, id DESC
+    LIMIT $1;
+    `, [safeLimit]);
+    return rows.map((row) => ({
+        id: Number(row.id),
+        threadId: Number(row.thread_id),
+        platformMessageId: String(row.platform_message_id ?? ""),
+        direction: String(row.direction ?? "inbound"),
+        senderLabel: row.sender_label ?? null,
+        messageText: String(row.message_text ?? ""),
+        sentAt: toMillis(row.sent_at ?? null) ?? Date.now(),
+        metadata: row.metadata ?? {},
+        createdAt: toMillis(row.created_at ?? null) ?? Date.now(),
+    }));
+}
+async function createSofiaSearchTarget(input) {
+    const db = requirePool();
+    const { rows } = await db.query(`
+    INSERT INTO sofia_agent_search_targets (
+      platform,
+      label,
+      query,
+      target_chat,
+      cadence_minutes,
+      metadata
+    )
+    VALUES ('telegram', $1, $2, $3, $4, $5::jsonb)
+    RETURNING *;
+    `, [
+        input.label,
+        input.query,
+        input.targetChat,
+        input.cadenceMinutes ?? 180,
+        JSON.stringify(input.metadata ?? {}),
+    ]);
+    return mapSofiaAgentSearchTargetRow(rows[0]);
+}
+async function listSofiaSearchTargets(enabledOnly = false) {
+    const db = requirePool();
+    const { rows } = await db.query(`
+    SELECT *
+    FROM sofia_agent_search_targets
+    ${enabledOnly ? "WHERE enabled = TRUE" : ""}
+    ORDER BY created_at ASC, id ASC;
+    `);
+    return rows.map((row) => mapSofiaAgentSearchTargetRow(row));
+}
+async function listDueSofiaSearchTargets(now = Date.now()) {
+    const db = requirePool();
+    const { rows } = await db.query(`
+    SELECT *
+    FROM sofia_agent_search_targets
+    WHERE enabled = TRUE
+      AND (
+        last_checked_at IS NULL
+        OR last_checked_at <= to_timestamp($1 / 1000.0) - make_interval(mins => cadence_minutes)
+      )
+    ORDER BY COALESCE(last_checked_at, to_timestamp(0)) ASC, id ASC;
+    `, [now]);
+    return rows.map((row) => mapSofiaAgentSearchTargetRow(row));
+}
+async function markSofiaSearchTargetChecked(targetId) {
+    const db = requirePool();
+    await db.query(`
+    UPDATE sofia_agent_search_targets
+    SET last_checked_at = NOW(), updated_at = NOW()
+    WHERE id = $1;
+    `, [targetId]);
 }
