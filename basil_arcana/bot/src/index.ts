@@ -1166,10 +1166,13 @@ async function sendLauncherMessage(ctx: Context): Promise<void> {
 }
 
 async function main(): Promise<void> {
+  console.log("Booting Telegram bot service...");
   initDb(config.databaseUrl);
   await ensureSchema();
+  console.log("Database initialized.");
 
   const bot = new Bot(config.telegramToken);
+  console.log("Bot instance created.");
 
   bot.command("start", async (ctx) => {
     await rememberUserProfile(ctx);
@@ -1656,6 +1659,12 @@ async function main(): Promise<void> {
   const retryDelayMs = 5000;
   for (;;) {
     try {
+      try {
+        await bot.api.deleteWebhook({ drop_pending_updates: false });
+        console.log("Webhook cleared, starting long polling...");
+      } catch (error) {
+        console.warn("deleteWebhook failed, proceeding to long polling", error);
+      }
       await bot.start({
         allowed_updates: ["message", "callback_query", "pre_checkout_query"],
       });

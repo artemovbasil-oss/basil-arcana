@@ -871,9 +871,12 @@ async function sendLauncherMessage(ctx) {
     await sendMainMenu(ctx);
 }
 async function main() {
+    console.log("Booting Telegram bot service...");
     (0, db_1.initDb)(config.databaseUrl);
     await (0, db_1.ensureSchema)();
+    console.log("Database initialized.");
     const bot = new grammy_1.Bot(config.telegramToken);
+    console.log("Bot instance created.");
     bot.command("start", async (ctx) => {
         await rememberUserProfile(ctx);
         const userId = ctx.from?.id;
@@ -1277,6 +1280,13 @@ async function main() {
     const retryDelayMs = 5000;
     for (;;) {
         try {
+            try {
+                await bot.api.deleteWebhook({ drop_pending_updates: false });
+                console.log("Webhook cleared, starting long polling...");
+            }
+            catch (error) {
+                console.warn("deleteWebhook failed, proceeding to long polling", error);
+            }
             await bot.start({
                 allowed_updates: ["message", "callback_query", "pre_checkout_query"],
             });

@@ -1,0 +1,39 @@
+{
+  "name": "basil-arcana-sofia-worker",
+  "private": true,
+  "version": "0.1.0",
+  "type": "commonjs",
+  "main": "dist/sofia_agent_cli.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/sofia_agent_cli.js scheduler",
+    "dev": "tsx src/sofia_agent_cli.ts scheduler",
+    "sofia:create-task": "tsx src/sofia_agent_cli.ts create-task",
+    "sofia:run-once": "tsx src/sofia_agent_cli.ts run-once",
+    "sofia:list-drafts": "tsx src/sofia_agent_cli.ts list-drafts",
+    "sofia:ingest-inbox": "tsx src/sofia_agent_cli.ts ingest-inbox",
+    "sofia:scheduler-once": "tsx src/sofia_agent_cli.ts scheduler-once",
+    "sofia:scheduler": "tsx src/sofia_agent_cli.ts scheduler",
+    "sofia:add-search-target": "tsx src/sofia_agent_cli.ts add-search-target",
+    "sofia:list-search-targets": "tsx src/sofia_agent_cli.ts list-search-targets",
+    "sofia:approve-task": "tsx src/sofia_agent_cli.ts approve-task",
+    "sofia:send-approved": "tsx src/sofia_agent_cli.ts send-approved",
+    "sofia:session-check": "tsx src/sofia_agent_cli.ts session-check",
+    "sofia:list-private-dialogs": "tsx src/sofia_agent_cli.ts list-private-dialogs",
+    "sofia:create-session": "tsx src/sofia_agent_session.ts"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "pg": "^8.18.0",
+    "qrcode-terminal": "^0.12.0",
+    "telegram": "^2.26.22"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "@types/pg": "^8.16.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.4.5"
+  }
+}
