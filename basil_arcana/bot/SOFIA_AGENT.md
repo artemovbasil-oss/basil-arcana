@@ -63,6 +63,12 @@ Check the MTProto user session:
 npm run sofia:session-check
 ```
 
+Create a fresh Telegram user session locally:
+
+```bash
+TELEGRAM_API_ID=... TELEGRAM_API_HASH=... npm run sofia:create-session
+```
+
 Ingest incoming private messages into threads/tasks:
 
 ```bash
