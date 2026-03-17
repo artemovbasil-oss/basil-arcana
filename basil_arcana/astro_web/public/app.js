@@ -8678,49 +8678,151 @@ let astrologyHubBySlug = astrologyHubArticles.reduce((acc, article) => {
   return acc;
 }, {});
 
+function renderHubArticleCard(article, options = {}) {
+  const extraClass = options.extraClass ? ` ${options.extraClass}` : "";
+  return `
+    <article class="card hub-card${extraClass}">
+      ${
+        article.imageLight && article.imageDark
+          ? `<a class="hub-sign-thumb-link" href="/astrology-hub/${article.slug}">
+              <img
+                class="hub-sign-thumb"
+                src="${state.theme === "light" ? article.imageLight : article.imageDark}"
+                data-zodiac-light="${article.imageLight}"
+                data-zodiac-dark="${article.imageDark}"
+                alt="${article.imageAlt || `${article.title} illustration`}"
+                loading="lazy"
+                decoding="async"
+              />
+            </a>`
+          : ""
+      }
+      <div class="hub-card-head">
+        <span class="hub-chip">${article.category}</span>
+        <span class="hub-meta">${article.readTime}</span>
+      </div>
+      <h2>${article.title}</h2>
+      <p>${article.excerpt}</p>
+      <div class="hub-card-footer">
+        <time datetime="${article.publishedAt}">${new Date(article.publishedAt).toLocaleDateString("en-US", { day: "2-digit", month: "long", year: "numeric" })}</time>
+        <a class="hub-link" href="/astrology-hub/${article.slug}">Read article</a>
+      </div>
+    </article>
+  `;
+}
+
 function astrologyHubView() {
+  const selfKnowledgeSlugs = [
+    "meditation-for-self-knowledge-through-tarot-and-astrology",
+    "yoga-for-self-discovery-using-astrology-and-tarot-symbolism",
+    "morning-meditation-ritual-with-tarot-card-and-astrology-signals",
+    "moon-phase-meditation-lunar-yoga-and-tarot-for-intuition"
+  ];
+  const featuredArticles = selfKnowledgeSlugs
+    .map((slug) => astrologyHubBySlug[slug])
+    .filter(Boolean);
+  const featuredLead = featuredArticles[0];
+  const featuredSide = featuredArticles.slice(1);
+  const categoryGroups = [
+    { id: "meditation", label: "Meditation", articles: astrologyHubArticles.filter((article) => article.category === "Meditation" || article.category === "Astrology & Meditation" || article.slug === "meditation-for-each-zodiac-sign").slice(0, 4) },
+    { id: "yoga", label: "Yoga", articles: astrologyHubArticles.filter((article) => article.category === "Yoga" || article.category === "Yoga & Astrology").slice(0, 4) },
+    { id: "tarot-practice", label: "Tarot Practice", articles: astrologyHubArticles.filter((article) => article.category === "Tarot Practice" || article.category === "Beginner Guide" || article.category === "Shadow Work").slice(0, 5) },
+    { id: "moon-rituals", label: "Moon Rituals", articles: astrologyHubArticles.filter((article) => article.category === "Moon Rituals" || article.category === "Venus Rituals" || article.category === "Mercury Retrograde").slice(0, 5) },
+    { id: "journaling", label: "Journaling", articles: astrologyHubArticles.filter((article) => article.category === "Journaling" || article.category === "Weekly Rituals").slice(0, 5) }
+  ];
   return `
     <section class="section">
-      <article class="card tone-card">
+      <article class="card tone-card hub-hero-card">
         <span class="eyebrow">Astrology Hub</span>
         <h1>Research + insight journal</h1>
-        <p>Public long-form pieces from Astronautica: method, history, safety standards, and practical models for reflective decision-making.</p>
+        <p>Public long-form pieces from Astronautica: method, history, safety standards, and practical models for reflective decision-making. The meditation, yoga, Tarot, and astrology cluster below is designed as a self-knowledge library, not just a reading archive.</p>
+        <div class="hub-filter-bar">
+          <a class="hub-filter-chip" href="#self-knowledge-cluster">Featured Cluster</a>
+          ${categoryGroups.map((group) => `<a class="hub-filter-chip" href="#${group.id}">${group.label}</a>`).join("")}
+          <a class="hub-filter-chip" href="#all-articles">All Articles</a>
+        </div>
       </article>
     </section>
-    <section class="section">
-      <div class="hub-grid">
-        ${astrologyHubArticles
-          .map((article) => `
-            <article class="card hub-card">
-              ${
-                article.imageLight && article.imageDark
-                  ? `<a class="hub-sign-thumb-link" href="/astrology-hub/${article.slug}">
-                      <img
-                        class="hub-sign-thumb"
-                        src="${state.theme === "light" ? article.imageLight : article.imageDark}"
-                        data-zodiac-light="${article.imageLight}"
-                        data-zodiac-dark="${article.imageDark}"
-                        alt="${article.imageAlt || `${article.title} illustration`}"
-                        loading="lazy"
-                        decoding="async"
-                      />
-                    </a>`
-                  : ""
-              }
-              <div class="hub-card-head">
-                <span class="hub-chip">${article.category}</span>
-                <span class="hub-meta">${article.readTime}</span>
+    <section class="section" id="self-knowledge-cluster">
+      <article class="card hub-feature-shell">
+        <div class="hub-section-head">
+          <div>
+            <span class="eyebrow">Featured Cluster</span>
+            <h2>Meditation, Yoga, Tarot, and Astrology for Self-Knowledge</h2>
+          </div>
+          <p class="muted">A linked editorial path for readers searching for meditation rituals, Tarot reflection, yoga for self-discovery, lunar practice, and symbolic journaling.</p>
+        </div>
+        <div class="hub-feature-layout">
+          ${
+            featuredLead
+              ? `<article class="card hub-feature-lead">
+                  <div class="hub-card-head">
+                    <span class="hub-chip">${featuredLead.category}</span>
+                    <span class="hub-meta">${featuredLead.readTime}</span>
+                  </div>
+                  <h2>${featuredLead.title}</h2>
+                  <p>${featuredLead.excerpt}</p>
+                  ${
+                    featuredLead.imageLight && featuredLead.imageDark
+                      ? `<a class="hub-sign-thumb-link hub-feature-image-link" href="/astrology-hub/${featuredLead.slug}">
+                          <img
+                            class="hub-sign-thumb hub-feature-image"
+                            src="${state.theme === "light" ? featuredLead.imageLight : featuredLead.imageDark}"
+                            data-zodiac-light="${featuredLead.imageLight}"
+                            data-zodiac-dark="${featuredLead.imageDark}"
+                            alt="${featuredLead.imageAlt || `${featuredLead.title} illustration`}"
+                            loading="lazy"
+                            decoding="async"
+                          />
+                        </a>`
+                      : ""
+                  }
+                  <div class="hub-card-footer">
+                    <time datetime="${featuredLead.publishedAt}">${new Date(featuredLead.publishedAt).toLocaleDateString("en-US", { day: "2-digit", month: "long", year: "numeric" })}</time>
+                    <a class="hub-link" href="/astrology-hub/${featuredLead.slug}">Open feature</a>
+                  </div>
+                </article>`
+              : ""
+          }
+          <div class="hub-feature-list">
+            ${featuredSide.map((article) => renderHubArticleCard(article, { extraClass: "hub-card-compact" })).join("")}
+          </div>
+        </div>
+      </article>
+    </section>
+    ${categoryGroups
+      .map((group) => `
+        <section class="section" id="${group.id}">
+          <article class="card hub-topic-shell">
+            <div class="hub-section-head">
+              <div>
+                <span class="eyebrow">Topic</span>
+                <h2>${group.label}</h2>
               </div>
-              <h2>${article.title}</h2>
-              <p>${article.excerpt}</p>
-              <div class="hub-card-footer">
-                <time datetime="${article.publishedAt}">${new Date(article.publishedAt).toLocaleDateString("en-US", { day: "2-digit", month: "long", year: "numeric" })}</time>
-                <a class="hub-link" href="/astrology-hub/${article.slug}">Read article</a>
-              </div>
-            </article>
-          `)
-          .join("")}
-      </div>
+              <a class="hub-link" href="#all-articles">Back to archive</a>
+            </div>
+            <div class="hub-grid">
+              ${group.articles.map((article) => renderHubArticleCard(article)).join("")}
+            </div>
+          </article>
+        </section>
+      `)
+      .join("")}
+    <section class="section" id="all-articles">
+      <article class="card hub-topic-shell">
+        <div class="hub-section-head">
+          <div>
+            <span class="eyebrow">Archive</span>
+            <h2>All Hub Articles</h2>
+          </div>
+          <p class="muted">Full archive across methodology, zodiac guides, Tarot meanings, meditation, yoga, and ritual practice.</p>
+        </div>
+        <div class="hub-grid">
+          ${astrologyHubArticles
+            .map((article) => renderHubArticleCard(article))
+            .join("")}
+        </div>
+      </article>
     </section>
   `;
 }
