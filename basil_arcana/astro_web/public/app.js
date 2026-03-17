@@ -8187,6 +8187,260 @@ const coreHubArticles = [
       <p>Manifestation gets shallow when it becomes pure wanting. It becomes meaningful when it reveals your real values, hidden fears, and actual readiness. The New Moon is useful because it invites beginning with honesty. Not “What sounds impressive?” but “What do I genuinely want to grow?”</p>
       <p>For the complementary reflective phase, read <a href="/astrology-hub/full-moon-journaling-ritual-with-tarot-and-astrology">Full Moon Journaling Ritual With Tarot and Astrology</a>.</p>
     `
+  },
+  {
+    slug: "tarot-spread-for-self-love-and-healing",
+    title: "Tarot Spread for Self-Love and Healing",
+    excerpt: "A reflective Tarot spread for self-love that supports emotional healing, healthier self-talk, and a softer relationship with your inner life.",
+    readTime: "13 min",
+    publishedAt: "2026-03-17",
+    category: "Tarot Practice",
+    seoDescription: "Tarot spread for self-love and healing: a grounded spread for emotional repair, self-worth, compassionate reflection, and personal growth.",
+    imageLight: hubEssayImage({ kicker: "Self-Love", title: "Tarot Spread for Self-Love", motif: "Heart / Tarot / Healing", accent: "#b06079", accentSoft: "#6b7ca8" }, "light"),
+    imageDark: hubEssayImage({ kicker: "Self-Love", title: "Tarot Spread for Self-Love", motif: "Heart / Tarot / Healing", accent: "#f0a3bf", accentSoft: "#b0c5ff" }, "dark"),
+    imageAlt: "Tarot spread for self-love article illustration",
+    content: `
+      <p class="article-lead">Self-love becomes real when it stops sounding like a slogan and starts becoming a practice of gentler truth. Tarot is useful here because it helps you see where you are starving yourself of trust, warmth, patience, or forgiveness. A good self-love spread is not just flattering. It is honest and supportive at the same time.</p>
+      <h2>A 5-card self-love spread</h2>
+      <div class="article-timeline">
+        <div><strong>Card 1:</strong> Where am I hardest on myself?</div>
+        <div><strong>Card 2:</strong> What part of me is asking for tenderness?</div>
+        <div><strong>Card 3:</strong> What belief is blocking healing?</div>
+        <div><strong>Card 4:</strong> What act of self-respect is needed now?</div>
+        <div><strong>Card 5:</strong> What kind of love am I learning to give myself?</div>
+      </div>
+      <h2>Best cards for this work</h2>
+      <p><a href="/astrology-hub/the-star-tarot-card-meaning">The Star</a>, <a href="/astrology-hub/queen-of-cups-tarot-card-meaning">Queen of Cups</a>, <a href="/astrology-hub/six-of-cups-tarot-card-meaning">Six of Cups</a>, and <a href="/astrology-hub/temperance-tarot-card-meaning">Temperance</a> are especially rich here because they speak to softness, memory, compassion, and integration.</p>
+      <h2>Astrology note</h2>
+      <p>This spread is especially supportive during Venus-heavy periods, emotional lunar phases, or recovery seasons where the real task is not performance but repair.</p>
+      <p>Pair it with <a href="/astrology-hub/meditation-for-self-knowledge-through-tarot-and-astrology">Meditation for Self-Knowledge Through Tarot and Astrology</a>.</p>
+    `
+  },
+  {
+    slug: "meditation-for-each-zodiac-sign",
+    title: "Meditation for Each Zodiac Sign",
+    excerpt: "A practical guide to meditation for each zodiac sign, showing how elemental style, emotional rhythm, and symbolic focus can change the way you sit with yourself.",
+    readTime: "17 min",
+    publishedAt: "2026-03-17",
+    category: "Astrology & Meditation",
+    seoDescription: "Meditation for each zodiac sign: practical astrology-based meditation ideas for emotional regulation, focus, intuition, and self-discovery.",
+    imageLight: hubEssayImage({ kicker: "Astrology & Meditation", title: "Meditation for Each Zodiac Sign", motif: "Signs / Breath / Rhythm", accent: "#5d78a7", accentSoft: "#ae7b48" }, "light"),
+    imageDark: hubEssayImage({ kicker: "Astrology & Meditation", title: "Meditation for Each Zodiac Sign", motif: "Signs / Breath / Rhythm", accent: "#abcfff", accentSoft: "#f0c58a" }, "dark"),
+    imageAlt: "Meditation for each zodiac sign article illustration",
+    content: `
+      <p class="article-lead">Different people do not fail meditation in the same way. Some signs get restless. Some get flooded. Some become too mental. Some become rigid. Meditation for each zodiac sign works best when it respects these differences instead of pretending one method suits everyone.</p>
+      <h2>Element before sign</h2>
+      <ul class="bullet-list">
+        <li><strong>Fire signs:</strong> shorter meditation, clearer structure, stronger grounding.</li>
+        <li><strong>Water signs:</strong> softer breath, emotional witnessing, protective boundaries.</li>
+        <li><strong>Air signs:</strong> journaling after the sit, clearer anchors, less drifting into thought.</li>
+        <li><strong>Earth signs:</strong> more spaciousness, less perfectionism, more body sensation.</li>
+      </ul>
+      <h2>Sign examples</h2>
+      <p>Aries often benefits from strong posture and shorter sessions. Cancer may need emotional containment and one clear symbolic focus like <a href="/astrology-hub/the-moon-tarot-card-meaning">The Moon</a>. Virgo may need to let go of the “right way” to meditate and work with <a href="/astrology-hub/temperance-tarot-card-meaning">Temperance</a>. Pisces often needs grounding before intuition becomes useful.</p>
+      <p>For embodiment, pair this article with <a href="/astrology-hub/best-yoga-poses-for-each-zodiac-sign">Best Yoga Poses for Each Zodiac Sign</a>.</p>
+    `
+  },
+  {
+    slug: "how-to-use-tarot-for-shadow-work",
+    title: "How to Use Tarot for Shadow Work",
+    excerpt: "A grounded guide to Tarot shadow work: how to explore avoidance, projection, fear, and hidden desire without turning the process into melodrama.",
+    readTime: "16 min",
+    publishedAt: "2026-03-17",
+    category: "Shadow Work",
+    seoDescription: "How to use Tarot for shadow work: practical methods for exploring fear, projection, avoidance, and hidden motives through Tarot reflection.",
+    imageLight: hubEssayImage({ kicker: "Shadow Work", title: "Tarot for Shadow Work", motif: "Shadow / Tarot / Truth", accent: "#6b5d7d", accentSoft: "#9b6b48" }, "light"),
+    imageDark: hubEssayImage({ kicker: "Shadow Work", title: "Tarot for Shadow Work", motif: "Shadow / Tarot / Truth", accent: "#c8b7df", accentSoft: "#efbd8f" }, "dark"),
+    imageAlt: "Tarot for shadow work article illustration",
+    content: `
+      <p class="article-lead">Shadow work is not about becoming darker or more dramatic. It is about becoming less split. Tarot is especially good for shadow work because it helps reveal the parts of life we pretend not to see: envy, fear, overcontrol, shame, desire, and the stories that keep repeating under different costumes.</p>
+      <h2>Best Tarot cards for shadow work</h2>
+      <ul class="bullet-list">
+        <li><a href="/astrology-hub/the-devil-tarot-card-meaning">The Devil</a> for attachment and pattern lock.</li>
+        <li><a href="/astrology-hub/the-moon-tarot-card-meaning">The Moon</a> for projection, fear, and ambiguity.</li>
+        <li><a href="/astrology-hub/the-tower-tarot-card-meaning">The Tower</a> for collapse of illusion.</li>
+        <li><a href="/astrology-hub/five-of-swords-tarot-card-meaning">Five of Swords</a> for ego conflict and subtle aggression.</li>
+      </ul>
+      <h2>A simple shadow-work spread</h2>
+      <div class="article-timeline">
+        <div><strong>Card 1:</strong> What am I avoiding seeing?</div>
+        <div><strong>Card 2:</strong> What do I project onto others?</div>
+        <div><strong>Card 3:</strong> What fear is underneath this pattern?</div>
+        <div><strong>Card 4:</strong> What truth would bring freedom?</div>
+      </div>
+      <h2>Keep it psychologically grounded</h2>
+      <p>Shadow work should produce responsibility, not identity theater. If the ritual leaves you feeling dramatic but not more accountable, it missed the point. The goal is not to admire your depth. The goal is to become more honest and therefore more free.</p>
+      <p>For emotional recovery after shadow work, read <a href="/astrology-hub/tarot-spread-for-self-love-and-healing">Tarot Spread for Self-Love and Healing</a>.</p>
+    `
+  },
+  {
+    slug: "best-crystals-for-meditation-and-astrology",
+    title: "Best Crystals for Meditation and Astrology",
+    excerpt: "A practical, non-cringe guide to crystals for meditation and astrology: how to use them as ritual anchors without giving them magical responsibilities they cannot carry.",
+    readTime: "13 min",
+    publishedAt: "2026-03-17",
+    category: "Ritual Tools",
+    seoDescription: "Best crystals for meditation and astrology: practical ways to use crystals as ritual anchors for focus, grounding, intention, and self-discovery.",
+    imageLight: hubEssayImage({ kicker: "Ritual Tools", title: "Crystals for Meditation and Astrology", motif: "Stone / Focus / Ritual", accent: "#4f8890", accentSoft: "#a9774c" }, "light"),
+    imageDark: hubEssayImage({ kicker: "Ritual Tools", title: "Crystals for Meditation and Astrology", motif: "Stone / Focus / Ritual", accent: "#9de2ea", accentSoft: "#efc38c" }, "dark"),
+    imageAlt: "Crystals for meditation and astrology article illustration",
+    content: `
+      <p class="article-lead">Crystals are most useful when they are treated as ritual anchors, not miracle machines. In meditation and astrology, they can help create atmosphere, focus, and symbolic coherence. They become unhelpful only when they are asked to replace self-observation, action, or discernment.</p>
+      <h2>A grounded way to use crystals</h2>
+      <p>Think of a crystal as a tactile cue. Quartz might represent clarity. Rose quartz might anchor softness and self-kindness. Smoky quartz might support grounding. The meaning matters because it shapes attention, not because the object is supposed to do your emotional work for you.</p>
+      <h2>Useful pairings</h2>
+      <ul class="bullet-list">
+        <li><strong>Rose quartz:</strong> self-love spreads, Venus rituals, heart-centered meditation.</li>
+        <li><strong>Clear quartz:</strong> clarity, journaling, and intention-setting.</li>
+        <li><strong>Amethyst:</strong> quiet reflection, spiritual spaciousness, calming ritual atmosphere.</li>
+        <li><strong>Smoky quartz:</strong> grounding during heavy emotional or lunar periods.</li>
+      </ul>
+      <p>Use them with <a href="/astrology-hub/new-moon-manifestation-with-tarot-and-astrology">New Moon Manifestation With Tarot and Astrology</a> or <a href="/astrology-hub/full-moon-journaling-ritual-with-tarot-and-astrology">Full Moon Journaling Ritual With Tarot and Astrology</a>.</p>
+    `
+  },
+  {
+    slug: "astrology-journaling-prompts-for-beginners",
+    title: "Astrology Journaling Prompts for Beginners",
+    excerpt: "A strong beginner’s guide to astrology journaling prompts for self-awareness, emotional clarity, habit tracking, and practical personal growth.",
+    readTime: "14 min",
+    publishedAt: "2026-03-17",
+    category: "Journaling",
+    seoDescription: "Astrology journaling prompts for beginners: practical prompts for self-awareness, emotional reflection, timing, and daily growth.",
+    imageLight: hubEssayImage({ kicker: "Journaling", title: "Astrology Journaling Prompts", motif: "Journal / Sky / Insight", accent: "#5473a0", accentSoft: "#b07c4a" }, "light"),
+    imageDark: hubEssayImage({ kicker: "Journaling", title: "Astrology Journaling Prompts", motif: "Journal / Sky / Insight", accent: "#accbff", accentSoft: "#efc18a" }, "dark"),
+    imageAlt: "Astrology journaling prompts article illustration",
+    content: `
+      <p class="article-lead">Astrology journaling works best when it stays concrete. Instead of recording vague “energy shifts,” try writing prompts that connect timing to behavior, emotion, and decision-making. This turns astrology from passive fascination into active self-knowledge.</p>
+      <h2>Prompts that actually help</h2>
+      <ul class="bullet-list">
+        <li>What kind of emotional climate does today seem to invite?</li>
+        <li>Where do I feel expansion, and where do I feel pressure?</li>
+        <li>What pattern repeated this week that deserves more attention?</li>
+        <li>Which boundary would make this transit easier to live well?</li>
+        <li>Which Tarot card describes my current internal atmosphere?</li>
+      </ul>
+      <h2>How to keep the practice simple</h2>
+      <p>Pick one transit, one prompt, and one observation. Journaling does not need to become a second job. The value is in repetition and honesty, not in volume.</p>
+      <p>For a daily structure, pair this with <a href="/astrology-hub/morning-meditation-ritual-with-tarot-card-and-astrology-signals">Morning Meditation Ritual With a Tarot Card and Astrology Signals</a>.</p>
+    `
+  },
+  {
+    slug: "tarot-journaling-prompts-for-self-discovery",
+    title: "Tarot Journaling Prompts for Self-Discovery",
+    excerpt: "A practical list of Tarot journaling prompts designed for self-discovery, emotional honesty, and turning symbolic insight into real-life decisions.",
+    readTime: "14 min",
+    publishedAt: "2026-03-17",
+    category: "Journaling",
+    seoDescription: "Tarot journaling prompts for self-discovery: practical prompts for emotional honesty, reflection, decision-making, and personal growth.",
+    imageLight: hubEssayImage({ kicker: "Journaling", title: "Tarot Journaling Prompts", motif: "Card / Journal / Insight", accent: "#9a5f52", accentSoft: "#58719a" }, "light"),
+    imageDark: hubEssayImage({ kicker: "Journaling", title: "Tarot Journaling Prompts", motif: "Card / Journal / Insight", accent: "#efb29f", accentSoft: "#a8c8ff" }, "dark"),
+    imageAlt: "Tarot journaling prompts article illustration",
+    content: `
+      <p class="article-lead">Tarot journaling is one of the best ways to keep Tarot grounded. A prompt turns the card from abstract meaning into a personal conversation. Over time, that conversation becomes a record of your patterns, your turning points, and the themes you are actually living through.</p>
+      <h2>Helpful prompts</h2>
+      <ul class="bullet-list">
+        <li>What part of this card feels uncomfortably true right now?</li>
+        <li>What would living this card in a healthy way look like today?</li>
+        <li>Where do I resist the lesson this card points to?</li>
+        <li>What action would honor the card without becoming dramatic?</li>
+        <li>Which old story does this card challenge?</li>
+      </ul>
+      <p>Use these prompts after reading <a href="/astrology-hub/how-to-meditate-with-a-tarot-deck">How to Meditate With a Tarot Deck</a> or <a href="/astrology-hub/tarot-meditation-for-beginners">Tarot Meditation for Beginners</a>.</p>
+    `
+  },
+  {
+    slug: "venus-rituals-for-self-worth-and-beauty",
+    title: "Venus Rituals for Self-Worth and Beauty",
+    excerpt: "A refined guide to Venus rituals for self-worth, beauty, softness, and relationship with pleasure, grounded in astrology and symbolic self-care.",
+    readTime: "12 min",
+    publishedAt: "2026-03-17",
+    category: "Venus Rituals",
+    seoDescription: "Venus rituals for self-worth and beauty: astrology-inspired practices for softness, self-respect, pleasure, confidence, and emotional nourishment.",
+    imageLight: hubEssayImage({ kicker: "Venus Rituals", title: "Venus Rituals for Self-Worth", motif: "Venus / Beauty / Softness", accent: "#bc6b84", accentSoft: "#8570ad" }, "light"),
+    imageDark: hubEssayImage({ kicker: "Venus Rituals", title: "Venus Rituals for Self-Worth", motif: "Venus / Beauty / Softness", accent: "#f5aec8", accentSoft: "#c2b6ff" }, "dark"),
+    imageAlt: "Venus rituals article illustration",
+    content: `
+      <p class="article-lead">Venus rituals are at their best when they are not about vanity but about value. Self-worth, receptivity, pleasure, beauty, and relational ease all belong to Venus symbolism. A mature Venus ritual helps you soften without collapsing, receive without performing, and care for yourself without making care into another achievement project.</p>
+      <h2>What a Venus ritual can include</h2>
+      <ul class="bullet-list">
+        <li>A gentle Tarot pull around worth, love, and relational truth.</li>
+        <li>A journaling prompt about desire or beauty.</li>
+        <li>A sensory act of care: scent, texture, music, or environment.</li>
+        <li>A practical self-respect action: boundary, request, or financial care.</li>
+      </ul>
+      <p>For the Tarot side, <a href="/astrology-hub/the-empress-tarot-card-meaning">The Empress</a>, <a href="/astrology-hub/the-star-tarot-card-meaning">The Star</a>, and <a href="/astrology-hub/queen-of-cups-tarot-card-meaning">Queen of Cups</a> are especially useful.</p>
+    `
+  },
+  {
+    slug: "mercury-retrograde-self-reflection-rituals",
+    title: "Mercury Retrograde Self-Reflection Rituals",
+    excerpt: "A practical guide to Mercury retrograde self-reflection rituals for journaling, review, communication repair, and calmer decision-making.",
+    readTime: "14 min",
+    publishedAt: "2026-03-17",
+    category: "Mercury Retrograde",
+    seoDescription: "Mercury retrograde self-reflection rituals: practical astrology-based routines for review, journaling, communication repair, and calmer decisions.",
+    imageLight: hubEssayImage({ kicker: "Mercury Retrograde", title: "Mercury Retrograde Rituals", motif: "Review / Language / Repair", accent: "#4c81a8", accentSoft: "#9b6d45" }, "light"),
+    imageDark: hubEssayImage({ kicker: "Mercury Retrograde", title: "Mercury Retrograde Rituals", motif: "Review / Language / Repair", accent: "#a4d3ff", accentSoft: "#edbf86" }, "dark"),
+    imageAlt: "Mercury retrograde rituals article illustration",
+    content: `
+      <p class="article-lead">Mercury retrograde becomes much less dramatic when you use it as a review season instead of a doom season. The most useful rituals here are reflective and practical: edit what is sloppy, revisit what is unfinished, and repair what is miscommunicated.</p>
+      <h2>Best Mercury retrograde rituals</h2>
+      <ul class="bullet-list">
+        <li>Communication review journaling.</li>
+        <li>Inbox and document cleanup.</li>
+        <li>Tarot spreads for clarity and revision.</li>
+        <li>Gentler scheduling and fewer impulsive commitments.</li>
+      </ul>
+      <h2>Helpful Tarot companions</h2>
+      <p><a href="/astrology-hub/justice-tarot-card-meaning">Justice</a>, <a href="/astrology-hub/page-of-swords-tarot-card-meaning">Page of Swords</a>, <a href="/astrology-hub/the-hanged-man-tarot-card-meaning">The Hanged Man</a>, and <a href="/astrology-hub/eight-of-pentacles-tarot-card-meaning">Eight of Pentacles</a> work especially well in Mercury retrograde rituals because they support revision, perspective, language, and craft.</p>
+    `
+  },
+  {
+    slug: "journaling-after-a-tarot-reading",
+    title: "Journaling After a Tarot Reading",
+    excerpt: "How to journal after a Tarot reading so the cards become part of real self-discovery rather than a fleeting moment of symbolic excitement.",
+    readTime: "11 min",
+    publishedAt: "2026-03-17",
+    category: "Journaling",
+    seoDescription: "Journaling after a Tarot reading: how to record insights, patterns, emotions, and next steps so Tarot becomes a real reflective practice.",
+    imageLight: hubEssayImage({ kicker: "Journaling", title: "Journaling After a Tarot Reading", motif: "Reading / Insight / Record", accent: "#7d6a57", accentSoft: "#5977a1" }, "light"),
+    imageDark: hubEssayImage({ kicker: "Journaling", title: "Journaling After a Tarot Reading", motif: "Reading / Insight / Record", accent: "#d6c2ad", accentSoft: "#a8cbff" }, "dark"),
+    imageAlt: "Journaling after a Tarot reading article illustration",
+    content: `
+      <p class="article-lead">A Tarot reading becomes much more valuable when it is written down. Journaling after a Tarot reading helps you separate the immediate emotional charge of the spread from the slower, more useful pattern recognition that emerges over time.</p>
+      <h2>What to record</h2>
+      <ul class="bullet-list">
+        <li>The exact cards and positions.</li>
+        <li>Your first honest reaction.</li>
+        <li>The key question you were asking.</li>
+        <li>One action, one warning, one emotional truth.</li>
+        <li>What happened later that confirmed or challenged the reading.</li>
+      </ul>
+      <p>This is one of the strongest ways to turn Tarot into a real self-knowledge archive instead of a passing mood. Pair it with <a href="/astrology-hub/tarot-journaling-prompts-for-self-discovery">Tarot Journaling Prompts for Self-Discovery</a>.</p>
+    `
+  },
+  {
+    slug: "self-discovery-rituals-for-sunday-reset",
+    title: "Self-Discovery Rituals for a Sunday Reset",
+    excerpt: "A Sunday reset ritual that blends meditation, Tarot, astrology, journaling, and planning into one elegant weekly self-discovery routine.",
+    readTime: "13 min",
+    publishedAt: "2026-03-17",
+    category: "Weekly Rituals",
+    seoDescription: "Self-discovery rituals for a Sunday reset: meditation, Tarot, astrology, journaling, and weekly reflection for a calmer, clearer new week.",
+    imageLight: hubEssayImage({ kicker: "Weekly Rituals", title: "Sunday Reset Ritual", motif: "Reset / Tarot / Week Ahead", accent: "#4d7f76", accentSoft: "#aa7846" }, "light"),
+    imageDark: hubEssayImage({ kicker: "Weekly Rituals", title: "Sunday Reset Ritual", motif: "Reset / Tarot / Week Ahead", accent: "#9de0d3", accentSoft: "#efc287" }, "dark"),
+    imageAlt: "Sunday reset ritual article illustration",
+    content: `
+      <p class="article-lead">Sunday is one of the best times for self-discovery because the week has ended but the next one has not yet fully begun. A Sunday reset ritual can become a beautiful bridge between reflection and action: What did I learn? What am I carrying? What deserves different structure next week?</p>
+      <h2>A weekly reset flow</h2>
+      <div class="article-timeline">
+        <div><strong>1.</strong> Clear the space and the mind with 5 minutes of breathing.</div>
+        <div><strong>2.</strong> Pull a 3-card Tarot spread for the week behind, the week ahead, and the core lesson between them.</div>
+        <div><strong>3.</strong> Check the astrological tone of the coming week.</div>
+        <div><strong>4.</strong> Journal one release, one priority, and one boundary.</div>
+      </div>
+      <p>This ritual pairs especially well with <a href="/astrology-hub/astrology-journaling-prompts-for-beginners">Astrology Journaling Prompts for Beginners</a> and <a href="/astrology-hub/journaling-after-a-tarot-reading">Journaling After a Tarot Reading</a>.</p>
+    `
   }
 ];
 
