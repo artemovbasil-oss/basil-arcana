@@ -3,9 +3,33 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ingestSofiaInbox = ingestSofiaInbox;
 const db_1 = require("../db");
 const mtproto_1 = require("./mtproto");
-function inferDmTaskType(text) {
+function normalizeHandle(value) {
+    if (!value) {
+        return null;
+    }
+    const trimmed = value.trim();
+    if (!trimmed) {
+        return null;
+    }
+    return trimmed.startsWith("@") ? trimmed.toLowerCase() : `@${trimmed.toLowerCase()}`;
+}
+function isApprovalCommand(text) {
+    const normalized = text.trim().toLowerCase();
+    if (!normalized) {
+        return false;
+    }
+    return (normalized.startsWith("ok") ||
+        normalized.startsWith("approve") ||
+        normalized === "all" ||
+        normalized === "все" ||
+        normalized === "cancel" ||
+        normalized.includes("ищи другие") ||
+        normalized === "reject");
+}
+function inferDmTaskType(text, mediaKind) {
     const normalized = text.toLowerCase();
-    if (normalized.includes("natal") ||
+    if (mediaKind === "photo" ||
+        normalized.includes("natal") ||
         normalized.includes("birth chart") ||
         normalized.includes("натал") ||
         normalized.includes("карта рождения")) {
@@ -33,6 +57,7 @@ async function ingestSofiaInbox(config) {
                 chatTitle: message.chatTitle,
                 chatUsername: message.chatUsername,
                 latestPermalink: message.permalink,
+                mediaKind: message.mediaKind,
             },
         });
         threadsUpserted += 1;
@@ -48,9 +73,15 @@ async function ingestSofiaInbox(config) {
                 chatTitle: message.chatTitle,
                 chatUsername: message.chatUsername,
                 permalink: message.permalink,
+                mediaKind: message.mediaKind,
             },
         });
         if (!saved.inserted || message.outgoing) {
+            continue;
+        }
+        const approverHandle = normalizeHandle(config.outreachReportChat);
+        const chatHandle = normalizeHandle(message.chatUsername ? `@${message.chatUsername}` : null);
+        if (approverHandle && chatHandle === approverHandle && isApprovalCommand(message.text)) {
             continue;
         }
         newMessages += 1;
@@ -59,7 +90,7 @@ async function ingestSofiaInbox(config) {
         if (existingTask) {
             continue;
         }
-        const taskType = inferDmTaskType(message.text);
+        const taskType = inferDmTaskType(message.text, message.mediaKind);
         const titlePrefix = taskType === "natal_chart_reply" ? "Natal chart reply" : "DM reply";
         await (0, db_1.createSofiaAgentTask)({
             taskType,
@@ -76,6 +107,7 @@ async function ingestSofiaInbox(config) {
                 chatTitle: message.chatTitle,
                 chatUsername: message.chatUsername,
                 permalink: message.permalink,
+                mediaKind: message.mediaKind,
             },
         });
         tasksCreated += 1;

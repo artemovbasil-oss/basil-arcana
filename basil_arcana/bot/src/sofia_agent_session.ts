@@ -1,8 +1,11 @@
 import { createInterface } from "node:readline/promises";
+import { mkdir } from "node:fs/promises";
+import path from "node:path";
 import { stdin as input, stdout as output } from "node:process";
 
 import { TelegramClient } from "telegram";
 import { StringSession } from "telegram/sessions";
+import QRCode from "qrcode";
 
 const qrcode = require("qrcode-terminal") as {
   generate: (value: string, options?: { small?: boolean }) => void;
@@ -29,6 +32,8 @@ async function main(): Promise<void> {
   });
 
   try {
+    await client.connect();
+
     const preferredMode = (process.env.SOFIA_SESSION_LOGIN_MODE ?? "").trim().toLowerCase();
     const mode =
       preferredMode === "qr" || preferredMode === "phone"
@@ -55,7 +60,16 @@ async function main(): Promise<void> {
           password: async () => rl.question("2FA password (if enabled, otherwise press Enter): "),
           qrCode: async (code) => {
             const url = `tg://login?token=${code.token.toString("base64url")}`;
+            const qrDir = path.join(process.cwd(), ".tmp");
+            const qrPath = path.join(qrDir, "sofia-login-qr.png");
+            await mkdir(qrDir, { recursive: true });
+            await QRCode.toFile(qrPath, url, {
+              errorCorrectionLevel: "M",
+              margin: 2,
+              scale: 8,
+            });
             qrcode.generate(url, { small: true });
+            output.write(`QR image saved to: ${qrPath}\n`);
             output.write(`QR expires at: ${new Date(code.expires * 1000).toISOString()}\n\n`);
           },
           onError: async (error) => {

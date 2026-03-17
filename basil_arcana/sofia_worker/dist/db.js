@@ -29,10 +29,16 @@ exports.findSofiaTaskByDedupKey = findSofiaTaskByDedupKey;
 exports.upsertSofiaAgentThread = upsertSofiaAgentThread;
 exports.createSofiaAgentMessage = createSofiaAgentMessage;
 exports.listRecentInboundSofiaMessages = listRecentInboundSofiaMessages;
+exports.listSofiaThreadMessages = listSofiaThreadMessages;
 exports.createSofiaSearchTarget = createSofiaSearchTarget;
 exports.listSofiaSearchTargets = listSofiaSearchTargets;
 exports.listDueSofiaSearchTargets = listDueSofiaSearchTargets;
 exports.markSofiaSearchTargetChecked = markSofiaSearchTargetChecked;
+exports.setSofiaSearchTargetEnabled = setSofiaSearchTargetEnabled;
+exports.resetSofiaSearchTarget = resetSofiaSearchTarget;
+exports.listSentSofiaOutreachSince = listSentSofiaOutreachSince;
+exports.getSofiaRuntimeState = getSofiaRuntimeState;
+exports.setSofiaRuntimeState = setSofiaRuntimeState;
 const pg_1 = require("pg");
 let pool = null;
 function requirePool() {
@@ -195,6 +201,13 @@ async function ensureSchema() {
       last_checked_at TIMESTAMPTZ,
       metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+    await db.query(`
+    CREATE TABLE IF NOT EXISTS sofia_agent_runtime_state (
+      state_key TEXT PRIMARY KEY,
+      state_value JSONB NOT NULL DEFAULT '{}'::jsonb,
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
   `);
@@ -861,6 +874,25 @@ async function listRecentInboundSofiaMessages(limit = 20) {
         createdAt: toMillis(row.created_at ?? null) ?? Date.now(),
     }));
 }
+async function listSofiaThreadMessages(threadId, limit = 12) {
+    const db = requirePool();
+    const safeLimit = Math.max(1, Math.min(50, Number(limit) || 12));
+    const { rows } = await db.query(`
+    SELECT direction, sender_label, message_text, sent_at
+    FROM sofia_agent_messages
+    WHERE thread_id = $1
+    ORDER BY sent_at DESC, id DESC
+    LIMIT $2;
+    `, [threadId, safeLimit]);
+    return rows
+        .map((row) => ({
+        direction: String(row.direction ?? "inbound"),
+        senderLabel: row.sender_label ?? null,
+        messageText: String(row.message_text ?? ""),
+        sentAt: toMillis(row.sent_at ?? null) ?? Date.now(),
+    }))
+        .reverse();
+}
 async function createSofiaSearchTarget(input) {
     const db = requirePool();
     const { rows } = await db.query(`
@@ -914,4 +946,79 @@ async function markSofiaSearchTargetChecked(targetId) {
     SET last_checked_at = NOW(), updated_at = NOW()
     WHERE id = $1;
     `, [targetId]);
+}
+async function setSofiaSearchTargetEnabled(targetId, enabled, metadata) {
+    const db = requirePool();
+    await db.query(`
+    UPDATE sofia_agent_search_targets
+    SET enabled = $2,
+        metadata = CASE
+          WHEN $3::jsonb IS NULL THEN metadata
+          ELSE COALESCE(metadata, '{}'::jsonb) || $3::jsonb
+        END,
+        updated_at = NOW()
+    WHERE id = $1;
+    `, [targetId, enabled, metadata ? JSON.stringify(metadata) : null]);
+}
+async function resetSofiaSearchTarget(targetId, enabled, metadata) {
+    const db = requirePool();
+    await db.query(`
+    UPDATE sofia_agent_search_targets
+    SET enabled = $2,
+        last_checked_at = NULL,
+        metadata = CASE
+          WHEN $3::jsonb IS NULL THEN metadata
+          ELSE COALESCE(metadata, '{}'::jsonb) || $3::jsonb
+        END,
+        updated_at = NOW()
+    WHERE id = $1;
+    `, [targetId, enabled, metadata ? JSON.stringify(metadata) : null]);
+}
+async function listSentSofiaOutreachSince(sinceMs) {
+    const db = requirePool();
+    const { rows } = await db.query(`
+    SELECT id, task_type, title, source_channel, target_chat, payload, updated_at
+    FROM sofia_agent_tasks
+    WHERE status = 'sent'
+      AND task_type IN ('channel_comment', 'group_outreach')
+      AND updated_at >= to_timestamp($1 / 1000.0)
+    ORDER BY updated_at DESC, id DESC;
+    `, [sinceMs]);
+    return rows.map((row) => {
+        const payload = row.payload ?? {};
+        return {
+            id: Number(row.id),
+            taskType: String(row.task_type ?? "group_outreach"),
+            title: String(row.title ?? ""),
+            sourceChannel: row.source_channel ?? null,
+            targetChat: row.target_chat ?? null,
+            sourceText: typeof payload.sourceText === "string" ? payload.sourceText : null,
+            sourcePermalink: typeof payload.sourcePermalink === "string" ? payload.sourcePermalink : null,
+            updatedAt: toMillis(row.updated_at ?? null) ?? Date.now(),
+        };
+    });
+}
+async function getSofiaRuntimeState(key) {
+    const db = requirePool();
+    const { rows } = await db.query(`
+    SELECT state_value
+    FROM sofia_agent_runtime_state
+    WHERE state_key = $1
+    LIMIT 1;
+    `, [key]);
+    if (rows.length === 0) {
+        return null;
+    }
+    return rows[0]?.state_value ?? {};
+}
+async function setSofiaRuntimeState(key, value) {
+    const db = requirePool();
+    await db.query(`
+    INSERT INTO sofia_agent_runtime_state (state_key, state_value, updated_at)
+    VALUES ($1, $2::jsonb, NOW())
+    ON CONFLICT (state_key)
+    DO UPDATE SET
+      state_value = EXCLUDED.state_value,
+      updated_at = NOW();
+    `, [key, JSON.stringify(value)]);
 }

@@ -1,9 +1,15 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const promises_1 = require("node:readline/promises");
+const promises_2 = require("node:fs/promises");
+const node_path_1 = __importDefault(require("node:path"));
 const node_process_1 = require("node:process");
 const telegram_1 = require("telegram");
 const sessions_1 = require("telegram/sessions");
+const qrcode_1 = __importDefault(require("qrcode"));
 const qrcode = require("qrcode-terminal");
 function requireEnv(name) {
     const value = process.env[name];
@@ -23,6 +29,7 @@ async function main() {
         connectionRetries: 5,
     });
     try {
+        await client.connect();
         const preferredMode = (process.env.SOFIA_SESSION_LOGIN_MODE ?? "").trim().toLowerCase();
         const mode = preferredMode === "qr" || preferredMode === "phone"
             ? preferredMode
@@ -44,7 +51,16 @@ async function main() {
                 password: async () => rl.question("2FA password (if enabled, otherwise press Enter): "),
                 qrCode: async (code) => {
                     const url = `tg://login?token=${code.token.toString("base64url")}`;
+                    const qrDir = node_path_1.default.join(process.cwd(), ".tmp");
+                    const qrPath = node_path_1.default.join(qrDir, "sofia-login-qr.png");
+                    await (0, promises_2.mkdir)(qrDir, { recursive: true });
+                    await qrcode_1.default.toFile(qrPath, url, {
+                        errorCorrectionLevel: "M",
+                        margin: 2,
+                        scale: 8,
+                    });
                     qrcode.generate(url, { small: true });
+                    node_process_1.stdout.write(`QR image saved to: ${qrPath}\n`);
                     node_process_1.stdout.write(`QR expires at: ${new Date(code.expires * 1000).toISOString()}\n\n`);
                 },
                 onError: async (error) => {

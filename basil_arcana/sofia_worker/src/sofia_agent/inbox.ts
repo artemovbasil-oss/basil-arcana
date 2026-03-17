@@ -7,9 +7,37 @@ import {
 } from "../db";
 import { fetchRecentPrivateMessages } from "./mtproto";
 
-function inferDmTaskType(text: string): "dm_reply" | "natal_chart_reply" {
+function normalizeHandle(value: string | null | undefined): string | null {
+  if (!value) {
+    return null;
+  }
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return null;
+  }
+  return trimmed.startsWith("@") ? trimmed.toLowerCase() : `@${trimmed.toLowerCase()}`;
+}
+
+function isApprovalCommand(text: string): boolean {
+  const normalized = text.trim().toLowerCase();
+  if (!normalized) {
+    return false;
+  }
+  return (
+    normalized.startsWith("ok") ||
+    normalized.startsWith("approve") ||
+    normalized === "all" ||
+    normalized === "все" ||
+    normalized === "cancel" ||
+    normalized.includes("ищи другие") ||
+    normalized === "reject"
+  );
+}
+
+function inferDmTaskType(text: string, mediaKind: "photo" | "document" | "other" | null): "dm_reply" | "natal_chart_reply" {
   const normalized = text.toLowerCase();
   if (
+    mediaKind === "photo" ||
     normalized.includes("natal") ||
     normalized.includes("birth chart") ||
     normalized.includes("натал") ||
@@ -50,6 +78,7 @@ export async function ingestSofiaInbox(config: SofiaAgentConfig): Promise<{
         chatTitle: message.chatTitle,
         chatUsername: message.chatUsername,
         latestPermalink: message.permalink,
+        mediaKind: message.mediaKind,
       },
     });
     threadsUpserted += 1;
@@ -66,10 +95,17 @@ export async function ingestSofiaInbox(config: SofiaAgentConfig): Promise<{
         chatTitle: message.chatTitle,
         chatUsername: message.chatUsername,
         permalink: message.permalink,
+        mediaKind: message.mediaKind,
       },
     });
 
     if (!saved.inserted || message.outgoing) {
+      continue;
+    }
+
+    const approverHandle = normalizeHandle(config.outreachReportChat);
+    const chatHandle = normalizeHandle(message.chatUsername ? `@${message.chatUsername}` : null);
+    if (approverHandle && chatHandle === approverHandle && isApprovalCommand(message.text)) {
       continue;
     }
 
@@ -80,7 +116,7 @@ export async function ingestSofiaInbox(config: SofiaAgentConfig): Promise<{
       continue;
     }
 
-    const taskType = inferDmTaskType(message.text);
+    const taskType = inferDmTaskType(message.text, message.mediaKind);
     const titlePrefix = taskType === "natal_chart_reply" ? "Natal chart reply" : "DM reply";
     await createSofiaAgentTask({
       taskType,
@@ -97,6 +133,7 @@ export async function ingestSofiaInbox(config: SofiaAgentConfig): Promise<{
         chatTitle: message.chatTitle,
         chatUsername: message.chatUsername,
         permalink: message.permalink,
+        mediaKind: message.mediaKind,
       },
     });
     tasksCreated += 1;

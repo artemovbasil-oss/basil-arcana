@@ -133,6 +133,24 @@ export interface SofiaAgentMessageRow {
   createdAt: number;
 }
 
+export interface SofiaThreadContextMessage {
+  direction: SofiaAgentMessageDirection;
+  senderLabel: string | null;
+  messageText: string;
+  sentAt: number;
+}
+
+export interface SofiaOutreachSentRow {
+  id: number;
+  taskType: SofiaAgentTaskType;
+  title: string;
+  sourceChannel: string | null;
+  targetChat: string | null;
+  sourceText: string | null;
+  sourcePermalink: string | null;
+  updatedAt: number;
+}
+
 export interface SofiaAgentSearchTargetInput {
   label: string;
   query: string;
@@ -337,6 +355,14 @@ export async function ensureSchema(): Promise<void> {
       last_checked_at TIMESTAMPTZ,
       metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS sofia_agent_runtime_state (
+      state_key TEXT PRIMARY KEY,
+      state_value JSONB NOT NULL DEFAULT '{}'::jsonb,
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
   `);
@@ -1190,6 +1216,32 @@ export async function listRecentInboundSofiaMessages(limit = 20): Promise<SofiaA
   }));
 }
 
+export async function listSofiaThreadMessages(
+  threadId: number,
+  limit = 12,
+): Promise<SofiaThreadContextMessage[]> {
+  const db = requirePool();
+  const safeLimit = Math.max(1, Math.min(50, Number(limit) || 12));
+  const { rows } = await db.query(
+    `
+    SELECT direction, sender_label, message_text, sent_at
+    FROM sofia_agent_messages
+    WHERE thread_id = $1
+    ORDER BY sent_at DESC, id DESC
+    LIMIT $2;
+    `,
+    [threadId, safeLimit],
+  );
+  return rows
+    .map((row) => ({
+      direction: String(row.direction ?? "inbound") as SofiaAgentMessageDirection,
+      senderLabel: (row.sender_label as string | null) ?? null,
+      messageText: String(row.message_text ?? ""),
+      sentAt: toMillis((row.sent_at as Date | null) ?? null) ?? Date.now(),
+    }))
+    .reverse();
+}
+
 export async function createSofiaSearchTarget(
   input: SofiaAgentSearchTargetInput,
 ): Promise<SofiaAgentSearchTargetRow> {
@@ -1258,5 +1310,108 @@ export async function markSofiaSearchTargetChecked(targetId: number): Promise<vo
     WHERE id = $1;
     `,
     [targetId],
+  );
+}
+
+export async function setSofiaSearchTargetEnabled(
+  targetId: number,
+  enabled: boolean,
+  metadata?: Record<string, unknown> | null,
+): Promise<void> {
+  const db = requirePool();
+  await db.query(
+    `
+    UPDATE sofia_agent_search_targets
+    SET enabled = $2,
+        metadata = CASE
+          WHEN $3::jsonb IS NULL THEN metadata
+          ELSE COALESCE(metadata, '{}'::jsonb) || $3::jsonb
+        END,
+        updated_at = NOW()
+    WHERE id = $1;
+    `,
+    [targetId, enabled, metadata ? JSON.stringify(metadata) : null],
+  );
+}
+
+export async function resetSofiaSearchTarget(
+  targetId: number,
+  enabled: boolean,
+  metadata?: Record<string, unknown> | null,
+): Promise<void> {
+  const db = requirePool();
+  await db.query(
+    `
+    UPDATE sofia_agent_search_targets
+    SET enabled = $2,
+        last_checked_at = NULL,
+        metadata = CASE
+          WHEN $3::jsonb IS NULL THEN metadata
+          ELSE COALESCE(metadata, '{}'::jsonb) || $3::jsonb
+        END,
+        updated_at = NOW()
+    WHERE id = $1;
+    `,
+    [targetId, enabled, metadata ? JSON.stringify(metadata) : null],
+  );
+}
+
+export async function listSentSofiaOutreachSince(sinceMs: number): Promise<SofiaOutreachSentRow[]> {
+  const db = requirePool();
+  const { rows } = await db.query(
+    `
+    SELECT id, task_type, title, source_channel, target_chat, payload, updated_at
+    FROM sofia_agent_tasks
+    WHERE status = 'sent'
+      AND task_type IN ('channel_comment', 'group_outreach')
+      AND updated_at >= to_timestamp($1 / 1000.0)
+    ORDER BY updated_at DESC, id DESC;
+    `,
+    [sinceMs],
+  );
+  return rows.map((row) => {
+    const payload = (row.payload as Record<string, unknown> | null) ?? {};
+    return {
+      id: Number(row.id),
+      taskType: String(row.task_type ?? "group_outreach") as SofiaAgentTaskType,
+      title: String(row.title ?? ""),
+      sourceChannel: (row.source_channel as string | null) ?? null,
+      targetChat: (row.target_chat as string | null) ?? null,
+      sourceText: typeof payload.sourceText === "string" ? payload.sourceText : null,
+      sourcePermalink: typeof payload.sourcePermalink === "string" ? payload.sourcePermalink : null,
+      updatedAt: toMillis((row.updated_at as Date | null) ?? null) ?? Date.now(),
+    };
+  });
+}
+
+export async function getSofiaRuntimeState(key: string): Promise<Record<string, unknown> | null> {
+  const db = requirePool();
+  const { rows } = await db.query(
+    `
+    SELECT state_value
+    FROM sofia_agent_runtime_state
+    WHERE state_key = $1
+    LIMIT 1;
+    `,
+    [key],
+  );
+  if (rows.length === 0) {
+    return null;
+  }
+  return (rows[0]?.state_value as Record<string, unknown> | null) ?? {};
+}
+
+export async function setSofiaRuntimeState(key: string, value: Record<string, unknown>): Promise<void> {
+  const db = requirePool();
+  await db.query(
+    `
+    INSERT INTO sofia_agent_runtime_state (state_key, state_value, updated_at)
+    VALUES ($1, $2::jsonb, NOW())
+    ON CONFLICT (state_key)
+    DO UPDATE SET
+      state_value = EXCLUDED.state_value,
+      updated_at = NOW();
+    `,
+    [key, JSON.stringify(value)],
   );
 }
