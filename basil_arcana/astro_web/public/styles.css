@@ -1415,6 +1415,33 @@ body[data-theme="light"] .login-lead-white {
   gap: 0.9rem;
 }
 
+.hub-product-rail {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+.hub-product-link {
+  display: grid;
+  gap: 0.35rem;
+  text-decoration: none;
+  color: var(--ink);
+  padding: 0.95rem;
+  border: 1px solid var(--line);
+  background:
+    radial-gradient(circle at 84% 14%, color-mix(in srgb, var(--ink) 7%, transparent 93%) 0%, transparent 36%),
+    var(--surface);
+}
+
+.hub-product-link h3,
+.hub-product-link p {
+  margin: 0;
+}
+
+.hub-product-link p {
+  color: var(--muted);
+}
+
 .hub-card-compact {
   gap: 0.55rem;
 }
@@ -6889,6 +6916,10 @@ body[data-theme="light"] .energy-star.neutral {
   }
 
   .hub-feature-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .hub-product-rail {
     grid-template-columns: 1fr;
   }
 

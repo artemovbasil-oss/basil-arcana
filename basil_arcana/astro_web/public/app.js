@@ -8741,6 +8741,12 @@ function astrologyHubView() {
           ${categoryGroups.map((group) => `<a class="hub-filter-chip" href="#${group.id}">${group.label}</a>`).join("")}
           <a class="hub-filter-chip" href="#all-articles">All Articles</a>
         </div>
+        <div class="hero-actions">
+          <a class="btn primary" href="/login">Sign in / Register</a>
+          <a class="btn ghost" href="/tarot">Tarot</a>
+          <a class="btn ghost" href="/natal-chart">Natal Chart</a>
+          <a class="btn ghost" href="/numerology">Numerology</a>
+        </div>
       </article>
     </section>
     <section class="section" id="self-knowledge-cluster">
@@ -8787,6 +8793,23 @@ function astrologyHubView() {
           <div class="hub-feature-list">
             ${featuredSide.map((article) => renderHubArticleCard(article, { extraClass: "hub-card-compact" })).join("")}
           </div>
+        </div>
+        <div class="hub-product-rail">
+          <a class="hub-product-link" href="/tarot">
+            <span class="eyebrow">Inside Astronautica</span>
+            <h3>Daily Tarot</h3>
+            <p>Open the 3-card spread and turn symbolic insight into a practical daily plan.</p>
+          </a>
+          <a class="hub-product-link" href="/natal-chart">
+            <span class="eyebrow">Inside Astronautica</span>
+            <h3>Natal Chart</h3>
+            <p>Move from article reading into your own chart, placements, and timing architecture.</p>
+          </a>
+          <a class="hub-product-link" href="/numerology">
+            <span class="eyebrow">Inside Astronautica</span>
+            <h3>Numerology</h3>
+            <p>Read your numbers as a daily rhythm layer for focus, mood, and behavioral review.</p>
+          </a>
         </div>
       </article>
     </section>
@@ -8909,9 +8932,15 @@ function astrologyHubArticleView(slug) {
     </section>
     <section class="section">
       <article class="card article-cta">
-        <h2>Explore more from Astrology Hub</h2>
-        <p class="muted">Continue reading: history, safety, and practical frameworks for modern reflective astrology.</p>
-        <a class="btn ghost" href="/astrology-hub">Back to all articles</a>
+        <h2>Continue inside the product</h2>
+        <p class="muted">Use this article as a doorway: open Tarot for symbolic reflection, Natal Chart for structure, Numerology for rhythm, or sign in to save your path.</p>
+        <div class="hero-actions">
+          <a class="btn primary" href="/login">Sign in / Register</a>
+          <a class="btn ghost" href="/tarot">Tarot</a>
+          <a class="btn ghost" href="/natal-chart">Natal Chart</a>
+          <a class="btn ghost" href="/numerology">Numerology</a>
+          <a class="btn ghost" href="/astrology-hub">Back to all articles</a>
+        </div>
       </article>
     </section>
     ${renderProfessionalReadingCta()}
