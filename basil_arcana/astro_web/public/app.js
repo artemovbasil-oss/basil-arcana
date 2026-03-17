@@ -8743,6 +8743,11 @@ function astrologyHubView() {
         <span class="eyebrow">Astrology Hub</span>
         <h1>Research + insight journal</h1>
         <p>Public long-form pieces from Astronautica: method, history, safety standards, and practical models for reflective decision-making. The meditation, yoga, Tarot, and astrology cluster below is designed as a self-knowledge library, not just a reading archive.</p>
+        <div class="hub-hero-notes">
+          <span class="hub-hero-note">20 long-form guides</span>
+          <span class="hub-hero-note">Meditation + Tarot + Astrology</span>
+          <span class="hub-hero-note">Built for self-knowledge</span>
+        </div>
         <div class="hub-filter-bar">
           <a class="hub-filter-chip" href="#self-knowledge-cluster">Featured Cluster</a>
           ${categoryGroups.map((group) => `<a class="hub-filter-chip" href="#${group.id}">${group.label}</a>`).join("")}
@@ -8823,7 +8828,7 @@ function astrologyHubView() {
     ${categoryGroups
       .map((group) => `
         <section class="section" id="${group.id}">
-          <article class="card hub-topic-shell">
+          <article class="card hub-topic-shell hub-topic-panel">
             <div class="hub-section-head">
               <div>
                 <span class="eyebrow">Topic</span>
@@ -8839,7 +8844,7 @@ function astrologyHubView() {
       `)
       .join("")}
     <section class="section" id="all-articles">
-      <article class="card hub-topic-shell">
+      <article class="card hub-topic-shell hub-archive-shell">
         <div class="hub-section-head">
           <div>
             <span class="eyebrow">Archive</span>

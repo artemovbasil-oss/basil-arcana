@@ -1346,6 +1346,67 @@ body[data-theme="light"] .login-lead-white {
   gap: 1rem;
 }
 
+.hub-hero-card {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(1.15rem, 2.7vw, 2rem);
+  background:
+    radial-gradient(circle at 12% 18%, color-mix(in srgb, var(--ink) 12%, transparent 88%) 0%, transparent 34%),
+    radial-gradient(circle at 86% 16%, color-mix(in srgb, var(--ink) 9%, transparent 91%) 0%, transparent 26%),
+    radial-gradient(circle at 74% 84%, color-mix(in srgb, var(--ink) 5%, transparent 95%) 0%, transparent 38%),
+    linear-gradient(135deg, color-mix(in srgb, var(--surface) 90%, transparent 10%) 0%, color-mix(in srgb, var(--surface-2) 78%, transparent 22%) 100%);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--line-strong) 40%, transparent 60%);
+}
+
+.hub-hero-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--ink) 4%, transparent 96%) 52%, transparent 100%);
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+.hub-hero-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.hub-hero-card h1 {
+  margin: 0;
+  max-width: 12ch;
+  font-size: clamp(2rem, 5vw, 4.4rem);
+  line-height: 0.92;
+  letter-spacing: -0.04em;
+}
+
+.hub-hero-card p {
+  margin: 0;
+  max-width: 54rem;
+  color: var(--muted);
+  font-size: clamp(1rem, 1.5vw, 1.14rem);
+  line-height: 1.7;
+}
+
+.hub-hero-notes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.hub-hero-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.42rem 0.72rem;
+  border: 1px solid color-mix(in srgb, var(--line-strong) 65%, transparent 35%);
+  background: color-mix(in srgb, var(--surface) 80%, transparent 20%);
+  border-radius: 999px;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .hub-filter-bar {
   display: flex;
   flex-wrap: wrap;
@@ -1364,6 +1425,13 @@ body[data-theme="light"] .login-lead-white {
   font-size: 0.72rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  transition: transform 0.18s ease, background-color 0.18s ease, border-color 0.18s ease;
+}
+
+.hub-filter-chip:hover {
+  transform: translateY(-1px);
+  background: color-mix(in srgb, var(--surface) 60%, transparent 40%);
+  border-color: var(--ink);
 }
 
 .hub-section-head {
@@ -1393,17 +1461,39 @@ body[data-theme="light"] .login-lead-white {
 .hub-feature-lead {
   display: grid;
   gap: 0.85rem;
-  padding: 1.1rem;
+  padding: clamp(1rem, 2vw, 1.4rem);
   background:
+    linear-gradient(180deg, color-mix(in srgb, var(--surface) 94%, transparent 6%) 0%, color-mix(in srgb, var(--surface-2) 76%, transparent 24%) 100%),
     radial-gradient(circle at 84% 16%, color-mix(in srgb, var(--ink) 9%, transparent 91%) 0%, transparent 34%),
     radial-gradient(circle at 18% 80%, color-mix(in srgb, var(--ink) 6%, transparent 94%) 0%, transparent 42%),
     var(--surface);
+  border: 1px solid color-mix(in srgb, var(--line-strong) 72%, transparent 28%);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--line-strong) 30%, transparent 70%),
+    0 18px 48px color-mix(in srgb, var(--ink) 6%, transparent 94%);
+}
+
+.hub-feature-lead h2 {
+  margin: 0;
+  max-width: 13ch;
+  font-size: clamp(1.6rem, 3.4vw, 3rem);
+  line-height: 0.96;
+  letter-spacing: -0.04em;
+}
+
+.hub-feature-lead p {
+  margin: 0;
+  max-width: 54ch;
+  color: var(--muted);
+  line-height: 1.7;
 }
 
 .hub-feature-image-link {
   border: 1px solid var(--line);
   padding: 0.55rem;
-  background: color-mix(in srgb, var(--surface-2) 92%, transparent 8%);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--surface) 88%, transparent 12%) 0%, color-mix(in srgb, var(--surface-2) 74%, transparent 26%) 100%);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--line-strong) 35%, transparent 65%);
 }
 
 .hub-feature-image {
@@ -1414,6 +1504,43 @@ body[data-theme="light"] .login-lead-white {
   display: grid;
   gap: 0.9rem;
   align-content: start;
+}
+
+.hub-feature-shell {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(1rem, 2.1vw, 1.5rem);
+  background:
+    radial-gradient(circle at 92% 8%, color-mix(in srgb, var(--ink) 8%, transparent 92%) 0%, transparent 28%),
+    linear-gradient(180deg, color-mix(in srgb, var(--surface) 95%, transparent 5%) 0%, color-mix(in srgb, var(--surface-2) 84%, transparent 16%) 100%);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--line-strong) 34%, transparent 66%),
+    0 18px 42px color-mix(in srgb, var(--ink) 4%, transparent 96%);
+}
+
+.hub-topic-shell {
+  position: relative;
+  overflow: hidden;
+}
+
+.hub-topic-panel {
+  padding: clamp(1rem, 2vw, 1.35rem);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--surface) 94%, transparent 6%) 0%, color-mix(in srgb, var(--surface-2) 88%, transparent 12%) 100%);
+}
+
+.hub-archive-shell {
+  padding: clamp(1rem, 2vw, 1.35rem);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--surface) 84%, transparent 16%) 0%, color-mix(in srgb, var(--surface-2) 92%, transparent 8%) 100%);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--line) 32%, transparent 68%);
+}
+
+.hub-archive-shell .hub-section-head p,
+.hub-archive-shell .hub-card p,
+.hub-archive-shell .hub-meta,
+.hub-archive-shell .hub-card-footer time {
+  color: color-mix(in srgb, var(--muted) 88%, var(--bg) 12%);
 }
 
 .hub-product-rail {
@@ -1432,6 +1559,13 @@ body[data-theme="light"] .login-lead-white {
   background:
     radial-gradient(circle at 84% 14%, color-mix(in srgb, var(--ink) 7%, transparent 93%) 0%, transparent 36%),
     var(--surface);
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.hub-product-link:hover {
+  transform: translateY(-2px);
+  border-color: var(--ink);
+  box-shadow: 0 12px 30px color-mix(in srgb, var(--ink) 7%, transparent 93%);
 }
 
 .hub-product-link h3,
@@ -1517,6 +1651,7 @@ body[data-theme="dark"] .celeb-archive-thumb-link {
     radial-gradient(circle at 82% 14%, color-mix(in srgb, var(--ink) 8%, transparent 92%) 0%, transparent 36%),
     radial-gradient(circle at 14% 84%, color-mix(in srgb, var(--ink) 6%, transparent 94%) 0%, transparent 44%),
     var(--surface);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--line) 24%, transparent 76%);
 }
 
 .hub-sign-thumb-link {
@@ -1527,6 +1662,12 @@ body[data-theme="dark"] .celeb-archive-thumb-link {
   padding: 0.5rem;
   aspect-ratio: 1 / 0.78;
   overflow: hidden;
+  transition: transform 0.18s ease, border-color 0.18s ease;
+}
+
+.hub-sign-thumb-link:hover {
+  transform: translateY(-1px);
+  border-color: var(--ink);
 }
 
 .hub-sign-thumb {
@@ -6941,6 +7082,11 @@ body[data-theme="light"] .energy-star.neutral {
 
   .hub-section-head {
     align-items: flex-start;
+  }
+
+  .hub-hero-card h1,
+  .hub-feature-lead h2 {
+    max-width: none;
   }
 
   .celeb-archive-grid {
