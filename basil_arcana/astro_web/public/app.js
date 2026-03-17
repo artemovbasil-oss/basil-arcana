@@ -7999,6 +7999,194 @@ const coreHubArticles = [
       <p>This is what makes the practice genuinely valuable for self-knowledge. The session ends not in abstraction but in clarity: what feels unstable, what image describes it, and what real-world behavior might restore balance.</p>
       <p>To embody the same framework through movement, continue with <a href="/astrology-hub/yoga-for-self-discovery-using-astrology-and-tarot-symbolism">Yoga for Self-Discovery Using Astrology and Tarot Symbolism</a>.</p>
     `
+  },
+  {
+    slug: "how-to-meditate-with-a-tarot-deck",
+    title: "How to Meditate With a Tarot Deck",
+    excerpt: "A practical beginner-friendly guide to meditating with Tarot cards: how to choose a card, sit with the image, journal the insight, and avoid overcomplicating the ritual.",
+    readTime: "14 min",
+    publishedAt: "2026-03-17",
+    category: "Tarot Practice",
+    seoDescription: "How to meditate with a Tarot deck: a practical Tarot meditation ritual for beginners using one card, journaling, breath work, and symbolic reflection.",
+    imageLight: hubEssayImage({ kicker: "Tarot Practice", title: "Meditate With a Tarot Deck", motif: "Card / Breath / Reflection", accent: "#8b5b35", accentSoft: "#4b76aa" }, "light"),
+    imageDark: hubEssayImage({ kicker: "Tarot Practice", title: "Meditate With a Tarot Deck", motif: "Card / Breath / Reflection", accent: "#efb98a", accentSoft: "#9cc5ff" }, "dark"),
+    imageAlt: "How to meditate with a Tarot deck article illustration",
+    content: `
+      <p class="article-lead">If you have ever wanted to use Tarot as more than a quick meaning lookup, meditation is the cleanest next step. A Tarot deck becomes far more interesting when you stop asking it for instant verdicts and start using it as a contemplative object. One image, one breath, one honest question: that is enough to begin.</p>
+      <h2>What Tarot meditation actually is</h2>
+      <p>Tarot meditation is not about forcing mystical downloads. It is about giving your attention one symbolic image and enough quiet to see what it evokes. A card can function like a mirror: it reflects what you fear, what you desire, what you resist, and what kind of action or surrender might be needed next.</p>
+      <div class="article-callout"><strong>Best beginner rule:</strong> choose one card, not three. Meditation gets weaker when interpretation becomes crowded.</div>
+      <h2>A simple Tarot meditation ritual</h2>
+      <div class="article-timeline">
+        <div><strong>Step 1:</strong> sit down, slow the breath, and decide on one question or emotional theme.</div>
+        <div><strong>Step 2:</strong> draw one card and look at the image for at least two minutes before searching for meanings.</div>
+        <div><strong>Step 3:</strong> note what you feel first: resistance, relief, discomfort, curiosity, grief, hope.</div>
+        <div><strong>Step 4:</strong> journal one insight and one practical action.</div>
+      </div>
+      <h2>Which cards are best for meditation</h2>
+      <ul class="bullet-list">
+        <li><a href="/astrology-hub/the-hermit-tarot-card-meaning">The Hermit</a> for solitude and truth.</li>
+        <li><a href="/astrology-hub/the-high-priestess-tarot-card-meaning">The High Priestess</a> for inner listening.</li>
+        <li><a href="/astrology-hub/strength-tarot-card-meaning">Strength</a> for emotional regulation.</li>
+        <li><a href="/astrology-hub/the-moon-tarot-card-meaning">The Moon</a> for uncertainty and intuition.</li>
+        <li><a href="/astrology-hub/temperance-tarot-card-meaning">Temperance</a> for healing and integration.</li>
+      </ul>
+      <h2>How astrology can improve the ritual</h2>
+      <p>If you want a richer practice, use astrology as context, not as command. On emotionally heavy days, meditate with softer cards and fewer expectations. On clearer, lighter days, use the ritual to ask what action wants to begin. Astrology helps you choose the right tone so the practice stays honest.</p>
+      <p>Go deeper with <a href="/astrology-hub/meditation-for-self-knowledge-through-tarot-and-astrology">Meditation for Self-Knowledge Through Tarot and Astrology</a>.</p>
+    `
+  },
+  {
+    slug: "tarot-meditation-for-beginners",
+    title: "Tarot Meditation for Beginners: A Calm Way to Start",
+    excerpt: "A gentle beginner’s guide to Tarot meditation for people who want self-discovery, calm, and reflection without feeling overwhelmed by esoteric complexity.",
+    readTime: "12 min",
+    publishedAt: "2026-03-17",
+    category: "Beginner Guide",
+    seoDescription: "Tarot meditation for beginners: an easy, calming ritual for self-discovery using one card, breath, reflection, and simple journaling.",
+    imageLight: hubEssayImage({ kicker: "Beginner Guide", title: "Tarot Meditation for Beginners", motif: "Begin / Breathe / Reflect", accent: "#5f7f49", accentSoft: "#a96e53" }, "light"),
+    imageDark: hubEssayImage({ kicker: "Beginner Guide", title: "Tarot Meditation for Beginners", motif: "Begin / Breathe / Reflect", accent: "#b8e09d", accentSoft: "#efb498" }, "dark"),
+    imageAlt: "Tarot meditation for beginners article illustration",
+    content: `
+      <p class="article-lead">Beginners often make the same mistake with Tarot: too many cards, too many meanings, too much pressure to “get it right.” Meditation is a better starting point. It teaches you to stay with one symbol long enough for real reflection to happen.</p>
+      <h2>Why beginners should start with meditation, not prediction</h2>
+      <p>Prediction creates anxiety. Meditation creates relationship. When you sit with one card, you learn how Tarot actually works for you: which images feel clear, which themes repeat, and how symbolic language interacts with your real emotional life.</p>
+      <div class="article-spotlight-grid">
+        <article><h3>Keep it small</h3><p>One card, five breaths, one notebook. That is enough.</p></article>
+        <article><h3>Keep it regular</h3><p>A calm ritual repeated often is better than an elaborate ritual done twice.</p></article>
+        <article><h3>Keep it honest</h3><p>Record your real reaction, not the reaction you think a spiritual person should have.</p></article>
+      </div>
+      <h2>The easiest beginner flow</h2>
+      <ul class="bullet-list">
+        <li>Choose a quiet time.</li>
+        <li>Shuffle the deck slowly.</li>
+        <li>Pull one card only.</li>
+        <li>Spend two minutes looking before interpreting.</li>
+        <li>Write: “This card feels like...” and “Today I need...”</li>
+      </ul>
+      <h2>Cards beginners usually connect with fastest</h2>
+      <p>Cards like <a href="/astrology-hub/the-star-tarot-card-meaning">The Star</a>, <a href="/astrology-hub/the-hermit-tarot-card-meaning">The Hermit</a>, <a href="/astrology-hub/ace-of-cups-tarot-card-meaning">Ace of Cups</a>, and <a href="/astrology-hub/queen-of-pentacles-tarot-card-meaning">Queen of Pentacles</a> often work well because their emotional atmosphere is readable even before technical interpretation.</p>
+      <h2>How to make it feel personal</h2>
+      <p>Pair the practice with your morning mood, moon phase, or current astrological season. That one extra layer helps the ritual feel alive. Beginners do not need more complexity. They need a little more relevance.</p>
+      <p>Then continue with <a href="/astrology-hub/how-to-meditate-with-a-tarot-deck">How to Meditate With a Tarot Deck</a>.</p>
+    `
+  },
+  {
+    slug: "best-yoga-poses-for-each-zodiac-sign",
+    title: "Best Yoga Poses for Each Zodiac Sign",
+    excerpt: "A beautifully structured guide to the best yoga poses for each zodiac sign, with practical insight into how elemental astrology can shape movement and self-regulation.",
+    readTime: "18 min",
+    publishedAt: "2026-03-17",
+    category: "Yoga & Astrology",
+    seoDescription: "Best yoga poses for each zodiac sign: practical astrology-based movement ideas for grounding, energy balance, self-discovery, and emotional regulation.",
+    imageLight: hubEssayImage({ kicker: "Yoga & Astrology", title: "Best Yoga Poses for Each Zodiac Sign", motif: "Element / Sign / Body", accent: "#7f5f9f", accentSoft: "#b78454" }, "light"),
+    imageDark: hubEssayImage({ kicker: "Yoga & Astrology", title: "Best Yoga Poses for Each Zodiac Sign", motif: "Element / Sign / Body", accent: "#d1b2ff", accentSoft: "#f2be87" }, "dark"),
+    imageAlt: "Best yoga poses for each zodiac sign article illustration",
+    content: `
+      <p class="article-lead">Astrology can be surprisingly practical in movement work. Different signs tend to thrive under different energetic conditions: some need grounding, some need softness, some need challenge, some need release. The best yoga poses for each zodiac sign are not about vanity or stereotypes. They are about nervous-system intelligence.</p>
+      <h2>The elemental logic behind the practice</h2>
+      <p>Fire signs often need grounding and containment as much as activation. Water signs often need stability and boundaries. Air signs may need embodiment more than more thinking. Earth signs may need mobility and imagination instead of only discipline. Once you understand that, sign-based yoga stops feeling gimmicky and starts feeling useful.</p>
+      <div class="article-infographic">
+        <div>
+          <span class="eyebrow">Quick Map</span>
+          <h2>Element first, sign second</h2>
+        </div>
+        <div class="article-spotlight-grid">
+          <article><h3>Fire</h3><p>Warrior with grounding, hip stability, breath pacing.</p></article>
+          <article><h3>Water</h3><p>Heart-softening poses, longer holds, emotional regulation.</p></article>
+          <article><h3>Air</h3><p>Balancing poses, spinal length, somatic anchoring.</p></article>
+          <article><h3>Earth</h3><p>Twists, opening work, mobility, and more emotional flow.</p></article>
+        </div>
+      </div>
+      <h2>Examples sign by sign</h2>
+      <ul class="bullet-list">
+        <li><strong>Aries:</strong> grounding lunges, low warrior, slower transitions.</li>
+        <li><strong>Taurus:</strong> hip opening, supported backbends, longer breath holds.</li>
+        <li><strong>Gemini:</strong> balance poses, seated twists, breath-count structure.</li>
+        <li><strong>Cancer:</strong> heart openers, forward folds, moon salutation rhythm.</li>
+        <li><strong>Leo:</strong> strong standing flows with humility and breath pacing.</li>
+        <li><strong>Virgo:</strong> precise alignment followed by nervous-system softening.</li>
+        <li><strong>Libra:</strong> symmetry work, balancing series, restorative closure.</li>
+        <li><strong>Scorpio:</strong> hip depth, stillness, long exhale, emotional containment.</li>
+        <li><strong>Sagittarius:</strong> stronger legs, focused holds, less scattered movement.</li>
+        <li><strong>Capricorn:</strong> spinal mobility, release from rigidity, trust in softness.</li>
+        <li><strong>Aquarius:</strong> embodiment work, leg grounding, shoulder release.</li>
+        <li><strong>Pisces:</strong> protective grounding, supported rest, fluid transitions.</li>
+      </ul>
+      <h2>How Tarot fits in</h2>
+      <p>If you want more depth, pair your practice with one Tarot archetype. A Virgo practice may resonate with <a href="/astrology-hub/temperance-tarot-card-meaning">Temperance</a>. A Scorpio sequence may echo <a href="/astrology-hub/the-moon-tarot-card-meaning">The Moon</a>. A Leo day may call for <a href="/astrology-hub/strength-tarot-card-meaning">Strength</a>. The body then has both a pose and a story to work with.</p>
+      <p>For a deeper version of this embodied system, read <a href="/astrology-hub/yoga-for-self-discovery-using-astrology-and-tarot-symbolism">Yoga for Self-Discovery Using Astrology and Tarot Symbolism</a>.</p>
+    `
+  },
+  {
+    slug: "full-moon-journaling-ritual-with-tarot-and-astrology",
+    title: "Full Moon Journaling Ritual With Tarot and Astrology",
+    excerpt: "A complete full moon journaling ritual that combines astrology, Tarot, and reflective writing for emotional clarity, release, and deeper self-discovery.",
+    readTime: "15 min",
+    publishedAt: "2026-03-17",
+    category: "Moon Rituals",
+    seoDescription: "Full moon journaling ritual with Tarot and astrology: reflective prompts, emotional clarity, release work, and a grounded ritual for self-discovery.",
+    imageLight: hubEssayImage({ kicker: "Moon Rituals", title: "Full Moon Journaling Ritual", motif: "Moon / Tarot / Journal", accent: "#6a63a4", accentSoft: "#aa7a42" }, "light"),
+    imageDark: hubEssayImage({ kicker: "Moon Rituals", title: "Full Moon Journaling Ritual", motif: "Moon / Tarot / Journal", accent: "#c3beff", accentSoft: "#f0c983" }, "dark"),
+    imageAlt: "Full moon journaling ritual article illustration",
+    content: `
+      <p class="article-lead">Full Moon rituals are at their best when they are emotionally honest and structurally simple. A journal, one Tarot spread, and a clear astrological awareness can turn the night from vague intensity into useful self-understanding. This is not about creating drama. It is about helping truth become readable.</p>
+      <h2>Why the Full Moon is ideal for journaling</h2>
+      <p>The Full Moon often corresponds with visibility. Feelings, tensions, and unfinished stories become harder to ignore. Journaling gives that intensity a container. Tarot gives it symbolic shape. Astrology reminds you that heightened emotion needs grounding, not instant action.</p>
+      <div class="article-callout"><strong>Best rule for Full Moon work:</strong> write first, decide later. Visibility is not the same thing as urgency.</div>
+      <h2>A Full Moon Tarot journaling ritual</h2>
+      <div class="article-timeline">
+        <div><strong>Step 1:</strong> regulate the body with breath or a short walk.</div>
+        <div><strong>Step 2:</strong> pull a 3-card spread: what is illuminated, what is draining me, what wants release.</div>
+        <div><strong>Step 3:</strong> journal for 10-15 minutes without editing.</div>
+        <div><strong>Step 4:</strong> end with one release action, not ten.</div>
+      </div>
+      <h2>Useful Full Moon journaling prompts</h2>
+      <ul class="bullet-list">
+        <li>What truth has become impossible to ignore?</li>
+        <li>Where am I exhausting myself by repeating a story that no longer fits?</li>
+        <li>What would emotional honesty look like this week?</li>
+        <li>What do I need to release softly rather than dramatically?</li>
+      </ul>
+      <h2>Tarot cards that work especially well here</h2>
+      <p><a href="/astrology-hub/the-moon-tarot-card-meaning">The Moon</a>, <a href="/astrology-hub/the-star-tarot-card-meaning">The Star</a>, <a href="/astrology-hub/death-tarot-card-meaning">Death</a>, <a href="/astrology-hub/eight-of-cups-tarot-card-meaning">Eight of Cups</a>, and <a href="/astrology-hub/four-of-swords-tarot-card-meaning">Four of Swords</a> are especially rich in full moon journaling because they speak directly to ambiguity, emotional truth, release, and restoration.</p>
+      <p>Then continue with <a href="/astrology-hub/moon-phase-meditation-lunar-yoga-and-tarot-for-intuition">Moon Phase Meditation, Lunar Yoga, and Tarot for Intuition</a>.</p>
+    `
+  },
+  {
+    slug: "new-moon-manifestation-with-tarot-and-astrology",
+    title: "New Moon Manifestation With Tarot and Astrology",
+    excerpt: "A grounded New Moon manifestation practice that replaces vague wish-making with intention, Tarot reflection, astrological timing, and one meaningful next step.",
+    readTime: "14 min",
+    publishedAt: "2026-03-17",
+    category: "Moon Rituals",
+    seoDescription: "New moon manifestation with Tarot and astrology: a grounded ritual for intention-setting, self-discovery, timing, and aligned action.",
+    imageLight: hubEssayImage({ kicker: "Moon Rituals", title: "New Moon Manifestation", motif: "Intention / Tarot / Timing", accent: "#4f7b93", accentSoft: "#b58545" }, "light"),
+    imageDark: hubEssayImage({ kicker: "Moon Rituals", title: "New Moon Manifestation", motif: "Intention / Tarot / Timing", accent: "#a8d7f2", accentSoft: "#f0c580" }, "dark"),
+    imageAlt: "New moon manifestation article illustration",
+    content: `
+      <p class="article-lead">The New Moon is often treated like a mystical wishing machine, but it becomes far more useful when understood as a clean starting point. New Moon manifestation works best when it is grounded in self-knowledge: what do I really want, what condition does it need, and what small action begins it in reality?</p>
+      <h2>Manifestation without fantasy</h2>
+      <p>A healthy New Moon ritual does not ask you to deny complexity or bypass effort. It asks you to clarify intention. Tarot helps you test whether that intention is emotionally honest. Astrology helps you understand the tone of the beginning. Together they create a ritual that is poetic but not empty.</p>
+      <div class="article-spotlight-grid">
+        <article><h3>Intention</h3><p>Name what wants to begin.</p></article>
+        <article><h3>Symbol</h3><p>Use one Tarot card to reflect the quality of the beginning.</p></article>
+        <article><h3>Action</h3><p>Anchor the ritual in one concrete next move.</p></article>
+      </div>
+      <h2>A simple New Moon ritual</h2>
+      <ul class="bullet-list">
+        <li>Lightly reset the space: clean surface, notebook, deck.</li>
+        <li>Take five slow breaths and write one intention.</li>
+        <li>Pull one Tarot card and ask: what does this intention need?</li>
+        <li>Check the astrological tone: expansion, caution, patience, courage?</li>
+        <li>End with one real-world action for the next 24 hours.</li>
+      </ul>
+      <h2>The best Tarot cards for beginnings</h2>
+      <p><a href="/astrology-hub/the-fool-tarot-card-meaning">The Fool</a>, <a href="/astrology-hub/ace-of-wands-tarot-card-meaning">Ace of Wands</a>, <a href="/astrology-hub/ace-of-cups-tarot-card-meaning">Ace of Cups</a>, and <a href="/astrology-hub/the-magician-tarot-card-meaning">The Magician</a> are especially strong for New Moon work because they carry fresh energy, possibility, trust, and activated intention.</p>
+      <h2>Why this is really a self-knowledge practice</h2>
+      <p>Manifestation gets shallow when it becomes pure wanting. It becomes meaningful when it reveals your real values, hidden fears, and actual readiness. The New Moon is useful because it invites beginning with honesty. Not “What sounds impressive?” but “What do I genuinely want to grow?”</p>
+      <p>For the complementary reflective phase, read <a href="/astrology-hub/full-moon-journaling-ritual-with-tarot-and-astrology">Full Moon Journaling Ritual With Tarot and Astrology</a>.</p>
+    `
   }
 ];
 
