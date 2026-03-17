@@ -6462,10 +6462,7 @@ function bindNatalToc() {
   });
 }
 
-function scrollToNatalHash({ smooth = true } = {}) {
-  if (window.location.pathname !== "/natal-chart") {
-    return;
-  }
+function scrollToRouteHash({ smooth = true } = {}) {
   const hash = String(window.location.hash || "").trim();
   if (!hash || hash === "#") {
     return;
@@ -8680,23 +8677,33 @@ let astrologyHubBySlug = astrologyHubArticles.reduce((acc, article) => {
 
 function renderHubArticleCard(article, options = {}) {
   const extraClass = options.extraClass ? ` ${options.extraClass}` : "";
+  const imageLight = article.imageLight || hubEssayImage({
+    kicker: article.category || "Astrology Hub",
+    title: article.title || "Astronautica",
+    motif: "Hub / Insight / Practice",
+    accent: "#5f7aa4",
+    accentSoft: "#b98549"
+  }, "light");
+  const imageDark = article.imageDark || hubEssayImage({
+    kicker: article.category || "Astrology Hub",
+    title: article.title || "Astronautica",
+    motif: "Hub / Insight / Practice",
+    accent: "#b3d1ff",
+    accentSoft: "#f1c98a"
+  }, "dark");
   return `
     <article class="card hub-card${extraClass}">
-      ${
-        article.imageLight && article.imageDark
-          ? `<a class="hub-sign-thumb-link" href="/astrology-hub/${article.slug}">
-              <img
-                class="hub-sign-thumb"
-                src="${state.theme === "light" ? article.imageLight : article.imageDark}"
-                data-zodiac-light="${article.imageLight}"
-                data-zodiac-dark="${article.imageDark}"
-                alt="${article.imageAlt || `${article.title} illustration`}"
-                loading="lazy"
-                decoding="async"
-              />
-            </a>`
-          : ""
-      }
+      <a class="hub-sign-thumb-link" href="/astrology-hub/${article.slug}">
+        <img
+          class="hub-sign-thumb"
+          src="${state.theme === "light" ? imageLight : imageDark}"
+          data-zodiac-light="${imageLight}"
+          data-zodiac-dark="${imageDark}"
+          alt="${article.imageAlt || `${article.title} illustration`}"
+          loading="lazy"
+          decoding="async"
+        />
+      </a>
       <div class="hub-card-head">
         <span class="hub-chip">${article.category}</span>
         <span class="hub-meta">${article.readTime}</span>
@@ -11908,7 +11915,7 @@ async function hydrateNatal() {
       shareNatalPublicPage();
     });
     animateHeadingTypewriter();
-    window.setTimeout(() => scrollToNatalHash({ smooth: false }), 0);
+    window.setTimeout(() => scrollToRouteHash({ smooth: false }), 0);
   } catch (error) {
     if (error.status === 401) {
       await refreshAuthState();
@@ -13001,7 +13008,7 @@ document.addEventListener("click", (event) => {
     if (history.replaceState) {
       history.replaceState(null, "", `${window.location.pathname}${href}`);
     }
-    scrollToNatalHash({ smooth: true });
+    scrollToRouteHash({ smooth: true });
     return;
   }
 
@@ -13013,7 +13020,7 @@ document.addEventListener("click", (event) => {
       if (history.replaceState) {
         history.replaceState(null, "", href);
       }
-      scrollToNatalHash({ smooth: true });
+      scrollToRouteHash({ smooth: true });
       return;
     }
   }
