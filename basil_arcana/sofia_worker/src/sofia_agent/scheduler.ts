@@ -17,7 +17,7 @@ import {
   setSofiaRuntimeState,
   setSofiaSearchTargetEnabled,
 } from "../db";
-import { resolveCommunityTarget, searchTelegramMessages, sendTelegramText } from "./mtproto";
+import { fetchTelegramMessageWindow, fetchTelegramMessageWindowWithClient, resolveCommunityTarget, resolveCommunityTargetWithClient, searchTelegramMessages, searchTelegramMessagesWithClient, sendTelegramText, type SofiaResolvedCommunityTarget, withSofiaTelegramClient } from "./mtproto";
 import { fetchTgstatCommunityCandidates } from "./tgstat";
 import { ingestSofiaInbox } from "./inbox";
 import { runSofiaGenerationBatch, sendApprovedSofiaTasks } from "./runtime";
@@ -29,9 +29,22 @@ const MANUAL_SOCIAL_COMMUNITIES = [
   "https://t.me/relocation_kaz",
   "https://t.me/russkie_v_gruzii",
   "https://t.me/russiansinturkey_antalya",
-  "https://t.me/rfaze",
   "https://t.me/mybaku_chat",
   "https://t.me/Baku_Go_Chat",
+  "https://t.me/ruskievstambule",
+] as const;
+
+const RELOCATION_DISCOVERY_QUERIES = [
+  "русские стамбул",
+  "русские в стамбуле",
+  "русские турция чат",
+  "релокация турция",
+  "русские грузия чат",
+  "релокация грузия",
+  "русские баку чат",
+  "релокация баку",
+  "expats istanbul chat",
+  "relocation turkey chat",
 ] as const;
 
 function outreachTaskType(targetChat: string | null): "channel_comment" | "group_outreach" {
@@ -57,6 +70,15 @@ interface CommunityCandidate {
   samplePermalink: string | null;
   query: string;
   writeMode: "group" | "discussion";
+}
+
+interface RelocationCandidate {
+  targetChat: string;
+  label: string;
+  sampleText: string;
+  samplePermalink: string | null;
+  writeMode: "group" | "discussion";
+  query: string;
 }
 
 async function ensureDefaultCommunityTargets(config: SofiaAgentConfig): Promise<void> {
@@ -125,6 +147,25 @@ async function ensureManualCommunityTargets(config: SofiaAgentConfig): Promise<v
   }
 
   const manualTargets = MANUAL_SOCIAL_COMMUNITIES.map((url) => ({ url, category: "social" as const }));
+  const manualHandles = new Set(
+    manualTargets
+      .map((item) => extractTelegramHandleFromUrl(item.url))
+      .filter((value): value is string => Boolean(value)),
+  );
+
+  for (const target of existing) {
+    if (target.metadata?.source !== "manual_allowlist") {
+      continue;
+    }
+    const handle = normalizeHandle(target.targetChat);
+    if (!handle || manualHandles.has(handle)) {
+      continue;
+    }
+    await setSofiaSearchTargetEnabled(target.id, false, {
+      disabledReason: "removed_from_manual_allowlist",
+      disabledAt: new Date().toISOString(),
+    });
+  }
 
   for (const item of manualTargets) {
     if (isInviteOnlyTelegramUrl(item.url)) {
@@ -335,6 +376,22 @@ function buildCandidateApprovalMessage(candidates: CommunityCandidate[]): string
   lines.push("");
   lines.push("Если ок, ответь: approve 1,2 или все.");
   lines.push("Если не ок, ответь: ищи другие.");
+  return lines.join("\n");
+}
+
+function buildRelocationSuggestionMessage(candidates: RelocationCandidate[]): string {
+  const lines = [
+    "Нашла новые релокационные чаты, куда можно вступить вручную и потом дать мне работать там.",
+    "",
+  ];
+  candidates.forEach((candidate, index) => {
+    const excerpt = trimSourceText(candidate.sampleText) ?? "без примера текста";
+    const link = candidate.samplePermalink ? `\n${candidate.samplePermalink}` : "";
+    const modeLabel = candidate.writeMode === "discussion" ? "через комментарии" : "обычная группа";
+    lines.push(`${index + 1}. ${candidate.label} — ${candidate.targetChat} (${modeLabel}) — ${excerpt}${link}`);
+  });
+  lines.push("");
+  lines.push("Если вступишь в какой-то из них, просто пришли мне хэндл, и я добавлю его в рабочие social-чаты.");
   return lines.join("\n");
 }
 
@@ -704,6 +761,86 @@ async function maybeDiscoverCommunityCandidates(config: SofiaAgentConfig): Promi
   });
 }
 
+async function maybeSuggestRelocationCommunities(config: SofiaAgentConfig): Promise<void> {
+  const approverHandle = normalizeHandle(config.outreachReportChat);
+  if (!approverHandle || !config.communityModeEnabled) {
+    return;
+  }
+  const stateKey = "relocation_discovery_shortlist";
+  const state = (await getSofiaRuntimeState(stateKey)) ?? {};
+  const lastSentAt =
+    typeof state.lastSentAt === "string" ? Date.parse(state.lastSentAt) : 0;
+  const now = Date.now();
+  if (Number.isFinite(lastSentAt) && now - lastSentAt < 12 * 60 * 60 * 1000) {
+    return;
+  }
+
+  const existingTargets = await listSofiaSearchTargets(false);
+  const excludedHandles = new Set(
+    existingTargets
+      .map((target) => normalizeHandle(target.targetChat))
+      .filter((value): value is string => Boolean(value)),
+  );
+  for (const handle of buildDiscoveryExclusionHandles(config, approverHandle)) {
+    excludedHandles.add(handle);
+  }
+
+  const candidates = new Map<string, RelocationCandidate>();
+  for (const query of RELOCATION_DISCOVERY_QUERIES) {
+    const matches = await searchTelegramMessages(config, {
+      query,
+      limit: Math.max(10, Math.min(config.schedulerSearchLimit * 2, 20)),
+    });
+    for (const match of matches) {
+      const normalizedTarget = normalizeHandle(match.chatUsername ? `@${match.chatUsername}` : null);
+      if (!normalizedTarget || excludedHandles.has(normalizedTarget) || candidates.has(normalizedTarget)) {
+        continue;
+      }
+      if (!match.chatTitle || !isMeaningfulCommunityText(match.text)) {
+        continue;
+      }
+      let resolvedCandidate: SofiaResolvedCommunityTarget;
+      try {
+        resolvedCandidate = await resolveCommunityTarget(config, normalizedTarget);
+      } catch {
+        continue;
+      }
+      if (!resolvedCandidate.isWritableCommunity) {
+        continue;
+      }
+      candidates.set(normalizedTarget, {
+        targetChat: normalizedTarget,
+        label: match.chatTitle,
+        sampleText: match.text,
+        samplePermalink: match.permalink,
+        query,
+        writeMode: resolvedCandidate.usedLinkedDiscussion ? "discussion" : "group",
+      });
+      if (candidates.size >= 7) {
+        break;
+      }
+    }
+    if (candidates.size >= 7) {
+      break;
+    }
+  }
+
+  if (!candidates.size) {
+    return;
+  }
+
+  const items = Array.from(candidates.values());
+  await sendTelegramText(config, {
+    targetChat: approverHandle,
+    message: buildRelocationSuggestionMessage(items),
+  });
+  await setSofiaRuntimeState(stateKey, {
+    lastSentAt: new Date(now).toISOString(),
+    items,
+  });
+  console.info(`[${new Date().toISOString()}] relocation shortlist sent to ${approverHandle}: count=${items.length}`);
+}
+
 
 async function syncTgstatCommunityTargets(config: SofiaAgentConfig): Promise<void> {
   if (!config.tgstatSyncEnabled || !config.tgstatApiToken) {
@@ -1014,53 +1151,121 @@ export async function runSofiaSearchSchedulerOnce(config: SofiaAgentConfig): Pro
         continue;
       }
     }
-    let resolvedTarget = null;
     try {
-      resolvedTarget = target.targetChat
-        ? await resolveCommunityTarget(config, target.targetChat)
-        : null;
-    } catch (error) {
-      console.info(
-        `[${new Date().toISOString()}] community target disabled after resolve failure: target=${target.targetChat ?? "GLOBAL"} error=${error instanceof Error ? error.message : String(error)}`,
-      );
-      await setSofiaSearchTargetEnabled(target.id, false, {
-        disabledReason: "resolve_failure",
-        disabledAt: new Date().toISOString(),
-        resolveError: error instanceof Error ? error.message : String(error),
-      });
-      await markSofiaSearchTargetChecked(target.id);
-      continue;
-    }
-    if (resolvedTarget && !resolvedTarget.isWritableCommunity) {
-      console.info(
-        `[${new Date().toISOString()}] community target skipped as non-writable: requested=${resolvedTarget.requestedTarget} kind=${resolvedTarget.targetKind}`,
-      );
-      await setSofiaSearchTargetEnabled(target.id, false, {
-        disabledReason: "non_writable",
-        disabledAt: new Date().toISOString(),
-        targetKind: resolvedTarget.targetKind,
-      });
-      await markSofiaSearchTargetChecked(target.id);
-      continue;
-    }
-    if (resolvedTarget?.usedLinkedDiscussion) {
-      console.info(
-        `[${new Date().toISOString()}] community target rerouted to discussion: requested=${resolvedTarget.requestedTarget} effective=${resolvedTarget.effectiveTarget}`,
-      );
-    }
-    console.info(`[${new Date().toISOString()}] community checking target: id=${target.id} requested=${target.targetChat ?? 'GLOBAL'} effective=${resolvedTarget?.effectiveTarget ?? target.targetChat ?? 'GLOBAL'} query="${target.query}"`);
-    let matches;
-    try {
-      matches = await searchTelegramMessages(config, {
-        query: target.query,
-        targetChat: resolvedTarget?.effectiveTarget ?? target.targetChat,
-        limit: config.schedulerSearchLimit,
+      await withSofiaTelegramClient(config, async (client) => {
+        const resolvedTarget = target.targetChat
+          ? await resolveCommunityTargetWithClient(client, target.targetChat)
+          : null;
+        if (resolvedTarget && !resolvedTarget.isWritableCommunity) {
+          console.info(
+            `[${new Date().toISOString()}] community target skipped as non-writable: requested=${resolvedTarget.requestedTarget} kind=${resolvedTarget.targetKind}`,
+          );
+          await setSofiaSearchTargetEnabled(target.id, false, {
+            disabledReason: "non_writable",
+            disabledAt: new Date().toISOString(),
+            targetKind: resolvedTarget.targetKind,
+          });
+          return;
+        }
+        if (resolvedTarget?.usedLinkedDiscussion) {
+          console.info(
+            `[${new Date().toISOString()}] community target rerouted to discussion: requested=${resolvedTarget.requestedTarget} effective=${resolvedTarget.effectiveTarget}`,
+          );
+        }
+        console.info(`[${new Date().toISOString()}] community checking target: id=${target.id} requested=${target.targetChat ?? 'GLOBAL'} effective=${resolvedTarget?.effectiveTarget ?? target.targetChat ?? 'GLOBAL'} query="${target.query}"`);
+        const matches = await searchTelegramMessagesWithClient(client, {
+          query: target.query,
+          targetChat: resolvedTarget?.effectiveTarget ?? target.targetChat,
+          limit: config.schedulerSearchLimit,
+        });
+
+        const eligibleMatches = matches.filter((match) => {
+      if (match.outgoing) return false;
+      if (!match.chatTitle && !match.chatUsername) return false;
+      const maxAgeMs = isSocialCategory(target) ? 36 * 60 * 60 * 1000 : freshWindowMs;
+      if (now - match.sentAt > maxAgeMs) return false;
+      const sender = (match.senderLabel ?? '').trim().toLowerCase();
+      const chat = (match.chatTitle ?? '').trim().toLowerCase();
+      if (sender && chat && sender === chat) return false;
+      return isMeaningfulCommunityText(match.text);
+        });
+        const questionMatches = eligibleMatches.filter((match) => isLikelyCommunityQuestionText(match.text));
+        const candidateMatches = (questionMatches.length ? questionMatches : eligibleMatches.slice(0, 1)).slice(
+      0,
+      isSocialCategory(target) ? 1 : questionMatches.length ? questionMatches.length : 1,
+        );
+
+        console.info(`[${new Date().toISOString()}] community matches found: target=${resolvedTarget?.effectiveTarget ?? target.targetChat ?? 'GLOBAL'} count=${matches.length} eligible=${eligibleMatches.length} selected=${candidateMatches.length} mode=${questionMatches.length ? 'question' : 'latest_message'}`);
+        const normalizedTargetChat = normalizeHandle(
+          resolvedTarget?.effectiveTarget ??
+            target.targetChat ??
+            (candidateMatches[0]?.chatUsername ? `@${candidateMatches[0].chatUsername}` : candidateMatches[0]?.chatId ?? null),
+        );
+        if (isSocialCategory(target) && normalizedTargetChat) {
+          if (recentSocialOutreach.has(normalizedTargetChat) || socialQueuedThisCycle.has(normalizedTargetChat)) {
+            console.info(
+              `[${new Date().toISOString()}] social target rate-limited: target=${normalizedTargetChat}`,
+            );
+            return;
+          }
+        }
+        for (const match of candidateMatches) {
+          if (tasksCreated >= config.communityMaxTasksPerCycle) {
+            break;
+          }
+          const dedupKey = `search:${target.id}:${match.peerKey}:${match.id}`;
+          const existing = await findSofiaTaskByDedupKey(dedupKey);
+          if (existing) {
+            continue;
+          }
+
+          await createSofiaAgentTask({
+            taskType: outreachTaskType(target.targetChat),
+            title: `${target.label}: ${match.chatTitle ?? "Telegram thread"}`,
+            sourceChannel: match.chatUsername ? `@${match.chatUsername}` : match.chatTitle,
+            targetChat:
+              resolvedTarget?.effectiveTarget ??
+              target.targetChat ??
+              (match.chatUsername ? `@${match.chatUsername}` : match.chatId),
+            payload: {
+              dedupKey,
+              searchTargetId: target.id,
+              sourceText: match.text,
+              sourceMessageId: match.id,
+              sourcePermalink: match.permalink,
+              senderLabel: match.senderLabel,
+              searchQuery: target.query,
+              chatTitle: match.chatTitle,
+              chatUsername: match.chatUsername,
+              requestedTargetChat: target.targetChat,
+              effectiveTargetChat: resolvedTarget?.effectiveTarget ?? target.targetChat,
+              replyToMessageId: Number(match.id),
+              recommendBotUrl: config.recommendBotUrl,
+              category: target.metadata?.category ?? null,
+              workflow: target.metadata?.workflow ?? null,
+              noPromoToday: target.metadata?.noPromoToday === true,
+              surroundingMessages: await fetchTelegramMessageWindowWithClient(client, {
+                targetChat:
+                  resolvedTarget?.effectiveTarget ??
+                  target.targetChat ??
+                  (match.chatUsername ? `@${match.chatUsername}` : match.chatId ?? null),
+                centerMessageId: Number(match.id),
+                before: 3,
+                after: 3,
+              }),
+            },
+          });
+          tasksCreated += 1;
+          if (isSocialCategory(target) && normalizedTargetChat) {
+            socialQueuedThisCycle.add(normalizedTargetChat);
+          }
+        }
       });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       if (isCommunityAccessLossError(error)) {
         console.info(
-          `[${new Date().toISOString()}] community target disabled after access loss: target=${resolvedTarget?.effectiveTarget ?? target.targetChat ?? "GLOBAL"} error=${errorMessage}`,
+          `[${new Date().toISOString()}] community target disabled after access loss: target=${target.targetChat ?? "GLOBAL"} error=${errorMessage}`,
         );
         await setSofiaSearchTargetEnabled(target.id, false, {
           disabledReason: "access_lost",
@@ -1070,81 +1275,16 @@ export async function runSofiaSearchSchedulerOnce(config: SofiaAgentConfig): Pro
         await markSofiaSearchTargetChecked(target.id);
         continue;
       }
-      throw error;
-    }
-
-    const eligibleMatches = matches.filter((match) => {
-      if (match.outgoing) return false;
-      if (!match.chatTitle && !match.chatUsername) return false;
-      const maxAgeMs = isSocialCategory(target) ? 36 * 60 * 60 * 1000 : freshWindowMs;
-      if (now - match.sentAt > maxAgeMs) return false;
-      const sender = (match.senderLabel ?? '').trim().toLowerCase();
-      const chat = (match.chatTitle ?? '').trim().toLowerCase();
-      if (sender && chat && sender === chat) return false;
-      return isMeaningfulCommunityText(match.text);
-    });
-    const questionMatches = eligibleMatches.filter((match) => isLikelyCommunityQuestionText(match.text));
-    const candidateMatches = (questionMatches.length ? questionMatches : eligibleMatches.slice(0, 1)).slice(
-      0,
-      isSocialCategory(target) ? 1 : questionMatches.length ? questionMatches.length : 1,
-    );
-
-    console.info(`[${new Date().toISOString()}] community matches found: target=${resolvedTarget?.effectiveTarget ?? target.targetChat ?? 'GLOBAL'} count=${matches.length} eligible=${eligibleMatches.length} selected=${candidateMatches.length} mode=${questionMatches.length ? 'question' : 'latest_message'}`);
-    const normalizedTargetChat = normalizeHandle(
-      resolvedTarget?.effectiveTarget ??
-        target.targetChat ??
-        (candidateMatches[0]?.chatUsername ? `@${candidateMatches[0].chatUsername}` : candidateMatches[0]?.chatId ?? null),
-    );
-    if (isSocialCategory(target) && normalizedTargetChat) {
-      if (recentSocialOutreach.has(normalizedTargetChat) || socialQueuedThisCycle.has(normalizedTargetChat)) {
-        console.info(
-          `[${new Date().toISOString()}] social target rate-limited: target=${normalizedTargetChat}`,
-        );
-        await markSofiaSearchTargetChecked(target.id);
-        continue;
-      }
-    }
-    for (const match of candidateMatches) {
-      if (tasksCreated >= config.communityMaxTasksPerCycle) {
-        break;
-      }
-      const dedupKey = `search:${target.id}:${match.peerKey}:${match.id}`;
-      const existing = await findSofiaTaskByDedupKey(dedupKey);
-      if (existing) {
-        continue;
-      }
-
-      await createSofiaAgentTask({
-        taskType: outreachTaskType(target.targetChat),
-        title: `${target.label}: ${match.chatTitle ?? "Telegram thread"}`,
-        sourceChannel: match.chatUsername ? `@${match.chatUsername}` : match.chatTitle,
-        targetChat:
-          resolvedTarget?.effectiveTarget ??
-          target.targetChat ??
-          (match.chatUsername ? `@${match.chatUsername}` : match.chatId),
-        payload: {
-          dedupKey,
-          searchTargetId: target.id,
-          sourceText: match.text,
-          sourceMessageId: match.id,
-          sourcePermalink: match.permalink,
-          senderLabel: match.senderLabel,
-          searchQuery: target.query,
-          chatTitle: match.chatTitle,
-          chatUsername: match.chatUsername,
-          requestedTargetChat: target.targetChat,
-          effectiveTargetChat: resolvedTarget?.effectiveTarget ?? target.targetChat,
-          replyToMessageId: Number(match.id),
-          recommendBotUrl: config.recommendBotUrl,
-          category: target.metadata?.category ?? null,
-          workflow: target.metadata?.workflow ?? null,
-          noPromoToday: target.metadata?.noPromoToday === true,
-        },
+      console.info(
+        `[${new Date().toISOString()}] community target disabled after resolve failure: target=${target.targetChat ?? "GLOBAL"} error=${errorMessage}`,
+      );
+      await setSofiaSearchTargetEnabled(target.id, false, {
+        disabledReason: "resolve_failure",
+        disabledAt: new Date().toISOString(),
+        resolveError: errorMessage,
       });
-      tasksCreated += 1;
-      if (isSocialCategory(target) && normalizedTargetChat) {
-        socialQueuedThisCycle.add(normalizedTargetChat);
-      }
+      await markSofiaSearchTargetChecked(target.id);
+      continue;
     }
 
     await markSofiaSearchTargetChecked(target.id);
@@ -1164,6 +1304,7 @@ export async function runSofiaSchedulerCycle(config: SofiaAgentConfig): Promise<
   sentCount: number;
 }> {
   const inbox = await ingestSofiaInbox(config);
+  await maybeSuggestRelocationCommunities(config);
   await maybeProcessCommunityApprovals(config);
   await maybeProcessCommunityDraftApprovals(config);
   const outreach = await runSofiaSearchSchedulerOnce(config);

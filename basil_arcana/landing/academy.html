@@ -116,7 +116,7 @@
         </div>
       </section>
       <nav class="site-links" aria-label="Site navigation"><a data-nav="news" data-link="news" data-path="./news.html" data-track="nav_news" href="./news.html">Новости</a><a data-nav="academy" data-link="academy" data-path="./academy.html" data-track="nav_academy" href="./academy.html">Академия Таро</a><a data-nav="tarot" data-link="tarot" data-path="./tarot-values.html" data-track="nav_tarot" href="./tarot-values.html">Карты таро «RWS»</a><a data-nav="lenormand" data-link="lenormand" data-path="./lenormand-values.html" data-track="nav_lenormand" href="./lenormand-values.html">Колода Таро Ленорман</a><a data-nav="crowley" data-link="crowley" data-path="./crowley-values.html" data-track="nav_crowley" href="./crowley-values.html">Колода Таро Тота Алистера Кроули</a></nav>
-      <footer class="footer" data-i18n="footer"></footer>
+      <footer class="footer" data-i18n="footer" style="text-align: right">BasilArcana · разработка сайта и приложения: <a href="https://www.artemov.app" style="color: inherit; text-decoration: underline;" target="_blank" rel="noopener noreferrer">artemov.app</a></footer>
     </main>
     <script>
       const LANG_STORAGE_KEY = "basilarcana_lang";
@@ -130,6 +130,15 @@
         if (lang && lang !== "ru") url.searchParams.set("lang", lang);
         return `${url.pathname}${url.search}`;
       }
+      function getFooterHtml(lang) {
+        const footerCopy = {
+          ru: 'BasilArcana · разработка сайта и приложения: <a href="https://www.artemov.app" style="color: inherit; text-decoration: underline;" target="_blank" rel="noopener noreferrer">artemov.app</a>',
+          kz: 'BasilArcana · сайт пен қосымшаны әзірлеу: <a href="https://www.artemov.app" style="color: inherit; text-decoration: underline;" target="_blank" rel="noopener noreferrer">artemov.app</a>',
+          en: 'BasilArcana · website and app development: <a href="https://www.artemov.app" style="color: inherit; text-decoration: underline;" target="_blank" rel="noopener noreferrer">artemov.app</a>'
+        };
+        return footerCopy[lang] || footerCopy.ru;
+      }
+
       function applyLang(lang) {
         const resolved = copy[lang] ? lang : "ru";
         const pack = copy[resolved];
@@ -137,6 +146,10 @@
         document.querySelectorAll("[data-i18n]").forEach((node) => {
           node.textContent = pack[node.dataset.i18n] || "";
         });
+        const footerNode = document.querySelector('[data-i18n="footer"]');
+        if (footerNode) {
+          footerNode.innerHTML = getFooterHtml(typeof resolved !== "undefined" ? resolved : lang);
+        }
         document.querySelectorAll(".lang-btn").forEach((btn) => {
           btn.setAttribute("aria-pressed", String(btn.dataset.lang === resolved));
         });

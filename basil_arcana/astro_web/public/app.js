@@ -8675,22 +8675,28 @@ let astrologyHubBySlug = astrologyHubArticles.reduce((acc, article) => {
   return acc;
 }, {});
 
+function hubArticleImages(article) {
+  return {
+    imageLight: article.imageLight || hubEssayImage({
+      kicker: article.category || "Astrology Hub",
+      title: article.title || "Astronautica",
+      motif: "Hub / Insight / Practice",
+      accent: "#5f7aa4",
+      accentSoft: "#b98549"
+    }, "light"),
+    imageDark: article.imageDark || hubEssayImage({
+      kicker: article.category || "Astrology Hub",
+      title: article.title || "Astronautica",
+      motif: "Hub / Insight / Practice",
+      accent: "#b3d1ff",
+      accentSoft: "#f1c98a"
+    }, "dark")
+  };
+}
+
 function renderHubArticleCard(article, options = {}) {
   const extraClass = options.extraClass ? ` ${options.extraClass}` : "";
-  const imageLight = article.imageLight || hubEssayImage({
-    kicker: article.category || "Astrology Hub",
-    title: article.title || "Astronautica",
-    motif: "Hub / Insight / Practice",
-    accent: "#5f7aa4",
-    accentSoft: "#b98549"
-  }, "light");
-  const imageDark = article.imageDark || hubEssayImage({
-    kicker: article.category || "Astrology Hub",
-    title: article.title || "Astronautica",
-    motif: "Hub / Insight / Practice",
-    accent: "#b3d1ff",
-    accentSoft: "#f1c98a"
-  }, "dark");
+  const { imageLight, imageDark } = hubArticleImages(article);
   return `
     <article class="card hub-card${extraClass}">
       <a class="hub-sign-thumb-link" href="/astrology-hub/${article.slug}">
@@ -8730,6 +8736,7 @@ function astrologyHubView() {
     .filter(Boolean);
   const featuredLead = featuredArticles[0];
   const featuredSide = featuredArticles.slice(1);
+  const featuredLeadImages = featuredLead ? hubArticleImages(featuredLead) : null;
   const categoryGroups = [
     { id: "meditation", label: "Meditation", articles: astrologyHubArticles.filter((article) => article.category === "Meditation" || article.category === "Astrology & Meditation" || article.slug === "meditation-for-each-zodiac-sign").slice(0, 4) },
     { id: "yoga", label: "Yoga", articles: astrologyHubArticles.filter((article) => article.category === "Yoga" || article.category === "Yoga & Astrology").slice(0, 4) },
@@ -8780,21 +8787,17 @@ function astrologyHubView() {
                   </div>
                   <h2>${featuredLead.title}</h2>
                   <p>${featuredLead.excerpt}</p>
-                  ${
-                    featuredLead.imageLight && featuredLead.imageDark
-                      ? `<a class="hub-sign-thumb-link hub-feature-image-link" href="/astrology-hub/${featuredLead.slug}">
-                          <img
-                            class="hub-sign-thumb hub-feature-image"
-                            src="${state.theme === "light" ? featuredLead.imageLight : featuredLead.imageDark}"
-                            data-zodiac-light="${featuredLead.imageLight}"
-                            data-zodiac-dark="${featuredLead.imageDark}"
-                            alt="${featuredLead.imageAlt || `${featuredLead.title} illustration`}"
-                            loading="lazy"
-                            decoding="async"
-                          />
-                        </a>`
-                      : ""
-                  }
+                  <a class="hub-sign-thumb-link hub-feature-image-link" href="/astrology-hub/${featuredLead.slug}">
+                    <img
+                      class="hub-sign-thumb hub-feature-image"
+                      src="${state.theme === "light" ? featuredLeadImages.imageLight : featuredLeadImages.imageDark}"
+                      data-zodiac-light="${featuredLeadImages.imageLight}"
+                      data-zodiac-dark="${featuredLeadImages.imageDark}"
+                      alt="${featuredLead.imageAlt || `${featuredLead.title} illustration`}"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </a>
                   <div class="hub-card-footer">
                     <time datetime="${featuredLead.publishedAt}">${new Date(featuredLead.publishedAt).toLocaleDateString("en-US", { day: "2-digit", month: "long", year: "numeric" })}</time>
                     <a class="hub-link" href="/astrology-hub/${featuredLead.slug}">Open feature</a>
@@ -8884,6 +8887,7 @@ function astrologyHubArticleView(slug) {
     { label: "Astrology Hub", href: "/astrology-hub" },
     { label: article.title, current: true }
   ]);
+  const { imageLight, imageDark } = hubArticleImages(article);
   return `
     ${breadcrumbs}
     <section class="section">
@@ -8898,19 +8902,15 @@ function astrologyHubArticleView(slug) {
               <span class="hub-meta">${article.readTime}</span>
             </div>
           </div>
-          ${
-            article.imageLight && article.imageDark
-              ? `<img
-                  class="article-sign-hero"
-                  src="${state.theme === "light" ? article.imageLight : article.imageDark}"
-                  data-zodiac-light="${article.imageLight}"
-                  data-zodiac-dark="${article.imageDark}"
-                  alt="${article.imageAlt || `${article.title} illustration`}"
-                  loading="lazy"
-                  decoding="async"
-                />`
-              : ""
-          }
+          <img
+            class="article-sign-hero"
+            src="${state.theme === "light" ? imageLight : imageDark}"
+            data-zodiac-light="${imageLight}"
+            data-zodiac-dark="${imageDark}"
+            alt="${article.imageAlt || `${article.title} illustration`}"
+            loading="lazy"
+            decoding="async"
+          />
         </div>
       </article>
     </section>

@@ -97,7 +97,7 @@
       </nav>
       <article class="article"><h1>Таро для начинающих: с чего начать практику и не бросить</h1><p class="lead">Старт в Таро проще и эффективнее, когда вы опираетесь на короткий ритм, а не на попытку «выучить все сразу».</p><h2>С чего начать в первую неделю</h2><ul><li>Выберите одну колоду, с которой вам эмоционально комфортно работать каждый день.</li><li>Практикуйте формат «1 вопрос + 1 карта + 1 действие на сегодня».</li><li>Закладывайте 10 минут в день, а не редкие длинные сессии.</li></ul><h2>Как формулировать вопросы</h2><p>Ставьте вопросы в зоне личного влияния: не «что будет?», а «что мне важно учесть, чтобы улучшить результат в ближайшие 7 дней?».</p><ul><li>Добавляйте контекст: сфера, срок, цель.</li><li>Уточняйте риск: «что может помешать?».</li><li>Фиксируйте следующий шаг после расклада.</li></ul><h2>Что даст стабильный прогресс</h2><p>Ведите дневник: дата, вопрос, карта, первый вывод, фактический итог через 24–72 часа. Это быстро формирует личный словарь значений и снижает тревожность в чтении.</p></article>
       <nav class="site-links" aria-label="Site navigation"><a data-nav="news" data-link="news" data-path="./news.html" data-track="nav_news" href="./news.html">Новости</a><a data-nav="academy" data-link="academy" data-path="./academy.html" data-track="nav_academy" href="./academy.html">Академия Таро</a><a data-nav="tarot" data-link="tarot" data-path="./tarot-values.html" data-track="nav_tarot" href="./tarot-values.html">Карты таро «RWS»</a><a data-nav="lenormand" data-link="lenormand" data-path="./lenormand-values.html" data-track="nav_lenormand" href="./lenormand-values.html">Колода Таро Ленорман</a><a data-nav="crowley" data-link="crowley" data-path="./crowley-values.html" data-track="nav_crowley" href="./crowley-values.html">Колода Таро Тота Алистера Кроули</a></nav>
-      <footer class="footer" data-i18n="footer">BasilArcana · RU / KZ / EN · Telegram-first experience</footer>
+      <footer class="footer" data-i18n="footer" style="text-align: right">BasilArcana · разработка сайта и приложения: <a href="https://www.artemov.app" style="color: inherit; text-decoration: underline;" target="_blank" rel="noopener noreferrer">artemov.app</a></footer>
     </main>
     <script src="./academy-translations.js"></script>
     <script>
@@ -118,13 +118,14 @@
         en: { topLine:"Magic plus vibe", navNews:"News", navTarot:"Tarot cards", navLenormand:"Lenormand deck", navAcademy:"Tarot Academy", footer:"BasilArcana · RU / KZ / EN · Telegram-first experience", devCta:"Turnkey custom bot and app development — write to us" }
       };
       function withLang(path, lang){ const url = new URL(path, window.location.href); if(lang && lang !== "ru") url.searchParams.set("lang", lang); return url.pathname + url.search; }
+      function getFooterHtml(lang){const footerCopy={ru:'BasilArcana · разработка сайта и приложения: <a href="https://www.artemov.app" style="color: inherit; text-decoration: underline;" target="_blank" rel="noopener noreferrer">artemov.app</a>',kz:'BasilArcana · сайт пен қосымшаны әзірлеу: <a href="https://www.artemov.app" style="color: inherit; text-decoration: underline;" target="_blank" rel="noopener noreferrer">artemov.app</a>',en:'BasilArcana · website and app development: <a href="https://www.artemov.app" style="color: inherit; text-decoration: underline;" target="_blank" rel="noopener noreferrer">artemov.app</a>'};return footerCopy[lang]||footerCopy.ru;}
       function applyLang(lang){
         const resolved = ui[lang] ? lang : "ru";
         const pack = ui[resolved];
         applyArticleLanguage(resolved);
         document.documentElement.lang = resolved === "kz" ? "kk" : resolved;
         document.querySelectorAll("[data-i18n]").forEach((node)=>{ const key = node.dataset.i18n; if(pack[key]) node.textContent = pack[key]; });
-        document.querySelectorAll(".lang-btn").forEach((btn)=>btn.setAttribute("aria-pressed", String(btn.dataset.lang === resolved)));
+        const footerNode=document.querySelector('[data-i18n="footer"]');if(footerNode)footerNode.innerHTML=getFooterHtml(typeof resolved!=='undefined'?resolved:lang);document.querySelectorAll(".lang-btn").forEach((btn)=>btn.setAttribute("aria-pressed", String(btn.dataset.lang === resolved)));
         const links = { home:"./index.html", news:"./news.html", tarot:"./tarot-values.html", lenormand:"./lenormand-values.html", academy:"./academy.html" };
         Object.entries(links).forEach(([key,path]) => {
           document.querySelectorAll("[data-link=\"" + key + "\"]").forEach((node)=>node.setAttribute("href", withLang(path, resolved)));

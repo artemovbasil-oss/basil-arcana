@@ -97,7 +97,7 @@
       </nav>
       <article class="article"><h1>Таро и психология: как символы помогают принимать решения</h1><p class="lead">Карты могут работать как инструмент саморефлексии: они структурируют внимание и помогают видеть скрытые мотивы и эмоции.</p><h2>Почему это работает</h2><ul><li>Символы поднимают личные ассоциации, которые сложно заметить в «обычном» мышлении.</li><li>Расклад дает структуру: эмоции, факты, риск, ресурс, действие.</li><li>Появляется дистанция от импульса, а значит — более зрелый выбор.</li></ul><h2>Что важно держать в фокусе</h2><p>Таро не заменяет медицину, психотерапию и юридическую консультацию. Его сильная сторона — помочь вам яснее мыслить и действовать осознанно.</p><h2>Практика на каждый день</h2><ul><li>После расклада проверяйте выводы фактами.</li><li>Записывайте альтернативные интерпретации.</li><li>Фиксируйте один конкретный шаг на 24 часа.</li></ul></article>
       <nav class="site-links" aria-label="Site navigation"><a data-nav="news" data-link="news" data-path="./news.html" data-track="nav_news" href="./news.html">Новости</a><a data-nav="academy" data-link="academy" data-path="./academy.html" data-track="nav_academy" href="./academy.html">Академия Таро</a><a data-nav="tarot" data-link="tarot" data-path="./tarot-values.html" data-track="nav_tarot" href="./tarot-values.html">Карты таро «RWS»</a><a data-nav="lenormand" data-link="lenormand" data-path="./lenormand-values.html" data-track="nav_lenormand" href="./lenormand-values.html">Колода Таро Ленорман</a><a data-nav="crowley" data-link="crowley" data-path="./crowley-values.html" data-track="nav_crowley" href="./crowley-values.html">Колода Таро Тота Алистера Кроули</a></nav>
-      <footer class="footer" data-i18n="footer">BasilArcana · RU / KZ / EN · Telegram-first experience</footer>
+      <footer class="footer" data-i18n="footer" style="text-align: right">BasilArcana · разработка сайта и приложения: <a href="https://www.artemov.app" style="color: inherit; text-decoration: underline;" target="_blank" rel="noopener noreferrer">artemov.app</a></footer>
     </main>
     <script src="./academy-translations.js"></script>
     <script>
@@ -118,13 +118,14 @@
         en: { topLine:"Magic plus vibe", navNews:"News", navTarot:"Tarot cards", navLenormand:"Lenormand deck", navAcademy:"Tarot Academy", footer:"BasilArcana · RU / KZ / EN · Telegram-first experience", devCta:"Turnkey custom bot and app development — write to us" }
       };
       function withLang(path, lang){ const url = new URL(path, window.location.href); if(lang && lang !== "ru") url.searchParams.set("lang", lang); return url.pathname + url.search; }
+      function getFooterHtml(lang){const footerCopy={ru:'BasilArcana · разработка сайта и приложения: <a href="https://www.artemov.app" style="color: inherit; text-decoration: underline;" target="_blank" rel="noopener noreferrer">artemov.app</a>',kz:'BasilArcana · сайт пен қосымшаны әзірлеу: <a href="https://www.artemov.app" style="color: inherit; text-decoration: underline;" target="_blank" rel="noopener noreferrer">artemov.app</a>',en:'BasilArcana · website and app development: <a href="https://www.artemov.app" style="color: inherit; text-decoration: underline;" target="_blank" rel="noopener noreferrer">artemov.app</a>'};return footerCopy[lang]||footerCopy.ru;}
       function applyLang(lang){
         const resolved = ui[lang] ? lang : "ru";
         const pack = ui[resolved];
         applyArticleLanguage(resolved);
         document.documentElement.lang = resolved === "kz" ? "kk" : resolved;
         document.querySelectorAll("[data-i18n]").forEach((node)=>{ const key = node.dataset.i18n; if(pack[key]) node.textContent = pack[key]; });
-        document.querySelectorAll(".lang-btn").forEach((btn)=>btn.setAttribute("aria-pressed", String(btn.dataset.lang === resolved)));
+        const footerNode=document.querySelector('[data-i18n="footer"]');if(footerNode)footerNode.innerHTML=getFooterHtml(typeof resolved!=='undefined'?resolved:lang);document.querySelectorAll(".lang-btn").forEach((btn)=>btn.setAttribute("aria-pressed", String(btn.dataset.lang === resolved)));
         const links = { home:"./index.html", news:"./news.html", tarot:"./tarot-values.html", lenormand:"./lenormand-values.html", academy:"./academy.html" };
         Object.entries(links).forEach(([key,path]) => {
           document.querySelectorAll("[data-link=\"" + key + "\"]").forEach((node)=>node.setAttribute("href", withLang(path, resolved)));

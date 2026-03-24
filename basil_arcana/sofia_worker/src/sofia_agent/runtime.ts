@@ -1,8 +1,11 @@
 import type { SofiaAgentConfig } from "../config";
 import {
   claimNextSofiaAgentTask,
+  countUsersCreatedTodayForSofia,
+  countUsersForSofia,
   createSofiaAgentMessage,
   getLatestDraftForTask,
+  listRecentOracleQueriesForSofia,
   listSofiaThreadMessages,
   listSofiaAgentTasksByStatus,
   markSofiaAgentTaskApproved,
@@ -26,6 +29,23 @@ function isCommunityTask(taskType: string): boolean {
 
 function isOwnedChannelPostTask(taskType: string): boolean {
   return taskType === "channel_post";
+}
+
+function isAdminBotSummaryTask(
+  task: { taskType: string; payload: Record<string, unknown> },
+  config: SofiaAgentConfig,
+): boolean {
+  if (!isInboxTask(task.taskType)) {
+    return false;
+  }
+  if (task.payload.adminCommand !== "bot_summary") {
+    return false;
+  }
+  const approverHandle = normalizeHandle(config.outreachReportChat);
+  const chatHandle = normalizeHandle(
+    typeof task.payload.chatUsername === "string" ? `@${task.payload.chatUsername}` : null,
+  );
+  return Boolean(approverHandle && chatHandle && approverHandle === chatHandle);
 }
 
 function isSocialCommunityTask(task: { taskType: string; payload: Record<string, unknown> }): boolean {
@@ -101,6 +121,51 @@ function buildConversationContext(messages: Awaited<ReturnType<typeof listSofiaT
     .join("\n");
 }
 
+function formatBotQueryType(queryType: string): string {
+  if (queryType.startsWith("reading_")) {
+    return `Расклад (${queryType.replace("reading_", "")})`;
+  }
+  if (queryType === "natal_chart") {
+    return "Натальная карта";
+  }
+  if (queryType === "compatibility") {
+    return "Совместимость";
+  }
+  return queryType;
+}
+
+async function buildAdminBotSummaryReply(): Promise<string> {
+  const [todayCount, totalCount, recentQueries] = await Promise.all([
+    countUsersCreatedTodayForSofia(),
+    countUsersForSofia(),
+    listRecentOracleQueriesForSofia(8),
+  ]);
+
+  const lines = [
+    "По основному боту сейчас так:",
+    `Сегодня добавилось пользователей: ${todayCount}`,
+    `Всего пользователей: ${totalCount}`,
+  ];
+
+  if (recentQueries.length === 0) {
+    lines.push("", "Последних запросов пока не вижу.");
+    return lines.join("\n");
+  }
+
+  lines.push("", "Последние запросы пользователей:");
+  for (const row of recentQueries) {
+    const createdAt = row.createdAt
+      ? new Date(row.createdAt).toISOString().replace("T", " ").slice(0, 16)
+      : "-";
+    const question = row.question.replace(/\s+/g, " ").trim();
+    const shortQuestion = question.length > 140 ? `${question.slice(0, 137)}...` : question;
+    lines.push(
+      `- ${createdAt} · user_id=${row.telegramUserId} · ${formatBotQueryType(row.queryType)} · ${row.locale ?? "-"}${shortQuestion ? ` · ${shortQuestion}` : ""}`,
+    );
+  }
+  return lines.join("\n");
+}
+
 function buildReplyGuidance(
   task: { taskType: string; payload: Record<string, unknown> },
   taskType: string,
@@ -128,11 +193,14 @@ function buildReplyGuidance(
   if (isInboxTask(taskType)) {
     if (recentOutbound.length === 0) {
       rules.push(
-        `If it feels natural in this first reply, you may softly mention the Tarot Arkana bot once: ${recommendBotUrl}. Present it as an optional helpful tool, not a pushy CTA.`,
+        `In this first reply, be warm and polite, then explicitly say that you can help with a natal chart reading or a tarot spread, and include the bot link once: ${recommendBotUrl}. Present it as an optional helpful tool, not a pushy CTA.`,
+      );
+      rules.push(
+        "A good first-reply pattern is: short human acknowledgment -> one sentence about what kind of help is available -> bot link -> optional one-line invitation to send details.",
       );
     } else if (!recentBotMention) {
       rules.push(
-        `You may occasionally recommend ${recommendBotUrl} only if it directly helps the user's question. Do not force it, and do not mention it more than once per 24 hours in the same thread.`,
+        `If the user still seems to need direction, you may briefly remind them that you can help with a natal chart reading or tarot spread via ${recommendBotUrl}. Do not force it, and do not mention it more than once per 24 hours in the same thread.`,
       );
     } else {
       rules.push("Do not mention the bot again in this reply unless the user directly asks for a tool or link.");
@@ -156,6 +224,13 @@ function buildReplyGuidance(
         rules.push("Do not force a follow-up question. Many good replies here should end as a simple statement or reaction.");
         rules.push("Keep the message compact and unshowy. A small emoji is fine occasionally, but only if it feels native to the thread.");
         rules.push("Mirror the local chat rhythm: if the thread is dry and practical, be dry and practical; if it is light, be light.");
+      }
+      if (targetHandle === "@ruskievstambule") {
+        rules.push("For @ruskievstambule specifically, keep the tone extra careful, low-key, and grounded.");
+        rules.push("Use the nearby chat context before replying. React to what people around the message are actually discussing, not only to the single line itself.");
+        rules.push("Dial enthusiasm down. Prefer calm, natural phrasing over bright encouragement.");
+        rules.push("Do not make every reply structurally similar. Many good replies here are one compact thought, one practical tip, or one quiet reaction.");
+        rules.push("Do not end every reply with a question. Only ask one if the thread naturally opens that door.");
       }
     } else {
       rules.push(
@@ -195,6 +270,18 @@ export async function runSofiaGenerationBatch(
       continue;
     }
     try {
+      if (isAdminBotSummaryTask(task, config)) {
+        const draftText = await buildAdminBotSummaryReply();
+        await saveSofiaAgentDraft({
+          taskId: task.id,
+          draftText,
+          model: "system",
+          notes: "admin_bot_summary",
+        });
+        await markSofiaAgentTaskApproved(task.id);
+        processed += 1;
+        continue;
+      }
       const systemPrompt = buildSofiaSystemPrompt(config.personaDisplayName, config.personaHandle);
       const persona = buildSofiaPersonaProfile(config.personaDisplayName, config.personaHandle);
       const threadId =

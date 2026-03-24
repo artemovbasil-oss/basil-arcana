@@ -7,7 +7,11 @@ exports.withSofiaTelegramClient = withSofiaTelegramClient;
 exports.getSofiaSelf = getSofiaSelf;
 exports.listPrivateDialogs = listPrivateDialogs;
 exports.fetchRecentPrivateMessages = fetchRecentPrivateMessages;
+exports.searchTelegramMessagesWithClient = searchTelegramMessagesWithClient;
 exports.searchTelegramMessages = searchTelegramMessages;
+exports.fetchTelegramMessageWindowWithClient = fetchTelegramMessageWindowWithClient;
+exports.fetchTelegramMessageWindow = fetchTelegramMessageWindow;
+exports.resolveCommunityTargetWithClient = resolveCommunityTargetWithClient;
 exports.resolveCommunityTarget = resolveCommunityTarget;
 exports.sendTelegramText = sendTelegramText;
 const telegram_1 = require("telegram");
@@ -305,114 +309,159 @@ async function fetchRecentPrivateMessages(config, limitDialogs, messagesPerDialo
         return summaries;
     });
 }
-async function searchTelegramMessages(config, input) {
-    return withSofiaTelegramClient(config, async (client) => {
-        const summaries = [];
-        const entity = input.targetChat ? await client.getEntity(input.targetChat) : undefined;
-        const query = input.query.trim();
-        const iterOptions = query
-            ? { limit: input.limit, search: query }
-            : { limit: input.limit };
-        for await (const message of client.iterMessages(entity, iterOptions)) {
-            const rawMessage = message;
-            const text = String(rawMessage.message ?? "").trim();
-            if (!text) {
-                continue;
-            }
-            const chat = await message.getChat?.();
-            const sender = await message.getSender?.();
-            const username = usernameFromEntity(chat);
-            summaries.push({
-                id: String(rawMessage.id ?? ""),
-                peerKey: buildPeerKey(chat, input.targetChat ?? "global"),
-                chatId: entityNumericId(chat),
-                chatTitle: titleFromEntity(chat),
-                chatUsername: username,
-                senderLabel: titleFromEntity(sender),
-                text,
-                mediaKind: detectMediaKind(rawMessage),
-                outgoing: Boolean(rawMessage.out),
-                sentAt: normalizeTimestamp(rawMessage.date),
-                permalink: buildPermalink(username, String(rawMessage.id ?? "")),
-            });
+async function searchTelegramMessagesWithClient(client, input) {
+    const summaries = [];
+    const entity = input.targetChat ? await client.getEntity(input.targetChat) : undefined;
+    const query = input.query.trim();
+    const iterOptions = query
+        ? { limit: input.limit, search: query }
+        : { limit: input.limit };
+    for await (const message of client.iterMessages(entity, iterOptions)) {
+        const rawMessage = message;
+        const text = String(rawMessage.message ?? "").trim();
+        if (!text) {
+            continue;
         }
-        return summaries;
-    });
+        const chat = await message.getChat?.();
+        const sender = await message.getSender?.();
+        const username = usernameFromEntity(chat);
+        summaries.push({
+            id: String(rawMessage.id ?? ""),
+            peerKey: buildPeerKey(chat, input.targetChat ?? "global"),
+            chatId: entityNumericId(chat),
+            chatTitle: titleFromEntity(chat),
+            chatUsername: username,
+            senderLabel: titleFromEntity(sender),
+            text,
+            mediaKind: detectMediaKind(rawMessage),
+            outgoing: Boolean(rawMessage.out),
+            sentAt: normalizeTimestamp(rawMessage.date),
+            permalink: buildPermalink(username, String(rawMessage.id ?? "")),
+        });
+    }
+    return summaries;
 }
-async function resolveCommunityTarget(config, targetChat) {
-    return withSofiaTelegramClient(config, async (client) => {
-        const entity = await client.getEntity(targetChat);
-        const requestedUsername = usernameFromEntity(entity);
-        const requestedTitle = titleFromEntity(entity);
-        const entityRecord = entity;
-        const className = String(entityRecord.className ?? "");
-        const isMegaGroup = entityRecord.megagroup === true || entityRecord.gigagroup === true;
-        const isBroadcastChannel = entityRecord.broadcast === true;
-        if (className !== "Channel") {
-            return {
-                requestedTarget: targetChat,
-                effectiveTarget: targetChat,
-                effectiveTitle: requestedTitle,
-                effectiveUsername: requestedUsername,
-                usedLinkedDiscussion: false,
-                targetKind: "group",
-                isWritableCommunity: true,
-            };
+async function searchTelegramMessages(config, input) {
+    return withSofiaTelegramClient(config, async (client) => searchTelegramMessagesWithClient(client, input));
+}
+async function fetchTelegramMessageWindowWithClient(client, input) {
+    if (!input.targetChat || !Number.isFinite(input.centerMessageId)) {
+        return [];
+    }
+    const before = Math.max(0, input.before ?? 3);
+    const after = Math.max(0, input.after ?? 3);
+    const entity = await client.getEntity(input.targetChat);
+    const inputPeer = await client.getInputEntity(entity);
+    const history = await client.invoke(new telegram_1.Api.messages.GetHistory({
+        peer: inputPeer,
+        offsetId: input.centerMessageId,
+        offsetDate: 0,
+        addOffset: -before,
+        limit: before + after + 1,
+        maxId: 0,
+        minId: 0,
+        hash: big_integer_1.default.zero,
+    }));
+    const chat = await client.getEntity(input.targetChat);
+    const items = [];
+    for (const message of history.messages ?? []) {
+        if (!(message instanceof telegram_1.Api.Message)) {
+            continue;
         }
-        if (isMegaGroup || !isBroadcastChannel) {
-            return {
-                requestedTarget: targetChat,
-                effectiveTarget: targetChat,
-                effectiveTitle: requestedTitle,
-                effectiveUsername: requestedUsername,
-                usedLinkedDiscussion: false,
-                targetKind: "group",
-                isWritableCommunity: true,
-            };
+        const rawMessage = message;
+        const text = String(rawMessage.message ?? "").trim();
+        if (!text) {
+            continue;
         }
-        const inputChannel = await client.getInputEntity(entity);
-        const full = await client.invoke(new telegram_1.Api.channels.GetFullChannel({
-            channel: inputChannel,
-        }));
-        const fullChatRecord = full.fullChat;
-        const linkedChatId = bigintString(fullChatRecord.linkedChatId);
-        if (!linkedChatId) {
-            return {
-                requestedTarget: targetChat,
-                effectiveTarget: targetChat,
-                effectiveTitle: requestedTitle,
-                effectiveUsername: requestedUsername,
-                usedLinkedDiscussion: false,
-                targetKind: "channel",
-                isWritableCommunity: false,
-            };
-        }
-        const linkedEntity = (full.chats ?? []).find((chat) => bigintString(chat.id) === linkedChatId);
-        if (!linkedEntity) {
-            return {
-                requestedTarget: targetChat,
-                effectiveTarget: targetChat,
-                effectiveTitle: requestedTitle,
-                effectiveUsername: requestedUsername,
-                usedLinkedDiscussion: false,
-                targetKind: "channel",
-                isWritableCommunity: false,
-            };
-        }
-        const linkedUsername = usernameFromEntity(linkedEntity);
-        const linkedTitle = titleFromEntity(linkedEntity);
-        const linkedNumericId = entityNumericId(linkedEntity);
-        const effectiveTarget = linkedUsername ? `@${linkedUsername}` : linkedNumericId ?? targetChat;
+        const sender = await message.getSender?.();
+        items.push({
+            id: String(rawMessage.id ?? ""),
+            senderLabel: titleFromEntity(sender ?? chat),
+            text,
+            outgoing: Boolean(rawMessage.out),
+            sentAt: normalizeTimestamp(rawMessage.date),
+        });
+    }
+    return items.sort((a, b) => a.sentAt - b.sentAt);
+}
+async function fetchTelegramMessageWindow(config, input) {
+    return withSofiaTelegramClient(config, async (client) => fetchTelegramMessageWindowWithClient(client, input));
+}
+async function resolveCommunityTargetWithClient(client, targetChat) {
+    const entity = await client.getEntity(targetChat);
+    const requestedUsername = usernameFromEntity(entity);
+    const requestedTitle = titleFromEntity(entity);
+    const entityRecord = entity;
+    const className = String(entityRecord.className ?? "");
+    const isMegaGroup = entityRecord.megagroup === true || entityRecord.gigagroup === true;
+    const isBroadcastChannel = entityRecord.broadcast === true;
+    if (className !== "Channel") {
         return {
             requestedTarget: targetChat,
-            effectiveTarget,
-            effectiveTitle: linkedTitle,
-            effectiveUsername: linkedUsername,
-            usedLinkedDiscussion: effectiveTarget !== targetChat,
-            targetKind: "channel",
+            effectiveTarget: targetChat,
+            effectiveTitle: requestedTitle,
+            effectiveUsername: requestedUsername,
+            usedLinkedDiscussion: false,
+            targetKind: "group",
             isWritableCommunity: true,
         };
-    });
+    }
+    if (isMegaGroup || !isBroadcastChannel) {
+        return {
+            requestedTarget: targetChat,
+            effectiveTarget: targetChat,
+            effectiveTitle: requestedTitle,
+            effectiveUsername: requestedUsername,
+            usedLinkedDiscussion: false,
+            targetKind: "group",
+            isWritableCommunity: true,
+        };
+    }
+    const inputChannel = await client.getInputEntity(entity);
+    const full = await client.invoke(new telegram_1.Api.channels.GetFullChannel({
+        channel: inputChannel,
+    }));
+    const fullChatRecord = full.fullChat;
+    const linkedChatId = bigintString(fullChatRecord.linkedChatId);
+    if (!linkedChatId) {
+        return {
+            requestedTarget: targetChat,
+            effectiveTarget: targetChat,
+            effectiveTitle: requestedTitle,
+            effectiveUsername: requestedUsername,
+            usedLinkedDiscussion: false,
+            targetKind: "channel",
+            isWritableCommunity: false,
+        };
+    }
+    const linkedEntity = (full.chats ?? []).find((chat) => bigintString(chat.id) === linkedChatId);
+    if (!linkedEntity) {
+        return {
+            requestedTarget: targetChat,
+            effectiveTarget: targetChat,
+            effectiveTitle: requestedTitle,
+            effectiveUsername: requestedUsername,
+            usedLinkedDiscussion: false,
+            targetKind: "channel",
+            isWritableCommunity: false,
+        };
+    }
+    const linkedUsername = usernameFromEntity(linkedEntity);
+    const linkedTitle = titleFromEntity(linkedEntity);
+    const linkedNumericId = entityNumericId(linkedEntity);
+    const effectiveTarget = linkedUsername ? `@${linkedUsername}` : linkedNumericId ?? targetChat;
+    return {
+        requestedTarget: targetChat,
+        effectiveTarget,
+        effectiveTitle: linkedTitle,
+        effectiveUsername: linkedUsername,
+        usedLinkedDiscussion: effectiveTarget !== targetChat,
+        targetKind: "channel",
+        isWritableCommunity: true,
+    };
+}
+async function resolveCommunityTarget(config, targetChat) {
+    return withSofiaTelegramClient(config, async (client) => resolveCommunityTargetWithClient(client, targetChat));
 }
 async function sendTelegramText(config, input) {
     return withSofiaTelegramClient(config, async (client) => {

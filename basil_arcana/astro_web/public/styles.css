@@ -1453,7 +1453,7 @@ body[data-theme="light"] .login-lead-white {
 
 .hub-feature-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+  grid-template-columns: 1fr;
   gap: 1rem;
   align-items: start;
 }
@@ -1489,19 +1489,26 @@ body[data-theme="light"] .login-lead-white {
 }
 
 .hub-feature-image-link {
+  display: block;
   border: 1px solid var(--line);
   padding: 0.55rem;
   background:
     linear-gradient(180deg, color-mix(in srgb, var(--surface) 88%, transparent 12%) 0%, color-mix(in srgb, var(--surface-2) 74%, transparent 26%) 100%);
   box-shadow: inset 0 1px 0 color-mix(in srgb, var(--line-strong) 35%, transparent 65%);
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
 }
 
 .hub-feature-image {
-  max-height: 360px;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
 }
 
 .hub-feature-list {
   display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.9rem;
   align-content: start;
 }
@@ -1582,6 +1589,18 @@ body[data-theme="light"] .login-lead-white {
   height: 100%;
 }
 
+.hub-card-compact .hub-sign-thumb-link {
+  aspect-ratio: 1 / 0.72;
+}
+
+.hub-card-compact h2 {
+  min-height: 2.4em;
+}
+
+.hub-card-compact p {
+  -webkit-line-clamp: 3;
+}
+
 .hub-card-compact .hub-sign-thumb {
   max-height: none;
 }
@@ -1645,6 +1664,7 @@ body[data-theme="dark"] .celeb-archive-thumb-link {
 
 .hub-card {
   display: grid;
+  grid-template-rows: auto auto 1fr auto;
   gap: 0.7rem;
   padding: 1rem;
   background:
@@ -7073,6 +7093,10 @@ body[data-theme="light"] .energy-star.neutral {
   }
 
   .hub-feature-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .hub-feature-list {
     grid-template-columns: 1fr;
   }
 

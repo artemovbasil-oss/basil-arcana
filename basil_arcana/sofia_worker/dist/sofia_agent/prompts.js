@@ -17,6 +17,30 @@ function taskGoal(taskType) {
     return "Write a natal-chart response that is specific, compassionate, and actionable.";
 }
 function buildSofiaTaskPrompt(task, conversationContext, assistantGuidance) {
+    const surroundingMessages = task.payload &&
+        typeof task.payload === "object" &&
+        "surroundingMessages" in task.payload &&
+        Array.isArray(task.payload.surroundingMessages)
+        ? task.payload.surroundingMessages
+            .map((item) => {
+            if (!item || typeof item !== "object") {
+                return null;
+            }
+            const row = item;
+            const speaker = row.outgoing === true
+                ? "Sofia"
+                : typeof row.senderLabel === "string" && row.senderLabel.trim()
+                    ? row.senderLabel.trim()
+                    : "User";
+            const text = typeof row.text === "string" ? row.text.trim() : "";
+            if (!text) {
+                return null;
+            }
+            return `${speaker}: ${text}`;
+        })
+            .filter((item) => Boolean(item))
+            .join("\n")
+        : "";
     const mediaKind = task.payload && typeof task.payload === "object" && "mediaKind" in task.payload
         ? String(task.payload.mediaKind ?? "")
         : "";
@@ -41,6 +65,7 @@ function buildSofiaTaskPrompt(task, conversationContext, assistantGuidance) {
             ? `- The inbound message includes a ${mediaKind} attachment. If image contents are not directly available in the payload, do not pretend you saw them. Acknowledge the attachment and ask for the minimum missing details needed to help.`
             : null,
         conversationContext ? `Recent thread context:\n${conversationContext}` : null,
+        surroundingMessages ? `Nearby messages from the same chat:\n${surroundingMessages}` : null,
         assistantGuidance ? `Reply guidance:\n${assistantGuidance}` : null,
         `Structured task payload:\n${payload}`,
         "Return a JSON object with keys: draft_text, short_rationale, risk_flags.",

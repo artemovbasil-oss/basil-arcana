@@ -26,6 +26,21 @@ function isApprovalCommand(text) {
         normalized.includes("ищи другие") ||
         normalized === "reject");
 }
+function inferAdminCommand(text) {
+    const normalized = text.trim().toLowerCase();
+    if (!normalized) {
+        return null;
+    }
+    if (normalized === "/users_today" ||
+        normalized === "/users_all" ||
+        normalized === "/oracle_queries") {
+        return "bot_summary";
+    }
+    if (/бот|bot|пользоват|users|user|запрос|queries|query|сегодня|today|всего|total|последн/i.test(normalized)) {
+        return "bot_summary";
+    }
+    return null;
+}
 function inferDmTaskType(text, mediaKind) {
     const normalized = text.toLowerCase();
     if (mediaKind === "photo" ||
@@ -84,6 +99,9 @@ async function ingestSofiaInbox(config) {
         if (approverHandle && chatHandle === approverHandle && isApprovalCommand(message.text)) {
             continue;
         }
+        const adminCommand = approverHandle && chatHandle === approverHandle
+            ? inferAdminCommand(message.text)
+            : null;
         newMessages += 1;
         const dedupKey = `dm:${thread.externalThreadId}:${message.id}`;
         const existingTask = await (0, db_1.findSofiaTaskByDedupKey)(dedupKey);
@@ -108,6 +126,7 @@ async function ingestSofiaInbox(config) {
                 chatUsername: message.chatUsername,
                 permalink: message.permalink,
                 mediaKind: message.mediaKind,
+                adminCommand,
             },
         });
         tasksCreated += 1;

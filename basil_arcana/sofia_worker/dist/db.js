@@ -11,6 +11,9 @@ exports.insertPayment = insertPayment;
 exports.listActiveSubscriptions = listActiveSubscriptions;
 exports.completeConsultation = completeConsultation;
 exports.listRecentUserQueriesForUser = listRecentUserQueriesForUser;
+exports.countUsersForSofia = countUsersForSofia;
+exports.countUsersCreatedTodayForSofia = countUsersCreatedTodayForSofia;
+exports.listRecentOracleQueriesForSofia = listRecentOracleQueriesForSofia;
 exports.listRecentOracleQueries = listRecentOracleQueries;
 exports.listUsersForBroadcast = listUsersForBroadcast;
 exports.listUsersForSofia = listUsersForSofia;
@@ -412,6 +415,41 @@ async function listRecentUserQueriesForUser(telegramUserId, limit = 10) {
     LIMIT $2;
     `, [telegramUserId, safeLimit]);
     return rows.map((row) => ({
+        queryType: String(row.query_type ?? ""),
+        question: String(row.question ?? ""),
+        locale: row.locale ?? null,
+        createdAt: toMillis(row.created_at ?? null),
+    }));
+}
+async function countUsersForSofia() {
+    const db = requirePool();
+    const { rows } = await db.query(`
+    SELECT COUNT(*)::int AS total
+    FROM users;
+    `);
+    return Number(rows[0]?.total ?? 0);
+}
+async function countUsersCreatedTodayForSofia() {
+    const db = requirePool();
+    const { rows } = await db.query(`
+    SELECT COUNT(*)::int AS total
+    FROM users
+    WHERE created_at >= date_trunc('day', NOW())
+      AND created_at < date_trunc('day', NOW()) + INTERVAL '1 day';
+    `);
+    return Number(rows[0]?.total ?? 0);
+}
+async function listRecentOracleQueriesForSofia(limit = 8) {
+    const db = requirePool();
+    const safeLimit = Math.max(1, Math.min(20, Number(limit) || 8));
+    const { rows } = await db.query(`
+    SELECT telegram_user_id, query_type, question, locale, created_at
+    FROM user_query_history
+    ORDER BY created_at DESC, id DESC
+    LIMIT $1;
+    `, [safeLimit]);
+    return rows.map((row) => ({
+        telegramUserId: Number(row.telegram_user_id),
         queryType: String(row.query_type ?? ""),
         question: String(row.question ?? ""),
         locale: row.locale ?? null,

@@ -645,6 +645,51 @@ export async function listRecentUserQueriesForUser(
   }));
 }
 
+export async function countUsersForSofia(): Promise<number> {
+  const db = requirePool();
+  const { rows } = await db.query(
+    `
+    SELECT COUNT(*)::int AS total
+    FROM users;
+    `,
+  );
+  return Number(rows[0]?.total ?? 0);
+}
+
+export async function countUsersCreatedTodayForSofia(): Promise<number> {
+  const db = requirePool();
+  const { rows } = await db.query(
+    `
+    SELECT COUNT(*)::int AS total
+    FROM users
+    WHERE created_at >= date_trunc('day', NOW())
+      AND created_at < date_trunc('day', NOW()) + INTERVAL '1 day';
+    `,
+  );
+  return Number(rows[0]?.total ?? 0);
+}
+
+export async function listRecentOracleQueriesForSofia(limit = 8): Promise<OracleQueryRow[]> {
+  const db = requirePool();
+  const safeLimit = Math.max(1, Math.min(20, Number(limit) || 8));
+  const { rows } = await db.query(
+    `
+    SELECT telegram_user_id, query_type, question, locale, created_at
+    FROM user_query_history
+    ORDER BY created_at DESC, id DESC
+    LIMIT $1;
+    `,
+    [safeLimit],
+  );
+  return rows.map((row) => ({
+    telegramUserId: Number(row.telegram_user_id),
+    queryType: String(row.query_type ?? ""),
+    question: String(row.question ?? ""),
+    locale: (row.locale as string | null) ?? null,
+    createdAt: toMillis((row.created_at as Date | null) ?? null),
+  }));
+}
+
 export async function listRecentOracleQueries(
   limit = 20,
   offset = 0,
