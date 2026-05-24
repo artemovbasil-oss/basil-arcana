@@ -1522,8 +1522,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       children: [
                         Expanded(
                           child: _FeatureSquareCard(
-                            assetIconPath: 'assets/icon/home_natal.svg',
-                            iconOffsetY: 1.5,
+                            imageAssetPath:
+                                'assets/icon/home_feature_natal.webp',
+                            gradientColors: const [
+                              Color(0xFF4217D9),
+                              Color(0xFF160F2E),
+                            ],
+                            borderColor: Color(0xFF7F66D8),
                             title: featureCopy.natalTitle,
                             onTap: () {
                               Navigator.push(
@@ -1540,7 +1545,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         const SizedBox(width: 10),
                         Expanded(
                           child: _FeatureSquareCard(
-                            assetIconPath: 'assets/icon/home_compatibility.svg',
+                            imageAssetPath:
+                                'assets/icon/home_feature_compatibility.webp',
+                            gradientColors: const [
+                              Color(0xFFDF070E),
+                              Color(0xFF1B0E20),
+                            ],
+                            borderColor: Color(0xFFFF5C00),
                             title: featureCopy.compatibilityTitle,
                             onTap: () {
                               Navigator.push(
@@ -1558,7 +1569,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         const SizedBox(width: 10),
                         Expanded(
                           child: _FeatureSquareCard(
-                            assetIconPath: 'assets/icon/home_library.svg',
+                            imageAssetPath:
+                                'assets/icon/home_feature_library.webp',
+                            gradientColors: const [
+                              Color(0xFFCA55E8),
+                              Color(0xFF2C143E),
+                            ],
+                            borderColor: Color(0xFFC955F0),
                             title: featureCopy.libraryTitle,
                             onTap: () {
                               Navigator.push(
@@ -5436,16 +5453,16 @@ class _RecentQueriesChip extends StatelessWidget {
 
 class _FeatureSquareCard extends StatelessWidget {
   const _FeatureSquareCard({
-    this.icon,
-    this.assetIconPath,
-    this.iconOffsetY = 0,
+    required this.imageAssetPath,
+    required this.gradientColors,
+    required this.borderColor,
     required this.title,
     required this.onTap,
-  }) : assert(icon != null || assetIconPath != null);
+  });
 
-  final IconData? icon;
-  final String? assetIconPath;
-  final double iconOffsetY;
+  final String imageAssetPath;
+  final List<Color> gradientColors;
+  final Color borderColor;
   final String title;
   final VoidCallback onTap;
 
@@ -5455,57 +5472,104 @@ class _FeatureSquareCard extends StatelessWidget {
     return InkWell(
       borderRadius: BorderRadius.circular(20),
       onTap: onTap,
-      child: Ink(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              colorScheme.primary.withOpacity(0.28),
-              colorScheme.surface.withOpacity(0.7),
+      child: AspectRatio(
+        aspectRatio: 1,
+        child: Ink(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                gradientColors.first,
+                gradientColors.last,
+              ],
+            ),
+            border: Border.all(
+              color: borderColor,
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: borderColor.withValues(alpha: 0.24),
+                blurRadius: 16,
+                offset: const Offset(0, 6),
+              ),
             ],
           ),
-          border: Border.all(
-            color: colorScheme.primary.withOpacity(0.35),
-          ),
-        ),
-        child: Column(
-          children: [
-            _IconCircleBadge(
-              size: 36,
-              child: Transform.translate(
-                offset: Offset(0, iconOffsetY),
-                child: assetIconPath != null
-                    ? SvgPicture.asset(
-                        assetIconPath!,
-                        width: 20,
-                        height: 20,
-                        colorFilter: const ColorFilter.mode(
-                          Color(0xFFF4EEFF),
-                          BlendMode.srcIn,
-                        ),
-                      )
-                    : Icon(
-                        icon,
-                        size: 22,
-                        color: const Color(0xFFF4EEFF),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(18.5),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Positioned.fill(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: RadialGradient(
+                        center: const Alignment(0, -0.25),
+                        radius: 0.9,
+                        colors: [
+                          Colors.white.withValues(alpha: 0.12),
+                          Colors.transparent,
+                        ],
                       ),
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              title,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w400,
-                    fontSize: 13,
-                    height: 1.15,
+                    ),
                   ),
-              maxLines: 3,
-              textAlign: TextAlign.center,
+                ),
+                Positioned(
+                  top: -8,
+                  left: -4,
+                  right: -4,
+                  height: 92,
+                  child: Image.asset(
+                    imageAssetPath,
+                    fit: BoxFit.contain,
+                    filterQuality: FilterQuality.high,
+                  ),
+                ),
+                Positioned.fill(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          Colors.black.withValues(alpha: 0.1),
+                          Colors.black.withValues(alpha: 0.48),
+                        ],
+                        stops: const [0.42, 0.68, 1],
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  left: 8,
+                  right: 8,
+                  bottom: 10,
+                  child: Text(
+                    title,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      color: colorScheme.onPrimary,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 15,
+                      height: 1.08,
+                      shadows: const [
+                        Shadow(
+                          color: Color(0xB0000000),
+                          blurRadius: 8,
+                          offset: Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
