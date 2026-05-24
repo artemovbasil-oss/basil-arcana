@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:basil_arcana/l10n/gen/app_localizations.dart';
 
+import 'core/audio/click_sound_layer.dart';
 import 'core/theme/app_theme.dart';
 import 'core/telemetry/web_error_overlay.dart';
 import 'core/telegram/telegram_back_button_observer.dart';
@@ -32,9 +33,12 @@ class BasilArcanaApp extends ConsumerWidget {
         highContrast: highContrastEnabled,
       ),
       builder: (context, child) {
+        final appChild = ClickSoundLayer(
+          child: child ?? const SizedBox.shrink(),
+        );
         return Stack(
           children: [
-            if (child != null) child,
+            appChild,
             const WebErrorOverlay(),
           ],
         );
