@@ -2118,52 +2118,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         ],
                       ),
                       const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _StatPill(
-                              label: copy.currentStreakLabel,
-                              value: copy.daysCountLabel(
-                                _streakStats.currentStreakDays,
-                              ),
-                              tone: _StatPillTone.green,
-                              loading: _loadingStreak,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: _StatPill(
-                              label: copy.bestStreakLabel,
-                              value: copy.daysCountLabel(
-                                _streakStats.longestStreakDays,
-                              ),
-                              tone: _StatPillTone.blue,
-                              loading: _loadingStreak,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: _AwarenessPill(
-                              label: copy.awarenessLabel,
-                              value: _streakStats.awarenessPercent,
-                              locked: _streakStats.awarenessLocked,
-                              shimmer: _titleShimmerController,
-                              loading: _loadingStreak,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      if (!_loadingStreak && _streakStats.lastActiveAt != null)
-                        Text(
-                          copy.lastActiveLabel(_streakStats.lastActiveAt!),
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: colorScheme.onSurface
-                                        .withValues(alpha: 0.68),
-                                  ),
-                        ),
-                      const SizedBox(height: 16),
                       Expanded(
                         child: ListView(
                           primary: false,
@@ -2180,12 +2134,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                 achievements: _buildRhythmAchievements(),
                                 streakDays: _streakStats.currentStreakDays,
                               ),
-                            const SizedBox(height: 26),
-                            Divider(
-                              height: 1,
-                              color: colorScheme.outlineVariant
-                                  .withValues(alpha: 0.38),
+                            const SizedBox(height: 18),
+                            _RhythmStatsSummary(
+                              copy: copy,
+                              stats: _streakStats,
+                              loading: _loadingStreak,
+                              shimmer: _titleShimmerController,
                             ),
+                            if (!_loadingStreak) ...[
+                              const SizedBox(height: 22),
+                              _EnergyProfileCard(
+                                copy: energyCopy,
+                                profile: profile,
+                                streakDays: _streakStats.currentStreakDays,
+                                activeDays: _streakStats.activeDays,
+                                showAchievements: false,
+                                onAskOracle: (question) =>
+                                    _startReadingFromRhythmInsight(question),
+                              ),
+                            ],
                             const SizedBox(height: 22),
                             SelfAnalysisReportCtaSection(
                               title: copy.reportSectionTitle,
@@ -2202,18 +2169,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                 selectedDeck: selectedDeck,
                               ),
                             ),
-                            if (!_loadingStreak) ...[
-                              const SizedBox(height: 22),
-                              _EnergyProfileCard(
-                                copy: energyCopy,
-                                profile: profile,
-                                streakDays: _streakStats.currentStreakDays,
-                                activeDays: _streakStats.activeDays,
-                                showAchievements: false,
-                                onAskOracle: (question) =>
-                                    _startReadingFromRhythmInsight(question),
-                              ),
-                            ],
                           ],
                         ),
                       ),
@@ -4015,105 +3970,120 @@ class _SecondaryFeatureCard extends StatelessWidget {
   }
 }
 
-class _StatPill extends StatelessWidget {
-  const _StatPill({
-    required this.label,
-    required this.value,
-    required this.tone,
-    this.loading = false,
+class _RhythmStatsSummary extends StatelessWidget {
+  const _RhythmStatsSummary({
+    required this.copy,
+    required this.stats,
+    required this.loading,
+    required this.shimmer,
   });
 
-  final String label;
-  final String value;
-  final _StatPillTone tone;
+  final _HomeStreakCopy copy;
+  final HomeStreakStats stats;
   final bool loading;
+  final Animation<double> shimmer;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: tone.gradient(colorScheme),
-        ),
-        border: Border.all(
-          color: tone.border(colorScheme),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (loading)
-            const SizedBox(
-              width: 16,
-              height: 16,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            )
-          else
-            Text(
-              value,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: _RhythmMiniStatCard(
+                label: copy.currentStreakLabel,
+                value: copy.daysCountLabel(stats.currentStreakDays),
+                loading: loading,
+                colors: const [Color(0xFF24443F), Color(0xFF26373C)],
+                borderColor: const Color(0xFF65B69F),
+              ),
             ),
-          const SizedBox(height: 2),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _RhythmMiniStatCard(
+                label: copy.bestStreakLabel,
+                value: copy.daysCountLabel(stats.longestStreakDays),
+                loading: loading,
+                colors: const [Color(0xFF314366), Color(0xFF303B5C)],
+                borderColor: const Color(0xFF72A9EF),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _RhythmMiniStatCard(
+                label: copy.awarenessLabel,
+                value: '${stats.awarenessPercent.clamp(30, 100)}%',
+                loading: loading,
+                shimmer: stats.awarenessLocked ? shimmer : null,
+                colors: const [Color(0xFF415474), Color(0xFF3A4562)],
+                borderColor: const Color(0xFF8EBBFF),
+              ),
+            ),
+          ],
+        ),
+        if (!loading && stats.lastActiveAt != null) ...[
+          const SizedBox(height: 8),
           Text(
-            label,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: colorScheme.onSurface.withValues(alpha: 0.72),
+            copy.lastActiveLabel(stats.lastActiveAt!),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurface.withValues(alpha: 0.68),
+                  fontWeight: FontWeight.w600,
                 ),
           ),
         ],
-      ),
+      ],
     );
   }
 }
 
-class _AwarenessPill extends StatelessWidget {
-  const _AwarenessPill({
+class _RhythmMiniStatCard extends StatelessWidget {
+  const _RhythmMiniStatCard({
     required this.label,
     required this.value,
-    required this.locked,
-    required this.shimmer,
-    this.loading = false,
+    required this.loading,
+    required this.colors,
+    required this.borderColor,
+    this.shimmer,
   });
 
   final String label;
-  final int value;
-  final bool locked;
-  final Animation<double> shimmer;
+  final String value;
   final bool loading;
+  final List<Color> colors;
+  final Color borderColor;
+  final Animation<double>? shimmer;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final percent = value.clamp(30, 100);
-    final textStyle = Theme.of(context).textTheme.titleMedium?.copyWith(
-          fontWeight: FontWeight.w700,
-          color: locked ? colorScheme.primary : null,
+    final valueStyle = Theme.of(context).textTheme.titleMedium?.copyWith(
+          color: Colors.white,
+          fontWeight: FontWeight.w900,
+          height: 1.05,
         );
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      constraints: const BoxConstraints(minHeight: 64),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            const Color(0xFF77B8FF).withValues(alpha: locked ? 0.3 : 0.24),
-            const Color(0xFFA9D5FF).withValues(alpha: locked ? 0.34 : 0.28),
+            colors.first.withValues(alpha: 0.94),
+            colors.last.withValues(alpha: 0.88),
           ],
         ),
         border: Border.all(
-          color: const Color(0xFF7DBBFF).withValues(alpha: 0.5),
+          color: borderColor.withValues(alpha: 0.58),
+          width: 1.2,
         ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           if (loading)
             const SizedBox(
@@ -4121,23 +4091,29 @@ class _AwarenessPill extends StatelessWidget {
               height: 16,
               child: CircularProgressIndicator(strokeWidth: 2),
             )
-          else if (locked && percent == 100)
+          else if (shimmer != null)
             _ShimmerTitle(
-              text: '$percent%',
-              animation: shimmer,
-              baseStyle: textStyle,
+              text: value,
+              animation: shimmer!,
+              baseStyle: valueStyle,
               shimmerColor: colorScheme.primary,
             )
           else
             Text(
-              '$percent%',
-              style: textStyle,
+              value,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: valueStyle,
             ),
-          const SizedBox(height: 2),
+          const SizedBox(height: 5),
           Text(
             label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: colorScheme.onSurface.withValues(alpha: 0.72),
+                  color: Colors.white.withValues(alpha: 0.68),
+                  fontWeight: FontWeight.w600,
+                  height: 1.05,
                 ),
           ),
         ],
@@ -5175,31 +5151,6 @@ class _EnergyDonutChartState extends State<_EnergyDonutChart>
         );
       },
     );
-  }
-}
-
-enum _StatPillTone {
-  green,
-  blue;
-
-  List<Color> gradient(ColorScheme colorScheme) {
-    return switch (this) {
-      _StatPillTone.green => [
-          const Color(0xFF7ED6B4).withValues(alpha: 0.22),
-          const Color(0xFF5EAE95).withValues(alpha: 0.18),
-        ],
-      _StatPillTone.blue => [
-          const Color(0xFF7EBEFF).withValues(alpha: 0.22),
-          const Color(0xFF6E9FD6).withValues(alpha: 0.18),
-        ],
-    };
-  }
-
-  Color border(ColorScheme colorScheme) {
-    return switch (this) {
-      _StatPillTone.green => const Color(0xFF79D0AF).withValues(alpha: 0.45),
-      _StatPillTone.blue => const Color(0xFF75B6F2).withValues(alpha: 0.45),
-    };
   }
 }
 
