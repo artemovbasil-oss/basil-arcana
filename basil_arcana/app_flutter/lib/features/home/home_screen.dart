@@ -2068,13 +2068,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         return ValueListenableBuilder<int>(
           valueListenable: _streakModalRefreshTick,
           builder: (context, _, __) {
-            final energyCopy = _EnergyProfileCopy.resolve(context);
-            final liveTopCards = _topCards(cards);
-            final profile = _buildEnergyProfile(
-              cards: cards,
-              topCards: liveTopCards,
-              selectedDeck: selectedDeck,
-            );
             return FractionallySizedBox(
               heightFactor: 0.95,
               child: SafeArea(
@@ -2202,17 +2195,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                 selectedDeck: selectedDeck,
                               ),
                             ),
-                            if (!_loadingStreak) ...[
-                              const SizedBox(height: 22),
-                              _EnergyProfileCard(
-                                copy: energyCopy,
-                                profile: profile,
-                                streakDays: _streakStats.currentStreakDays,
-                                activeDays: _streakStats.activeDays,
-                                onAskOracle: (question) =>
-                                    _startReadingFromRhythmInsight(question),
-                              ),
-                            ],
                           ],
                         ),
                       ),
