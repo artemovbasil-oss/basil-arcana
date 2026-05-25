@@ -2056,8 +2056,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     required List<CardModel> cards,
     required DeckType selectedDeck,
   }) async {
-    final energyCopy = _EnergyProfileCopy.resolve(context);
-
     final colorScheme = Theme.of(context).colorScheme;
     await showModalBottomSheet<void>(
       context: context,
@@ -2067,10 +2065,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (context) {
-        const reportCtaReservedSpace = 176.0;
         return ValueListenableBuilder<int>(
           valueListenable: _streakModalRefreshTick,
           builder: (context, _, __) {
+            final energyCopy = _EnergyProfileCopy.resolve(context);
             final liveTopCards = _topCards(cards);
             final profile = _buildEnergyProfile(
               cards: cards,
@@ -2083,141 +2081,113 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 top: false,
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(18, 14, 18, 20),
-                  child: Stack(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      Center(
+                        child: Container(
+                          width: 40,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: colorScheme.outlineVariant
+                                .withValues(alpha: 0.8),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
                         children: [
-                          Center(
-                            child: Container(
-                              width: 40,
-                              height: 4,
-                              decoration: BoxDecoration(
-                                color: colorScheme.outlineVariant
-                                    .withValues(alpha: 0.8),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  copy.modalTitle,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleLarge
-                                      ?.copyWith(
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                ),
-                              ),
-                              IconButton(
-                                onPressed: () => Navigator.of(context).pop(),
-                                icon: const Icon(Icons.close),
-                                tooltip: copy.closeLabel,
-                                visualDensity: VisualDensity.compact,
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _StatPill(
-                                  label: copy.currentStreakLabel,
-                                  value: copy.daysCountLabel(
-                                    _streakStats.currentStreakDays,
-                                  ),
-                                  tone: _StatPillTone.green,
-                                  loading: _loadingStreak,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: _StatPill(
-                                  label: copy.bestStreakLabel,
-                                  value: copy.daysCountLabel(
-                                    _streakStats.longestStreakDays,
-                                  ),
-                                  tone: _StatPillTone.blue,
-                                  loading: _loadingStreak,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: _AwarenessPill(
-                                  label: copy.awarenessLabel,
-                                  value: _streakStats.awarenessPercent,
-                                  locked: _streakStats.awarenessLocked,
-                                  shimmer: _titleShimmerController,
-                                  loading: _loadingStreak,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          if (!_loadingStreak &&
-                              _streakStats.lastActiveAt != null)
-                            Text(
-                              copy.lastActiveLabel(_streakStats.lastActiveAt!),
+                          Expanded(
+                            child: Text(
+                              copy.modalTitle,
                               style: Theme.of(context)
                                   .textTheme
-                                  .bodySmall
+                                  .titleLarge
                                   ?.copyWith(
-                                    color: colorScheme.onSurface
-                                        .withValues(alpha: 0.68),
+                                    fontWeight: FontWeight.w700,
                                   ),
                             ),
-                          const SizedBox(height: 14),
+                          ),
+                          IconButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            icon: const Icon(Icons.close),
+                            tooltip: copy.closeLabel,
+                            visualDensity: VisualDensity.compact,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
                           Expanded(
-                            child: ListView(
-                              primary: false,
-                              physics: const ClampingScrollPhysics(),
-                              padding: const EdgeInsets.only(
-                                bottom: reportCtaReservedSpace,
+                            child: _StatPill(
+                              label: copy.currentStreakLabel,
+                              value: copy.daysCountLabel(
+                                _streakStats.currentStreakDays,
                               ),
-                              children: [
-                                if (_loadingStreak)
-                                  _HomeMagicLoadingCard(
-                                    label: copy.streakLoadingSubtitle,
-                                  )
-                                else
-                                  _EnergyProfileCard(
-                                    copy: energyCopy,
-                                    profile: profile,
-                                    streakDays: _streakStats.currentStreakDays,
-                                    activeDays: _streakStats.activeDays,
-                                    onAskOracle: (question) =>
-                                        _startReadingFromRhythmInsight(
-                                      question,
-                                    ),
-                                  ),
-                                const SizedBox(height: 12),
-                              ],
+                              tone: _StatPillTone.green,
+                              loading: _loadingStreak,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: _StatPill(
+                              label: copy.bestStreakLabel,
+                              value: copy.daysCountLabel(
+                                _streakStats.longestStreakDays,
+                              ),
+                              tone: _StatPillTone.blue,
+                              loading: _loadingStreak,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: _AwarenessPill(
+                              label: copy.awarenessLabel,
+                              value: _streakStats.awarenessPercent,
+                              locked: _streakStats.awarenessLocked,
+                              shimmer: _titleShimmerController,
+                              loading: _loadingStreak,
                             ),
                           ),
                         ],
                       ),
-                      Positioned(
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        child: Container(
-                          padding: const EdgeInsets.only(top: 8),
-                          decoration: BoxDecoration(
-                            color: colorScheme.surface,
-                            border: Border(
-                              top: BorderSide(
-                                color: colorScheme.outlineVariant
-                                    .withValues(alpha: 0.32),
+                      const SizedBox(height: 8),
+                      if (!_loadingStreak && _streakStats.lastActiveAt != null)
+                        Text(
+                          copy.lastActiveLabel(_streakStats.lastActiveAt!),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: colorScheme.onSurface
+                                        .withValues(alpha: 0.68),
+                                  ),
+                        ),
+                      const SizedBox(height: 16),
+                      Expanded(
+                        child: ListView(
+                          primary: false,
+                          physics: const ClampingScrollPhysics(),
+                          padding: EdgeInsets.zero,
+                          children: [
+                            if (_loadingStreak)
+                              _HomeMagicLoadingCard(
+                                label: copy.streakLoadingSubtitle,
+                              )
+                            else
+                              _RhythmRewardsSection(
+                                title: _rhythmAwardsTitle(context),
+                                achievements: _buildRhythmAchievements(),
+                                streakDays: _streakStats.currentStreakDays,
                               ),
+                            const SizedBox(height: 26),
+                            Divider(
+                              height: 1,
+                              color: colorScheme.outlineVariant
+                                  .withValues(alpha: 0.38),
                             ),
-                          ),
-                          child: SafeArea(
-                            top: false,
-                            child: SelfAnalysisReportCtaSection(
+                            const SizedBox(height: 22),
+                            SelfAnalysisReportCtaSection(
                               title: copy.reportSectionTitle,
                               body: copy.reportSectionBody,
                               paidLabel: copy.reportPaidCta,
@@ -2232,7 +2202,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                 selectedDeck: selectedDeck,
                               ),
                             ),
-                          ),
+                            if (!_loadingStreak) ...[
+                              const SizedBox(height: 22),
+                              _EnergyProfileCard(
+                                copy: energyCopy,
+                                profile: profile,
+                                streakDays: _streakStats.currentStreakDays,
+                                activeDays: _streakStats.activeDays,
+                                onAskOracle: (question) =>
+                                    _startReadingFromRhythmInsight(question),
+                              ),
+                            ],
+                          ],
                         ),
                       ),
                     ],
@@ -4228,7 +4209,7 @@ class _EnergyProfileCard extends StatelessWidget {
     ];
     final mainSignal =
         profile.repeatedSignals.isEmpty ? null : profile.repeatedSignals.first;
-    final achievements = _buildAchievements(streakDays);
+    final achievements = _buildAchievements();
     final recentGoal = max(3, min(30, (activeDays / 2).round()));
     final cadencePercent = activeDays <= 0
         ? 0
@@ -4400,7 +4381,7 @@ class _EnergyProfileCard extends StatelessWidget {
                   ),
             ),
             const SizedBox(height: 14),
-            _EnergySectionTitle(text: _awardsTitle(context)),
+            _EnergySectionTitle(text: _rhythmAwardsTitle(context)),
             const SizedBox(height: 8),
             _AchievementGrid(
               achievements: achievements,
@@ -4422,34 +4403,8 @@ class _EnergyProfileCard extends StatelessWidget {
     );
   }
 
-  String _awardsTitle(BuildContext context) {
-    final code = Localizations.localeOf(context).languageCode;
-    if (code == 'ru') {
-      return 'Награды ритма';
-    }
-    if (code == 'kk') {
-      return 'Ритм марапаттары';
-    }
-    if (code == 'fr') {
-      return 'Récompenses du rythme';
-    }
-    if (code == 'tr') {
-      return 'Ritim ödülleri';
-    }
-    return 'Rhythm awards';
-  }
-
-  List<_AchievementMilestone> _buildAchievements(int streak) {
-    final thresholds = <int>[3, 5, 7, 14, 21];
-    final milestones = <_AchievementMilestone>[];
-    for (final value in thresholds) {
-      milestones.add(_AchievementMilestone(days: value));
-    }
-    final monthlyMax = max(30, ((streak + 29) ~/ 30) * 30);
-    for (var month = 30; month <= monthlyMax; month += 30) {
-      milestones.add(_AchievementMilestone(days: month, isMonthly: true));
-    }
-    return milestones;
+  List<_AchievementMilestone> _buildAchievements() {
+    return _buildRhythmAchievements();
   }
 
   void _showInsightDetails(
@@ -4751,14 +4706,85 @@ class _MiniTrendBubble extends StatelessWidget {
 class _AchievementMilestone {
   const _AchievementMilestone({
     required this.days,
-    this.isMonthly = false,
   });
 
   final int days;
-  final bool isMonthly;
 }
 
-class _AchievementGrid extends StatelessWidget {
+String _rhythmAwardsTitle(BuildContext context) {
+  final code = Localizations.localeOf(context).languageCode;
+  if (code == 'ru') {
+    return 'Награды ритма';
+  }
+  if (code == 'kk') {
+    return 'Ритм марапаттары';
+  }
+  if (code == 'fr') {
+    return 'Récompenses du rythme';
+  }
+  if (code == 'tr') {
+    return 'Ritim ödülleri';
+  }
+  return 'Rhythm awards';
+}
+
+List<_AchievementMilestone> _buildRhythmAchievements() {
+  const thresholds = <int>[3, 5, 7, 14, 21, 30];
+  return [
+    for (final value in thresholds) _AchievementMilestone(days: value),
+  ];
+}
+
+String _rhythmDaysLabel(BuildContext context, int days) {
+  final code = Localizations.localeOf(context).languageCode;
+  if (code == 'ru') {
+    return days == 21 ? '21 день' : '$days дней';
+  }
+  if (code == 'kk') {
+    return '$days күн';
+  }
+  if (code == 'fr') {
+    return '$days j';
+  }
+  if (code == 'tr') {
+    return '$days gün';
+  }
+  return days == 1 ? '1 day' : '$days days';
+}
+
+class _RhythmRewardsSection extends StatelessWidget {
+  const _RhythmRewardsSection({
+    required this.title,
+    required this.achievements,
+    required this.streakDays,
+  });
+
+  final String title;
+  final List<_AchievementMilestone> achievements;
+  final int streakDays;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w800,
+              ),
+        ),
+        const SizedBox(height: 18),
+        _AchievementGrid(
+          achievements: achievements,
+          streakDays: streakDays,
+        ),
+      ],
+    );
+  }
+}
+
+class _AchievementGrid extends StatefulWidget {
   const _AchievementGrid({
     required this.achievements,
     required this.streakDays,
@@ -4768,27 +4794,65 @@ class _AchievementGrid extends StatelessWidget {
   final int streakDays;
 
   @override
+  State<_AchievementGrid> createState() => _AchievementGridState();
+}
+
+class _AchievementGridState extends State<_AchievementGrid>
+    with TickerProviderStateMixin {
+  late final AnimationController _appearController;
+  late final AnimationController _idleController;
+
+  @override
+  void initState() {
+    super.initState();
+    _appearController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    )..forward();
+    _idleController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 5200),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _appearController.dispose();
+    _idleController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        const spacing = 8.0;
+        const spacing = 24.0;
         const columns = 3;
         final totalSpacing = spacing * (columns - 1);
         final itemWidth = (constraints.maxWidth - totalSpacing) / columns;
-        return Wrap(
-          spacing: spacing,
-          runSpacing: spacing,
-          children: [
-            for (final item in achievements)
-              SizedBox(
-                width: itemWidth,
-                child: _AchievementBadge(
-                  days: item.days,
-                  unlocked: streakDays >= item.days,
-                  isMonthly: item.isMonthly,
-                ),
-              ),
-          ],
+        return AnimatedBuilder(
+          animation: Listenable.merge([_appearController, _idleController]),
+          builder: (context, _) {
+            return Wrap(
+              spacing: spacing,
+              runSpacing: 24,
+              children: [
+                for (var i = 0; i < widget.achievements.length; i++)
+                  SizedBox(
+                    width: itemWidth,
+                    child: _AchievementBadge(
+                      days: widget.achievements[i].days,
+                      unlocked:
+                          widget.streakDays >= widget.achievements[i].days,
+                      assetName: 'assets/icon/rhythm_reward_${i + 1}.webp',
+                      animationIndex: i,
+                      appearValue: _appearController.value,
+                      idleValue: _idleController.value,
+                    ),
+                  ),
+              ],
+            );
+          },
         );
       },
     );
@@ -4799,101 +4863,140 @@ class _AchievementBadge extends StatelessWidget {
   const _AchievementBadge({
     required this.days,
     required this.unlocked,
-    required this.isMonthly,
+    required this.assetName,
+    required this.animationIndex,
+    required this.appearValue,
+    required this.idleValue,
   });
 
   final int days;
   final bool unlocked;
-  final bool isMonthly;
+  final String assetName;
+  final int animationIndex;
+  final double appearValue;
+  final double idleValue;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final bg = unlocked
-        ? colorScheme.primary.withValues(alpha: 0.18)
-        : colorScheme.surface.withValues(alpha: 0.24);
-    final border = unlocked
-        ? colorScheme.primary.withValues(alpha: 0.5)
-        : colorScheme.outlineVariant.withValues(alpha: 0.35);
-    return Container(
-      height: 44,
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: border),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          _AchievementIcon(unlocked: unlocked, monthly: isMonthly),
-          const SizedBox(width: 6),
-          Text(
-            '$days',
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w800,
+    final delayedAppear = ((appearValue * 1.45) - animationIndex * 0.12)
+        .clamp(0.0, 1.0)
+        .toDouble();
+    final easedAppear = Curves.easeOutBack.transform(delayedAppear);
+    final phase = (idleValue * pi * 2) + animationIndex * 0.76;
+    final idleLift = unlocked ? sin(phase) * 2.0 : sin(phase) * 0.8;
+    final idleScale = unlocked ? 1 + sin(phase + 0.7) * 0.012 : 1.0;
+    final visualOpacity = unlocked ? 1.0 : 0.48;
+    final cardColors = unlocked
+        ? const [Color(0xFF674CA1), Color(0xFF2B213D)]
+        : const [Color(0xFF4B3A75), Color(0xFF20182E)];
+    final borderColor = unlocked
+        ? colorScheme.primary.withValues(alpha: 0.48)
+        : colorScheme.outlineVariant.withValues(alpha: 0.3);
+
+    return Opacity(
+      opacity: lerpDouble(0, visualOpacity, delayedAppear)!,
+      child: Transform.translate(
+        offset: Offset(0, (1 - delayedAppear) * 14 + idleLift),
+        child: Transform.scale(
+          scale: max(0.92, easedAppear) * idleScale,
+          child: AspectRatio(
+            aspectRatio: 1,
+            child: Container(
+              clipBehavior: Clip.antiAlias,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: borderColor, width: 1.4),
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: cardColors,
                 ),
+                boxShadow: unlocked
+                    ? [
+                        BoxShadow(
+                          color: colorScheme.primary.withValues(alpha: 0.18),
+                          blurRadius: 16,
+                          offset: const Offset(0, 8),
+                        ),
+                      ]
+                    : null,
+              ),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Positioned.fill(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: RadialGradient(
+                          center: const Alignment(0, -0.72),
+                          radius: 0.92,
+                          colors: [
+                            Colors.white.withValues(
+                              alpha: unlocked ? 0.1 : 0.04,
+                            ),
+                            Colors.transparent,
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 6,
+                    right: 6,
+                    top: 12,
+                    bottom: 28,
+                    child: Image.asset(
+                      assetName,
+                      fit: BoxFit.contain,
+                      filterQuality: FilterQuality.high,
+                    ),
+                  ),
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 12,
+                    child: Center(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF2F2948)
+                              .withValues(alpha: unlocked ? 0.9 : 0.68),
+                          borderRadius: BorderRadius.circular(9),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.34),
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.18),
+                              blurRadius: 7,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: Text(
+                          _rhythmDaysLabel(context, days),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style:
+                              Theme.of(context).textTheme.titleSmall?.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w900,
+                                    height: 1.05,
+                                  ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
-          const SizedBox(width: 2),
-          Text(
-            _dayShort(context),
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: colorScheme.onSurface.withValues(alpha: 0.72),
-                  fontWeight: FontWeight.w600,
-                ),
-          ),
-        ],
+        ),
       ),
-    );
-  }
-
-  String _dayShort(BuildContext context) {
-    final code = Localizations.localeOf(context).languageCode;
-    if (code == 'ru') {
-      return 'дн';
-    }
-    if (code == 'kk') {
-      return 'күн';
-    }
-    if (code == 'fr') {
-      return 'j';
-    }
-    if (code == 'tr') {
-      return 'g';
-    }
-    return 'd';
-  }
-}
-
-class _AchievementIcon extends StatelessWidget {
-  const _AchievementIcon({
-    required this.unlocked,
-    required this.monthly,
-  });
-
-  final bool unlocked;
-  final bool monthly;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = unlocked ? const Color(0xFFFFD574) : const Color(0xFF7E7A95);
-    final svg = monthly
-        ? '''
-<svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-  <path d="M10 2.2l2 4.1 4.5.7-3.2 3.1.8 4.4-4.1-2.2-4.1 2.2.8-4.4-3.2-3.1 4.5-.7L10 2.2z" fill="#ffffff"/>
-</svg>
-'''
-        : '''
-<svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="10" cy="10" r="7" fill="none" stroke="#ffffff" stroke-width="1.8"/>
-  <path d="M6.2 10.4l2.3 2.2 5.3-5.3" fill="none" stroke="#ffffff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>
-''';
-    return SvgPicture.string(
-      svg,
-      width: 16,
-      height: 16,
-      colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
     );
   }
 }
@@ -5007,8 +5110,8 @@ class _EnergyDonutChartState extends State<_EnergyDonutChart>
       builder: (context, _) {
         final reveal = Curves.easeOutCubic.transform(_revealController.value);
         return SizedBox(
-          width: 126,
-          height: 126,
+          width: 136,
+          height: 136,
           child: CustomPaint(
             painter: _DonutChartPainter(
               slices: widget.slices,
@@ -5016,13 +5119,52 @@ class _EnergyDonutChartState extends State<_EnergyDonutChart>
               progress: reveal,
               orbitPhase: _orbitController.value,
             ),
-            child: Center(
-              child: Text(
-                widget.centerLabel,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w800,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Transform.translate(
+                  offset: Offset(0, sin(_orbitController.value * pi * 2) * 1.4),
+                  child: ClipOval(
+                    child: Container(
+                      width: 96,
+                      height: 96,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: colorScheme.surface.withValues(alpha: 0.32),
+                      ),
+                      child: Image.asset(
+                        'assets/icon/rhythm_char.webp',
+                        fit: BoxFit.cover,
+                        alignment: const Alignment(0, 0.08),
+                        filterQuality: FilterQuality.high,
+                      ),
                     ),
-              ),
+                  ),
+                ),
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 23,
+                  child: Center(
+                    child: Text(
+                      widget.centerLabel,
+                      style:
+                          Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w900,
+                        height: 0.9,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black.withValues(alpha: 0.55),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         );
