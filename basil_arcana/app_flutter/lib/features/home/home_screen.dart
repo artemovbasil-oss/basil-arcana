@@ -4715,7 +4715,7 @@ List<_AchievementMilestone> _buildRhythmAchievements() {
 String _rhythmDaysLabel(BuildContext context, int days) {
   final code = Localizations.localeOf(context).languageCode;
   if (code == 'ru') {
-    return days == 21 ? '21 день' : '$days дней';
+    return '$days ${_ruDayUnit(days)}';
   }
   if (code == 'kk') {
     return '$days күн';
