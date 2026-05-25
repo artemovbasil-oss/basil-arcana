@@ -2068,6 +2068,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         return ValueListenableBuilder<int>(
           valueListenable: _streakModalRefreshTick,
           builder: (context, _, __) {
+            final energyCopy = _EnergyProfileCopy.resolve(context);
+            final liveTopCards = _topCards(cards);
+            final profile = _buildEnergyProfile(
+              cards: cards,
+              topCards: liveTopCards,
+              selectedDeck: selectedDeck,
+            );
             return FractionallySizedBox(
               heightFactor: 0.95,
               child: SafeArea(
@@ -2195,6 +2202,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                 selectedDeck: selectedDeck,
                               ),
                             ),
+                            if (!_loadingStreak) ...[
+                              const SizedBox(height: 22),
+                              _EnergyProfileCard(
+                                copy: energyCopy,
+                                profile: profile,
+                                streakDays: _streakStats.currentStreakDays,
+                                activeDays: _streakStats.activeDays,
+                                showAchievements: false,
+                                onAskOracle: (question) =>
+                                    _startReadingFromRhythmInsight(question),
+                              ),
+                            ],
                           ],
                         ),
                       ),
@@ -4134,6 +4153,7 @@ class _EnergyProfileCard extends StatelessWidget {
     required this.streakDays,
     required this.activeDays,
     required this.onAskOracle,
+    this.showAchievements = true,
   });
 
   final _EnergyProfileCopy copy;
@@ -4141,6 +4161,7 @@ class _EnergyProfileCard extends StatelessWidget {
   final int streakDays;
   final int activeDays;
   final ValueChanged<String> onAskOracle;
+  final bool showAchievements;
 
   @override
   Widget build(BuildContext context) {
@@ -4362,22 +4383,24 @@ class _EnergyProfileCard extends StatelessWidget {
                     color: colorScheme.onSurface.withValues(alpha: 0.72),
                   ),
             ),
-            const SizedBox(height: 14),
-            _EnergySectionTitle(text: _rhythmAwardsTitle(context)),
-            const SizedBox(height: 8),
-            _AchievementGrid(
-              achievements: achievements,
-              streakDays: streakDays,
-            ),
-            if (streakDays > 1) ...[
-              const SizedBox(height: 10),
-              Text(
-                copy.localeHint(streakDays),
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: colorScheme.primary.withValues(alpha: 0.88),
-                      fontWeight: FontWeight.w600,
-                    ),
+            if (showAchievements) ...[
+              const SizedBox(height: 14),
+              _EnergySectionTitle(text: _rhythmAwardsTitle(context)),
+              const SizedBox(height: 8),
+              _AchievementGrid(
+                achievements: achievements,
+                streakDays: streakDays,
               ),
+              if (streakDays > 1) ...[
+                const SizedBox(height: 10),
+                Text(
+                  copy.localeHint(streakDays),
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: colorScheme.primary.withValues(alpha: 0.88),
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+              ],
             ],
           ],
         ],
