@@ -2129,18 +2129,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                 label: copy.streakLoadingSubtitle,
                               )
                             else
+                              _RhythmStatsSummary(
+                                copy: copy,
+                                stats: _streakStats,
+                                loading: _loadingStreak,
+                              ),
+                            const SizedBox(height: 18),
+                            if (!_loadingStreak)
                               _RhythmRewardsSection(
                                 title: _rhythmAwardsTitle(context),
                                 achievements: _buildRhythmAchievements(),
                                 streakDays: _streakStats.currentStreakDays,
                               ),
-                            const SizedBox(height: 18),
-                            _RhythmStatsSummary(
-                              copy: copy,
-                              stats: _streakStats,
-                              loading: _loadingStreak,
-                              shimmer: _titleShimmerController,
-                            ),
                             if (!_loadingStreak) ...[
                               const SizedBox(height: 22),
                               _EnergyProfileCard(
@@ -3975,17 +3975,14 @@ class _RhythmStatsSummary extends StatelessWidget {
     required this.copy,
     required this.stats,
     required this.loading,
-    required this.shimmer,
   });
 
   final _HomeStreakCopy copy;
   final HomeStreakStats stats;
   final bool loading;
-  final Animation<double> shimmer;
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -4013,29 +4010,45 @@ class _RhythmStatsSummary extends StatelessWidget {
             const SizedBox(width: 8),
             Expanded(
               child: _RhythmMiniStatCard(
-                label: copy.awarenessLabel,
-                value: '${stats.awarenessPercent.clamp(30, 100)}%',
+                label: _rhythmActivityLabel(context),
+                value: _rhythmActivityDate(stats.lastActiveAt),
                 loading: loading,
-                shimmer: stats.awarenessLocked ? shimmer : null,
                 colors: const [Color(0xFF415474), Color(0xFF3A4562)],
                 borderColor: const Color(0xFF8EBBFF),
               ),
             ),
           ],
         ),
-        if (!loading && stats.lastActiveAt != null) ...[
-          const SizedBox(height: 8),
-          Text(
-            copy.lastActiveLabel(stats.lastActiveAt!),
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurface.withValues(alpha: 0.68),
-                  fontWeight: FontWeight.w600,
-                ),
-          ),
-        ],
       ],
     );
   }
+}
+
+String _rhythmActivityLabel(BuildContext context) {
+  final code = Localizations.localeOf(context).languageCode;
+  if (code == 'ru') {
+    return 'Активность';
+  }
+  if (code == 'kk') {
+    return 'Белсенділік';
+  }
+  if (code == 'fr') {
+    return 'Activité';
+  }
+  if (code == 'tr') {
+    return 'Aktivite';
+  }
+  return 'Activity';
+}
+
+String _rhythmActivityDate(DateTime? date) {
+  if (date == null) {
+    return '—';
+  }
+  final day = date.day.toString().padLeft(2, '0');
+  final month = date.month.toString().padLeft(2, '0');
+  final year = date.year.toString();
+  return '$day.$month.$year';
 }
 
 class _RhythmMiniStatCard extends StatelessWidget {
@@ -4045,7 +4058,6 @@ class _RhythmMiniStatCard extends StatelessWidget {
     required this.loading,
     required this.colors,
     required this.borderColor,
-    this.shimmer,
   });
 
   final String label;
@@ -4053,11 +4065,9 @@ class _RhythmMiniStatCard extends StatelessWidget {
   final bool loading;
   final List<Color> colors;
   final Color borderColor;
-  final Animation<double>? shimmer;
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final valueStyle = Theme.of(context).textTheme.titleMedium?.copyWith(
           color: Colors.white,
           fontWeight: FontWeight.w900,
@@ -4090,13 +4100,6 @@ class _RhythmMiniStatCard extends StatelessWidget {
               width: 16,
               height: 16,
               child: CircularProgressIndicator(strokeWidth: 2),
-            )
-          else if (shimmer != null)
-            _ShimmerTitle(
-              text: value,
-              animation: shimmer!,
-              baseStyle: valueStyle,
-              shimmerColor: colorScheme.primary,
             )
           else
             Text(
@@ -4351,13 +4354,6 @@ class _EnergyProfileCard extends StatelessWidget {
               ),
               accent: palette[2],
               trailingTrend: cadencePercent,
-            ),
-            const SizedBox(height: 6),
-            Text(
-              copy.repeatsPercentMeaning(cadencePercent),
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: colorScheme.onSurface.withValues(alpha: 0.72),
-                  ),
             ),
             if (showAchievements) ...[
               const SizedBox(height: 14),
